@@ -6,9 +6,13 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@netvision/shared": "workspace:*",
+    "@netvision/simulation-engine": "workspace:*",
+    "@netvision/ui": "workspace:*",
     "@tanstack/react-query": "^5.40.0",
     "@xyflow/react": "^12.0.0",
     "clsx": "^2.1.1",

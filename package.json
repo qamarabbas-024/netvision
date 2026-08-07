@@ -3,26 +3,25 @@
   "version": "1.0.0",
   "private": true,
   "description": "NetVision - Learn Networking by Seeing It. Interactive networking learning platform.",
-  "workspaces": [
-    "frontend",
-    "backend",
-    "packages/*"
-  ],
+  "packageManager": "pnpm@8.15.9",
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=frontend\" \"npm run dev --workspace=backend\"",
-    "dev:frontend": "npm run dev --workspace=frontend",
-    "dev:backend": "npm run dev --workspace=backend",
-    "build": "npm run build --workspace=frontend && npm run build --workspace=backend",
-    "lint": "npm run lint --workspace=frontend && npm run lint --workspace=backend",
-    "test": "npm run test --workspace=backend",
+    "dev": "concurrently \"pnpm --filter netvision-frontend dev\" \"pnpm --filter netvision-backend dev\"",
+    "dev:frontend": "pnpm --filter netvision-frontend dev",
+    "dev:backend": "pnpm --filter netvision-backend dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter netvision-backend test",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
-    "db:migrate": "npm run prisma:migrate --workspace=backend"
+    "db:migrate": "pnpm --filter netvision-backend prisma:migrate",
+    "db:generate": "pnpm --filter netvision-backend prisma:generate"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
+    "turbo": "^2.0.0",
     "typescript": "^5.4.5"
   },
   "keywords": [

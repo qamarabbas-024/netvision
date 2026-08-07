@@ -15,20 +15,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm db:generate
 
       - name: Run ESLint
-        run: npm run lint
+        run: pnpm lint
 
       - name: Check TypeScript types
-        run: npx tsc --noEmit --project frontend/tsconfig.json && npx tsc --noEmit --project backend/tsconfig.json
+        run: pnpm typecheck
 
   build:
     name: Build Verification
@@ -39,17 +47,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Generate Prisma Client
-        run: npm run prisma:generate --workspace=backend
+        run: pnpm db:generate
 
-      - name: Build Next.js & NestJS
-        run: npm run build
+      - name: Build Monorepo
+        run: pnpm build
