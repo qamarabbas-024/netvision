@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum LessonType {
+  THEORY
+  ANIMATION
+  INTERACTIVE_SIMULATION
+  SANDBOX_LAB
+  QUIZ
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  username     String         @unique
+  passwordHash String
+  fullName     String?
+  role         Role           @default(STUDENT)
+  avatarUrl    String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  progress     UserProgress[]
+  certificates Certificate[]
+  achievements UserAchievement[]
+  simulations  SimulationState[]
+
+  @@map("users")
+}
+
+model Course {
+  id             String       @id @default(uuid())
+  slug           String       @unique
+  title          String
+  tagline        String
+  description    String
+  level          CourseLevel  @default(BEGINNER)
+  icon           String
+  estimatedHours Int          @default(5)
+  published      Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  modules        Module[]
+  certificates   Certificate[]
+
+  @@map("courses")
+}
+
+model Module {
+  id          String   @id @default(uuid())
+  courseId    String
+  title       String
+  description String
+  order       Int
+  createdAt   DateTime @default(now())
+
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons     Lesson[]
+
+  @@map("modules")
+}
+
+model Lesson {
+  id              String       @id @default(uuid())
+  moduleId        String
+  title           String
+  slug            String       @unique
+  type            LessonType   @default(THEORY)
+  durationMinutes Int          @default(15)
+  order           Int
+  contentJson     Json?
+  createdAt       DateTime     @default(now())
+
+  module          Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  quizzes         Quiz[]
+  userProgress    UserProgress[]
+
+  @@map("lessons")
+}
+
+model Quiz {
+  id         String         @id @default(uuid())
+  lessonId   String
+  title      String
+  passingScore Int          @default(80)
+  
+  lesson     Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions  QuizQuestion[]
+
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id            String   @id @default(uuid())
+  quizId        String
+  questionText  String
+  optionsJson   Json     // Array of option strings
+  correctOption Int      // Index of correct option
+  explanation   String?
+
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@map("quiz_questions")
+}
+
+model UserProgress {
+  id          String   @id @default(uuid())
+  userId      String
+  lessonId    String
+  completed   Boolean  @default(false)
+  score       Int?
+  completedAt DateTime?
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@map("user_progress")
+}
+
+model Certificate {
+  id         String   @id @default(uuid())
+  userId     String
+  courseId   String
+  code       String   @unique @default(uuid())
+  issuedAt   DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("certificates")
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  description String
+  badgeIcon   String
+
+  users       UserAchievement[]
+
+  @@map("achievements")
+}
+
+model UserAchievement {
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@id([userId, achievementId])
+  @@map("user_achievements")
+}
+
+model SimulationState {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  topologyJson Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("simulation_states")
+}
