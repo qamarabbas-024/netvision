@@ -31,17 +31,21 @@ model User {
   id           String         @id @default(uuid())
   email        String         @unique
   username     String         @unique
-  passwordHash String
+  passwordHash String?
   fullName     String?
   role         Role           @default(STUDENT)
   avatarUrl    String?
+  isVerified   Boolean        @default(false)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
-  progress     UserProgress[]
-  certificates Certificate[]
-  achievements UserAchievement[]
-  simulations  SimulationState[]
+  progress      UserProgress[]
+  savedLessons  SavedLesson[]
+  certificates  Certificate[]
+  achievements  UserAchievement[]
+  simulations   SimulationState[]
+  quizAttempts  QuizAttempt[]
+  oauthAccounts OAuthAccount[]
 
   @@map("users")
 }
@@ -51,6 +55,7 @@ model Course {
   slug           String       @unique
   title          String
   tagline        String
+  category       String       @default("Fundamentals")
   description    String
   level          CourseLevel  @default(BEGINNER)
   icon           String
@@ -94,36 +99,56 @@ model Lesson {
   module          Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   quizzes         Quiz[]
   userProgress    UserProgress[]
+  savedBy         SavedLesson[]
 
   @@index([moduleId])
   @@map("lessons")
 }
 
 model Quiz {
-  id         String         @id @default(uuid())
-  lessonId   String
-  title      String
-  passingScore Int          @default(80)
+  id           String         @id @default(uuid())
+  lessonId     String
+  title        String
+  passingScore Int            @default(80)
   
-  lesson     Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  questions  QuizQuestion[]
+  lesson       Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions    QuizQuestion[]
+  attempts     QuizAttempt[]
 
   @@index([lessonId])
   @@map("quizzes")
 }
 
 model QuizQuestion {
-  id            String   @id @default(uuid())
-  quizId        String
-  questionText  String
-  optionsJson   Json     // Array of option strings
-  correctOption Int      // Index of correct option
-  explanation   String?
+  id               String   @id @default(uuid())
+  quizId           String
+  questionText     String
+  optionsJson      Json     // Array of option strings
+  correctOption    Int      // Index of correct option
+  explanation      String?  // Overall explanation
+  explanationsJson Json?    // Optional map of option index to specific explanation string
 
-  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quiz             Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   @@index([quizId])
   @@map("quiz_questions")
+}
+
+model QuizAttempt {
+  id          String   @id @default(uuid())
+  userId      String
+  quizId      String
+  score       Int      // Percentage 0-100
+  passed      Boolean
+  answersJson Json     // Record of questionId -> selectedOption
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([quizId])
+  @@map("quiz_attempts")
 }
 
 model UserProgress {
@@ -197,3 +222,59 @@ model SimulationState {
   @@index([userId])
   @@map("simulation_states")
 }
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  email     String
+  otpHash   String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@map("email_verifications")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  email     String
+  tokenHash String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@map("password_reset_tokens")
+}
+
+model SavedLesson {
+  id        String   @id @default(uuid())
+  userId    String
+  lessonId  String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@map("saved_lessons")
+}
+
+model OAuthAccount {
+  id                String   @id @default(uuid())
+  userId            String
+  provider          String   // "google" | "github"
+  providerAccountId String
+  providerEmail     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("oauth_accounts")
+}
+
+

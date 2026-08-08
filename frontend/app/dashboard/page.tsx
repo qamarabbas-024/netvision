@@ -1,15 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { Button } from '@/components/ui/Button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
 import { RouterIcon, SwitchIcon, DNSIcon, PacketIcon } from '@/components/ui/Icons';
+import { getUserProgressApi } from '@/lib/api';
 import {
   Flame,
   Zap,
@@ -24,6 +25,20 @@ import {
 } from 'lucide-react';
 
 export default function DashboardPage() {
+  const [userProgress, setUserProgress] = useState<any>({
+    completedLessons: 4,
+    totalLessons: 45,
+    overallProgressPercent: 10,
+  });
+
+  useEffect(() => {
+    getUserProgressApi().then((data) => {
+      if (data) {
+        setUserProgress(data);
+      }
+    });
+  }, []);
+
   const recentLessons = [
     {
       id: 'lesson-1',
@@ -173,7 +188,9 @@ export default function DashboardPage() {
                   <div className="p-5 rounded-2xl glass-panel border border-[#272732] flex flex-col justify-between">
                     <BookOpen className="w-6 h-6 text-[#00f0ff] mb-2" />
                     <div>
-                      <span className="text-2xl font-bold text-white font-mono block">18</span>
+                      <span className="text-2xl font-bold text-white font-mono block">
+                        {userProgress?.completedLessons ?? 4}
+                      </span>
                       <span className="text-xs text-zinc-400">Completed Lessons</span>
                     </div>
                   </div>

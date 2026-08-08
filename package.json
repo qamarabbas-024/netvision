@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "NetVision - Learn Networking by Seeing It. Interactive networking learning platform.",
-  "packageManager": "pnpm@8.15.9",
+  "packageManager": "pnpm@11.20.0",
   "scripts": {
     "dev": "concurrently \"pnpm --filter netvision-frontend dev\" \"pnpm --filter netvision-backend dev\"",
     "dev:frontend": "pnpm --filter netvision-frontend dev",
@@ -18,6 +18,8 @@
     "db:generate": "pnpm --filter netvision-backend prisma:generate"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",

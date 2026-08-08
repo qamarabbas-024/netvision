@@ -48,10 +48,10 @@ export const FooterSection: React.FC = () => {
         {/* Architecture & Docs */}
         <div className="md:col-span-2 flex flex-col gap-3">
           <h4 className="text-xs font-mono font-bold uppercase text-white tracking-wider">Resources</h4>
-          <Link href="/docs" className="text-xs hover:text-[#00f0ff] transition-colors">Architecture Doc</Link>
-          <Link href="/docs" className="text-xs hover:text-[#00f0ff] transition-colors">Design System</Link>
-          <Link href="/docs" className="text-xs hover:text-[#00f0ff] transition-colors">Pedagogy Blueprint</Link>
-          <a href="https://github.com" className="text-xs hover:text-[#00f0ff] transition-colors">GitHub Repo</a>
+          <Link href="/docs/architecture" className="text-xs hover:text-[#00f0ff] transition-colors">Architecture Doc</Link>
+          <Link href="/docs/design-system" className="text-xs hover:text-[#00f0ff] transition-colors">Design System</Link>
+          <Link href="/docs/pedagogy-blueprint" className="text-xs hover:text-[#00f0ff] transition-colors">Pedagogy Blueprint</Link>
+          <a href="https://github.com" target="_blank" rel="noreferrer" className="text-xs hover:text-[#00f0ff] transition-colors">GitHub Repo</a>
         </div>
 
         {/* Newsletter Signup */}

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { ClientProviders } from '@/components/providers/ClientProviders';
 
 export const metadata: Metadata = {
   title: 'NetVision - Learn Networking by Seeing It',
@@ -16,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark scroll-smooth">
       <body className="bg-[#09090b] text-[#f4f4f5] antialiased selection:bg-cyan-500 selection:text-black">
-        {children}
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

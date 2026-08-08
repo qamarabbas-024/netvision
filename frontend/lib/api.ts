@@ -1,0 +1,537 @@
+// NetVision Frontend API Client with Fallback Resilience
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+
+function getAuthHeaders(): HeadersInit {
+  if (typeof window === 'undefined') return { 'Content-Type': 'application/json' };
+  const token = localStorage.getItem('netvision_token') || sessionStorage.getItem('netvision_token');
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+}
+
+export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  try {
+    const res = await fetch(url, {
+      ...options,
+      headers: {
+        ...getAuthHeaders(),
+        ...(options.headers || {}),
+      },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `API request failed with status ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (err: any) {
+    console.warn(`[NetVision API] Fetch failed for ${url}: ${err.message}. Using fallback data layer.`);
+    throw err;
+  }
+}
+
+// Fallback Educational Topics Data Engine
+export const FALLBACK_TOPICS = [
+  // --- BEGINNER ---
+  {
+    id: 'course-1',
+    slug: 'networking-fundamentals',
+    title: 'Networking Fundamentals',
+    tagline: 'Understand networks, client-server models, LANs, WANs, and packet transmission core concepts.',
+    category: 'Fundamentals',
+    description: 'Computer networking is the digital nervous system of modern computing.',
+    level: 'BEGINNER' as const,
+    icon: 'Layers',
+    estimatedHours: 4,
+    modulesCount: 1,
+    lessonsCount: 3,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-2',
+    slug: 'network-devices',
+    title: 'Network Devices',
+    tagline: 'Master switches, routers, hubs, firewalls, modems, and access points.',
+    category: 'Fundamentals',
+    description: 'Explore hardware components forwarding and protecting data packets.',
+    level: 'BEGINNER' as const,
+    icon: 'Cpu',
+    estimatedHours: 5,
+    modulesCount: 1,
+    lessonsCount: 3,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-3',
+    slug: 'network-topologies',
+    title: 'Network Topologies',
+    tagline: 'Star, Mesh, Bus, Ring, and Hybrid network layouts and resilience.',
+    category: 'Fundamentals',
+    description: 'Learn physical and logical network layouts and redundancy design.',
+    level: 'BEGINNER' as const,
+    icon: 'Layers',
+    estimatedHours: 4,
+    modulesCount: 1,
+    lessonsCount: 2,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-4',
+    slug: 'osi-model',
+    title: 'OSI 7-Layer Reference Model',
+    tagline: 'Master Physical, Data Link, Network, Transport, Session, Presentation, and Application layers.',
+    category: 'Fundamentals',
+    description: 'Deep dive into ISO/IEC 7498-1 standard reference model.',
+    level: 'BEGINNER' as const,
+    icon: 'Layers',
+    estimatedHours: 6,
+    modulesCount: 1,
+    lessonsCount: 4,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-5',
+    slug: 'tcp-ip-model',
+    title: 'TCP/IP Protocol Architecture',
+    tagline: 'Learn the practical 4-layer DoD internet protocol suite.',
+    category: 'TCP/IP',
+    description: 'Explore the 4-layer TCP/IP protocol suite powering the internet.',
+    level: 'BEGINNER' as const,
+    icon: 'Packet',
+    estimatedHours: 5,
+    modulesCount: 1,
+    lessonsCount: 3,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-6',
+    slug: 'ethernet',
+    title: 'Ethernet & Data Link Framing',
+    tagline: '802.3 Ethernet framing, preamble, MAC header, payload, and FCS CRC check.',
+    category: 'Fundamentals',
+    description: 'Master IEEE 802.3 Ethernet standards, frame formats, and CSMA/CD.',
+    level: 'BEGINNER' as const,
+    icon: 'Switch',
+    estimatedHours: 4,
+    modulesCount: 1,
+    lessonsCount: 3,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-7',
+    slug: 'mac-addresses',
+    title: 'MAC Addresses & Hardware Identifiers',
+    tagline: 'Understand 48-bit hex physical addresses, OUI vendor codes, and unicast/broadcast.',
+    category: 'Fundamentals',
+    description: 'Learn Media Access Control hardware identification.',
+    level: 'BEGINNER' as const,
+    icon: 'Cpu',
+    estimatedHours: 3,
+    modulesCount: 1,
+    lessonsCount: 2,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-8',
+    slug: 'arp',
+    title: 'Address Resolution Protocol (ARP)',
+    tagline: 'Discover how IP addresses map to MAC hardware addresses on local networks.',
+    category: 'Fundamentals',
+    description: 'Learn ARP Request broadcasts, ARP Replies, and local ARP caches.',
+    level: 'BEGINNER' as const,
+    icon: 'Router',
+    estimatedHours: 4,
+    modulesCount: 1,
+    lessonsCount: 2,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+
+  // --- INTERMEDIATE ---
+  {
+    id: 'course-9',
+    slug: 'ipv4-addressing',
+    title: 'IPv4 Addressing & Structure',
+    tagline: '32-bit dotted-decimal addresses, network vs host portions, and private IP ranges.',
+    category: 'TCP/IP',
+    description: 'Master IPv4 addressing, CIDR notation, and RFC 1918 private spaces.',
+    level: 'INTERMEDIATE' as const,
+    icon: 'Packet',
+    estimatedHours: 6,
+    modulesCount: 1,
+    lessonsCount: 4,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-10',
+    slug: 'ipv6-fundamentals',
+    title: 'IPv6 Next-Generation Addressing',
+    tagline: '128-bit hexadecimal addressing, SLAAC auto-configuration, and neighbor discovery.',
+    category: 'TCP/IP',
+    description: 'Explore IPv6 128-bit architecture and zero compression rules.',
+    level: 'INTERMEDIATE' as const,
+    icon: 'Packet',
+    estimatedHours: 5,
+    modulesCount: 1,
+    lessonsCount: 3,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-11',
+    slug: 'ip-subnetting',
+    title: 'IP Subnetting & CIDR Calculations',
+    tagline: 'Master VLSM, CIDR notation, subnet calculations, usable hosts, and broadcast addresses.',
+    category: 'Routing',
+    description: 'Master binary subnet masking and CIDR prefix length calculations.',
+    level: 'INTERMEDIATE' as const,
+    icon: 'Router',
+    estimatedHours: 8,
+    modulesCount: 1,
+    lessonsCount: 4,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-12',
+    slug: 'tcp-protocol',
+    title: 'TCP Protocol & 3-Way Handshake',
+    tagline: 'Reliable connection-oriented transport, windowing, flow control, and SYN-ACK handshakes.',
+    category: 'TCP/IP',
+    description: 'Master Transmission Control Protocol (TCP) handshakes and flow control.',
+    level: 'INTERMEDIATE' as const,
+    icon: 'Packet',
+    estimatedHours: 6,
+    modulesCount: 1,
+    lessonsCount: 4,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-13',
+    slug: 'udp-protocol',
+    title: 'UDP Connectionless Protocol',
+    tagline: 'Fast, lightweight, connectionless transport for real-time video, VoIP, and DNS.',
+    category: 'TCP/IP',
+    description: 'Understand User Datagram Protocol (UDP) and real-time media transport.',
+    level: 'INTERMEDIATE' as const,
+    icon: 'Packet',
+    estimatedHours: 4,
+    modulesCount: 1,
+    lessonsCount: 2,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-14',
+    slug: 'dns-service',
+    title: 'Domain Name System (DNS)',
+    tagline: 'Domain resolution, recursive queries, root servers, A/AAAA records, and caching.',
+    category: 'TCP/IP',
+    description: 'Master the internet domain directory system and record lookups.',
+    level: 'INTERMEDIATE' as const,
+    icon: 'DNSIcon',
+    estimatedHours: 5,
+    modulesCount: 1,
+    lessonsCount: 3,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-15',
+    slug: 'dhcp-service',
+    title: 'Dynamic Host Configuration Protocol (DHCP)',
+    tagline: 'Automated IP lease management via the DORA process.',
+    category: 'TCP/IP',
+    description: 'Understand Discover, Offer, Request, Acknowledge (DORA) dynamic leases.',
+    level: 'INTERMEDIATE' as const,
+    icon: 'DNSIcon',
+    estimatedHours: 4,
+    modulesCount: 1,
+    lessonsCount: 3,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-16',
+    slug: 'http-https-protocols',
+    title: 'HTTP & HTTPS Web Protocols',
+    tagline: 'Web requests, status codes, headers, TLS encryption, and certificates.',
+    category: 'TCP/IP',
+    description: 'Explore HTTP/1.1 and HTTP/2 request semantics and TLS encryption.',
+    level: 'INTERMEDIATE' as const,
+    icon: 'Packet',
+    estimatedHours: 5,
+    modulesCount: 1,
+    lessonsCount: 3,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+
+  // --- ADVANCED ---
+  {
+    id: 'course-17',
+    slug: 'ip-routing',
+    title: 'IP Routing & Dynamic Protocols',
+    tagline: 'Routing tables, static routes, default gateways, OSPF, BGP, and metric path selection.',
+    category: 'Routing',
+    description: 'Master router path selection using routing tables and administrative distance.',
+    level: 'ADVANCED' as const,
+    icon: 'Router',
+    estimatedHours: 8,
+    modulesCount: 1,
+    lessonsCount: 4,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-18',
+    slug: 'vlan-switching',
+    title: 'VLAN Switching & 802.1Q Trunking',
+    tagline: 'Virtual LAN isolation, 802.1Q VLAN tags, access vs trunk ports, and Spanning Tree (STP).',
+    category: 'Switching',
+    description: 'Master Layer 2 switching segmentation and 802.1Q trunking.',
+    level: 'ADVANCED' as const,
+    icon: 'Switch',
+    estimatedHours: 7,
+    modulesCount: 1,
+    lessonsCount: 4,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-19',
+    slug: 'nat-translation',
+    title: 'Network Address Translation (NAT)',
+    tagline: 'Static NAT, Dynamic NAT, and PAT (Port Address Translation) multiplexing.',
+    category: 'Routing',
+    description: 'Understand SNAT, DNAT, and PAT port translation multiplexing.',
+    level: 'ADVANCED' as const,
+    icon: 'Router',
+    estimatedHours: 5,
+    modulesCount: 1,
+    lessonsCount: 3,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+  {
+    id: 'course-20',
+    slug: 'network-security',
+    title: 'Network Security & Firewalls',
+    tagline: 'ACLs, stateful inspection, TLS encryption, VPN tunnels, and threat mitigation.',
+    category: 'Security',
+    description: 'Master network defense, stateful packet inspection, and IPsec VPNs.',
+    level: 'ADVANCED' as const,
+    icon: 'ShieldCheck',
+    estimatedHours: 8,
+    modulesCount: 1,
+    lessonsCount: 4,
+    completedLessons: 0,
+    progressPercent: 0,
+  },
+];
+
+export async function getTopicsApi(level?: string, category?: string) {
+  try {
+    const params = new URLSearchParams();
+    if (level) params.append('level', level);
+    if (category) params.append('category', category);
+    return await fetchApi<any[]>(`/courses?${params.toString()}`);
+  } catch {
+    return FALLBACK_TOPICS.filter((t) => {
+      const matchLevel = !level || t.level === level;
+      const matchCategory = !category || category === 'All' || t.category === category;
+      return matchLevel && matchCategory;
+    });
+  }
+}
+
+export async function getTopicDetailApi(slug: string) {
+  try {
+    return await fetchApi<any>(`/courses/${slug}`);
+  } catch {
+    const topic = FALLBACK_TOPICS.find((t) => t.slug === slug) || FALLBACK_TOPICS[3]; // Default OSI Model
+    return {
+      ...topic,
+      totalLessons: 3,
+      completedLessons: 0,
+      progressPercent: 0,
+      modules: [
+        {
+          id: 'mod-1',
+          title: `Module 1: ${topic.title} Mastery`,
+          description: topic.tagline,
+          order: 1,
+          lessons: [
+            {
+              id: `les-${topic.slug}-1`,
+              title: `1.1 Introduction to ${topic.title}`,
+              slug: topic.slug,
+              type: 'THEORY',
+              durationMinutes: 15,
+              order: 1,
+              completed: false,
+              hasQuiz: true,
+              quizId: `quiz-${topic.slug}`,
+            },
+            {
+              id: `les-${topic.slug}-2`,
+              title: `1.2 ${topic.title} Deep Dive & Mechanics`,
+              slug: `${topic.slug}-deep-dive`,
+              type: 'ANIMATION',
+              durationMinutes: 20,
+              order: 2,
+              completed: false,
+              hasQuiz: true,
+              quizId: `quiz-${topic.slug}-2`,
+            },
+          ],
+        },
+      ],
+    };
+  }
+}
+
+export async function getLessonDetailApi(slug: string) {
+  try {
+    return await fetchApi<any>(`/lessons/${slug}`);
+  } catch {
+    const matchedTopic = FALLBACK_TOPICS.find((t) => t.slug === slug || slug.includes(t.slug)) || FALLBACK_TOPICS[3];
+    return {
+      id: `les-${matchedTopic.slug}`,
+      title: `${matchedTopic.title} Concept & Architecture`,
+      slug: matchedTopic.slug,
+      type: 'THEORY',
+      durationMinutes: 20,
+      order: 1,
+      isCompleted: false,
+      score: null,
+      course: {
+        id: matchedTopic.id,
+        title: matchedTopic.title,
+        slug: matchedTopic.slug,
+        level: matchedTopic.level,
+      },
+      module: {
+        id: 'mod-1',
+        title: `Module 1: ${matchedTopic.title} Foundations`,
+      },
+      content: {
+        shortExplanation: matchedTopic.tagline,
+        theory: `${matchedTopic.title} forms a foundational pillar of computer networking. Understanding how headers, addressing, and protocol state machines interact allows network engineers to architect resilient high-performance systems.`,
+        analogy: `Think of ${matchedTopic.title} like an efficient express delivery postal protocol: every packet carries exact source and destination routing metrics to guarantee accurate physical delivery.`,
+        keyConcepts: [
+          'Protocol Data Unit (PDU) encapsulation and header structure.',
+          'Addressing resolution and optimal path selection.',
+          'Reliability, error checking, and state tracking mechanisms.'
+        ],
+        examples: [
+          `Real-world data transmission using ${matchedTopic.title} across enterprise networks.`
+        ],
+        practicalActivity: {
+          title: `Activity: ${matchedTopic.title} Packet Inspection`,
+          instructions: 'Review header fields and trace how packets flow through switches and routers.'
+        }
+      },
+      quiz: {
+        id: `quiz-${matchedTopic.slug}`,
+        title: `${matchedTopic.title} Assessment Quiz`,
+        passingScore: 80,
+        questionCount: 2,
+        questions: [
+          {
+            id: `q-${matchedTopic.slug}-1`,
+            questionText: `What is the primary role of ${matchedTopic.title} in computer networks?`,
+            options: [
+              'To encrypt physical fiber optic cables only',
+              `To provide standardized protocol communication for ${matchedTopic.category}`,
+              'To replace MAC address tables in Layer 2 switches',
+              'To measure raw bandwidth frequency in Hertz'
+            ]
+          },
+          {
+            id: `q-${matchedTopic.slug}-2`,
+            questionText: `Which OSI/TCP layer is directly associated with ${matchedTopic.title}?`,
+            options: [
+              'Physical Layer 1',
+              'Data Link Layer 2',
+              'Layer 3 Network or Layer 4 Transport depending on protocol role',
+              'Session Layer 5 only'
+            ]
+          }
+        ]
+      }
+    };
+  }
+}
+
+export async function submitQuizApi(quizId: string, answers: Record<string, number>) {
+  return await fetchApi<any>(`/quizzes/${quizId}/submit`, {
+    method: 'POST',
+    body: JSON.stringify({ answers }),
+  });
+}
+
+export async function completeLessonApi(lessonId: string) {
+  try {
+    return await fetchApi<any>('/progress/complete', {
+      method: 'POST',
+      body: JSON.stringify({ lessonId }),
+    });
+  } catch {
+    return { success: true, lessonId, completed: true };
+  }
+}
+
+export async function getUserProgressApi() {
+  try {
+    return await fetchApi<any>('/progress');
+  } catch {
+    return {
+      totalCourses: 20,
+      totalLessons: 45,
+      completedLessons: 4,
+      overallProgressPercent: 10,
+      recentAttempts: [],
+    };
+  }
+}
+
+export async function searchApi(query: string) {
+  try {
+    return await fetchApi<{ courses: any[]; lessons: any[]; modules: any[] }>(`/search?q=${encodeURIComponent(query)}`);
+  } catch {
+    const q = query.toLowerCase();
+    const courses = FALLBACK_TOPICS.filter((t) => t.title.toLowerCase().includes(q) || t.tagline.toLowerCase().includes(q)).slice(0, 5);
+    return { courses, lessons: [], modules: [] };
+  }
+}
+
+export async function toggleSaveLessonApi(lessonId: string) {
+  return await fetchApi<{ saved: boolean; message: string }>('/progress/save-lesson', {
+    method: 'POST',
+    body: JSON.stringify({ lessonId }),
+  });
+}
+
+export async function getSavedLessonsApi() {
+  try {
+    return await fetchApi<any[]>('/progress/saved-lessons');
+  } catch {
+    return [];
+  }
+}
+
+

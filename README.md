@@ -38,7 +38,7 @@ NetVision Monorepo Layout
 
 - **Frontend**: Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Framer Motion, `@xyflow/react`, Zustand, `@tanstack/react-query`.
 - **Backend**: NestJS 10, TypeScript, Prisma ORM, PostgreSQL 16, Redis 7, Argon2, `@nestjs/jwt`, `@nestjs/swagger`, `@nestjs/throttler`, Helmet.
-- **Infrastructure & CI/CD**: pnpm v9 Workspaces, Turborepo, Docker Compose, GitHub Actions.
+- **Infrastructure & CI/CD**: pnpm v11 Workspaces, Turborepo, Docker Compose, GitHub Actions.
 
 ---
 
@@ -47,7 +47,7 @@ NetVision Monorepo Layout
 ### Prerequisites
 
 - **Node.js**: `>= 20.x`
-- **pnpm**: `>= 9.x` (`npm i -g pnpm`)
+- **pnpm**: `11.20.0` (`npm i -g pnpm@11.20.0`)
 - **Docker**: Docker Desktop or Docker Engine
 
 ### 1. Clone & Install Dependencies
