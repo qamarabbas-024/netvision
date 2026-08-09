@@ -193,14 +193,15 @@ export const SandboxCanvas: React.FC = () => {
       {/* Main Sandbox Area */}
       <div className="flex-1 flex flex-col gap-4 min-w-0">
         {/* Toolbar Header */}
-        <div className="glass-panel p-4 rounded-2xl border border-[#272732] flex flex-wrap items-center justify-between gap-4">
+        <div className="glass-panel p-3.5 sm:p-4 rounded-2xl border border-[#272732] flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 sm:gap-4">
           {/* Mode Toggles */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant={toolMode === 'select' ? 'cyan' : 'ghost'}
               size="sm"
               onClick={() => { setToolMode('select'); setCableSourceNodeId(null); }}
               leftIcon={<MousePointer className="w-4 h-4" />}
+              className="flex-1 sm:flex-initial justify-center"
             >
               Select / Move
             </Button>
@@ -210,42 +211,44 @@ export const SandboxCanvas: React.FC = () => {
               size="sm"
               onClick={() => setToolMode('cable')}
               leftIcon={<LinkIcon className="w-4 h-4" />}
+              className="flex-1 sm:flex-initial justify-center"
             >
               {cableSourceNodeId ? 'Click Target Node' : 'Connect Cable'}
             </Button>
           </div>
 
           {/* Action Tools */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="danger"
               size="sm"
               disabled={!selectedNodeId}
               onClick={handleDeleteSelected}
               leftIcon={<Trash2 className="w-4 h-4" />}
+              className="justify-center"
             >
               Delete Node
             </Button>
 
-            <Button variant="ghost" size="sm" onClick={handleResetCanvas} leftIcon={<RotateCcw className="w-4 h-4" />}>
-              Clear Topology
+            <Button variant="ghost" size="sm" onClick={handleResetCanvas} leftIcon={<RotateCcw className="w-4 h-4" />} className="justify-center">
+              Clear
             </Button>
 
-            <Button variant="secondary" size="sm" onClick={handleSaveTopology} leftIcon={<Save className="w-4 h-4" />}>
-              Save JSON
+            <Button variant="secondary" size="sm" onClick={handleSaveTopology} leftIcon={<Save className="w-4 h-4" />} className="justify-center">
+              Save
             </Button>
 
-            <Button variant="secondary" size="sm" onClick={handleLoadPreset} leftIcon={<FolderOpen className="w-4 h-4" />}>
-              Load Preset
+            <Button variant="secondary" size="sm" onClick={handleLoadPreset} leftIcon={<FolderOpen className="w-4 h-4" />} className="justify-center">
+              Preset
             </Button>
           </div>
 
           {/* Packet Dispatcher Tools */}
-          <div className="flex items-center gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-[#272732] w-full lg:w-auto">
+          <div className="flex flex-wrap items-center gap-2 pt-2 xl:pt-0 border-t xl:border-t-0 border-[#272732] w-full xl:w-auto">
             <select
               value={sourceNodeId}
               onChange={(e) => setSourceNodeId(e.target.value)}
-              className="bg-[#121217] text-white border border-[#272732] rounded-xl px-2 py-1 text-xs"
+              className="bg-[#121217] text-white border border-[#272732] rounded-xl px-2.5 py-1.5 text-xs flex-1"
             >
               {nodes.map((n) => (
                 <option key={n.id} value={n.id}>Src: {n.name}</option>
@@ -255,23 +258,24 @@ export const SandboxCanvas: React.FC = () => {
             <select
               value={targetNodeId}
               onChange={(e) => setTargetNodeId(e.target.value)}
-              className="bg-[#121217] text-white border border-[#272732] rounded-xl px-2 py-1 text-xs"
+              className="bg-[#121217] text-white border border-[#272732] rounded-xl px-2.5 py-1.5 text-xs flex-1"
             >
               {nodes.map((n) => (
                 <option key={n.id} value={n.id}>Dst: {n.name}</option>
               ))}
             </select>
 
-            <Button variant="cyan" size="sm" onClick={handleDispatchPing} leftIcon={<Activity className="w-4 h-4" />}>
-              Dispatch Ping
+            <Button variant="cyan" size="sm" onClick={handleDispatchPing} leftIcon={<Activity className="w-4 h-4" />} className="shrink-0">
+              Ping
             </Button>
           </div>
         </div>
 
-        {/* Sandbox Drag-and-Drop Canvas */}
-        <div className="relative h-[520px] bg-[#09090b] rounded-3xl border border-[#272732] overflow-hidden p-8">
-          {/* Cables Line Layer */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none">
+        {/* Sandbox Drag-and-Drop Canvas Container */}
+        <div className="relative w-full h-[480px] sm:h-[520px] bg-[#09090b] rounded-3xl border border-[#272732] overflow-x-auto overflow-y-hidden p-4 sm:p-8 touch-pan-x">
+          <div className="min-w-[920px] h-full relative">
+            {/* Cables Line Layer */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none">
             {links.map((link) => {
               const srcNode = nodes.find((n) => n.id === link.sourceNodeId);
               const tgtNode = nodes.find((n) => n.id === link.targetNodeId);
@@ -369,6 +373,7 @@ export const SandboxCanvas: React.FC = () => {
           })}
         </div>
       </div>
+    </div>
 
       {/* Modals */}
       <DeviceConfigModal

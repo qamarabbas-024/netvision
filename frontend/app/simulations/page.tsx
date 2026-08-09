@@ -18,23 +18,23 @@ export default function SimulationsPage() {
         <div className="flex-1 flex flex-col min-w-0">
           <AppTopbar />
 
-          <main className="p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
-            <div className="max-w-7xl mx-auto flex flex-col gap-8">
+          <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+            <div className="max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8">
               {/* Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
                     Visual Simulation Engine
                   </span>
-                  <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                  <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
                     Interactive Protocol Simulator
                   </h1>
-                  <p className="text-sm text-zinc-400 mt-1">
+                  <p className="text-xs sm:text-sm text-zinc-400 mt-1">
                     Dispatch packet streams, pause time to inspect OSI layer headers, and reconfigure network nodes.
                   </p>
                 </div>
 
-                <Badge variant="cyan">60 FPS Simulation Engine Active</Badge>
+                <Badge variant="cyan" className="self-start md:self-auto">60 FPS Engine Active</Badge>
               </div>
 
               {/* Main Simulation Engine Canvas */}

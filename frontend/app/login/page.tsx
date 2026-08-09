@@ -64,7 +64,7 @@ function LoginContent() {
   };
 
   return (
-    <Card className="w-full max-w-md p-8 glass-panel-glow border-[#00f0ff]/30 shadow-2xl relative z-10">
+    <Card className="w-full max-w-md p-5 sm:p-8 glass-panel-glow border-[#00f0ff]/30 shadow-2xl relative z-10">
       {/* Brand Header */}
       <div className="flex flex-col items-center text-center mb-8">
         <Link href="/" className="flex items-center gap-3 mb-4">
@@ -174,7 +174,7 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] bg-net-grid-pattern flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] bg-net-grid-pattern flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-b from-[#00f0ff]/10 via-[#3b82f6]/5 to-transparent blur-[120px] pointer-events-none" />
       <Suspense fallback={<div className="text-xs text-zinc-400">Loading sign in...</div>}>
         <LoginContent />

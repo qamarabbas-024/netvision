@@ -40,63 +40,64 @@ export const DHCPVisual: React.FC = () => {
   const current = doraSteps[stepIndex];
 
   return (
-    <div className="p-6 rounded-2xl glass-panel border border-[#272732] flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 rounded-2xl glass-panel border border-[#272732] flex flex-col gap-5 sm:gap-6">
+      <div className="flex items-start sm:items-center justify-between gap-3">
         <div>
           <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-wider font-semibold block mb-1">
             Dynamic Host Configuration Protocol
           </span>
-          <h3 className="text-xl font-bold text-white">DHCP DORA 4-Step IP Lease Process</h3>
+          <h3 className="text-lg sm:text-xl font-bold text-white leading-tight">DHCP DORA 4-Step IP Lease Process</h3>
         </div>
 
         <button
           onClick={() => setStepIndex(0)}
-          className="p-2 rounded-xl bg-[#121217] border border-[#272732] text-zinc-400 hover:text-white"
+          className="p-2 rounded-xl bg-[#121217] border border-[#272732] text-zinc-400 hover:text-white transition-colors shrink-0"
+          title="Reset Process"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
 
-      <div className="p-6 rounded-xl bg-[#09090b] border border-[#272732] flex flex-col gap-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-14 h-14 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/40 flex items-center justify-center text-[#00f0ff]">
-              <Laptop className="w-7 h-7" />
+      <div className="p-4 sm:p-6 rounded-xl bg-[#09090b] border border-[#272732] flex flex-col gap-4 sm:gap-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col items-center gap-1.5 text-center">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/40 flex items-center justify-center text-[#00f0ff]">
+              <Laptop className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
             <span className="text-xs font-bold text-white">Client Node</span>
-            <span className="text-[10px] font-mono text-zinc-400">{current.clientMsg}</span>
+            <span className="text-[9px] sm:text-[10px] font-mono text-zinc-400">{current.clientMsg}</span>
           </div>
 
-          <div className="flex-1 text-center">
-            <span className={`inline-block px-4 py-1.5 rounded-full border text-xs font-mono font-bold uppercase ${current.color}`}>
+          <div className="flex-1 text-center py-1 sm:py-0">
+            <span className={`inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border text-[10px] sm:text-xs font-mono font-bold uppercase ${current.color}`}>
               {current.title}
             </span>
           </div>
 
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/40 flex items-center justify-center text-purple-400">
-              <Server className="w-7 h-7" />
+          <div className="flex flex-col items-center gap-1.5 text-center">
+            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-purple-500/10 border border-purple-500/40 flex items-center justify-center text-purple-400">
+              <Server className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
             <span className="text-xs font-bold text-white">DHCP Server</span>
-            <span className="text-[10px] font-mono text-zinc-400">{current.serverMsg}</span>
+            <span className="text-[9px] sm:text-[10px] font-mono text-zinc-400">{current.serverMsg}</span>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#121217] border border-[#272732]">
-          <h4 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-            {stepIndex === 3 && <CheckCircle className="w-4 h-4 text-emerald-400" />} {current.title}
+        <div className="p-3.5 sm:p-4 rounded-xl bg-[#121217] border border-[#272732]">
+          <h4 className="text-xs sm:text-sm font-bold text-white mb-1 flex items-center gap-2">
+            {stepIndex === 3 && <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />} {current.title}
           </h4>
-          <p className="text-xs text-zinc-300 leading-relaxed">{current.desc}</p>
+          <p className="text-[11px] sm:text-xs text-zinc-300 leading-relaxed">{current.desc}</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <span className="text-xs font-mono text-zinc-400">Step {stepIndex + 1} of 4</span>
 
         <button
           disabled={stepIndex === 3}
           onClick={() => setStepIndex((prev) => Math.min(3, prev + 1))}
-          className="px-4 py-2 rounded-xl bg-[#00f0ff] text-black font-bold text-xs hover:bg-[#00f0ff]/90 disabled:opacity-30 transition-all"
+          className="px-4 py-2.5 rounded-xl bg-[#00f0ff] text-black font-bold text-xs hover:bg-[#00f0ff]/90 disabled:opacity-30 transition-all shrink-0 min-h-[40px]"
         >
           {stepIndex === 3 ? 'DHCP Lease Active!' : 'Next DORA Step →'}
         </button>

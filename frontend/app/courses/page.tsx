@@ -34,7 +34,7 @@ export default function CourseCatalogPage() {
         <div className="flex-1 flex flex-col min-w-0">
           <AppTopbar />
 
-          <main className="p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+          <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
             <div className="max-w-7xl mx-auto flex flex-col gap-8">
               {isLoading ? (
                 <div className="py-20 flex justify-center">

@@ -14,9 +14,12 @@ enum Role {
 }
 
 enum CourseLevel {
+  FOUNDATIONAL
   BEGINNER
   INTERMEDIATE
+  SECURITY
   ADVANCED
+  EXPERT
 }
 
 enum LessonType {
@@ -46,6 +49,8 @@ model User {
   simulations   SimulationState[]
   quizAttempts  QuizAttempt[]
   oauthAccounts OAuthAccount[]
+  labAttempts   LabAttempt[]
+  sandboxSessions SandboxSession[]
 
   @@map("users")
 }
@@ -85,24 +90,257 @@ model Module {
   @@map("modules")
 }
 
-model Lesson {
-  id              String       @id @default(uuid())
-  moduleId        String
-  title           String
-  slug            String       @unique
-  type            LessonType   @default(THEORY)
-  durationMinutes Int          @default(15)
-  order           Int
-  contentJson     Json?
-  createdAt       DateTime     @default(now())
+enum LabType {
+  GUIDED
+  ASSISTED
+  CHALLENGE
+  TROUBLESHOOTING_INCIDENT
+}
 
-  module          Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  quizzes         Quiz[]
-  userProgress    UserProgress[]
-  savedBy         SavedLesson[]
+model Lesson {
+  id                   String            @id @default(uuid())
+  moduleId             String
+  title                String
+  slug                 String            @unique
+  type                 LessonType        @default(THEORY)
+  durationMinutes      Int               @default(15)
+  order                Int
+  contentJson          Json?
+  introduction         String?
+  simpleExplanation    String?
+  analogy              String?
+  technicalExplanation String?
+  cheatsheetJson       Json?
+  visualizationType    String?
+  masteryScoreRequired Int               @default(80)
+  createdAt            DateTime          @default(now())
+
+  module               Module            @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  quizzes              Quiz[]
+  userProgress         UserProgress[]
+  savedBy              SavedLesson[]
+  objectives           LessonObjective[]
+  concepts             LessonConcept[]
+  examples             LessonExample[]
+  commands             LessonCommand[]
+  labs                 LessonLab[]
+  mistakes             LessonMistake[]
+  recaps               LessonRecap[]
 
   @@index([moduleId])
   @@map("lessons")
+}
+
+model LessonObjective {
+  id        String   @id @default(uuid())
+  lessonId  String
+  text      String
+  order     Int      @default(0)
+
+  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@map("lesson_objectives")
+}
+
+model LessonConcept {
+  id               String   @id @default(uuid())
+  lessonId         String
+  title            String
+  summary          String
+  explanation      String?
+  technicalDetails String?
+  order            Int      @default(0)
+
+  lesson           Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@map("lesson_concepts")
+}
+
+model LessonExample {
+  id          String   @id @default(uuid())
+  lessonId    String
+  title       String
+  scenario    String
+  explanation String
+  order       Int      @default(0)
+
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@map("lesson_examples")
+}
+
+model LessonCommand {
+  id            String   @id @default(uuid())
+  lessonId      String
+  command       String
+  description   String
+  exampleOutput String?
+  category      String?  @default("General")
+  order         Int      @default(0)
+
+  lesson        Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@map("lesson_commands")
+}
+
+model LessonLab {
+  id                       String       @id @default(uuid())
+  lessonId                 String
+  slug                     String?      @unique
+  type                     LabType      @default(GUIDED)
+  title                    String
+  description              String?
+  difficulty               CourseLevel  @default(BEGINNER)
+  estimatedMinutes         Int          @default(15)
+  objectivesJson           Json?        // Array of objective strings
+  prerequisitesJson        Json?        // Array of prerequisite slugs
+  environmentJson          Json?        // Initial topology and device configuration state
+  instructions             String
+  commandsJson             Json?        // Predefined allowed commands and output matchers
+  expectedObservationsJson Json?        // Expected outputs/telemetry
+  hintsJson                Json?        // Progressive hint strings
+  validationRulesJson      Json?        // Target state checks and regex rules
+  solutionJson             Json?        // Step-by-step solution guide
+  commonMistakesJson       Json?        // Pitfalls & troubleshooting tips
+  completionCriteria       String?
+  initialTopologyJson      Json?
+  targetStateJson          Json?
+  order                    Int          @default(0)
+
+  lesson                   Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  attempts                 LabAttempt[]
+  sandboxSessions          SandboxSession[]
+
+  @@index([lessonId])
+  @@map("lesson_labs")
+}
+
+model LessonMistake {
+  id              String   @id @default(uuid())
+  lessonId        String
+  mistake         String
+  whyWrong        String
+  correctApproach String
+  order           Int      @default(0)
+
+  lesson          Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@map("lesson_mistakes")
+}
+
+model LessonRecap {
+  id       String   @id @default(uuid())
+  lessonId String
+  point    String
+  order    Int      @default(0)
+
+  lesson   Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+  @@map("lesson_recaps")
+}
+
+enum OperatingSystem {
+  WINDOWS
+  LINUX
+  MACOS
+  ALL
+}
+
+model CommandReference {
+  id                 String          @id @default(uuid())
+  command            String          @unique
+  operatingSystem    OperatingSystem @default(ALL)
+  category           String          @default("Network information")
+  purpose            String
+  syntax             String
+  example            String
+  expectedOutput     String?
+  explanation        String
+  warnings           String?
+  relatedLessonSlugs Json?           // Array of lesson slug strings
+  createdAt          DateTime        @default(now())
+
+  @@map("command_references")
+}
+
+model LabAttempt {
+  id                   String    @id @default(uuid())
+  userId               String
+  labId                String
+  startedAt            DateTime  @default(now())
+  completedAt          DateTime?
+  commandHistoryJson   Json?     // Array of executed command logs
+  validationResultJson Json?     // Validation status, score breakdown, rule checks
+  hintsUsedCount       Int       @default(0)
+  attemptsCount        Int       @default(1)
+  passed               Boolean   @default(false)
+  score                Int       @default(0)
+  status               String    @default("IN_PROGRESS")
+  userSolutionJson     Json?
+  createdAt            DateTime  @default(now())
+
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab                  LessonLab @relation(fields: [labId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([labId])
+  @@map("lab_attempts")
+}
+
+enum SandboxStatus {
+  CREATED
+  STARTING
+  RUNNING
+  STOPPED
+  EXPIRED
+  FAILED
+}
+
+model SandboxSession {
+  id                 String        @id @default(uuid())
+  userId             String
+  labId              String?
+  status             SandboxStatus @default(CREATED)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  expiresAt          DateTime
+  providerType       String        @default("SIMULATED") // SIMULATED | DOCKER
+  resourceLimitsJson Json?         // { ramMb: 512, cpuCores: 0.5, timeoutSec: 10 }
+  networkStateJson   Json?         // Topology nodes, IP configs, routing tables
+  historyJson        Json?         // Executed command logs
+
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lab                LessonLab?    @relation(fields: [labId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([labId])
+  @@index([status])
+  @@map("sandbox_sessions")
+}
+
+enum CognitiveLevel {
+  RECALL
+  UNDERSTANDING
+  APPLICATION
+  TROUBLESHOOTING
+  EXPERT_REASONING
+}
+
+enum QuestionType {
+  MULTIPLE_CHOICE
+  MULTIPLE_ANSWER
+  TRUE_FALSE
+  SCENARIO
+  TROUBLESHOOTING
+  COMMAND_INTERPRETATION
+  PACKET_ANALYSIS
+  CONFIGURATION_ANALYSIS
 }
 
 model Quiz {
@@ -120,31 +358,38 @@ model Quiz {
 }
 
 model QuizQuestion {
-  id               String   @id @default(uuid())
+  id               String         @id @default(uuid())
   quizId           String
   questionText     String
-  optionsJson      Json     // Array of option strings
-  correctOption    Int      // Index of correct option
-  explanation      String?  // Overall explanation
-  explanationsJson Json?    // Optional map of option index to specific explanation string
+  optionsJson      Json           // Array of option strings
+  correctOption    Int            // Index of correct option
+  explanation      String?        // Overall explanation
+  explanationsJson Json?          // Optional map of option index to specific explanation string
+  cognitiveLevel   CognitiveLevel @default(UNDERSTANDING)
+  questionType     QuestionType   @default(MULTIPLE_CHOICE)
+  concept          String?        // Target networking concept tag (e.g. "IDS vs IPS", "TCP Handshake")
+  difficulty       CourseLevel    @default(BEGINNER)
+  points           Int            @default(10)
 
-  quiz             Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quiz             Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   @@index([quizId])
   @@map("quiz_questions")
 }
 
 model QuizAttempt {
-  id          String   @id @default(uuid())
-  userId      String
-  quizId      String
-  score       Int      // Percentage 0-100
-  passed      Boolean
-  answersJson Json     // Record of questionId -> selectedOption
-  createdAt   DateTime @default(now())
+  id               String   @id @default(uuid())
+  userId           String
+  quizId           String
+  score            Int      // Percentage 0-100
+  passed           Boolean
+  answersJson      Json     // Record of questionId -> selectedOption
+  weakConceptsJson Json?    // Array of identified weak concept tags
+  attemptNumber    Int      @default(1)
+  createdAt        DateTime @default(now())
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz             Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([quizId])
@@ -152,15 +397,22 @@ model QuizAttempt {
 }
 
 model UserProgress {
-  id          String   @id @default(uuid())
-  userId      String
-  lessonId    String
-  completed   Boolean  @default(false)
-  score       Int?
-  completedAt DateTime?
+  id                 String    @id @default(uuid())
+  userId             String
+  lessonId           String
+  started            Boolean   @default(true)
+  viewed             Boolean   @default(true)
+  practicalCompleted Boolean   @default(false)
+  quizAttemptsCount  Int       @default(0)
+  completed          Boolean   @default(false)
+  score              Int?
+  bestScore          Int?
+  masteryScore       Int?
+  weakConceptsJson   Json?
+  completedAt        DateTime?
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson             Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
   @@index([userId])

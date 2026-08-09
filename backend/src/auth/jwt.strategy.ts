@@ -16,10 +16,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService
   ) {
+    const isProd = configService.get<string>('NODE_ENV') === 'production';
+    const secret = configService.get<string>('JWT_SECRET');
+
+    if (isProd && (!secret || secret === 'super_secret_netvision_jwt_key')) {
+      throw new Error('CRITICAL SECURITY ERROR: JWT_SECRET environment variable must be set in production!');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET', 'super_secret_netvision_jwt_key'),
+      secretOrKey: secret || 'super_secret_netvision_jwt_key',
     });
   }
 

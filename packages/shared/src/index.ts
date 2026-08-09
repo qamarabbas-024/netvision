@@ -1,6 +1,7 @@
 // NetVision Shared Package Exports
 
 export * from './models/KnowledgeModel';
+export * from './models/SandboxModel';
 
 export const API_ROUTES = {
   AUTH: {

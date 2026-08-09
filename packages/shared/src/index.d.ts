@@ -1,4 +1,5 @@
 export * from './models/KnowledgeModel';
+export * from './models/SandboxModel';
 export declare const API_ROUTES: {
     readonly AUTH: {
         readonly LOGIN: "/auth/login";

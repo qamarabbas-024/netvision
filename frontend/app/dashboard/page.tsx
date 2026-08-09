@@ -106,10 +106,10 @@ export default function DashboardPage() {
           <AppTopbar />
 
           {/* Dashboard Body */}
-          <main className="p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
-            <div className="max-w-7xl mx-auto flex flex-col gap-8">
+          <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+            <div className="max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8">
               {/* Welcome Header */}
-              <div className="glass-panel p-8 rounded-3xl border border-[#00f0ff]/30 shadow-glow-cyan flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
+              <div className="glass-panel p-5 sm:p-8 rounded-3xl border border-[#00f0ff]/30 shadow-glow-cyan flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#00f0ff]/10 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="relative z-10">
@@ -117,34 +117,34 @@ export default function DashboardPage() {
                     <Zap className="w-3.5 h-3.5" />
                     Level 4 Networking Learner
                   </div>
-                  <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                  <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
                     Welcome Back, Alex! ⚡
                   </h1>
-                  <p className="text-sm text-zinc-400 mt-1 max-w-xl">
+                  <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
                     You're on a <strong className="text-amber-400">7-Day Study Streak</strong>! Keep learning visually to unlock your Routing Specialist certificate.
                   </p>
                 </div>
 
-                <div className="relative z-10 flex items-center gap-4">
+                <div className="relative z-10 flex flex-wrap sm:flex-nowrap items-center gap-3 sm:gap-4 w-full lg:w-auto">
                   {/* Streak Box */}
-                  <div className="p-4 rounded-2xl bg-[#121217] border border-[#272732] flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-                      <Flame className="w-6 h-6 fill-amber-400 animate-bounce" />
+                  <div className="p-3.5 sm:p-4 rounded-2xl bg-[#121217] border border-[#272732] flex items-center gap-3 flex-1 sm:flex-initial">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                      <Flame className="w-5 h-5 sm:w-6 sm:h-6 fill-amber-400 animate-bounce" />
                     </div>
                     <div>
-                      <span className="text-xs text-zinc-500 block font-mono">STREAK</span>
-                      <span className="text-lg font-bold text-white">7 Days</span>
+                      <span className="text-[10px] sm:text-xs text-zinc-500 block font-mono">STREAK</span>
+                      <span className="text-base sm:text-lg font-bold text-white">7 Days</span>
                     </div>
                   </div>
 
                   {/* XP Box */}
-                  <div className="p-4 rounded-2xl bg-[#121217] border border-[#272732] flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
-                      <TrendingUp className="w-6 h-6" />
+                  <div className="p-3.5 sm:p-4 rounded-2xl bg-[#121217] border border-[#272732] flex items-center gap-3 flex-1 sm:flex-initial">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <span className="text-xs text-zinc-500 block font-mono">TOTAL XP</span>
-                      <span className="text-lg font-bold text-white font-mono">1,450 XP</span>
+                      <span className="text-[10px] sm:text-xs text-zinc-500 block font-mono">TOTAL XP</span>
+                      <span className="text-base sm:text-lg font-bold text-white font-mono">1,450 XP</span>
                     </div>
                   </div>
                 </div>

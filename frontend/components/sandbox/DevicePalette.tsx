@@ -20,20 +20,20 @@ export const DevicePalette: React.FC<DevicePaletteProps> = ({ onAddDevice }) => 
   ];
 
   return (
-    <div className="glass-panel p-4 rounded-2xl border border-[#272732] flex flex-col gap-3 shrink-0 w-56">
-      <h3 className="text-xs font-mono font-bold uppercase text-zinc-400 tracking-wider mb-1">
+    <div className="glass-panel p-3.5 sm:p-4 rounded-2xl border border-[#272732] flex flex-col gap-3 shrink-0 w-full lg:w-56">
+      <h3 className="text-xs font-mono font-bold uppercase text-zinc-400 tracking-wider">
         Device Palette
       </h3>
 
-      <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-2">
         {paletteItems.map((item) => (
           <button
             key={item.type}
             onClick={() => onAddDevice(item.type)}
-            className="flex items-center gap-3 p-3 rounded-xl glass-panel border border-[#272732] hover:border-[#00f0ff]/40 hover:bg-white/5 transition-all text-left group"
+            className="flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl glass-panel border border-[#272732] hover:border-[#00f0ff]/40 hover:bg-white/5 transition-all text-left group min-h-[44px]"
           >
-            {item.icon}
-            <span className="text-xs font-bold text-zinc-300 group-hover:text-white transition-colors">
+            <span className="shrink-0">{item.icon}</span>
+            <span className="text-xs font-bold text-zinc-300 group-hover:text-white transition-colors truncate">
               {item.label}
             </span>
           </button>

@@ -15,20 +15,20 @@ export const RouterForwardingVisual: React.FC = () => {
   const matched = routeTable.find((r) => r.match === selectedDest)!;
 
   return (
-    <div className="p-6 rounded-2xl glass-panel border border-[#272732] flex flex-col gap-6">
+    <div className="p-4 sm:p-6 rounded-2xl glass-panel border border-[#272732] flex flex-col gap-5 sm:gap-6">
       <div>
         <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-wider font-semibold block mb-1">
           Layer 3 Longest Prefix Match Routing
         </span>
-        <h3 className="text-xl font-bold text-white flex items-center gap-2">
-          <Router className="w-5 h-5 text-[#00f0ff]" /> Router Packet Forwarding Decision Engine
+        <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+          <Router className="w-5 h-5 text-[#00f0ff] shrink-0" /> <span>Router Forwarding Engine</span>
         </h3>
       </div>
 
-      <div className="p-6 rounded-xl bg-[#09090b] border border-[#272732] flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="p-4 sm:p-6 rounded-xl bg-[#09090b] border border-[#272732] flex flex-col gap-5 sm:gap-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <span className="text-xs font-mono text-zinc-400">TEST DESTINATION IP PACKET:</span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {(['10.0.1.5', '172.16.0.22', '8.8.8.8'] as const).map((ip) => (
               <button
                 key={ip}
@@ -46,9 +46,9 @@ export const RouterForwardingVisual: React.FC = () => {
         </div>
 
         {/* Route Table Display */}
-        <div className="p-4 rounded-xl bg-[#121217] border border-[#272732]">
-          <h4 className="text-xs font-bold text-white mb-3 flex items-center gap-1.5 font-mono">
-            <Table className="w-4 h-4 text-purple-400" /> ROUTER ROUTING TABLE
+        <div className="p-3.5 sm:p-4 rounded-xl bg-[#121217] border border-[#272732]">
+          <h4 className="text-xs font-bold text-white mb-3 flex items-center gap-1.5 font-mono uppercase">
+            <Table className="w-4 h-4 text-purple-400 shrink-0" /> ROUTER ROUTING TABLE
           </h4>
 
           <div className="flex flex-col gap-2">
@@ -57,11 +57,11 @@ export const RouterForwardingVisual: React.FC = () => {
               return (
                 <div
                   key={idx}
-                  className={`p-3 rounded-lg border flex items-center justify-between text-xs font-mono transition-all ${
+                  className={`p-3 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2 text-xs font-mono transition-all ${
                     isMatched ? 'border-emerald-400 bg-emerald-400/10 text-white font-bold' : 'border-zinc-800 text-zinc-400'
                   }`}
                 >
-                  <span>{route.dest}</span>
+                  <span className="text-white">{route.dest}</span>
                   <span>Via {route.nextHop}</span>
                   <span className="text-[#00f0ff]">{route.interface}</span>
                   {isMatched && <span className="text-emerald-400 font-bold">MATCH ✓</span>}
@@ -72,9 +72,9 @@ export const RouterForwardingVisual: React.FC = () => {
         </div>
 
         {/* Forwarding Result */}
-        <div className="p-4 rounded-xl bg-[#121217] border border-emerald-400/30 flex items-center gap-3">
-          <ArrowRight className="w-5 h-5 text-emerald-400" />
-          <p className="text-xs text-zinc-200 font-mono">
+        <div className="p-3.5 sm:p-4 rounded-xl bg-[#121217] border border-emerald-400/30 flex items-center gap-3">
+          <ArrowRight className="w-5 h-5 text-emerald-400 shrink-0" />
+          <p className="text-xs text-zinc-200 font-mono leading-relaxed">
             Packet to <strong>{selectedDest}</strong> matches route <strong>{matched.dest}</strong> and will be forwarded out of interface <strong>{matched.interface}</strong>.
           </p>
         </div>

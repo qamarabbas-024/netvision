@@ -15,10 +15,13 @@ import { TopicsService } from './topics.service';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { CompleteLessonDto } from './dto/complete-lesson.dto';
 import { ToggleSaveLessonDto } from './dto/toggle-save-lesson.dto';
+import { SubmitLabDto } from './dto/submit-lab.dto';
+import { ExecuteLabCommandDto } from './dto/execute-lab-command.dto';
+import { ValidateLabDto } from './dto/validate-lab.dto';
 import { CourseLevel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-@ApiTags('courses', 'topics', 'lessons', 'quizzes', 'search', 'progress')
+@ApiTags('courses', 'topics', 'lessons', 'quizzes', 'labs', 'search', 'progress')
 @Controller()
 export class TopicsController {
   constructor(private readonly topicsService: TopicsService) {}
@@ -90,6 +93,55 @@ export class TopicsController {
   ) {
     const userId = req?.user?.id;
     return this.topicsService.submitQuiz(id, dto, userId);
+  }
+
+  @ApiOperation({ summary: 'Get lab details by ID or slug' })
+  @Get('labs/:id')
+  async getLabDetails(@Param('id') id: string) {
+    return this.topicsService.getLabDetails(id);
+  }
+
+  @ApiOperation({ summary: 'Safely execute command in simulated lab environment' })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('labs/execute')
+  async executeLabCommand(@Body() dto: ExecuteLabCommandDto) {
+    return this.topicsService.executeLabCommand(dto);
+  }
+
+  @ApiOperation({ summary: 'Validate lab attempt and calculate score' })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('labs/validate')
+  async validateLab(@Body() dto: ValidateLabDto, @Req() req: any) {
+    return this.topicsService.validateLab(req.user.id, dto);
+  }
+
+  @ApiOperation({ summary: 'Get all network commands with OS, category, and search filters' })
+  @ApiQuery({ name: 'os', type: String, required: false })
+  @ApiQuery({ name: 'category', type: String, required: false })
+  @ApiQuery({ name: 'q', type: String, required: false })
+  @Get('commands')
+  async getAllCommands(
+    @Query('os') os?: string,
+    @Query('category') category?: string,
+    @Query('q') q?: string,
+  ) {
+    return this.topicsService.getAllCommands(os, category, q);
+  }
+
+  @ApiOperation({ summary: 'Get detailed command specification by ID or command string' })
+  @Get('commands/:id')
+  async getCommandById(@Param('id') id: string) {
+    return this.topicsService.getCommandById(id);
+  }
+
+  @ApiOperation({ summary: 'Submit lab attempt (legacy alias)' })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('progress/lab-attempt')
+  async submitLabAttempt(@Body() dto: SubmitLabDto, @Req() req: any) {
+    return this.topicsService.submitLabAttempt(req.user.id, dto.labId, dto.passed, dto.score, dto.userSolution);
   }
 
   @ApiOperation({ summary: 'Mark lesson as complete for authenticated user' })

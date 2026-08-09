@@ -68,3 +68,31 @@ body {
     linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
 }
+
+/* Mobile Word Break & Code Block Utilities */
+pre, code {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.break-word-all {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+/* Touch Target Minimum Dimensions on Mobile */
+@media (max-width: 640px) {
+  button, input, select, a {
+    min-height: 40px;
+  }
+}
+
+/* Accessibility: Respect Prefers Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

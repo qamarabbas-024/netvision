@@ -20,38 +20,38 @@ export const OSILayerVisual: React.FC = () => {
   const activeLayer = OSI_LAYERS.find((l) => l.level === activeLevel)!;
 
   return (
-    <div className="p-6 rounded-2xl glass-panel border border-[#272732] flex flex-col gap-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div className="p-4 sm:p-6 rounded-2xl glass-panel border border-[#272732] flex flex-col gap-5 sm:gap-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
           <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-wider font-semibold block mb-1">
             Interactive Visual Model
           </span>
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            <Layers className="w-5 h-5 text-[#00f0ff]" /> OSI 7-Layer Encapsulation Stack
+          <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+            <Layers className="w-5 h-5 text-[#00f0ff] shrink-0" /> <span>OSI 7-Layer Stack</span>
           </h3>
         </div>
 
-        <div className="flex items-center gap-2 bg-[#121217] p-1.5 rounded-xl border border-[#272732]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 bg-[#121217] p-1.5 rounded-xl border border-[#272732] w-full sm:w-auto">
           <button
             onClick={() => { setMode('encapsulation'); setActiveLevel(7); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
               mode === 'encapsulation' ? 'bg-[#00f0ff] text-black shadow-glow-cyan' : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <ArrowDown className="w-3.5 h-3.5" /> Sender (Encapsulation)
+            <ArrowDown className="w-3.5 h-3.5" /> Sender (Encapsulate)
           </button>
           <button
             onClick={() => { setMode('decapsulation'); setActiveLevel(1); }}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 ${
               mode === 'decapsulation' ? 'bg-purple-500 text-white' : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <ArrowUp className="w-3.5 h-3.5" /> Receiver (Decapsulation)
+            <ArrowUp className="w-3.5 h-3.5" /> Receiver (Decapsulate)
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         {/* Layer Stack */}
         <div className="lg:col-span-6 flex flex-col gap-2">
           {OSI_LAYERS.map((layer) => {
@@ -60,60 +60,60 @@ export const OSILayerVisual: React.FC = () => {
               <button
                 key={layer.level}
                 onClick={() => setActiveLevel(layer.level)}
-                className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
-                  isSelected ? `${layer.color} shadow-lg scale-[1.02]` : 'border-[#272732] bg-[#121217] text-zinc-400 hover:border-zinc-700'
+                className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all flex items-center justify-between min-h-[44px] ${
+                  isSelected ? `${layer.color} shadow-lg scale-[1.01]` : 'border-[#272732] bg-[#121217] text-zinc-400 hover:border-zinc-700'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <span className="w-7 h-7 rounded-lg bg-black/40 flex items-center justify-center font-mono font-bold text-xs">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-black/40 flex items-center justify-center font-mono font-bold text-xs shrink-0">
                     L{layer.level}
                   </span>
-                  <div>
-                    <h4 className="text-sm font-bold text-white">{layer.name} Layer</h4>
-                    <span className="text-[11px] font-mono opacity-80">{layer.protocol}</span>
+                  <div className="min-w-0">
+                    <h4 className="text-xs sm:text-sm font-bold text-white truncate">{layer.name} Layer</h4>
+                    <span className="text-[10px] sm:text-[11px] font-mono opacity-80 truncate block">{layer.protocol}</span>
                   </div>
                 </div>
-                {isSelected && <CheckCircle2 className="w-4 h-4 text-[#00f0ff]" />}
+                {isSelected && <CheckCircle2 className="w-4 h-4 text-[#00f0ff] shrink-0" />}
               </button>
             );
           })}
         </div>
 
         {/* Layer Data Unit Details */}
-        <div className="lg:col-span-6 p-5 rounded-xl bg-[#121217] border border-[#272732] flex flex-col justify-between">
+        <div className="lg:col-span-6 p-4 sm:p-5 rounded-xl bg-[#121217] border border-[#272732] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#272732]">
-              <span className="text-xs font-mono text-zinc-400">LAYER {activeLayer.level} DATA UNIT</span>
-              <span className="text-xs font-mono font-bold text-[#00f0ff] uppercase">{mode} MODE</span>
+            <div className="flex items-center justify-between mb-3 pb-2.5 border-b border-[#272732]">
+              <span className="text-[10px] sm:text-xs font-mono text-zinc-400">LAYER {activeLayer.level} DATA UNIT</span>
+              <span className="text-[10px] sm:text-xs font-mono font-bold text-[#00f0ff] uppercase">{mode}</span>
             </div>
 
-            <h4 className="text-lg font-bold text-white mb-2">{activeLayer.name} Layer (L{activeLayer.level})</h4>
+            <h4 className="text-base sm:text-lg font-bold text-white mb-2">{activeLayer.name} Layer (L{activeLayer.level})</h4>
             <p className="text-xs text-zinc-300 leading-relaxed mb-4">
               {mode === 'encapsulation'
                 ? `As data moves DOWN from Layer 7 to Layer 1, the ${activeLayer.name} layer wraps the payload with its specific ${activeLayer.protocol} header information.`
                 : `As bits move UP from Layer 1 to Layer 7, the ${activeLayer.name} layer strips its header, verifies integrity, and passes payload up.`}
             </p>
 
-            <div className="p-3 rounded-lg bg-black/50 border border-zinc-800 font-mono text-xs text-[#00f0ff] mb-4">
+            <div className="p-2.5 sm:p-3 rounded-lg bg-black/50 border border-zinc-800 font-mono text-xs text-[#00f0ff] mb-4 overflow-x-auto whitespace-nowrap">
               <strong>Header + Data:</strong> {activeLayer.data}
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-3 border-t border-[#272732]">
+          <div className="flex items-center justify-between pt-3 border-t border-[#272732] text-xs font-semibold">
             <button
               disabled={activeLevel === 1}
               onClick={() => setActiveLevel((prev) => Math.max(1, prev - 1))}
-              className="text-xs font-bold text-zinc-400 hover:text-white disabled:opacity-30"
+              className="text-zinc-400 hover:text-white disabled:opacity-30 p-1"
             >
-              ← Lower Layer
+              ← Lower
             </button>
-            <span className="text-xs font-mono text-zinc-500">Step {8 - activeLevel} of 7</span>
+            <span className="font-mono text-zinc-500 text-[11px]">Step {8 - activeLevel} of 7</span>
             <button
               disabled={activeLevel === 7}
               onClick={() => setActiveLevel((prev) => Math.min(7, prev + 1))}
-              className="text-xs font-bold text-zinc-400 hover:text-white disabled:opacity-30"
+              className="text-zinc-400 hover:text-white disabled:opacity-30 p-1"
             >
-              Higher Layer →
+              Higher →
             </button>
           </div>
         </div>

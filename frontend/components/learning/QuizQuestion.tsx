@@ -1,6 +1,8 @@
+'use client';
+
 import React from 'react';
 import { Card } from '@/components/ui/Card';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, Brain, Target } from 'lucide-react';
 
 export interface QuizQuestionProps {
   questionNumber: number;
@@ -9,6 +11,11 @@ export interface QuizQuestionProps {
     id: string;
     questionText: string;
     options: string[];
+    cognitiveLevel?: string;
+    questionType?: string;
+    concept?: string;
+    difficulty?: string;
+    points?: number;
   };
   selectedOption: number | null;
   onSelectOption: (optionIndex: number) => void;
@@ -16,6 +23,8 @@ export interface QuizQuestionProps {
     isCorrect: boolean;
     correctOption: number;
     explanation?: string;
+    whyCorrect?: string;
+    whyWrong?: string;
   };
   isSubmitting?: boolean;
 }
@@ -29,12 +38,37 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
   resultFeedback,
   isSubmitting = false,
 }) => {
+  const getCognitiveBadge = (level?: string) => {
+    switch (level?.toUpperCase()) {
+      case 'RECALL':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">L1: RECALL</span>;
+      case 'APPLICATION':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">L3: APPLICATION</span>;
+      case 'TROUBLESHOOTING':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">L4: TROUBLESHOOTING</span>;
+      case 'EXPERT_REASONING':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">L5: EXPERT REASONING</span>;
+      default:
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">L2: UNDERSTANDING</span>;
+    }
+  };
+
   return (
-    <Card className="p-8 glass-panel-glow border-[#00f0ff]/30">
-      <div className="flex items-center justify-between mb-6">
-        <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold">
-          Question {questionNumber} of {totalQuestions}
-        </span>
+    <Card className="p-6 sm:p-8 glass-panel-glow border-[#00f0ff]/30 flex flex-col gap-6">
+      {/* Question Header Meta */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#272732] pb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold">
+            Question {questionNumber} of {totalQuestions}
+          </span>
+          {getCognitiveBadge(question.cognitiveLevel)}
+          {question.concept && (
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono text-zinc-400 bg-white/5 border border-white/10 flex items-center gap-1">
+              <Target className="w-3 h-3 text-[#00f0ff]" /> {question.concept}
+            </span>
+          )}
+        </div>
+
         {resultFeedback && (
           <span
             className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${
@@ -45,7 +79,7 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
           >
             {resultFeedback.isCorrect ? (
               <>
-                <CheckCircle2 className="w-4 h-4" /> Correct (+100 XP)
+                <CheckCircle2 className="w-4 h-4" /> Correct (+{question.points || 10} pts)
               </>
             ) : (
               <>
@@ -56,11 +90,13 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
         )}
       </div>
 
-      <h3 className="text-xl font-bold text-white leading-snug mb-8">
+      {/* Question Text */}
+      <h3 className="text-lg sm:text-xl font-bold text-white leading-snug">
         {question.questionText}
       </h3>
 
-      <div className="flex flex-col gap-4 mb-8">
+      {/* Options List */}
+      <div className="flex flex-col gap-3">
         {question.options.map((optionText, idx) => {
           const isSelected = selectedOption === idx;
           let optionStyle =
@@ -85,11 +121,11 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
               key={idx}
               disabled={!!resultFeedback || isSubmitting}
               onClick={() => onSelectOption(idx)}
-              className={`w-full p-4 rounded-2xl border text-left transition-all flex items-center justify-between gap-4 ${optionStyle}`}
+              className={`w-full p-3.5 sm:p-4 rounded-2xl border text-left transition-all flex items-start justify-between gap-3 ${optionStyle}`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-start gap-3 min-w-0">
                 <span
-                  className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-mono font-bold shrink-0 ${
+                  className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-mono font-bold shrink-0 mt-0.5 ${
                     isSelected
                       ? 'bg-[#00f0ff] text-black'
                       : 'bg-white/5 border border-white/10 text-zinc-400'
@@ -97,7 +133,7 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 >
                   {String.fromCharCode(65 + idx)}
                 </span>
-                <span className="text-sm leading-relaxed">{optionText}</span>
+                <span className="text-xs sm:text-sm leading-relaxed break-word-all">{optionText}</span>
               </div>
 
               {resultFeedback && idx === resultFeedback.correctOption && (
@@ -111,12 +147,13 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
         })}
       </div>
 
+      {/* Result Feedback & Explanations */}
       {resultFeedback?.explanation && (
-        <div className="p-4 rounded-2xl bg-white/5 border border-white/10 text-xs text-zinc-300 space-y-1">
-          <span className="font-bold text-[#00f0ff] uppercase tracking-wider block">
-            Explanation:
+        <div className="p-4 rounded-2xl bg-[#09090b] border border-[#272732] text-xs text-zinc-300 space-y-2">
+          <span className="font-bold text-[#00f0ff] uppercase tracking-wider block flex items-center gap-1.5">
+            <Brain className="w-4 h-4 text-[#00f0ff]" /> Concept Explanation & Analysis:
           </span>
-          <p>{resultFeedback.explanation}</p>
+          <p className="leading-relaxed">{resultFeedback.explanation}</p>
         </div>
       )}
     </Card>

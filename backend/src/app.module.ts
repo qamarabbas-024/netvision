@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { TopicsModule } from './topics/topics.module';
 import { AdminModule } from './admin/admin.module';
+import { SandboxModule } from './sandbox/sandbox.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AdminModule } from './admin/admin.module';
     AuthModule,
     TopicsModule,
     AdminModule,
+    SandboxModule,
   ],
   controllers: [AppController],
   providers: [

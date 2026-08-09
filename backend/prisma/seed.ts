@@ -15,6 +15,7 @@ async function main() {
   await prisma.module.deleteMany();
   await prisma.course.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.commandReference.deleteMany();
 
   // Create Users
   const adminPasswordHash = await argon2.hash('admin123');
@@ -60,6 +61,231 @@ async function main() {
   });
 
   // 21 UNIQUE TOPICS SEED DEFINITIONS WITH EASY, MEDIUM, HARD SCENARIOS
+  const level0CourseData = {
+    slug: 'level-0-foundations',
+    title: 'Level 0: Computer & Network Foundations',
+    tagline: 'Master computer networking fundamentals, hardware devices, packets, and CLI diagnostics from scratch.',
+    category: 'Level 0 Foundations',
+    description: 'The definitive starting point for networking engineers, cybersecurity students, and IT professionals.',
+    level: CourseLevel.FOUNDATIONAL,
+    icon: 'Network',
+    estimatedHours: 12,
+    moduleTitle: 'Module 1: Fundamental Concepts of Interconnected Systems',
+    moduleDescription: 'Master the 14 core foundational pillars of computer networking, packet mechanics, protocol standards, and hands-on CLI troubleshooting.',
+    lessons: [
+      {
+        lessonTitle: '1. What is a Computer Network?',
+        lessonSlug: 'level-0-what-is-a-computer-network',
+        shortExplanation: 'A computer network is an interconnected system of digital devices sharing data, files, and services.',
+        theory: `1. WHAT IS IT?\nA computer network connects two or more computers over physical cables or radio waves so they can exchange digital data.\n\n2. WHY DO WE NEED IT?\nWithout networks, data transfer required copying files to physical storage drives ("Sneakernet"). Networks enable instant global communication.\n\n3. HOW DOES IT WORK?\nData is segmented into packets, tagged with destination addresses, and routed across switches and routers.\n\n4. REAL-WORLD EXAMPLE:\nOpening a web browser sends packet requests over Wi-Fi to a web server thousands of miles away, returning webpage content to your screen in milliseconds.`,
+        analogy: 'The global postal service: envelopes contain messages, street addresses ensure routing, and postal vans deliver packages.',
+        keyConcepts: ['Interconnected Systems: Nodes sharing data.', 'Resource Sharing: Files, printers, and cloud applications.', 'Packet Switching: Segmenting large payloads into small units.', 'Network Boundaries: LAN vs WAN vs Internet.'],
+        commands: ['ping 8.8.8.8', 'ping netvision.edu'],
+        labTitle: 'Guided Practice: Test Packet Connectivity',
+        labInstructions: 'Run ping 8.8.8.8 in the CLI sandbox to observe packet transmission and round-trip time latency.',
+        questions: [
+          createQ('[EASY] What is the primary purpose of a computer network?', ['To manufacture computer chips', 'To share data, services, and resources between connected devices', 'To speed up CPU clock speed', 'To format hard drives'], 1, 'Networks enable connected endpoints to exchange data and access shared resources.', { 0: 'Chip manufacturing occurs in semiconductor fabs.', 2: 'CPU clock speed is hardware performance.', 3: 'Formatting is disk storage maintenance.' }),
+          createQ('[MEDIUM] Why do computer networks break large files into smaller Packets before sending them across links?', ['To prevent long single transfers from monopolizing network bandwidth', 'Because computers can only read 1 byte at a time', 'To increase total file size', 'To bypass firewall rules'], 0, 'Packet switching ensures fair link sharing and rapid retransmission of missing fragments.', { 1: 'Computers process gigabytes per second.', 2: 'Packet headers add minimal overhead.', 3: 'Firewalls inspect all packets.' }),
+        ],
+      },
+      {
+        lessonTitle: '2. Devices in a Network',
+        lessonSlug: 'level-0-devices-in-a-network',
+        shortExplanation: 'Network devices include End Hosts (PCs, Phones) and Network Infrastructure (Switches, Routers, Access Points).',
+        theory: `1. WHAT IS IT?\nNetwork hardware is split into End Devices (Clients, Servers) and Infrastructure Devices (Switches, Routers, Firewalls, Access Points).\n\n2. HOW DO THEY FUNCTION?\n- End Hosts generate and consume data.\n- Infrastructure devices forward, filter, and route data traffic.`,
+        analogy: 'Traffic ecosystem: Cars and trucks are End Hosts; roads, traffic lights, and highway intersections are Infrastructure Devices.',
+        keyConcepts: ['End Devices: PCs, Laptops, Servers, IoT.', 'Network Interface Card (NIC): Hardware chip providing network connectivity.', 'Infrastructure Devices: Switches, Routers, Wireless Access Points.', 'Transmission Media: Copper (Twisted Pair), Fiber Optic, Wi-Fi.'],
+        commands: ['ipconfig /all', 'arp -a'],
+        labTitle: 'Guided Practice: Inspect Local Network Devices',
+        labInstructions: 'Execute ipconfig /all to locate your local NIC physical MAC address and Default Gateway device IP.',
+        questions: [
+          createQ('[EASY] Which component provides a computer with the physical hardware connection to a wired or wireless network?', ['CPU', 'RAM', 'Network Interface Card (NIC)', 'GPU'], 2, 'The NIC (Network Interface Card) converts digital data into electrical, optical, or radio signals for network transmission.', { 0: 'CPU processes logic.', 1: 'RAM stores volatile memory.', 3: 'GPU renders graphics.' }),
+          createQ('[MEDIUM] What is the functional difference between an End Device and an Infrastructure Device?', ['End devices generate/consume data; infrastructure devices forward traffic between endpoints', 'End devices are wireless; infrastructure devices are wired', 'Infrastructure devices run web browsers', 'End devices use no IP addresses'], 0, 'Endpoints (laptops/servers) create data payloads; infrastructure devices (switches/routers) route and deliver packets.', { 1: 'Both can be wired or wireless.', 2: 'Browsers run on end devices.', 3: 'All IP devices use IP addresses.' }),
+        ],
+      },
+      {
+        lessonTitle: '3. Client and Server Architecture',
+        lessonSlug: 'level-0-client-and-server-architecture',
+        shortExplanation: 'The Client-Server model distributes tasks: Clients request resources; Servers listen for and deliver resources.',
+        theory: `1. WHAT IS IT?\nA software architecture where Clients (web browsers, mobile apps) initiate requests, and Servers (web, database, mail servers) listen on dedicated network ports to serve responses.\n\n2. KEY METRICS:\nServers are designed for high availability, concurrent request handling, and strict security uptime.`,
+        analogy: 'Restaurant dining: Customer (Client) places an order from the menu; Chef (Server) receives the request and returns cooked food.',
+        keyConcepts: ['Client: Request initiator (e.g. Chrome, Firefox).', 'Server: Resource provider (e.g. NGINX, Node.js, PostgreSQL).', 'Listening Socket: IP + Port combination bound by a server process.', 'Stateless Requests: Independent request-response pairs.'],
+        commands: ['netstat -ano', 'curl -I https://netvision.edu'],
+        labTitle: 'Guided Practice: Inspect Active Client/Server Connections',
+        labInstructions: 'Run netstat -ano to list all listening server sockets and established client TCP connections.',
+        questions: [
+          createQ('[EASY] In the Client-Server model, which node initiates the communication session?', ['The Server', 'The Client', 'The Router', 'The Cable'], 1, 'Clients send initial request packets to server listening sockets.', { 0: 'Servers wait passively for incoming connections.', 2: 'Routers forward packets.', 3: 'Cables carry signals.' }),
+          createQ('[MEDIUM] What defines a network Socket on a server?', ['CPU clock frequency', 'The combination of an IP Address and a Port Number (e.g. 192.168.1.10:443)', 'The monitor screen size', 'The hard drive serial number'], 1, 'A socket is an IP address plus port number identifying an active network endpoint process.', { 0: 'CPU clock is processing speed.', 2: 'Monitor size is display spec.', 3: 'Serial number is disk hardware ID.' }),
+        ],
+      },
+      {
+        lessonTitle: '4. LAN, WAN, and the Global Internet',
+        lessonSlug: 'level-0-lan-wan-internet-boundaries',
+        shortExplanation: 'Networks are categorized by geographical scale: LAN (Local Area), WAN (Wide Area), and the Internet.',
+        theory: `1. WHAT IS IT?\n- LAN (Local Area Network): Connects devices inside a single building, home, or office.\n- WAN (Wide Area Network): Spans cities, countries, or continents.\n- Internet: A global mesh of interconnected WANs operated by ISPs.`,
+        analogy: 'City roads vs Interstate Highways: LAN is local city streets; WAN is interstate highways connecting distant states.',
+        keyConcepts: ['LAN: High speed, low latency, local private ownership.', 'WAN: Connects separate LANs using ISP telecom infrastructure.', 'Bandwidth vs Latency: Data throughput capacity vs travel delay.', 'Autonomous System (AS): Enterprise WAN administrative boundary.'],
+        commands: ['tracert 8.8.8.8', 'ip route'],
+        labTitle: 'Guided Practice: Trace Packet Paths Across LAN/WAN Boundaries',
+        labInstructions: 'Run tracert 8.8.8.8 to trace how your packet leaves your local LAN gateway and crosses global ISP WAN routers.',
+        questions: [
+          createQ('[EASY] What type of network connects devices inside a single home or office building?', ['WAN (Wide Area Network)', 'LAN (Local Area Network)', 'GAN (Global Area Network)', 'SAN (Storage Area Network)'], 1, 'LAN (Local Area Network) covers a small geographical area like a home or single office building.', { 0: 'WAN connects distant cities.', 2: 'GAN is global satellite topology.', 3: 'SAN connects server storage arrays.' }),
+          createQ('[MEDIUM] What is the relationship between LANs, WANs, and the Internet?', ['The Internet is a global network of interconnected LANs and WANs managed by ISPs', 'LANs run without IP addresses', 'WANs only transfer voice calls', 'Internet replaces local switches'], 0, 'The Internet is a worldwide interconnected network of private and public LANs/WANs using standard TCP/IP routing.', { 1: 'LAN devices use IP addresses.', 2: 'WANs transfer all digital packet types.', 3: 'Local switches remain essential for LAN framing.' }),
+        ],
+      },
+      {
+        lessonTitle: '5. IP Addresses & Logical Location',
+        lessonSlug: 'level-0-ip-addresses-logical-location',
+        shortExplanation: 'An IP Address is a logical Layer 3 numerical identifier assigned to devices for network routing.',
+        theory: `1. WHAT IS IT?\nAn Internet Protocol (IP) address identifies where a device is logically located on a network (like a home street address).\n\n2. IPv4 FORMAT:\n32-bit binary number written as four decimal octets separated by dots (e.g. \`192.168.1.50\`).\n\n3. PRIVATE VS PUBLIC IPs:\n- Private IPs (\`192.168.x.x\`, \`10.x.x.x\`): Used inside local LANs.\n- Public IPs: Globally unique addresses assigned by ISPs for Internet routing.`,
+        analogy: 'Home mailing address: Street name and house number tell postal drivers where to deliver your parcel.',
+        keyConcepts: ['IPv4 Structure: 4 octets, 32 total bits (e.g. 192.168.1.1).', 'Private IP Ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16.', 'Public IP: Unique internet-routable address.', 'Subnet Mask: Separates Network ID from Host ID.'],
+        commands: ['ipconfig', 'ip addr show'],
+        labTitle: 'Guided Practice: Identify Private LAN IP Configuration',
+        labInstructions: 'Run ipconfig (Windows) or ip addr show (Linux) to find your interface IPv4 address and subnet mask.',
+        questions: [
+          createQ('[EASY] How many bits make up a standard IPv4 address?', ['16 bits', '32 bits', '64 bits', '128 bits'], 1, 'IPv4 addresses are 32-bit binary values represented in dotted-decimal format.', { 0: '16 bits is port range size.', 2: '64 bits is interface identifier.', 3: '128 bits is IPv6 length.' }),
+          createQ('[MEDIUM] Which of the following IPv4 addresses belongs to a RFC 1918 Private IP address range?', ['8.8.8.8', '192.168.1.50', '203.0.113.10', '1.1.1.1'], 1, '192.168.0.0/16 is a designated RFC 1918 private IPv4 address range.', { 0: '8.8.8.8 is Google public DNS.', 2: '203.0.113.10 is public documentation IP.', 3: '1.1.1.1 is Cloudflare public DNS.' }),
+        ],
+      },
+      {
+        lessonTitle: '6. MAC Addresses & Physical Identity',
+        lessonSlug: 'level-0-mac-addresses-physical-identity',
+        shortExplanation: 'A MAC Address is a permanent 48-bit physical hardware address burned into a Network Interface Card (NIC).',
+        theory: `1. WHAT IS IT?\nA Media Access Control (MAC) address is a unique 48-bit identifier assigned to a network interface at the factory.\n\n2. FORMAT:\n6 pairs of hexadecimal digits (e.g. \`00:1A:2B:3C:4D:5E\`).\n- First 3 bytes (OUI): Identify the manufacturer (Cisco, Apple, Intel).\n- Last 3 bytes: Unique NIC device serial.`,
+        analogy: 'Vehicle Identification Number (VIN) stamped on a car engine: permanent hardware identity regardless of license plate changes.',
+        keyConcepts: ['Layer 2 Hardware Address: Used for local Ethernet frame forwarding.', '48-bit Length: 12 hexadecimal characters.', 'OUI (Organizationally Unique Identifier): First 24 bits indicate manufacturer.', 'MAC vs IP: Physical identity vs Logical location.'],
+        commands: ['getmac', 'arp -a'],
+        labTitle: 'Guided Practice: Discover Hardware MAC Address',
+        labInstructions: 'Run getmac (Windows) or arp -a to view physical MAC address bindings for local network adapters.',
+        questions: [
+          createQ('[EASY] At which Layer of the OSI model do MAC addresses operate?', ['Layer 1 Physical', 'Layer 2 Data Link', 'Layer 3 Network', 'Layer 7 Application'], 1, 'MAC addresses are physical Layer 2 Data Link hardware identifiers.', { 0: 'Layer 1 is physical bits/cables.', 2: 'Layer 3 handles IP addresses.', 3: 'Layer 7 handles software apps.' }),
+          createQ('[MEDIUM] What information is encoded in the first 3 bytes (24 bits) of a MAC address?', ['The user password', 'The OUI (Organizationally Unique Identifier) identifying the manufacturer', 'The IP subnet mask', 'The Wi-Fi password'], 1, 'The first 24 bits form the OUI, which identifies the hardware manufacturer (e.g., Intel, Apple, Cisco).', { 0: 'Passwords are software credentials.', 2: 'Subnet mask is Layer 3 config.', 3: 'Wi-Fi keys are security credentials.' }),
+        ],
+      },
+      {
+        lessonTitle: '7. Network Ports & Socket Boundaries',
+        lessonSlug: 'level-0-network-ports-socket-boundaries',
+        shortExplanation: 'Network Ports (0-65535) direct incoming traffic to specific software applications running on a host.',
+        theory: `1. WHAT IS IT?\nA port is a 16-bit numerical number (1 to 65535) that allows an operating system to direct network packets to the exact application intended (e.g. Port 80 for HTTP, Port 443 for HTTPS).\n\n2. PORT CATEGORIES:\n- Well-Known Ports (0–1023): HTTP (80), HTTPS (443), SSH (22), DNS (53).\n- Registered Ports (1024–49151): Database services (MySQL 3306, Postgres 5432).\n- Dynamic/Ephemeral Ports (49152–65535): Temporary client outbound ports.`,
+        analogy: 'Apartment building address: Building address is IP Address; apartment number is Port Number.',
+        keyConcepts: ['Port Range: 0 to 65535.', 'Well-Known Ports: Standardized server application channels.', 'Ephemeral Ports: Random high-number client ports for return traffic.', 'Socket: IP Address + Port Number (e.g. 192.168.1.50:52114).'],
+        commands: ['netstat -ano', 'ss -tulpn'],
+        labTitle: 'Guided Practice: Audit Open Network Ports',
+        labInstructions: 'Run netstat -ano to discover which server port numbers (80, 443, 5432) are currently listening on your machine.',
+        questions: [
+          createQ('[EASY] What default port is used for secure encrypted HTTPS web traffic?', ['Port 21', 'Port 80', 'Port 443', 'Port 3389'], 2, 'HTTPS operates on TCP Port 443 by default.', { 0: 'Port 21 is FTP.', 1: 'Port 80 is unencrypted HTTP.', 3: 'Port 3389 is RDP.' }),
+          createQ('[MEDIUM] Why does a client browser open a random high-numbered Ephemeral Port (e.g. 52114) when making a web request?', ['To allow the web server to send return packets back to the exact browser tab session', 'To disable firewalls', 'To bypass NAT routers', 'To encrypt hard drive files'], 0, 'Ephemeral source ports multiplex return traffic sessions back to the originating client socket.', { 1: 'Firewalls inspect all ports.', 2: 'NAT relies on source ports for PAT.', 3: 'Disk encryption is local OS storage.' }),
+        ],
+      },
+      {
+        lessonTitle: '8. Network Packets & Data Framing',
+        lessonSlug: 'level-0-network-packets-data-framing',
+        shortExplanation: 'A Packet is a formatted block of digital data containing header metadata and payload data.',
+        theory: `1. WHAT IS IT?\nData sent over networks is divided into units called Packets at Layer 3, and encapsulated into Frames at Layer 2.\n\n2. ANATOMY OF A PACKET:\n- Header: Source IP, Destination IP, TTL, Protocol ID.\n- Payload: Actual application content (web page data, file chunk).\n- Trailer (Frame Check Sequence): Error detection CRC hash.`,
+        analogy: 'Shipping package: Cardboard box has shipping label (Header), item inside (Payload), and tape sealing it (Trailer).',
+        keyConcepts: ['Encapsulation: Wrapping data with protocol headers at each layer.', 'Decapsulation: Stripping headers as data ascends the stack.', 'Header: Control metadata (IPs, Ports, Sequence #).', 'MTU (Maximum Transmission Unit): Maximum payload size (typically 1500 bytes).'],
+        commands: ['ping -l 1400 192.168.1.1', 'ping -s 1400 192.168.1.1'],
+        labTitle: 'Guided Practice: Test Packet Payload Sizes',
+        labInstructions: 'Run ping -l 1400 192.168.1.1 to transmit custom payload size packets to your default gateway.',
+        questions: [
+          createQ('[EASY] What section of a network packet contains control information such as Source and Destination IP addresses?', ['Payload', 'Header', 'Trailer', 'Footer'], 1, 'The Header contains control metadata required to route and process packets.', { 0: 'Payload contains actual user data content.', 2: 'Trailer contains error-checking FCS CRC hash.', 3: 'Footer is non-standard terminology.' }),
+          createQ('[MEDIUM] What process describes wrapping application data with protocol headers as it travels down the OSI stack?', ['Encapsulation', 'Decapsulation', 'Defragmentation', 'Compression'], 0, 'Encapsulation adds headers (Application ➔ Transport ➔ Network ➔ Data Link) before physical transmission.', { 1: 'Decapsulation removes headers upon arrival.', 2: 'Defragmentation reassembles split packets.', 3: 'Compression reduces payload size.' }),
+        ],
+      },
+      {
+        lessonTitle: '9. Network Protocols & Standard Language',
+        lessonSlug: 'level-0-network-protocols-standards',
+        shortExplanation: 'Protocols are standardized sets of rules governing how network devices format, transmit, and receive data.',
+        theory: `1. WHAT IS IT?\nA Protocol is a formal agreement defining syntax, timing, authentication, and error detection for network communication.\n\n2. COMMON PROTOCOL EXAMPLES:\n- Web: HTTP, HTTPS\n- File Transfer: FTP, SFTP\n- Email: SMTP, IMAP, POP3\n- Core Transport: TCP, UDP\n- Network Addressing: IP, ICMP, ARP`,
+        analogy: 'Human languages: Two people must speak the same language (English, Spanish) and grammar rules to understand each other.',
+        keyConcepts: ['Protocol Standard: RFC (Request for Comments) documentation.', 'Layered Protocol Stack: TCP/IP model.', 'Connection-Oriented (TCP) vs Connectionless (UDP).', 'Interoperability: Vendor-neutral communication.'],
+        commands: ['nslookup netvision.edu', 'ping 127.0.0.1'],
+        labTitle: 'Guided Practice: Test Loopback Protocol Stack',
+        labInstructions: 'Run ping 127.0.0.1 to verify your local OS TCP/IP protocol stack is active and operational.',
+        questions: [
+          createQ('[EASY] What is a Network Protocol?', ['A physical fiber optic cable', 'A standardized set of rules governing how devices format and exchange data', 'A computer monitor brand', 'A hard drive file format'], 1, 'Protocols define rules for formatting, timing, and processing network communications.', { 0: 'Cables are physical medium.', 2: 'Monitors are displays.', 3: 'File systems structure local disks.' }),
+          createQ('[MEDIUM] What organization publishes RFC (Request for Comments) documents that define official Internet protocols?', ['IETF (Internet Engineering Task Force)', 'NASA', 'Microsoft', 'UNESCO'], 0, 'The IETF publishes RFC standards for core protocols like IP, TCP, HTTP, and DNS.', { 1: 'NASA is space research.', 2: 'Microsoft is a software vendor.', 3: 'UNESCO is a UN cultural body.' }),
+        ],
+      },
+      {
+        lessonTitle: '10. DNS: The Phonebook of the Internet',
+        lessonSlug: 'level-0-dns-internet-phonebook',
+        shortExplanation: 'DNS (Domain Name System) translates human-readable hostnames into machine-routable IP addresses.',
+        theory: `1. WHAT IS IT?\nDomain Name System (DNS) is an Application-layer protocol running on Port 53 that converts domain names (\`netvision.edu\`) into IP addresses (\`104.21.48.12\`).\n\n2. WHY DO WE NEED IT?\nHumans remember names easily, but routers require numerical IP addresses to route packets.\n\n3. DNS RECORD TYPES:\n- A Record: Maps hostname to IPv4 address.\n- AAAA Record: Maps hostname to IPv6 address.\n- CNAME Record: Alias mapping to another hostname.`,
+        analogy: 'Phone contacts app: You tap "Mom" in your contact list; phone dials her numerical phone number automatically.',
+        keyConcepts: ['DNS Resolution: Translating domain names to IP addresses.', 'Port 53 UDP/TCP: Standard DNS communication port.', 'DNS Cache: Local memory storing recent lookups to speed up web browsing.', 'Recursive Resolver vs Authoritative Server.'],
+        commands: ['nslookup netvision.edu', 'dig netvision.edu A'],
+        labTitle: 'Guided Practice: Resolve Hostnames Using DNS',
+        labInstructions: 'Run nslookup netvision.edu to inspect your configured DNS server and resolved IPv4 address.',
+        questions: [
+          createQ('[EASY] What is the primary function of the Domain Name System (DNS)?', ['To translate human-friendly domain names (e.g. google.com) into numerical IP addresses', 'To assign MAC addresses to network cards', 'To measure Wi-Fi signal strength', 'To encrypt server hard drives'], 0, 'DNS acts as the internet phonebook, resolving human domain names to IP addresses.', { 1: 'MAC addresses are assigned in factories.', 2: 'Wi-Fi strength is measured by wireless radios.', 3: 'Disk encryption is local security.' }),
+          createQ('[MEDIUM] Which DNS record type maps a domain name specifically to a 32-bit IPv4 address?', ['A Record', 'MX Record', 'TXT Record', 'AAAA Record'], 0, 'An "A" Record maps a hostname to an IPv4 address; AAAA maps to IPv6.', { 1: 'MX Record specifies mail servers.', 2: 'TXT Record holds text verification metadata.', 3: 'AAAA maps to IPv6.' }),
+        ],
+      },
+      {
+        lessonTitle: '11. DHCP: Automatic Network Configuration',
+        lessonSlug: 'level-0-dhcp-automatic-ip-allocation',
+        shortExplanation: 'DHCP (Dynamic Host Configuration Protocol) automatically assigns IP addresses, subnet masks, and gateways to network clients.',
+        theory: `1. WHAT IS IT?\nDHCP dynamically leases IP addresses and network parameters to devices when they join a network, eliminating manual static IP configuration.\n\n2. THE 4-STEP DORA PROCESS:\n1. Discover: Client broadcasts request for an IP.\n2. Offer: DHCP Server offers an available IP address.\n3. Request: Client requests to lease the offered IP.\n4. Acknowledge: DHCP Server confirms lease assignment.`,
+        analogy: 'Hotel room key check-in: Guest requests a room; receptionist assigns room number keycard for the duration of the stay.',
+        keyConcepts: ['DORA Process: Discover, Offer, Request, Acknowledge.', 'DHCP Lease Time: Duration an assigned IP remains valid.', 'Default Gateway & DNS Provisioning.', 'UDP Ports 67 (Server) and 68 (Client).'],
+        commands: ['ipconfig /release', 'ipconfig /renew'],
+        labTitle: 'Guided Practice: Trace DHCP Address Allocation',
+        labInstructions: 'Run ipconfig /all to locate your local DHCP Server IP address and lease duration timestamps.',
+        questions: [
+          createQ('[EASY] What protocol automatically provisions IP addresses and network settings to devices connecting to a LAN?', ['DHCP', 'DNS', 'FTP', 'HTTP'], 0, 'DHCP (Dynamic Host Configuration Protocol) automatically assigns IP parameters to network clients.', { 1: 'DNS resolves hostnames to IPs.', 2: 'FTP transfers files.', 3: 'HTTP transfers web pages.' }),
+          createQ('[MEDIUM] What is the correct 4-step sequence executed during DHCP IP address negotiation?', ['Discover ➔ Offer ➔ Request ➔ Acknowledge (DORA)', 'Request ➔ Connect ➔ Send ➔ Close', 'Ping ➔ Trace ➔ Route ➔ Connect', 'SYN ➔ SYN-ACK ➔ ACK ➔ FIN'], 0, 'DHCP uses the DORA sequence: Discover, Offer, Request, Acknowledge.', { 1: 'Generic request flow.', 2: 'Diagnostic sequence.', 3: 'TCP handshake sequence.' }),
+        ],
+      },
+      {
+        lessonTitle: '12. Routers: Inter-Subnet Path Finders',
+        lessonSlug: 'level-0-routers-inter-subnet-pathfinders',
+        shortExplanation: 'Routers operate at Layer 3 to connect separate subnets and forward packets across optimal network paths.',
+        theory: `1. WHAT IS IT?\nA Router is a Layer 3 network device that inspects destination IP addresses in packet headers to choose the best path across interconnected networks.\n\n2. WHY DO WE NEED THEM?\nSwitches only forward traffic inside a local LAN. Routers are required to forward traffic between different subnets and out to the Internet.`,
+        analogy: 'Highway junction router: Inspects destination state on signs and directs cars onto the correct interstate highway.',
+        keyConcepts: ['Layer 3 Device: Operates using IP Addresses and Routing Tables.', 'Default Gateway: Local router IP interface serving as exit path.', 'Longest Prefix Matching: Route selection logic.', 'NAT (Network Address Translation): Sharing public IP.'],
+        commands: ['route print', 'ip route'],
+        labTitle: 'Guided Practice: View Router Gateway Table',
+        labInstructions: 'Run route print (Windows) or ip route (Linux) to identify your local router Default Gateway IP (0.0.0.0/0).',
+        questions: [
+          createQ('[EASY] What layer of the OSI model does a Router primarily operate at?', ['Layer 1 Physical', 'Layer 2 Data Link', 'Layer 3 Network', 'Layer 7 Application'], 2, 'Routers evaluate Layer 3 IP headers to route packets across separate networks.', { 0: 'Layer 1 is physical cables.', 1: 'Layer 2 is switch MAC framing.', 3: 'Layer 7 is application software.' }),
+          createQ('[MEDIUM] What table does a router inspect to decide where to forward an incoming packet?', ['MAC Address Table', 'Routing Table', 'ARP Cache', 'DNS Cache'], 1, 'Routers compare packet destination IPs against entries in their Routing Table.', { 0: 'MAC table is used by Layer 2 switches.', 2: 'ARP cache maps IP to MAC on local hosts.', 3: 'DNS cache resolves hostnames.' }),
+        ],
+      },
+      {
+        lessonTitle: '13. Switches: Local LAN Frame Forwarders',
+        lessonSlug: 'level-0-switches-local-lan-forwarders',
+        shortExplanation: 'Switches operate at Layer 2 to connect devices within a single local network using MAC address tables.',
+        theory: `1. WHAT IS IT?\nA Switch is a Layer 2 networking device containing multiple Ethernet ports. It inspects source and destination MAC addresses in frame headers to forward data directly to target ports.\n\n2. MAC LEARNING:\nSwitches inspect incoming frames to build a MAC Address Table (CAM Table) mapping MACs to physical port numbers.`,
+        analogy: 'Office mailroom sorter: Sorts inter-office envelopes into specific employee mailboxes based on name badges.',
+        keyConcepts: ['Layer 2 Device: Operates using MAC Addresses.', 'CAM / MAC Address Table: Port-to-MAC mapping database.', 'Broadcast Domain: Extent of network reached by broadcast frames.', 'VLAN (Virtual LAN): Logical switch partitioning.'],
+        commands: ['arp -a', 'ip neigh'],
+        labTitle: 'Guided Practice: Inspect Local LAN MAC Table',
+        labInstructions: 'Run arp -a to inspect resolved MAC addresses for local LAN hosts connected to your switch.',
+        questions: [
+          createQ('[EASY] What device connects multiple devices on a single local network and forwards frames using MAC addresses?', ['Router', 'Ethernet Switch', 'Modem', 'Repeater'], 1, 'Switches evaluate Layer 2 MAC addresses to forward frames between devices on the same LAN.', { 0: 'Routers route between separate IP subnets.', 2: 'Modems convert digital signals for WAN ISP cables.', 3: 'Repeaters regenerate bit signals.' }),
+          createQ('[MEDIUM] How does a switch populate its internal MAC Address Table (CAM Table)?', ['By downloading files from Google', 'By inspecting the Source MAC address of incoming Ethernet frames on each port', 'By asking the router', 'By manual configuration only'], 1, 'Switches dynamically learn MAC addresses by recording the source MAC address of incoming frames on each physical port.', { 0: 'Google does not manage local switch tables.', 2: 'Routers do not provide local MAC mappings.', 3: 'MAC learning is automatic.' }),
+        ],
+      },
+      {
+        lessonTitle: '14. Basic Network Troubleshooting Workflow',
+        lessonSlug: 'level-0-basic-network-troubleshooting-workflow',
+        shortExplanation: 'A systematic bottom-up diagnostic methodology isolates physical, logical, and application network failures.',
+        theory: `1. WHAT IS IT?\nNetwork troubleshooting uses a structured OSI bottom-up approach to isolate network connectivity outages rapidly.\n\n2. THE 5-STEP TROUBLESHOOTING WORKFLOW:\n1. Check Physical Cable / Link (Layer 1): Is the cable plugged in? Wi-Fi connected?\n2. Test Loopback IP (Layer 3 OS): \`ping 127.0.0.1\`\n3. Test Local Gateway (Layer 3 Subnet): \`ping 192.168.1.1\`\n4. Test Remote IP (Layer 3 WAN): \`ping 8.8.8.8\`\n5. Test Hostname DNS (Layer 7 App): \`nslookup google.com\``,
+        analogy: 'Doctor diagnostic checkup: Takes pulse (Physical), checks reflexes (Local OS), checks blood pressure (Gateway), runs lab test (DNS/App).',
+        keyConcepts: ['Bottom-Up Method: Layer 1 ➔ Layer 3 ➔ Layer 7.', 'Ping Isolation Steps: Loopback ➔ Gateway ➔ Internet IP ➔ Hostname.', 'DNS vs Routing Outage Isolation.', 'Terminal Diagnostic Tools: ping, ipconfig, nslookup, tracert.'],
+        commands: ['ping 127.0.0.1', 'ping 192.168.1.1', 'ping 8.8.8.8', 'nslookup google.com'],
+        labTitle: 'Troubleshooting Incident: Systematic Network Failure Isolation',
+        labInstructions: 'Execute the 4-step ping workflow (Loopback ➔ Gateway ➔ Internet IP ➔ DNS) to isolate the network failure.',
+        questions: [
+          createQ('[EASY] In systematic bottom-up network troubleshooting, what should an engineer check FIRST when a computer loses connectivity?', ['DNS server records', 'Physical cable connection and link LED light status (Layer 1)', 'Web browser cache settings', 'Database query execution'], 1, 'Always verify Physical Layer 1 connectivity (cables/Wi-Fi link) before testing higher-layer software settings.', { 0: 'DNS is tested after verifying IP reachability.', 2: 'Browser cache is Layer 7.', 3: 'Database is application logic.' }),
+          createQ('[MEDIUM] If a user can ping Internet IP `8.8.8.8` successfully, but typing `google.com` in their web browser fails to load, what type of network outage is occurring?', ['Physical cable disconnection', 'Local router hardware crash', 'DNS Resolution failure', 'Power outage'], 2, 'Successful ping to a public IP proves Layer 3 routing works; failure to open domain hostnames indicates a Layer 7 DNS failure.', { 0: 'Pings prove physical cables are working.', 1: 'Pings prove gateway router is forwarding packets.', 3: 'System has power.' }),
+        ],
+      },
+    ],
+  };
+
   const topicsData = [
     // 1. WHAT IS COMPUTER NETWORKING?
     {
@@ -676,6 +902,153 @@ async function main() {
 
   console.log(`📚 Inserting ${topicsData.length} Educational Topics and Quiz Banks...`);
 
+  console.log('🎓 Seeding LEVEL 0 → Course 1 → Module 1 (14 Foundational Lessons)...');
+
+  const l0Course = await prisma.course.create({
+    data: {
+      slug: level0CourseData.slug,
+      title: level0CourseData.title,
+      tagline: level0CourseData.tagline,
+      category: level0CourseData.category,
+      description: level0CourseData.description,
+      level: level0CourseData.level,
+      icon: level0CourseData.icon,
+      estimatedHours: level0CourseData.estimatedHours,
+      published: true,
+      modules: {
+        create: [
+          {
+            title: level0CourseData.moduleTitle,
+            description: level0CourseData.moduleDescription,
+            order: 1,
+            lessons: {
+              create: level0CourseData.lessons.map((les, idx) => ({
+                title: les.lessonTitle,
+                slug: les.lessonSlug,
+                type: LessonType.THEORY,
+                durationMinutes: 20,
+                order: idx + 1,
+                introduction: les.shortExplanation,
+                simpleExplanation: les.shortExplanation,
+                analogy: les.analogy,
+                technicalExplanation: les.theory,
+                visualizationType: les.lessonSlug,
+                masteryScoreRequired: 80,
+                cheatsheetJson: les.keyConcepts.map((kc: string, i: number) => ({
+                  title: `Core Rule ${i + 1}`,
+                  value: kc,
+                  description: `Foundational rule for ${les.lessonTitle}`,
+                })),
+                contentJson: {
+                  shortExplanation: les.shortExplanation,
+                  theory: les.theory,
+                  analogy: les.analogy,
+                  keyConcepts: les.keyConcepts,
+                },
+                objectives: {
+                  create: les.keyConcepts.map((kc: string, i: number) => ({
+                    text: `Understand ${kc.split(':')[0]}`,
+                    order: i,
+                  })),
+                },
+                concepts: {
+                  create: les.keyConcepts.map((kc: string, i: number) => {
+                    const parts = kc.split(':');
+                    return {
+                      title: parts[0] || `Concept ${i + 1}`,
+                      summary: parts[1] || kc,
+                      explanation: les.theory,
+                      technicalDetails: les.shortExplanation,
+                      order: i,
+                    };
+                  }),
+                },
+                examples: {
+                  create: [
+                    {
+                      title: `Real-World Application: ${les.lessonTitle}`,
+                      scenario: `Everyday production scenario for ${les.lessonTitle}`,
+                      explanation: les.analogy || les.shortExplanation,
+                      order: 0,
+                    },
+                  ],
+                },
+                commands: {
+                  create: (les.commands || []).map((cmd: string, i: number) => ({
+                    command: cmd,
+                    description: `Practical terminal command for ${les.lessonTitle}`,
+                    exampleOutput: `Simulated output for ${cmd}`,
+                    category: 'Foundations',
+                    order: i,
+                  })),
+                },
+                labs: {
+                  create: [
+                    {
+                      slug: `${les.lessonSlug}-lab`,
+                      type: 'GUIDED',
+                      title: les.labTitle,
+                      description: les.labInstructions,
+                      difficulty: CourseLevel.FOUNDATIONAL,
+                      estimatedMinutes: 15,
+                      instructions: les.labInstructions,
+                      objectivesJson: [`Execute ${les.commands[0] || 'ping'} in CLI sandbox`, 'Verify response telemetry'],
+                      commandsJson: les.commands,
+                      expectedObservationsJson: ['0% packet loss', 'Valid IP address telemetry'],
+                      hintsJson: ['Hint 1: Type the command exactly as shown in the instructions.'],
+                      completionCriteria: 'Execute diagnostic command cleanly.',
+                      order: 0,
+                    },
+                  ],
+                },
+                mistakes: {
+                  create: [
+                    {
+                      mistake: `Misunderstanding boundaries in ${les.lessonTitle}`,
+                      whyWrong: 'Confusing logical software addresses with physical hardware addresses.',
+                      correctApproach: 'Use Layer 2 MAC addresses for local LAN delivery and Layer 3 IP addresses for routing.',
+                      order: 0,
+                    },
+                  ],
+                },
+                recaps: {
+                  create: les.keyConcepts.map((kc: string, i: number) => ({
+                    point: kc,
+                    order: i,
+                  })),
+                },
+                quizzes: {
+                  create: [
+                    {
+                      title: `${les.lessonTitle} Assessment`,
+                      passingScore: 80,
+                      questions: {
+                        create: les.questions.map((q) => ({
+                          questionText: q.questionText,
+                          optionsJson: q.optionsJson,
+                          correctOption: q.correctOption,
+                          explanation: q.explanation,
+                          explanationsJson: q.explanationsJson,
+                          cognitiveLevel: 'UNDERSTANDING' as any,
+                          questionType: 'MULTIPLE_CHOICE' as any,
+                          concept: les.lessonTitle,
+                          difficulty: CourseLevel.FOUNDATIONAL,
+                          points: 10,
+                        })),
+                      },
+                    },
+                  ],
+                },
+              })),
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  console.log(`  ✓ Seeded LEVEL 0 Course 1 Module 1: "${l0Course.title}" (14 Complete Lessons)`);
+
   for (const topic of topicsData) {
     const course = await prisma.course.create({
       data: {
@@ -702,6 +1075,17 @@ async function main() {
                     type: LessonType.THEORY,
                     durationMinutes: 15,
                     order: 1,
+                    introduction: topic.shortExplanation,
+                    simpleExplanation: topic.shortExplanation,
+                    analogy: topic.analogy,
+                    technicalExplanation: topic.theory,
+                    visualizationType: topic.slug,
+                    masteryScoreRequired: 80,
+                    cheatsheetJson: topic.keyConcepts.map((kc: string, i: number) => ({
+                      title: `Pillar ${i + 1}`,
+                      value: kc,
+                      description: `Core operational rule for ${topic.title}`,
+                    })),
                     contentJson: {
                       shortExplanation: topic.shortExplanation,
                       theory: topic.theory,
@@ -709,19 +1093,122 @@ async function main() {
                       keyConcepts: topic.keyConcepts,
                       practicalActivity: topic.practicalActivity,
                     },
+                    objectives: {
+                      create: topic.keyConcepts.map((kc: string, idx: number) => ({
+                        text: `Understand ${kc.split(':')[0]}`,
+                        order: idx,
+                      })),
+                    },
+                    concepts: {
+                      create: topic.keyConcepts.map((kc: string, idx: number) => {
+                        const parts = kc.split(':');
+                        return {
+                          title: parts[0] || `Concept ${idx + 1}`,
+                          summary: parts[1] || kc,
+                          explanation: topic.theory,
+                          technicalDetails: topic.shortExplanation,
+                          order: idx,
+                        };
+                      }),
+                    },
+                    examples: {
+                      create: [
+                        {
+                          title: `Real-World Application of ${topic.title}`,
+                          scenario: `Enterprise production deployment of ${topic.title}.`,
+                          explanation: topic.analogy || `Applied in production networks for reliable packet delivery.`,
+                          order: 0,
+                        },
+                      ],
+                    },
+                    commands: {
+                      create: [
+                        {
+                          command: topic.slug.includes('tcp') ? 'netstat -ano' : topic.slug.includes('ip') ? 'ipconfig /all' : 'ping 192.168.1.1',
+                          description: `Diagnostic terminal check for ${topic.title}`,
+                          exampleOutput: 'Interface 192.168.1.50 Status: ACTIVE',
+                          category: 'Diagnostics',
+                          order: 0,
+                        },
+                      ],
+                    },
+                    labs: {
+                      create: [
+                        {
+                          slug: `${topic.lessonSlug}-guided-lab`,
+                          type: 'GUIDED',
+                          title: `Guided Practice: ${topic.title}`,
+                          description: topic.practicalActivity?.instructions || `Execute CLI diagnostic commands to verify ${topic.title}.`,
+                          difficulty: topic.level,
+                          estimatedMinutes: 15,
+                          instructions: topic.practicalActivity?.instructions || `Run network diagnostic commands in the CLI sandbox.`,
+                          objectivesJson: [`Execute diagnostic command for ${topic.title}`, `Verify socket ICMP packet telemetry`],
+                          commandsJson: ['ping 192.168.1.1', 'arp -a', 'ipconfig /all', 'nslookup netvision.edu'],
+                          expectedObservationsJson: ['IPv4 Address', 'Default Gateway IP', 'ICMP Echo Reply'],
+                          hintsJson: [
+                            'Hint 1: Run ipconfig /all to verify local interface settings.',
+                            'Hint 2: Run ping 192.168.1.1 to confirm gateway ICMP echo responses.',
+                          ],
+                          completionCriteria: 'Execute diagnostic command and verify 0% packet loss.',
+                          order: 0,
+                        },
+                        {
+                          slug: `${topic.lessonSlug}-challenge-lab`,
+                          type: 'CHALLENGE',
+                          title: `Troubleshooting Incident: ${topic.title}`,
+                          description: `Diagnose and fix misconfigured network parameters for ${topic.title}.`,
+                          difficulty: topic.level,
+                          estimatedMinutes: 20,
+                          instructions: `A client cannot connect to the gateway router. Investigate configuration parameters and resolve the subnet issue.`,
+                          objectivesJson: ['Identify misconfigured network parameter', 'Apply target configuration repair'],
+                          commandsJson: ['ping 192.168.1.1', 'show ip route', 'arp -a'],
+                          expectedObservationsJson: ['Restored gateway connectivity'],
+                          hintsJson: ['Hint 1: Compare default gateway IP and subnet mask boundaries.'],
+                          completionCriteria: 'Apply correct gateway configuration.',
+                          order: 1,
+                        },
+                      ],
+                    },
+                    mistakes: {
+                      create: [
+                        {
+                          mistake: `Misinterpreting protocol boundaries in ${topic.title}`,
+                          whyWrong: `Confusing Layer 2 physical addressing with Layer 3 logical routing logic.`,
+                          correctApproach: `Use Layer 2 MAC framing for local LAN delivery and Layer 3 IP addressing for global path routing.`,
+                          order: 0,
+                        },
+                      ],
+                    },
+                    recaps: {
+                      create: topic.keyConcepts.map((kc: string, idx: number) => ({
+                        point: kc,
+                        order: idx,
+                      })),
+                    },
                     quizzes: {
                       create: [
                         {
                           title: `${topic.title} Concept Assessment`,
                           passingScore: 80,
                           questions: {
-                            create: topic.questions.map((q) => ({
-                              questionText: q.questionText,
-                              optionsJson: q.optionsJson,
-                              correctOption: q.correctOption,
-                              explanation: q.explanation,
-                              explanationsJson: q.explanationsJson,
-                            })),
+                            create: topic.questions.map((q) => {
+                              const match = q.questionText.match(/^\[(EASY|MEDIUM|HARD)\]/i);
+                              const tag = match ? match[1].toUpperCase() : 'EASY';
+                              const cogLevel = tag === 'HARD' ? 'TROUBLESHOOTING' : tag === 'MEDIUM' ? 'APPLICATION' : 'RECALL';
+
+                              return {
+                                questionText: q.questionText,
+                                optionsJson: q.optionsJson,
+                                correctOption: q.correctOption,
+                                explanation: q.explanation,
+                                explanationsJson: q.explanationsJson,
+                                cognitiveLevel: cogLevel as any,
+                                questionType: 'MULTIPLE_CHOICE' as any,
+                                concept: topic.title,
+                                difficulty: topic.level,
+                                points: tag === 'HARD' ? 20 : tag === 'MEDIUM' ? 15 : 10,
+                              };
+                            }),
                           },
                         },
                       ],
@@ -735,7 +1222,222 @@ async function main() {
       },
     });
 
-    console.log(`  ✓ Seeded Topic Course: "${course.title}" (${topic.questions.length} Quiz Qs)`);
+    console.log(`  ✓ Seeded Topic Course: "${course.title}" (${topic.questions.length} Quiz Qs, Normalized Labs & Sections)`);
+  }
+
+  console.log('💻 Seeding Central Command Reference Library...');
+
+  const commandsData = [
+    {
+      command: 'ipconfig',
+      operatingSystem: 'WINDOWS' as any,
+      category: 'Network information',
+      purpose: 'Display basic IPv4/IPv6 address, subnet mask, and default gateway configuration for active network adapters.',
+      syntax: 'ipconfig',
+      example: 'ipconfig',
+      expectedOutput: `Ethernet adapter Local Area Connection:\n  IPv4 Address. . . . . . . . . . . : 192.168.1.50\n  Subnet Mask . . . . . . . . . . . : 255.255.255.0\n  Default Gateway . . . . . . . . . : 192.168.1.1`,
+      explanation: 'Quickly shows your local IP address and default gateway. Useful when troubleshooting whether DHCP assigned an IP.',
+      warnings: 'Only shows summary data for active connections.',
+      relatedLessonSlugs: ['what-is-computer-networking', 'ipv4-structure-private-space'],
+    },
+    {
+      command: 'ipconfig /all',
+      operatingSystem: 'WINDOWS' as any,
+      category: 'Network information',
+      purpose: 'Display complete network configuration including physical MAC address, DHCP server, DNS servers, and lease timestamps.',
+      syntax: 'ipconfig /all',
+      example: 'ipconfig /all',
+      expectedOutput: `Ethernet adapter Local Area Connection:\n  Physical Address. . . . . . . . . : 00-1A-2B-3C-4D-5E\n  DHCP Enabled. . . . . . . . . . . : Yes\n  IPv4 Address. . . . . . . . . . . : 192.168.1.50(Preferred)\n  Subnet Mask . . . . . . . . . . . : 255.255.255.0\n  Default Gateway . . . . . . . . . : 192.168.1.1\n  DHCP Server . . . . . . . . . . . : 192.168.1.1\n  DNS Servers . . . . . . . . . . . : 1.1.1.1, 8.8.8.8`,
+      explanation: 'Reveals MAC hardware addresses, DNS server IPs, and DHCP lease status for detailed network diagnostics.',
+      warnings: 'Produces long output; scroll to find your primary network interface.',
+      relatedLessonSlugs: ['mac-addressing-structure', 'dhcp-dora-process'],
+    },
+    {
+      command: 'ping',
+      operatingSystem: 'ALL' as any,
+      category: 'Connectivity',
+      purpose: 'Test Layer 3 ICMP echo reachability and measure round-trip latency to a target IP or domain.',
+      syntax: 'ping <target_ip_or_hostname>',
+      example: 'ping 192.168.1.1',
+      expectedOutput: `PING 192.168.1.1 (192.168.1.1): 56 data bytes\n64 bytes from 192.168.1.1: icmp_seq=0 ttl=64 time=1.12 ms\n64 bytes from 192.168.1.1: icmp_seq=1 ttl=64 time=0.98 ms\n--- 192.168.1.1 ping statistics ---\n2 packets transmitted, 2 received, 0% packet loss, time 2003ms`,
+      explanation: 'Sends ICMP Echo Request packets to test if a target host is active and responsive.',
+      warnings: 'Firewalls may block ICMP packets even if the host is active.',
+      relatedLessonSlugs: ['what-is-computer-networking', 'routing-mechanics-protocols'],
+    },
+    {
+      command: 'tracert',
+      operatingSystem: 'WINDOWS' as any,
+      category: 'Troubleshooting',
+      purpose: 'Trace the path of intermediate router hops to a destination network and measure hop-by-hop latency.',
+      syntax: 'tracert <target_ip_or_domain>',
+      example: 'tracert 8.8.8.8',
+      expectedOutput: `Tracing route to dns.google [8.8.8.8] over a maximum of 30 hops:\n  1    1 ms    1 ms    1 ms  192.168.1.1\n  2    8 ms    7 ms    9 ms  10.0.0.1\n  3   18 ms   17 ms   19 ms  8.8.8.8\nTrace complete.`,
+      explanation: 'Uses incrementing TTL values to identify every router along the path to locate network bottlenecks or drops.',
+      warnings: 'Some enterprise firewalls hide intermediate hops resulting in asterisk (*) timeouts.',
+      relatedLessonSlugs: ['routing-mechanics-protocols'],
+    },
+    {
+      command: 'nslookup',
+      operatingSystem: 'ALL' as any,
+      category: 'DNS',
+      purpose: 'Query Domain Name System (DNS) servers to resolve hostnames to IP addresses or inspect DNS records.',
+      syntax: 'nslookup <hostname_or_ip>',
+      example: 'nslookup netvision.edu',
+      expectedOutput: `Server:  1.1.1.1\nAddress: 1.1.1.1#53\n\nNon-authoritative answer:\nName:    netvision.edu\nAddress: 104.21.48.12`,
+      explanation: 'Verifies whether your configured DNS server is correctly resolving domain names to target IP addresses.',
+      warnings: 'Default query uses local OS DNS resolver.',
+      relatedLessonSlugs: ['dns-hierarchy-resolution'],
+    },
+    {
+      command: 'arp -a',
+      operatingSystem: 'ALL' as any,
+      category: 'ARP',
+      purpose: 'Display the operating system local ARP cache table mapping IP addresses to physical MAC addresses.',
+      syntax: 'arp -a',
+      example: 'arp -a',
+      expectedOutput: `Interface: 192.168.1.50 --- 0x2\n  Internet Address      Physical Address      Type\n  192.168.1.1           00-11-22-33-44-55     dynamic\n  192.168.1.100         aa-bb-cc-dd-ee-ff     dynamic`,
+      explanation: 'Shows resolved Layer 2 MAC addresses for local LAN hosts recently communicated with.',
+      warnings: 'Entries expire after 2-10 minutes of inactivity.',
+      relatedLessonSlugs: ['arp-protocol-mechanics', 'mac-addressing-structure'],
+    },
+    {
+      command: 'netstat',
+      operatingSystem: 'WINDOWS' as any,
+      category: 'Connections',
+      purpose: 'Display active TCP connections, listening socket ports, and protocol statistics.',
+      syntax: 'netstat -ano',
+      example: 'netstat -ano',
+      expectedOutput: `Active Connections\n  Proto  Local Address          Foreign Address        State           PID\n  TCP    127.0.0.1:5432         0.0.0.0:0              LISTENING       1420\n  TCP    192.168.1.50:52114     104.21.48.12:443       ESTABLISHED     3120`,
+      explanation: 'Essential for auditing open network ports and identifying applications making outbound network connections.',
+      warnings: 'Use -ano to display process ID numbers (PID).',
+      relatedLessonSlugs: ['tcp-mechanics', 'http-methods-status-codes'],
+    },
+    {
+      command: 'route print',
+      operatingSystem: 'WINDOWS' as any,
+      category: 'Routing',
+      purpose: 'Display the Windows IP routing table including network destinations, netmasks, gateways, and metrics.',
+      syntax: 'route print',
+      example: 'route print',
+      expectedOutput: `IPv4 Route Table\nActive Routes:\nNetwork Destination        Netmask          Gateway       Interface  Metric\n          0.0.0.0          0.0.0.0      192.168.1.1    192.168.1.50      25\n        127.0.0.0        255.0.0.0        On-link         127.0.0.1     331\n      192.168.1.0    255.255.255.0        On-link      192.168.1.50     281`,
+      explanation: 'Shows how Windows determines whether to send packets to the local LAN or forward to the default gateway router.',
+      warnings: 'Requires administrator privileges to add static routes.',
+      relatedLessonSlugs: ['routing-mechanics-protocols', 'subnetting-cidr-math'],
+    },
+    {
+      command: 'ip addr',
+      operatingSystem: 'LINUX' as any,
+      category: 'Network information',
+      purpose: 'Show or configure network interfaces, IPv4/IPv6 addresses, and link states on Linux.',
+      syntax: 'ip addr show',
+      example: 'ip addr',
+      expectedOutput: `1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN\n    inet 127.0.0.1/8 scope host lo\n2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP\n    inet 192.168.1.50/24 brd 192.168.1.255 scope global eth0\n    link/ether 00:1a:2b:3c:4d:5e brd ff:ff:ff:ff:ff:ff`,
+      explanation: 'Modern iproute2 replacement for ifconfig on Linux distributions.',
+      warnings: 'Use ip -c addr for colorized output.',
+      relatedLessonSlugs: ['ipv4-structure-private-space', 'ethernet-standards-framing'],
+    },
+    {
+      command: 'ip route',
+      operatingSystem: 'LINUX' as any,
+      category: 'Routing',
+      purpose: 'Display and manage the kernel routing table on Linux systems.',
+      syntax: 'ip route show',
+      example: 'ip route',
+      expectedOutput: `default via 192.168.1.1 dev eth0 proto dhcp metric 100\n192.168.1.0/24 dev eth0 proto kernel scope link src 192.168.1.50 metric 100`,
+      explanation: 'Replaces legacy netstat -r / route command on Linux.',
+      warnings: 'Modifying routes with ip route add requires sudo privileges.',
+      relatedLessonSlugs: ['routing-mechanics-protocols'],
+    },
+    {
+      command: 'traceroute',
+      operatingSystem: 'LINUX' as any,
+      category: 'Troubleshooting',
+      purpose: 'Print the route packets take to network host on Linux/macOS.',
+      syntax: 'traceroute <target>',
+      example: 'traceroute 8.8.8.8',
+      expectedOutput: `traceroute to 8.8.8.8 (8.8.8.8), 30 hops max, 60 byte packets\n 1  192.168.1.1 (192.168.1.1)  1.120 ms  1.050 ms  1.080 ms\n 2  10.0.0.1 (10.0.0.1)  8.450 ms  8.320 ms  8.400 ms\n 3  dns.google (8.8.8.8)  18.100 ms  18.050 ms  18.120 ms`,
+      explanation: 'Traces packet path using UDP or ICMP probes across Linux routers.',
+      warnings: 'May require installing inetutils-traceroute package.',
+      relatedLessonSlugs: ['routing-mechanics-protocols'],
+    },
+    {
+      command: 'dig',
+      operatingSystem: 'LINUX' as any,
+      category: 'DNS',
+      purpose: 'DNS lookup utility for querying DNS name servers on Linux/macOS.',
+      syntax: 'dig <hostname> [record_type]',
+      example: 'dig netvision.edu A',
+      expectedOutput: `; <<>> DiG 9.18.1 <<>> netvision.edu A\n;; ANSWER SECTION:\nnetvision.edu.		300	IN	A	104.21.48.12\n\n;; Query time: 14 msec\n;; SERVER: 1.1.1.1#53(1.1.1.1)`,
+      explanation: 'Flexible diagnostic tool providing detailed DNS query/answer section outputs.',
+      warnings: 'Use +short for concise IP-only output.',
+      relatedLessonSlugs: ['dns-hierarchy-resolution'],
+    },
+    {
+      command: 'ip neigh',
+      operatingSystem: 'LINUX' as any,
+      category: 'ARP',
+      purpose: 'Show neighbor MAC address tables (ARP cache) on Linux.',
+      syntax: 'ip neigh show',
+      example: 'ip neigh',
+      expectedOutput: `192.168.1.1 dev eth0 lladdr 00:11:22:33:44:55 REACHABLE\n192.168.1.100 dev eth0 lladdr aa:bb:cc:dd:ee:ff STALE`,
+      explanation: 'Modern iproute2 command replacing legacy arp -a on Linux.',
+      warnings: 'STALE status indicates the entry has not been validated recently.',
+      relatedLessonSlugs: ['arp-protocol-mechanics'],
+    },
+    {
+      command: 'ss',
+      operatingSystem: 'LINUX' as any,
+      category: 'Ports',
+      purpose: 'Utility to investigate socket connections, listening ports, and TCP statistics on Linux.',
+      syntax: 'ss -tulpn',
+      example: 'ss -tulpn',
+      expectedOutput: `Netid  State   Recv-Q  Send-Q  Local Address:Port   Peer Address:Port  Process\nudp    UNCONN  0       0       0.0.0.0:68           0.0.0.0:*          users:(("dhclient",pid=842))\ntcp    LISTEN  0       128     0.0.0.0:22           0.0.0.0:*          users:(("sshd",pid=1050))`,
+      explanation: 'Modern, faster replacement for netstat on Linux systems.',
+      warnings: 'Requires sudo privileges to view process names (-p).',
+      relatedLessonSlugs: ['tcp-mechanics', 'udp-mechanics'],
+    },
+    {
+      command: 'ifconfig',
+      operatingSystem: 'MACOS' as any,
+      category: 'Network information',
+      purpose: 'Display network interface configuration and link status on macOS and BSD Unix.',
+      syntax: 'ifconfig',
+      example: 'ifconfig en0',
+      expectedOutput: `en0: flags=8863<UP,BROADCAST,SMART,RUNNING,SIMPLEX,MULTICAST> mtu 1500\n\toptions=400<CHANNEL_IO>\n\tether 00:1a:2b:3c:4d:5e\n\tinet 192.168.1.50 netmask 0ffffff00 broadcast 192.168.1.255\n\tmedia: autoselect (1000baseT <full-duplex>)\n\tstatus: active`,
+      explanation: 'Standard interface diagnostic tool on macOS.',
+      warnings: 'en0 is typically Wi-Fi on MacBooks.',
+      relatedLessonSlugs: ['ethernet-standards-framing', 'ipv4-structure-private-space'],
+    },
+    {
+      command: 'netstat -nr',
+      operatingSystem: 'MACOS' as any,
+      category: 'Routing',
+      purpose: 'Display kernel routing table on macOS and BSD systems.',
+      syntax: 'netstat -nr',
+      example: 'netstat -nr',
+      expectedOutput: `Routing tables\n\nInternet:\nDestination        Gateway            Flags        Netif Expire\ndefault            192.168.1.1        UGSc           en0\n127                127.0.0.1          UCS            lo0\n192.168.1          link#6             UCS            en0`,
+      explanation: 'Shows macOS active routing table and default gateway interface.',
+      warnings: 'Flags UGSc indicate Useful Gateway Static connection.',
+      relatedLessonSlugs: ['routing-mechanics-protocols'],
+    },
+  ];
+
+  for (const cmd of commandsData) {
+    await prisma.commandReference.create({
+      data: {
+        command: cmd.command,
+        operatingSystem: cmd.operatingSystem,
+        category: cmd.category,
+        purpose: cmd.purpose,
+        syntax: cmd.syntax,
+        example: cmd.example,
+        expectedOutput: cmd.expectedOutput,
+        explanation: cmd.explanation,
+        warnings: cmd.warnings,
+        relatedLessonSlugs: cmd.relatedLessonSlugs,
+      },
+    });
+    console.log(`  ✓ Seeded Command Reference: "${cmd.command}" [${cmd.operatingSystem}] (${cmd.category})`);
   }
 
   console.log('✅ Educational Seed Completed Successfully!');

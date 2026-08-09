@@ -52,14 +52,14 @@ export const CourseCategoriesSection: React.FC = () => {
   ];
 
   return (
-    <section id="courses" className="py-20 bg-net-grid-pattern relative">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+    <section id="courses" className="py-16 sm:py-20 bg-net-grid-pattern relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 sm:mb-16 gap-4 sm:gap-6">
           <div>
             <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold mb-2 block">
               Curriculum Roadmap
             </span>
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-5xl font-extrabold text-white tracking-tight">
               Explore Learning Pathways
             </h2>
           </div>
@@ -68,22 +68,22 @@ export const CourseCategoriesSection: React.FC = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {categories.map((c, idx) => (
             <div
               key={idx}
-              className="glass-panel p-8 rounded-2xl border border-[#272732] hover:border-[#00f0ff]/40 transition-all flex flex-col justify-between group"
+              className="glass-panel p-5 sm:p-8 rounded-2xl border border-[#272732] hover:border-[#00f0ff]/40 transition-all flex flex-col justify-between group"
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 gap-2">
                   <Badge variant={c.badgeVariant}>{c.level}</Badge>
-                  <span className="text-xs font-mono text-zinc-500">{c.lessonsCount} Interactive Lessons</span>
+                  <span className="text-xs font-mono text-zinc-500">{c.lessonsCount} Lessons</span>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2 group-hover:text-[#00f0ff] transition-colors flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-zinc-400 group-hover:text-[#00f0ff]" />
-                  {c.title}
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-[#00f0ff] transition-colors flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-zinc-400 group-hover:text-[#00f0ff] shrink-0" />
+                  <span>{c.title}</span>
                 </h3>
-                <p className="text-xs text-zinc-400 leading-relaxed mb-6">{c.desc}</p>
+                <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed mb-6">{c.desc}</p>
               </div>
               <Link
                 href="/courses"

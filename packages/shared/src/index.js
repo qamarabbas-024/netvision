@@ -17,6 +17,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.API_ROUTES = void 0;
 __exportStar(require("./models/KnowledgeModel"), exports);
+__exportStar(require("./models/SandboxModel"), exports);
 exports.API_ROUTES = {
     AUTH: {
         LOGIN: '/auth/login',

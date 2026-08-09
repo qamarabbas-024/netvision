@@ -56,7 +56,7 @@ export const Modal: React.FC<ModalProps> = ({
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             className={cn(
-              'relative z-10 w-full max-w-lg glass-panel rounded-2xl border border-[#272732] p-6 shadow-2xl overflow-hidden',
+              'relative z-10 w-full max-w-lg glass-panel rounded-2xl border border-[#272732] p-4 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto',
               className
             )}
           >

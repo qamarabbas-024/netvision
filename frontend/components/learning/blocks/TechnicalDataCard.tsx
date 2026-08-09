@@ -40,33 +40,33 @@ export const TechnicalDataCard: React.FC<TechnicalDataCardProps> = ({
   };
 
   return (
-    <div className="p-4 rounded-2xl glass-panel border border-[#272732] hover:border-[#00f0ff]/40 transition-all flex flex-col gap-2 relative group my-3">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
+    <div className="p-3.5 sm:p-4 rounded-2xl glass-panel border border-[#272732] hover:border-[#00f0ff]/40 transition-all flex flex-col gap-2 relative group my-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
           {getTypeBadge()}
           <span className="text-xs font-bold text-white">{title}</span>
         </div>
 
         <button
           onClick={handleCopy}
-          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-[11px]"
+          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-[11px] shrink-0 min-h-[36px] px-2"
           title="Copy value"
         >
           {copied ? (
             <>
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <span className="text-emerald-400 font-bold">Copied</span>
             </>
           ) : (
             <>
-              <Copy className="w-3.5 h-3.5" />
+              <Copy className="w-3.5 h-3.5 shrink-0" />
               <span>Copy</span>
             </>
           )}
         </button>
       </div>
 
-      <div className="p-3 rounded-xl bg-[#09090b] border border-[#272732] font-mono text-sm text-[#00f0ff] font-extrabold tracking-wide break-all">
+      <div className="p-2.5 sm:p-3 rounded-xl bg-[#09090b] border border-[#272732] font-mono text-xs sm:text-sm text-[#00f0ff] font-extrabold tracking-wide break-all overflow-x-auto">
         {value}
       </div>
 

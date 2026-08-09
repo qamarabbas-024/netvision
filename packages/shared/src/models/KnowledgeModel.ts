@@ -3,6 +3,16 @@
 export type KnowledgeLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
 export type KnowledgeLocale = 'en-US' | 'es-ES' | 'fr-FR' | 'de-DE' | 'zh-CN';
 
+export type PedagogyStage =
+  | 'learn'
+  | 'understand'
+  | 'see'
+  | 'interact'
+  | 'practice'
+  | 'breakfix'
+  | 'quiz'
+  | 'mastery';
+
 export interface TheoryBlockData {
   id: string;
   title: string;
@@ -26,6 +36,22 @@ export interface SimulationScenarioData {
     links: Array<{ id: string; source: string; target: string }>;
   };
   expectedPacketSequence: string[];
+}
+
+export interface BreakFixScenarioData {
+  id: string;
+  title: string;
+  symptom: string;
+  topologySummary: string;
+  faultyNodeId: string;
+  faultType: 'INCORRECT_IP' | 'WRONG_SUBNET_MASK' | 'WRONG_GATEWAY' | 'PORT_SHUTDOWN' | 'CORRUPTED_ARP_CACHE' | 'FIREWALL_BLOCK';
+  options: Array<{
+    id: string;
+    label: string;
+    actionType: string;
+    isCorrectFix: boolean;
+    explanation: string;
+  }>;
 }
 
 export interface QuizQuestionData {
@@ -57,6 +83,7 @@ export interface UniversalKnowledgeItem {
   learningObjectives: string[];
   theoryBlocks: TheoryBlockData[];
   simulationScenarios: SimulationScenarioData[];
+  breakFixScenarios?: BreakFixScenarioData[];
   quizQuestions: QuizQuestionData[];
   commonMistakes: string[];
   interviewQuestions: InterviewQuestionData[];
@@ -85,3 +112,4 @@ export class KnowledgeModelSerializer {
     return parsed as UniversalKnowledgeItem;
   }
 }
+

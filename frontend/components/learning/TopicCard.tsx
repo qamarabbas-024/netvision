@@ -45,12 +45,12 @@ export const TopicCard: React.FC<TopicCardProps> = ({
 
   return (
     <Link href={`/courses/${topic.slug}`}>
-      <div className="glass-panel p-6 rounded-3xl border border-[#272732] hover:border-[#00f0ff]/40 hover:shadow-glow-cyan transition-all flex flex-col justify-between h-full group relative overflow-hidden">
+      <div className="glass-panel p-4 sm:p-6 rounded-3xl border border-[#272732] hover:border-[#00f0ff]/40 hover:shadow-glow-cyan transition-all flex flex-col justify-between h-full group relative overflow-hidden">
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
             <DifficultyBadge level={topic.level} />
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {isCompleted && (
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                   <CheckCircle2 className="w-3.5 h-3.5" />
@@ -71,15 +71,15 @@ export const TopicCard: React.FC<TopicCardProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+          <div className="flex items-center gap-3 mb-3 min-w-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
               {renderIcon(topic.icon)}
             </div>
-            <div>
-              <span className="text-[11px] font-mono text-zinc-500 block uppercase tracking-wider">
+            <div className="min-w-0">
+              <span className="text-[10px] sm:text-[11px] font-mono text-zinc-500 block uppercase tracking-wider truncate">
                 {topic.category}
               </span>
-              <h3 className="text-lg font-bold text-white group-hover:text-[#00f0ff] transition-colors leading-snug">
+              <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-[#00f0ff] transition-colors leading-snug truncate">
                 {topic.title}
               </h3>
             </div>
