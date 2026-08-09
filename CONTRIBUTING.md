@@ -14,7 +14,7 @@ Please maintain a polite, respectful, and inclusive environment for all communit
 
 1. Fork and clone the repository:
    ```bash
-   git clone https://github.com/your-username/netvision.git
+   git clone https://github.com/qamarabbas-024/netvision.git
    cd netvision
    ```
 
