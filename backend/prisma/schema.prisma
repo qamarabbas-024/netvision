@@ -269,26 +269,43 @@ model CommandReference {
   @@map("command_references")
 }
 
-model LabAttempt {
-  id                   String    @id @default(uuid())
-  userId               String
-  labId                String
-  startedAt            DateTime  @default(now())
-  completedAt          DateTime?
-  commandHistoryJson   Json?     // Array of executed command logs
-  validationResultJson Json?     // Validation status, score breakdown, rule checks
-  hintsUsedCount       Int       @default(0)
-  attemptsCount        Int       @default(1)
-  passed               Boolean   @default(false)
-  score                Int       @default(0)
-  status               String    @default("IN_PROGRESS")
-  userSolutionJson     Json?
-  createdAt            DateTime  @default(now())
+model AnonymousLearner {
+  id              String            @id @default(uuid())
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lab                  LessonLab @relation(fields: [labId], references: [id], onDelete: Cascade)
+  progress        UserProgress[]
+  quizAttempts    QuizAttempt[]
+  labAttempts     LabAttempt[]
+  savedLessons    SavedLesson[]
+  sandboxSessions SandboxSession[]
+
+  @@map("anonymous_learners")
+}
+
+model LabAttempt {
+  id                   String            @id @default(uuid())
+  userId               String?
+  anonymousId          String?
+  labId                String
+  startedAt            DateTime          @default(now())
+  completedAt          DateTime?
+  commandHistoryJson   Json?             // Array of executed command logs
+  validationResultJson Json?             // Validation status, score breakdown, rule checks
+  hintsUsedCount       Int               @default(0)
+  attemptsCount        Int               @default(1)
+  passed               Boolean           @default(false)
+  score                Int               @default(0)
+  status               String            @default("IN_PROGRESS")
+  userSolutionJson     Json?
+  createdAt            DateTime          @default(now())
+
+  user                 User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousLearner     AnonymousLearner? @relation(fields: [anonymousId], references: [id], onDelete: Cascade)
+  lab                  LessonLab         @relation(fields: [labId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([anonymousId])
   @@index([labId])
   @@map("lab_attempts")
 }
@@ -303,22 +320,25 @@ enum SandboxStatus {
 }
 
 model SandboxSession {
-  id                 String        @id @default(uuid())
-  userId             String
+  id                 String            @id @default(uuid())
+  userId             String?
+  anonymousId        String?
   labId              String?
-  status             SandboxStatus @default(CREATED)
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  status             SandboxStatus     @default(CREATED)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
   expiresAt          DateTime
-  providerType       String        @default("SIMULATED") // SIMULATED | DOCKER
-  resourceLimitsJson Json?         // { ramMb: 512, cpuCores: 0.5, timeoutSec: 10 }
-  networkStateJson   Json?         // Topology nodes, IP configs, routing tables
-  historyJson        Json?         // Executed command logs
+  providerType       String            @default("SIMULATED") // SIMULATED | DOCKER
+  resourceLimitsJson Json?             // { ramMb: 512, cpuCores: 0.5, timeoutSec: 10 }
+  networkStateJson   Json?             // Topology nodes, IP configs, routing tables
+  historyJson        Json?             // Executed command logs
 
-  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lab                LessonLab?    @relation(fields: [labId], references: [id], onDelete: SetNull)
+  user               User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousLearner   AnonymousLearner? @relation(fields: [anonymousId], references: [id], onDelete: Cascade)
+  lab                LessonLab?        @relation(fields: [labId], references: [id], onDelete: SetNull)
 
   @@index([userId])
+  @@index([anonymousId])
   @@index([labId])
   @@index([status])
   @@map("sandbox_sessions")
@@ -378,44 +398,51 @@ model QuizQuestion {
 }
 
 model QuizAttempt {
-  id               String   @id @default(uuid())
-  userId           String
+  id               String            @id @default(uuid())
+  userId           String?
+  anonymousId      String?
   quizId           String
-  score            Int      // Percentage 0-100
+  score            Int               // Percentage 0-100
   passed           Boolean
-  answersJson      Json     // Record of questionId -> selectedOption
-  weakConceptsJson Json?    // Array of identified weak concept tags
-  attemptNumber    Int      @default(1)
-  createdAt        DateTime @default(now())
+  answersJson      Json              // Record of questionId -> selectedOption
+  weakConceptsJson Json?             // Array of identified weak concept tags
+  attemptNumber    Int               @default(1)
+  createdAt        DateTime          @default(now())
 
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quiz             Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user             User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousLearner AnonymousLearner? @relation(fields: [anonymousId], references: [id], onDelete: Cascade)
+  quiz             Quiz              @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([anonymousId])
   @@index([quizId])
   @@map("quiz_attempts")
 }
 
 model UserProgress {
-  id                 String    @id @default(uuid())
-  userId             String
+  id                 String            @id @default(uuid())
+  userId             String?
+  anonymousId        String?
   lessonId           String
-  started            Boolean   @default(true)
-  viewed             Boolean   @default(true)
-  practicalCompleted Boolean   @default(false)
-  quizAttemptsCount  Int       @default(0)
-  completed          Boolean   @default(false)
+  started            Boolean           @default(true)
+  viewed             Boolean           @default(true)
+  practicalCompleted Boolean           @default(false)
+  quizAttemptsCount  Int               @default(0)
+  completed          Boolean           @default(false)
   score              Int?
   bestScore          Int?
   masteryScore       Int?
   weakConceptsJson   Json?
   completedAt        DateTime?
 
-  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson             Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user               User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousLearner   AnonymousLearner? @relation(fields: [anonymousId], references: [id], onDelete: Cascade)
+  lesson             Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, lessonId])
+  @@index([userId, lessonId])
+  @@index([anonymousId, lessonId])
   @@index([userId])
+  @@index([anonymousId])
   @@index([lessonId])
   @@map("user_progress")
 }
@@ -500,16 +527,20 @@ model PasswordResetToken {
 }
 
 model SavedLesson {
-  id        String   @id @default(uuid())
-  userId    String
-  lessonId  String
-  createdAt DateTime @default(now())
+  id               String            @id @default(uuid())
+  userId           String?
+  anonymousId      String?
+  lessonId         String
+  createdAt        DateTime          @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user             User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousLearner AnonymousLearner? @relation(fields: [anonymousId], references: [id], onDelete: Cascade)
+  lesson           Lesson            @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, lessonId])
+  @@index([userId, lessonId])
+  @@index([anonymousId, lessonId])
   @@index([userId])
+  @@index([anonymousId])
   @@map("saved_lessons")
 }
 

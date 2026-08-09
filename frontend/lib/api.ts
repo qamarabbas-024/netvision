@@ -1,13 +1,15 @@
-// NetVision Frontend API Client with Fallback Resilience
+import { GuestProgressService } from '@/services/GuestProgressService';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
 function getAuthHeaders(): HeadersInit {
   if (typeof window === 'undefined') return { 'Content-Type': 'application/json' };
   const token = localStorage.getItem('netvision_token') || sessionStorage.getItem('netvision_token');
+  const anonId = GuestProgressService.getLearnerId();
   return {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(anonId ? { 'X-Anonymous-ID': anonId } : {}),
   };
 }
 
@@ -706,6 +708,18 @@ export async function terminateSandboxSessionApi(sessionId: string) {
       sessionId,
       status: 'STOPPED',
     };
+  }
+}
+
+export async function claimAnonymousProgressApi(anonymousId: string) {
+  try {
+    return await fetchApi<any>('/learners/claim', {
+      method: 'POST',
+      body: JSON.stringify({ anonymousId }),
+    });
+  } catch (err: any) {
+    console.warn(`[NetVision API] Claim progress error: ${err.message}`);
+    return null;
   }
 }
 

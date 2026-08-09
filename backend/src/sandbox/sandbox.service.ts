@@ -34,12 +34,52 @@ export class SandboxService {
     return this.providers[key] || this.simulatedProvider;
   }
 
-  async createSession(userId: string, dto: CreateSandboxSessionDto) {
+  private async ensureAnonymousLearner(anonymousId?: string) {
+    if (!anonymousId) return null;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(anonymousId)) {
+      throw new BadRequestException(`Invalid anonymousId format "${anonymousId}". Must be a valid UUID.`);
+    }
+
+    try {
+      return await this.prisma.anonymousLearner.upsert({
+        where: { id: anonymousId },
+        update: {},
+        create: { id: anonymousId },
+      });
+    } catch (err) {
+      const existing = await this.prisma.anonymousLearner.findUnique({
+        where: { id: anonymousId },
+      });
+      if (existing) return existing;
+      throw new BadRequestException('Failed to register anonymous learner session.');
+    }
+  }
+
+  async createSession(identity: { userId?: string; anonymousId?: string }, dto: CreateSandboxSessionDto) {
+    const { userId, anonymousId } = identity;
+    if (!userId && !anonymousId) {
+      throw new BadRequestException('A valid user ID or anonymous learner ID is required.');
+    }
+    if (anonymousId && !userId) {
+      await this.ensureAnonymousLearner(anonymousId);
+    }
+
+    // Limit active running sandbox sessions per owner to max 5
+    const activeCount = await this.prisma.sandboxSession.count({
+      where: userId
+        ? { userId, status: SandboxStatus.RUNNING, expiresAt: { gt: new Date() } }
+        : { anonymousId, status: SandboxStatus.RUNNING, expiresAt: { gt: new Date() } },
+    });
+    if (activeCount >= 5) {
+      throw new BadRequestException('Maximum active sandbox session limit (5) reached. Please terminate an active session before starting a new one.');
+    }
+
     const provider = this.getProvider(dto.providerType);
     const durationMins = dto.durationMinutes || 30;
 
     // Call provider to initialize environment
-    const env = await provider.createEnvironment(userId, dto.labId, {
+    const env = await provider.createEnvironment(userId || anonymousId!, dto.labId, {
       timeoutSec: 10,
     });
 
@@ -47,7 +87,8 @@ export class SandboxService {
 
     const session = await this.prisma.sandboxSession.create({
       data: {
-        userId,
+        userId: userId || null,
+        anonymousId: anonymousId || null,
         labId: dto.labId || null,
         status: SandboxStatus.RUNNING,
         expiresAt,
@@ -58,7 +99,7 @@ export class SandboxService {
       },
     });
 
-    this.logger.log(`Active Sandbox Session [${session.id}] started for user ${userId} (Expires: ${expiresAt.toISOString()})`);
+    this.logger.log(`Active Sandbox Session [${session.id}] started for ${userId ? `user ${userId}` : `anonymous ${anonymousId}`} (Expires: ${expiresAt.toISOString()})`);
 
     return {
       sessionId: session.id,
@@ -71,7 +112,8 @@ export class SandboxService {
     };
   }
 
-  async executeCommand(userId: string, sessionId: string, dto: ExecuteSandboxCommandDto) {
+  async executeCommand(identity: { userId?: string; anonymousId?: string }, sessionId: string, dto: ExecuteSandboxCommandDto) {
+    const { userId, anonymousId } = identity;
     const session = await this.prisma.sandboxSession.findUnique({
       where: { id: sessionId },
     });
@@ -80,7 +122,9 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox session "${sessionId}" not found.`);
     }
 
-    if (session.userId !== userId) {
+    if (userId && session.userId !== userId) {
+      throw new ForbiddenException(`Access denied to sandbox session "${sessionId}".`);
+    } else if (!userId && anonymousId && session.anonymousId !== anonymousId) {
       throw new ForbiddenException(`Access denied to sandbox session "${sessionId}".`);
     }
 
@@ -117,7 +161,8 @@ export class SandboxService {
     };
   }
 
-  async getSessionStatus(userId: string, sessionId: string) {
+  async getSessionStatus(identity: { userId?: string; anonymousId?: string }, sessionId: string) {
+    const { userId, anonymousId } = identity;
     const session = await this.prisma.sandboxSession.findUnique({
       where: { id: sessionId },
     });
@@ -126,7 +171,9 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox session "${sessionId}" not found.`);
     }
 
-    if (session.userId !== userId) {
+    if (userId && session.userId !== userId) {
+      throw new ForbiddenException(`Access denied to sandbox session "${sessionId}".`);
+    } else if (!userId && anonymousId && session.anonymousId !== anonymousId) {
       throw new ForbiddenException(`Access denied to sandbox session "${sessionId}".`);
     }
 
@@ -155,7 +202,8 @@ export class SandboxService {
     };
   }
 
-  async terminateSession(userId: string, sessionId: string) {
+  async terminateSession(identity: { userId?: string; anonymousId?: string }, sessionId: string) {
+    const { userId, anonymousId } = identity;
     const session = await this.prisma.sandboxSession.findUnique({
       where: { id: sessionId },
     });
@@ -164,7 +212,9 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox session "${sessionId}" not found.`);
     }
 
-    if (session.userId !== userId) {
+    if (userId && session.userId !== userId) {
+      throw new ForbiddenException(`Access denied to sandbox session "${sessionId}".`);
+    } else if (!userId && anonymousId && session.anonymousId !== anonymousId) {
       throw new ForbiddenException(`Access denied to sandbox session "${sessionId}".`);
     }
 
@@ -181,6 +231,28 @@ export class SandboxService {
       status: SandboxStatus.STOPPED,
       message: 'Sandbox session terminated successfully.',
     };
+  }
+
+  async getUserSessions(identity: { userId?: string; anonymousId?: string }) {
+    const { userId, anonymousId } = identity;
+    const where = userId ? { userId } : anonymousId ? { anonymousId } : null;
+    if (!where) return [];
+
+    const sessions = await this.prisma.sandboxSession.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    });
+
+    return sessions.map((s) => ({
+      sessionId: s.id,
+      labId: s.labId,
+      status: s.status,
+      providerType: s.providerType,
+      createdAt: s.createdAt,
+      expiresAt: s.expiresAt,
+      isExpired: new Date() > new Date(s.expiresAt),
+    }));
   }
 
   async cleanupExpiredSessions() {

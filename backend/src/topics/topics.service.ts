@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { CourseLevel } from '@prisma/client';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
@@ -14,7 +14,6 @@ export class TopicsService {
 
     const courses = await this.prisma.course.findMany({
       where,
-      orderBy: { createdAt: 'asc' },
       include: {
         modules: {
           include: {
@@ -22,23 +21,26 @@ export class TopicsService {
           },
         },
       },
+      orderBy: { createdAt: 'asc' },
     });
 
-    const userProgressMap: Record<string, boolean> = {};
+    let userProgressMap: Record<string, boolean> = {};
     if (userId) {
-      const progressList = await this.prisma.userProgress.findMany({
+      const progressRecords = await this.prisma.userProgress.findMany({
         where: { userId, completed: true },
+        select: { lessonId: true },
       });
-      progressList.forEach((p) => {
-        userProgressMap[p.lessonId] = true;
-      });
+      userProgressMap = progressRecords.reduce((acc, p) => {
+        acc[p.lessonId] = true;
+        return acc;
+      }, {} as Record<string, boolean>);
     }
 
     return courses.map((course) => {
       const allLessons = course.modules.flatMap((m) => m.lessons);
-      const totalLessons = allLessons.length;
-      const completedLessons = allLessons.filter((l) => userProgressMap[l.id]).length;
-      const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
+      const lessonsCount = allLessons.length;
+      const completedCount = allLessons.filter((l) => userProgressMap[l.id]).length;
+      const progressPercent = lessonsCount > 0 ? Math.round((completedCount / lessonsCount) * 100) : 0;
 
       return {
         id: course.id,
@@ -51,8 +53,8 @@ export class TopicsService {
         icon: course.icon,
         estimatedHours: course.estimatedHours,
         modulesCount: course.modules.length,
-        lessonsCount: totalLessons,
-        completedLessons,
+        lessonsCount,
+        completedLessons: completedCount,
         progressPercent,
       };
     });
@@ -68,9 +70,7 @@ export class TopicsService {
             lessons: {
               orderBy: { order: 'asc' },
               include: {
-                quizzes: {
-                  select: { id: true, title: true },
-                },
+                quizzes: { select: { id: true } },
               },
             },
           },
@@ -79,42 +79,40 @@ export class TopicsService {
     });
 
     if (!course) {
-      throw new NotFoundException(`Course or Topic with slug "${slug}" was not found.`);
+      throw new NotFoundException(`Course with slug "${slug}" not found.`);
     }
 
-    const userProgressMap: Record<string, { completed: boolean; score?: number | null }> = {};
+    let userProgressMap: Record<string, { completed: boolean; score: number | null }> = {};
     if (userId) {
-      const progressList = await this.prisma.userProgress.findMany({
+      const progressRecords = await this.prisma.userProgress.findMany({
         where: { userId },
       });
-      progressList.forEach((p) => {
-        userProgressMap[p.lessonId] = { completed: p.completed, score: p.score };
-      });
+      userProgressMap = progressRecords.reduce((acc, p) => {
+        acc[p.lessonId] = { completed: p.completed, score: p.score };
+        return acc;
+      }, {} as Record<string, { completed: boolean; score: number | null }>);
     }
 
-    const allLessons = course.modules.flatMap((m) => m.lessons);
-    const totalLessons = allLessons.length;
-    const completedLessons = allLessons.filter((l) => userProgressMap[l.id]?.completed).length;
-    const progressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-
-    const formattedModules = course.modules.map((m) => ({
-      id: m.id,
-      title: m.title,
-      description: m.description,
-      order: m.order,
-      lessons: m.lessons.map((l) => ({
-        id: l.id,
-        title: l.title,
-        slug: l.slug,
-        type: l.type,
-        durationMinutes: l.durationMinutes,
-        order: l.order,
-        completed: !!userProgressMap[l.id]?.completed,
-        score: userProgressMap[l.id]?.score || null,
-        hasQuiz: l.quizzes.length > 0,
-        quizId: l.quizzes[0]?.id || null,
+    const modules = course.modules.map((mod) => ({
+      id: mod.id,
+      title: mod.title,
+      description: mod.description,
+      order: mod.order,
+      lessons: mod.lessons.map((lesson) => ({
+        id: lesson.id,
+        slug: lesson.slug,
+        title: lesson.title,
+        type: lesson.type,
+        durationMinutes: lesson.durationMinutes,
+        order: lesson.order,
+        completed: userProgressMap[lesson.id]?.completed ?? false,
+        score: userProgressMap[lesson.id]?.score ?? null,
+        quizId: lesson.quizzes[0]?.id || null,
       })),
     }));
+
+    const allLessons = modules.flatMap((m) => m.lessons);
+    const completedCount = allLessons.filter((l) => l.completed).length;
 
     return {
       id: course.id,
@@ -126,10 +124,11 @@ export class TopicsService {
       level: course.level,
       icon: course.icon,
       estimatedHours: course.estimatedHours,
-      totalLessons,
-      completedLessons,
-      progressPercent,
-      modules: formattedModules,
+      modulesCount: modules.length,
+      lessonsCount: allLessons.length,
+      completedLessons: completedCount,
+      progressPercent: allLessons.length > 0 ? Math.round((completedCount / allLessons.length) * 100) : 0,
+      modules,
     };
   }
 
@@ -142,11 +141,6 @@ export class TopicsService {
             course: true,
           },
         },
-        quizzes: {
-          include: {
-            questions: true,
-          },
-        },
         objectives: { orderBy: { order: 'asc' } },
         concepts: { orderBy: { order: 'asc' } },
         examples: { orderBy: { order: 'asc' } },
@@ -154,6 +148,11 @@ export class TopicsService {
         labs: { orderBy: { order: 'asc' } },
         mistakes: { orderBy: { order: 'asc' } },
         recaps: { orderBy: { order: 'asc' } },
+        quizzes: {
+          include: {
+            questions: true,
+          },
+        },
       },
     });
 
@@ -164,9 +163,10 @@ export class TopicsService {
     let isCompleted = false;
     let score: number | null = null;
     if (userId) {
-      const progress = await this.prisma.userProgress.findUnique({
+      const progress = await this.prisma.userProgress.findFirst({
         where: {
-          userId_lessonId: { userId, lessonId: lesson.id },
+          userId,
+          lessonId: lesson.id,
         },
       });
       if (progress) {
@@ -423,7 +423,39 @@ export class TopicsService {
     };
   }
 
-  async validateLab(userId: string, dto: { labId: string; commandHistory?: string[]; hintsUsedCount?: number; userSolution?: Record<string, any> }) {
+  public async ensureAnonymousLearner(anonymousId?: string) {
+    if (!anonymousId) return null;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(anonymousId)) {
+      throw new BadRequestException(`Invalid anonymousId format "${anonymousId}". Must be a valid UUID.`);
+    }
+
+    try {
+      return await this.prisma.anonymousLearner.upsert({
+        where: { id: anonymousId },
+        update: {},
+        create: { id: anonymousId },
+      });
+    } catch (err) {
+      const existing = await this.prisma.anonymousLearner.findUnique({
+        where: { id: anonymousId },
+      });
+      if (existing) return existing;
+      throw new InternalServerErrorException('Failed to register anonymous learner session.');
+    }
+  }
+
+  async validateLab(
+    identity: { userId?: string; anonymousId?: string },
+    dto: { labId: string; commandHistory?: string[]; hintsUsedCount?: number; userSolution?: Record<string, any> }
+  ) {
+    const { userId, anonymousId } = identity;
+    if (!userId && !anonymousId) {
+      throw new BadRequestException('A valid user ID or anonymous learner ID is required.');
+    }
+    if (anonymousId && !userId) {
+      await this.ensureAnonymousLearner(anonymousId);
+    }
     const { labId, commandHistory = [], hintsUsedCount = 0, userSolution } = dto;
 
     const lab = await this.prisma.lessonLab.findUnique({
@@ -464,13 +496,20 @@ export class TopicsService {
     score = Math.max(0, score - safeHintsCount * 5);
     const passed = score >= 70;
 
+    const pastLabAttemptsCount = await this.prisma.labAttempt.count({
+      where: userId ? { userId, labId } : { anonymousId, labId },
+    });
+    const currentLabAttemptNumber = pastLabAttemptsCount + 1;
+
     const attempt = await this.prisma.labAttempt.create({
       data: {
-        userId,
+        userId: userId || null,
+        anonymousId: anonymousId || null,
         labId,
         passed,
         score,
         hintsUsedCount,
+        attemptsCount: currentLabAttemptNumber,
         commandHistoryJson: commandHistory,
         validationResultJson: checks,
         userSolutionJson: userSolution || {},
@@ -480,23 +519,31 @@ export class TopicsService {
     });
 
     // Update UserProgress for this lesson
-    await this.prisma.userProgress.upsert({
-      where: {
-        userId_lessonId: { userId, lessonId: lab.lessonId },
-      },
-      update: {
-        practicalCompleted: passed,
-        score: Math.max(score, 0),
-      },
-      create: {
-        userId,
-        lessonId: lab.lessonId,
-        practicalCompleted: passed,
-        started: true,
-        viewed: true,
-        score,
-      },
+    const existingProgress = await this.prisma.userProgress.findFirst({
+      where: userId ? { userId, lessonId: lab.lessonId } : { anonymousId, lessonId: lab.lessonId },
     });
+
+    if (existingProgress) {
+      await this.prisma.userProgress.update({
+        where: { id: existingProgress.id },
+        data: {
+          practicalCompleted: passed || existingProgress.practicalCompleted,
+          score: Math.max(score, existingProgress.score || 0),
+        },
+      });
+    } else {
+      await this.prisma.userProgress.create({
+        data: {
+          userId: userId || null,
+          anonymousId: anonymousId || null,
+          lessonId: lab.lessonId,
+          practicalCompleted: passed,
+          started: true,
+          viewed: true,
+          score,
+        },
+      });
+    }
 
     return {
       attemptId: attempt.id,
@@ -504,6 +551,7 @@ export class TopicsService {
       labTitle: lab.title,
       passed,
       score,
+      attemptsCount: currentLabAttemptNumber,
       hintsUsedCount,
       checks,
       completionSummary: passed
@@ -672,7 +720,11 @@ export class TopicsService {
     };
   }
 
-  async submitQuiz(quizId: string, dto: SubmitQuizDto, userId?: string) {
+  async submitQuiz(
+    quizId: string,
+    dto: SubmitQuizDto,
+    identity?: { userId?: string; anonymousId?: string }
+  ) {
     if (!quizId || typeof quizId !== 'string') {
       throw new BadRequestException('Invalid or missing quizId parameter.');
     }
@@ -713,7 +765,7 @@ export class TopicsService {
 
       const cleanQuestionText = q.questionText.replace(/^\[(EASY|MEDIUM|HARD)\]\s*/i, '');
       let explanationText = q.explanation || '';
-      let whyCorrectText = `"${correctText}" is correct because ${q.explanation || 'it satisfies protocol standards.'}`;
+      const whyCorrectText = `"${correctText}" is correct because ${q.explanation || 'it satisfies protocol standards.'}`;
       let whyWrongText = '';
 
       if (!isCorrect) {
@@ -750,60 +802,75 @@ export class TopicsService {
       (c) => `Concept Review Recommended: Review core principles for "${c}".`
     );
 
-    if (userId) {
+    const userId = identity?.userId;
+    const anonymousId = identity?.anonymousId;
+
+    let attemptNumber = 1;
+
+    if (userId || anonymousId) {
+      if (anonymousId && !userId) {
+        await this.ensureAnonymousLearner(anonymousId);
+      }
       const pastAttemptsCount = await this.prisma.quizAttempt.count({
-        where: { userId, quizId },
+        where: userId ? { userId, quizId } : { anonymousId, quizId },
       });
+
+      attemptNumber = pastAttemptsCount + 1;
 
       await this.prisma.quizAttempt.create({
         data: {
-          userId,
+          userId: userId || null,
+          anonymousId: anonymousId || null,
           quizId,
           score,
           passed,
           answersJson: answers,
           weakConceptsJson: weakConcepts,
-          attemptNumber: pastAttemptsCount + 1,
+          attemptNumber,
         },
       });
 
-      const existingProgress = await this.prisma.userProgress.findUnique({
-        where: { userId_lessonId: { userId, lessonId: quiz.lessonId } },
+      const existingProgress = await this.prisma.userProgress.findFirst({
+        where: userId ? { userId, lessonId: quiz.lessonId } : { anonymousId, lessonId: quiz.lessonId },
       });
 
       const currentBest = Math.max(score, existingProgress?.bestScore || 0);
       const currentAttempts = (existingProgress?.quizAttemptsCount || 0) + 1;
       const isCompleted = passed || (existingProgress?.completed ?? false);
 
-      await this.prisma.userProgress.upsert({
-        where: {
-          userId_lessonId: { userId, lessonId: quiz.lessonId },
-        },
-        update: {
-          started: true,
-          viewed: true,
-          completed: isCompleted,
-          score: Math.max(score, existingProgress?.score || 0),
-          bestScore: currentBest,
-          masteryScore: currentBest,
-          quizAttemptsCount: currentAttempts,
-          weakConceptsJson: weakConcepts,
-          completedAt: isCompleted ? new Date() : existingProgress?.completedAt,
-        },
-        create: {
-          userId,
-          lessonId: quiz.lessonId,
-          started: true,
-          viewed: true,
-          completed: passed,
-          score,
-          bestScore: score,
-          masteryScore: score,
-          quizAttemptsCount: 1,
-          weakConceptsJson: weakConcepts,
-          completedAt: passed ? new Date() : null,
-        },
-      });
+      if (existingProgress) {
+        await this.prisma.userProgress.update({
+          where: { id: existingProgress.id },
+          data: {
+            started: true,
+            viewed: true,
+            completed: isCompleted,
+            score: Math.max(score, existingProgress.score || 0),
+            bestScore: currentBest,
+            masteryScore: currentBest,
+            quizAttemptsCount: currentAttempts,
+            weakConceptsJson: weakConcepts,
+            completedAt: isCompleted ? new Date() : existingProgress.completedAt,
+          },
+        });
+      } else {
+        await this.prisma.userProgress.create({
+          data: {
+            userId: userId || null,
+            anonymousId: anonymousId || null,
+            lessonId: quiz.lessonId,
+            started: true,
+            viewed: true,
+            completed: passed,
+            score,
+            bestScore: score,
+            masteryScore: score,
+            quizAttemptsCount: 1,
+            weakConceptsJson: weakConcepts,
+            completedAt: passed ? new Date() : null,
+          },
+        });
+      }
     }
 
     return {
@@ -813,13 +880,21 @@ export class TopicsService {
       passingScore: quiz.passingScore,
       correctCount,
       totalQuestions,
+      attemptNumber,
       weakConcepts,
       recommendations,
       results,
     };
   }
 
-  async markLessonComplete(lessonIdOrSlug: string, userId: string) {
+  async markLessonStarted(lessonIdOrSlug: string, identity: { userId?: string; anonymousId?: string }) {
+    const { userId, anonymousId } = identity;
+    if (!userId && !anonymousId) {
+      throw new BadRequestException('A valid user ID or anonymous learner ID is required.');
+    }
+    if (anonymousId && !userId) {
+      await this.ensureAnonymousLearner(anonymousId);
+    }
     const lesson = await this.prisma.lesson.findFirst({
       where: {
         OR: [{ id: lessonIdOrSlug }, { slug: lessonIdOrSlug }],
@@ -830,21 +905,90 @@ export class TopicsService {
       throw new NotFoundException(`Lesson "${lessonIdOrSlug}" not found.`);
     }
 
-    const progress = await this.prisma.userProgress.upsert({
+    const existing = await this.prisma.userProgress.findFirst({
+      where: userId ? { userId, lessonId: lesson.id } : { anonymousId, lessonId: lesson.id },
+    });
+
+    let progress;
+    if (existing) {
+      progress = await this.prisma.userProgress.update({
+        where: { id: existing.id },
+        data: {
+          started: true,
+          viewed: true,
+        },
+      });
+    } else {
+      progress = await this.prisma.userProgress.create({
+        data: {
+          userId: userId || null,
+          anonymousId: anonymousId || null,
+          lessonId: lesson.id,
+          started: true,
+          viewed: true,
+          completed: false,
+        },
+      });
+    }
+
+    return {
+      success: true,
+      lessonId: lesson.id,
+      started: progress.started,
+      viewed: progress.viewed,
+    };
+  }
+
+  async markLessonViewed(lessonIdOrSlug: string, identity: { userId?: string; anonymousId?: string }) {
+    return this.markLessonStarted(lessonIdOrSlug, identity);
+  }
+
+  async markLessonComplete(lessonIdOrSlug: string, identity: { userId?: string; anonymousId?: string }) {
+    const { userId, anonymousId } = identity;
+    if (!userId && !anonymousId) {
+      throw new BadRequestException('A valid user ID or anonymous learner ID is required.');
+    }
+    if (anonymousId && !userId) {
+      await this.ensureAnonymousLearner(anonymousId);
+    }
+    const lesson = await this.prisma.lesson.findFirst({
       where: {
-        userId_lessonId: { userId, lessonId: lesson.id },
-      },
-      update: {
-        completed: true,
-        completedAt: new Date(),
-      },
-      create: {
-        userId,
-        lessonId: lesson.id,
-        completed: true,
-        completedAt: new Date(),
+        OR: [{ id: lessonIdOrSlug }, { slug: lessonIdOrSlug }],
       },
     });
+
+    if (!lesson) {
+      throw new NotFoundException(`Lesson "${lessonIdOrSlug}" not found.`);
+    }
+
+    const existing = await this.prisma.userProgress.findFirst({
+      where: userId ? { userId, lessonId: lesson.id } : { anonymousId, lessonId: lesson.id },
+    });
+
+    let progress;
+    if (existing) {
+      progress = await this.prisma.userProgress.update({
+        where: { id: existing.id },
+        data: {
+          started: true,
+          viewed: true,
+          completed: true,
+          completedAt: existing.completedAt || new Date(),
+        },
+      });
+    } else {
+      progress = await this.prisma.userProgress.create({
+        data: {
+          userId: userId || null,
+          anonymousId: anonymousId || null,
+          lessonId: lesson.id,
+          started: true,
+          viewed: true,
+          completed: true,
+          completedAt: new Date(),
+        },
+      });
+    }
 
     return {
       success: true,
@@ -854,9 +998,22 @@ export class TopicsService {
     };
   }
 
-  async getUserProgress(userId: string) {
+  async getUserProgress(identity: { userId?: string; anonymousId?: string }) {
+    const { userId, anonymousId } = identity;
+    const where = userId ? { userId } : anonymousId ? { anonymousId } : null;
+
+    if (!where) {
+      return {
+        totalCourses: await this.prisma.course.count({ where: { published: true } }),
+        totalLessons: await this.prisma.lesson.count(),
+        completedLessons: 0,
+        overallProgressPercent: 0,
+        recentAttempts: [],
+      };
+    }
+
     const progressList = await this.prisma.userProgress.findMany({
-      where: { userId },
+      where,
       include: {
         lesson: {
           include: {
@@ -876,7 +1033,7 @@ export class TopicsService {
     const overallProgressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
     const attempts = await this.prisma.quizAttempt.findMany({
-      where: { userId },
+      where,
       orderBy: { createdAt: 'desc' },
       take: 10,
       include: {
@@ -961,11 +1118,16 @@ export class TopicsService {
     return { courses, lessons, modules };
   }
 
-  async toggleSaveLesson(lessonId: string, userId: string) {
-    const existing = await this.prisma.savedLesson.findUnique({
-      where: {
-        userId_lessonId: { userId, lessonId },
-      },
+  async toggleSaveLesson(lessonId: string, identity: { userId?: string; anonymousId?: string }) {
+    const { userId, anonymousId } = identity;
+    if (!userId && !anonymousId) {
+      throw new BadRequestException('A valid user ID or anonymous learner ID is required.');
+    }
+    if (anonymousId && !userId) {
+      await this.ensureAnonymousLearner(anonymousId);
+    }
+    const existing = await this.prisma.savedLesson.findFirst({
+      where: userId ? { userId, lessonId } : { anonymousId, lessonId },
     });
 
     if (existing) {
@@ -976,14 +1138,22 @@ export class TopicsService {
     }
 
     await this.prisma.savedLesson.create({
-      data: { userId, lessonId },
+      data: {
+        userId: userId || null,
+        anonymousId: anonymousId || null,
+        lessonId,
+      },
     });
     return { saved: true, message: 'Lesson saved to bookmarks.' };
   }
 
-  async getSavedLessons(userId: string) {
+  async getSavedLessons(identity: { userId?: string; anonymousId?: string }) {
+    const { userId, anonymousId } = identity;
+    const where = userId ? { userId } : anonymousId ? { anonymousId } : null;
+    if (!where) return [];
+
     const saved = await this.prisma.savedLesson.findMany({
-      where: { userId },
+      where,
       include: {
         lesson: {
           include: {
@@ -1009,5 +1179,161 @@ export class TopicsService {
       courseSlug: s.lesson.module.course.slug,
       savedAt: s.createdAt,
     }));
+  }
+
+  async claimProgress(userId: string, anonymousId: string) {
+    if (!userId || !anonymousId) {
+      throw new BadRequestException('Both userId and anonymousId are required to claim progress.');
+    }
+
+    const anonProgress = await this.prisma.userProgress.findMany({
+      where: { anonymousId },
+    });
+
+    let claimedProgressCount = 0;
+    for (const p of anonProgress) {
+      const existingUserProg = await this.prisma.userProgress.findFirst({
+        where: { userId, lessonId: p.lessonId },
+      });
+
+      if (existingUserProg) {
+        await this.prisma.userProgress.update({
+          where: { id: existingUserProg.id },
+          data: {
+            started: existingUserProg.started || p.started,
+            viewed: existingUserProg.viewed || p.viewed,
+            practicalCompleted: existingUserProg.practicalCompleted || p.practicalCompleted,
+            completed: existingUserProg.completed || p.completed,
+            score: Math.max(existingUserProg.score || 0, p.score || 0),
+            bestScore: Math.max(existingUserProg.bestScore || 0, p.bestScore || 0),
+            masteryScore: Math.max(existingUserProg.masteryScore || 0, p.masteryScore || 0),
+            quizAttemptsCount: (existingUserProg.quizAttemptsCount || 0) + (p.quizAttemptsCount || 0),
+            completedAt: existingUserProg.completedAt || p.completedAt,
+          },
+        });
+        await this.prisma.userProgress.delete({ where: { id: p.id } });
+      } else {
+        await this.prisma.userProgress.update({
+          where: { id: p.id },
+          data: { userId, anonymousId: null },
+        });
+      }
+      claimedProgressCount++;
+    }
+
+    const { count: claimedQuizCount } = await this.prisma.quizAttempt.updateMany({
+      where: { anonymousId },
+      data: { userId, anonymousId: null },
+    });
+
+    const { count: claimedLabCount } = await this.prisma.labAttempt.updateMany({
+      where: { anonymousId },
+      data: { userId, anonymousId: null },
+    });
+
+    const anonSaved = await this.prisma.savedLesson.findMany({
+      where: { anonymousId },
+    });
+    for (const s of anonSaved) {
+      const existingSaved = await this.prisma.savedLesson.findFirst({
+        where: { userId, lessonId: s.lessonId },
+      });
+      if (existingSaved) {
+        await this.prisma.savedLesson.delete({ where: { id: s.id } });
+      } else {
+        await this.prisma.savedLesson.update({
+          where: { id: s.id },
+          data: { userId, anonymousId: null },
+        });
+      }
+    }
+
+    await this.prisma.sandboxSession.updateMany({
+      where: { anonymousId },
+      data: { userId, anonymousId: null },
+    });
+
+    await this.prisma.anonymousLearner.delete({ where: { id: anonymousId } }).catch(() => null);
+
+    return {
+      success: true,
+      message: 'Anonymous progress merged into account successfully.',
+      claimedProgressCount,
+      claimedQuizCount,
+      claimedLabCount,
+    };
+  }
+
+  async claimCertificate(userId: string, courseIdOrSlug: string) {
+    if (!userId) {
+      throw new UnauthorizedException('Authentication is required to claim certificates.');
+    }
+    const course = await this.prisma.course.findFirst({
+      where: { OR: [{ id: courseIdOrSlug }, { slug: courseIdOrSlug }] },
+      include: { modules: { include: { lessons: true } } },
+    });
+    if (!course) {
+      throw new NotFoundException(`Course "${courseIdOrSlug}" not found.`);
+    }
+
+    const courseLessonIds = course.modules.flatMap((m) => m.lessons.map((l) => l.id));
+    const userProgress = await this.prisma.userProgress.findMany({
+      where: { userId, lessonId: { in: courseLessonIds } },
+    });
+
+    const completedCount = userProgress.filter((p) => p.completed).length;
+    const totalRequired = courseLessonIds.length;
+
+    if (totalRequired > 0 && completedCount < totalRequired) {
+      throw new BadRequestException(
+        `Certificate eligibility not met. Completed ${completedCount}/${totalRequired} required course lessons.`
+      );
+    }
+
+    let certificate = await this.prisma.certificate.findFirst({
+      where: { userId, courseId: course.id },
+      include: { user: { select: { id: true, username: true, fullName: true } }, course: true },
+    });
+
+    if (!certificate) {
+      certificate = await this.prisma.certificate.create({
+        data: { userId, courseId: course.id },
+        include: { user: { select: { id: true, username: true, fullName: true } }, course: true },
+      });
+    }
+
+    return {
+      id: certificate.id,
+      code: certificate.code,
+      issuedAt: certificate.issuedAt,
+      user: {
+        id: certificate.user.id,
+        username: certificate.user.username,
+        fullName: certificate.user.fullName || certificate.user.username,
+      },
+      course: {
+        id: certificate.course.id,
+        title: certificate.course.title,
+        slug: certificate.course.slug,
+      },
+    };
+  }
+
+  async getCertificateById(certificateIdOrCode: string) {
+    const cert = await this.prisma.certificate.findFirst({
+      where: { OR: [{ id: certificateIdOrCode }, { code: certificateIdOrCode }] },
+      include: { user: { select: { username: true, fullName: true } }, course: true },
+    });
+    if (!cert) {
+      throw new NotFoundException(`Certificate "${certificateIdOrCode}" not found.`);
+    }
+    return {
+      id: cert.id,
+      code: cert.code,
+      issuedAt: cert.issuedAt,
+      recipientName: cert.user.fullName || cert.user.username,
+      courseTitle: cert.course.title,
+      courseSlug: cert.course.slug,
+    };
   }
 }

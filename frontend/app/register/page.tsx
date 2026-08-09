@@ -123,7 +123,7 @@ export default function RegisterPage() {
             rightIcon={<ArrowRight className="w-5 h-5" />}
             className="w-full mt-2"
           >
-            Create Account & Send OTP
+            Create Account
           </Button>
         </form>
 

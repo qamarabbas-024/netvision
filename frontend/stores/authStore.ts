@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { User, UserRole } from '@/types';
+import { GuestProgressService } from '@/services/GuestProgressService';
+import { claimAnonymousProgressApi } from '@/lib/api';
 
 interface AuthState {
   user: User | null;
@@ -30,6 +32,14 @@ export const useAuthStore = create<AuthState>((set) => ({
         sessionStorage.setItem('netvision_user', JSON.stringify(user));
         localStorage.removeItem('netvision_token');
         localStorage.removeItem('netvision_user');
+      }
+
+      // Merge & claim guest progress into authenticated user account
+      const anonId = GuestProgressService.getLearnerId();
+      if (anonId) {
+        claimAnonymousProgressApi(anonId).then(() => {
+          GuestProgressService.clearLocalGuestProgress();
+        });
       }
     }
     set({ user, token, isAuthenticated: true, isLoading: false });

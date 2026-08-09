@@ -80,7 +80,7 @@ export class SimulatedSandboxProvider implements ISandboxProvider {
     }
 
     let output = '';
-    let exitCode = 0;
+    const exitCode = 0;
 
     const lowerCmd = cleanCmd.toLowerCase();
 

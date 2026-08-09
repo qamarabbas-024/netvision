@@ -9,6 +9,8 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { MailModule } from '../mail/mail.module';
 
+import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
+
 @Module({
   imports: [
     PassportModule,
@@ -25,7 +27,7 @@ import { MailModule } from '../mail/mail.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy, GithubStrategy],
-  exports: [AuthService],
+  providers: [AuthService, JwtStrategy, GoogleStrategy, GithubStrategy, OptionalJwtAuthGuard],
+  exports: [AuthService, OptionalJwtAuthGuard],
 })
 export class AuthModule {}
