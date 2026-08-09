@@ -1118,7 +1118,7 @@ export class TopicsService {
     return { courses, lessons, modules };
   }
 
-  async toggleSaveLesson(lessonId: string, identity: { userId?: string; anonymousId?: string }) {
+  async toggleSaveLesson(lessonIdOrSlug: string, identity: { userId?: string; anonymousId?: string }) {
     const { userId, anonymousId } = identity;
     if (!userId && !anonymousId) {
       throw new BadRequestException('A valid user ID or anonymous learner ID is required.');
@@ -1126,8 +1126,15 @@ export class TopicsService {
     if (anonymousId && !userId) {
       await this.ensureAnonymousLearner(anonymousId);
     }
+    const lesson = await this.prisma.lesson.findFirst({
+      where: { OR: [{ id: lessonIdOrSlug }, { slug: lessonIdOrSlug }] },
+    });
+    if (!lesson) {
+      throw new NotFoundException(`Lesson "${lessonIdOrSlug}" not found.`);
+    }
+
     const existing = await this.prisma.savedLesson.findFirst({
-      where: userId ? { userId, lessonId } : { anonymousId, lessonId },
+      where: userId ? { userId, lessonId: lesson.id } : { anonymousId, lessonId: lesson.id },
     });
 
     if (existing) {
@@ -1141,7 +1148,7 @@ export class TopicsService {
       data: {
         userId: userId || null,
         anonymousId: anonymousId || null,
-        lessonId,
+        lessonId: lesson.id,
       },
     });
     return { saved: true, message: 'Lesson saved to bookmarks.' };
@@ -1185,83 +1192,140 @@ export class TopicsService {
     if (!userId || !anonymousId) {
       throw new BadRequestException('Both userId and anonymousId are required to claim progress.');
     }
-
-    const anonProgress = await this.prisma.userProgress.findMany({
-      where: { anonymousId },
-    });
-
-    let claimedProgressCount = 0;
-    for (const p of anonProgress) {
-      const existingUserProg = await this.prisma.userProgress.findFirst({
-        where: { userId, lessonId: p.lessonId },
-      });
-
-      if (existingUserProg) {
-        await this.prisma.userProgress.update({
-          where: { id: existingUserProg.id },
-          data: {
-            started: existingUserProg.started || p.started,
-            viewed: existingUserProg.viewed || p.viewed,
-            practicalCompleted: existingUserProg.practicalCompleted || p.practicalCompleted,
-            completed: existingUserProg.completed || p.completed,
-            score: Math.max(existingUserProg.score || 0, p.score || 0),
-            bestScore: Math.max(existingUserProg.bestScore || 0, p.bestScore || 0),
-            masteryScore: Math.max(existingUserProg.masteryScore || 0, p.masteryScore || 0),
-            quizAttemptsCount: (existingUserProg.quizAttemptsCount || 0) + (p.quizAttemptsCount || 0),
-            completedAt: existingUserProg.completedAt || p.completedAt,
-          },
-        });
-        await this.prisma.userProgress.delete({ where: { id: p.id } });
-      } else {
-        await this.prisma.userProgress.update({
-          where: { id: p.id },
-          data: { userId, anonymousId: null },
-        });
-      }
-      claimedProgressCount++;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(anonymousId)) {
+      throw new BadRequestException(`Invalid anonymousId format "${anonymousId}". Must be a valid UUID.`);
     }
 
-    const { count: claimedQuizCount } = await this.prisma.quizAttempt.updateMany({
-      where: { anonymousId },
-      data: { userId, anonymousId: null },
-    });
-
-    const { count: claimedLabCount } = await this.prisma.labAttempt.updateMany({
-      where: { anonymousId },
-      data: { userId, anonymousId: null },
-    });
-
-    const anonSaved = await this.prisma.savedLesson.findMany({
-      where: { anonymousId },
-    });
-    for (const s of anonSaved) {
-      const existingSaved = await this.prisma.savedLesson.findFirst({
-        where: { userId, lessonId: s.lessonId },
+    return await this.prisma.$transaction(async (tx) => {
+      const anonLearner = await tx.anonymousLearner.findUnique({
+        where: { id: anonymousId },
       });
-      if (existingSaved) {
-        await this.prisma.savedLesson.delete({ where: { id: s.id } });
-      } else {
-        await this.prisma.savedLesson.update({
-          where: { id: s.id },
-          data: { userId, anonymousId: null },
-        });
+
+      const anonProgress = await tx.userProgress.findMany({
+        where: { anonymousId },
+      });
+      const anonQuizCount = await tx.quizAttempt.count({
+        where: { anonymousId },
+      });
+      const anonLabCount = await tx.labAttempt.count({
+        where: { anonymousId },
+      });
+      const anonSavedCount = await tx.savedLesson.count({
+        where: { anonymousId },
+      });
+      const anonSandboxCount = await tx.sandboxSession.count({
+        where: { anonymousId },
+      });
+
+      const totalAnonItems =
+        anonProgress.length + anonQuizCount + anonLabCount + anonSavedCount + anonSandboxCount;
+
+      if (!anonLearner && totalAnonItems === 0) {
+        return {
+          success: true,
+          claimedCount: 0,
+          message: 'Already claimed or no progress found.',
+        };
       }
-    }
 
-    await this.prisma.sandboxSession.updateMany({
-      where: { anonymousId },
-      data: { userId, anonymousId: null },
+      let claimedProgressCount = 0;
+      for (const p of anonProgress) {
+        const existingUserProg = await tx.userProgress.findFirst({
+          where: { userId, lessonId: p.lessonId },
+        });
+
+        if (existingUserProg) {
+          let earliestCompletedAt = existingUserProg.completedAt;
+          if (existingUserProg.completedAt && p.completedAt) {
+            earliestCompletedAt =
+              new Date(existingUserProg.completedAt).getTime() <= new Date(p.completedAt).getTime()
+                ? existingUserProg.completedAt
+                : p.completedAt;
+          } else {
+            earliestCompletedAt = existingUserProg.completedAt || p.completedAt;
+          }
+
+          const existingWeak = Array.isArray(existingUserProg.weakConceptsJson)
+            ? (existingUserProg.weakConceptsJson as string[])
+            : [];
+          const guestWeak = Array.isArray(p.weakConceptsJson)
+            ? (p.weakConceptsJson as string[])
+            : [];
+          const mergedWeakConcepts = Array.from(new Set([...existingWeak, ...guestWeak]));
+
+          await tx.userProgress.update({
+            where: { id: existingUserProg.id },
+            data: {
+              started: existingUserProg.started || p.started,
+              viewed: existingUserProg.viewed || p.viewed,
+              practicalCompleted: existingUserProg.practicalCompleted || p.practicalCompleted,
+              completed: existingUserProg.completed || p.completed,
+              score: Math.max(existingUserProg.score || 0, p.score || 0),
+              bestScore: Math.max(existingUserProg.bestScore || 0, p.bestScore || 0),
+              masteryScore: Math.max(existingUserProg.masteryScore || 0, p.masteryScore || 0),
+              quizAttemptsCount: (existingUserProg.quizAttemptsCount || 0) + (p.quizAttemptsCount || 0),
+              completedAt: earliestCompletedAt,
+              weakConceptsJson: mergedWeakConcepts,
+            },
+          });
+          await tx.userProgress.delete({ where: { id: p.id } });
+        } else {
+          await tx.userProgress.update({
+            where: { id: p.id },
+            data: { userId, anonymousId: null },
+          });
+        }
+        claimedProgressCount++;
+      }
+
+      const { count: claimedQuizCount } = await tx.quizAttempt.updateMany({
+        where: { anonymousId },
+        data: { userId, anonymousId: null },
+      });
+
+      const { count: claimedLabCount } = await tx.labAttempt.updateMany({
+        where: { anonymousId },
+        data: { userId, anonymousId: null },
+      });
+
+      const anonSaved = await tx.savedLesson.findMany({
+        where: { anonymousId },
+      });
+      for (const s of anonSaved) {
+        const existingSaved = await tx.savedLesson.findFirst({
+          where: { userId, lessonId: s.lessonId },
+        });
+        if (existingSaved) {
+          await tx.savedLesson.delete({ where: { id: s.id } });
+        } else {
+          await tx.savedLesson.update({
+            where: { id: s.id },
+            data: { userId, anonymousId: null },
+          });
+        }
+      }
+
+      await tx.sandboxSession.updateMany({
+        where: { anonymousId },
+        data: { userId, anonymousId: null },
+      });
+
+      if (anonLearner) {
+        await tx.anonymousLearner.delete({ where: { id: anonymousId } }).catch(() => null);
+      }
+
+      const totalClaimed = claimedProgressCount + claimedQuizCount + claimedLabCount + anonSaved.length;
+
+      return {
+        success: true,
+        claimedCount: totalClaimed,
+        message: 'Guest progress successfully claimed.',
+        claimedProgressCount,
+        claimedQuizCount,
+        claimedLabCount,
+      };
     });
-
-    await this.prisma.anonymousLearner.delete({ where: { id: anonymousId } }).catch(() => null);
-
-    return {
-      success: true,
-      message: 'Anonymous progress merged into account successfully.',
-      claimedProgressCount,
-      claimedQuizCount,
-      claimedLabCount,
-    };
   }
 
   async claimCertificate(userId: string, courseIdOrSlug: string) {

@@ -228,6 +228,14 @@ export class TopicsController {
     return this.topicsService.claimProgress(req.user.id, dto.anonymousId);
   }
 
+  @ApiOperation({ summary: 'Claim anonymous guest progress into authenticated account (alias)' })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('progress/claim')
+  async claimProgressAlias(@Body() dto: ClaimProgressDto, @Req() req: any) {
+    return this.topicsService.claimProgress(req.user.id, dto.anonymousId);
+  }
+
   @ApiOperation({ summary: 'Claim verified course certificate for authenticated account' })
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
