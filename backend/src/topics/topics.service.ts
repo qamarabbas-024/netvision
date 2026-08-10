@@ -2,10 +2,14 @@ import { Injectable, NotFoundException, BadRequestException, UnauthorizedExcepti
 import { PrismaService } from '../database/prisma.service';
 import { CourseLevel } from '@prisma/client';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
+import { AchievementsService } from '../achievements/achievements.service';
 
 @Injectable()
 export class TopicsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly achievementsService: AchievementsService
+  ) {}
 
   async getCourses(userId?: string, level?: CourseLevel, category?: string) {
     const where: any = { published: true };
@@ -545,6 +549,10 @@ export class TopicsService {
       });
     }
 
+    if (passed) {
+      await this.achievementsService.awardAchievement({ userId, anonymousId }, 'FIRST_LAB').catch(() => null);
+    }
+
     return {
       attemptId: attempt.id,
       labId: lab.id,
@@ -871,6 +879,17 @@ export class TopicsService {
           },
         });
       }
+
+      const identityInput = { userId, anonymousId };
+      if (passed) {
+        await this.achievementsService.awardAchievement(identityInput, 'FIRST_QUIZ').catch(() => null);
+      }
+      if (score === 100) {
+        await this.achievementsService.awardAchievement(identityInput, 'PERFECT_SCORE').catch(() => null);
+      }
+      if (isCompleted) {
+        await this.achievementsService.awardAchievement(identityInput, 'FIRST_STEP').catch(() => null);
+      }
     }
 
     return {
@@ -988,6 +1007,10 @@ export class TopicsService {
           completedAt: new Date(),
         },
       });
+    }
+
+    if (progress.completed) {
+      await this.achievementsService.awardAchievement({ userId, anonymousId }, 'FIRST_STEP').catch(() => null);
     }
 
     return {
@@ -1328,6 +1351,133 @@ export class TopicsService {
     });
   }
 
+  async getCourseAssessment(identity: { userId?: string; anonymousId?: string }, courseIdOrSlug: string) {
+    const { userId, anonymousId } = identity;
+    if (!userId && !anonymousId) {
+      throw new BadRequestException('Learner identity (userId or anonymousId) is required.');
+    }
+
+    const course = await this.prisma.course.findFirst({
+      where: { OR: [{ id: courseIdOrSlug }, { slug: courseIdOrSlug }] },
+      include: {
+        modules: {
+          orderBy: { order: 'asc' },
+          include: {
+            lessons: {
+              orderBy: { order: 'asc' },
+              include: {
+                quizzes: {
+                  select: { id: true, title: true, passingScore: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course "${courseIdOrSlug}" not found.`);
+    }
+
+    const allLessons = course.modules.flatMap((m) => m.lessons);
+    const totalRequiredLessons = allLessons.length;
+
+    if (totalRequiredLessons === 0) {
+      return {
+        courseId: course.id,
+        courseSlug: course.slug,
+        requiredLessons: 0,
+        completedAssessments: 0,
+        missingAssessments: 0,
+        lessonScores: [],
+        assessmentAverage: 0,
+        assessmentPassed: false,
+        allRequiredAssessmentsComplete: false,
+        eligibleForCertificate: false,
+      };
+    }
+
+    const quizToLessonMap: Record<string, string> = {};
+
+    for (const lesson of allLessons) {
+      if (lesson.quizzes && lesson.quizzes.length > 0) {
+        for (const q of lesson.quizzes) {
+          quizToLessonMap[q.id] = lesson.id;
+        }
+      }
+    }
+
+    const allQuizIds = Object.keys(quizToLessonMap);
+
+    let attempts: Array<{ quizId: string; score: number; passed: boolean }> = [];
+    if (allQuizIds.length > 0) {
+      attempts = await this.prisma.quizAttempt.findMany({
+        where: userId
+          ? { userId, quizId: { in: allQuizIds } }
+          : { anonymousId: anonymousId!, quizId: { in: allQuizIds } },
+        select: { quizId: true, score: true, passed: true },
+      });
+    }
+
+    const lessonBestScores: Record<string, number> = {};
+
+    for (const attempt of attempts) {
+      const lessonId = quizToLessonMap[attempt.quizId];
+      if (lessonId) {
+        if (lessonBestScores[lessonId] === undefined || attempt.score > lessonBestScores[lessonId]) {
+          lessonBestScores[lessonId] = attempt.score;
+        }
+      }
+    }
+
+    const completedLessonScores: number[] = [];
+    let completedAssessmentsCount = 0;
+
+    for (const lesson of allLessons) {
+      if (lessonBestScores[lesson.id] !== undefined) {
+        completedLessonScores.push(lessonBestScores[lesson.id]);
+        completedAssessmentsCount++;
+      }
+    }
+
+    const missingAssessmentsCount = totalRequiredLessons - completedAssessmentsCount;
+    const allRequiredAssessmentsComplete =
+      completedAssessmentsCount === totalRequiredLessons && missingAssessmentsCount === 0;
+
+    const sumBestScores = completedLessonScores.reduce((sum, score) => sum + score, 0);
+
+    const assessmentAverage =
+      totalRequiredLessons > 0 ? Math.floor(sumBestScores / totalRequiredLessons) : 0;
+
+    const assessmentPassed = allRequiredAssessmentsComplete && assessmentAverage >= 80;
+
+    const userProgressRecords = await this.prisma.userProgress.findMany({
+      where: userId
+        ? { userId, lessonId: { in: allLessons.map((l) => l.id) } }
+        : { anonymousId: anonymousId!, lessonId: { in: allLessons.map((l) => l.id) } },
+      select: { lessonId: true, completed: true },
+    });
+
+    const completedLessonsCount = userProgressRecords.filter((p) => p.completed).length;
+    const allLessonsCompleted = completedLessonsCount === totalRequiredLessons;
+
+    const eligibleForCertificate = allLessonsCompleted && assessmentPassed;
+
+    return {
+      courseId: course.id,
+      courseSlug: course.slug,
+      requiredLessons: totalRequiredLessons,
+      completedAssessments: completedAssessmentsCount,
+      missingAssessments: missingAssessmentsCount,
+      lessonScores: completedLessonScores,
+      assessmentAverage,
+      assessmentPassed,
+      allRequiredAssessmentsComplete,
+      eligibleForCertificate,
+    };
+  }
+
   async claimCertificate(userId: string, courseIdOrSlug: string) {
     if (!userId) {
       throw new UnauthorizedException('Authentication is required to claim certificates.');
@@ -1340,17 +1490,23 @@ export class TopicsService {
       throw new NotFoundException(`Course "${courseIdOrSlug}" not found.`);
     }
 
-    const courseLessonIds = course.modules.flatMap((m) => m.lessons.map((l) => l.id));
-    const userProgress = await this.prisma.userProgress.findMany({
-      where: { userId, lessonId: { in: courseLessonIds } },
-    });
+    const assessment = await this.getCourseAssessment({ userId }, course.id);
 
-    const completedCount = userProgress.filter((p) => p.completed).length;
-    const totalRequired = courseLessonIds.length;
-
-    if (totalRequired > 0 && completedCount < totalRequired) {
+    if (!assessment.allRequiredAssessmentsComplete) {
       throw new BadRequestException(
-        `Certificate eligibility not met. Completed ${completedCount}/${totalRequired} required course lessons.`
+        `Certificate eligibility not met. Missing ${assessment.missingAssessments} required course assessments.`
+      );
+    }
+
+    if (!assessment.assessmentPassed) {
+      throw new BadRequestException(
+        `Certificate eligibility not met. Course assessment average is ${assessment.assessmentAverage}%, but a minimum of 80% is required.`
+      );
+    }
+
+    if (!assessment.eligibleForCertificate) {
+      throw new BadRequestException(
+        `Certificate eligibility not met. Course lessons or assessments incomplete.`
       );
     }
 
@@ -1364,6 +1520,9 @@ export class TopicsService {
         data: { userId, courseId: course.id },
         include: { user: { select: { id: true, username: true, fullName: true } }, course: true },
       });
+
+      // Safely award COURSE_COMPLETE achievement upon verified course completion & 80%+ assessment pass
+      await this.achievementsService.awardAchievement({ userId }, 'COURSE_COMPLETE').catch(() => null);
     }
 
     return {

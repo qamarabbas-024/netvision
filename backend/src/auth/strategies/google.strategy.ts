@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
+import { CookieStateStore } from '../stores/cookie-state.store';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -15,6 +16,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET', 'placeholder_google_secret'),
       callbackURL: `${configService.get<string>('API_URL', 'http://localhost:4000/api/v1')}/auth/google/callback`,
       scope: ['email', 'profile'],
+      store: new CookieStateStore(),
     });
   }
 

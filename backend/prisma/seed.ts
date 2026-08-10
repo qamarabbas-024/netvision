@@ -1,4 +1,4 @@
-import { PrismaClient, CourseLevel, LessonType, Role } from '@prisma/client';
+import { PrismaClient, CourseLevel, LessonType, Role, AchievementCategory } from '@prisma/client';
 import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
@@ -7,6 +7,8 @@ async function main() {
   console.log('🌱 Seeding NetVision Educational Networking Data (21 Topics + Progressive Difficulty Scenarios + Users)...');
 
   // Clean existing data
+  await prisma.userAchievement.deleteMany();
+  await prisma.achievement.deleteMany();
   await prisma.quizAttempt.deleteMany();
   await prisma.quizQuestion.deleteMany();
   await prisma.quiz.deleteMany();
@@ -1438,6 +1440,120 @@ async function main() {
       },
     });
     console.log(`  ✓ Seeded Command Reference: "${cmd.command}" [${cmd.operatingSystem}] (${cmd.category})`);
+  }
+
+  console.log('🏆 Seeding Educational Achievement Badges...');
+
+  const achievementsData = [
+    {
+      slug: 'FIRST_STEP',
+      title: 'First Step',
+      description: 'Completed your first interactive networking lesson.',
+      badgeIcon: 'Zap',
+      category: AchievementCategory.LEARNING,
+      points: 50,
+      isActive: true,
+      criteriaJson: { type: 'LESSON_COMPLETED', count: 1 },
+    },
+    {
+      slug: 'FIRST_QUIZ',
+      title: 'First Knowledge Check',
+      description: 'Passed your first lesson quiz assessment.',
+      badgeIcon: 'CheckSquare',
+      category: AchievementCategory.ASSESSMENT,
+      points: 50,
+      isActive: true,
+      criteriaJson: { type: 'QUIZ_PASSED', count: 1 },
+    },
+    {
+      slug: 'PERFECT_SCORE',
+      title: 'Perfect Score',
+      description: 'Achieved a 100% score on a qualifying quiz assessment.',
+      badgeIcon: 'Award',
+      category: AchievementCategory.ASSESSMENT,
+      points: 100,
+      isActive: true,
+      criteriaJson: { type: 'PERFECT_QUIZ_SCORE', score: 100 },
+    },
+    {
+      slug: 'FIRST_LAB',
+      title: 'First Lab Completed',
+      description: 'Successfully completed your first practical lab exercise.',
+      badgeIcon: 'Terminal',
+      category: AchievementCategory.PRACTICAL,
+      points: 75,
+      isActive: true,
+      criteriaJson: { type: 'LAB_PASSED', count: 1 },
+    },
+    {
+      slug: 'PACKET_MASTER',
+      title: 'Packet Master',
+      description: 'Mastered network packet encapsulation and packet tracing.',
+      badgeIcon: 'Network',
+      category: AchievementCategory.SKILL,
+      points: 150,
+      isActive: false,
+      criteriaJson: { type: 'MASTERY_RESERVED', module: 'PACKET_INSPECTION' },
+    },
+    {
+      slug: 'SUBNET_SPECIALIST',
+      title: 'Subnet Specialist',
+      description: 'Mastered IPv4 subnetting, CIDR calculations, and network partitioning.',
+      badgeIcon: 'Cpu',
+      category: AchievementCategory.SKILL,
+      points: 150,
+      isActive: false,
+      criteriaJson: { type: 'MASTERY_RESERVED', module: 'SUBNETTING' },
+    },
+    {
+      slug: 'HANDSHAKE_HERO',
+      title: 'Handshake Hero',
+      description: 'Mastered TCP stateful connection handshakes and packet flags.',
+      badgeIcon: 'Handshake',
+      category: AchievementCategory.SKILL,
+      points: 150,
+      isActive: false,
+      criteriaJson: { type: 'MASTERY_RESERVED', module: 'TCP_HANDSHAKE' },
+    },
+    {
+      slug: 'SECURITY_GUARDIAN',
+      title: 'Security Guardian',
+      description: 'Mastered network security fundamentals, firewalls, and encryption.',
+      badgeIcon: 'Shield',
+      category: AchievementCategory.SKILL,
+      points: 200,
+      isActive: false,
+      criteriaJson: { type: 'MASTERY_RESERVED', module: 'SECURITY' },
+    },
+    {
+      slug: 'COURSE_COMPLETE',
+      title: 'Course Completionist',
+      description: 'Completed 100% of all lessons and assessments in a course.',
+      badgeIcon: 'CheckCircle2',
+      category: AchievementCategory.COMPLETION,
+      points: 200,
+      isActive: true,
+      criteriaJson: { type: 'COURSE_COMPLETE' },
+    },
+    {
+      slug: 'NETVISION_SCHOLAR',
+      title: 'NetVision Scholar',
+      description: 'Earned multiple official networking completion certificates.',
+      badgeIcon: 'GraduationCap',
+      category: AchievementCategory.MILESTONE,
+      points: 300,
+      isActive: false,
+      criteriaJson: { type: 'MILESTONE_RESERVED', certificatesCount: 3 },
+    },
+  ];
+
+  for (const ach of achievementsData) {
+    await prisma.achievement.upsert({
+      where: { slug: ach.slug },
+      update: ach,
+      create: ach,
+    });
+    console.log(`  ✓ Seeded Achievement Badge: "${ach.title}" [${ach.category}] (Active: ${ach.isActive})`);
   }
 
   console.log('✅ Educational Seed Completed Successfully!');

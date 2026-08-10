@@ -279,6 +279,7 @@ model AnonymousLearner {
   labAttempts     LabAttempt[]
   savedLessons    SavedLesson[]
   sandboxSessions SandboxSession[]
+  achievements    UserAchievement[]
 
   @@map("anonymous_learners")
 }
@@ -462,28 +463,45 @@ model Certificate {
   @@map("certificates")
 }
 
-model Achievement {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  title       String
-  description String
-  badgeIcon   String
+enum AchievementCategory {
+  LEARNING
+  ASSESSMENT
+  PRACTICAL
+  SKILL
+  COMPLETION
+  MILESTONE
+}
 
-  users       UserAchievement[]
+model Achievement {
+  id           String              @id @default(uuid())
+  slug         String              @unique
+  title        String
+  description  String
+  badgeIcon    String
+  category     AchievementCategory @default(LEARNING)
+  points       Int                 @default(50)
+  isActive     Boolean             @default(true)
+  criteriaJson Json?
+  createdAt    DateTime            @default(now())
+
+  users        UserAchievement[]
 
   @@map("achievements")
 }
 
 model UserAchievement {
-  userId        String
+  id            String            @id @default(uuid())
+  userId        String?
+  anonymousId   String?
   achievementId String
-  unlockedAt    DateTime @default(now())
+  unlockedAt    DateTime          @default(now())
 
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  user             User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousLearner AnonymousLearner? @relation(fields: [anonymousId], references: [id], onDelete: Cascade)
+  achievement      Achievement       @relation(fields: [achievementId], references: [id], onDelete: Cascade)
 
-  @@id([userId, achievementId])
   @@index([userId])
+  @@index([anonymousId])
   @@index([achievementId])
   @@map("user_achievements")
 }

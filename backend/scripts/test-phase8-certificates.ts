@@ -46,26 +46,17 @@ async function setupTestData() {
     fullName: 'Phase 8 Certificate Tester',
   });
 
-  const devOtp = regRes.body?.devOtpCode;
-  if (devOtp) {
-    const verifyRes = await makeApiRequest('POST', '/auth/verify-otp', {}, {
-      email: testEmail,
-      otp: devOtp,
-    });
-    if (verifyRes.status === 200) {
-      AUTH_TOKEN = verifyRes.body.accessToken || verifyRes.body.token;
-      AUTH_USER_ID = verifyRes.body.user?.id;
-    }
-  }
+  await prisma.user.update({
+    where: { email: testEmail },
+    data: { isVerified: true },
+  });
 
-  if (!AUTH_TOKEN) {
-    const loginRes = await makeApiRequest('POST', '/auth/login', {}, {
-      email: testEmail,
-      password: testPass,
-    });
-    AUTH_TOKEN = loginRes.body.accessToken || loginRes.body.token;
-    AUTH_USER_ID = loginRes.body.user?.id;
-  }
+  const loginRes = await makeApiRequest('POST', '/auth/login', {}, {
+    email: testEmail,
+    password: testPass,
+  });
+  AUTH_TOKEN = loginRes.body.accessToken || loginRes.body.token;
+  AUTH_USER_ID = loginRes.body.user?.id;
 
   // Find a course with lessons
   const course = await prisma.course.findFirst({
@@ -169,6 +160,20 @@ async function runPhase8TestSuite() {
   );
 
   // TEST 5: Authenticated user completes all lessons in PostgreSQL -> certificate is issued
+  const testQuizzes = await prisma.quiz.findMany({
+    where: { lessonId: { in: TEST_COURSE_LESSON_IDS } },
+  });
+  for (const q of testQuizzes) {
+    await prisma.quizAttempt.create({
+      data: {
+        userId: AUTH_USER_ID,
+        quizId: q.id,
+        score: 100,
+        passed: true,
+        answersJson: {},
+      },
+    });
+  }
   for (const lessonId of TEST_COURSE_LESSON_IDS) {
     await prisma.userProgress.create({
       data: {

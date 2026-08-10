@@ -122,6 +122,9 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox session "${sessionId}" not found.`);
     }
 
+    if (!userId && !anonymousId) {
+      throw new ForbiddenException(`Access denied to sandbox session "${sessionId}". Learner identity is required.`);
+    }
     if (userId && session.userId !== userId) {
       throw new ForbiddenException(`Access denied to sandbox session "${sessionId}".`);
     } else if (!userId && anonymousId && session.anonymousId !== anonymousId) {
@@ -171,6 +174,9 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox session "${sessionId}" not found.`);
     }
 
+    if (!userId && !anonymousId) {
+      throw new ForbiddenException(`Access denied to sandbox session "${sessionId}". Learner identity is required.`);
+    }
     if (userId && session.userId !== userId) {
       throw new ForbiddenException(`Access denied to sandbox session "${sessionId}".`);
     } else if (!userId && anonymousId && session.anonymousId !== anonymousId) {
@@ -212,6 +218,9 @@ export class SandboxService {
       throw new NotFoundException(`Sandbox session "${sessionId}" not found.`);
     }
 
+    if (!userId && !anonymousId) {
+      throw new ForbiddenException(`Access denied to sandbox session "${sessionId}". Learner identity is required.`);
+    }
     if (userId && session.userId !== userId) {
       throw new ForbiddenException(`Access denied to sandbox session "${sessionId}".`);
     } else if (!userId && anonymousId && session.anonymousId !== anonymousId) {

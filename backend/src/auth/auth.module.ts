@@ -18,12 +18,19 @@ import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET', 'super_secret_netvision_jwt_key'),
-        signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRATION', '7d'),
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+        const isProd = configService.get<string>('NODE_ENV') === 'production';
+        if (isProd && (!secret || secret === 'super_secret_netvision_jwt_key')) {
+          throw new Error('CRITICAL SECURITY ERROR: JWT_SECRET environment variable must be set in production!');
+        }
+        return {
+          secret: secret || 'super_secret_netvision_jwt_key',
+          signOptions: {
+            expiresIn: configService.get<string>('JWT_EXPIRATION', '7d'),
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

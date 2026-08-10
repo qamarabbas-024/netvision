@@ -738,4 +738,51 @@ export async function getCertificateByIdApi(idOrCode: string) {
   return await fetchApi<any>(`/certificates/${idOrCode}`);
 }
 
+export interface AchievementItem {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  badgeIcon: string;
+  category: 'LEARNING' | 'ASSESSMENT' | 'PRACTICAL' | 'SKILL' | 'COMPLETION' | 'MILESTONE';
+  points: number;
+  isActive: boolean;
+  unlocked?: boolean;
+  unlockedAt?: string | null;
+}
+
+export async function getAchievementsApi(): Promise<AchievementItem[]> {
+  try {
+    return await fetchApi<AchievementItem[]>('/achievements');
+  } catch {
+    return [];
+  }
+}
+
+export async function getMyAchievementsApi(): Promise<{
+  totalAchievements: number;
+  unlockedCount: number;
+  totalPointsEarned: number;
+  achievements: AchievementItem[];
+}> {
+  return await fetchApi<any>('/achievements/me');
+}
+
+export interface CourseAssessmentStatus {
+  courseId: string;
+  courseSlug: string;
+  requiredLessons: number;
+  completedAssessments: number;
+  missingAssessments: number;
+  lessonScores: number[];
+  assessmentAverage: number;
+  assessmentPassed: boolean;
+  allRequiredAssessmentsComplete: boolean;
+  eligibleForCertificate: boolean;
+}
+
+export async function getCourseAssessmentApi(courseSlug: string): Promise<CourseAssessmentStatus> {
+  return await fetchApi<CourseAssessmentStatus>(`/courses/${courseSlug}/assessment`);
+}
+
 

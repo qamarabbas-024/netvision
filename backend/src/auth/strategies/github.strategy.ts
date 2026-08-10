@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github2';
 import { ConfigService } from '@nestjs/config';
 import { AuthService } from '../auth.service';
+import { CookieStateStore } from '../stores/cookie-state.store';
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
@@ -15,6 +16,7 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       clientSecret: configService.get<string>('GITHUB_CLIENT_SECRET', 'placeholder_github_secret'),
       callbackURL: `${configService.get<string>('API_URL', 'http://localhost:4000/api/v1')}/auth/github/callback`,
       scope: ['user:email'],
+      store: new CookieStateStore(),
     });
   }
 

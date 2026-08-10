@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -20,12 +21,21 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+  private readonly devOtpStore = new Map<string, string>();
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService
   ) {}
+
+  getDevOtpForTest(email: string): string | null {
+    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
+    if (isProd) return null;
+    return this.devOtpStore.get(email.toLowerCase().trim()) || null;
+  }
 
   private hashToken(rawToken: string): string {
     return crypto.createHash('sha256').update(rawToken).digest('hex');
@@ -85,15 +95,15 @@ export class AuthService {
       },
     });
 
-    await this.emailService.sendVerificationOtp(normalizedEmail, rawOtp);
-
-    const isDev = this.isDevModeNoSmtp();
+    if (this.isDevModeNoSmtp()) {
+      this.devOtpStore.set(normalizedEmail, rawOtp);
+      this.logger.warn(`📧 [DEV EMAIL CONSOLE LOG] Verification OTP for ${normalizedEmail}: ${rawOtp}`);
+    }
 
     return {
       message: 'Registration successful! A 6-digit verification code has been dispatched to your email address.',
       email: normalizedEmail,
       requiresOtp: true,
-      ...(isDev ? { devOtpCode: rawOtp } : {}),
     };
   }
 
@@ -199,13 +209,13 @@ export class AuthService {
       },
     });
 
-    await this.emailService.sendVerificationOtp(normalizedEmail, rawOtp);
-
-    const isDev = this.isDevModeNoSmtp();
+    if (this.isDevModeNoSmtp()) {
+      this.devOtpStore.set(normalizedEmail, rawOtp);
+      this.logger.warn(`📧 [DEV EMAIL CONSOLE LOG] Resent Verification OTP for ${normalizedEmail}: ${rawOtp}`);
+    }
 
     return {
       message: 'A new 6-digit verification code has been dispatched to your email address.',
-      ...(isDev ? { devOtpCode: rawOtp } : {}),
     };
   }
 
@@ -234,12 +244,13 @@ export class AuthService {
       await this.prisma.emailVerification.create({
         data: { email: normalizedEmail, otpHash, expiresAt, attempts: 0 },
       });
-      await this.emailService.sendVerificationOtp(normalizedEmail, rawOtp);
-
-      const isDev = this.isDevModeNoSmtp();
+      if (this.isDevModeNoSmtp()) {
+        this.devOtpStore.set(normalizedEmail, rawOtp);
+        this.logger.warn(`📧 [DEV EMAIL CONSOLE LOG] Unverified Login OTP for ${normalizedEmail}: ${rawOtp}`);
+      }
 
       throw new UnauthorizedException(
-        `Account email is not verified. A new 6-digit OTP code has been dispatched to your email.${isDev ? ` (DEV CODE: ${rawOtp})` : ''}`
+        'Account email is not verified. A new 6-digit OTP code has been dispatched to your email.'
       );
     }
 

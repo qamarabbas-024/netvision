@@ -59,6 +59,16 @@ export class TopicsController {
     return this.topicsService.getCourseBySlug(slug, identity.userId || undefined);
   }
 
+  @ApiOperation({ summary: 'Get course assessment status and average score for requester' })
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('courses/:slug/assessment')
+  async getCourseAssessment(
+    @LearnerIdentity() identity: LearnerIdentityContext,
+    @Param('slug') slug: string
+  ) {
+    return this.topicsService.getCourseAssessment(identity, slug);
+  }
+
   @ApiOperation({ summary: 'Alias route: Get all learning topics' })
   @UseGuards(OptionalJwtAuthGuard)
   @Get('topics')
