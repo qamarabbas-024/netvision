@@ -56,18 +56,21 @@ model User {
 }
 
 model Course {
-  id             String       @id @default(uuid())
-  slug           String       @unique
-  title          String
-  tagline        String
-  category       String       @default("Fundamentals")
-  description    String
-  level          CourseLevel  @default(BEGINNER)
-  icon           String
-  estimatedHours Int          @default(5)
-  published      Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id                String       @id @default(uuid())
+  slug              String       @unique
+  code              String?      @unique
+  order             Int          @default(0)
+  title             String
+  tagline           String
+  category          String       @default("Fundamentals")
+  description       String
+  level             CourseLevel  @default(BEGINNER)
+  icon              String
+  estimatedHours    Int          @default(5)
+  published         Boolean      @default(true)
+  prerequisitesJson Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   modules        Module[]
   certificates   Certificate[]
