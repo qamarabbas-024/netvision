@@ -8,9 +8,11 @@ import { AppTopbar } from '@/components/ui/Topbar';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Award, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore';
+import { Award, ArrowRight, ShieldCheck, Lock } from 'lucide-react';
 
 export default function CertificatesCatalogPage() {
+  const { isAuthenticated } = useAuthStore();
   const certs = [
     {
       id: 'cert-88912',
@@ -45,6 +47,28 @@ export default function CertificatesCatalogPage() {
                 </h1>
               </div>
 
+              {!isAuthenticated ? (
+                <div className="p-8 glass-panel rounded-3xl border border-[#00f0ff]/30 text-center flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center text-[#00f0ff]">
+                    <Lock className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-2">Account Required for Verified Certificates</h3>
+                    <p className="text-sm text-zinc-400 max-w-md mx-auto">
+                      Complete your course requirements and log in or create an account to claim your official verified course certificates.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 mt-2">
+                    <Link href="/login">
+                      <Button variant="ghost">Log In</Button>
+                    </Link>
+                    <Link href="/register">
+                      <Button variant="cyan">Create Account</Button>
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {certs.map((c) => (
                   <Card key={c.id} className="p-8 glass-panel-glow border-[#00f0ff]/30 flex flex-col justify-between">
@@ -77,6 +101,7 @@ export default function CertificatesCatalogPage() {
                   </Card>
                 ))}
               </div>
+              )}
             </div>
           </main>
         </div>

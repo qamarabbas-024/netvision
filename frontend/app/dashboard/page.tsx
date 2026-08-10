@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
 import { RouterIcon, SwitchIcon, DNSIcon, PacketIcon } from '@/components/ui/Icons';
 import { getUserProgressApi } from '@/lib/api';
+import { useAuthStore } from '@/stores/authStore';
 import {
   Flame,
   Zap,
@@ -25,6 +26,7 @@ import {
 } from 'lucide-react';
 
 export default function DashboardPage() {
+  const { user, isAuthenticated } = useAuthStore();
   const [userProgress, setUserProgress] = useState<any>({
     completedLessons: 4,
     totalLessons: 45,
@@ -108,6 +110,31 @@ export default function DashboardPage() {
           {/* Dashboard Body */}
           <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
             <div className="max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8">
+              {/* Guest UX Banner */}
+              {!isAuthenticated && (
+                <div className="glass-panel p-5 rounded-2xl border border-[#00f0ff]/30 bg-[#00f0ff]/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center text-[#00f0ff] shrink-0">
+                      <Zap className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">Learning as Guest</h4>
+                      <p className="text-xs text-zinc-400">
+                        Your learning progress is saved on this device. Log in or create an account anytime to sync progress across devices and claim certificates.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto">
+                    <Link href="/login" className="flex-1 sm:flex-initial">
+                      <Button variant="ghost" size="sm" className="w-full">Log In</Button>
+                    </Link>
+                    <Link href="/register" className="flex-1 sm:flex-initial">
+                      <Button variant="cyan" size="sm" className="w-full">Create Account</Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               {/* Welcome Header */}
               <div className="glass-panel p-5 sm:p-8 rounded-3xl border border-[#00f0ff]/30 shadow-glow-cyan flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-[#00f0ff]/10 rounded-full blur-3xl pointer-events-none" />
@@ -115,10 +142,10 @@ export default function DashboardPage() {
                 <div className="relative z-10">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-[#00f0ff] text-xs font-mono font-bold uppercase mb-3">
                     <Zap className="w-3.5 h-3.5" />
-                    Level 4 Networking Learner
+                    {isAuthenticated ? 'Level 4 Networking Learner' : 'Guest Learner'}
                   </div>
                   <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                    Welcome Back, Alex! ⚡
+                    Welcome{isAuthenticated && (user?.fullName || user?.username) ? `, ${user.fullName || user.username}` : ''}! ⚡
                   </h1>
                   <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
                     You're on a <strong className="text-amber-400">7-Day Study Streak</strong>! Keep learning visually to unlock your Routing Specialist certificate.

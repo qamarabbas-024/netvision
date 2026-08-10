@@ -5,12 +5,16 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v
 function getAuthHeaders(): HeadersInit {
   if (typeof window === 'undefined') return { 'Content-Type': 'application/json' };
   const token = localStorage.getItem('netvision_token') || sessionStorage.getItem('netvision_token');
-  const anonId = GuestProgressService.getLearnerId();
-  return {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(anonId ? { 'X-Anonymous-ID': anonId } : {}),
-  };
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    const anonId = GuestProgressService.getLearnerId();
+    if (anonId) {
+      headers['X-Anonymous-ID'] = anonId;
+    }
+  }
+  return headers;
 }
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -721,6 +725,17 @@ export async function claimAnonymousProgressApi(anonymousId: string) {
     console.warn(`[NetVision API] Claim progress error: ${err.message}`);
     return null;
   }
+}
+
+export async function claimCertificateApi(courseId: string) {
+  return await fetchApi<any>('/certificates/claim', {
+    method: 'POST',
+    body: JSON.stringify({ courseId }),
+  });
+}
+
+export async function getCertificateByIdApi(idOrCode: string) {
+  return await fetchApi<any>(`/certificates/${idOrCode}`);
 }
 
 
