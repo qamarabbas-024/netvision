@@ -501,16 +501,48 @@ export async function completeLessonApi(lessonId: string) {
   }
 }
 
-export async function getUserProgressApi() {
+export interface StudentDashboardMetrics {
+  totalCourses: number;
+  totalLessons: number;
+  completedLessons: number;
+  overallProgressPercent: number;
+  studyStreak: number;
+  totalXp: number;
+  simulationsRun: number;
+  quizAverageScore: number;
+  certificatesEarned: number;
+  completedCoursesCount: number;
+  badges: {
+    earned: number;
+    total: number;
+    items: AchievementItem[];
+  };
+  recentAttempts: any[];
+  recentLessons: any[];
+}
+
+export async function getUserProgressApi(): Promise<StudentDashboardMetrics> {
   try {
-    return await fetchApi<any>('/progress');
+    return await fetchApi<StudentDashboardMetrics>('/progress/dashboard');
   } catch {
     return {
-      totalCourses: 20,
-      totalLessons: 45,
-      completedLessons: 4,
-      overallProgressPercent: 10,
+      totalCourses: 22,
+      totalLessons: 35,
+      completedLessons: 0,
+      overallProgressPercent: 0,
+      studyStreak: 0,
+      totalXp: 0,
+      simulationsRun: 0,
+      quizAverageScore: 0,
+      certificatesEarned: 0,
+      completedCoursesCount: 0,
+      badges: {
+        earned: 0,
+        total: 5,
+        items: [],
+      },
       recentAttempts: [],
+      recentLessons: [],
     };
   }
 }

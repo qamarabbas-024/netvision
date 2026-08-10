@@ -230,6 +230,13 @@ export class TopicsController {
     return this.topicsService.getUserProgress(identity);
   }
 
+  @ApiOperation({ summary: 'Get authenticated or guest dynamic dashboard metrics' })
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get('progress/dashboard')
+  async getStudentDashboardMetrics(@LearnerIdentity() identity: LearnerIdentityContext) {
+    return this.topicsService.getStudentDashboardMetrics(identity);
+  }
+
   @ApiOperation({ summary: 'Claim anonymous guest progress into authenticated account' })
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)

@@ -388,7 +388,7 @@ export class TopicsService {
   }
 
   async executeLabCommand(dto: { labId: string; command: string; currentTopologyState?: Record<string, any> }) {
-    const { labId, command } = dto;
+    const { command } = dto;
     const cleanCmd = (command || '').trim();
 
     if (!cleanCmd) {
@@ -1021,20 +1021,47 @@ export class TopicsService {
     };
   }
 
-  async getUserProgress(identity: { userId?: string; anonymousId?: string }) {
+  async getStudentDashboardMetrics(identity: { userId?: string; anonymousId?: string }) {
     const { userId, anonymousId } = identity;
     const where = userId ? { userId } : anonymousId ? { anonymousId } : null;
 
+    const totalCourses = await this.prisma.course.count({ where: { published: true } });
+    const totalLessons = await this.prisma.lesson.count({
+      where: { module: { course: { published: true } } },
+    });
+
+    const activeAchievements = await this.prisma.achievement.findMany({
+      where: { isActive: true },
+      orderBy: { points: 'asc' },
+    });
+
     if (!where) {
       return {
-        totalCourses: await this.prisma.course.count({ where: { published: true } }),
-        totalLessons: await this.prisma.lesson.count(),
+        totalCourses,
+        totalLessons,
         completedLessons: 0,
         overallProgressPercent: 0,
+        studyStreak: 0,
+        totalXp: 0,
+        simulationsRun: 0,
+        quizAverageScore: 0,
+        certificatesEarned: 0,
+        completedCoursesCount: 0,
+        badges: {
+          earned: 0,
+          total: activeAchievements.length,
+          items: activeAchievements.map((a) => ({
+            ...a,
+            unlocked: false,
+            unlockedAt: null,
+          })),
+        },
         recentAttempts: [],
+        recentLessons: [],
       };
     }
 
+    // 1. Progress & Completed Lessons
     const progressList = await this.prisma.userProgress.findMany({
       where,
       include: {
@@ -1048,35 +1075,194 @@ export class TopicsService {
           },
         },
       },
+      orderBy: { completedAt: 'desc' },
     });
 
-    const totalCourses = await this.prisma.course.count({ where: { published: true } });
-    const totalLessons = await this.prisma.lesson.count();
     const completedLessons = progressList.filter((p) => p.completed).length;
     const overallProgressPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
-    const attempts = await this.prisma.quizAttempt.findMany({
+    // 2. Study Streak Calculation (gather YYYY-MM-DD date strings across all activity)
+    const activityDatesSet = new Set<string>();
+
+    for (const p of progressList) {
+      if (p.completedAt) activityDatesSet.add(p.completedAt.toISOString().split('T')[0]);
+    }
+
+    const quizAttempts = await this.prisma.quizAttempt.findMany({
       where,
+      select: { quizId: true, score: true, passed: true, createdAt: true, quiz: { select: { title: true } } },
       orderBy: { createdAt: 'desc' },
-      take: 10,
-      include: {
-        quiz: { select: { title: true } },
-      },
     });
+    for (const qa of quizAttempts) {
+      activityDatesSet.add(qa.createdAt.toISOString().split('T')[0]);
+    }
+
+    const labAttempts = await this.prisma.labAttempt.findMany({
+      where,
+      select: { startedAt: true, createdAt: true, passed: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    for (const la of labAttempts) {
+      if (la.startedAt) activityDatesSet.add(la.startedAt.toISOString().split('T')[0]);
+      if (la.createdAt) activityDatesSet.add(la.createdAt.toISOString().split('T')[0]);
+    }
+
+    const sandboxSessions = await this.prisma.sandboxSession.findMany({
+      where,
+      select: { createdAt: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    for (const ss of sandboxSessions) {
+      activityDatesSet.add(ss.createdAt.toISOString().split('T')[0]);
+    }
+
+    // Continuous consecutive study streak
+    const todayStr = new Date().toISOString().split('T')[0];
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterdayStr = yesterdayDate.toISOString().split('T')[0];
+
+    let studyStreak = 0;
+    let checkDate = new Date();
+
+    if (!activityDatesSet.has(todayStr) && activityDatesSet.has(yesterdayStr)) {
+      checkDate = yesterdayDate;
+    }
+
+    let keepChecking = true;
+    while (keepChecking) {
+      const dateStr = checkDate.toISOString().split('T')[0];
+      if (activityDatesSet.has(dateStr)) {
+        studyStreak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        keepChecking = false;
+      }
+    }
+
+    // 3. Quiz Average Score (Best score per unique quiz)
+    const bestScorePerQuiz: Record<string, number> = {};
+    for (const qa of quizAttempts) {
+      if (bestScorePerQuiz[qa.quizId] === undefined || qa.score > bestScorePerQuiz[qa.quizId]) {
+        bestScorePerQuiz[qa.quizId] = qa.score;
+      }
+    }
+
+    const uniqueQuizScores = Object.values(bestScorePerQuiz);
+    const quizAverageScore =
+      uniqueQuizScores.length > 0
+        ? Math.round(uniqueQuizScores.reduce((a, b) => a + b, 0) / uniqueQuizScores.length)
+        : 0;
+
+    // 4. Simulations Run (Authoritative SandboxSession runs)
+    const simulationsRun = sandboxSessions.length;
+
+    // 5. Certificates Earned
+    const certificatesEarned = userId
+      ? await this.prisma.certificate.count({ where: { userId } })
+      : 0;
+
+    // 6. Badges & Total XP (Authoritative points from earned achievements)
+    let earnedAchievements: Array<{ achievementId: string; unlockedAt: Date }> = [];
+    if (userId) {
+      earnedAchievements = await this.prisma.userAchievement.findMany({
+        where: { userId },
+        select: { achievementId: true, unlockedAt: true },
+      });
+    } else if (anonymousId) {
+      earnedAchievements = await this.prisma.userAchievement.findMany({
+        where: { anonymousId },
+        select: { achievementId: true, unlockedAt: true },
+      });
+    }
+
+    const unlockedMap = new Map<string, Date>();
+    for (const ua of earnedAchievements) {
+      unlockedMap.set(ua.achievementId, ua.unlockedAt);
+    }
+
+    let achievementXpSum = 0;
+    const badgeItems = activeAchievements.map((ach) => {
+      const isUnlocked = unlockedMap.has(ach.id);
+      if (isUnlocked) {
+        achievementXpSum += ach.points;
+      }
+      return {
+        id: ach.id,
+        slug: ach.slug,
+        title: ach.title,
+        description: ach.description,
+        badgeIcon: ach.badgeIcon,
+        category: ach.category,
+        points: ach.points,
+        unlocked: isUnlocked,
+        unlockedAt: unlockedMap.get(ach.id) ? unlockedMap.get(ach.id)!.toISOString() : null,
+      };
+    });
+
+    // Authoritative totalXp derived strictly from earned achievement points
+    const totalXp = achievementXpSum;
+
+    // 7. Completed Courses Count (Phase 11B Gating)
+    const publishedCourses = await this.prisma.course.findMany({
+      where: { published: true },
+      select: { id: true, slug: true },
+    });
+
+    let completedCoursesCount = 0;
+    for (const course of publishedCourses) {
+      try {
+        const assessment = await this.getCourseAssessment(identity, course.id);
+        if (assessment.eligibleForCertificate) {
+          completedCoursesCount++;
+        }
+      } catch {
+        // Ignore
+      }
+    }
+
+    // 8. Recent Lessons
+    const recentLessons = progressList.slice(0, 5).map((p) => ({
+      id: p.lesson.id,
+      title: p.lesson.title,
+      slug: p.lesson.slug,
+      courseTitle: p.lesson.module.course.title,
+      courseSlug: p.lesson.module.course.slug,
+      type: p.lesson.type,
+      durationMinutes: p.lesson.durationMinutes,
+      status: p.completed ? 'COMPLETED' : p.viewed ? 'IN_PROGRESS' : 'UP_NEXT',
+      completedAt: p.completedAt,
+    }));
 
     return {
       totalCourses,
       totalLessons,
       completedLessons,
       overallProgressPercent,
-      recentAttempts: attempts.map((a) => ({
-        id: a.id,
+      studyStreak,
+      totalXp,
+      simulationsRun,
+      quizAverageScore,
+      certificatesEarned,
+      completedCoursesCount,
+      badges: {
+        earned: unlockedMap.size,
+        total: activeAchievements.length,
+        items: badgeItems,
+      },
+      recentAttempts: quizAttempts.slice(0, 5).map((a) => ({
+        id: a.quizId,
         quizTitle: a.quiz.title,
         score: a.score,
         passed: a.passed,
         createdAt: a.createdAt,
       })),
+      recentLessons,
     };
+  }
+
+  async getUserProgress(identity: { userId?: string; anonymousId?: string }) {
+    return this.getStudentDashboardMetrics(identity);
   }
 
   async search(query: string) {

@@ -28,9 +28,16 @@ import {
 export default function DashboardPage() {
   const { user, isAuthenticated } = useAuthStore();
   const [userProgress, setUserProgress] = useState<any>({
-    completedLessons: 4,
-    totalLessons: 45,
-    overallProgressPercent: 10,
+    completedLessons: 0,
+    totalLessons: 35,
+    overallProgressPercent: 0,
+    studyStreak: 0,
+    totalXp: 0,
+    simulationsRun: 0,
+    quizAverageScore: 0,
+    certificatesEarned: 0,
+    badges: { earned: 0, total: 5, items: [] },
+    recentLessons: [],
   });
 
   useEffect(() => {
@@ -41,43 +48,14 @@ export default function DashboardPage() {
     });
   }, []);
 
-  const recentLessons = [
-    {
-      id: 'lesson-1',
-      title: 'Understanding MAC vs. IP Addresses',
-      course: 'Networking Fundamentals',
-      type: 'INTERACTIVE_SIMULATION',
-      duration: '12 min',
-      status: 'COMPLETED',
-      icon: <RouterIcon size={16} />,
-    },
-    {
-      id: 'lesson-2',
-      title: 'TCP 3-Way Handshake Simulation',
-      course: 'TCP/IP Protocol Suite',
-      type: 'ANIMATION',
-      duration: '15 min',
-      status: 'IN_PROGRESS',
-      progress: 65,
-      icon: <PacketIcon size={16} />,
-    },
-    {
-      id: 'lesson-3',
-      title: 'Configuring Static IPv4 Routes',
-      course: 'Subnetting & Routing',
-      type: 'SANDBOX_LAB',
-      duration: '20 min',
-      status: 'UP_NEXT',
-      icon: <SwitchIcon size={16} />,
-    },
-  ];
-
-  const achievements = [
-    { name: 'Packet Master', desc: 'Dispatched 50 visual packets', icon: '⚡', unlocked: true },
-    { name: 'Subnet Ninja', desc: 'Passed CIDR calculation lab', icon: '🥷', unlocked: true },
-    { name: 'Handshake Hero', desc: 'Completed TCP handshake module', icon: '🤝', unlocked: true },
-    { name: 'Firewall Defender', desc: 'Configured 10 stateful ACL rules', icon: '🛡️', unlocked: false },
-  ];
+  const badgeItems = userProgress?.badges?.items?.length
+    ? userProgress.badges.items
+    : [
+        { title: 'First Step', description: 'Completed your first lesson', badgeIcon: 'Zap', unlocked: false },
+        { title: 'First Knowledge Check', description: 'Passed your first quiz', badgeIcon: 'CheckSquare', unlocked: false },
+        { title: 'Perfect Score', description: 'Scored 100% on a quiz', badgeIcon: 'Award', unlocked: false },
+        { title: 'First Lab Completed', description: 'Completed your first lab', badgeIcon: 'Terminal', unlocked: false },
+      ];
 
   const recommended = [
     {
@@ -148,7 +126,7 @@ export default function DashboardPage() {
                     Welcome{isAuthenticated && (user?.fullName || user?.username) ? `, ${user.fullName || user.username}` : ''}! ⚡
                   </h1>
                   <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
-                    You're on a <strong className="text-amber-400">7-Day Study Streak</strong>! Keep learning visually to unlock your Routing Specialist certificate.
+                    You're on a <strong className="text-amber-400">{userProgress?.studyStreak ?? 0}-Day Study Streak</strong>! Keep learning visually to unlock course completion certificates.
                   </p>
                 </div>
 
@@ -160,7 +138,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <span className="text-[10px] sm:text-xs text-zinc-500 block font-mono">STREAK</span>
-                      <span className="text-base sm:text-lg font-bold text-white">7 Days</span>
+                      <span className="text-base sm:text-lg font-bold text-white">{userProgress?.studyStreak ?? 0} Days</span>
                     </div>
                   </div>
 
@@ -171,7 +149,7 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <span className="text-[10px] sm:text-xs text-zinc-500 block font-mono">TOTAL XP</span>
-                      <span className="text-base sm:text-lg font-bold text-white font-mono">1,450 XP</span>
+                      <span className="text-base sm:text-lg font-bold text-white font-mono">{userProgress?.totalXp ?? 0} XP</span>
                     </div>
                   </div>
                 </div>
@@ -184,7 +162,7 @@ export default function DashboardPage() {
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <Badge variant="cyan">CURRENT COURSE</Badge>
-                      <span className="text-xs font-mono text-zinc-400">Module 3 of 6</span>
+                      <span className="text-xs font-mono text-zinc-400">{userProgress?.completedLessons ?? 0} of {userProgress?.totalLessons ?? 35} Lessons</span>
                     </div>
 
                     <h2 className="text-2xl font-bold text-white mb-2">
@@ -194,17 +172,17 @@ export default function DashboardPage() {
                       Next up: Interactive 3-way handshake simulation. Dispatch SYN, SYN-ACK, and ACK packets across client and server nodes.
                     </p>
 
-                    <Progress value={65} label="Course Progress" className="mb-6" />
+                    <Progress value={userProgress?.overallProgressPercent ?? 0} label="Course Progress" className="mb-6" />
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-[#272732]">
                     <div className="flex items-center gap-2 text-xs text-zinc-400">
                       <Clock className="w-4 h-4 text-[#00f0ff]" />
-                      <span>Estimated 15 mins remaining</span>
+                      <span>{userProgress?.overallProgressPercent ?? 0}% Complete</span>
                     </div>
                     <Link href="/simulations">
                       <Button variant="cyan" leftIcon={<PlayCircle className="w-4 h-4" />}>
-                        Resume Lesson 4
+                        Resume Learning
                       </Button>
                     </Link>
                   </div>
@@ -216,7 +194,7 @@ export default function DashboardPage() {
                     <BookOpen className="w-6 h-6 text-[#00f0ff] mb-2" />
                     <div>
                       <span className="text-2xl font-bold text-white font-mono block">
-                        {userProgress?.completedLessons ?? 4}
+                        {userProgress?.completedLessons ?? 0}
                       </span>
                       <span className="text-xs text-zinc-400">Completed Lessons</span>
                     </div>
@@ -225,7 +203,9 @@ export default function DashboardPage() {
                   <div className="p-5 rounded-2xl glass-panel border border-[#272732] flex flex-col justify-between">
                     <Zap className="w-6 h-6 text-purple-400 mb-2" />
                     <div>
-                      <span className="text-2xl font-bold text-white font-mono block">42</span>
+                      <span className="text-2xl font-bold text-white font-mono block">
+                        {userProgress?.simulationsRun ?? 0}
+                      </span>
                       <span className="text-xs text-zinc-400">Simulations Run</span>
                     </div>
                   </div>
@@ -233,7 +213,9 @@ export default function DashboardPage() {
                   <div className="p-5 rounded-2xl glass-panel border border-[#272732] flex flex-col justify-between">
                     <CheckCircle2 className="w-6 h-6 text-emerald-400 mb-2" />
                     <div>
-                      <span className="text-2xl font-bold text-white font-mono block">94%</span>
+                      <span className="text-2xl font-bold text-white font-mono block">
+                        {userProgress?.quizAverageScore ?? 0}%
+                      </span>
                       <span className="text-xs text-zinc-400">Quiz Avg Score</span>
                     </div>
                   </div>
@@ -241,7 +223,9 @@ export default function DashboardPage() {
                   <div className="p-5 rounded-2xl glass-panel border border-[#272732] flex flex-col justify-between">
                     <Award className="w-6 h-6 text-amber-400 mb-2" />
                     <div>
-                      <span className="text-2xl font-bold text-white font-mono block">2</span>
+                      <span className="text-2xl font-bold text-white font-mono block">
+                        {userProgress?.certificatesEarned ?? 0}
+                      </span>
                       <span className="text-xs text-zinc-400">Certificates Earned</span>
                     </div>
                   </div>
@@ -260,16 +244,19 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    {recentLessons.map((item) => (
+                    {(userProgress?.recentLessons?.length ? userProgress.recentLessons : [
+                      { id: '1', title: 'Understanding MAC vs. IP Addresses', courseTitle: 'Networking Fundamentals', durationMinutes: 12, status: 'COMPLETED' },
+                      { id: '2', title: 'TCP 3-Way Handshake Simulation', courseTitle: 'TCP/IP Protocol Suite', durationMinutes: 15, status: 'IN_PROGRESS' },
+                    ]).map((item: any) => (
                       <div
                         key={item.id}
                         className="glass-panel p-4 rounded-2xl border border-[#272732] hover:border-[#00f0ff]/30 transition-colors flex items-center justify-between gap-4"
                       >
                         <div className="flex items-center gap-3">
-                          {item.icon}
+                          <RouterIcon size={16} />
                           <div>
                             <h4 className="text-sm font-bold text-white">{item.title}</h4>
-                            <span className="text-xs text-zinc-500 font-mono">{item.course} • {item.duration}</span>
+                            <span className="text-xs text-zinc-500 font-mono">{item.courseTitle || 'Networking'} • {item.durationMinutes || 15} min</span>
                           </div>
                         </div>
 
@@ -277,7 +264,7 @@ export default function DashboardPage() {
                           {item.status === 'COMPLETED' ? (
                             <Badge variant="emerald">Completed</Badge>
                           ) : item.status === 'IN_PROGRESS' ? (
-                            <Badge variant="cyan">65% Done</Badge>
+                            <Badge variant="cyan">In Progress</Badge>
                           ) : (
                             <Badge variant="neutral">Up Next</Badge>
                           )}
@@ -291,20 +278,22 @@ export default function DashboardPage() {
                 <div className="lg:col-span-5 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-bold text-white">Earned Badges</h3>
-                    <span className="text-xs text-zinc-400 font-mono">3 / 4 Unlocked</span>
+                    <span className="text-xs text-zinc-400 font-mono">
+                      {userProgress?.badges?.earned ?? 0} / {userProgress?.badges?.total ?? 5} Unlocked
+                    </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    {achievements.map((ach, idx) => (
+                    {badgeItems.map((ach: any, idx: number) => (
                       <div
-                        key={idx}
+                        key={ach.id || idx}
                         className={`p-4 rounded-2xl glass-panel border flex flex-col items-center text-center gap-2 ${
                           ach.unlocked ? 'border-[#00f0ff]/30 bg-[#00f0ff]/5' : 'border-[#272732] opacity-50'
                         }`}
                       >
-                        <span className="text-3xl">{ach.icon}</span>
-                        <h4 className="text-xs font-bold text-white">{ach.name}</h4>
-                        <p className="text-[10px] text-zinc-400">{ach.desc}</p>
+                        <span className="text-3xl">{ach.badgeIcon === 'Zap' ? '⚡' : ach.badgeIcon === 'CheckSquare' ? '☑️' : ach.badgeIcon === 'Terminal' ? '💻' : ach.badgeIcon === 'CheckCircle2' ? '🎓' : '🏆'}</span>
+                        <h4 className="text-xs font-bold text-white">{ach.title || ach.name}</h4>
+                        <p className="text-[10px] text-zinc-400">{ach.description || ach.desc}</p>
                       </div>
                     ))}
                   </div>
