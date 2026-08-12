@@ -23,37 +23,47 @@ async function main() {
     explanationsJson: wrongWhys,
   });
 
-  // 1. Create / Upsert Users
-  const adminPasswordHash = await argon2.hash('admin123');
-  const studentPasswordHash = await argon2.hash('alex123');
+  // 1. Create / Upsert Users (Environment Controlled for Production Safety)
+  const isProd = process.env.NODE_ENV === 'production';
+  const shouldSeedDemoUsers = !isProd || process.env.SEED_DEMO_USERS === 'true';
 
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@netvision.edu' },
-    update: { isVerified: true },
-    create: {
-      email: 'admin@netvision.edu',
-      username: 'admin',
-      fullName: 'System Administrator',
-      passwordHash: adminPasswordHash,
-      role: Role.ADMIN,
-      isVerified: true,
-    },
-  });
+  if (shouldSeedDemoUsers) {
+    const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'admin123';
+    const studentPassword = process.env.SEED_STUDENT_PASSWORD || 'alex123';
 
-  const studentUser = await prisma.user.upsert({
-    where: { email: 'alex@netvision.edu' },
-    update: { isVerified: true },
-    create: {
-      email: 'alex@netvision.edu',
-      username: 'alex',
-      fullName: 'Alex Rivers',
-      passwordHash: studentPasswordHash,
-      role: Role.STUDENT,
-      isVerified: true,
-    },
-  });
+    const adminPasswordHash = await argon2.hash(adminPassword);
+    const studentPasswordHash = await argon2.hash(studentPassword);
 
-  console.log(`👤 Verified Users: ADMIN (${adminUser.email}), STUDENT (${studentUser.email})`);
+    const adminUser = await prisma.user.upsert({
+      where: { email: 'admin@netvision.edu' },
+      update: { isVerified: true },
+      create: {
+        email: 'admin@netvision.edu',
+        username: 'admin',
+        fullName: 'System Administrator',
+        passwordHash: adminPasswordHash,
+        role: Role.ADMIN,
+        isVerified: true,
+      },
+    });
+
+    const studentUser = await prisma.user.upsert({
+      where: { email: 'alex@netvision.edu' },
+      update: { isVerified: true },
+      create: {
+        email: 'alex@netvision.edu',
+        username: 'alex',
+        fullName: 'Alex Rivers',
+        passwordHash: studentPasswordHash,
+        role: Role.STUDENT,
+        isVerified: true,
+      },
+    });
+
+    console.log(`👤 Verified Demo Users: ADMIN (${adminUser.email}), STUDENT (${studentUser.email})`);
+  } else {
+    console.log('ℹ️ Production Environment Detected: Skipping default demo/test user creation.');
+  }
 
   // 2. Upsert 16 Target Progressive Courses
   console.log('📚 Upserting 16 Progressive Target Courses (NET-101 to NET-404)...');
@@ -457,6 +467,73 @@ async function main() {
       create: ach,
     });
   }
+
+  // 6. Seed Initial Professional Certification Definition (NV-NET)
+  console.log('🎓 Seeding Professional Certification Definition (NV-NET)...');
+  await prisma.certificationDefinition.upsert({
+    where: { code: 'NV-NET' },
+    update: {
+      title: 'NetVision Certified Network Administrator',
+      description: 'Demonstrates professional competence in Ethernet Layer 2 switching, IPv4 CIDR subnetting, core IP services (ARP, ICMP, DNS, DHCP), and Transport Layer TCP/UDP protocol operations.',
+      level: CourseLevel.BEGINNER,
+      isActive: true,
+      requirementsJson: {
+        requiredCourseCodes: ['NET-201', 'NET-202', 'NET-203', 'NET-204'],
+        minAssessmentAvg: 80,
+        requireAllLabs: true,
+      },
+      policyJson: {
+        maxAttempts: 3,
+        cooldownAfterFirstFailure: 86400, // 24 hours
+        cooldownAfterSubsequentFailure: 259200, // 72 hours
+        rollingWindowDays: 30,
+      },
+      theoryConfigJson: {
+        questionCount: 50,
+        durationSeconds: 3600, // 60 minutes
+        passingScore: 80,
+        troubleshootingMinimum: 70,
+      },
+      practicalConfigJson: {
+        durationSeconds: 5400, // 90 minutes
+        passingScore: 80,
+        maximumHints: 2,
+        hintPenalty: 5, // 5 percentage points penalty per hint
+        scenarioCode: 'NV-NET-PRACTICAL-SCENARIO-1',
+      },
+    },
+    create: {
+      code: 'NV-NET',
+      title: 'NetVision Certified Network Administrator',
+      description: 'Demonstrates professional competence in Ethernet Layer 2 switching, IPv4 CIDR subnetting, core IP services (ARP, ICMP, DNS, DHCP), and Transport Layer TCP/UDP protocol operations.',
+      level: CourseLevel.BEGINNER,
+      isActive: true,
+      requirementsJson: {
+        requiredCourseCodes: ['NET-201', 'NET-202', 'NET-203', 'NET-204'],
+        minAssessmentAvg: 80,
+        requireAllLabs: true,
+      },
+      policyJson: {
+        maxAttempts: 3,
+        cooldownAfterFirstFailure: 86400, // 24 hours
+        cooldownAfterSubsequentFailure: 259200, // 72 hours
+        rollingWindowDays: 30,
+      },
+      theoryConfigJson: {
+        questionCount: 50,
+        durationSeconds: 3600, // 60 minutes
+        passingScore: 80,
+        troubleshootingMinimum: 70,
+      },
+      practicalConfigJson: {
+        durationSeconds: 5400, // 90 minutes
+        passingScore: 80,
+        maximumHints: 2,
+        hintPenalty: 5, // 5 percentage points penalty per hint
+        scenarioCode: 'NV-NET-PRACTICAL-SCENARIO-1',
+      },
+    },
+  });
 
   console.log('✅ Phase 12C Curriculum Migration & Seed Completed Successfully!');
 }

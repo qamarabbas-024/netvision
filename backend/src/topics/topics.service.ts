@@ -1426,9 +1426,12 @@ export class TopicsService {
       const anonSandboxCount = await tx.sandboxSession.count({
         where: { anonymousId },
       });
+      const anonAchievementCount = await tx.userAchievement.count({
+        where: { anonymousId },
+      });
 
       const totalAnonItems =
-        anonProgress.length + anonQuizCount + anonLabCount + anonSavedCount + anonSandboxCount;
+        anonProgress.length + anonQuizCount + anonLabCount + anonSavedCount + anonSandboxCount + anonAchievementCount;
 
       if (!anonLearner && totalAnonItems === 0) {
         return {
@@ -1520,11 +1523,16 @@ export class TopicsService {
         data: { userId, anonymousId: null },
       });
 
+      const { count: claimedAchievementCount } = await tx.userAchievement.updateMany({
+        where: { anonymousId },
+        data: { userId, anonymousId: null },
+      });
+
       if (anonLearner) {
         await tx.anonymousLearner.delete({ where: { id: anonymousId } }).catch(() => null);
       }
 
-      const totalClaimed = claimedProgressCount + claimedQuizCount + claimedLabCount + anonSaved.length;
+      const totalClaimed = claimedProgressCount + claimedQuizCount + claimedLabCount + anonSaved.length + claimedAchievementCount;
 
       return {
         success: true,
@@ -1533,6 +1541,7 @@ export class TopicsService {
         claimedProgressCount,
         claimedQuizCount,
         claimedLabCount,
+        claimedAchievementCount,
       };
     });
   }
@@ -1617,6 +1626,9 @@ export class TopicsService {
       }
     }
 
+    const lessonsWithQuizzesCount = new Set(Object.values(quizToLessonMap)).size;
+    const totalRequiredAssessments = lessonsWithQuizzesCount > 0 ? lessonsWithQuizzesCount : totalRequiredLessons;
+
     const completedLessonScores: number[] = [];
     let completedAssessmentsCount = 0;
 
@@ -1627,14 +1639,14 @@ export class TopicsService {
       }
     }
 
-    const missingAssessmentsCount = totalRequiredLessons - completedAssessmentsCount;
+    const missingAssessmentsCount = Math.max(0, totalRequiredAssessments - completedAssessmentsCount);
     const allRequiredAssessmentsComplete =
-      completedAssessmentsCount === totalRequiredLessons && missingAssessmentsCount === 0;
+      completedAssessmentsCount >= totalRequiredAssessments && missingAssessmentsCount === 0;
 
     const sumBestScores = completedLessonScores.reduce((sum, score) => sum + score, 0);
 
     const assessmentAverage =
-      totalRequiredLessons > 0 ? Math.floor(sumBestScores / totalRequiredLessons) : 0;
+      totalRequiredAssessments > 0 ? Math.floor(sumBestScores / totalRequiredAssessments) : 0;
 
     const assessmentPassed = allRequiredAssessmentsComplete && assessmentAverage >= 80;
 

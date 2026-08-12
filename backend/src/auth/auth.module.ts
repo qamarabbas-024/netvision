@@ -21,8 +21,22 @@ import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
       useFactory: (configService: ConfigService) => {
         const secret = configService.get<string>('JWT_SECRET');
         const isProd = configService.get<string>('NODE_ENV') === 'production';
-        if (isProd && (!secret || secret === 'super_secret_netvision_jwt_key')) {
-          throw new Error('CRITICAL SECURITY ERROR: JWT_SECRET environment variable must be set in production!');
+        const insecureDefaults = [
+          'super_secret_netvision_jwt_key',
+          'super_secret_netvision_jwt_key_change_in_production',
+          'YOUR_PRODUCTION_JWT_SECRET_MIN_32_CHARS_LONG_CHANGE_THIS',
+          'change_me',
+          'secret',
+        ];
+
+        if (
+          isProd &&
+          (!secret ||
+            insecureDefaults.includes(secret) ||
+            secret.toLowerCase().includes('change_in_production') ||
+            secret.length < 16)
+        ) {
+          throw new Error('CRITICAL SECURITY ERROR: JWT_SECRET environment variable must be set securely in production!');
         }
         return {
           secret: secret || 'super_secret_netvision_jwt_key',

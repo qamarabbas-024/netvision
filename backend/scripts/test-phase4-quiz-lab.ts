@@ -48,26 +48,20 @@ async function setupTestData() {
     fullName: 'Phase 4 Tester',
   });
 
-  const devOtp = regRes.body?.devOtpCode;
-  if (devOtp) {
-    // Step 2: Verify OTP
-    const verifyRes = await makeApiRequest('POST', '/auth/verify-otp', {}, {
-      email: testEmail,
-      otp: devOtp,
-    });
-    if (verifyRes.status === 200) {
-      AUTH_TOKEN = verifyRes.body.accessToken || verifyRes.body.token;
-      AUTH_USER_ID = verifyRes.body.user?.id;
-    }
-  }
+  await prisma.user.update({
+    where: { email: testEmail },
+    data: { isVerified: true },
+  });
 
-  if (!AUTH_TOKEN) {
-    const loginRes = await makeApiRequest('POST', '/auth/login', {}, {
-      email: testEmail,
-      password: testPass,
-    });
-    AUTH_TOKEN = loginRes.body.accessToken || loginRes.body.token;
-    AUTH_USER_ID = loginRes.body.user?.id;
+  const loginRes = await makeApiRequest('POST', '/auth/login', {}, {
+    email: testEmail,
+    password: testPass,
+  });
+  AUTH_TOKEN = loginRes.body.accessToken || loginRes.body.data?.accessToken || loginRes.body.token;
+
+  const createdUser = await prisma.user.findUnique({ where: { email: testEmail } });
+  if (createdUser) {
+    AUTH_USER_ID = createdUser.id;
   }
 
   // Find a quiz, lab, and lesson in DB
@@ -76,7 +70,7 @@ async function setupTestData() {
   TEST_QUIZ_ID = quiz.id;
   TEST_LESSON_ID = quiz.lessonId;
 
-  let lab = await prisma.lessonLab.findFirst();
+  let lab = await prisma.lessonLab.findFirst({ where: { lessonId: TEST_LESSON_ID } });
   if (!lab) {
     lab = await prisma.lessonLab.create({
       data: {
@@ -154,20 +148,25 @@ async function runPhase4TestSuite() {
   );
 
   // TEST 3: Authenticated QuizAttempt has userId = authenticated ID, anonymousId = null
+  let resAuthQuizStatus = 0;
+  let resAuthQuizBody: any = null;
   if (AUTH_TOKEN) {
-    await makeApiRequest(
+    const resAuthQuiz = await makeApiRequest(
       'POST',
       `/quizzes/${TEST_QUIZ_ID}/submit`,
       { Authorization: `Bearer ${AUTH_TOKEN}` },
       { answers: answersPayload }
     );
+    resAuthQuizStatus = resAuthQuiz.status;
+    resAuthQuizBody = resAuthQuiz.body;
   }
   const userQuizAttempt = await prisma.quizAttempt.findFirst({
     where: { userId: AUTH_USER_ID, quizId: TEST_QUIZ_ID },
   });
   assert(
     userQuizAttempt !== null && userQuizAttempt.userId === AUTH_USER_ID && userQuizAttempt.anonymousId === null,
-    'TEST 3: Authenticated QuizAttempt has userId = user ID and anonymousId = null'
+    'TEST 3: Authenticated QuizAttempt has userId = user ID and anonymousId = null',
+    `status: ${resAuthQuizStatus}, body: ${JSON.stringify(resAuthQuizBody)}, AUTH_USER_ID: ${AUTH_USER_ID}`
   );
 
   // TEST 4: Guest quiz attempt numbering works

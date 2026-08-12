@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { SandboxStatus } from '@prisma/client';
 import {
   ISandboxProvider,
@@ -22,31 +22,10 @@ export class DockerSandboxProvider implements ISandboxProvider {
     resourceLimits: SandboxResourceLimits;
     networkState: Record<string, any>;
   }> {
-    const defaultLimits: SandboxResourceLimits = {
-      ramMb: limits?.ramMb || 512,
-      cpuCores: limits?.cpuCores || 0.5,
-      timeoutSec: limits?.timeoutSec || 10,
-      maxProcesses: limits?.maxProcesses || 50,
-    };
-
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
-
-    this.logger.log(
-      `[Docker Provider Stub] Initialized Isolated Docker Container Policy for user ${userId}: ` +
-        `--memory=${defaultLimits.ramMb}m --cpus=${defaultLimits.cpuCores} --pids-limit=${defaultLimits.maxProcesses} --read-only --security-opt no-new-privileges`
+    this.logger.warn(`Rejected DOCKER sandbox session creation request for user ${userId}`);
+    throw new BadRequestException(
+      'Docker sandbox provider is not available in this environment. Please use providerType SIMULATED.'
     );
-
-    return {
-      providerSessionId: `docker-container-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      status: SandboxStatus.RUNNING,
-      expiresAt,
-      resourceLimits: defaultLimits,
-      networkState: {
-        containerId: `netvision-lab-${Date.now()}`,
-        networkMode: 'isolated-bridge-netvision',
-        ip: '172.20.0.5',
-      },
-    };
   }
 
   async executeCommand(
@@ -54,29 +33,18 @@ export class DockerSandboxProvider implements ISandboxProvider {
     command: string,
     limits?: SandboxResourceLimits
   ): Promise<SandboxExecutionResult> {
-    const startTime = Date.now();
-    const cleanCmd = (command || '').trim();
-
-    this.logger.warn(
-      `[Docker Provider Stub] Security Check: Command '${cleanCmd}' routed via isolated container RPC interface for session ${sessionId}.`
+    this.logger.warn(`Rejected DOCKER sandbox command execution for session ${sessionId}`);
+    throw new BadRequestException(
+      'Docker sandbox provider is not available in this environment. Container execution is disabled.'
     );
-
-    return {
-      command: cleanCmd,
-      output: `[Docker Container Sandbox Stub] Executed command '${cleanCmd}' inside container session ${sessionId}.\nStatus: Isolated Container Execution Successful.`,
-      exitCode: 0,
-      durationMs: Date.now() - startTime,
-      isSimulated: false,
-      timestamp: new Date().toISOString(),
-    };
   }
 
   async terminateSession(sessionId: string): Promise<boolean> {
-    this.logger.log(`[Docker Provider Stub] Stopped container session ${sessionId}`);
+    this.logger.log(`[Docker Provider Safety] Terminated Docker stub session ${sessionId}`);
     return true;
   }
 
   async getStatus(sessionId: string): Promise<SandboxStatus> {
-    return SandboxStatus.RUNNING;
+    return SandboxStatus.STOPPED;
   }
 }

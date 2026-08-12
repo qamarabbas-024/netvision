@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:prod": "prisma migrate deploy",
     "prisma:seed": "prisma db seed",
     "test:email": "ts-node scripts/test-email.ts"
   },

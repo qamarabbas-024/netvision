@@ -9,6 +9,7 @@ import { TopicsModule } from './topics/topics.module';
 import { AdminModule } from './admin/admin.module';
 import { SandboxModule } from './sandbox/sandbox.module';
 import { AchievementsModule } from './achievements/achievements.module';
+import { CertificationsModule } from './certifications/certifications.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AchievementsModule } from './achievements/achievements.module';
     AdminModule,
     SandboxModule,
     AchievementsModule,
+    CertificationsModule,
   ],
   controllers: [AppController],
   providers: [

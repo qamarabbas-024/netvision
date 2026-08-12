@@ -31,6 +31,11 @@ export class SandboxService {
 
   private getProvider(type?: string): ISandboxProvider {
     const key = (type || 'SIMULATED').toUpperCase();
+    if (key === 'DOCKER') {
+      throw new BadRequestException(
+        'Docker sandbox provider is disabled in production and unavailable in this deployment. Please use providerType SIMULATED.'
+      );
+    }
     return this.providers[key] || this.simulatedProvider;
   }
 

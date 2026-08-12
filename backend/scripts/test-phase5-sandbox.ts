@@ -45,26 +45,20 @@ async function setupTestData() {
     fullName: 'Phase 5 Tester',
   });
 
-  const devOtp = regRes.body?.devOtpCode;
-  if (devOtp) {
-    // Step 2: Verify OTP
-    const verifyRes = await makeApiRequest('POST', '/auth/verify-otp', {}, {
-      email: testEmail,
-      otp: devOtp,
-    });
-    if (verifyRes.status === 200) {
-      AUTH_TOKEN = verifyRes.body.accessToken || verifyRes.body.token;
-      AUTH_USER_ID = verifyRes.body.user?.id;
-    }
-  }
+  await prisma.user.update({
+    where: { email: testEmail },
+    data: { isVerified: true },
+  });
 
-  if (!AUTH_TOKEN) {
-    const loginRes = await makeApiRequest('POST', '/auth/login', {}, {
-      email: testEmail,
-      password: testPass,
-    });
-    AUTH_TOKEN = loginRes.body.accessToken || loginRes.body.token;
-    AUTH_USER_ID = loginRes.body.user?.id;
+  const loginRes = await makeApiRequest('POST', '/auth/login', {}, {
+    email: testEmail,
+    password: testPass,
+  });
+  AUTH_TOKEN = loginRes.body.accessToken || loginRes.body.data?.accessToken || loginRes.body.token;
+
+  const createdUser = await prisma.user.findUnique({ where: { email: testEmail } });
+  if (createdUser) {
+    AUTH_USER_ID = createdUser.id;
   }
 
   // Cleanup old test sessions

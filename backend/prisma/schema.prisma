@@ -42,15 +42,16 @@ model User {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
-  progress      UserProgress[]
-  savedLessons  SavedLesson[]
-  certificates  Certificate[]
-  achievements  UserAchievement[]
-  simulations   SimulationState[]
-  quizAttempts  QuizAttempt[]
-  oauthAccounts OAuthAccount[]
-  labAttempts   LabAttempt[]
+  progress        UserProgress[]
+  savedLessons    SavedLesson[]
+  certificates    Certificate[]
+  achievements    UserAchievement[]
+  simulations     SimulationState[]
+  quizAttempts    QuizAttempt[]
+  oauthAccounts   OAuthAccount[]
+  labAttempts     LabAttempt[]
   sandboxSessions SandboxSession[]
+  examAttempts    ExamAttempt[]
 
   @@map("users")
 }
@@ -452,18 +453,88 @@ model UserProgress {
 }
 
 model Certificate {
-  id         String   @id @default(uuid())
-  userId     String
-  courseId   String
-  code       String   @unique @default(uuid())
-  issuedAt   DateTime @default(now())
+  id                 String   @id @default(uuid())
+  userId             String
+  courseId           String?
+  code               String   @unique @default(uuid())
+  issuedAt           DateTime @default(now())
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  credentialId       String?  @unique
+  certificationCode String?
+  certificationTitle String?
+  recipientName      String?
+  status             String   @default("ACTIVE")
+  verificationCode   String?  @unique
+  metadataJson       Json?
+
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course             Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([courseId])
+  @@index([certificationCode])
   @@map("certificates")
+}
+
+model CertificationDefinition {
+  id                  String        @id @default(uuid())
+  code                String        @unique
+  title               String
+  description         String
+  level               CourseLevel   @default(BEGINNER)
+  isActive            Boolean       @default(true)
+  requirementsJson    Json?
+  policyJson          Json?
+  theoryConfigJson    Json?
+  practicalConfigJson Json?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  attempts            ExamAttempt[]
+
+  @@map("certification_definitions")
+}
+
+enum ExamType {
+  THEORY
+  PRACTICAL
+}
+
+enum ExamAttemptStatus {
+  READY
+  IN_PROGRESS
+  SUBMITTED
+  PASSED
+  FAILED
+  EXPIRED
+  CANCELLED
+}
+
+model ExamAttempt {
+  id                 String                 @id @default(uuid())
+  userId             String
+  certificationCode String
+  type               ExamType
+  status             ExamAttemptStatus      @default(READY)
+  startedAt          DateTime               @default(now())
+  expiresAt          DateTime
+  submittedAt        DateTime?
+  attemptNumber      Int                    @default(1)
+  score              Float?
+  passed             Boolean?
+  configSnapshotJson Json?
+  resultMetadataJson Json?
+  auditMetadataJson  Json?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  user               User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  certification      CertificationDefinition @relation(fields: [certificationCode], references: [code], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([certificationCode])
+  @@index([status])
+  @@map("exam_attempts")
 }
 
 enum AchievementCategory {
@@ -580,5 +651,3 @@ model OAuthAccount {
   @@index([userId])
   @@map("oauth_accounts")
 }
-
-

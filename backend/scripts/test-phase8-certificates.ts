@@ -60,6 +60,7 @@ async function setupTestData() {
 
   // Find a course with lessons
   const course = await prisma.course.findFirst({
+    where: { modules: { some: { lessons: { some: {} } } } },
     include: { modules: { include: { lessons: true } } },
   });
 
@@ -174,6 +175,20 @@ async function runPhase8TestSuite() {
       },
     });
   }
+  const testLabs = await prisma.lessonLab.findMany({
+    where: { lessonId: { in: TEST_COURSE_LESSON_IDS } },
+  });
+  for (const lab of testLabs) {
+    await prisma.labAttempt.create({
+      data: {
+        userId: AUTH_USER_ID,
+        labId: lab.id,
+        passed: true,
+        score: 100,
+        status: 'COMPLETED',
+      },
+    });
+  }
   for (const lessonId of TEST_COURSE_LESSON_IDS) {
     await prisma.userProgress.create({
       data: {
@@ -196,7 +211,8 @@ async function runPhase8TestSuite() {
   const issuedCertCode = res5.body?.code;
   assert(
     res5.status === 200 && !!issuedCertId && !!issuedCertCode,
-    'TEST 5: Authenticated user with valid course completion receives certificate'
+    'TEST 5: Authenticated user with valid course completion receives certificate',
+    `Status: ${res5.status}, Body: ${JSON.stringify(res5.body)}`
   );
 
   // TEST 6: Certificate belongs to authenticated user's ID
