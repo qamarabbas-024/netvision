@@ -1,6 +1,7 @@
 import { PrismaClient, CourseLevel, LessonType, Role, AchievementCategory } from '@prisma/client';
 import * as argon2 from 'argon2';
-import { TARGET_16_COURSES, BENCHMARK_LESSONS_METADATA } from '../src/topics/curriculum-migration';
+import { TARGET_16_COURSES } from '../src/topics/curriculum-migration';
+import { BENCHMARK_LESSONS_FULL } from '../src/topics/benchmark-lessons-content';
 
 const prisma = new PrismaClient();
 
@@ -115,68 +116,89 @@ async function main() {
     console.log(`  ✓ Course [${cDef.code}] "${cDef.title}" (${cDef.level}) -> Module [${mod.title}]`);
   }
 
-  // 3. Upsert Benchmark Structural Lessons (NET-101, NET-202, NET-404)
-  console.log('📌 Upserting Benchmark Lesson Structural Metadata Placeholders...');
-  for (const bMeta of BENCHMARK_LESSONS_METADATA) {
-    const targetCourseId = courseMap.get(bMeta.courseCode);
+  // 3. Upsert Benchmark Deep Lessons (NET-101, NET-202, NET-404)
+  console.log('📌 Upserting Benchmark Lessons with Full 18-Step Architecture, Questions & Labs...');
+  for (const bDef of BENCHMARK_LESSONS_FULL) {
+    const targetCourseId = courseMap.get(bDef.courseCode);
     if (!targetCourseId) continue;
     const targetModId = targetModuleMap.get(targetCourseId)!;
 
     const bLesson = await prisma.lesson.upsert({
-      where: { slug: bMeta.lessonSlug },
+      where: { slug: bDef.slug },
       update: {
         moduleId: targetModId,
-        title: bMeta.lessonTitle,
-        type: bMeta.type,
-        durationMinutes: bMeta.durationMinutes,
-        order: bMeta.order,
-        visualizationType: bMeta.visualizationType,
-        introduction: `Structural benchmark placeholder for ${bMeta.lessonTitle}.`,
-        contentJson: bMeta.stepMetadataJson as any,
+        title: bDef.title,
+        type: bDef.type,
+        durationMinutes: bDef.durationMinutes,
+        order: bDef.order,
+        visualizationType: bDef.visualizationType,
+        introduction: bDef.introduction,
+        contentJson: bDef.stepMetadata as any,
       },
       create: {
         moduleId: targetModId,
-        title: bMeta.lessonTitle,
-        slug: bMeta.lessonSlug,
-        type: bMeta.type,
-        durationMinutes: bMeta.durationMinutes,
-        order: bMeta.order,
-        visualizationType: bMeta.visualizationType,
-        introduction: `Structural benchmark placeholder for ${bMeta.lessonTitle}.`,
-        contentJson: bMeta.stepMetadataJson as any,
+        title: bDef.title,
+        slug: bDef.slug,
+        type: bDef.type,
+        durationMinutes: bDef.durationMinutes,
+        order: bDef.order,
+        visualizationType: bDef.visualizationType,
+        introduction: bDef.introduction,
+        contentJson: bDef.stepMetadata as any,
       },
     });
 
     // Upsert Benchmark Quiz
     const quiz = await prisma.quiz.upsert({
-      where: { id: `quiz-${bMeta.lessonSlug}` },
-      update: { lessonId: bLesson.id, title: `${bMeta.lessonTitle} Quiz Check` },
-      create: { id: `quiz-${bMeta.lessonSlug}`, lessonId: bLesson.id, title: `${bMeta.lessonTitle} Quiz Check` },
+      where: { id: `quiz-${bDef.slug}` },
+      update: { lessonId: bLesson.id, title: `${bDef.title} Quiz Assessment` },
+      create: { id: `quiz-${bDef.slug}`, lessonId: bLesson.id, title: `${bDef.title} Quiz Assessment` },
     });
 
-    const bQ = createQ(
-      `[BENCHMARK] What is the primary focus of ${bMeta.lessonTitle}?`,
-      ['Core technical protocol mechanics', 'Generic hardware branding', 'Physical desk assembly', 'Unrelated software code'],
-      0,
-      'This benchmark lesson covers core technical networking mechanics.',
-      { 1: 'Hardware branding is not protocol mechanics.', 2: 'Desk assembly is furniture.', 3: 'Software code is general programming.' }
-    );
+    // Upsert Benchmark Quiz Questions
+    for (const qDef of bDef.questions) {
+      const existingQ = await prisma.quizQuestion.findFirst({
+        where: { quizId: quiz.id, questionText: qDef.text },
+      });
 
-    const existingQ = await prisma.quizQuestion.findFirst({ where: { quizId: quiz.id } });
-    if (!existingQ) {
-      await prisma.quizQuestion.create({
+      if (!existingQ) {
+        await prisma.quizQuestion.create({
+          data: {
+            quizId: quiz.id,
+            questionText: qDef.text,
+            optionsJson: qDef.options,
+            correctOption: qDef.correctOption,
+            explanation: qDef.explanation,
+            explanationsJson: qDef.explanationsJson,
+            difficulty: qDef.difficulty,
+            cognitiveLevel: qDef.cognitiveLevel,
+            questionType: qDef.questionType,
+            concept: qDef.concept,
+          },
+        });
+      }
+    }
+
+    // Upsert Benchmark Lab
+    const existingLab = await prisma.lessonLab.findFirst({
+      where: { lessonId: bLesson.id },
+    });
+
+    if (!existingLab) {
+      await prisma.lessonLab.create({
         data: {
-          quizId: quiz.id,
-          questionText: bQ.questionText,
-          optionsJson: bQ.optionsJson,
-          correctOption: bQ.correctOption,
-          explanation: bQ.explanation,
-          explanationsJson: bQ.explanationsJson,
+          lessonId: bLesson.id,
+          title: bDef.lab.title,
+          instructions: bDef.lab.instructions,
+          difficulty: bDef.lab.difficulty,
+          estimatedMinutes: bDef.lab.estimatedMinutes,
+          initialTopologyJson: bDef.lab.initialTopologyJson,
+          objectivesJson: bDef.lab.tasks,
         },
       });
     }
 
-    console.log(`  ✓ Benchmark Lesson [${bMeta.courseCode}] "${bMeta.lessonTitle}"`);
+    console.log(`  ✓ Benchmark Deep Lesson [${bDef.courseCode}] "${bDef.title}" (${bDef.questions.length} questions, 1 lab)`);
   }
 
   // 4. Seed Legacy 22 Courses & Map 35 Lessons to Target Modules

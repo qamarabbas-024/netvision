@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Progress } from '@/components/ui/Progress';
-import { RouterIcon, SwitchIcon, DNSIcon, PacketIcon } from '@/components/ui/Icons';
-import { getUserProgressApi } from '@/lib/api';
+import { RouterIcon, DNSIcon } from '@/components/ui/Icons';
+import { getUserProgressApi, getTopicsApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import {
   Flame,
@@ -36,9 +36,12 @@ export default function DashboardPage() {
     simulationsRun: 0,
     quizAverageScore: 0,
     certificatesEarned: 0,
+    currentCourse: null,
     badges: { earned: 0, total: 5, items: [] },
     recentLessons: [],
   });
+
+  const [activeCourseDetail, setActiveCourseDetail] = useState<any | null>(null);
 
   useEffect(() => {
     getUserProgressApi().then((data) => {
@@ -46,7 +49,31 @@ export default function DashboardPage() {
         setUserProgress(data);
       }
     });
+
+    // Also fetch top course to populate active course if user has none
+    getTopicsApi().then((topics) => {
+      if (topics && topics.length > 0) {
+        const active = topics.find((t: any) => (t.progressPercent || 0) > 0 && (t.progressPercent || 0) < 100) || topics[0];
+        setActiveCourseDetail(active);
+      }
+    });
   }, []);
+
+  const currentCourse = userProgress.currentCourse || activeCourseDetail || {
+    title: 'Computer & Digital Information Foundations',
+    slug: 'net-101-digital-foundations',
+    completedLessons: 0,
+    totalLessons: 5,
+    progressPercent: 0,
+    nextLessonSlug: 'what-is-binary',
+  };
+
+  const currentCourseTitle = currentCourse.title || 'Networking Fundamentals';
+  const currentCourseSlug = currentCourse.slug || 'net-101-digital-foundations';
+  const courseCompletedLessons = currentCourse.completedLessons ?? 0;
+  const courseTotalLessons = currentCourse.totalLessons || currentCourse.lessonsCount || 5;
+  const courseProgressPercent = currentCourse.progressPercent ?? 0;
+  const nextLessonSlug = currentCourse.nextLessonSlug || 'what-is-binary';
 
   const badgeItems = userProgress?.badges?.items?.length
     ? userProgress.badges.items
@@ -59,18 +86,20 @@ export default function DashboardPage() {
 
   const recommended = [
     {
-      title: 'DNS Hierarchy & Recursive Queries',
-      category: 'Core Protocols',
+      title: 'Layer 2 Ethernet Framing & MAC Addressing',
+      category: 'Beginner',
       duration: '15 min',
-      level: 'INTERMEDIATE',
-      icon: <DNSIcon size={18} />,
+      level: 'BEGINNER',
+      icon: <RouterIcon size={18} />,
+      slug: 'net-201-layer2-ethernet',
     },
     {
-      title: 'Stateful Firewall Inspection',
-      category: 'Cyber Security',
+      title: 'IPv4 Subnetting & CIDR Calculation',
+      category: 'Beginner',
       duration: '18 min',
-      level: 'ADVANCED',
-      icon: <ShieldCheck className="w-5 h-5 text-rose-400" />,
+      level: 'BEGINNER',
+      icon: <DNSIcon size={18} />,
+      slug: 'net-202-ipv4-subnetting',
     },
   ];
 
@@ -98,7 +127,7 @@ export default function DashboardPage() {
                     <div>
                       <h4 className="text-sm font-bold text-white">Learning as Guest</h4>
                       <p className="text-xs text-zinc-400">
-                        Your learning progress is saved on this device. Log in or create an account anytime to sync progress across devices and claim certificates.
+                        Your progress is saved locally on this device. Create an account anytime to sync progress across devices and earn certificates.
                       </p>
                     </div>
                   </div>
@@ -120,13 +149,13 @@ export default function DashboardPage() {
                 <div className="relative z-10">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-[#00f0ff] text-xs font-mono font-bold uppercase mb-3">
                     <Zap className="w-3.5 h-3.5" />
-                    {isAuthenticated ? 'Level 4 Networking Learner' : 'Guest Learner'}
+                    {isAuthenticated ? 'Technical Networking Learner' : 'Guest Learner'}
                   </div>
                   <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
                     Welcome{isAuthenticated && (user?.fullName || user?.username) ? `, ${user.fullName || user.username}` : ''}! ⚡
                   </h1>
                   <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-xl">
-                    You're on a <strong className="text-amber-400">{userProgress?.studyStreak ?? 0}-Day Study Streak</strong>! Keep learning visually to unlock course completion certificates.
+                    You're on a <strong className="text-amber-400">{userProgress?.studyStreak ?? 0}-Day Study Streak</strong>! Master protocols through theory, visualizers, and practical labs.
                   </p>
                 </div>
 
@@ -134,7 +163,7 @@ export default function DashboardPage() {
                   {/* Streak Box */}
                   <div className="p-3.5 sm:p-4 rounded-2xl bg-[#121217] border border-[#272732] flex items-center gap-3 flex-1 sm:flex-initial">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                      <Flame className="w-5 h-5 sm:w-6 sm:h-6 fill-amber-400 animate-bounce" />
+                      <Flame className="w-5 h-5 sm:w-6 sm:h-6 fill-amber-400 animate-pulse" />
                     </div>
                     <div>
                       <span className="text-[10px] sm:text-xs text-zinc-500 block font-mono">STREAK</span>
@@ -155,34 +184,38 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Active Course & Stats Row */}
+              {/* Active Course & Performance Stats Row */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Active "Continue Learning" Card */}
+                {/* Active "Continue Learning" Card (Course-Scoped!) */}
                 <Card className="lg:col-span-8 p-6 glass-panel-glow border-[#00f0ff]/30 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-4">
                       <Badge variant="cyan">CURRENT COURSE</Badge>
-                      <span className="text-xs font-mono text-zinc-400">{userProgress?.completedLessons ?? 0} of {userProgress?.totalLessons ?? 35} Lessons</span>
+                      <span className="text-xs font-mono text-zinc-400">
+                        {courseCompletedLessons} of {courseTotalLessons} Lessons
+                      </span>
                     </div>
 
                     <h2 className="text-2xl font-bold text-white mb-2">
-                      TCP/IP Protocol Suite & Handshakes
+                      {currentCourseTitle}
                     </h2>
                     <p className="text-xs text-zinc-400 max-w-lg mb-6 leading-relaxed">
-                      Next up: Interactive 3-way handshake simulation. Dispatch SYN, SYN-ACK, and ACK packets across client and server nodes.
+                      Continue your active course curriculum. Theory explanations, protocol visualizers, and CLI diagnostic labs.
                     </p>
 
-                    <Progress value={userProgress?.overallProgressPercent ?? 0} label="Course Progress" className="mb-6" />
+                    {/* Course-Scoped Progress Bar */}
+                    <Progress value={courseProgressPercent} label="Course Completion" className="mb-6" />
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-[#272732]">
-                    <div className="flex items-center gap-2 text-xs text-zinc-400">
+                    <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono">
                       <Clock className="w-4 h-4 text-[#00f0ff]" />
-                      <span>{userProgress?.overallProgressPercent ?? 0}% Complete</span>
+                      <span>{courseProgressPercent}% Course Complete</span>
                     </div>
-                    <Link href="/simulations">
+                    {/* Deep-links to next incomplete lesson */}
+                    <Link href={`/courses/${currentCourseSlug}/lessons/${nextLessonSlug}`}>
                       <Button variant="cyan" leftIcon={<PlayCircle className="w-4 h-4" />}>
-                        Resume Learning
+                        Continue Learning →
                       </Button>
                     </Link>
                   </div>
@@ -196,7 +229,7 @@ export default function DashboardPage() {
                       <span className="text-2xl font-bold text-white font-mono block">
                         {userProgress?.completedLessons ?? 0}
                       </span>
-                      <span className="text-xs text-zinc-400">Completed Lessons</span>
+                      <span className="text-xs text-zinc-400">Total Lessons Completed</span>
                     </div>
                   </div>
 
@@ -237,7 +270,7 @@ export default function DashboardPage() {
                 {/* Left: Recent Lessons */}
                 <div className="lg:col-span-7 flex flex-col gap-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-white">Recent Lessons & Labs</h3>
+                    <h3 className="text-lg font-bold text-white">Recent Lessons & Activities</h3>
                     <Link href="/courses" className="text-xs font-semibold text-[#00f0ff] hover:underline">
                       View Syllabus
                     </Link>
@@ -245,18 +278,20 @@ export default function DashboardPage() {
 
                   <div className="flex flex-col gap-3">
                     {(userProgress?.recentLessons?.length ? userProgress.recentLessons : [
-                      { id: '1', title: 'Understanding MAC vs. IP Addresses', courseTitle: 'Networking Fundamentals', durationMinutes: 12, status: 'COMPLETED' },
-                      { id: '2', title: 'TCP 3-Way Handshake Simulation', courseTitle: 'TCP/IP Protocol Suite', durationMinutes: 15, status: 'IN_PROGRESS' },
+                      { id: '1', title: 'Binary Numbers & Bitwise Fundamentals', courseTitle: 'Digital Information Foundations', durationMinutes: 15, status: 'COMPLETED' },
+                      { id: '2', title: 'The 7-Layer OSI & 4-Layer TCP/IP Reference Models', courseTitle: 'The OSI & TCP/IP Reference Models', durationMinutes: 20, status: 'IN_PROGRESS' },
                     ]).map((item: any) => (
                       <div
                         key={item.id}
                         className="glass-panel p-4 rounded-2xl border border-[#272732] hover:border-[#00f0ff]/30 transition-colors flex items-center justify-between gap-4"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           <RouterIcon size={16} />
-                          <div>
-                            <h4 className="text-sm font-bold text-white">{item.title}</h4>
-                            <span className="text-xs text-zinc-500 font-mono">{item.courseTitle || 'Networking'} • {item.durationMinutes || 15} min</span>
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-bold text-white truncate">{item.title}</h4>
+                            <span className="text-xs text-zinc-500 font-mono">
+                              {item.courseTitle || 'Networking'} • {item.durationMinutes || 15} min
+                            </span>
                           </div>
                         </div>
 
@@ -291,7 +326,17 @@ export default function DashboardPage() {
                           ach.unlocked ? 'border-[#00f0ff]/30 bg-[#00f0ff]/5' : 'border-[#272732] opacity-50'
                         }`}
                       >
-                        <span className="text-3xl">{ach.badgeIcon === 'Zap' ? '⚡' : ach.badgeIcon === 'CheckSquare' ? '☑️' : ach.badgeIcon === 'Terminal' ? '💻' : ach.badgeIcon === 'CheckCircle2' ? '🎓' : '🏆'}</span>
+                        <span className="text-3xl">
+                          {ach.badgeIcon === 'Zap'
+                            ? '⚡'
+                            : ach.badgeIcon === 'CheckSquare'
+                            ? '☑️'
+                            : ach.badgeIcon === 'Terminal'
+                            ? '💻'
+                            : ach.badgeIcon === 'CheckCircle2'
+                            ? '🎓'
+                            : '🏆'}
+                        </span>
                         <h4 className="text-xs font-bold text-white">{ach.title || ach.name}</h4>
                         <p className="text-[10px] text-zinc-400">{ach.description || ach.desc}</p>
                       </div>
@@ -302,27 +347,26 @@ export default function DashboardPage() {
 
               {/* Recommended Next Lessons */}
               <div className="flex flex-col gap-4 pt-4 border-t border-[#272732]/60">
-                <h3 className="text-lg font-bold text-white">Recommended Next For You</h3>
+                <h3 className="text-lg font-bold text-white">Recommended Courses</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {recommended.map((rec, idx) => (
-                    <div
-                      key={idx}
-                      className="glass-panel p-6 rounded-2xl border border-[#272732] hover:border-[#00f0ff]/40 transition-all flex items-center justify-between group cursor-pointer"
-                    >
-                      <div className="flex items-center gap-4">
-                        {rec.icon}
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="cyan">{rec.category}</Badge>
-                            <span className="text-[11px] font-mono text-zinc-500">{rec.duration}</span>
+                    <Link key={idx} href={`/courses/${rec.slug}`}>
+                      <div className="glass-panel p-6 rounded-2xl border border-[#272732] hover:border-[#00f0ff]/40 transition-all flex items-center justify-between group cursor-pointer">
+                        <div className="flex items-center gap-4">
+                          {rec.icon}
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="cyan">{rec.category}</Badge>
+                              <span className="text-[11px] font-mono text-zinc-500">{rec.duration}</span>
+                            </div>
+                            <h4 className="text-sm font-bold text-white group-hover:text-[#00f0ff] transition-colors">
+                              {rec.title}
+                            </h4>
                           </div>
-                          <h4 className="text-sm font-bold text-white group-hover:text-[#00f0ff] transition-colors">
-                            {rec.title}
-                          </h4>
                         </div>
+                        <ArrowRight className="w-5 h-5 text-zinc-500 group-hover:text-[#00f0ff] group-hover:translate-x-1 transition-all" />
                       </div>
-                      <ArrowRight className="w-5 h-5 text-zinc-500 group-hover:text-[#00f0ff] group-hover:translate-x-1 transition-all" />
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>

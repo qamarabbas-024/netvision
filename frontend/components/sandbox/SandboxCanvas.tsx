@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   Play,
@@ -19,6 +19,11 @@ import {
   Shield,
   Server,
   Cloud,
+  Terminal,
+  Download,
+  Upload,
+  Wrench,
+  CheckCircle2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -26,36 +31,92 @@ import { NetworkNode, NetworkLink, NetworkPacket, NodeType } from '@/types';
 import { DeviceConfigModal } from '../simulation/DeviceConfigModal';
 import { PacketInspectorModal } from '../simulation/PacketInspectorModal';
 import { DevicePalette } from './DevicePalette';
+import { PortSelectionModal } from './PortSelectionModal';
+import { DeviceCliModal } from './DeviceCliModal';
+import {
+  TroubleshootingScenariosModal,
+  TroubleshootingScenario,
+} from './TroubleshootingScenariosModal';
 
 export const SandboxCanvas: React.FC = () => {
   const [nodes, setNodes] = useState<NetworkNode[]>([
-    { id: 'sb-1', name: 'Client PC 1', type: 'pc', ipAddress: '192.168.1.10', macAddress: '00:1A:2B:11:11:11', status: 'online', position: { x: 120, y: 180 } },
-    { id: 'sb-2', name: 'Client PC 2', type: 'pc', ipAddress: '192.168.1.11', macAddress: '00:1A:2B:22:22:22', status: 'online', position: { x: 120, y: 320 } },
-    { id: 'sb-3', name: 'Core Switch', type: 'switch', ipAddress: '192.168.1.1', macAddress: '00:1A:2B:33:33:33', status: 'online', position: { x: 380, y: 250 } },
-    { id: 'sb-4', name: 'Gateway Router', type: 'router', ipAddress: '10.0.0.1', macAddress: '00:1A:2B:44:44:44', status: 'online', position: { x: 620, y: 250 } },
-    { id: 'sb-5', name: 'Web Server', type: 'server', ipAddress: '172.16.0.5', macAddress: '00:1A:2B:55:55:55', status: 'online', position: { x: 860, y: 250 } },
+    {
+      id: 'sb-1',
+      name: 'Client PC 1',
+      type: 'pc',
+      ipAddress: '192.168.1.10',
+      macAddress: '00:1A:2B:11:11:11',
+      subnetMask: '255.255.255.0',
+      defaultGateway: '192.168.1.1',
+      status: 'online',
+      position: { x: 120, y: 180 },
+    },
+    {
+      id: 'sb-2',
+      name: 'Client PC 2',
+      type: 'pc',
+      ipAddress: '192.168.1.11',
+      macAddress: '00:1A:2B:22:22:22',
+      subnetMask: '255.255.255.0',
+      defaultGateway: '192.168.1.1',
+      status: 'online',
+      position: { x: 120, y: 320 },
+    },
+    {
+      id: 'sb-3',
+      name: 'Core Switch',
+      type: 'switch',
+      ipAddress: '192.168.1.1',
+      macAddress: '00:1A:2B:33:33:33',
+      status: 'online',
+      position: { x: 420, y: 250 },
+    },
+    {
+      id: 'sb-4',
+      name: 'Gateway Router',
+      type: 'router',
+      ipAddress: '10.0.0.1',
+      macAddress: '00:1A:2B:44:44:44',
+      status: 'online',
+      position: { x: 720, y: 250 },
+    },
+    {
+      id: 'sb-5',
+      name: 'Web Server',
+      type: 'server',
+      ipAddress: '172.16.0.5',
+      macAddress: '00:1A:2B:55:55:55',
+      status: 'online',
+      position: { x: 980, y: 250 },
+    },
   ]);
 
   const [links, setLinks] = useState<NetworkLink[]>([
-    { id: 'sbl-1', sourceNodeId: 'sb-1', targetNodeId: 'sb-3', bandwidthMbps: 1000, latencyMs: 1, status: 'connected' },
-    { id: 'sbl-2', sourceNodeId: 'sb-2', targetNodeId: 'sb-3', bandwidthMbps: 1000, latencyMs: 1, status: 'connected' },
-    { id: 'sbl-3', sourceNodeId: 'sb-3', targetNodeId: 'sb-4', bandwidthMbps: 1000, latencyMs: 2, status: 'connected' },
-    { id: 'sbl-4', sourceNodeId: 'sb-4', targetNodeId: 'sb-5', bandwidthMbps: 1000, latencyMs: 5, status: 'connected' },
+    { id: 'sbl-1', sourceNodeId: 'sb-1', targetNodeId: 'sb-3', sourcePort: 'eth0', targetPort: 'eth0/1', bandwidthMbps: 1000, latencyMs: 1, status: 'connected' },
+    { id: 'sbl-2', sourceNodeId: 'sb-2', targetNodeId: 'sb-3', sourcePort: 'eth0', targetPort: 'eth0/2', bandwidthMbps: 1000, latencyMs: 1, status: 'connected' },
+    { id: 'sbl-3', sourceNodeId: 'sb-3', targetNodeId: 'sb-4', sourcePort: 'eth0/24', targetPort: 'ge0/0/0', bandwidthMbps: 1000, latencyMs: 2, status: 'connected' },
+    { id: 'sbl-4', sourceNodeId: 'sb-4', targetNodeId: 'sb-5', sourcePort: 'ge0/0/1', targetPort: 'eth0', bandwidthMbps: 1000, latencyMs: 5, status: 'connected' },
   ]);
 
   // Mode Selection: 'select' | 'cable'
   const [toolMode, setToolMode] = useState<'select' | 'cable'>('select');
-  const [cableSourceNodeId, setCableSourceNodeId] = useState<string | null>(null);
+  const [cableSourceNode, setCableSourceNode] = useState<NetworkNode | null>(null);
+  const [cableTargetNode, setCableTargetNode] = useState<NetworkNode | null>(null);
+  const [showPortModal, setShowPortModal] = useState<boolean>(false);
 
-  // Selected Items for Actions
+  // Selected Node & Modal States
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [configNode, setConfigNode] = useState<NetworkNode | null>(null);
+  const [cliNode, setCliNode] = useState<NetworkNode | null>(null);
+  const [showScenariosModal, setShowScenariosModal] = useState<boolean>(false);
+  const [activeScenario, setActiveScenario] = useState<TroubleshootingScenario | null>(null);
 
-  // Packet Runner State
+  // Packet Dispatcher State
   const [sourceNodeId, setSourceNodeId] = useState<string>('sb-1');
   const [targetNodeId, setTargetNodeId] = useState<string>('sb-5');
   const [activePackets, setActivePackets] = useState<NetworkPacket[]>([]);
   const [inspectedPacket, setInspectedPacket] = useState<NetworkPacket | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Add Device Node
   const handleAddDevice = (type: NodeType) => {
@@ -67,37 +128,48 @@ export const SandboxCanvas: React.FC = () => {
       type,
       ipAddress: `192.168.1.${10 + count}`,
       macAddress: `00:1A:2B:${count}${count}:${count}${count}:${count}${count}`,
+      subnetMask: '255.255.255.0',
+      defaultGateway: '192.168.1.1',
       status: 'online',
       position: { x: 250 + Math.random() * 200, y: 150 + Math.random() * 150 },
     };
     setNodes((prev) => [...prev, newNode]);
   };
 
-  // Node Click Behavior
+  // Node Click Logic
   const handleNodeClick = (node: NetworkNode) => {
     if (toolMode === 'cable') {
-      if (!cableSourceNodeId) {
-        setCableSourceNodeId(node.id);
-      } else if (cableSourceNodeId !== node.id) {
-        // Create Cable Link
-        const newLinkId = `sbl-${Math.random().toString(36).substring(2, 7)}`;
-        setLinks((prev) => [
-          ...prev,
-          {
-            id: newLinkId,
-            sourceNodeId: cableSourceNodeId,
-            targetNodeId: node.id,
-            bandwidthMbps: 1000,
-            latencyMs: 1,
-            status: 'connected',
-          },
-        ]);
-        setCableSourceNodeId(null);
-        setToolMode('select');
+      if (!cableSourceNode) {
+        setCableSourceNode(node);
+      } else if (cableSourceNode.id !== node.id) {
+        setCableTargetNode(node);
+        setShowPortModal(true);
       }
     } else {
       setSelectedNodeId(node.id);
     }
+  };
+
+  // Establish Physical Wiring Link from Port Modal
+  const handleConfirmLink = (sourcePort: string, targetPort: string, bandwidthMbps: number) => {
+    if (!cableSourceNode || !cableTargetNode) return;
+    const newLinkId = `sbl-${Math.random().toString(36).substring(2, 7)}`;
+    setLinks((prev) => [
+      ...prev,
+      {
+        id: newLinkId,
+        sourceNodeId: cableSourceNode.id,
+        targetNodeId: cableTargetNode.id,
+        sourcePort,
+        targetPort,
+        bandwidthMbps,
+        latencyMs: 1,
+        status: 'connected',
+      },
+    ]);
+    setCableSourceNode(null);
+    setCableTargetNode(null);
+    setToolMode('select');
   };
 
   // Delete Selected Node
@@ -108,38 +180,44 @@ export const SandboxCanvas: React.FC = () => {
     setSelectedNodeId(null);
   };
 
-  // Reset Canvas
-  const handleResetCanvas = () => {
-    setNodes([]);
-    setLinks([]);
-    setSelectedNodeId(null);
+  // Export Topology to JSON File
+  const handleExportTopology = () => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify({ nodes, links }, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `netvision-topology-${Date.now()}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
   };
 
-  // Save Topology
-  const handleSaveTopology = () => {
-    const topologyData = JSON.stringify({ nodes, links });
-    localStorage.setItem('netvision_sandbox_topology', topologyData);
-    alert('Topology saved successfully to local state!');
+  // Import Topology JSON
+  const handleImportTopology = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+        if (parsed.nodes && parsed.links) {
+          setNodes(parsed.nodes);
+          setLinks(parsed.links);
+        }
+      } catch (err) {
+        alert('Invalid topology JSON file.');
+      }
+    };
+    reader.readAsText(file);
   };
 
-  // Load Preset
-  const handleLoadPreset = () => {
-    const presetNodes: NetworkNode[] = [
-      { id: 'p-1', name: 'Office PC', type: 'pc', ipAddress: '192.168.1.10', macAddress: '00:1A:2B:11:11:11', status: 'online', position: { x: 150, y: 220 } },
-      { id: 'p-2', name: 'Switch L2', type: 'switch', ipAddress: '192.168.1.1', macAddress: '00:1A:2B:22:22:22', status: 'online', position: { x: 400, y: 220 } },
-      { id: 'p-3', name: 'Firewall', type: 'firewall', ipAddress: '192.168.1.254', macAddress: '00:1A:2B:33:33:33', status: 'online', position: { x: 650, y: 220 } },
-      { id: 'p-4', name: 'Cloud Server', type: 'server', ipAddress: '8.8.8.8', macAddress: '00:1A:2B:44:44:44', status: 'online', position: { x: 880, y: 220 } },
-    ];
-    const presetLinks: NetworkLink[] = [
-      { id: 'pl-1', sourceNodeId: 'p-1', targetNodeId: 'p-2', bandwidthMbps: 1000, latencyMs: 1, status: 'connected' },
-      { id: 'pl-2', sourceNodeId: 'p-2', targetNodeId: 'p-3', bandwidthMbps: 1000, latencyMs: 2, status: 'connected' },
-      { id: 'pl-3', sourceNodeId: 'p-3', targetNodeId: 'p-4', bandwidthMbps: 1000, latencyMs: 10, status: 'connected' },
-    ];
-    setNodes(presetNodes);
-    setLinks(presetLinks);
+  // Load Troubleshooting Scenario
+  const handleLoadScenario = (scen: TroubleshootingScenario) => {
+    setActiveScenario(scen);
+    setNodes(scen.presetTopology.nodes);
+    setLinks(scen.presetTopology.links);
   };
 
-  // Run Packet Stream
+  // Dispatch Packet Stream
   const handleDispatchPing = () => {
     const srcNode = nodes.find((n) => n.id === sourceNodeId);
     const tgtNode = nodes.find((n) => n.id === targetNodeId);
@@ -153,7 +231,7 @@ export const SandboxCanvas: React.FC = () => {
       sourceMac: srcNode.macAddress,
       targetMac: tgtNode.macAddress,
       protocol: 'ICMP',
-      payload: `ICMP Echo Request [Ping Payload Data]`,
+      payload: `ICMP Echo Request [Ping Payload]`,
       ttl: 64,
       status: 'in_flight',
       progressPercent: 0,
@@ -187,11 +265,29 @@ export const SandboxCanvas: React.FC = () => {
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-6">
-      {/* Device Palette Left Bar */}
+      {/* Device Palette Sidebar */}
       <DevicePalette onAddDevice={handleAddDevice} />
 
-      {/* Main Sandbox Area */}
+      {/* Main Sandbox Canvas Area */}
       <div className="flex-1 flex flex-col gap-4 min-w-0">
+        {/* Active Scenario Banner */}
+        {activeScenario && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Wrench className="w-5 h-5 text-amber-400 shrink-0" />
+              <div>
+                <span className="text-xs font-mono font-bold text-amber-400 block uppercase">
+                  ACTIVE TROUBLESHOOTING SCENARIO: {activeScenario.title}
+                </span>
+                <p className="text-xs text-zinc-300">{activeScenario.goal}</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setActiveScenario(null)}>
+              Exit Scenario
+            </Button>
+          </div>
+        )}
+
         {/* Toolbar Header */}
         <div className="glass-panel p-3.5 sm:p-4 rounded-2xl border border-[#272732] flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 sm:gap-4">
           {/* Mode Toggles */}
@@ -199,9 +295,8 @@ export const SandboxCanvas: React.FC = () => {
             <Button
               variant={toolMode === 'select' ? 'cyan' : 'ghost'}
               size="sm"
-              onClick={() => { setToolMode('select'); setCableSourceNodeId(null); }}
+              onClick={() => { setToolMode('select'); setCableSourceNode(null); }}
               leftIcon={<MousePointer className="w-4 h-4" />}
-              className="flex-1 sm:flex-initial justify-center"
             >
               Select / Move
             </Button>
@@ -211,9 +306,8 @@ export const SandboxCanvas: React.FC = () => {
               size="sm"
               onClick={() => setToolMode('cable')}
               leftIcon={<LinkIcon className="w-4 h-4" />}
-              className="flex-1 sm:flex-initial justify-center"
             >
-              {cableSourceNodeId ? 'Click Target Node' : 'Connect Cable'}
+              {cableSourceNode ? `Click Target (${cableSourceNode.name})` : 'Connect Cable'}
             </Button>
           </div>
 
@@ -225,25 +319,30 @@ export const SandboxCanvas: React.FC = () => {
               disabled={!selectedNodeId}
               onClick={handleDeleteSelected}
               leftIcon={<Trash2 className="w-4 h-4" />}
-              className="justify-center"
             >
-              Delete Node
+              Delete
             </Button>
 
-            <Button variant="ghost" size="sm" onClick={handleResetCanvas} leftIcon={<RotateCcw className="w-4 h-4" />} className="justify-center">
-              Clear
+            <Button variant="secondary" size="sm" onClick={handleExportTopology} leftIcon={<Download className="w-4 h-4" />}>
+              Export JSON
             </Button>
 
-            <Button variant="secondary" size="sm" onClick={handleSaveTopology} leftIcon={<Save className="w-4 h-4" />} className="justify-center">
-              Save
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              leftIcon={<Upload className="w-4 h-4" />}
+            >
+              Import JSON
             </Button>
+            <input type="file" ref={fileInputRef} onChange={handleImportTopology} accept=".json" className="hidden" />
 
-            <Button variant="secondary" size="sm" onClick={handleLoadPreset} leftIcon={<FolderOpen className="w-4 h-4" />} className="justify-center">
-              Preset
+            <Button variant="cyan" size="sm" onClick={() => setShowScenariosModal(true)} leftIcon={<Wrench className="w-4 h-4" />}>
+              Scenarios
             </Button>
           </div>
 
-          {/* Packet Dispatcher Tools */}
+          {/* Packet Stream Dispatcher */}
           <div className="flex flex-wrap items-center gap-2 pt-2 xl:pt-0 border-t xl:border-t-0 border-[#272732] w-full xl:w-auto">
             <select
               value={sourceNodeId}
@@ -265,117 +364,144 @@ export const SandboxCanvas: React.FC = () => {
               ))}
             </select>
 
-            <Button variant="cyan" size="sm" onClick={handleDispatchPing} leftIcon={<Activity className="w-4 h-4" />} className="shrink-0">
+            <Button variant="cyan" size="sm" onClick={handleDispatchPing} leftIcon={<Activity className="w-4 h-4" />}>
               Ping
             </Button>
           </div>
         </div>
 
-        {/* Sandbox Drag-and-Drop Canvas Container */}
-        <div className="relative w-full h-[480px] sm:h-[520px] bg-[#09090b] rounded-3xl border border-[#272732] overflow-x-auto overflow-y-hidden p-4 sm:p-8 touch-pan-x">
-          <div className="min-w-[920px] h-full relative">
-            {/* Cables Line Layer */}
+        {/* Sandbox Canvas Box */}
+        <div className="relative w-full h-[520px] sm:h-[560px] bg-[#09090b] rounded-3xl border border-[#272732] overflow-x-auto overflow-y-hidden p-4 sm:p-8 touch-pan-x bg-net-grid-pattern">
+          <div className="min-w-[1020px] h-full relative">
+            {/* Cable SVG Lines Layer */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none">
-            {links.map((link) => {
-              const srcNode = nodes.find((n) => n.id === link.sourceNodeId);
-              const tgtNode = nodes.find((n) => n.id === link.targetNodeId);
-              if (!srcNode || !tgtNode) return null;
+              {links.map((link) => {
+                const srcNode = nodes.find((n) => n.id === link.sourceNodeId);
+                const tgtNode = nodes.find((n) => n.id === link.targetNodeId);
+                if (!srcNode || !tgtNode) return null;
+
+                return (
+                  <g key={link.id}>
+                    <line
+                      x1={srcNode.position.x + 32}
+                      y1={srcNode.position.y + 32}
+                      x2={tgtNode.position.x + 32}
+                      y2={tgtNode.position.y + 32}
+                      stroke="#00f0ff"
+                      strokeWidth="2.5"
+                      strokeDasharray="6 4"
+                      className="animate-pulse"
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* Interactive Nodes */}
+            {nodes.map((node) => {
+              const isSelected = selectedNodeId === node.id;
+              const isCableSource = cableSourceNode?.id === node.id;
 
               return (
-                <line
-                  key={link.id}
-                  x1={srcNode.position.x + 30}
-                  y1={srcNode.position.y + 30}
-                  x2={tgtNode.position.x + 30}
-                  y2={tgtNode.position.y + 30}
-                  stroke="#00f0ff"
-                  strokeWidth="2"
-                  strokeDasharray="6 4"
-                  className="animate-pulse"
-                />
+                <motion.div
+                  key={node.id}
+                  drag
+                  dragMomentum={false}
+                  onDrag={(_, info) => {
+                    setNodes((prev) =>
+                      prev.map((n) =>
+                        n.id === node.id
+                          ? { ...n, position: { x: n.position.x + info.delta.x, y: n.position.y + info.delta.y } }
+                          : n
+                      )
+                    );
+                  }}
+                  style={{ left: node.position.x, top: node.position.y }}
+                  onClick={() => handleNodeClick(node)}
+                  className="absolute z-10 flex flex-col items-center gap-2 cursor-grab active:cursor-grabbing group"
+                >
+                  <div
+                    className={`w-16 h-16 rounded-2xl glass-panel border flex items-center justify-center transition-all shadow-lg relative ${
+                      isCableSource
+                        ? 'border-[#00f0ff] shadow-glow-cyan bg-[#00f0ff]/20 animate-pulse'
+                        : isSelected
+                        ? 'border-[#00f0ff] shadow-glow-cyan bg-white/10'
+                        : 'border-[#272732] hover:border-zinc-500'
+                    }`}
+                  >
+                    {getNodeIcon(node.type)}
+
+                    {/* Quick CLI Modal Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCliNode(node);
+                      }}
+                      className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 text-[#00f0ff] hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Open Terminal CLI"
+                    >
+                      <Terminal className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Settings Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setConfigNode(node);
+                      }}
+                      className="absolute -top-1 -left-1 w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Configure Device"
+                    >
+                      <Settings className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="text-center">
+                    <span className="text-xs font-bold text-white block group-hover:text-[#00f0ff] transition-colors">
+                      {node.name}
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-500">{node.ipAddress}</span>
+                  </div>
+                </motion.div>
               );
             })}
-          </svg>
 
-          {/* Render Interactive Devices */}
-          {nodes.map((node) => {
-            const isSelected = selectedNodeId === node.id;
-            const isCableSource = cableSourceNodeId === node.id;
+            {/* Packets */}
+            {activePackets.map((pkt) => {
+              const progress = pkt.progressPercent / 100;
+              const currentX = 150 + (900 - 150) * progress;
 
-            return (
-              <motion.div
-                key={node.id}
-                drag
-                dragMomentum={false}
-                onDrag={(_, info) => {
-                  setNodes((prev) =>
-                    prev.map((n) =>
-                      n.id === node.id
-                        ? { ...n, position: { x: n.position.x + info.delta.x, y: n.position.y + info.delta.y } }
-                        : n
-                    )
-                  );
-                }}
-                style={{ left: node.position.x, top: node.position.y }}
-                onClick={() => handleNodeClick(node)}
-                className={`absolute z-10 flex flex-col items-center gap-2 cursor-grab active:cursor-grabbing group`}
-              >
-                <div
-                  className={`w-16 h-16 rounded-2xl glass-panel border flex items-center justify-center transition-all shadow-lg relative ${
-                    isCableSource
-                      ? 'border-[#00f0ff] shadow-glow-cyan bg-[#00f0ff]/20 animate-pulse'
-                      : isSelected
-                      ? 'border-[#00f0ff] shadow-glow-cyan bg-white/10'
-                      : 'border-[#272732] hover:border-zinc-500'
-                  }`}
+              return (
+                <motion.div
+                  key={pkt.id}
+                  style={{ left: currentX, top: 250 }}
+                  onClick={() => setInspectedPacket(pkt)}
+                  className="absolute z-30 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
                 >
-                  {getNodeIcon(node.type)}
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setConfigNode(node);
-                    }}
-                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Settings className="w-3 h-3" />
-                  </button>
-                </div>
-
-                <div className="text-center">
-                  <span className="text-xs font-bold text-white block group-hover:text-[#00f0ff] transition-colors">
-                    {node.name}
-                  </span>
-                  <span className="text-[10px] font-mono text-zinc-500">{node.ipAddress}</span>
-                </div>
-              </motion.div>
-            );
-          })}
-
-          {/* Render Moving Packets */}
-          {activePackets.map((pkt) => {
-            const progress = pkt.progressPercent / 100;
-            const currentX = 150 + (850 - 150) * progress;
-
-            return (
-              <motion.div
-                key={pkt.id}
-                style={{ left: currentX, top: 250 }}
-                onClick={() => setInspectedPacket(pkt)}
-                className="absolute z-30 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-              >
-                <div className="px-3 py-1 rounded-lg bg-[#00f0ff] text-black font-mono text-[10px] font-bold shadow-glow-cyan flex items-center gap-1 animate-pulse">
-                  <Activity className="w-3 h-3" />
-                  <span>{pkt.protocol} Ping Packet</span>
-                </div>
-              </motion.div>
-            );
-          })}
+                  <div className="px-3 py-1.5 rounded-xl bg-[#00f0ff] text-black font-mono text-[10px] font-bold shadow-glow-cyan flex items-center gap-1 animate-pulse">
+                    <Activity className="w-3.5 h-3.5" />
+                    <span>{pkt.protocol} Ping</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </div>
-    </div>
 
       {/* Modals */}
+      <PortSelectionModal
+        sourceNode={cableSourceNode}
+        targetNode={cableTargetNode}
+        isOpen={showPortModal}
+        onClose={() => {
+          setShowPortModal(false);
+          setCableSourceNode(null);
+          setCableTargetNode(null);
+        }}
+        onConfirm={handleConfirmLink}
+      />
+
       <DeviceConfigModal
         node={configNode}
         isOpen={!!configNode}
@@ -383,6 +509,18 @@ export const SandboxCanvas: React.FC = () => {
         onSave={(updated) => {
           setNodes((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
         }}
+      />
+
+      <DeviceCliModal
+        node={cliNode}
+        isOpen={!!cliNode}
+        onClose={() => setCliNode(null)}
+      />
+
+      <TroubleshootingScenariosModal
+        isOpen={showScenariosModal}
+        onClose={() => setShowScenariosModal(false)}
+        onLoadScenario={handleLoadScenario}
       />
 
       <PacketInspectorModal

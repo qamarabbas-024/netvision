@@ -16,7 +16,7 @@ export const defaultNavItems: NavItem[] = [
   { label: 'Courses', href: '/courses' },
   { label: 'Simulations', href: '/simulations' },
   { label: 'Sandbox Lab', href: '/sandbox' },
-  { label: 'Docs & Arch', href: '/docs' },
+  { label: 'Docs', href: '/docs' },
 ];
 
 export const Navbar: React.FC<{ items?: NavItem[] }> = ({ items = defaultNavItems }) => {
