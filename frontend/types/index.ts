@@ -6,6 +6,18 @@ export type PacketProtocol = 'ARP' | 'DNS' | 'ICMP' | 'HTTP' | 'HTTPS' | 'TCP' |
 
 export type PacketStatus = 'idle' | 'in_flight' | 'delivered' | 'dropped' | 'blocked';
 
+export type SimulationLifecycleState =
+  | 'IDLE'
+  | 'CONFIGURED'
+  | 'READY'
+  | 'DISPATCHED'
+  | 'PACKET_CREATED'
+  | 'TRANSMITTING'
+  | 'RECEIVED'
+  | 'PROCESSED'
+  | 'RESPONSE'
+  | 'COMPLETED';
+
 export interface NetworkInterface {
   id: string;
   name: string; // e.g. eth0, eth1, ge0/0/0
@@ -36,6 +48,12 @@ export interface FirewallRule {
   direction: 'INBOUND' | 'OUTBOUND';
 }
 
+export interface VlanEntry {
+  id: number;
+  name: string;
+  ports: string[];
+}
+
 export interface NetworkNode {
   id: string;
   name: string;
@@ -44,12 +62,15 @@ export interface NetworkNode {
   macAddress: string;
   subnetMask?: string;
   defaultGateway?: string;
+  dnsServer?: string;
   status: 'online' | 'offline' | 'warning';
   position: { x: number; y: number };
   interfaces?: NetworkInterface[];
   routingTable?: RouteEntry[];
   macTable?: MacTableEntry[];
   firewallRules?: FirewallRule[];
+  vlans?: VlanEntry[];
+  services?: string[]; // e.g. ['HTTP', 'HTTPS', 'DNS']
 }
 
 export interface NetworkLink {
@@ -86,6 +107,12 @@ export interface NetworkPacket {
   tcpState?: 'LISTEN' | 'SYN_SENT' | 'SYN_RECEIVED' | 'ESTABLISHED' | 'FIN_WAIT' | 'CLOSED';
   hopHistory?: string[];
   dropReason?: string;
+  failureDetails?: {
+    what: string;
+    why: string;
+    evidence: string;
+    troubleshooting: string;
+  };
 }
 
 export interface SimulationEvent {
@@ -96,6 +123,8 @@ export interface SimulationEvent {
   nodeType?: NodeType;
   eventTitle: string;
   explanation: string;
+  why?: string;
+  technical?: string;
   type: 'info' | 'success' | 'warning' | 'error';
   packetProtocol?: PacketProtocol;
 }
@@ -158,5 +187,6 @@ export interface SimulationState {
   activePackets: NetworkPacket[];
   isPlaying: boolean;
   simulationSpeed: number; // 0.5x, 1x, 2x
+  lifecycleState: SimulationLifecycleState;
   events: SimulationEvent[];
 }

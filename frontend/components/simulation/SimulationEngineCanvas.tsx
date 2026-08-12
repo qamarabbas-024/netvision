@@ -9,7 +9,6 @@ import {
   StepForward,
   ZoomIn,
   ZoomOut,
-  Settings,
   Activity,
   Cpu,
   Radio,
@@ -17,10 +16,20 @@ import {
   Shield,
   Monitor,
   Globe,
+  AlertCircle,
+  ShieldAlert,
+  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { NetworkNode, NetworkLink, NetworkPacket, PacketProtocol, SimulationEvent } from '@/types';
+import {
+  NetworkNode,
+  NetworkLink,
+  NetworkPacket,
+  PacketProtocol,
+  SimulationEvent,
+  SimulationLifecycleState,
+} from '@/types';
 import { PacketInspectorModal } from './PacketInspectorModal';
 import { DeviceConfigModal } from './DeviceConfigModal';
 import { SimulationEventLog } from './SimulationEventLog';
@@ -55,13 +64,16 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
     ]
   );
 
-  // Controls State
+  // Controls & Lifecycle State
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [speedMultiplier, setSpeedMultiplier] = useState<number>(1);
   const [selectedProtocol, setSelectedProtocol] = useState<PacketProtocol>('TCP');
   const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const [lifecycleState, setLifecycleState] = useState<SimulationLifecycleState>('IDLE');
+  const [simulateFailure, setSimulateFailure] = useState<boolean>(false);
+  const [guidanceNotice, setGuidanceNotice] = useState<string | null>(null);
 
-  // Active Packets & Events Timeline
+  // Active Packets & Educational Events
   const [activePackets, setActivePackets] = useState<NetworkPacket[]>([]);
   const [events, setEvents] = useState<SimulationEvent[]>([]);
   const [inspectedPacket, setInspectedPacket] = useState<NetworkPacket | null>(null);
@@ -70,6 +82,8 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
   const addEvent = (
     title: string,
     explanation: string,
+    why?: string,
+    technical?: string,
     type: SimulationEvent['type'] = 'info',
     nodeName?: string,
     protocol?: PacketProtocol
@@ -79,6 +93,8 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
       timestamp: new Date().toLocaleTimeString(),
       eventTitle: title,
       explanation,
+      why,
+      technical,
       type,
       nodeName,
       packetProtocol: protocol || selectedProtocol,
@@ -86,8 +102,25 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
     setEvents((prev) => [newEvent, ...prev]);
   };
 
-  // Dispatch Packet Engine
+  // Play vs Dispatch Handler
+  const handlePlayClick = () => {
+    if (activePackets.length === 0) {
+      // PLAY clicked before sequence dispatched -> Show clear guidance & auto-stage
+      setGuidanceNotice(
+        `Staging ${selectedProtocol} sequence. Dispatching initial PDU segment from Client PC 1.`
+      );
+      dispatchPacket();
+    } else {
+      setIsPlaying(!isPlaying);
+      setGuidanceNotice(null);
+    }
+  };
+
+  // Dispatch Packet Sequence
   const dispatchPacket = () => {
+    setGuidanceNotice(null);
+    setLifecycleState('DISPATCHED');
+
     const srcNode = nodes[0];
     const dstNode = nodes[nodes.length - 1];
 
@@ -126,18 +159,21 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
     };
 
     setActivePackets([newPacket]);
+    setLifecycleState('TRANSMITTING');
     setIsPlaying(true);
 
     addEvent(
       `Packet Dispatched from ${srcNode.name}`,
       `Initiated ${selectedProtocol} transmission toward target IP ${dstNode.ipAddress}. Constructing PDU headers.`,
+      `The host application requested communication with server ${dstNode.ipAddress}. Layer 4 constructs control segments.`,
+      `Protocol ${selectedProtocol} PDU initialized. Source MAC: ${srcNode.macAddress}.`,
       'info',
       srcNode.name,
       selectedProtocol
     );
   };
 
-  // Animation & Hop State Machine Loop
+  // Simulation Animation & Node Processing Loop
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isPlaying) {
@@ -152,6 +188,8 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
                 addEvent(
                   `Ingress at ${nodes[1].name} (L2 Switch)`,
                   `L2 Switch receives Ethernet frame on Port 1. Inspects destination MAC address in MAC forwarding table.`,
+                  `L2 switches operate at Data Link Layer and forward frames based on destination MAC addresses without modifying IP headers.`,
+                  `Switch MAC Table match: Port 1 -> Port 2. Frame forwarded to next-hop router interface.`,
                   'info',
                   nodes[1].name,
                   p.protocol
@@ -161,6 +199,8 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
                 addEvent(
                   `Ingress at ${nodes[2].name} (Gateway Router)`,
                   `L3 Gateway Router receives IP packet. Decrements TTL to ${p.ttl - 1} and looks up route for ${p.targetIp}.`,
+                  `Routers perform Layer 3 forwarding lookups using longest-prefix match on routing tables.`,
+                  `TTL decremented from ${p.ttl} to ${p.ttl - 1}. Target subnet 172.16.0.0/24 routed to next-hop firewall interface.`,
                   'info',
                   nodes[2].name,
                   p.protocol
@@ -168,24 +208,55 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
                 p.ttl = Math.max(0, p.ttl - 1);
                 p.hopHistory = Array.from(new Set([...(p.hopHistory || []), nodes[2].name]));
               } else if (p.progressPercent < 75 && nextProgress >= 75) {
-                addEvent(
-                  `Stateful Firewall Inspection (${nodes[3].name})`,
-                  `Firewall evaluates active connection state table. Rule matching: ALLOW destination port 80/443.`,
-                  'success',
-                  nodes[3].name,
-                  p.protocol
-                );
-                p.hopHistory = Array.from(new Set([...(p.hopHistory || []), nodes[3].name]));
+                if (simulateFailure) {
+                  // Simulate Firewall Rule DENY Drop Failure
+                  p.status = 'dropped';
+                  p.dropReason = 'Stateful Firewall ACL Rule DENY Port 80 (HTTP)';
+                  p.failureDetails = {
+                    what: `Packet dropped by ${nodes[3].name} at Layer 4 inspection.`,
+                    why: `Stateful Firewall ACL rule explicitly matched DENY for destination port 80/TCP.`,
+                    evidence: `Firewall state log: DROP INBOUND TCP 192.168.1.10:54321 -> 172.16.0.5:80 (Rule #2 DENY).`,
+                    troubleshooting: `Edit Firewall configuration rules to add an ALLOW rule for TCP Port 80.`,
+                  };
+
+                  addEvent(
+                    `Firewall Security ACL Blocked Packet`,
+                    `Stateful Firewall matched explicit DENY ACL rule for TCP Port 80. Frame dropped.`,
+                    `Security firewalls filter unauthorized traffic by inspecting L4 port numbers and session state tables.`,
+                    `ACL Policy Rule #2: DENY TCP Port 80 INBOUND. Packet discarded.`,
+                    'error',
+                    nodes[3].name,
+                    p.protocol
+                  );
+
+                  setIsPlaying(false);
+                  setLifecycleState('COMPLETED');
+                  return { ...p, progressPercent: 75, status: 'dropped' as const };
+                } else {
+                  addEvent(
+                    `Stateful Firewall Inspection (${nodes[3].name})`,
+                    `Firewall evaluates active connection state table. Rule matching: ALLOW destination port 80/443.`,
+                    `Stateful firewalls maintain connection tracking tables (CONNTRACK) to allow legitimate response traffic automatically.`,
+                    `Firewall CONNTRACK updated: State SYN_SENT -> ESTABLISHED.`,
+                    'success',
+                    nodes[3].name,
+                    p.protocol
+                  );
+                  p.hopHistory = Array.from(new Set([...(p.hopHistory || []), nodes[3].name]));
+                }
               }
 
               if (nextProgress >= 100) {
                 addEvent(
                   `Packet Delivered to ${nodes[4].name}`,
-                  `Server successfully received ${p.protocol} packet. Dispatching acknowledgement response.`,
+                  `Server successfully received ${p.protocol} packet. Dispatching SYN-ACK response frame.`,
+                  `Server TCP stack processes SYN, allocates socket memory buffer, and responds with SYN-ACK.`,
+                  `TCP SYN-ACK Segment generated: Seq=500, Ack=101, State=SYN_RECEIVED.`,
                   'success',
                   nodes[4].name,
                   p.protocol
                 );
+                setLifecycleState('COMPLETED');
                 if (onSimulationComplete) onSimulationComplete();
                 return { ...p, progressPercent: 100, status: 'delivered' as const };
               }
@@ -197,7 +268,7 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
       }, 50);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, speedMultiplier, nodes, onSimulationComplete]);
+  }, [isPlaying, speedMultiplier, nodes, simulateFailure, onSimulationComplete]);
 
   const handleStepForward = () => {
     setIsPlaying(false);
@@ -210,6 +281,8 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
     setIsPlaying(false);
     setActivePackets([]);
     setEvents([]);
+    setLifecycleState('IDLE');
+    setGuidanceNotice(null);
   };
 
   const getNodeIcon = (type: string) => {
@@ -225,6 +298,19 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
 
   return (
     <div className="w-full flex flex-col gap-6">
+      {/* Guidance Notice Banner if Play clicked before Dispatch */}
+      {guidanceNotice && (
+        <div className="p-3.5 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-xs text-[#00f0ff] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Info className="w-4 h-4 shrink-0" />
+            <span className="font-mono font-semibold">{guidanceNotice}</span>
+          </div>
+          <button onClick={() => setGuidanceNotice(null)} className="text-zinc-400 hover:text-white text-xs">
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Simulation Controls Toolbar */}
       <div className="glass-panel p-3.5 sm:p-4 rounded-3xl border border-[#272732] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
         {/* Playback Buttons */}
@@ -232,10 +318,10 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
           <Button
             variant="cyan"
             size="sm"
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={handlePlayClick}
             leftIcon={isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           >
-            {isPlaying ? 'Pause' : 'Play'}
+            {isPlaying ? 'Pause' : 'Play Sequence'}
           </Button>
 
           <Button variant="ghost" size="sm" onClick={handleStepForward} leftIcon={<StepForward className="w-4 h-4" />}>
@@ -267,6 +353,21 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
           </div>
         </div>
 
+        {/* Failure State Simulation Toggle */}
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <button
+            onClick={() => setSimulateFailure(!simulateFailure)}
+            className={`px-3 py-1.5 rounded-xl border font-bold flex items-center gap-1.5 transition-all ${
+              simulateFailure
+                ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-glow-rose'
+                : 'bg-white/5 text-zinc-400 border-white/10 hover:text-white'
+            }`}
+          >
+            <ShieldAlert className="w-3.5 h-3.5" />
+            {simulateFailure ? 'Failure Mode: ON (Firewall Block)' : 'Failure Mode: OFF'}
+          </button>
+        </div>
+
         {/* Protocol Selector & Dispatch */}
         <div className="flex items-center gap-2 sm:gap-3">
           <select
@@ -283,17 +384,6 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
             Dispatch Packet →
           </Button>
         </div>
-
-        {/* Canvas Zoom */}
-        <div className="flex items-center gap-1 text-zinc-400">
-          <button onClick={() => setZoomLevel((z) => Math.max(0.7, z - 0.1))} className="p-1.5 rounded-lg hover:bg-white/5">
-            <ZoomOut className="w-4 h-4" />
-          </button>
-          <span className="text-xs font-mono">{Math.round(zoomLevel * 100)}%</span>
-          <button onClick={() => setZoomLevel((z) => Math.min(1.4, z + 0.1))} className="p-1.5 rounded-lg hover:bg-white/5">
-            <ZoomIn className="w-4 h-4" />
-          </button>
-        </div>
       </div>
 
       {/* Main Interactive Canvas */}
@@ -302,7 +392,7 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
           className="min-w-[960px] h-full relative transition-transform duration-200"
           style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
         >
-          {/* Cables SVG Link Layer */}
+          {/* Cables Link Layer */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none">
             {links.map((link) => {
               const srcNode = nodes.find((n) => n.id === link.sourceNodeId);
@@ -324,7 +414,7 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
             })}
           </svg>
 
-          {/* Render Devices / Nodes */}
+          {/* Render Nodes */}
           {nodes.map((node) => (
             <motion.div
               key={node.id}
@@ -335,7 +425,6 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
               <div className="w-16 h-16 rounded-2xl glass-panel border border-[#272732] group-hover:border-[#00f0ff]/50 flex items-center justify-center transition-all shadow-lg relative">
                 {getNodeIcon(node.type)}
 
-                {/* Status LED Indicator */}
                 <span
                   className={`absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full ${
                     node.status === 'online' ? 'bg-emerald-400 shadow-glow-emerald' : 'bg-rose-500'
@@ -358,6 +447,7 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
             const startX = 80;
             const endX = 880;
             const currentX = startX + (endX - startX) * progress;
+            const isDropped = packet.status === 'dropped';
 
             return (
               <motion.div
@@ -369,10 +459,16 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
                   setInspectedPacket(packet);
                 }}
               >
-                <div className="px-3 py-1.5 rounded-xl bg-[#00f0ff] text-black font-mono text-[10px] font-bold shadow-glow-cyan flex items-center gap-1.5 animate-pulse">
+                <div
+                  className={`px-3 py-1.5 rounded-xl font-mono text-[10px] font-bold shadow-lg flex items-center gap-1.5 ${
+                    isDropped
+                      ? 'bg-rose-500 text-white shadow-glow-rose animate-bounce'
+                      : 'bg-[#00f0ff] text-black shadow-glow-cyan animate-pulse'
+                  }`}
+                >
                   <Activity className="w-3.5 h-3.5" />
                   <span>{packet.protocol} Packet</span>
-                  <span className="text-[9px] bg-black/20 px-1 rounded">TTL: {packet.ttl}</span>
+                  {isDropped && <span className="bg-black/40 px-1 rounded">DROPPED</span>}
                 </div>
               </motion.div>
             );
@@ -380,7 +476,7 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
         </div>
       </div>
 
-      {/* Live Event Log Timeline */}
+      {/* Live Educational Event Log Timeline */}
       <SimulationEventLog events={events} onClearEvents={() => setEvents([])} />
 
       {/* Modals */}
