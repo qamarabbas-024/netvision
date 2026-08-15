@@ -8,9 +8,11 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { Alert } from '@/components/ui/Alert';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const setAuth = useAuthStore((s) => s.setAuth);
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -40,7 +42,16 @@ export default function RegisterPage() {
         throw new Error(data.message || 'Registration failed. Please check input values.');
       }
 
-      router.push(`/register/verify-otp?email=${encodeURIComponent(cleanEmail)}`);
+      // If OTP is required by backend, route to verification
+      if (data.requiresOtp) {
+        router.push(`/register/verify-otp?email=${encodeURIComponent(cleanEmail)}`);
+      } else if (data.accessToken && data.user) {
+        // Public Beta immediate activation: auto-authenticate and enter dashboard
+        setAuth(data.user, data.accessToken, true);
+        router.push('/dashboard');
+      } else {
+        router.push('/login?registered=true');
+      }
     } catch (err: any) {
       setError(err.message || 'An error occurred during registration.');
     } finally {

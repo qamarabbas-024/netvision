@@ -19,6 +19,21 @@ import { ResendOtpDto } from './dto/resend-otp.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
+export interface RegisterResponse {
+  message: string;
+  email: string;
+  requiresOtp: boolean;
+  user?: {
+    id: string;
+    email: string;
+    username: string;
+    role: string;
+    isVerified: boolean;
+  };
+  accessToken?: string;
+  refreshToken?: string;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -41,13 +56,17 @@ export class AuthService {
     return crypto.createHash('sha256').update(rawToken).digest('hex');
   }
 
+  private isEmailVerificationEnabled(): boolean {
+    return this.configService.get<string>('EMAIL_VERIFICATION_ENABLED', 'false') === 'true';
+  }
+
   private isDevModeNoEmail(): boolean {
     const isProd = this.configService.get<string>('NODE_ENV') === 'production';
     if (isProd) return false;
     return !this.emailService.isConfigured();
   }
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto): Promise<RegisterResponse> {
     const normalizedEmail = dto.email.toLowerCase().trim();
     const normalizedUsername = dto.username.toLowerCase().trim();
 
@@ -65,6 +84,7 @@ export class AuthService {
     }
 
     const passwordHash = await argon2.hash(dto.password);
+    const emailVerificationEnabled = this.isEmailVerificationEnabled();
 
     const user = await this.prisma.user.create({
       data: {
@@ -72,40 +92,61 @@ export class AuthService {
         username: normalizedUsername,
         passwordHash,
         fullName: dto.fullName?.trim() || null,
-        isVerified: false,
+        isVerified: !emailVerificationEnabled,
       },
     });
 
-    // Generate secure 6-digit numeric OTP
-    const rawOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpHash = this.hashToken(rawOtp);
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+    // If email verification is enabled, generate and dispatch OTP
+    if (emailVerificationEnabled) {
+      // Generate secure 6-digit numeric OTP
+      const rawOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpHash = this.hashToken(rawOtp);
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
 
-    // Clear previous verification records for email
-    await this.prisma.emailVerification.deleteMany({
-      where: { email: normalizedEmail },
-    });
+      // Clear previous verification records for email
+      await this.prisma.emailVerification.deleteMany({
+        where: { email: normalizedEmail },
+      });
 
-    await this.prisma.emailVerification.create({
-      data: {
+      await this.prisma.emailVerification.create({
+        data: {
+          email: normalizedEmail,
+          otpHash,
+          expiresAt,
+          attempts: 0,
+        },
+      });
+
+      if (this.isDevModeNoEmail()) {
+        this.devOtpStore.set(normalizedEmail, rawOtp);
+        this.logger.warn(`📧 [DEV EMAIL CONSOLE LOG] Verification OTP for ${normalizedEmail}: ${rawOtp}`);
+      }
+
+      await this.emailService.sendVerificationOtp(normalizedEmail, rawOtp);
+
+      return {
+        message: 'Registration successful! A 6-digit verification code has been dispatched to your email address.',
         email: normalizedEmail,
-        otpHash,
-        expiresAt,
-        attempts: 0,
-      },
-    });
-
-    if (this.isDevModeNoEmail()) {
-      this.devOtpStore.set(normalizedEmail, rawOtp);
-      this.logger.warn(`📧 [DEV EMAIL CONSOLE LOG] Verification OTP for ${normalizedEmail}: ${rawOtp}`);
+        requiresOtp: true,
+      };
     }
 
-    await this.emailService.sendVerificationOtp(normalizedEmail, rawOtp);
+    // Public Beta Mode (EMAIL_VERIFICATION_ENABLED=false):
+    // Account is immediately active and usable with JWT tokens issued directly.
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
 
     return {
-      message: 'Registration successful! A 6-digit verification code has been dispatched to your email address.',
+      message: 'Registration successful! Welcome to NetVision.',
       email: normalizedEmail,
-      requiresOtp: true,
+      requiresOtp: false,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        isVerified: user.isVerified,
+      },
+      ...tokens,
     };
   }
 
@@ -171,6 +212,12 @@ export class AuthService {
   }
 
   async resendOtp(dto: ResendOtpDto) {
+    if (!this.isEmailVerificationEnabled()) {
+      return {
+        message: 'Email verification is currently disabled for public beta. You can log in directly.',
+      };
+    }
+
     const normalizedEmail = dto.email.toLowerCase().trim();
 
     const user = await this.prisma.user.findUnique({
@@ -239,7 +286,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (!user.isVerified) {
+    // If email verification is enabled and user is not verified, require OTP verification
+    if (this.isEmailVerificationEnabled() && !user.isVerified) {
       const rawOtp = Math.floor(100000 + Math.random() * 900000).toString();
       const otpHash = this.hashToken(rawOtp);
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
@@ -260,6 +308,15 @@ export class AuthService {
       );
     }
 
+    // If user was created unverified prior to beta mode, automatically mark verified
+    if (!user.isVerified && !this.isEmailVerificationEnabled()) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { isVerified: true },
+      });
+      user.isVerified = true;
+    }
+
     const tokens = await this.generateTokens(user.id, user.email, user.role);
 
     return {
@@ -276,6 +333,13 @@ export class AuthService {
 
   async forgotPassword(dto: ForgotPasswordDto) {
     const normalizedEmail = dto.email.toLowerCase().trim();
+
+    // If email delivery is not configured, report unavailable rather than silently pretending
+    if (!this.emailService.isConfigured()) {
+      throw new BadRequestException(
+        'Password reset via email is currently unavailable during public beta. Please contact support.'
+      );
+    }
 
     const user = await this.prisma.user.findUnique({
       where: { email: normalizedEmail },

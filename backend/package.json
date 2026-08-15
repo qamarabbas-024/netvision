@@ -16,7 +16,8 @@
     "prisma:migrate:prod": "prisma migrate deploy",
     "prisma:seed": "prisma db seed",
     "test:email": "ts-node scripts/test-email.ts",
-    "test:email:suite": "ts-node scripts/test-email-suite.ts"
+    "test:email:suite": "ts-node scripts/test-email-suite.ts",
+    "test:beta:auth": "ts-node scripts/test-beta-auth.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
