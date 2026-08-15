@@ -52,7 +52,7 @@ Below is the exhaustive matrix comparing the master networking domain taxonomy a
 | **Enterprise Switching & VLANs** | **IMPLEMENTED** | MAC address table learning, collision/broadcast domains, 802.1Q VLAN isolation, access vs trunk ports (NET-301). | Dynamic Trunking Protocol (DTP), Private VLANs, Voice VLANs. |
 | **Loop Prevention (STP / RSTP)** | **IMPLEMENTED** | Bridge ID priority & MAC calculation, Root Bridge election, Root/Designated/Blocked port roles, BPDU frame propagation, RSTP 802.1w convergence, BPDU Guard, interactive 3-switch simulation engine (NET-302). | Multiple Spanning Tree Protocol (MSTP 802.1s) region instances. |
 | **IP Routing & Forwarding** | **IMPLEMENTED** | Next-hop lookup, longest prefix match, administrative distance, static routing, default gateway administration (NET-303). | Floating static routes, ECMP (Equal-Cost Multi-Path) load sharing. |
-| **Dynamic Routing Protocols (OSPF)** | **PARTIAL** | Course placeholder seeded (NET-304); routing overview in core lessons. | OSPF LSA types (1, 2, 3), Area 0 backbone rules, DR/BDR elections. |
+| **Dynamic Routing Protocols (OSPF)** | **IMPLEMENTED** | Link-state routing principles, Area 0 backbone, LSDB synchronization, Dijkstra SPF algorithm, 7-state neighbor FSM, DR/BDR elections, Type-1 Router LSAs, interactive multi-router simulation engine (NET-304). | Multi-Area OSPF (ABR/ASBR), Type 3/4/5/7 LSAs, stub area types. |
 | **Perimeter Security, ACLs & Firewalls** | **IMPLEMENTED** | Standard vs Extended ACL syntax, stateful vs stateless packet inspection, TCP port filtering rules (NET-305). | Next-Generation Firewall (NGFW) Layer 7 inspection, IDS/IPS Snort signatures. |
 | **NAT, PAT & Edge Routing** | **IMPLEMENTED** | Static NAT, Dynamic NAT, Port Address Translation (NAT Overload), socket mapping tables (NET-401). | Carrier-Grade NAT (CGNAT), NAT64/DNS64 IPv6 transition mechanisms. |
 | **VPNs & Cryptography** | **IMPLEMENTED** | IPsec architecture (AH, ESP), IKE Phase 1/Phase 2 tunnels, symmetric vs asymmetric encryption (AES/RSA) (NET-402). | SSL/TLS VPNs, WireGuard protocol internals, GRE over IPsec. |
@@ -111,7 +111,7 @@ The platform content is designed with a strictly ordered cognitive taxonomy:
 3. **Mastery-Based Assessment**: Quizzes require an 80% passing score, enforce immediate feedback with per-option explanations, and track weak concepts.
 
 ### Areas for Improvement:
-1. **Dynamic Routing Placeholder**: Course NET-304 (OSPF) currently has a module container awaiting full lesson body content (NET-302 STP completed).
+1. **Core Routing & Switching Parity**: Courses NET-302 (STP) and NET-304 (OSPF) are both fully implemented with 18-step benchmark lessons, interactive visualizers, and troubleshooting labs.
 2. **Question Pool Depth**: Expanding question pools across all courses to 10+ questions per quiz will further improve testing variability.
 3. **Command Table Population**: Command reference data is currently embedded inside lesson metadata; populating the dedicated `command_references` relational table will enable full global search.
 
@@ -129,6 +129,7 @@ To prevent learner cognitive overload, future content expansion should adhere to
    - IPv4 Subnetting & CIDR Mastery
    - DNS, DHCP & Transport Ports
    - Basic Routing, Switching, VLANs & Spanning Tree (STP)
+   - Dynamic Link-State Routing (Single-Area OSPF)
    - Fundamental Security (ACLs, Firewalls)
 
 2. PROFESSIONAL & ENTERPRISE (Intermediate Career Path):
@@ -156,8 +157,8 @@ To prevent learner cognitive overload, future content expansion should adhere to
 
 ## 7. Recommended Next Content Priorities
 
-1. **Populate NET-304 (OSPF)** dynamic routing lesson content and interactive visualizer.
-2. **Expand Quiz Question Bank** from 55 to 150+ questions across the 16 target courses.
-3. **Seed the Global Command Reference Table** with 50+ Cisco IOS / Linux / Windows CLI commands.
-4. **Develop IPv6 Transition Lab** (Dual-stack and NAT64 simulation).
-5. **Add Comprehensive Multi-Course Theory & Practical Exams** to support the `NETVISION-CERT-FOUNDATIONS` certification track.
+1. **Expand Quiz Question Bank** from 60 to 150+ questions across the 16 target courses.
+2. **Seed the Global Command Reference Table** with 50+ Cisco IOS / Linux / Windows CLI commands.
+3. **Develop IPv6 Transition Lab** (Dual-stack and NAT64 simulation).
+4. **Add Comprehensive Multi-Course Theory & Practical Exams** to support the `NETVISION-CERT-FOUNDATIONS` certification track.
+5. **Develop Multi-Area OSPF & BGP Advanced Scenarios**.

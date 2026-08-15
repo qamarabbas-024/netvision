@@ -12,6 +12,7 @@ import { RouterForwardingVisual } from './RouterForwardingVisual';
 import { IPAddressingVisual } from './IPAddressingVisual';
 import { ClientServerVisual } from './ClientServerVisual';
 import { STPVisual } from './STPVisual';
+import { OSPFVisual } from './OSPFVisual';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -20,6 +21,9 @@ export interface VisualRegistryProps {
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
 
+  if (slug.includes('ospf') || slug.includes('net-304') || slug.includes('link-state')) {
+    return <OSPFVisual />;
+  }
   if (slug.includes('stp') || slug.includes('spanning-tree') || slug.includes('net-302')) {
     return <STPVisual />;
   }

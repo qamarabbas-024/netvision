@@ -1203,4 +1203,408 @@ export const BENCHMARK_LESSONS_FULL: BenchmarkLessonFullDefinition[] = [
       ],
     },
   },
+
+  // =========================================================================
+  // BENCHMARK LESSON 5: NET-304 (Single-Area OSPF & Link-State Routing)
+  // =========================================================================
+  {
+    courseCode: 'NET-304',
+    slug: 'net-304-single-area-ospf-routing',
+    title: 'Dynamic Routing Protocols & Single-Area OSPF',
+    type: LessonType.THEORY,
+    durationMinutes: 40,
+    order: 1,
+    visualizationType: 'OSPF_TOPOLOGY_SIMULATION',
+    introduction:
+      'Master Open Shortest Path First (OSPFv2 RFC 2328), Link-State Database (LSDB) synchronization, Dijkstra SPF algorithm calculations, 7-state neighbor adjacencies, DR/BDR elections, and dynamic failure reconvergence.',
+    stepMetadata: {
+      step1_objective:
+        'Understand how OSPF link-state routing protocols construct identical Link-State Databases (LSDBs) across an autonomous system, how Dijkstra’s Shortest Path First (SPF) algorithm computes loop-free routes, and how 7-state neighbor finite state machines (FSM) establish robust dynamic adjacencies.',
+      step2_prerequisites: [
+        'NET-202: IPv4 Addressing & CIDR Subnetting Mastery',
+        'NET-204: Transport Layer Protocols (TCP & UDP)',
+        'NET-303: IP Routing & Static Route Administration',
+      ],
+      step3_whyItMatters:
+        'Static routing requires manual administrative updates whenever network topology changes occur, creating high administrative overhead and severe vulnerability to single points of failure. OSPF automatically detects link state transitions within milliseconds, floods Type-1 Router LSAs to all neighbors, and executes Dijkstra’s algorithm to calculate alternate loop-free paths with zero human intervention.',
+      step4_coreConcept:
+        'OSPF (Open Shortest Path First) is an Interior Gateway Protocol (IGP) based on Link-State technology. Instead of routing by rumor like Distance-Vector protocols (RIP), every OSPF router maintains a complete, identical map of the entire network topology in its Link-State Database (LSDB) and independently calculates the shortest path tree to all subnets using Dijkstra’s algorithm.',
+      step5_technicalAnatomy: {
+        title: 'OSPF Core Architectural Components',
+        description:
+          'OSPF operates directly over IP (Protocol Number 89) without relying on TCP or UDP. It structures networks hierarchically around Area 0 (Backbone Area) and selects unique 32-bit Router IDs (RIDs) to identify participating nodes.',
+        components: [
+          {
+            name: 'Router ID (RID)',
+            detail: 'A 32-bit identifier in dotted-decimal format. Determined by: (1) manual `router-id` command, (2) highest active Loopback IP, or (3) highest active physical interface IP.',
+          },
+          {
+            name: 'Area 0 (Backbone)',
+            detail: 'The central transit area (0.0.0.0) through which all inter-area routing traffic must pass in multi-area topologies.',
+          },
+          {
+            name: 'Designated Router (DR) & BDR',
+            detail: 'Elected on multi-access Ethernet segments (Highest OSPF Priority 0–255, then highest RID) to minimize adjacency meshes from n*(n-1)/2 to n.',
+          },
+          {
+            name: 'Metric Cost Formula',
+            detail: 'Cost = Reference Bandwidth / Interface Bandwidth (Default Reference: 100 Mbps; 100M=Cost 1, 10M=Cost 10; configurable via `auto-cost reference-bandwidth`).',
+          },
+        ],
+      },
+      step6_howItWorks: {
+        steps: [
+          {
+            stepNumber: 1,
+            title: 'Neighbor Discovery via Hello Packets',
+            action:
+              'Routers send Hello multicasts to 224.0.0.5 (AllSPFRouters) every 10 seconds. When a router sees its own RID in a neighbor’s Hello, bidirectional communication (2-WAY state) is established.',
+          },
+          {
+            stepNumber: 2,
+            title: 'DR/BDR Election on Multi-Access Segments',
+            action:
+              'On broadcast networks, routers elect a Designated Router (DR) and Backup Designated Router (BDR). Non-DR routers (DROTHERs) form full adjacencies only with the DR and BDR.',
+          },
+          {
+            stepNumber: 3,
+            title: 'Database Description (DBD) & Master/Slave Negotiation',
+            action:
+              'In ExStart state, routers negotiate master/slave roles using highest RID. In Exchange state, routers exchange DBD packets summarizing their local LSDBs.',
+          },
+          {
+            stepNumber: 4,
+            title: 'Loading & Synchronization (LSR / LSU / LSAck)',
+            action:
+              'Routers request missing or outdated LSAs using Link-State Requests (LSR) and receive Link-State Updates (LSU), acknowledged by LSAck, reaching FULL state.',
+          },
+          {
+            stepNumber: 5,
+            title: 'Dijkstra SPF Tree & Routing Table Installation',
+            action:
+              'Each router places itself as the root of the shortest path tree, computes cumulative costs to each destination subnet, and installs optimal routes into the IP routing table.',
+          },
+        ],
+      },
+      step7_packetHeaderView: {
+        protocol: 'OSPFv2 Common Packet Header (24 Bytes) & Hello Payload',
+        fields: [
+          {
+            fieldName: 'Version #',
+            bitLength: '8 bits (1 Byte)',
+            hexSample: '0x02',
+            description: 'OSPF Version 2 (IPv4) or Version 3 (IPv6).',
+          },
+          {
+            fieldName: 'Type',
+            bitLength: '8 bits (1 Byte)',
+            hexSample: '0x01',
+            description: '1=Hello, 2=DBD, 3=Link-State Request, 4=Link-State Update, 5=Link-State Ack.',
+          },
+          {
+            fieldName: 'Packet Length',
+            bitLength: '16 bits (2 Bytes)',
+            hexSample: '0x002C',
+            description: 'Total length of OSPF packet including standard header.',
+          },
+          {
+            fieldName: 'Router ID',
+            bitLength: '32 bits (4 Bytes)',
+            hexSample: '0x01010101',
+            description: 'Originating router 32-bit ID (e.g. 1.1.1.1).',
+          },
+          {
+            fieldName: 'Area ID',
+            bitLength: '32 bits (4 Bytes)',
+            hexSample: '0x00000000',
+            description: 'Area identifier (0.0.0.0 for Backbone Area 0).',
+          },
+          {
+            fieldName: 'Checksum & Auth Type',
+            bitLength: '32 bits (4 Bytes)',
+            hexSample: '0x0002',
+            description: '0=Null, 1=Simple Password, 2=Cryptographic MD5/HMAC-SHA.',
+          },
+        ],
+      },
+      step8_visualExplanation: {
+        type: 'OSPF_TOPOLOGY_SIMULATION',
+        title: '3-Router Multi-Access OSPF Adjacency & Dijkstra Tree',
+        description:
+          'In a 3-router topology (R1: 1.1.1.1, R2: 2.2.2.2 [DR], R3: 3.3.3.3 [BDR]), routers multicast Hellos to 224.0.0.5, synchronize their LSDBs to the FULL state, and compute shortest paths. If the primary link between R1 and R2 fails, R1 instantly recalculates its route through R3 with zero loops.',
+        nodesOrFrames: [
+          { node: 'R1', routerId: '1.1.1.1', priority: 1, role: 'DROTHER' },
+          { node: 'R2', routerId: '2.2.2.2', priority: 255, role: 'DR' },
+          { node: 'R3', routerId: '3.3.3.3', priority: 128, role: 'BDR' },
+        ],
+      },
+      step9_workedExample: {
+        title: 'Calculating Shortest Path First (SPF) Cost from R1 across a Redundant Topology',
+        problemStatement:
+          'Router R1 connects to R2 (Cost 10) and R3 (Cost 10). R2 connects to R3 (Cost 5). R2 connects to Destination Subnet 192.168.50.0/24 (Cost 1). Determine: (1) R1 path to 192.168.50.0/24 under normal conditions, (2) R1 path cost if link R1-R2 fails.',
+        stepByStepSolution: [
+          'Step 1: Evaluate Path A (Direct via R2): Cost(R1->R2) = 10, Cost(R2->Subnet) = 1. Total Cost = 10 + 1 = 11.',
+          'Step 2: Evaluate Path B (Indirect via R3): Cost(R1->R3) = 10, Cost(R3->R2) = 5, Cost(R2->Subnet) = 1. Total Cost = 10 + 5 + 1 = 16.',
+          'Step 3: Compare costs: 11 < 16. R1 chooses Path A (Direct via R2) with Metric 11 and Next-Hop R2.',
+          'Step 4: Link Failure Scenario: Link R1-R2 fails. R1 detects loss of neighbor adjacency, runs Dijkstra SPF, and installs Path B via R3 with Metric 16.',
+        ],
+        finalResult: 'Normal: Path via R2 (Cost 11). Post-Failover: Path via R3 (Cost 16).',
+      },
+      step10_realWorldScenario: {
+        topology: 'Dual-Homed Enterprise Campus Core & Distribution Routing',
+        scenarioText:
+          'A fiber cut severs the primary 10 Gbps uplink between HQ Access Router and Data Center Core Router A. Within 40 milliseconds, OSPF detects interface down, floods Type-1 LSAs to Core Router B, and reconverges data plane traffic across the redundant link with zero packet loss for active VoIP calls.',
+        engineeringContext:
+          'Always configure `auto-cost reference-bandwidth 100000` (100 Gbps) on modern Gigabit and 10-Gigabit networks so OSPF assigns differentiated metrics (1G=100, 10G=10, 100G=1) rather than treating all links >= 100 Mbps as Cost 1.',
+      },
+      step11_deviceBehavior: {
+        hostBehavior:
+          'End-user client computers do not speak OSPF. Edge ports connected to end devices should be configured with `passive-interface` to stop sending OSPF Hello multicasts onto user subnets.',
+        nicBehavior:
+          'Receives multicast frames destined for 01:00:5E:00:00:05 (224.0.0.5) and 01:00:5E:00:00:06 (224.0.0.6) and passes them to the OSPF routing daemon.',
+        switchOrRouterBehavior:
+          'Router runs OSPF daemon, maintains neighbor state table, periodically flushes/refreshes LSAs every 30 minutes, and re-executes Dijkstra SPF algorithm upon receiving any new LSA sequence number.',
+      },
+      step12_cliTooling: [
+        {
+          command: 'show ip ospf neighbor',
+          description: 'Displays all formed neighbor adjacencies, neighbor Router IDs, current state (FULL/DR, FULL/BDR), dead timer, and interface.',
+          expectedOutput:
+            'Neighbor ID     Pri   State           Dead Time   Address         Interface\n2.2.2.2           1   FULL/DR         00:00:34    10.0.12.2       GigabitEthernet0/1\n3.3.3.3         128   FULL/BDR        00:00:36    10.0.13.3       GigabitEthernet0/2',
+          proofExplanation:
+            'Confirms that full two-way database synchronization is active with both neighbor routers.',
+        },
+        {
+          command: 'show ip ospf database',
+          description: 'Dumps the local Link-State Database (LSDB), listing all Type-1 Router LSAs, Type-2 Network LSAs, and advertising Router IDs.',
+          expectedOutput:
+            '            OSPF Router with ID (1.1.1.1) (Process ID 1)\n\n                Router Link States (Area 0)\nLink ID         ADV Router      Age         Seq#       Checksum Link count\n1.1.1.1         1.1.1.1         342         0x80000004 0x004F2A 2\n2.2.2.2         2.2.2.2         315         0x80000006 0x008C1B 2\n3.3.3.3         3.3.3.3         290         0x80000005 0x002A7E 2',
+          proofExplanation:
+            'Shows that all three routers have advertised their Type-1 Router LSAs and the database is completely synchronized across Area 0.',
+        },
+        {
+          command: 'show ip route ospf',
+          description: 'Displays only the routes learned dynamically via OSPF installed in the IP routing table.',
+          expectedOutput:
+            'O    10.0.23.0/24 [110/15] via 10.0.12.2, 00:14:22, GigabitEthernet0/1',
+          proofExplanation:
+            'Shows administrative distance 110 (OSPF default) and cumulative metric cost 15 via next-hop 10.0.12.2.',
+        },
+      ],
+      step13_troubleshooting: [
+        {
+          symptom: 'OSPF neighbor relationship is stuck in `EXSTART` or `EXCHANGE` state and never reaches `FULL`.',
+          possibleCauses: [
+            'Maximum Transmission Unit (MTU) mismatch between the two connecting router interfaces.',
+            'Unicast fragmentation dropped by intermediate firewall.',
+          ],
+          diagnosticSteps: [
+            'Execute `show interfaces GigabitEthernet0/1 | include MTU` on both sides of the link.',
+            'Check for MTU disparity (e.g., 1500 bytes vs 1492 bytes or 9000 jumbo frames).',
+          ],
+          remediation:
+            'Align MTU values to match on both interface endpoints (e.g. `ip mtu 1500`) or configure `ip ospf mtu-ignore` on low-speed serial links.',
+        },
+        {
+          symptom: 'OSPF neighbor relationship remains in `INIT` state.',
+          possibleCauses: [
+            'One-way communication: Router A receives Hellos from Router B, but Router B does not receive Hellos from Router A (blocked by access-list or unicast reverse-path filter).',
+          ],
+          diagnosticSteps: [
+            'Execute `show ip ospf interface` to check Hello/Dead timers.',
+            'Check inbound ACLs on neighbor router to verify IP protocol 89 is permitted.',
+          ],
+          remediation:
+            'Ensure ACL allows `permit ospf any any` or permit multicast destination `224.0.0.5`.',
+        },
+      ],
+      step14_commonMistakes: [
+        {
+          misconception: 'OSPF uses standard Subnet Masks in network configuration statements.',
+          correction:
+            'OSPF requires Wildcard Masks (inverted subnet masks) in Cisco IOS, e.g. `network 192.168.1.0 0.0.0.255 area 0` instead of `255.255.255.0`.',
+        },
+        {
+          misconception: 'Hello and Dead timers do not need to match between neighbors.',
+          correction:
+            'For two OSPF routers to form an adjacency, their Hello Interval (default 10s) and Dead Interval (default 40s), Area ID, and Authentication MUST match exactly.',
+        },
+      ],
+      step15_securityPerspective: {
+        threatOrVulnerability:
+          'Rogue OSPF Router Injection / Route Poisoning: An unauthorized device connects to a LAN switchport and sends forged OSPF Hello and LSU packets advertising false 0.0.0.0/0 default routes, blackholing all company traffic or intercepting unencrypted data.',
+        mitigationStrategy:
+          'Enable `passive-interface default` so only explicit router-to-router links exchange OSPF packets, and configure Cryptographic MD5/SHA authentication on all inter-router interfaces using `ip ospf authentication message-digest`.',
+      },
+      step16_examPrep: {
+        keyExamPoints: [
+          'OSPF Administrative Distance is 110.',
+          '7 Neighbor States in order: Down -> Init -> 2-Way -> ExStart -> Exchange -> Loading -> Full.',
+          'DR/BDR Election criteria: (1) Highest OSPF Priority (0–255, 0 = never DR), (2) Highest Router ID.',
+          'Multicast addresses: 224.0.0.5 (AllSPFRouters), 224.0.0.6 (AllDRouters).',
+          'OSPF uses IP Protocol Number 89 (not TCP or UDP).',
+        ],
+        frequentTraps: [
+          'DR/BDR election is non-preemptive: adding a router with higher priority will NOT immediately take over DR unless OSPF is restarted.',
+          'Remember that DROTHER routers establish FULL adjacencies ONLY with DR and BDR; DROTHER-to-DROTHER state remains in 2-WAY.',
+        ],
+      },
+      step17_practicalLabRef: {
+        title: 'Guided Practice: Enterprise Single-Area OSPF Neighbor Adjacency & Routing Troubleshooting',
+        scenario:
+          'A corporate network with three routers running single-area OSPF has a connectivity failure. R1 cannot reach subnet 10.0.23.0/24 behind R3 due to an MTU mismatch and missing network statement.',
+        tasks: [
+          'Inspect OSPF neighbor table using `show ip ospf neighbor`.',
+          'Identify why R1 and R2 are stuck in EXSTART state and resolve the MTU mismatch.',
+          'Advertise subnet 10.0.23.0/24 into Area 0 on R3 using `network 10.0.23.0 0.0.0.255 area 0`.',
+          'Verify complete routing table convergence with `show ip route ospf`.',
+        ],
+        verificationMethod:
+          'Execute ping across all three router interfaces and verify `show ip ospf neighbor` shows FULL/DR and FULL/BDR.',
+      },
+      step18_masterySummary: {
+        summaryPoints: [
+          'OSPF is an open standard link-state protocol providing rapid, loop-free convergence.',
+          'Every router in Area 0 maintains an identical Link-State Database (LSDB).',
+          'Dijkstra’s SPF algorithm runs locally on each router to calculate shortest path trees.',
+          '7-state neighbor finite state machine guarantees reliable database synchronization.',
+          'DR/BDR elections optimize adjacency scaling on broadcast multi-access Ethernet segments.',
+          'Passive interfaces and cryptographic authentication protect OSPF routing domains.',
+        ],
+        nextLessonBridge:
+          'Now that you have mastered enterprise switching (NET-301), loop prevention with STP (NET-302), and dynamic link-state routing with OSPF (NET-304), proceed to NET-305 to learn how to secure networks with Access Control Lists (ACLs) and stateful firewalls.',
+      },
+    },
+    questions: [
+      {
+        text: 'What criteria does an OSPF router use to automatically select its Router ID (RID) if it is not manually configured via the `router-id` command?',
+        options: [
+          'Highest IPv4 address among active Loopback interfaces; if none exist, the highest IPv4 address among active physical interfaces',
+          'Lowest MAC address across all Ethernet ports',
+          'The default gateway IP assigned via DHCP',
+          'Randomly generated 32-bit integer generated at boot',
+        ],
+        correctOption: 0,
+        explanation:
+          'In OSPF, the Router ID selection hierarchy is: (1) Manual `router-id` command, (2) Highest active Loopback interface IP, (3) Highest active physical interface IP.',
+        explanationsJson: {
+          1: 'MAC address is used in STP Bridge IDs, not OSPF Router IDs.',
+          2: 'OSPF routers do not use DHCP default gateways for Router ID assignment.',
+          3: 'OSPF Router ID selection is completely deterministic.',
+        },
+        difficulty: CourseLevel.INTERMEDIATE,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'OSPF Router ID Selection Hierarchy',
+      },
+      {
+        text: 'Two OSPF routers connected across a point-to-point GigabitEthernet link are stuck in the `EXSTART` neighbor state and will not transition to `FULL`. What is the most likely root cause?',
+        options: [
+          'An IP MTU mismatch between the two connecting router interfaces',
+          'The routers are running different STP spanning-tree priorities',
+          'The router priorities are both set to 1',
+          'The routers are connected via copper cables instead of fiber optics',
+        ],
+        correctOption: 0,
+        explanation:
+          'During the ExStart/Exchange states, routers exchange Database Description (DBD) packets with MTU values in the header. If the interface MTUs mismatch, the slave router will reject the DBD and the adjacency hangs indefinitely in EXSTART/EXCHANGE.',
+        explanationsJson: {
+          1: 'STP operates at Layer 2 and does not prevent Layer 3 OSPF ExStart progression.',
+          2: 'Priority 1 is the standard default and allows normal adjacency formation.',
+          3: 'Physical cable medium has no bearing on OSPF MTU negotiation.',
+        },
+        difficulty: CourseLevel.INTERMEDIATE,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'OSPF MTU Mismatch & ExStart Hang',
+      },
+      {
+        text: 'On a broadcast multi-access Ethernet network with 5 routers running OSPF, which neighbor state is expected between two non-DR/non-BDR (DROTHER) routers?',
+        options: [
+          '2-WAY (DROTHER routers establish bidirectional communication but do not synchronize full LSDBs with each other)',
+          'FULL (all routers must synchronize LSDBs directly with all other routers)',
+          'DOWN (DROTHER routers ignore each other completely)',
+          'EXSTART (DROTHER routers continuously attempt database exchange)',
+        ],
+        correctOption: 0,
+        explanation:
+          'On multi-access segments, DROTHER routers form FULL adjacencies ONLY with the DR and BDR. Between two DROTHER routers, the state remains permanently in 2-WAY to conserve CPU and network bandwidth.',
+        explanationsJson: {
+          1: 'Full mesh adjacencies are eliminated on broadcast networks by DR/BDR design.',
+          2: 'Routers discover each other via Hello packets, reaching 2-WAY, not DOWN.',
+          3: 'DROTHERs do not exchange DBDs with each other, so they never enter ExStart.',
+        },
+        difficulty: CourseLevel.INTERMEDIATE,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'DR/BDR Multi-Access Adjacency Mechanics',
+      },
+      {
+        text: '[APPLICATION] An administrator configures a new GigabitEthernet interface (1 Gbps) on a Cisco router running default OSPF settings. If the default reference bandwidth is 100 Mbps ($10^8$), what OSPF metric cost is assigned to this link?',
+        options: [
+          'Cost 1 (Because 100 Mbps / 1000 Mbps = 0.1, and OSPF rounds any value less than 1 up to 1)',
+          'Cost 10',
+          'Cost 100',
+          'Cost 0',
+        ],
+        correctOption: 0,
+        explanation:
+          'OSPF calculates Cost = Reference Bandwidth / Interface Bandwidth. With default reference bandwidth of 100 Mbps, any interface >= 100 Mbps (FastEthernet, GigabitEthernet, 10-Gigabit) receives a cost of 1 unless `auto-cost reference-bandwidth` is adjusted.',
+        explanationsJson: {
+          1: 'Cost 10 is for a 10 Mbps Ethernet link under 100 Mbps reference bandwidth.',
+          2: 'Cost 100 is for a 1 Mbps link.',
+          3: 'OSPF minimum metric cost is always 1; metric 0 is not valid.',
+        },
+        difficulty: CourseLevel.INTERMEDIATE,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'OSPF Metric Cost Formula & Reference Bandwidth',
+      },
+      {
+        text: 'What destination multicast IP addresses are used by OSPF routers on multi-access broadcast networks?',
+        options: [
+          '224.0.0.5 (AllSPFRouters - listened to by all OSPF routers) and 224.0.0.6 (AllDRouters - listened to only by DR and BDR)',
+          '224.0.0.1 (All systems) and 224.0.0.2 (All routers)',
+          '224.0.0.9 (RIPv2) and 224.0.0.10 (EIGRP)',
+          '239.255.255.250 (SSDP)',
+        ],
+        correctOption: 0,
+        explanation:
+          'OSPF uses two reserved IPv4 multicast addresses: 224.0.0.5 for all OSPF-speaking routers, and 224.0.0.6 specifically for communicating updates to the DR and BDR.',
+        explanationsJson: {
+          1: '224.0.0.1 and 224.0.0.2 are general IPv4 host/router multicasts.',
+          2: '224.0.0.9 is RIPv2 and 224.0.0.10 is EIGRP.',
+          3: '239.255.255.250 is UPnP/SSDP.',
+        },
+        difficulty: CourseLevel.INTERMEDIATE,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'OSPF Reserved Multicast Addresses',
+      },
+    ],
+    lab: {
+      title: 'Guided Practice: Enterprise Single-Area OSPF Neighbor Adjacency & Routing Troubleshooting',
+      instructions:
+        '1. Inspect the 3-router single-area OSPF topology.\n2. Execute `show ip ospf neighbor` to inspect neighbor states and identify DR/BDR roles.\n3. Execute `show ip ospf database` to verify Type-1 Router LSAs.\n4. Troubleshoot and resolve neighbor adjacency failures, and verify end-to-end routing table convergence using `show ip route ospf`.',
+      difficulty: CourseLevel.INTERMEDIATE,
+      estimatedMinutes: 25,
+      initialTopologyJson: {
+        routers: [
+          { id: 'R1', routerId: '1.1.1.1', priority: 1, role: 'DROTHER' },
+          { id: 'R2', routerId: '2.2.2.2', priority: 255, role: 'DR' },
+          { id: 'R3', routerId: '3.3.3.3', priority: 128, role: 'BDR' },
+        ],
+        subnets: [
+          { network: '10.0.12.0/24', cost: 10 },
+          { network: '10.0.13.0/24', cost: 10 },
+          { network: '10.0.23.0/24', cost: 5 },
+        ],
+      },
+      tasks: [
+        'Execute `show ip ospf neighbor` to verify FULL adjacencies with DR and BDR.',
+        'Inspect Link-State Database using `show ip ospf database`.',
+        'Verify shortest path route calculation with `show ip route ospf`.',
+      ],
+    },
+  },
 ];
