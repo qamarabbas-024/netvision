@@ -50,7 +50,7 @@ Below is the exhaustive matrix comparing the master networking domain taxonomy a
 | **Core IP Services (ARP, ICMP, DNS, DHCP)** | **IMPLEMENTED** | ARP cache resolution, ICMP echo/TTL expired, DNS hierarchical resolution tree, DHCP DORA 4-step state machine (NET-203). | Dynamic DNS (DDNS), DNSSEC, DHCP relay agent (Option 82). |
 | **Transport Layer (TCP & UDP)** | **IMPLEMENTED** | TCP 3-way handshake (SYN, SYN-ACK, ACK), 4-way teardown, sequence/ACK numbering, windowing, UDP connectionless datagrams (NET-204). | TCP congestion control algorithms (Reno, Cubic, BBR), selective ACK (SACK). |
 | **Enterprise Switching & VLANs** | **IMPLEMENTED** | MAC address table learning, collision/broadcast domains, 802.1Q VLAN isolation, access vs trunk ports (NET-301). | Dynamic Trunking Protocol (DTP), Private VLANs, Voice VLANs. |
-| **Loop Prevention (STP / RSTP)** | **PARTIAL** | Course placeholder seeded (NET-302); conceptual overview in switching lessons. | Bridge ID election, root port selection, BPDU Guard, RSTP rapid convergence. |
+| **Loop Prevention (STP / RSTP)** | **IMPLEMENTED** | Bridge ID priority & MAC calculation, Root Bridge election, Root/Designated/Blocked port roles, BPDU frame propagation, RSTP 802.1w convergence, BPDU Guard, interactive 3-switch simulation engine (NET-302). | Multiple Spanning Tree Protocol (MSTP 802.1s) region instances. |
 | **IP Routing & Forwarding** | **IMPLEMENTED** | Next-hop lookup, longest prefix match, administrative distance, static routing, default gateway administration (NET-303). | Floating static routes, ECMP (Equal-Cost Multi-Path) load sharing. |
 | **Dynamic Routing Protocols (OSPF)** | **PARTIAL** | Course placeholder seeded (NET-304); routing overview in core lessons. | OSPF LSA types (1, 2, 3), Area 0 backbone rules, DR/BDR elections. |
 | **Perimeter Security, ACLs & Firewalls** | **IMPLEMENTED** | Standard vs Extended ACL syntax, stateful vs stateless packet inspection, TCP port filtering rules (NET-305). | Next-Generation Firewall (NGFW) Layer 7 inspection, IDS/IPS Snort signatures. |
@@ -111,8 +111,8 @@ The platform content is designed with a strictly ordered cognitive taxonomy:
 3. **Mastery-Based Assessment**: Quizzes require an 80% passing score, enforce immediate feedback with per-option explanations, and track weak concepts.
 
 ### Areas for Improvement:
-1. **Placeholder Modules**: Courses NET-302 (STP) and NET-304 (OSPF) currently have module containers without full lesson bodies.
-2. **Question Pool Depth**: Some advanced courses currently feature 1–2 quiz questions per lesson; expanding to 5–10 questions per quiz will improve testing variability.
+1. **Dynamic Routing Placeholder**: Course NET-304 (OSPF) currently has a module container awaiting full lesson body content (NET-302 STP completed).
+2. **Question Pool Depth**: Expanding question pools across all courses to 10+ questions per quiz will further improve testing variability.
 3. **Command Table Population**: Command reference data is currently embedded inside lesson metadata; populating the dedicated `command_references` relational table will enable full global search.
 
 ---
@@ -128,12 +128,12 @@ To prevent learner cognitive overload, future content expansion should adhere to
    - Ethernet, MAC Addresses & ARP
    - IPv4 Subnetting & CIDR Mastery
    - DNS, DHCP & Transport Ports
-   - Basic Routing, Switching & VLANs
+   - Basic Routing, Switching, VLANs & Spanning Tree (STP)
    - Fundamental Security (ACLs, Firewalls)
 
 2. PROFESSIONAL & ENTERPRISE (Intermediate Career Path):
    - Multi-Area OSPF & EIGRP
-   - Spanning Tree Protocol (RSTP / MSTP)
+   - Rapid Spanning Tree Protocol (RSTP / MSTP)
    - Enterprise NAT / PAT & IPv6 Transition
    - Site-to-Site IPsec & SSL VPNs
    - Wi-Fi 6 Enterprise Architecture
@@ -156,8 +156,8 @@ To prevent learner cognitive overload, future content expansion should adhere to
 
 ## 7. Recommended Next Content Priorities
 
-1. **Populate NET-302 (STP) & NET-304 (OSPF)** lesson content and interactive visualizers.
-2. **Expand Quiz Question Bank** from 50 to 150+ questions across the 16 target courses.
+1. **Populate NET-304 (OSPF)** dynamic routing lesson content and interactive visualizer.
+2. **Expand Quiz Question Bank** from 55 to 150+ questions across the 16 target courses.
 3. **Seed the Global Command Reference Table** with 50+ Cisco IOS / Linux / Windows CLI commands.
 4. **Develop IPv6 Transition Lab** (Dual-stack and NAT64 simulation).
 5. **Add Comprehensive Multi-Course Theory & Practical Exams** to support the `NETVISION-CERT-FOUNDATIONS` certification track.

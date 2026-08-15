@@ -11,6 +11,7 @@ import { PacketJourneyVisual } from './PacketJourneyVisual';
 import { RouterForwardingVisual } from './RouterForwardingVisual';
 import { IPAddressingVisual } from './IPAddressingVisual';
 import { ClientServerVisual } from './ClientServerVisual';
+import { STPVisual } from './STPVisual';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -19,6 +20,9 @@ export interface VisualRegistryProps {
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
 
+  if (slug.includes('stp') || slug.includes('spanning-tree') || slug.includes('net-302')) {
+    return <STPVisual />;
+  }
   if (slug.includes('osi')) {
     return <OSILayerVisual />;
   }

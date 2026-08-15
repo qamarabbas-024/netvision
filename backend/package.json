@@ -17,7 +17,8 @@
     "prisma:seed": "prisma db seed",
     "test:email": "ts-node scripts/test-email.ts",
     "test:email:suite": "ts-node scripts/test-email-suite.ts",
-    "test:beta:auth": "ts-node scripts/test-beta-auth.ts"
+    "test:beta:auth": "ts-node scripts/test-beta-auth.ts",
+    "test:deployment": "ts-node scripts/test-deployment-readiness.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

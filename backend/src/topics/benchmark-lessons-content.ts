@@ -803,4 +803,404 @@ export const BENCHMARK_LESSONS_FULL: BenchmarkLessonFullDefinition[] = [
       ],
     },
   },
+
+  // =========================================================================
+  // BENCHMARK LESSON 4: NET-302 (Spanning Tree Protocol & Loop Prevention)
+  // =========================================================================
+  {
+    courseCode: 'NET-302',
+    slug: 'net-302-spanning-tree-protocol-loop-prevention',
+    title: 'Spanning Tree Protocol (STP) & Layer-2 Loop Prevention',
+    type: LessonType.THEORY,
+    durationMinutes: 35,
+    order: 1,
+    visualizationType: 'STP_TOPOLOGY_ENGINE',
+    introduction:
+      'Master IEEE 802.1D Spanning Tree Protocol (STP), Bridge ID calculations, Root Bridge elections, Root & Designated Port selections, and sub-second RSTP failure reconvergence.',
+    stepMetadata: {
+      step1_objective:
+        'Understand why redundant Layer-2 switching topologies cause catastrophic broadcast storms, how STP elects a single Root Bridge via BPDUs, and how port roles (Root, Designated, Blocked) guarantee loop-free forwarding with automatic failover.',
+      step2_prerequisites: [
+        'NET-201: Layer 2 Ethernet Frames & MAC Address Tables',
+        'NET-301: Enterprise Switching, VLANs & 802.1Q Trunks',
+      ],
+      step3_whyItMatters:
+        'Unlike Layer-3 IPv4 packets which have a Time-To-Live (TTL) header field to terminate routing loops, Ethernet Layer-2 frames have NO TTL field. A single broadcast frame (e.g. ARP request) inside a redundant multi-switch loop will circulate infinitely, causing exponential frame amplification (Broadcast Storm), CPU saturation (100%), and complete network outage within seconds.',
+      step4_coreConcept:
+        'The Spanning Tree Protocol (IEEE 802.1D / IEEE 802.1w RSTP) dynamically builds a loop-free logical topology (a spanning tree) by placing redundant switch ports into a non-forwarding (Blocking/Discarding) state while keeping them ready to unblock immediately if an active link fails.',
+      step5_technicalAnatomy: {
+        title: 'Bridge ID & STP Port Role Classification',
+        description:
+          'Every switch has an 8-byte Bridge Identifier (BID) comprising a 2-byte Priority (default 32768 in increments of 4096) + 6-byte Base MAC Address. The switch with the lowest numeric BID becomes the Root Bridge.',
+        components: [
+          {
+            name: 'Root Bridge (RB)',
+            detail: 'The logical center and master clock of the spanning tree. All active ports on the Root Bridge are Designated Ports (Forwarding).',
+          },
+          {
+            name: 'Root Port (RP)',
+            detail: 'Exactly one port per non-root switch that has the lowest Root Path Cost to reach the Root Bridge.',
+          },
+          {
+            name: 'Designated Port (DP)',
+            detail: 'The single port on each network segment that forwards traffic toward the Root Bridge with the lowest advertised path cost.',
+          },
+          {
+            name: 'Alternate / Blocked Port (BLK)',
+            detail: 'A redundant port placed in a non-forwarding state. It discards user payload frames but continuously listens to incoming BPDUs.',
+          },
+        ],
+      },
+      step6_howItWorks: {
+        steps: [
+          {
+            stepNumber: 1,
+            title: 'Root Bridge Election',
+            action:
+              'All switches exchange Configuration BPDUs. The switch with the lowest Bridge Priority (default 32768) + Lowest MAC Address is elected Root Bridge.',
+          },
+          {
+            stepNumber: 2,
+            title: 'Root Port (RP) Selection',
+            action:
+              'Each non-root switch evaluates all incoming ports and selects the single port with the lowest cumulative Root Path Cost (10G=2, 1G=4, 100M=19, 10M=100).',
+          },
+          {
+            stepNumber: 3,
+            title: 'Designated Port (DP) Election',
+            action:
+              'For each physical link segment, the switch with the lowest path cost to the root bridge designates its connected port as Forwarding.',
+          },
+          {
+            stepNumber: 4,
+            title: 'Loop-Breaking Port Blocking',
+            action:
+              'All remaining ports that are neither Root Ports nor Designated Ports transition into the Blocking (Discarding) state to eliminate physical loops.',
+          },
+        ],
+      },
+      step7_packetHeaderView: {
+        protocol: 'IEEE 802.1D Bridge Protocol Data Unit (BPDU)',
+        fields: [
+          {
+            fieldName: 'Protocol Identifier',
+            bitLength: '16 bits (2 Bytes)',
+            hexSample: '0x0000',
+            description: 'Identifies IEEE 802.1D Spanning Tree Protocol.',
+          },
+          {
+            fieldName: 'BPDU Type',
+            bitLength: '8 bits (1 Byte)',
+            hexSample: '0x00',
+            description: '0x00 = Configuration BPDU; 0x80 = Topology Change Notification (TCN).',
+          },
+          {
+            fieldName: 'Root Bridge Identifier',
+            bitLength: '64 bits (8 Bytes)',
+            hexSample: '0x1000 001A.2B3C.4D02',
+            description: 'Priority (4096) + Extended System ID + MAC address of current Root.',
+          },
+          {
+            fieldName: 'Root Path Cost',
+            bitLength: '32 bits (4 Bytes)',
+            hexSample: '0x00000004',
+            description: 'Cumulative path cost from transmitting bridge to root bridge (Cost 4 for 1 Gbps link).',
+          },
+          {
+            fieldName: 'Sender Bridge Identifier',
+            bitLength: '64 bits (8 Bytes)',
+            hexSample: '0x8000 001A.2B3C.4D01',
+            description: 'Priority (32768) + Base MAC of switch sending this specific BPDU.',
+          },
+          {
+            fieldName: 'Port Identifier',
+            bitLength: '16 bits (2 Bytes)',
+            hexSample: '0x8001',
+            description: 'Port Priority (128) + Port Number (e.g. GigabitEthernet0/1).',
+          },
+        ],
+      },
+      step8_visualExplanation: {
+        type: 'STP_TOPOLOGY_ENGINE',
+        title: 'Interactive 3-Switch Ring Topology Loop-Breaking State Machine',
+        description:
+          'In a 3-switch triangle ring (SW-A, SW-B, SW-C), SW-B with Bridge Priority 4096 is elected Root Bridge. SW-C places its port facing SW-A into Alternate/Blocking (BLK) state, cutting the loop while keeping an instant standby path if the link between SW-B and SW-C fails.',
+        nodesOrFrames: [
+          { node: 'SW-B', role: 'ROOT_BRIDGE', priority: 4096, mac: '00:1A:2B:3C:4D:02' },
+          { node: 'SW-A', role: 'NON_ROOT', rootPort: 'Gi0/1', designatedPort: 'Gi0/2' },
+          { node: 'SW-C', role: 'NON_ROOT', rootPort: 'Gi0/2', blockedPort: 'Gi0/1' },
+        ],
+      },
+      step9_workedExample: {
+        title: 'Calculating Root Bridge, Path Costs, and Blocked Ports in a 3-Switch Enterprise Ring',
+        problemStatement:
+          'Three switches SW-1 (Priority 32768, MAC 00:01), SW-2 (Priority 4096, MAC 00:02), and SW-3 (Priority 32768, MAC 00:03) are connected via 1 Gbps links (Cost = 4). Determine: (1) Root Bridge, (2) Root Ports on SW-1 and SW-3, (3) Blocked port on the segment between SW-1 and SW-3.',
+        stepByStepSolution: [
+          'Step 1: Compare Bridge IDs (Priority + MAC). SW-2 has Priority 4096, which is lower than 32768. SW-2 is unanimously elected Root Bridge.',
+          'Step 2: Calculate Root Path Costs for SW-1 and SW-3. SW-1 direct link to SW-2 = Cost 4. SW-3 direct link to SW-2 = Cost 4. Both direct ports become Root Ports (RP).',
+          'Step 3: Evaluate the link between SW-1 and SW-3. Both switches advertise Root Path Cost = 4. The tie-breaker is Lowest Sender Bridge ID.',
+          'Step 4: Compare SW-1 (32768.00:01) vs SW-3 (32768.00:03). SW-1 has a lower MAC address (00:01 < 00:03).',
+          'Step 5: SW-1 wins Designated Port (DP) on the link. SW-3 loses and places its port facing SW-1 into Alternate/Blocking (BLK) state.',
+        ],
+        finalResult: 'Root Bridge: SW-2. Root Ports: SW-1(Gi0/1) & SW-3(Gi0/2). Blocked Port: SW-3(Gi0/1).',
+      },
+      step10_realWorldScenario: {
+        topology: 'Enterprise Data Center Multi-Tier Access & Distribution Switching',
+        scenarioText:
+          'An engineer accidentally connects two patch cables between two access switches already connected to distribution switches, creating an unintended redundant loop. STP detects duplicate BPDUs, blocks the redundant link within 2 seconds, and generates an SNMP alert, preventing an enterprise-wide network collapse.',
+        engineeringContext:
+          'Always configure distribution switches with `spanning-tree vlan 1-4094 priority 4096` (Primary Root) and `priority 8192` (Secondary Root) to ensure predictable deterministic root placement rather than relying on random default MAC tie-breakers.',
+      },
+      step11_deviceBehavior: {
+        hostBehavior:
+          'End-user laptops and servers do not run STP. If an edge port is connected to an end-device, configure `spanning-tree portfast` to bypass Listening/Learning delays and enable instant DHCP acquisition.',
+        nicBehavior:
+          'NIC sends standard untagged or 802.1Q tagged frames. If a rogue virtualization host sends BPDUs, BPDU Guard triggers immediate port shutdown.',
+        switchOrRouterBehavior:
+          'Switches originate and consume BPDUs on all active trunk and access ports every 2.0 seconds (Hello Time). Blocked ports discard all user payload frames but continuously process BPDUs.',
+      },
+      step12_cliTooling: [
+        {
+          command: 'show spanning-tree',
+          description: 'Displays the current Root Bridge ID, local Bridge ID, hello timers, and all port roles/states for VLAN 1.',
+          expectedOutput:
+            'VLAN0001\n  Spanning tree enabled protocol rstp\n  Root ID    Priority    4096\n             Address     001a.2b3c.4d02\n             This bridge is the root\n  Interface        Role Sts Cost      Prio.Nbr Type\n  ---------------- ---- --- --------- -------- --------------------------------\n  Gi0/1            Desg FWD 4         128.1    P2p\n  Gi0/2            Desg FWD 4         128.2    P2p',
+          proofExplanation:
+            'Confirms this switch has priority 4096 and is the Root Bridge, with all active interfaces in the Designated Forwarding (Desg FWD) state.',
+        },
+        {
+          command: 'spanning-tree vlan 1 priority 4096',
+          description: 'Statically sets the local Bridge Priority for VLAN 1 to 4096, guaranteeing Root Bridge election.',
+          expectedOutput: 'Switch(config)# spanning-tree vlan 1 priority 4096',
+          proofExplanation:
+            'Priority values must be configured in multiples of 4096 (0, 4096, 8192, 12288, 16384, 20480, 24576, 28672, 32768, 36864, 40960, 45056, 49152, 53248, 57344, 61440).',
+        },
+        {
+          command: 'spanning-tree portfast default',
+          description: 'Enables PortFast globally on all non-trunk access ports, transitioning directly to Forwarding.',
+          expectedOutput: 'Switch(config)# spanning-tree portfast default',
+          proofExplanation:
+            'Eliminates the 30-second 802.1D listening/learning delay for workstations and servers while pairing with BPDU Guard for security.',
+        },
+      ],
+      step13_troubleshooting: [
+        {
+          symptom: 'Complete LAN slowdown, 100% switch CPU utilization, blinking link LEDs across all switchports.',
+          possibleCauses: [
+            'Layer 2 loop caused by unmanaged desktop switch looped back onto itself.',
+            'STP disabled on one or more trunk links.',
+            'BPDU Filter enabled on a trunk link, suppressing BPDU transmission.',
+          ],
+          diagnosticSteps: [
+            'Execute `show spanning-tree summary` to verify STP is actively running on all VLANs.',
+            'Execute `show interfaces counters errors` to check for massive broadcast frame counts.',
+            'Locate ports with flapping MAC address tables via `show mac address-table dynamic`.',
+          ],
+          remediation:
+            'Remove physical redundant patch cable, ensure `spanning-tree bpduguard enable` is applied on all access ports, and never configure `bpdufilter` on switch-to-switch links.',
+        },
+        {
+          symptom: 'Switch port remains in `err-disabled` state after connecting an end device.',
+          possibleCauses: [
+            'End device is a hypervisor or VoIP phone transmitting BPDUs on a BPDU Guard-protected port.',
+          ],
+          diagnosticSteps: [
+            'Execute `show interfaces status err-disabled`.',
+            'Check console log for `%SPANTREE-2-BLOCK_BPDUGUARD: Received BPDU on port Gi0/10 with BPDU Guard enabled`.',
+          ],
+          remediation:
+            'If the connected device is a legitimate switch or virtualization host, remove `portfast` and `bpduguard`, and configure proper trunking with STP enabled.',
+        },
+      ],
+      step14_commonMistakes: [
+        {
+          misconception: 'Leaving all switches at default Bridge Priority 32768 is fine in production.',
+          correction:
+            'If all switches use 32768, the oldest switch with the lowest random MAC address will become the Root Bridge, routing all enterprise traffic through an underpowered access switch. Always explicitly set Core switches to Priority 4096.',
+        },
+        {
+          misconception: 'Configuring PortFast on trunk links connecting other switches increases speed.',
+          correction:
+            'PortFast disables initial loop-detection listening states. Enabling it on switch-to-switch trunk links will cause immediate, catastrophic broadcast storms upon connection.',
+        },
+      ],
+      step15_securityPerspective: {
+        threatOrVulnerability:
+          'STP Root Hijacking Attack: An attacker connects a laptop running Yersinia or Scapy, transmitting forged BPDUs with Priority 0 and MAC 00:00:00:00:00:01. The attacker becomes the Root Bridge, intercepting all Layer-2 transit traffic.',
+        mitigationStrategy:
+          'Configure `spanning-tree guard root` on distribution-to-access downlink ports to prevent unauthorized switches from becoming root, and enable `spanning-tree bpduguard enable` on all access edge ports.',
+      },
+      step16_examPrep: {
+        keyExamPoints: [
+          'Bridge Priority default is 32768; values must be configured in multiples of 4096.',
+          'Lowest Bridge ID wins Root Bridge election.',
+          'Root Bridge has NO Root Ports; all active ports on the Root Bridge are Designated Ports.',
+          'Path Cost standards: 10G = 2, 1G = 4, 100M = 19, 10M = 100.',
+          '802.1D Port States: Blocking -> Listening (15s) -> Learning (15s) -> Forwarding.',
+          'RSTP 802.1w Port States: Discarding, Learning, Forwarding.',
+        ],
+        frequentTraps: [
+          'Do not confuse Root Port (one per non-root switch) with Designated Port (one per segment).',
+          'Remember that lower numbers always win in STP (lower priority, lower cost, lower MAC).',
+          'Extended System ID adds the VLAN ID (1-4094) to the base priority (e.g. Priority 4096 + VLAN 10 = BID Priority 4106).',
+        ],
+      },
+      step17_practicalLabRef: {
+        title: 'Guided Practice: Enterprise Layer-2 Redundant Topology Loop Prevention & STP Reconvergence',
+        scenario:
+          'A multi-switch campus network has three interconnected switches. The administrator must verify Root Bridge election, identify blocked loop ports, configure root bridge priority, and verify automatic failover.',
+        tasks: [
+          'Inspect Bridge IDs and port roles using `show spanning-tree`.',
+          'Identify the Root Bridge and explain why port Gi0/1 on SW-C is blocked.',
+          'Configure SW-A as Primary Root using `spanning-tree vlan 1 priority 4096`.',
+          'Disconnect the active link between SW-A and SW-B to trigger and observe STP reconvergence.',
+        ],
+        verificationMethod:
+          'Verify `show spanning-tree` output confirms new Root Bridge ID and transition of the alternate port to Forwarding state.',
+      },
+      step18_masterySummary: {
+        summaryPoints: [
+          'Ethernet lacks TTL, making Layer-2 loop prevention mandatory.',
+          'STP elects a single Root Bridge per broadcast domain using the lowest numeric Bridge ID.',
+          'Non-root switches elect one Root Port with the lowest path cost to the root.',
+          'Each segment elects one Designated Port; all remaining redundant ports are blocked.',
+          'RSTP (802.1w) provides sub-second convergence via synchronization handshakes.',
+          'BPDU Guard and Root Guard protect the spanning tree topology from rogue devices.',
+        ],
+        nextLessonBridge:
+          'With Layer 2 switching and loop-free redundant topologies mastered in NET-301 and NET-302, proceed to NET-303 to learn how routers forward packets across distinct Layer 3 broadcast domains using IP routing tables and static routes.',
+      },
+    },
+    questions: [
+      {
+        text: 'Why do Layer-2 switching loops cause continuous catastrophic broadcast storms while Layer-3 routing loops eventually terminate?',
+        options: [
+          'Ethernet Layer-2 frame headers lack a Time-To-Live (TTL) field, allowing looped broadcast frames to circulate indefinitely until bandwidth and CPU are exhausted',
+          'Switches have less RAM than enterprise routers',
+          'Layer-2 frames are encrypted by default, preventing switches from inspecting packet boundaries',
+          'STP only operates on fiber optic media and cannot inspect copper Ethernet cables',
+        ],
+        correctOption: 0,
+        explanation:
+          'IPv4 and IPv6 packets contain a TTL/Hop Limit field decremented at every Layer-3 router hop. Ethernet frames have no such mechanism, so any broadcast frame flooded on a loop will circulate and multiply infinitely.',
+        explanationsJson: {
+          1: 'Memory capacity is irrelevant; without a TTL field, frames circulate forever.',
+          2: 'Standard Ethernet frames are unencrypted plaintext headers.',
+          3: 'STP operates universally across all physical media (copper, fiber, virtual).',
+        },
+        difficulty: CourseLevel.INTERMEDIATE,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Layer 2 Loop Mechanics & TTL Absence',
+      },
+      {
+        text: 'Two switches SW-1 (Priority: 32768, MAC: 00:11:22:33:44:55) and SW-2 (Priority: 4096, MAC: AA:BB:CC:DD:EE:FF) are connected together. Which switch is elected Root Bridge and why?',
+        options: [
+          'SW-2, because its Bridge Priority (4096) is numerically lower than SW-1 (32768), and priority is evaluated before MAC address',
+          'SW-1, because its MAC address starts with 00 which is lower than AA',
+          'SW-1, because 32768 is the standard default priority',
+          'Both switches become Root Bridges in a split-brain condition',
+        ],
+        correctOption: 0,
+        explanation:
+          'In STP Root Bridge elections, the switch with the lowest numeric Bridge Priority wins. MAC address is only evaluated as a tie-breaker when priorities are identical.',
+        explanationsJson: {
+          1: 'MAC address is only compared if Bridge Priorities are equal.',
+          2: 'Default priority 32768 loses to the manually lowered priority 4096.',
+          3: 'STP strictly elects exactly one Root Bridge per broadcast domain / VLAN.',
+        },
+        difficulty: CourseLevel.INTERMEDIATE,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Root Bridge Election Criteria',
+      },
+      {
+        text: 'What is the correct tie-breaker hierarchy used by a non-root switch when electing a Root Port (RP)?',
+        options: [
+          '1. Lowest Root Path Cost -> 2. Lowest Sender Bridge ID -> 3. Lowest Sender Port ID',
+          '1. Highest Port Speed -> 2. Lowest Port Number -> 3. Highest MAC Address',
+          '1. Lowest Sender Port ID -> 2. Lowest Root Path Cost -> 3. Switch Uptime',
+          '1. Random selection -> 2. Neighbor Switch Priority',
+        ],
+        correctOption: 0,
+        explanation:
+          'Root Port selection follows strict deterministic tie-breakers: (1) Lowest cumulative root path cost, (2) Lowest sender Bridge ID (neighbor BID), (3) Lowest sender Port ID (Priority.PortNumber).',
+        explanationsJson: {
+          1: 'Port speed is encapsulated inside the path cost, but neighbor BID is the formal second tie-breaker.',
+          2: 'Root path cost is always the primary criterion, not sender port ID.',
+          3: 'STP is completely deterministic and never uses random selection.',
+        },
+        difficulty: CourseLevel.INTERMEDIATE,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'STP Root Port Tie-Breakers',
+      },
+      {
+        text: '[TROUBLESHOOTING] An administrator connects a Rogue Unmanaged Switch to an access port configured with `spanning-tree portfast` and `spanning-tree bpduguard enable`. What immediately happens when the rogue switch sends a BPDU?',
+        options: [
+          'BPDU Guard triggers, immediately placing the switch port into the `err-disabled` state and shutting down the link to prevent unauthorized topology manipulation',
+          'The rogue switch becomes Root Bridge and takes over network traffic',
+          'The port drops only the BPDU frame but continues forwarding user packets',
+          'The core switch reboots to clear its MAC address table',
+        ],
+        correctOption: 0,
+        explanation:
+          'BPDU Guard is a critical security feature designed for edge access ports. If any BPDU is received on a BPDU Guard-enabled port, the switch immediately disables the port (err-disabled) to protect the spanning tree topology.',
+        explanationsJson: {
+          1: 'BPDU Guard specifically prevents rogue switches from claiming Root Bridge status.',
+          2: 'BPDU Guard disables the entire port, rather than silently dropping individual frames.',
+          3: 'Switches do not reboot upon receiving unexpected BPDUs.',
+        },
+        difficulty: CourseLevel.INTERMEDIATE,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'BPDU Guard & Edge Port Protection',
+      },
+      {
+        text: 'What is the primary operational advantage of Rapid Spanning Tree Protocol (RSTP IEEE 802.1w) over legacy 802.1D STP?',
+        options: [
+          'RSTP uses an explicit Proposal/Agreement handshake mechanism, achieving sub-second (< 1s) reconvergence instead of 802.1D standard 30-50 second timer delays',
+          'RSTP increases maximum link bandwidth from 1 Gbps to 100 Gbps',
+          'RSTP replaces Layer 2 switching with Layer 3 IP routing',
+          'RSTP eliminates the need for a Root Bridge election',
+        ],
+        correctOption: 0,
+        explanation:
+          'Legacy 802.1D requires listening (15s) and learning (15s) timer delays. 802.1w RSTP introduces point-to-point synchronization handshakes that unblock ports in milliseconds.',
+        explanationsJson: {
+          1: 'STP/RSTP manage logical topology states, not physical PHY link speeds.',
+          2: 'RSTP remains an Ethernet Layer-2 loop-prevention protocol.',
+          3: 'RSTP still uses Root Bridge elections and Bridge IDs.',
+        },
+        difficulty: CourseLevel.INTERMEDIATE,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'RSTP Convergence Optimization',
+      },
+    ],
+    lab: {
+      title: 'Guided Practice: Enterprise Layer-2 Redundant Topology Loop Prevention & STP Reconvergence',
+      instructions:
+        '1. Inspect the 3-switch redundant ring topology.\n2. Execute `show spanning-tree` to identify the Root Bridge and verify the Root Port (RP) and Alternate/Blocked (BLK) ports.\n3. Configure primary root bridge priority: `spanning-tree vlan 1 priority 4096`.\n4. Simulate a link failure on the active root path and observe STP reconvergence unblocking the redundant link.',
+      difficulty: CourseLevel.INTERMEDIATE,
+      estimatedMinutes: 20,
+      initialTopologyJson: {
+        switches: [
+          { id: 'SW-A', priority: 32768, mac: '00:1A:2B:3C:4D:01' },
+          { id: 'SW-B', priority: 4096, mac: '00:1A:2B:3C:4D:02', isRoot: true },
+          { id: 'SW-C', priority: 32768, mac: '00:1A:2B:3C:4D:03', blockedPort: 'Gi0/1' },
+        ],
+        links: [
+          { from: 'SW-A', to: 'SW-B', status: 'UP', cost: 4 },
+          { from: 'SW-B', to: 'SW-C', status: 'UP', cost: 4 },
+          { from: 'SW-A', to: 'SW-C', status: 'BLOCKED', cost: 4 },
+        ],
+      },
+      tasks: [
+        'Execute `show spanning-tree` to inspect Bridge IDs and port roles.',
+        'Identify which port is in the BLK (Blocking) state and explain why.',
+        'Simulate link failure between SW-B and SW-C and verify reconvergence.',
+      ],
+    },
+  },
 ];
