@@ -1,56 +1,50 @@
 # NetVision Master Development Roadmap 🛣️
 
-This document outlines the execution phases for building **NetVision**.
+**Platform Version**: 1.0.0 (Public Beta)
+**Live Application**: [https://netvision-three.vercel.app/](https://netvision-three.vercel.app/)
+**Staging Backend**: [https://netvision-backend-staging.onrender.com](https://netvision-backend-staging.onrender.com)
 
 ---
 
-## 📌 Phase 1: Architecture & Monorepo Foundation ✅
-- [x] Initialize Monorepo structure (`frontend`, `backend`, `packages`).
-- [x] Configure Tailwind CSS, TypeScript, ESLint, Prettier, `.gitignore`.
-- [x] Set up Docker Compose for local PostgreSQL 16 & Redis 7 services.
-- [x] Define core Prisma database schema (User, Role, Course, Module, Lesson, Quiz, Progress, Certificate, SimulationState).
-- [x] Define global design tokens & dark-mode-first aesthetic system (Linear + Cisco inspired).
+## 📌 Phase 1: Core Architecture & Monorepo Foundation ✅
+- [x] Pure `pnpm` monorepo structure (`frontend`, `backend`, `packages/shared`, `packages/simulation-engine`, `packages/ui`).
+- [x] Turborepo task pipeline configuration and caching.
+- [x] Prisma 5 ORM with PostgreSQL database schema and migrations.
+- [x] Dark-mode-first cyber aesthetic design system with Tailwind CSS and Framer Motion.
 
 ---
 
-## 📌 Phase 2: Landing Page & Reusable UI Design System
-- [ ] Build Apple & Linear-inspired Hero Section with dynamic packet flow visualizer.
-- [ ] Develop interactive feature overview components & interactive sample demo card.
-- [ ] Create responsive navbar, footer, course preview cards, and stats visualizers.
+## 📌 Phase 2: Core Learning Engine & Curriculum ✅
+- [x] 16-Course progressive curriculum architecture (NET-101 to NET-404).
+- [x] Multi-modal lesson structure (analogy, simple explanation, technical explanation, cheatsheet).
+- [x] Interactive simulation engines (TCP 3-way handshake, Subnetting, ARP, DNS, DHCP, L3 routing).
+- [x] 38 Guided interactive CLI practice labs.
+- [x] 38 Mastery quizzes with 50 questions across Bloom's cognitive taxonomy.
+- [x] Deterministic in-memory simulated network sandbox (`SimulatedSandboxProvider`).
 
 ---
 
-## 📌 Phase 3: Authentication & Security Architecture
-- [ ] Implement NestJS Auth Module (Argon2 password hashing, JWT access/refresh tokens in HttpOnly cookies).
-- [ ] Build Next.js Auth pages (`/login`, `/register`) with interactive state validation.
-- [ ] Set up Role-Based Access Control (RBAC) & Rate Limiting protection.
+## 📌 Phase 3: Identity, Progress & Gamification ✅
+- [x] Argon2id password hashing and stateless JWT authentication.
+- [x] Google and GitHub OAuth 2.0 integration.
+- [x] Guest-first anonymous learner identity (`X-Anonymous-ID`) with atomic progress claiming.
+- [x] 10 Automated achievement badge unlocks across 6 categories.
+- [x] Verifiable digital certificate generation (`NETVISION-CERT-FOUNDATIONS`) with public validation.
+- [x] Public beta zero-friction authentication (`EMAIL_VERIFICATION_ENABLED=false`).
 
 ---
 
-## 📌 Phase 4: Learner Dashboard & Course Catalog System
-- [ ] Build user welcome header, active progress tracker, recent lessons, and achievements showcase.
-- [ ] Develop course catalog filterable by topic (Fundamentals, Protocols, Routing, Security).
+## 📌 Phase 4: Active Milestones (Current Focus) 🚀
+- [ ] **Search Engine Optimization (SEO)**: Dynamic XML sitemap, metadata tags, OpenGraph cards, and JSON-LD schema markup.
+- [ ] **Curriculum Expansion**: Complete full lesson bodies and interactive visualizers for NET-302 (STP) and NET-304 (OSPF).
+- [ ] **Assessment Pool Expansion**: Expand question bank from 50 to 150+ questions across all 16 courses.
+- [ ] **Multi-Device Topology Canvas**: Interactive drag-and-drop canvas builder using `@xyflow/react`.
+- [ ] **Production Email Verification**: Activate live Resend HTTPS API email delivery with custom verified domain.
 
 ---
 
-## 📌 Phase 5: Interactive Lesson Viewer & Quiz Engine
-- [ ] Implement multi-stage lesson viewer (Theory -> Interactive Visual -> Practice -> Quiz).
-- [ ] Build interactive quiz system with instant visual feedback and score calculation.
-
----
-
-## 📌 Phase 6: Core Simulation Engine & Packet Animation Engine
-- [ ] Build dynamic packet animator for ARP, DNS lookup, TCP 3-way handshake, and ICMP Ping.
-- [ ] Create interactive simulation controls (Play, Pause, Step-Forward, Speed Control, Packet Inspector).
-
----
-
-## 📌 Phase 7: Interactive Networking Sandbox
-- [ ] Implement drag-and-drop canvas (`@xyflow/react`) supporting Routers, Switches, Firewalls, PCs, Servers.
-- [ ] Allow link creation, IP/subnet configuration, packet dispatching, and break/repair scenarios.
-
----
-
-## 📌 Phase 8: Certificates, Achievements, and Admin System
-- [ ] Generate downloadable SVG/PDF certificates upon course completion.
-- [ ] Admin dashboard for course management, user analytics, and system performance monitoring.
+## 📌 Phase 5: Advanced & Enterprise Expansion 🔮
+- [ ] **Teacher & Classroom Portal**: Cohort analytics, classroom progress monitoring, and assignment dispatch (`Role.TEACHER`).
+- [ ] **Deep Troubleshooting Incidents**: Complex multi-hop break-and-repair scenarios with packet loss and MTU blackhole diagnostics.
+- [ ] **Advanced Specializations**: Cloud VPC Peering, Kubernetes CNI networking, and Snort/Suricata IDS lab modules.
+- [ ] **Interactive Packet Generator**: Custom packet crafter (Ethernet/IP/TCP raw headers) with simulated wire playback.
