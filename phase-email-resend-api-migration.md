@@ -1,183 +1,181 @@
-# NetVision — Resend HTTPS Email API Migration Report
+# NetVision — Resend HTTPS Email API Migration & NestJS DI Report
 
-**Target Environment**: Production (Render Free Tier) & Development  
-**Migration Scope**: Production Outbound Email Delivery via Resend HTTPS REST API SDK  
-**Documentation Version**: 1.0.0
+**Target Environment**: Production (Render Free Tier) & Development
+**Migration Scope**: Production Outbound Email Delivery via Resend HTTPS REST API & NestJS Dependency Injection Architecture
+**Documentation Version**: 2.0.0
 
 ---
 
-## 1. Architecture
+## 1. Executive Summary & DI Root Cause
 
-NetVision uses an abstracted, pluggable email architecture allowing clean provider delegation based on execution mode.
+### Root Cause of NestJS Startup Crash:
+When `EmailService` was refactored to accept `providerOverride?: EmailProvider` in its constructor without an explicit injection token, TypeScript's `emitDecoratorMetadata` emitted parameter metadata as `[ConfigService, Object]` because the `EmailProvider` interface is erased at runtime. NestJS attempted to resolve a provider for the generic `Object` class token at index 1 and crashed during application startup:
+```text
+Nest can't resolve dependencies of the EmailService (ConfigService, ?).
+Please make sure that the argument Object at index [1] is available in the MailModule context.
+```
+
+### Dependency Injection Resolution:
+1. Created an explicit injection token: `export const EMAIL_PROVIDER = Symbol('EMAIL_PROVIDER');`.
+2. Created a dedicated provider factory (`emailProviderFactory`) registered in `MailModule` that resolves `EMAIL_PROVIDER` based on `ConfigService` (`NODE_ENV`, `EMAIL_PROVIDER`, `SMTP_*`).
+3. Created `DevConsoleProvider` implementing `EmailProvider` to cleanly handle development console fallback.
+4. Injected `@Inject(EMAIL_PROVIDER) private readonly provider: EmailProvider` in `EmailService`.
+
+---
+
+## 2. Architecture & Dependency Injection Wiring
 
 ```
-                      ┌─────────────────────────────────┐
-                      │          AuthService            │
-                      │ (register, resendOtp, forgotPw) │
-                      └────────────────┬────────────────┘
-                                       │
-                                       ▼
-                      ┌─────────────────────────────────┐
-                      │          EmailService           │
-                      │ (templates, contracts, routing) │
-                      └────────────────┬────────────────┘
-                                       │
-                ┌──────────────────────┴──────────────────────┐
-                │                                             │
-     [NODE_ENV === 'production']                 [NODE_ENV !== 'production']
-                │                                             │
-                ▼                                             ├─► EMAIL_PROVIDER=resend ──► ResendProvider
-         ResendProvider                                       │                            (HTTPS API)
-  (HTTPS REST API: `resend` SDK)                              ├─► SMTP configured?     ──► SmtpProvider
-                                                              │                            (Nodemailer)
-                                                              └─► Default / Unconf     ──► DevConsoleFallback
+                        ┌─────────────────────────────────────────┐
+                        │              ConfigService              │
+                        │ (reads NODE_ENV, RESEND_*, SMTP_*, etc) │
+                        └────────────────────┬────────────────────┘
+                                             │
+                                             ▼
+                        ┌─────────────────────────────────────────┐
+                        │          emailProviderFactory           │
+                        │        (provides: EMAIL_PROVIDER)       │
+                        └────────────────────┬────────────────────┘
+                                             │
+               ┌─────────────────────────────┼─────────────────────────────┐
+               │                             │                             │
+    [NODE_ENV === 'production']   [EMAIL_PROVIDER === 'resend']   [SMTP configured]
+               │                             │                             │
+               ▼                             ▼                             ▼
+        ResendProvider                ResendProvider                 SmtpProvider
+   (HTTPS API: `resend` SDK)     (HTTPS API: `resend` SDK)           (Nodemailer)
+               │                             │                             │
+               └─────────────────────────────┼─────────────────────────────┘
+                                             │ [otherwise: DevConsoleProvider]
+                                             ▼
+                                ┌─────────────────────────┐
+                                │ @Inject(EMAIL_PROVIDER) │
+                                │      EmailService       │
+                                └─────────────────────────┘
 ```
 
 ### Components:
-- **`EmailProvider` Interface (`src/mail/interfaces/email-provider.interface.ts`)**: Exposes `name`, `isConfigured()`, `getMissingVariables()`, `sendEmail(options)`.
-- **`ResendProvider` (`src/mail/providers/resend.provider.ts`)**: Dispatches email over HTTPS using the official `resend` Node.js SDK (`import { Resend } from 'resend'`). Handles network errors and API errors safely without throwing uncaught exceptions.
+- **`EMAIL_PROVIDER` Token (`src/mail/interfaces/email-provider.interface.ts`)**: `Symbol('EMAIL_PROVIDER')` used for type-safe NestJS DI resolution.
+- **`emailProviderFactory` (`src/mail/mail.module.ts`)**: Factory provider that instantiates the appropriate concrete `EmailProvider` based on environment variables.
+- **`ResendProvider` (`src/mail/providers/resend.provider.ts`)**: Dispatches email over HTTPS using the official `resend` Node.js SDK. Catches and sanitizes API/network errors without uncaught throws.
 - **`SmtpProvider` (`src/mail/providers/smtp.provider.ts`)**: Encapsulates standard SMTP delivery using `nodemailer`.
-- **`EmailService` (`src/mail/email.service.ts`)**: Provides business-layer transactional templates (6-digit OTP with 10-minute expiry, password reset with 15-minute expiry, diagnostic test) and routes to the appropriate provider.
+- **`DevConsoleProvider` (`src/mail/providers/dev-console.provider.ts`)**: Implements `EmailProvider` for safe development console logging when no transport is configured.
+- **`EmailService` (`src/mail/email.service.ts`)**: Provider-agnostic service receiving `@Inject(EMAIL_PROVIDER)` and orchestrating transactional email templates (6-digit OTP with 10-minute expiry, password reset with 15-minute expiry, diagnostic tests).
 
 ---
 
-## 2. Provider Selection Logic
+## 3. Provider Selection Behavior
 
-Provider resolution is isolated in `EmailService.initProvider()`:
+The `emailProviderFactory` evaluates environment configuration in order of precedence:
 
 1. **Production Mode (`NODE_ENV === 'production'`)**:
-   - Strictly delegates to `ResendProvider`.
+   - Strictly instantiates `ResendProvider`.
    - Never initializes or attempts Nodemailer/SMTP connections.
-   - Requires `RESEND_API_KEY`. Reads `RESEND_FROM_EMAIL` (defaulting to `"NetVision <onboarding@resend.dev>"`).
+   - Requires `RESEND_API_KEY`. Defaults sender to `"NetVision <onboarding@resend.dev>"` unless overridden by `RESEND_FROM_EMAIL`.
 
 2. **Development / Test Mode (`NODE_ENV !== 'production'`)**:
-   - If `EMAIL_PROVIDER=resend` is explicitly configured:
-     - Delegates to `ResendProvider` for intentional manual local testing.
-   - If `EMAIL_PROVIDER=smtp` OR (no `EMAIL_PROVIDER` specified AND `SMTP_HOST && SMTP_USER && SMTP_PASS` are provided):
-     - Delegates to `SmtpProvider`.
-   - Default / Otherwise:
-     - Falls back to `DevConsoleFallback` (`this.provider = null`).
-     - **Safety Guarantee**: Does **NOT** automatically send real emails via Resend merely because `RESEND_API_KEY` is present in local `.env`.
+   - **Explicit Resend Override**: If `EMAIL_PROVIDER=resend`, instantiates `ResendProvider` for intentional manual local testing.
+   - **SMTP Mode**: If `EMAIL_PROVIDER=smtp` OR (`SMTP_HOST && SMTP_USER && SMTP_PASS` are provided), instantiates `SmtpProvider`.
+   - **Default Safe Fallback**: If neither is configured, instantiates `DevConsoleProvider`.
+   - **Safety Guarantee**: Does **NOT** automatically send real emails via Resend merely because `RESEND_API_KEY` is present in local `.env`.
 
 ---
 
-## 3. Production Behavior
-
-- Render Free aggressively blocks outbound TCP traffic on ports 25, 465, and 587.
-- NetVision production exclusively dispatches all outbound transactional emails (registration OTP, resend OTP, unverified login OTP, password reset) via HTTPS POST to `https://api.resend.com/emails`.
-- If `RESEND_API_KEY` is missing in production, calls safely return `{ success: false, error: 'Email provider not configured. RESEND_API_KEY is required in production.' }` without crashing or attempting SMTP.
-- Secret sanitization: API keys, raw OTP codes, password reset tokens, and Authorization headers are never logged.
-
----
-
-## 4. Development Behavior
-
-- By default, development does not send live emails unless explicitly configured.
-- When unconfigured, OTPs and reset URLs are routed to local console logs for seamless development and testing.
-- If SMTP credentials are provided (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`), local emails are delivered through the configured SMTP server (e.g. Mailtrap).
-- If manual local verification with Resend is required, developers set `EMAIL_PROVIDER=resend` in `backend/.env`.
-
----
-
-## 5. Environment Variables
-
-### Template (`backend/.env.example`):
-```env
-# ==============================================================================
-# EMAIL DELIVERY CONFIGURATION
-# ==============================================================================
-# Resend HTTPS Email API (Required in Production on Render Free)
-RESEND_API_KEY=
-RESEND_FROM_EMAIL="NetVision <onboarding@resend.dev>"
-
-# Provider selection override (Optional for local testing: 'resend' or 'smtp')
-# Default behavior in development: uses SMTP if configured, otherwise DevConsoleFallback.
-# Set EMAIL_PROVIDER=resend to explicitly test Resend locally.
-EMAIL_PROVIDER=
-
-# SMTP Server Configuration (Optional for local development / self-hosted environments)
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_USER=
-SMTP_PASS=
-SMTP_FROM="NetVision Platform" <no-reply@netvision.edu>
-SMTP_REJECT_UNAUTHORIZED=true
-```
-
----
-
-## 6. Files Changed
+## 4. Files Changed
 
 | File | Status | Description |
 |---|---|---|
 | `backend/package.json` | Modified | Added `resend` (v6.19.0) and `test:email:suite` npm script |
 | `backend/.env.example` | Modified | Added `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and documented `EMAIL_PROVIDER` |
-| `backend/src/mail/interfaces/email-provider.interface.ts` | Created | Defined `EmailProvider`, `EmailDeliveryResult`, `SendEmailOptions`, and `EmailProviderStatus` |
-| `backend/src/mail/providers/resend.provider.ts` | Created | Resend HTTPS REST API provider implementation using official SDK |
-| `backend/src/mail/providers/smtp.provider.ts` | Created | Nodemailer SMTP provider implementation for local / self-hosted environments |
-| `backend/src/mail/email.service.ts` | Modified | Provider selection routing, safe `getProviderStatus()`, and transactional templates |
-| `backend/src/auth/auth.service.ts` | Modified | Integrated `sendVerificationOtp` with provider check and dev store alignment |
-| `backend/scripts/test-email.ts` | Modified | CLI verification utility updated with full provider diagnostic messaging |
-| `backend/scripts/test-email-suite.ts` | Created | 13-test automated suite covering all 12 test requirements with mocked SDK |
+| `backend/src/mail/interfaces/email-provider.interface.ts` | Modified | Defined `EmailProvider`, `EmailDeliveryResult`, `SendEmailOptions`, `EmailProviderStatus`, and `EMAIL_PROVIDER` token |
+| `backend/src/mail/providers/dev-console.provider.ts` | **Created** | Concrete fallback provider implementing `EmailProvider` for unconfigured development |
+| `backend/src/mail/providers/resend.provider.ts` | **Created** | Resend HTTPS REST API provider implementation using official SDK |
+| `backend/src/mail/providers/smtp.provider.ts` | **Created** | Nodemailer SMTP provider implementation for local / self-hosted environments |
+| `backend/src/mail/mail.module.ts` | Modified | Implemented `emailProviderFactory` registering `EMAIL_PROVIDER` with NestJS DI |
+| `backend/src/mail/email.service.ts` | Modified | Updated to inject `@Inject(EMAIL_PROVIDER) private readonly provider: EmailProvider` |
+| `backend/src/auth/auth.service.ts` | Modified | Aligned dev store checks with `emailService.isConfigured()` |
+| `backend/scripts/test-email.ts` | Modified | Updated CLI verification tool with full provider diagnostic messaging |
+| `backend/scripts/test-email-suite.ts` | **Created** | Comprehensive 14-test suite covering Nest DI resolution, factory matrix, and mocked SDK |
 | `pnpm-lock.yaml` | Modified | Updated lockfile with `resend` dependency graph |
 
 ---
 
-## 7. Tests
+## 5. Verification Results
 
-Automated test suite (`backend/scripts/test-email-suite.ts`):
+### A. Automated Email & Nest DI Test Suite
 Command: `pnpm --filter netvision-backend test:email:suite`
 
-All 13 test cases passed with zero network requests (Resend SDK mocked):
-1. **ResendProvider initialization**: Initializes with API key and custom sender.
-2. **Missing RESEND_API_KEY**: Safely reports missing variable and fails gracefully.
-3. **Missing RESEND_FROM_EMAIL**: Safely defaults to `"NetVision <onboarding@resend.dev>"` and supports custom sender overrides.
-4. **Successful Resend send (Mocked SDK)**: Validates full payload mapping (to, from, subject, html, text) and messageId return.
-5. **Resend API error handling**: Validates API error objects and network exceptions without uncaught throws.
-6. **Production mode blocks SMTP**: Ensures production strictly uses Resend HTTPS API and never attempts SMTP.
-7. **Development mode uses SMTP when configured**: Validates Nodemailer transport activation in dev.
-8. **Development mode fallback**: Safely routes to `DevConsoleFallback` when SMTP is unconfigured.
-9. **Development does NOT automatically use Resend**: Verifies presence of `RESEND_API_KEY` in dev does NOT send emails without `EMAIL_PROVIDER=resend`.
-10. **EMAIL_PROVIDER=resend explicit opt-in**: Verifies explicit override selects Resend for local testing.
-11. **Safe provider status reporting (`getProviderStatus`)**: Verifies safe output across all modes without secret leakage.
-12. **No secrets in logs/errors**: Verifies API keys, passwords, OTPs, and reset tokens never appear in diagnostics or error messages.
-13. **Template Content & Contract Integrity**: Verifies OTP (6 digits, 10 min expiry) and reset token (15 min expiry) HTML/text contracts and NetVision branding.
+```text
+================================================================
+🧪 NETVISION RESEND HTTPS EMAIL API MIGRATION & NEST DI TEST SUITE
+================================================================
 
----
+[TEST 1] NestJS Dependency Injection Resolution & Factory Verification
+  ✓ Passed: NestJS DI container resolves EmailService and EMAIL_PROVIDER token without Object/unknown errors
 
-## 8. Typecheck
+[TEST 2] EmailProviderFactory Decision Matrix (Production, SMTP, Dev Fallback, Explicit)
+  ✓ Passed: EmailProviderFactory accurately selects the correct provider across all environment configurations
 
+[TEST 3] ResendProvider Initialization with API Key & Custom Sender
+  ✓ Passed: ResendProvider initializes correctly with key and sender
+
+[TEST 4] Missing RESEND_API_KEY Handling & Safe Failure
+  ✓ Passed: Missing API key fails safely with clear diagnostics
+
+[TEST 5] Missing RESEND_FROM_EMAIL Safe Fallback & Custom Override
+  ✓ Passed: Sender configuration safely falls back to default and supports custom domains
+
+[TEST 6] Successful Resend Email Dispatch (Mocked SDK)
+  ✓ Passed: Email dispatched successfully via Resend with correct payload
+
+[TEST 7] Resend API Error & Exception Handling
+  ✓ Passed: Resend API errors and network exceptions handled safely
+
+[TEST 8] Production Mode Exclusively Uses Resend & Blocks SMTP
+  ✓ Passed: Production strictly enforces Resend HTTPS API and ignores SMTP
+
+[TEST 9] Development Mode Uses SMTP When Configured
+  ✓ Passed: Development mode utilizes SMTP transport when configured
+
+[TEST 10] Development Mode Falls Back Safely to DevConsoleProvider When SMTP is Absent
+  ✓ Passed: Development mode safely falls back to console provider without sending real emails
+
+[TEST 11] Safe Provider Status Reporting via getProviderStatus()
+  ✓ Passed: getProviderStatus() returns accurate, safe diagnostic metadata across all modes
+
+[TEST 12] Security & Sanitization: No Secrets in Logs, Errors, or Diagnostics
+  ✓ Passed: Zero secrets, OTP codes, reset tokens, or credentials leak in diagnostics
+
+[TEST 13] Email Template Content & Contract Integrity (OTP & Password Reset)
+  ✓ Passed: Email templates and response contracts completely preserved
+
+[TEST 14] Full Nest Application Bootstrap & MailModule DI Context
+  ✓ Passed: Nest Application bootstraps cleanly without dependency injection errors
+
+================================================================
+🎉 ALL 14 EMAIL MIGRATION, NEST DI & BOOTSTRAP TESTS PASSED!
+================================================================
+```
+
+### B. TypeScript Compilation
 Command: `pnpm --filter netvision-backend typecheck`
-- **Output**: `$ tsc --noEmit`
 - **Result**: `Exit code 0` (0 errors)
 
----
-
-## 9. Build
-
+### C. NestJS Production Build
 Command: `pnpm --filter netvision-backend build`
-- **Output**: `$ nest build`
 - **Result**: `Exit code 0` (Clean compilation to `backend/dist/`)
 
----
+### D. Identity & Security Regression Suites
+- `scripts/test-phase2-identity.ts`: 5/5 assertions passed
+- `scripts/test-deployment-readiness.ts`: 12/12 assertions passed
 
-## 10. Regression Results
-
-All existing authentication, identity, and deployment readiness test suites passed:
-- `scripts/test-phase2-identity.ts`: 5/5 assertions passed (Optional JWT, Anonymous ID resolution, user precedence).
-- `scripts/test-deployment-readiness.ts`: 12/12 assertions passed (Production config validation, database health, migration scripts, sandbox isolation).
-- `scripts/test-email-suite.ts`: 13/13 assertions passed.
-
----
-
-## 11. git diff --check
-
+### E. Git Syntax & Formatting Check
 Command: `git diff --check`
-- **Result**: `Exit code 0` (No whitespace errors, merge markers, or formatting issues)
+- **Result**: `Exit code 0` (No whitespace or syntax errors)
 
 ---
 
-## 12. Manual Render Configuration Steps
+## 6. Manual Render Configuration Steps
 
 To configure production email delivery in Render:
 
@@ -187,8 +185,4 @@ To configure production email delivery in Render:
 4. Add the following environment variables:
    - `RESEND_API_KEY`: `re_xxxxxxxxxxxxxxxxxxxxxxxx` (Your production Resend API Key)
    - `RESEND_FROM_EMAIL`: `"NetVision" <onboarding@resend.dev>` (or your verified domain sender e.g. `"NetVision" <no-reply@netvision.app>`)
-5. Save changes (Render will trigger a redeploy).
-6. **Manual Smoke Test Flow**:
-   - Trigger a user registration or password reset on the production deployment.
-   - Verify the HTTPS API call reaches Resend in the [Resend Logs](https://resend.com/emails).
-   - Check the destination email inbox for the branded NetVision verification email.
+5. Save changes (Render will redeploy).

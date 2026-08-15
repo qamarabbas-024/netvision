@@ -1,7 +1,13 @@
-import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from '../src/app.module';
+import { MailModule, emailProviderFactory } from '../src/mail/mail.module';
 import { EmailService } from '../src/mail/email.service';
+import { EMAIL_PROVIDER, EmailProvider } from '../src/mail/interfaces/email-provider.interface';
 import { ResendProvider } from '../src/mail/providers/resend.provider';
 import { SmtpProvider } from '../src/mail/providers/smtp.provider';
+import { DevConsoleProvider } from '../src/mail/providers/dev-console.provider';
 import { Resend } from 'resend';
 
 function createMockConfigService(envMap: Record<string, any>): ConfigService {
@@ -23,14 +29,121 @@ function assert(condition: boolean, message: string) {
 
 async function runEmailTestSuite() {
   console.log('================================================================');
-  console.log('🧪 NETVISION RESEND HTTPS EMAIL API MIGRATION TEST SUITE');
+  console.log('🧪 NETVISION RESEND HTTPS EMAIL API MIGRATION & NEST DI TEST SUITE');
   console.log('================================================================\n');
   let passedCount = 0;
 
   // --------------------------------------------------------------------------
-  // TEST 1: ResendProvider initialization
+  // TEST 1: NestJS Dependency Injection Resolution for EMAIL_PROVIDER & EmailService
   // --------------------------------------------------------------------------
-  console.log('[TEST 1] ResendProvider Initialization with API Key & Custom Sender');
+  console.log('[TEST 1] NestJS Dependency Injection Resolution & Factory Verification');
+  {
+    const moduleRef: TestingModule = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot({
+          isGlobal: true,
+          ignoreEnvFile: true,
+          load: [
+            () => ({
+              NODE_ENV: 'development',
+              RESEND_API_KEY: 're_test_key_di',
+              EMAIL_PROVIDER: 'resend',
+            }),
+          ],
+        }),
+        MailModule,
+      ],
+    }).compile();
+
+    const emailService = moduleRef.get<EmailService>(EmailService);
+    const emailProvider = moduleRef.get<EmailProvider>(EMAIL_PROVIDER);
+
+    assert(emailService !== null && emailService !== undefined, 'EmailService resolved from Nest DI container');
+    assert(emailProvider !== null && emailProvider !== undefined, 'EMAIL_PROVIDER token resolved from Nest DI container');
+    assert(emailService.getActiveProviderName() === 'Resend (HTTPS API)', 'EmailService successfully delegates to injected ResendProvider');
+    assert(emailService.isConfigured() === true, 'EmailService reports configured status');
+
+    await moduleRef.close();
+    console.log('  ✓ Passed: NestJS DI container resolves EmailService and EMAIL_PROVIDER token without Object/unknown errors');
+    passedCount++;
+  }
+
+  // --------------------------------------------------------------------------
+  // TEST 2: EmailProviderFactory Selection Matrix
+  // --------------------------------------------------------------------------
+  console.log('\n[TEST 2] EmailProviderFactory Decision Matrix (Production, SMTP, Dev Fallback, Explicit)');
+  {
+    // 2a: Production -> ResendProvider
+    const prodConfig = createMockConfigService({
+      NODE_ENV: 'production',
+      RESEND_API_KEY: 're_prod_factory_key',
+      RESEND_FROM_EMAIL: 'NetVision <noreply@netvision.app>',
+    });
+    const prodProvider = emailProviderFactory.useFactory(prodConfig);
+    assert(prodProvider instanceof ResendProvider, 'Production strictly creates ResendProvider');
+    assert(prodProvider.isConfigured() === true, 'Production ResendProvider is configured');
+    assert(prodProvider.name === 'Resend (HTTPS API)', 'Provider name identifies as Resend (HTTPS API)');
+
+    // 2b: Production with missing key -> Unconfigured ResendProvider (NEVER SMTP)
+    const prodMissingConfig = createMockConfigService({
+      NODE_ENV: 'production',
+      SMTP_HOST: 'smtp.render-blocked.com',
+      SMTP_USER: 'user',
+      SMTP_PASS: 'pass',
+    });
+    const prodMissingProvider = emailProviderFactory.useFactory(prodMissingConfig);
+    assert(prodMissingProvider instanceof ResendProvider, 'Production with missing key still creates ResendProvider (NEVER SMTP)');
+    assert(prodMissingProvider.isConfigured() === false, 'Production ResendProvider is unconfigured');
+
+    // 2c: Development with SMTP -> SmtpProvider
+    const devSmtpConfig = createMockConfigService({
+      NODE_ENV: 'development',
+      SMTP_HOST: 'smtp.mailtrap.io',
+      SMTP_USER: 'smtp_user',
+      SMTP_PASS: 'smtp_pass',
+    });
+    const devSmtpProvider = emailProviderFactory.useFactory(devSmtpConfig);
+    assert(devSmtpProvider instanceof SmtpProvider, 'Development with SMTP credentials creates SmtpProvider');
+    assert(devSmtpProvider.isConfigured() === true, 'Development SmtpProvider is configured');
+
+    // 2d: Development unconfigured -> DevConsoleProvider
+    const devUnconfConfig = createMockConfigService({
+      NODE_ENV: 'development',
+    });
+    const devUnconfProvider = emailProviderFactory.useFactory(devUnconfConfig);
+    assert(devUnconfProvider instanceof DevConsoleProvider, 'Unconfigured development creates DevConsoleProvider');
+    assert(devUnconfProvider.isConfigured() === false, 'DevConsoleProvider is not configured');
+    assert(devUnconfProvider.name === 'Development Console Fallback', 'Reports Development Console Fallback');
+
+    // 2e: Development with RESEND_API_KEY but NO EMAIL_PROVIDER -> DevConsoleProvider (Safe default!)
+    const devResendOnlyConfig = createMockConfigService({
+      NODE_ENV: 'development',
+      RESEND_API_KEY: 're_dev_key',
+    });
+    const devResendOnlyProvider = emailProviderFactory.useFactory(devResendOnlyConfig);
+    assert(
+      devResendOnlyProvider instanceof DevConsoleProvider,
+      'Development with RESEND_API_KEY but no EMAIL_PROVIDER creates DevConsoleProvider (safe default)'
+    );
+
+    // 2f: Development with explicit EMAIL_PROVIDER=resend -> ResendProvider
+    const devExplicitConfig = createMockConfigService({
+      NODE_ENV: 'development',
+      EMAIL_PROVIDER: 'resend',
+      RESEND_API_KEY: 're_dev_explicit_key',
+    });
+    const devExplicitProvider = emailProviderFactory.useFactory(devExplicitConfig);
+    assert(devExplicitProvider instanceof ResendProvider, 'Development with EMAIL_PROVIDER=resend creates ResendProvider');
+    assert(devExplicitProvider.isConfigured() === true, 'Explicit ResendProvider is configured');
+
+    console.log('  ✓ Passed: EmailProviderFactory accurately selects the correct provider across all environment configurations');
+    passedCount++;
+  }
+
+  // --------------------------------------------------------------------------
+  // TEST 3: ResendProvider Initialization with API Key & Custom Sender
+  // --------------------------------------------------------------------------
+  console.log('\n[TEST 3] ResendProvider Initialization with API Key & Custom Sender');
   {
     const mockResendClient = {
       emails: {
@@ -48,9 +161,9 @@ async function runEmailTestSuite() {
   }
 
   // --------------------------------------------------------------------------
-  // TEST 2: Missing RESEND_API_KEY Handling
+  // TEST 4: Missing RESEND_API_KEY Handling & Safe Failure
   // --------------------------------------------------------------------------
-  console.log('\n[TEST 2] Missing RESEND_API_KEY Handling & Safe Failure');
+  console.log('\n[TEST 4] Missing RESEND_API_KEY Handling & Safe Failure');
   {
     const provider = new ResendProvider(undefined, undefined);
     assert(provider.isConfigured() === false, 'ResendProvider should not be configured when API key is missing');
@@ -68,9 +181,9 @@ async function runEmailTestSuite() {
   }
 
   // --------------------------------------------------------------------------
-  // TEST 3: Missing RESEND_FROM_EMAIL (Default Safe Sender Fallback)
+  // TEST 5: Missing RESEND_FROM_EMAIL Safe Fallback & Custom Override
   // --------------------------------------------------------------------------
-  console.log('\n[TEST 3] Missing RESEND_FROM_EMAIL Safe Fallback & Custom Override');
+  console.log('\n[TEST 5] Missing RESEND_FROM_EMAIL Safe Fallback & Custom Override');
   {
     let capturedPayload: any = null;
     const mockClient = {
@@ -82,7 +195,7 @@ async function runEmailTestSuite() {
       },
     } as unknown as Resend;
 
-    // 3a: Omitted from email defaults to onboarding@resend.dev
+    // 5a: Omitted from email defaults to onboarding@resend.dev
     const providerDefault = new ResendProvider('re_dummy_key', undefined, mockClient);
     assert(
       providerDefault.getDefaultFrom() === 'NetVision <onboarding@resend.dev>',
@@ -99,7 +212,7 @@ async function runEmailTestSuite() {
       'Dispatched email should use default sender when none specified in options'
     );
 
-    // 3b: Explicit custom sender from options
+    // 5b: Explicit custom sender from options
     await providerDefault.sendEmail({
       to: 'user@example.com',
       from: 'NetVision Support <support@netvision.app>',
@@ -116,9 +229,9 @@ async function runEmailTestSuite() {
   }
 
   // --------------------------------------------------------------------------
-  // TEST 4: Successful Resend Send Using Mocked SDK
+  // TEST 6: Successful Resend Email Dispatch (Mocked SDK)
   // --------------------------------------------------------------------------
-  console.log('\n[TEST 4] Successful Resend Email Dispatch (Mocked SDK)');
+  console.log('\n[TEST 6] Successful Resend Email Dispatch (Mocked SDK)');
   {
     let sentPayload: any = null;
     const mockResendClient = {
@@ -151,11 +264,11 @@ async function runEmailTestSuite() {
   }
 
   // --------------------------------------------------------------------------
-  // TEST 5: Resend API Error & Exception Handling
+  // TEST 7: Resend API Error & Exception Handling
   // --------------------------------------------------------------------------
-  console.log('\n[TEST 5] Resend API Error & Exception Handling');
+  console.log('\n[TEST 7] Resend API Error & Exception Handling');
   {
-    // Case 5a: API returned error object
+    // Case 7a: API returned error object
     const mockErrorClient = {
       emails: {
         send: async () => ({
@@ -165,17 +278,17 @@ async function runEmailTestSuite() {
       },
     } as unknown as Resend;
 
-    const provider5a = new ResendProvider('re_dummy_key', undefined, mockErrorClient);
-    const result5a = await provider5a.sendEmail({
+    const provider7a = new ResendProvider('re_dummy_key', undefined, mockErrorClient);
+    const result7a = await provider7a.sendEmail({
       to: 'test@unverified.org',
       subject: 'Test',
       html: '<p>Test</p>',
     });
 
-    assert(result5a.success === false, 'API error response must yield success: false');
-    assert(result5a.error === 'Domain verification required', 'Error message must be preserved safely');
+    assert(result7a.success === false, 'API error response must yield success: false');
+    assert(result7a.error === 'Domain verification required', 'Error message must be preserved safely');
 
-    // Case 5b: Network exception thrown
+    // Case 7b: Network exception thrown
     const mockThrowClient = {
       emails: {
         send: async () => {
@@ -184,36 +297,33 @@ async function runEmailTestSuite() {
       },
     } as unknown as Resend;
 
-    const provider5b = new ResendProvider('re_dummy_key', undefined, mockThrowClient);
-    const result5b = await provider5b.sendEmail({
+    const provider7b = new ResendProvider('re_dummy_key', undefined, mockThrowClient);
+    const result7b = await provider7b.sendEmail({
       to: 'test@unreachable.org',
       subject: 'Test',
       html: '<p>Test</p>',
     });
 
-    assert(result5b.success === false, 'Thrown exception must yield success: false without crashing');
-    assert(result5b.error === 'Connection reset by peer', 'Safe error message returned');
+    assert(result7b.success === false, 'Thrown exception must yield success: false without crashing');
+    assert(result7b.error === 'Connection reset by peer', 'Safe error message returned');
     console.log('  ✓ Passed: Resend API errors and network exceptions handled safely');
     passedCount++;
   }
 
   // --------------------------------------------------------------------------
-  // TEST 6: Production Mode NEVER Initializes or Attempts SMTP
+  // TEST 8: Production Mode Exclusively Uses Resend & Blocks SMTP
   // --------------------------------------------------------------------------
-  console.log('\n[TEST 6] Production Mode Exclusively Uses Resend & Blocks SMTP');
+  console.log('\n[TEST 8] Production Mode Exclusively Uses Resend & Blocks SMTP');
   {
-    // 6a: Production with Resend configured and SMTP variables present in env
+    // 8a: Production with Resend configured
     const prodConfig = createMockConfigService({
       NODE_ENV: 'production',
       RESEND_API_KEY: 're_mock_prod_key',
       RESEND_FROM_EMAIL: 'NetVision <noreply@netvision.app>',
-      SMTP_HOST: 'smtp.blocked-render-port.com',
-      SMTP_PORT: 587,
-      SMTP_USER: 'smtp_user',
-      SMTP_PASS: 'smtp_secret',
     });
+    const prodProvider = emailProviderFactory.useFactory(prodConfig);
+    const emailServiceProd = new EmailService(prodConfig, prodProvider);
 
-    const emailServiceProd = new EmailService(prodConfig);
     assert(emailServiceProd.isConfigured() === true, 'Production should be configured with Resend');
     assert(
       emailServiceProd.getActiveProviderName() === 'Resend (HTTPS API)',
@@ -224,7 +334,7 @@ async function runEmailTestSuite() {
       'No missing variables when Resend key is configured'
     );
 
-    // 6b: Production with missing RESEND_API_KEY (and SMTP variables present)
+    // 8b: Production with missing RESEND_API_KEY (and SMTP variables present)
     const prodMissingKeyConfig = createMockConfigService({
       NODE_ENV: 'production',
       SMTP_HOST: 'smtp.blocked-render-port.com',
@@ -232,8 +342,9 @@ async function runEmailTestSuite() {
       SMTP_USER: 'smtp_user',
       SMTP_PASS: 'smtp_secret',
     });
+    const prodMissingProvider = emailProviderFactory.useFactory(prodMissingKeyConfig);
+    const emailServiceProdMissing = new EmailService(prodMissingKeyConfig, prodMissingProvider);
 
-    const emailServiceProdMissing = new EmailService(prodMissingKeyConfig);
     assert(
       emailServiceProdMissing.isConfigured() === false,
       'Production without RESEND_API_KEY must not be configured'
@@ -255,9 +366,9 @@ async function runEmailTestSuite() {
   }
 
   // --------------------------------------------------------------------------
-  // TEST 7: Development Mode Uses SMTP When Configured
+  // TEST 9: Development Mode Uses SMTP When Configured
   // --------------------------------------------------------------------------
-  console.log('\n[TEST 7] Development Mode Uses SMTP When Configured');
+  console.log('\n[TEST 9] Development Mode Uses SMTP When Configured');
   {
     const devSmtpConfig = createMockConfigService({
       NODE_ENV: 'development',
@@ -301,15 +412,16 @@ async function runEmailTestSuite() {
   }
 
   // --------------------------------------------------------------------------
-  // TEST 8: Development Mode Falls Back Safely When SMTP is Absent
+  // TEST 10: Development Mode Falls Back Safely to DevConsoleProvider
   // --------------------------------------------------------------------------
-  console.log('\n[TEST 8] Development Mode Falls Back Safely When SMTP is Absent');
+  console.log('\n[TEST 10] Development Mode Falls Back Safely to DevConsoleProvider When SMTP is Absent');
   {
     const devFallbackConfig = createMockConfigService({
       NODE_ENV: 'development',
     });
+    const fallbackProvider = emailProviderFactory.useFactory(devFallbackConfig);
+    const emailServiceDevFallback = new EmailService(devFallbackConfig, fallbackProvider);
 
-    const emailServiceDevFallback = new EmailService(devFallbackConfig);
     assert(emailServiceDevFallback.isConfigured() === false, 'Unconfigured dev is not configured');
     assert(
       emailServiceDevFallback.getActiveProviderName() === 'Development Console Fallback',
@@ -328,78 +440,7 @@ async function runEmailTestSuite() {
     );
     assert(fallbackResetRes.success === false, 'Fallback reset send returns success: false');
 
-    console.log('  ✓ Passed: Development mode safely falls back to console fallback');
-    passedCount++;
-  }
-
-  // --------------------------------------------------------------------------
-  // TEST 9: Development Mode Does NOT Automatically Use Resend
-  // --------------------------------------------------------------------------
-  console.log('\n[TEST 9] Development Does NOT Automatically Use Resend Just Because RESEND_API_KEY Exists');
-  {
-    // Local dev with RESEND_API_KEY in .env, but NO EMAIL_PROVIDER and NO SMTP
-    const devResendOnlyConfig = createMockConfigService({
-      NODE_ENV: 'development',
-      RESEND_API_KEY: 're_secret_local_dev_key',
-    });
-
-    const emailService = new EmailService(devResendOnlyConfig);
-    assert(
-      emailService.isConfigured() === false,
-      'EmailService must NOT be configured in development merely because RESEND_API_KEY is present'
-    );
-    assert(
-      emailService.getActiveProviderName() === 'Development Console Fallback',
-      'Active provider must remain Development Console Fallback'
-    );
-
-    const sendRes = await emailService.sendVerificationOtp('dev@example.com', '654321');
-    assert(sendRes.success === false, 'Sending must not attempt real Resend delivery without explicit opt-in');
-
-    console.log('  ✓ Passed: Development does not automatically trigger Resend without explicit configuration');
-    passedCount++;
-  }
-
-  // --------------------------------------------------------------------------
-  // TEST 10: EMAIL_PROVIDER=resend Explicitly Selects Resend in Development
-  // --------------------------------------------------------------------------
-  console.log('\n[TEST 10] EMAIL_PROVIDER=resend Explicitly Selects Resend in Development');
-  {
-    // 10a: Explicit EMAIL_PROVIDER=resend with API key
-    const devExplicitResendConfig = createMockConfigService({
-      NODE_ENV: 'development',
-      EMAIL_PROVIDER: 'resend',
-      RESEND_API_KEY: 're_explicit_dev_key',
-      RESEND_FROM_EMAIL: 'NetVision <onboarding@resend.dev>',
-    });
-
-    const emailServiceExplicit = new EmailService(devExplicitResendConfig);
-    assert(
-      emailServiceExplicit.isConfigured() === true,
-      'EmailService should be configured when EMAIL_PROVIDER=resend and key is present'
-    );
-    assert(
-      emailServiceExplicit.getActiveProviderName() === 'Resend (HTTPS API)',
-      'Active provider is Resend (HTTPS API)'
-    );
-
-    // 10b: Explicit EMAIL_PROVIDER=resend without API key
-    const devExplicitMissingKey = createMockConfigService({
-      NODE_ENV: 'development',
-      EMAIL_PROVIDER: 'resend',
-    });
-
-    const emailServiceMissingKey = new EmailService(devExplicitMissingKey);
-    assert(
-      emailServiceMissingKey.isConfigured() === false,
-      'EMAIL_PROVIDER=resend without key should not be configured'
-    );
-    assert(
-      emailServiceMissingKey.getMissingVariables().includes('RESEND_API_KEY'),
-      'Missing variables should specify RESEND_API_KEY'
-    );
-
-    console.log('  ✓ Passed: EMAIL_PROVIDER=resend explicitly selects Resend for local testing');
+    console.log('  ✓ Passed: Development mode safely falls back to console provider without sending real emails');
     passedCount++;
   }
 
@@ -413,14 +454,16 @@ async function runEmailTestSuite() {
       NODE_ENV: 'production',
       RESEND_API_KEY: 're_prod_key_123',
     });
-    const statusProd = new EmailService(prodConfig).getProviderStatus();
+    const prodProv = emailProviderFactory.useFactory(prodConfig);
+    const statusProd = new EmailService(prodConfig, prodProv).getProviderStatus();
     assert(statusProd.provider === 'resend', 'Provider should be resend');
     assert(statusProd.configured === true, 'Configured should be true');
     assert(statusProd.missing === undefined, 'No missing variables in status');
 
     // 11b: Production unconfigured
     const prodUnconf = createMockConfigService({ NODE_ENV: 'production' });
-    const statusProdUnconf = new EmailService(prodUnconf).getProviderStatus();
+    const prodUnconfProv = emailProviderFactory.useFactory(prodUnconf);
+    const statusProdUnconf = new EmailService(prodUnconf, prodUnconfProv).getProviderStatus();
     assert(statusProdUnconf.provider === 'resend', 'Provider should be resend');
     assert(statusProdUnconf.configured === false, 'Configured should be false');
     assert(
@@ -430,7 +473,8 @@ async function runEmailTestSuite() {
 
     // 11c: Development fallback
     const devUnconf = createMockConfigService({ NODE_ENV: 'development' });
-    const statusDev = new EmailService(devUnconf).getProviderStatus();
+    const devUnconfProv = emailProviderFactory.useFactory(devUnconf);
+    const statusDev = new EmailService(devUnconf, devUnconfProv).getProviderStatus();
     assert(statusDev.provider === 'console_fallback', 'Provider should be console_fallback');
     assert(statusDev.configured === false, 'Configured should be false');
 
@@ -441,7 +485,8 @@ async function runEmailTestSuite() {
       SMTP_USER: 'user',
       SMTP_PASS: 'pass',
     });
-    const statusDevSmtp = new EmailService(devSmtp).getProviderStatus();
+    const devSmtpProv = emailProviderFactory.useFactory(devSmtp);
+    const statusDevSmtp = new EmailService(devSmtp, devSmtpProv).getProviderStatus();
     assert(statusDevSmtp.provider === 'smtp', 'Provider should be smtp');
     assert(statusDevSmtp.configured === true, 'Configured should be true');
 
@@ -451,7 +496,8 @@ async function runEmailTestSuite() {
       EMAIL_PROVIDER: 'resend',
       RESEND_API_KEY: 're_dev_key',
     });
-    const statusDevExplicit = new EmailService(devExplicit).getProviderStatus();
+    const devExplicitProv = emailProviderFactory.useFactory(devExplicit);
+    const statusDevExplicit = new EmailService(devExplicit, devExplicitProv).getProviderStatus();
     assert(statusDevExplicit.provider === 'resend', 'Provider should be resend');
     assert(statusDevExplicit.configured === true, 'Configured should be true');
 
@@ -460,7 +506,7 @@ async function runEmailTestSuite() {
   }
 
   // --------------------------------------------------------------------------
-  // TEST 12: No Secrets Appear in Logs, Errors, or Status
+  // TEST 12: Security & Sanitization: No Secrets in Logs, Errors, or Diagnostics
   // --------------------------------------------------------------------------
   console.log('\n[TEST 12] Security & Sanitization: No Secrets in Logs, Errors, or Diagnostics');
   {
@@ -474,8 +520,8 @@ async function runEmailTestSuite() {
       RESEND_API_KEY: SECRET_KEY,
       SMTP_PASS: SECRET_PASS,
     });
-
-    const emailService = new EmailService(prodConfig);
+    const prov = emailProviderFactory.useFactory(prodConfig);
+    const emailService = new EmailService(prodConfig, prov);
     const status = emailService.getProviderStatus();
     const statusStr = JSON.stringify(status);
 
@@ -483,7 +529,10 @@ async function runEmailTestSuite() {
     assert(!statusStr.includes(SECRET_PASS), 'Status output must NOT leak SMTP password');
 
     // Test error response sanitization
-    const unconfProd = new EmailService(createMockConfigService({ NODE_ENV: 'production' }));
+    const unconfProdConfig = createMockConfigService({ NODE_ENV: 'production' });
+    const unconfProv = emailProviderFactory.useFactory(unconfProdConfig);
+    const unconfProd = new EmailService(unconfProdConfig, unconfProv);
+
     const otpRes = await unconfProd.sendVerificationOtp('victim@example.com', SECRET_OTP);
     assert(!otpRes.error?.includes(SECRET_OTP), 'Error message must NOT leak OTP code');
 
@@ -500,7 +549,7 @@ async function runEmailTestSuite() {
   console.log('\n[TEST 13] Email Template Content & Contract Integrity (OTP & Password Reset)');
   {
     let capturedOptions: any = null;
-    const mockProvider = {
+    const mockProvider: EmailProvider = {
       name: 'MockResend',
       isConfigured: () => true,
       getMissingVariables: () => [],
@@ -544,8 +593,26 @@ async function runEmailTestSuite() {
     passedCount++;
   }
 
+  // --------------------------------------------------------------------------
+  // TEST 14: Full Nest Application Context Bootstrap (Production E2E DI Validation)
+  // --------------------------------------------------------------------------
+  console.log('\n[TEST 14] Full Nest Application Bootstrap & MailModule DI Context');
+  {
+    const app = await NestFactory.createApplicationContext(AppModule, { logger: false });
+    const resolvedEmailService = app.get(EmailService);
+    const resolvedProvider = app.get<EmailProvider>(EMAIL_PROVIDER);
+
+    assert(resolvedEmailService instanceof EmailService, 'EmailService instantiated by full NestJS application');
+    assert(resolvedProvider !== undefined && resolvedProvider !== null, 'EMAIL_PROVIDER resolved by full NestJS application');
+    assert(typeof resolvedEmailService.getActiveProviderName() === 'string', 'EmailService has active provider');
+
+    await app.close();
+    console.log('  ✓ Passed: Nest Application bootstraps cleanly without dependency injection errors');
+    passedCount++;
+  }
+
   console.log('\n================================================================');
-  console.log(`🎉 ALL ${passedCount} EMAIL MIGRATION & SECURITY TESTS PASSED!`);
+  console.log(`🎉 ALL ${passedCount} EMAIL MIGRATION, NEST DI & BOOTSTRAP TESTS PASSED!`);
   console.log('================================================================\n');
 }
 

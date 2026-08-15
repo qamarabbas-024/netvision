@@ -25,3 +25,5 @@ export interface EmailProviderStatus {
   missing?: string[];
 }
 
+export const EMAIL_PROVIDER = Symbol('EMAIL_PROVIDER');
+

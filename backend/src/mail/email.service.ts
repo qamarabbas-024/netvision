@@ -1,109 +1,39 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   EmailProvider,
   EmailDeliveryResult,
   EmailProviderStatus,
+  EMAIL_PROVIDER,
 } from './interfaces/email-provider.interface';
 import { ResendProvider } from './providers/resend.provider';
 import { SmtpProvider } from './providers/smtp.provider';
 
-export { EmailDeliveryResult, EmailProviderStatus } from './interfaces/email-provider.interface';
+export { EmailDeliveryResult, EmailProviderStatus, EMAIL_PROVIDER } from './interfaces/email-provider.interface';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private provider: EmailProvider | null = null;
-  private isProduction = false;
+  private readonly isProduction: boolean;
 
   constructor(
     private readonly configService: ConfigService,
-    providerOverride?: EmailProvider
+    @Inject(EMAIL_PROVIDER)
+    private readonly provider: EmailProvider
   ) {
-    if (providerOverride) {
-      this.provider = providerOverride;
-      this.logger.log(`EmailService initialized with injected provider: ${providerOverride.name}`);
-    } else {
-      this.initProvider();
-    }
-  }
-
-  private initProvider() {
     const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
     this.isProduction = nodeEnv === 'production';
-
-    if (this.isProduction) {
-      // Production on Render Free: HTTPS API via Resend ONLY (SMTP ports 25, 465, 587 are blocked)
-      // Production must NEVER initialize or attempt SMTP.
-      const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
-      const resendFromEmail = this.configService.get<string>(
-        'RESEND_FROM_EMAIL',
-        'NetVision <onboarding@resend.dev>'
-      );
-
-      this.provider = new ResendProvider(resendApiKey, resendFromEmail);
-      this.logger.log(
-        `[PRODUCTION] Email transport initialized with Resend HTTPS API (Configured: ${this.provider.isConfigured()})`
-      );
-      return;
-    }
-
-    // Non-production (development/test):
-    const explicitProvider = this.configService.get<string>('EMAIL_PROVIDER')?.trim().toLowerCase();
-
-    if (explicitProvider === 'resend') {
-      // Explicit manual override for local Resend testing
-      const resendApiKey = this.configService.get<string>('RESEND_API_KEY');
-      const resendFromEmail = this.configService.get<string>(
-        'RESEND_FROM_EMAIL',
-        'NetVision <onboarding@resend.dev>'
-      );
-      this.provider = new ResendProvider(resendApiKey, resendFromEmail);
-      this.logger.log(
-        `[DEVELOPMENT] Explicit EMAIL_PROVIDER=resend configured. Using Resend HTTPS API (Configured: ${this.provider.isConfigured()})`
-      );
-      return;
-    }
-
-    // Default development/test behavior:
-    // 1. If SMTP is configured -> SmtpProvider
-    // 2. Otherwise -> DevConsoleFallback
-    // IMPORTANT: DO NOT automatically use Resend merely because RESEND_API_KEY exists.
-    const smtpHost = this.configService.get<string>('SMTP_HOST');
-    const smtpUser = this.configService.get<string>('SMTP_USER');
-    const smtpPass = this.configService.get<string>('SMTP_PASS');
-    const smtpPort = this.configService.get<number>('SMTP_PORT', 587);
-    const smtpFrom = this.configService.get<string>(
-      'SMTP_FROM',
-      '"NetVision Platform" <no-reply@netvision.edu>'
+    this.logger.log(
+      `EmailService initialized with provider: ${this.provider.name} (Configured: ${this.provider.isConfigured()})`
     );
-    const smtpRejectUnauthorized =
-      this.configService.get<string>('SMTP_REJECT_UNAUTHORIZED', 'true') === 'true';
-
-    if (explicitProvider === 'smtp' || (smtpHost && smtpUser && smtpPass)) {
-      this.provider = new SmtpProvider({
-        host: smtpHost,
-        port: Number(smtpPort),
-        user: smtpUser,
-        pass: smtpPass,
-        from: smtpFrom,
-        rejectUnauthorized: smtpRejectUnauthorized,
-      });
-      this.logger.log(`[DEVELOPMENT] Email transport initialized with SMTP: ${smtpHost || 'unconfigured'}:${smtpPort}`);
-    } else {
-      this.provider = null;
-      this.logger.warn(
-        `⚠️ [DEVELOPMENT] No active email transport configured (SMTP missing and no explicit EMAIL_PROVIDER=resend). Using DevConsoleFallback.`
-      );
-    }
   }
 
   public isConfigured(): boolean {
-    return this.provider ? this.provider.isConfigured() : false;
+    return this.provider.isConfigured();
   }
 
   public getActiveProviderName(): string {
-    return this.provider ? this.provider.name : 'Development Console Fallback';
+    return this.provider.name;
   }
 
   public getMissingVariables(): string[] {
@@ -120,11 +50,7 @@ export class EmailService {
       return missing;
     }
 
-    if (this.provider) {
-      return this.provider.getMissingVariables();
-    }
-
-    return ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'];
+    return this.provider.getMissingVariables();
   }
 
   public getProviderStatus(): EmailProviderStatus {
@@ -139,8 +65,12 @@ export class EmailService {
         providerName = 'resend';
       } else if (this.provider instanceof SmtpProvider || explicitProvider === 'smtp') {
         providerName = 'smtp';
-      } else if (this.provider) {
-        providerName = this.provider.name.toLowerCase().includes('resend') ? 'resend' : 'smtp';
+      } else if (this.provider instanceof ResendProvider) {
+        providerName = 'resend';
+      } else if (this.provider.name.toLowerCase().includes('resend')) {
+        providerName = 'resend';
+      } else if (this.provider.name.toLowerCase().includes('smtp')) {
+        providerName = 'smtp';
       }
     }
 
@@ -161,7 +91,7 @@ export class EmailService {
   }
 
   async sendVerificationOtp(toEmail: string, otp: string): Promise<EmailDeliveryResult> {
-    if (!this.provider || !this.provider.isConfigured()) {
+    if (!this.provider.isConfigured()) {
       if (!this.isProduction) {
         this.logDevFallback(toEmail, otp, 'VERIFICATION OTP');
       }
@@ -198,7 +128,7 @@ export class EmailService {
     const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
     const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
-    if (!this.provider || !this.provider.isConfigured()) {
+    if (!this.provider.isConfigured()) {
       if (!this.isProduction) {
         this.logDevFallback(toEmail, resetUrl, 'PASSWORD RESET LINK');
       }
@@ -235,7 +165,7 @@ export class EmailService {
   }
 
   async sendTestEmail(toEmail: string): Promise<EmailDeliveryResult> {
-    if (!this.provider || !this.provider.isConfigured()) {
+    if (!this.provider.isConfigured()) {
       const missing = this.getMissingVariables().join(', ');
       return {
         success: false,
