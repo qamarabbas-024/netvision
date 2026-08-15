@@ -16,33 +16,39 @@ async function main() {
   const app = await NestFactory.createApplicationContext(AppModule, { logger: false });
   const emailService = app.get(EmailService);
 
-  console.log(`Checking SMTP Configuration...`);
+  const activeProvider = emailService.getActiveProviderName();
+  console.log(`Active Provider: ${activeProvider}`);
+
   if (!emailService.isConfigured()) {
     const missing = emailService.getMissingVariables();
-    console.error(`\n❌ ERROR: Real email delivery is disabled because backend/.env is missing SMTP environment variables.`);
+    console.error(`\n❌ ERROR: Email delivery is disabled because required environment variables are missing.`);
     console.error(`Missing variables: ${missing.join(', ')}`);
     console.log('\nTo configure email delivery:');
     console.log('1. Open backend/.env');
-    console.log('2. Add your SMTP provider credentials:');
-    console.log('   SMTP_HOST=smtp.gmail.com (or smtp.resend.com / smtp.sendgrid.net)');
+    console.log('2. In Production (Render Free):');
+    console.log('   RESEND_API_KEY=re_your_api_key');
+    console.log('   RESEND_FROM_EMAIL="NetVision <onboarding@resend.dev>" (or your verified domain)');
+    console.log('3. In Local Development (optional SMTP or explicit Resend):');
+    console.log('   EMAIL_PROVIDER=resend (to test Resend locally)');
+    console.log('   OR:');
+    console.log('   SMTP_HOST=smtp.gmail.com');
     console.log('   SMTP_PORT=587');
-    console.log('   SMTP_USER=your_email_or_username');
-    console.log('   SMTP_PASS=your_app_password_or_api_key');
-    console.log('   SMTP_FROM="NetVision Platform" <no-reply@yourdomain.com>\n');
+    console.log('   SMTP_USER=your_user');
+    console.log('   SMTP_PASS=your_pass\n');
     await app.close();
     process.exit(1);
   }
 
-  console.log(`Sending test email to: ${targetEmail}...`);
+  console.log(`Sending test email to: ${targetEmail} via ${activeProvider}...`);
   const result = await emailService.sendTestEmail(targetEmail);
 
   if (result.success) {
-    console.log(`\n🎉 SUCCESS! Real test email was delivered successfully.`);
+    console.log(`\n🎉 SUCCESS! Test email was delivered successfully via ${activeProvider}.`);
     console.log(`Message ID: ${result.messageId}`);
     console.log(`Please check your inbox at ${targetEmail}.`);
   } else {
     console.error(`\n❌ DELIVERY FAILED: ${result.error}`);
-    console.error(`Please check your SMTP credentials, port, and provider security settings.`);
+    console.error(`Please verify your ${activeProvider} credentials and settings.`);
   }
 
   await app.close();

@@ -15,7 +15,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:prod": "prisma migrate deploy",
     "prisma:seed": "prisma db seed",
-    "test:email": "ts-node scripts/test-email.ts"
+    "test:email": "ts-node scripts/test-email.ts",
+    "test:email:suite": "ts-node scripts/test-email-suite.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -45,6 +46,7 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.19.0",
     "rxjs": "^7.8.1",
     "swagger-ui-express": "^5.0.1"
   },

@@ -41,10 +41,10 @@ export class AuthService {
     return crypto.createHash('sha256').update(rawToken).digest('hex');
   }
 
-  private isDevModeNoSmtp(): boolean {
+  private isDevModeNoEmail(): boolean {
     const isProd = this.configService.get<string>('NODE_ENV') === 'production';
-    const smtpHost = this.configService.get<string>('SMTP_HOST');
-    return !isProd && !smtpHost;
+    if (isProd) return false;
+    return !this.emailService.isConfigured();
   }
 
   async register(dto: RegisterDto) {
@@ -95,10 +95,12 @@ export class AuthService {
       },
     });
 
-    if (this.isDevModeNoSmtp()) {
+    if (this.isDevModeNoEmail()) {
       this.devOtpStore.set(normalizedEmail, rawOtp);
       this.logger.warn(`📧 [DEV EMAIL CONSOLE LOG] Verification OTP for ${normalizedEmail}: ${rawOtp}`);
     }
+
+    await this.emailService.sendVerificationOtp(normalizedEmail, rawOtp);
 
     return {
       message: 'Registration successful! A 6-digit verification code has been dispatched to your email address.',
@@ -209,10 +211,12 @@ export class AuthService {
       },
     });
 
-    if (this.isDevModeNoSmtp()) {
+    if (this.isDevModeNoEmail()) {
       this.devOtpStore.set(normalizedEmail, rawOtp);
       this.logger.warn(`📧 [DEV EMAIL CONSOLE LOG] Resent Verification OTP for ${normalizedEmail}: ${rawOtp}`);
     }
+
+    await this.emailService.sendVerificationOtp(normalizedEmail, rawOtp);
 
     return {
       message: 'A new 6-digit verification code has been dispatched to your email address.',
@@ -244,10 +248,12 @@ export class AuthService {
       await this.prisma.emailVerification.create({
         data: { email: normalizedEmail, otpHash, expiresAt, attempts: 0 },
       });
-      if (this.isDevModeNoSmtp()) {
+      if (this.isDevModeNoEmail()) {
         this.devOtpStore.set(normalizedEmail, rawOtp);
         this.logger.warn(`📧 [DEV EMAIL CONSOLE LOG] Unverified Login OTP for ${normalizedEmail}: ${rawOtp}`);
       }
+
+      await this.emailService.sendVerificationOtp(normalizedEmail, rawOtp);
 
       throw new UnauthorizedException(
         'Account email is not verified. A new 6-digit OTP code has been dispatched to your email.'
