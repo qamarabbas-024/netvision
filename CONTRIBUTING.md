@@ -18,19 +18,25 @@ Please maintain a polite, respectful, and inclusive environment for all communit
    cd netvision
    ```
 
-2. Install dependencies:
+2. Install workspace dependencies using `pnpm`:
    ```bash
-   npm install
+   pnpm install
    ```
 
-3. Spin up development PostgreSQL and Redis containers:
+3. Spin up the development PostgreSQL database:
    ```bash
-   npm run db:up
+   pnpm db:up
    ```
 
-4. Start development servers:
+4. Run database migrations and seed curriculum:
    ```bash
-   npm run dev
+   pnpm db:migrate
+   pnpm --filter netvision-backend prisma:seed
+   ```
+
+5. Start development servers:
+   ```bash
+   pnpm dev
    ```
 
 ---
@@ -47,7 +53,16 @@ We follow Conventional Commits format:
 
 ## 🧪 Testing Before Pull Request
 
-Ensure linting and typechecking pass cleanly before submitting your PR:
+Ensure all test suites, typechecks, and builds pass cleanly before submitting your PR:
 ```bash
-npm run lint
+# Typecheck all packages
+pnpm typecheck
+
+# Run backend test suites
+pnpm --filter netvision-backend test:beta:auth
+pnpm --filter netvision-backend test:email:suite
+pnpm --filter netvision-backend test:deployment
+
+# Build all applications
+pnpm build
 ```

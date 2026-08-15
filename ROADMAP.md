@@ -34,17 +34,15 @@
 
 ---
 
-## 📌 Phase 4: Active Milestones (Current Focus) 🚀
-- [ ] **Search Engine Optimization (SEO)**: Dynamic XML sitemap, metadata tags, OpenGraph cards, and JSON-LD schema markup.
-- [ ] **Curriculum Expansion**: Complete full lesson bodies and interactive visualizers for NET-302 (STP) and NET-304 (OSPF).
-- [ ] **Assessment Pool Expansion**: Expand question bank from 50 to 150+ questions across all 16 courses.
-- [ ] **Multi-Device Topology Canvas**: Interactive drag-and-drop canvas builder using `@xyflow/react`.
-- [ ] **Production Email Verification**: Activate live Resend HTTPS API email delivery with custom verified domain.
+## 📌 Phase 4: Master Priority Roadmap 🚀
 
----
-
-## 📌 Phase 5: Advanced & Enterprise Expansion 🔮
-- [ ] **Teacher & Classroom Portal**: Cohort analytics, classroom progress monitoring, and assignment dispatch (`Role.TEACHER`).
-- [ ] **Deep Troubleshooting Incidents**: Complex multi-hop break-and-repair scenarios with packet loss and MTU blackhole diagnostics.
-- [ ] **Advanced Specializations**: Cloud VPC Peering, Kubernetes CNI networking, and Snort/Suricata IDS lab modules.
-- [ ] **Interactive Packet Generator**: Custom packet crafter (Ethernet/IP/TCP raw headers) with simulated wire playback.
+1. **Security Audit & Hardening**: Continuous automated security testing, dependency auditing, and strict sandbox isolation verification.
+2. **SEO Foundation**: Dynamic XML sitemap, robots.txt, metadata tags, OpenGraph cards, and JSON-LD educational schema markup.
+3. **Spanning Tree Protocol (STP)**: Complete full lesson bodies and interactive loop-prevention visualizer for course NET-302.
+4. **OSPF Dynamic Routing**: Single-Area OSPF neighbor adjacencies and shortest path first routing mechanics for course NET-304.
+5. **Assessment & Question Expansion**: Expand mastery question bank from 50 to 150+ scenario-based questions.
+6. **Troubleshooting Engine**: Interactive multi-hop network break-and-repair incident scenarios with packet loss and MTU blackhole diagnostics.
+7. **Certification Improvements**: Multi-course comprehensive examination blueprints and public anti-tampering verification badges.
+8. **Production Email & Domain Setup**: Custom DNS domain verification and live transactional email delivery activation via Resend HTTPS API.
+9. **Teacher & Classroom Features**: Cohort analytics, classroom progress monitoring, and assignment dispatch (`Role.TEACHER`).
+10. **Advanced Networking Specializations**: Cloud VPC Peering, Kubernetes CNI networking, and Snort/Suricata IDS lab modules.
