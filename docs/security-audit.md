@@ -156,11 +156,11 @@ The overall security posture of NetVision is **ROBUST** with strong defensive fu
 
 ## 3. Vulnerability Findings Matrix
 
-| Finding ID | Title | Severity | Affected Component | Exploit Preconditions | Recommended Remediation |
-|:---:|---|:---:|---|---|---|
-| **SEC-01** | Transitive Next.js & Dev Dependency Advisories | **LOW** | `frontend/package.json` | Requires specific cache-poisoning or proxy scenarios | Update Next.js to $\ge 15.5.16$ in subsequent maintenance cycle. |
-| **SEC-02** | Swagger OpenAPI Exposure in Staging | **INFO** | `backend/src/main.ts` | Accessible on staging deployment (`/api/docs`) | Confirmed disabled automatically when `NODE_ENV=production`. |
-| **SEC-03** | LocalStorage JWT Token Storage | **LOW** | `frontend/stores/authStore.ts` | Requires pre-existing XSS vulnerability on frontend | Consider migrating access tokens to HttpOnly SameSite cookies in Phase 3. |
+| Finding ID | Title | Severity | Affected Component | Evidence | Impact | Exploit Preconditions | Recommended Remediation | Live Verified? |
+|:---:|---|:---:|---|---|---|---|---|:---:|
+| **SEC-01** | Transitive Next.js & Build Tooling Advisories | **LOW** | `frontend/package.json` | `pnpm audit` reports 51 advisories in transitive build packages (`next < 15.5.16`, `body-parser < 1.20.6`). | Potential cache poisoning under specific proxy configs. | Malicious proxy headers with cache misconfiguration. | Upgrade `next` to $\ge 15.5.16$ during next scheduled dependency cycle. | **YES** |
+| **SEC-02** | Swagger OpenAPI Exposure on Staging Environment | **INFO** | `backend/src/main.ts` (Lines 89–98) | OpenAPI route `/api/docs` accessible on staging host (`netvision-backend-staging.onrender.com`). | Exposes API endpoint signatures and DTO structures to evaluators. | Staging environment with `NODE_ENV !== 'production'`. | Maintain existing logic (`if (process.env.NODE_ENV !== 'production')`); verified automatically suppressed in production. | **YES** |
+| **SEC-03** | Browser LocalStorage JWT Storage | **LOW** | `frontend/stores/authStore.ts` | Access tokens stored in browser `localStorage` / `sessionStorage`. | Tokens could be accessed if an unmitigated XSS flaw were introduced. | Requires arbitrary script execution on frontend domain. | Migrate access tokens to `HttpOnly`, `Secure`, `SameSite=Strict` cookies in Phase 4. | **YES** |
 
 ---
 
