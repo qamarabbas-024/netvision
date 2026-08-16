@@ -51,10 +51,11 @@ export class AppRateLimitGuard implements CanActivate {
       case 'STRICT_AUTH':
         result = this.rateLimiterService.checkStrictAuthLimit(clientIp, accountEmail);
         break;
-      case 'USER':
+      case 'USER': {
         const userId = (req as any).user?.id || (req as any).user?.sub || '';
         result = this.rateLimiterService.checkUserLimit(userId, clientIp);
         break;
+      }
       case 'PUBLIC':
       default:
         result = this.rateLimiterService.checkPublicLimit(clientIp);
