@@ -1406,10 +1406,11 @@ export class TopicsService {
       throw new BadRequestException(`Invalid anonymousId format "${anonymousId}". Must be a valid UUID.`);
     }
 
-    return await this.prisma.$transaction(async (tx) => {
-      const anonLearner = await tx.anonymousLearner.findUnique({
-        where: { id: anonymousId },
-      });
+    return await this.prisma.$transaction(
+      async (tx) => {
+        const anonLearner = await tx.anonymousLearner.findUnique({
+          where: { id: anonymousId },
+        });
 
       const anonProgress = await tx.userProgress.findMany({
         where: { anonymousId },
@@ -1543,7 +1544,8 @@ export class TopicsService {
         claimedLabCount,
         claimedAchievementCount,
       };
-    });
+    },
+    { timeout: 15000, maxWait: 5000 });
   }
 
   async getCourseAssessment(identity: { userId?: string; anonymousId?: string }, courseIdOrSlug: string) {

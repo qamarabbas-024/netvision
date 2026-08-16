@@ -5,6 +5,7 @@ import {
   NotFoundException,
   BadRequestException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -12,6 +13,7 @@ import * as argon2 from 'argon2';
 import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { EmailService } from '../mail/email.service';
+import { RateLimiterService } from '../security/rate-limiter/rate-limiter.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -43,7 +45,8 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    @Optional() private readonly rateLimiterService?: RateLimiterService
   ) {}
 
   getDevOtpForTest(email: string): string | null {
@@ -66,7 +69,7 @@ export class AuthService {
     return !this.emailService.isConfigured();
   }
 
-  async register(dto: RegisterDto): Promise<RegisterResponse> {
+  async register(dto: RegisterDto, clientIp = '127.0.0.1'): Promise<RegisterResponse> {
     const normalizedEmail = dto.email.toLowerCase().trim();
     const normalizedUsername = dto.username.toLowerCase().trim();
 
@@ -150,11 +153,12 @@ export class AuthService {
     };
   }
 
-  async verifyOtp(dto: VerifyOtpDto) {
+  async verifyOtp(dto: VerifyOtpDto, clientIp = '127.0.0.1') {
     const normalizedEmail = dto.email.toLowerCase().trim();
     const sanitizedOtp = dto.otp.trim().replace(/\D/g, '');
 
     if (sanitizedOtp.length !== 6) {
+      this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
       throw new BadRequestException('OTP code must be a 6-digit numeric code.');
     }
 
@@ -164,22 +168,26 @@ export class AuthService {
     });
 
     if (!verificationRecord) {
+      this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
       throw new UnauthorizedException('No active verification process found for this email. Please sign up or request a new code.');
     }
 
     if (new Date() > verificationRecord.expiresAt) {
+      this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
       await this.prisma.emailVerification.deleteMany({ where: { email: normalizedEmail } });
       throw new UnauthorizedException('Verification OTP code has expired. Please request a new code.');
     }
 
     if (verificationRecord.attempts >= 3) {
+      this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
       await this.prisma.emailVerification.deleteMany({ where: { email: normalizedEmail } });
       throw new UnauthorizedException('Maximum verification attempts exceeded. Please request a new OTP code.');
     }
 
     const incomingOtpHash = this.hashToken(sanitizedOtp);
     if (incomingOtpHash !== verificationRecord.otpHash) {
-      // Increment failed attempt counter
+      // Increment failed attempt counter and record failed auth
+      this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
       await this.prisma.emailVerification.update({
         where: { id: verificationRecord.id },
         data: { attempts: verificationRecord.attempts + 1 },
@@ -196,6 +204,9 @@ export class AuthService {
     // Delete verification record immediately (single-use enforcement)
     await this.prisma.emailVerification.deleteMany({ where: { email: normalizedEmail } });
 
+    // Record successful auth
+    this.rateLimiterService?.recordSuccessfulAuth(clientIp, normalizedEmail);
+
     const tokens = await this.generateTokens(user.id, user.email, user.role);
 
     return {
@@ -211,7 +222,7 @@ export class AuthService {
     };
   }
 
-  async resendOtp(dto: ResendOtpDto) {
+  async resendOtp(dto: ResendOtpDto, clientIp = '127.0.0.1') {
     if (!this.isEmailVerificationEnabled()) {
       return {
         message: 'Email verification is currently disabled for public beta. You can log in directly.',
@@ -270,7 +281,7 @@ export class AuthService {
     };
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginDto, clientIp = '127.0.0.1') {
     const normalizedEmail = dto.email.toLowerCase().trim();
 
     const user = await this.prisma.user.findUnique({
@@ -278,11 +289,13 @@ export class AuthService {
     });
 
     if (!user) {
+      this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await argon2.verify(user.passwordHash, dto.password);
     if (!isPasswordValid) {
+      this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -317,6 +330,9 @@ export class AuthService {
       user.isVerified = true;
     }
 
+    // Clear failed backoff records on successful credentials
+    this.rateLimiterService?.recordSuccessfulAuth(clientIp, normalizedEmail);
+
     const tokens = await this.generateTokens(user.id, user.email, user.role);
 
     return {
@@ -331,7 +347,7 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(dto: ForgotPasswordDto) {
+  async forgotPassword(dto: ForgotPasswordDto, clientIp = '127.0.0.1') {
     const normalizedEmail = dto.email.toLowerCase().trim();
 
     // If email delivery is not configured, report unavailable rather than silently pretending
@@ -368,7 +384,7 @@ export class AuthService {
     return { message: 'If your account exists, a password reset link has been dispatched to your email.' };
   }
 
-  async resetPassword(dto: ResetPasswordDto) {
+  async resetPassword(dto: ResetPasswordDto, clientIp = '127.0.0.1') {
     const incomingTokenHash = this.hashToken(dto.token.trim());
 
     const resetRecord = await this.prisma.passwordResetToken.findFirst({
@@ -377,10 +393,12 @@ export class AuthService {
     });
 
     if (!resetRecord) {
+      this.rateLimiterService?.recordFailedAuth(clientIp);
       throw new UnauthorizedException('Invalid or expired password reset token.');
     }
 
     if (new Date() > resetRecord.expiresAt) {
+      this.rateLimiterService?.recordFailedAuth(clientIp, resetRecord.email);
       await this.prisma.passwordResetToken.deleteMany({ where: { email: resetRecord.email } });
       throw new UnauthorizedException('Password reset token has expired. Please request a new link.');
     }
@@ -396,6 +414,8 @@ export class AuthService {
       where: { id: resetRecord.id },
       data: { used: true },
     });
+
+    this.rateLimiterService?.recordSuccessfulAuth(clientIp, resetRecord.email);
 
     return { message: 'Password reset successful! You may now sign in with your new password.' };
   }

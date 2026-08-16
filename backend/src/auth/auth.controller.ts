@@ -1,6 +1,5 @@
 import { Controller, Post, Body, Get, UseGuards, Req, Res, HttpCode, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -12,6 +11,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GithubAuthGuard } from './guards/github-auth.guard';
+import { AuthRateLimit, StrictAuthRateLimit, UserRateLimit } from '../security/rate-limiter/rate-limit.decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -20,45 +20,51 @@ export class AuthController {
     private readonly configService: ConfigService
   ) {}
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @AuthRateLimit()
   @Post('register')
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(@Body() dto: RegisterDto, @Req() req: any) {
+    const clientIp = req.ips?.[0] || req.ip || '127.0.0.1';
+    return this.authService.register(dto, clientIp);
   }
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @AuthRateLimit()
   @HttpCode(HttpStatus.OK)
   @Post('verify-otp')
-  async verifyOtp(@Body() dto: VerifyOtpDto) {
-    return this.authService.verifyOtp(dto);
+  async verifyOtp(@Body() dto: VerifyOtpDto, @Req() req: any) {
+    const clientIp = req.ips?.[0] || req.ip || '127.0.0.1';
+    return this.authService.verifyOtp(dto, clientIp);
   }
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @AuthRateLimit()
   @HttpCode(HttpStatus.OK)
   @Post('resend-otp')
-  async resendOtp(@Body() dto: ResendOtpDto) {
-    return this.authService.resendOtp(dto);
+  async resendOtp(@Body() dto: ResendOtpDto, @Req() req: any) {
+    const clientIp = req.ips?.[0] || req.ip || '127.0.0.1';
+    return this.authService.resendOtp(dto, clientIp);
   }
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @AuthRateLimit()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(@Body() dto: LoginDto, @Req() req: any) {
+    const clientIp = req.ips?.[0] || req.ip || '127.0.0.1';
+    return this.authService.login(dto, clientIp);
   }
 
-  @Throttle({ default: { limit: 20, ttl: 60000 } })
+  @StrictAuthRateLimit()
   @HttpCode(HttpStatus.OK)
   @Post('forgot-password')
-  async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto);
+  async forgotPassword(@Body() dto: ForgotPasswordDto, @Req() req: any) {
+    const clientIp = req.ips?.[0] || req.ip || '127.0.0.1';
+    return this.authService.forgotPassword(dto, clientIp);
   }
 
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @StrictAuthRateLimit()
   @HttpCode(HttpStatus.OK)
   @Post('reset-password')
-  async resetPassword(@Body() dto: ResetPasswordDto) {
-    return this.authService.resetPassword(dto);
+  async resetPassword(@Body() dto: ResetPasswordDto, @Req() req: any) {
+    const clientIp = req.ips?.[0] || req.ip || '127.0.0.1';
+    return this.authService.resetPassword(dto, clientIp);
   }
 
   // Google OAuth Initiate & Callback

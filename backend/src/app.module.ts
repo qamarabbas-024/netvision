@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { DatabaseModule } from './database/database.module';
@@ -10,6 +9,8 @@ import { AdminModule } from './admin/admin.module';
 import { SandboxModule } from './sandbox/sandbox.module';
 import { AchievementsModule } from './achievements/achievements.module';
 import { CertificationsModule } from './certifications/certifications.module';
+import { RateLimiterModule } from './security/rate-limiter/rate-limiter.module';
+import { AppRateLimitGuard } from './security/rate-limiter/app-rate-limit.guard';
 
 @Module({
   imports: [
@@ -17,12 +18,7 @@ import { CertificationsModule } from './certifications/certifications.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: 60000,
-        limit: 100,
-      },
-    ]),
+    RateLimiterModule,
     DatabaseModule,
     AuthModule,
     TopicsModule,
@@ -35,7 +31,7 @@ import { CertificationsModule } from './certifications/certifications.module';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: AppRateLimitGuard,
     },
   ],
 })
