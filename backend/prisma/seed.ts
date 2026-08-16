@@ -470,6 +470,14 @@ async function main() {
         maximumHints: 2,
         hintPenalty: 5, // 5 percentage points penalty per hint
         scenarioCode: 'NV-NET-PRACTICAL-SCENARIO-1',
+        scoringWeights: {
+          theoryWeight: 20,
+          practicalWeight: 35,
+          troubleshootingWeight: 25,
+          packetAnalysisWeight: 20,
+          componentMinimum: 60,
+          passingScore: 80,
+        },
       },
     },
     create: {
@@ -501,6 +509,14 @@ async function main() {
         maximumHints: 2,
         hintPenalty: 5, // 5 percentage points penalty per hint
         scenarioCode: 'NV-NET-PRACTICAL-SCENARIO-1',
+        scoringWeights: {
+          theoryWeight: 20,
+          practicalWeight: 35,
+          troubleshootingWeight: 25,
+          packetAnalysisWeight: 20,
+          componentMinimum: 60,
+          passingScore: 80,
+        },
       },
     },
   });

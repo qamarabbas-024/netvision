@@ -117,6 +117,49 @@ export class CertificationsController {
     return this.certsService.getAttemptStatus(req.user.id, attemptId);
   }
 
+  @ApiOperation({ summary: 'Execute diagnostic command or remediation fix on troubleshooting incident' })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('exams/practical/:attemptId/troubleshoot')
+  async executeTroubleshootingAction(
+    @Req() req: any,
+    @Param('attemptId') attemptId: string,
+    @Body() dto: any
+  ) {
+    return this.certsService.executeTroubleshootingAction(req.user.id, attemptId, dto);
+  }
+
+  @ApiOperation({ summary: 'Record incremental answer choice for packet/protocol analysis question' })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('exams/practical/:attemptId/packet-answer')
+  async answerPacketQuestion(
+    @Req() req: any,
+    @Param('attemptId') attemptId: string,
+    @Body() dto: any
+  ) {
+    return this.certsService.answerPacketQuestion(req.user.id, attemptId, dto);
+  }
+
+  @ApiOperation({ summary: 'Claim official professional certification certificate after passing required exams' })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('certifications/:code/claim-certificate')
+  async claimCertificationCertificate(
+    @Req() req: any,
+    @Param('code') code: string
+  ) {
+    return this.certsService.claimCertificationCertificate(req.user.id, code);
+  }
+
+  @ApiOperation({ summary: 'Publicly verify a professional certification or credential by ID / code' })
+  @Get('certificates/verify/:credentialId')
+  async verifyCertificate(
+    @Param('credentialId') credentialId: string
+  ) {
+    return this.certsService.verifyCertificate(credentialId);
+  }
+
   @ApiOperation({ summary: 'Execute state configuration or diagnostic action on practical exam topology' })
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)

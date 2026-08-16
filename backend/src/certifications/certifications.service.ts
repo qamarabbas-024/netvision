@@ -16,6 +16,7 @@ export interface StartExamDto {
 export interface SubmitExamDto {
   answersJson?: Record<string, any>;
   practicalStateJson?: Record<string, any>;
+  packetAnswersJson?: Record<string, any>;
   hintsUsed?: number;
 }
 
@@ -30,9 +31,30 @@ export interface PracticalActionDto {
   payload?: any;
 }
 
+export interface TroubleshootingActionDto {
+  action: 'executeCommand' | 'applyFix';
+  command?: string;
+  remediationAction?: string;
+  incidentId?: string;
+}
+
+export interface AnswerPacketDto {
+  questionId: string;
+  selectedOption: number;
+}
+
 export interface RequestHintDto {
   objectiveId?: string;
   hintId?: string;
+}
+
+export interface PracticalScoringWeights {
+  theoryWeight?: number;
+  practicalWeight?: number;
+  troubleshootingWeight?: number;
+  packetAnalysisWeight?: number;
+  componentMinimum?: number;
+  passingScore?: number;
 }
 
 @Injectable()
@@ -347,7 +369,7 @@ export class CertificationsService {
   }
 
   // Strip correct answers & explanations before sending question payload to client
-  // Practical Exam Scenario Builder (NV-NET 5-Node Topology)
+  // Practical Exam Scenario Builder (NV-NET 5-Node Topology + Troubleshooting + Packet Analysis + Theory)
   public buildPracticalExamScenario(scenarioCode = 'NV-NET-PRACTICAL-SCENARIO-1') {
     const topologyState = {
       scenarioCode,
@@ -465,10 +487,217 @@ export class CertificationsService {
       },
     ];
 
+    const theoryQuestions = [
+      {
+        id: 'q-prac-theo-1',
+        questionText: 'Which OSI model layer is responsible for logical IP addressing, packet routing, and fragmentation across multiple networks?',
+        optionsJson: ['Network Layer (Layer 3)', 'Data Link Layer (Layer 2)', 'Transport Layer (Layer 4)', 'Physical Layer (Layer 1)'],
+        correctOption: 0,
+        explanation: 'Layer 3 Network handles IP addressing, routing protocols, and packet delivery across networks.',
+        cognitiveLevel: 'UNDERSTANDING',
+        questionType: 'MULTIPLE_CHOICE',
+        points: 20,
+        domain: 'THEORY',
+      },
+      {
+        id: 'q-prac-theo-2',
+        questionText: 'How many usable host IP addresses are provided by an IPv4 CIDR block /26?',
+        optionsJson: ['62 usable hosts', '64 usable hosts', '30 usable hosts', '126 usable hosts'],
+        correctOption: 0,
+        explanation: 'A /26 prefix leaves 6 host bits: 2^6 - 2 = 62 usable host addresses.',
+        cognitiveLevel: 'APPLICATION',
+        questionType: 'MULTIPLE_CHOICE',
+        points: 20,
+        domain: 'THEORY',
+      },
+      {
+        id: 'q-prac-theo-3',
+        questionText: 'What protocol is used by a host to dynamically discover the Layer 2 MAC address associated with a target IPv4 address on the same local subnet?',
+        optionsJson: ['Address Resolution Protocol (ARP)', 'Domain Name System (DNS)', 'Dynamic Host Configuration Protocol (DHCP)', 'Internet Control Message Protocol (ICMP)'],
+        correctOption: 0,
+        explanation: 'ARP resolves IPv4 Layer 3 addresses into Layer 2 Ethernet MAC addresses via local broadcasts.',
+        cognitiveLevel: 'UNDERSTANDING',
+        questionType: 'MULTIPLE_CHOICE',
+        points: 20,
+        domain: 'THEORY',
+      },
+      {
+        id: 'q-prac-theo-4',
+        questionText: 'In 802.1D Spanning Tree Protocol (STP), what is the decisive factor that elects the Root Bridge among switches?',
+        optionsJson: ['The lowest Bridge ID (Bridge Priority + System ID Extension + Base MAC address)', 'The highest IP address configured on VLAN 1', 'The switch with the greatest number of active GigabitEthernet ports', 'The switch that receives the earliest BPDU during boot'],
+        correctOption: 0,
+        explanation: 'STP elects the switch with the lowest numeric Bridge ID as Root Bridge.',
+        cognitiveLevel: 'UNDERSTANDING',
+        questionType: 'MULTIPLE_CHOICE',
+        points: 20,
+        domain: 'THEORY',
+      },
+      {
+        id: 'q-prac-theo-5',
+        questionText: 'Which TCP header flag is transmitted by a client to gracefully initiate the closure of an established TCP connection session?',
+        optionsJson: ['FIN (Finish) with ACK', 'RST (Reset)', 'SYN (Synchronize)', 'PSH (Push)'],
+        correctOption: 0,
+        explanation: 'The FIN flag initiates the standard 4-way TCP connection teardown handshake.',
+        cognitiveLevel: 'UNDERSTANDING',
+        questionType: 'MULTIPLE_CHOICE',
+        points: 20,
+        domain: 'THEORY',
+      },
+    ];
+
+    const troubleshootingIncident = {
+      id: 'INC-OSPF-01',
+      title: 'Branch Office OSPF Neighbor Adjacency & Routing Failure',
+      incidentDescription:
+        'Branch router ROUTER-B fails to establish an OSPF FULL adjacency with Core router ROUTER-A across link 10.10.10.0/30. Routes to the 172.16.0.0/24 server subnet are missing from ROUTER-B routing table, causing client traffic to be dropped.',
+      category: 'Routing Protocols (OSPF)',
+      initialSymptoms: [
+        'OSPF neighbor status stuck in INIT/DOWN on interface Gi0/2',
+        'OSPF routes to 172.16.0.0/24 are missing from ROUTER-B routing table',
+        'Ping from branch subnet to 172.16.0.10 fails with Request Timeout',
+      ],
+      currentState: {
+        routerB: {
+          interface: 'Gi0/2',
+          ip: '10.10.10.2/30',
+          ospfArea: 0,
+          helloInterval: 30, // INJECTION: Mismatched Hello timer (should be 10)
+          deadInterval: 120, // INJECTION: Mismatched Dead timer (should be 40)
+          status: 'INIT',
+        },
+        routerA: {
+          interface: 'Gi0/2',
+          ip: '10.10.10.1/30',
+          ospfArea: 0,
+          helloInterval: 10,
+          deadInterval: 40,
+          status: 'INIT',
+        },
+        remediationApplied: false,
+      },
+      evidenceItems: [
+        {
+          id: 'EV-OSPF-1',
+          title: 'OSPF Hello/Dead Timer Discrepancy',
+          description: 'Interface Gi0/2 OSPF timer mismatch detected: Router-B is configured for Hello 30s / Dead 120s, while Router-A uses standard Hello 10s / Dead 40s.',
+          unlocked: false,
+        },
+        {
+          id: 'EV-OSPF-2',
+          title: 'Missing OSPF Inter-Area Route Injection',
+          description: 'Routing table inspection confirms 0 OSPF LSAs installed due to timer mismatch preventing FULL adjacency.',
+          unlocked: false,
+        },
+      ],
+      allowedCommands: [
+        'show ip ospf neighbor',
+        'show ip ospf interface Gi0/2',
+        'show ip route ospf',
+        'ping 10.10.10.1',
+        'show ip protocols',
+      ],
+    };
+
+    const packetAnalysisQuestions = [
+      {
+        id: 'q-pkt-1',
+        questionText:
+          '[Packet Capture Analysis: TCP 3-Way Handshake]\nFrame 1: Client -> Server [SYN] Seq=1000, Ack=0, Len=0, MSS=1460\nFrame 2: Server -> Client [SYN, ACK] Seq=5000, Ack=1001, Len=0, MSS=1460\nFrame 3: Client -> Server [ACK] ...\n\nWhat are the precise Sequence Number (Seq) and Acknowledgment Number (Ack) values in Frame 3?',
+        optionsJson: ['Seq=1001, Ack=5001', 'Seq=1000, Ack=5000', 'Seq=5001, Ack=1001', 'Seq=1001, Ack=5000'],
+        correctOption: 0,
+        explanation: 'In the third packet of the TCP handshake, client sequence is ISN_c+1 (1001) and ack is ISN_s+1 (5001).',
+        cognitiveLevel: 'APPLICATION',
+        questionType: 'PACKET_ANALYSIS',
+        points: 20,
+        domain: 'PACKET_ANALYSIS',
+      },
+      {
+        id: 'q-pkt-2',
+        questionText:
+          '[Packet Capture Analysis: Ethernet II / ARP Protocol]\nDestination: ff:ff:ff:ff:ff:ff (Broadcast)\nSource: 00:50:79:66:68:01\nType: ARP (0x0806)\nOpcode: request (1)\nSender IP: 192.168.1.50, Sender MAC: 00:50:79:66:68:01\nTarget IP: 192.168.1.1, Target MAC: 00:00:00:00:00:00\n\nWhat is the purpose of this frame and why is Target MAC 00:00:00:00:00:00?',
+        optionsJson: [
+          'ARP Request: Client is discovering MAC for 192.168.1.1; Target MAC is 00:00:00:00:00:00 because it is unknown and requested from the network',
+          'ARP Reply: Default gateway 192.168.1.1 is responding to client query',
+          'Gratuitous ARP: Announcing duplicate IP address detection',
+          'Reverse ARP: Client requesting dynamic IP allocation from RARP server',
+        ],
+        correctOption: 0,
+        explanation: 'Opcode 1 indicates an ARP Request sent to broadcast MAC with Target MAC 00:00:00:00:00:00.',
+        cognitiveLevel: 'APPLICATION',
+        questionType: 'PACKET_ANALYSIS',
+        points: 20,
+        domain: 'PACKET_ANALYSIS',
+      },
+      {
+        id: 'q-pkt-3',
+        questionText:
+          '[Packet Capture Analysis: DHCP DORA Message Sequence]\nFrame 1: 0.0.0.0:68 -> 255.255.255.255:67 (DHCPDISCOVER, XID=0x39a1fe)\nFrame 2: 192.168.1.1:67 -> 255.255.255.255:68 (DHCPOFFER, Offered IP: 192.168.1.50)\nFrame 3: 0.0.0.0:68 -> 255.255.255.255:67 (DHCPREQUEST, Option 50: 192.168.1.50, Option 54: 192.168.1.1)\nFrame 4: 192.168.1.1:67 -> 255.255.255.255:68 (DHCPACK)\n\nWhy is Frame 3 (DHCPREQUEST) sent to broadcast 255.255.255.255 rather than unicast to 192.168.1.1?',
+        optionsJson: [
+          'To inform all other DHCP servers that offered leases that their offers were declined so they can return IPs to their pools',
+          'Because client hardware lacks an Ethernet driver',
+          'Because DHCP relies strictly on TCP point-to-point connections',
+          'Because IP routers forbid unicast UDP port 67 transmissions',
+        ],
+        correctOption: 0,
+        explanation: 'The DHCPREQUEST is broadcast so that any other responding DHCP servers know their offer was declined.',
+        cognitiveLevel: 'APPLICATION',
+        questionType: 'PACKET_ANALYSIS',
+        points: 20,
+        domain: 'PACKET_ANALYSIS',
+      },
+      {
+        id: 'q-pkt-4',
+        questionText:
+          '[Packet Capture Analysis: DNS Response Header]\nUser Datagram Protocol, Src Port: 53, Dst Port: 54112\nDomain Name System (response)\nTransaction ID: 0x9b12\nFlags: 0x8180 (QR=1, Opcode=0, AA=0, TC=0, RD=1, RA=1, RCODE=0)\nQuestions: 1 (app.netvision.local: type A, class IN)\nAnswers: 1 (app.netvision.local: type A, class IN, TTL 300, addr 172.16.0.10)\n\nWhat do the DNS flags QR=1 and RCODE=0 signify?',
+        optionsJson: [
+          'A successful DNS Response with No Error (RCODE=0)',
+          'A recursive query from a client workstation with an error code',
+          'A Non-Existent Domain (NXDOMAIN) error message',
+          'A Server Failure error indicating UDP port 53 drop',
+        ],
+        correctOption: 0,
+        explanation: 'In DNS headers, QR=1 represents a Response and RCODE=0 indicates No Error.',
+        cognitiveLevel: 'APPLICATION',
+        questionType: 'PACKET_ANALYSIS',
+        points: 20,
+        domain: 'PACKET_ANALYSIS',
+      },
+      {
+        id: 'q-pkt-5',
+        questionText:
+          '[Packet Capture Analysis: 802.1D STP BPDU Configuration Frame]\nProtocol Identifier: Spanning Tree Protocol (0x0000)\nRoot Identifier: Priority 32768, MAC 00:1c:58:29:40:00\nRoot Path Cost: 4\nBridge Identifier: Priority 32768, MAC 00:26:98:14:80:00\nPort Identifier: 0x8001 (FastEthernet0/1)\n\nBased on this BPDU received on Switch-B, is Switch-B the Root Bridge?',
+        optionsJson: [
+          'No, because Root MAC (00:1c:58:29:40:00) is lower than Bridge MAC (00:26:98:14:80:00) and Root Path Cost is 4 (> 0)',
+          'Yes, because Port Identifier is 0x8001',
+          'Yes, because Bridge Priority is 32768',
+          'Yes, because Root Path Cost is less than 19',
+        ],
+        correctOption: 0,
+        explanation: 'On the Root Bridge, Bridge ID matches Root ID and Root Path Cost is 0. Since Root Path Cost is 4, Switch-B is not the Root Bridge.',
+        cognitiveLevel: 'APPLICATION',
+        questionType: 'PACKET_ANALYSIS',
+        points: 20,
+        domain: 'PACKET_ANALYSIS',
+      },
+    ];
+
+    const scoringWeights: PracticalScoringWeights = {
+      theoryWeight: 20,
+      practicalWeight: 35,
+      troubleshootingWeight: 25,
+      packetAnalysisWeight: 20,
+      componentMinimum: 60,
+      passingScore: 80,
+    };
+
     return {
       scenarioCode,
       topologyState,
       objectives,
+      theoryQuestions,
+      troubleshootingIncident,
+      packetAnalysisQuestions,
+      scoringWeights,
     };
   }
 
@@ -542,6 +771,33 @@ export class CertificationsService {
       concept: q.concept,
       domain: q.domain,
     }));
+  }
+
+  private sanitizeIncidentForClient(incident: any) {
+    if (!incident) return null;
+    return {
+      id: incident.id,
+      title: incident.title,
+      incidentDescription: incident.incidentDescription,
+      category: incident.category,
+      initialSymptoms: incident.initialSymptoms,
+      currentState: {
+        routerB: {
+          interface: incident.currentState?.routerB?.interface,
+          ip: incident.currentState?.routerB?.ip,
+          ospfArea: incident.currentState?.routerB?.ospfArea,
+          status: incident.currentState?.routerB?.status,
+        },
+        remediationApplied: incident.currentState?.remediationApplied || false,
+      },
+      evidenceItems: (incident.evidenceItems || []).map((e: any) => ({
+        id: e.id,
+        title: e.title,
+        description: e.description,
+        unlocked: !!e.unlocked,
+      })),
+      allowedCommands: incident.allowedCommands || [],
+    };
   }
 
   async startExamAttempt(userId: string, dto: StartExamDto) {
@@ -646,6 +902,10 @@ export class CertificationsService {
           scenarioCode: configSnapshot.scenarioCode,
           topologyState,
           objectives: evaluated.objectiveResults,
+          troubleshootingIncident: this.sanitizeIncidentForClient(configSnapshot.troubleshootingIncident),
+          theoryQuestions: this.sanitizeQuestionsForClient(configSnapshot.theoryQuestions || []),
+          packetAnalysisQuestions: this.sanitizeQuestionsForClient(configSnapshot.packetAnalysisQuestions || []),
+          scoringWeights: configSnapshot.scoringWeights,
           hintsUsed: configSnapshot.hintsUsed || 0,
           maximumHints: configSnapshot.maximumHints || 2,
           hintPenalty: configSnapshot.hintPenalty || 5,
@@ -686,6 +946,17 @@ export class CertificationsService {
         scenarioCode: scenario.scenarioCode,
         topologyState: scenario.topologyState,
         objectives: scenario.objectives,
+        theoryQuestions: scenario.theoryQuestions,
+        troubleshootingIncident: scenario.troubleshootingIncident,
+        packetAnalysisQuestions: scenario.packetAnalysisQuestions,
+        scoringWeights: config?.scoringWeights || scenario.scoringWeights || {
+          theoryWeight: 20,
+          practicalWeight: 35,
+          troubleshootingWeight: 25,
+          packetAnalysisWeight: 20,
+          componentMinimum: 60,
+          passingScore: config?.passingScore || 80,
+        },
         hintsUsed: 0,
         usedHintIds: [],
         maximumHints: config?.maximumHints || 2,
@@ -710,6 +981,7 @@ export class CertificationsService {
         configSnapshotJson,
         resultMetadataJson: {
           answersJson: {},
+          packetAnswersJson: {},
         },
       },
     });
@@ -735,6 +1007,10 @@ export class CertificationsService {
         scenarioCode: configSnapshotJson.scenarioCode,
         topologyState,
         objectives: evaluated.objectiveResults,
+        troubleshootingIncident: this.sanitizeIncidentForClient(configSnapshotJson.troubleshootingIncident),
+        theoryQuestions: this.sanitizeQuestionsForClient(configSnapshotJson.theoryQuestions || []),
+        packetAnalysisQuestions: this.sanitizeQuestionsForClient(configSnapshotJson.packetAnalysisQuestions || []),
+        scoringWeights: configSnapshotJson.scoringWeights,
         hintsUsed: 0,
         maximumHints: configSnapshotJson.maximumHints || 2,
         hintPenalty: configSnapshotJson.hintPenalty || 5,
@@ -800,6 +1076,12 @@ export class CertificationsService {
         scenarioCode: configSnapshot.scenarioCode,
         topologyState,
         objectives: evaluated.objectiveResults,
+        troubleshootingIncident: this.sanitizeIncidentForClient(configSnapshot.troubleshootingIncident),
+        theoryQuestions: this.sanitizeQuestionsForClient(configSnapshot.theoryQuestions || []),
+        packetAnalysisQuestions: this.sanitizeQuestionsForClient(configSnapshot.packetAnalysisQuestions || []),
+        scoringWeights: configSnapshot.scoringWeights,
+        answersJson: (attempt.resultMetadataJson as any)?.answersJson || {},
+        packetAnswersJson: (attempt.resultMetadataJson as any)?.packetAnswersJson || {},
         hintsUsed: configSnapshot.hintsUsed || 0,
         maximumHints: configSnapshot.maximumHints || 2,
         hintPenalty: configSnapshot.hintPenalty || 5,
@@ -1113,6 +1395,185 @@ export class CertificationsService {
     };
   }
 
+  async executeTroubleshootingAction(userId: string, attemptId: string, dto: TroubleshootingActionDto) {
+    if (!userId) {
+      throw new BadRequestException('Authenticated User ID is required.');
+    }
+
+    const attempt = await this.prisma.examAttempt.findUnique({
+      where: { id: attemptId },
+    });
+
+    if (!attempt) {
+      throw new NotFoundException(`Practical exam attempt "${attemptId}" not found.`);
+    }
+
+    if (attempt.userId !== userId) {
+      throw new ForbiddenException(`Access denied to exam attempt "${attemptId}". You do not own this attempt.`);
+    }
+
+    if (attempt.type !== ExamType.PRACTICAL) {
+      throw new BadRequestException(`Attempt "${attemptId}" is not a practical examination.`);
+    }
+
+    const now = new Date();
+    if (now > new Date(attempt.expiresAt) || attempt.status === ExamAttemptStatus.EXPIRED) {
+      await this.prisma.examAttempt.update({
+        where: { id: attemptId },
+        data: { status: ExamAttemptStatus.EXPIRED },
+      });
+      throw new BadRequestException(`Exam attempt "${attemptId}" has expired. Actions locked.`);
+    }
+
+    if (attempt.status !== ExamAttemptStatus.IN_PROGRESS) {
+      throw new BadRequestException(`Exam attempt "${attemptId}" is in status ${attempt.status}. Actions locked.`);
+    }
+
+    const configSnapshot: any = attempt.configSnapshotJson || {};
+    const incident: any = configSnapshot.troubleshootingIncident || {};
+    let commandOutput = '';
+    const unlockedEvidence: any[] = [];
+
+    if (dto.action === 'executeCommand') {
+      const rawCmd = (dto.command || '').trim();
+      const lowerCmd = rawCmd.toLowerCase();
+
+      if (lowerCmd.includes('show ip ospf neighbor')) {
+        if (incident.currentState?.remediationApplied) {
+          commandOutput = `Neighbor ID     Pri   State           Dead Time   Address         Interface\n10.10.10.1        1   FULL/BDR        00:00:36    10.10.10.1      GigabitEthernet0/2`;
+        } else {
+          commandOutput = `Neighbor ID     Pri   State           Dead Time   Address         Interface\n10.10.10.1        1   INIT/DROTHER    00:00:28    10.10.10.1      GigabitEthernet0/2\n%OSPF-4-ERRRCV: Received Hello from 10.10.10.1 on GigabitEthernet0/2 with Mismatched Dead/Hello Timers (Hello 10 != 30, Dead 40 != 120)`;
+          const ev1 = (incident.evidenceItems || []).find((e: any) => e.id === 'EV-OSPF-1');
+          if (ev1 && !ev1.unlocked) {
+            ev1.unlocked = true;
+            unlockedEvidence.push(ev1);
+          }
+        }
+      } else if (lowerCmd.includes('show ip ospf interface')) {
+        const hello = incident.currentState?.routerB?.helloInterval || 30;
+        const dead = incident.currentState?.routerB?.deadInterval || 120;
+        commandOutput = `GigabitEthernet0/2 is up, line protocol is up\n  Internet Address 10.10.10.2/30, Area 0\n  Process ID 1, Router ID 10.10.10.2, Network Type BROADCAST, Cost: 1\n  Timer intervals configured, Hello ${hello}, Dead ${dead}, Wait 40, Retransmit 5\n  Neighbor Count is 1, Adjacent neighbor count is ${incident.currentState?.remediationApplied ? '1 (FULL)' : '0 (INIT)'}`;
+        const ev1 = (incident.evidenceItems || []).find((e: any) => e.id === 'EV-OSPF-1');
+        if (ev1 && !ev1.unlocked) {
+          ev1.unlocked = true;
+          unlockedEvidence.push(ev1);
+        }
+      } else if (lowerCmd.includes('show ip route ospf') || lowerCmd.includes('show ip route')) {
+        if (incident.currentState?.remediationApplied) {
+          commandOutput = `Codes: C - connected, S - static, O - OSPF, IA - OSPF inter area\n\nO    172.16.0.0/24 [110/2] via 10.10.10.1, 00:01:14, GigabitEthernet0/2\nO    192.168.1.0/24 [110/2] via 10.10.10.1, 00:01:14, GigabitEthernet0/2`;
+        } else {
+          commandOutput = `% No OSPF routes installed in routing table (Neighbor adjacency in INIT state)`;
+          const ev2 = (incident.evidenceItems || []).find((e: any) => e.id === 'EV-OSPF-2');
+          if (ev2 && !ev2.unlocked) {
+            ev2.unlocked = true;
+            unlockedEvidence.push(ev2);
+          }
+        }
+      } else if (lowerCmd.startsWith('ping')) {
+        if (incident.currentState?.remediationApplied) {
+          commandOutput = `PING 10.10.10.1 (10.10.10.1): 56 data bytes\n64 bytes from 10.10.10.1: icmp_seq=1 ttl=255 time=0.9 ms\n64 bytes from 10.10.10.1: icmp_seq=2 ttl=255 time=0.8 ms\n--- 10.10.10.1 ping statistics ---\n2 packets transmitted, 2 received, 0% packet loss`;
+        } else {
+          commandOutput = `PING 10.10.10.1 (10.10.10.1): 56 data bytes\nRequest timeout for icmp_seq 1\nRequest timeout for icmp_seq 2\n--- 10.10.10.1 ping statistics ---\n2 packets transmitted, 0 received, 100% packet loss`;
+        }
+      } else {
+        commandOutput = `Command '${rawCmd}' executed successfully on ROUTER-B. Diagnostic telemetry recorded.`;
+      }
+    } else if (dto.action === 'applyFix') {
+      const fix = (dto.remediationAction || '').trim();
+      if (
+        fix === 'ALIGN_OSPF_TIMERS' ||
+        fix.toLowerCase().includes('hello') ||
+        fix.toLowerCase().includes('10') ||
+        fix.toLowerCase().includes('ospf')
+      ) {
+        if (incident.currentState && incident.currentState.routerB) {
+          incident.currentState.routerB.helloInterval = 10;
+          incident.currentState.routerB.deadInterval = 40;
+          incident.currentState.routerB.status = 'FULL';
+        }
+        incident.currentState = incident.currentState || {};
+        incident.currentState.remediationApplied = true;
+        commandOutput = `%OSPF-5-ADJCHG: Process 1, Nbr 10.10.10.1 on GigabitEthernet0/2 from LOADING to FULL, Done\nOSPF Adjacency established. Routes to 172.16.0.0/24 populated successfully.`;
+      } else {
+        commandOutput = `Remediation action '${fix}' did not resolve the OSPF timer mismatch. Verify OSPF interface timer configuration.`;
+      }
+    }
+
+    configSnapshot.troubleshootingIncident = incident;
+    await this.prisma.examAttempt.update({
+      where: { id: attemptId },
+      data: { configSnapshotJson: configSnapshot },
+    });
+
+    return {
+      attemptId,
+      action: dto.action,
+      commandOutput,
+      incidentState: {
+        remediationApplied: incident.currentState?.remediationApplied || false,
+        unlockedEvidenceCount: (incident.evidenceItems || []).filter((e: any) => e.unlocked).length,
+        evidenceItems: (incident.evidenceItems || []).filter((e: any) => e.unlocked),
+      },
+    };
+  }
+
+  async answerPacketQuestion(userId: string, attemptId: string, dto: AnswerPacketDto) {
+    if (!userId) {
+      throw new BadRequestException('Authenticated User ID is required.');
+    }
+
+    const attempt = await this.prisma.examAttempt.findUnique({
+      where: { id: attemptId },
+    });
+
+    if (!attempt) {
+      throw new NotFoundException(`Exam attempt "${attemptId}" not found.`);
+    }
+
+    if (attempt.userId !== userId) {
+      throw new ForbiddenException(`Access denied to exam attempt "${attemptId}". You do not own this attempt.`);
+    }
+
+    const now = new Date();
+    if (now > new Date(attempt.expiresAt) || attempt.status === ExamAttemptStatus.EXPIRED) {
+      await this.prisma.examAttempt.update({
+        where: { id: attemptId },
+        data: { status: ExamAttemptStatus.EXPIRED },
+      });
+      throw new BadRequestException(`Exam attempt "${attemptId}" has expired. Answer submission blocked.`);
+    }
+
+    if (attempt.status !== ExamAttemptStatus.IN_PROGRESS) {
+      throw new BadRequestException(`Exam attempt "${attemptId}" is in status ${attempt.status}. Answers cannot be modified.`);
+    }
+
+    const resultMeta: any = attempt.resultMetadataJson || {};
+    const packetAnswersJson = resultMeta.packetAnswersJson || {};
+    const answersJson = resultMeta.answersJson || {};
+
+    packetAnswersJson[dto.questionId] = dto.selectedOption;
+    answersJson[dto.questionId] = dto.selectedOption;
+
+    await this.prisma.examAttempt.update({
+      where: { id: attemptId },
+      data: {
+        resultMetadataJson: {
+          ...resultMeta,
+          answersJson,
+          packetAnswersJson,
+        },
+      },
+    });
+
+    return {
+      attemptId,
+      questionId: dto.questionId,
+      selectedOption: dto.selectedOption,
+      saved: true,
+      totalAnswered: Object.keys(packetAnswersJson).length,
+    };
+  }
+
   async submitExamAttempt(userId: string, attemptId: string, dto: SubmitExamDto) {
     if (!userId) {
       throw new BadRequestException('Authenticated User ID is required to submit an exam attempt.');
@@ -1144,6 +1605,7 @@ export class CertificationsService {
         passed: attempt.passed,
         submittedAt: attempt.submittedAt,
         domainScores: resultMeta.domainScores || {},
+        componentScores: resultMeta.componentScores || {},
         correctCount: resultMeta.correctCount || 0,
         incorrectCount: resultMeta.incorrectCount || 0,
         baseScore: resultMeta.baseScore,
@@ -1183,15 +1645,107 @@ export class CertificationsService {
     if (attempt.type === ExamType.PRACTICAL) {
       const topologyState: any = configSnapshot.topologyState || { nodes: [] };
       const objectives: any[] = configSnapshot.objectives || [];
-
       const evaluated = this.evaluatePracticalState(topologyState, objectives);
-      const hintsUsed = configSnapshot.hintsUsed || 0;
-      const hintPenalty = hintsUsed * 5; // 5 percentage points penalty per hint
-      const baseScore = evaluated.baseScore;
-      const finalScore = Math.max(0, baseScore - hintPenalty);
 
-      const passingScore = configSnapshot.passingScore || 80;
-      const passed = finalScore >= passingScore && evaluated.allCriticalPassed;
+      const hintsUsed = configSnapshot.hintsUsed || 0;
+      const hintPenalty = hintsUsed * (configSnapshot.hintPenalty || 5);
+      const practicalBaseScore = evaluated.baseScore;
+
+      const resultMeta: any = attempt.resultMetadataJson || {};
+      const answersMap = dto.answersJson || resultMeta.answersJson || {};
+      const packetAnswersMap = dto.packetAnswersJson || resultMeta.packetAnswersJson || answersMap;
+
+      const theoryQuestions: any[] = configSnapshot.theoryQuestions || [];
+      const troubleshootingIncident: any = configSnapshot.troubleshootingIncident;
+      const packetAnalysisQuestions: any[] = configSnapshot.packetAnalysisQuestions || [];
+      const scoringWeights: PracticalScoringWeights = configSnapshot.scoringWeights || {};
+
+      const hasTheoryAnswers = theoryQuestions.length > 0 && Object.keys(answersMap).some((k) => theoryQuestions.some((t) => t.id === k));
+      const hasPacketAnswers =
+        packetAnalysisQuestions.length > 0 &&
+        (Object.keys(packetAnswersMap).some((k) => packetAnalysisQuestions.some((p) => p.id === k)) ||
+          Object.keys(answersMap).some((k) => packetAnalysisQuestions.some((p) => p.id === k)));
+      const hasTroubleshootingActivity =
+        !!troubleshootingIncident &&
+        (troubleshootingIncident.currentState?.remediationApplied === true ||
+          (troubleshootingIncident.evidenceItems || []).some((e: any) => e.unlocked));
+
+      const isMultiDomain =
+        (theoryQuestions.length > 0 || !!troubleshootingIncident || packetAnalysisQuestions.length > 0) &&
+        (hasTheoryAnswers || hasPacketAnswers || hasTroubleshootingActivity);
+
+      let theoryScore = 100;
+      if (theoryQuestions.length > 0) {
+        let correctTheory = 0;
+        for (const tq of theoryQuestions) {
+          if (answersMap[tq.id] === tq.correctOption) {
+            correctTheory++;
+          }
+        }
+        theoryScore = Math.round((correctTheory / theoryQuestions.length) * 100);
+      }
+
+      let troubleshootingScore = 100;
+      let troubleshootingRemediated = true;
+      if (troubleshootingIncident) {
+        const isRemediated = troubleshootingIncident.currentState?.remediationApplied === true;
+        const unlockedCount = (troubleshootingIncident.evidenceItems || []).filter((e: any) => e.unlocked).length;
+        troubleshootingRemediated = isRemediated;
+        troubleshootingScore = isRemediated ? 100 : Math.min(50, unlockedCount * 25);
+      }
+
+      let packetAnalysisScore = 100;
+      if (packetAnalysisQuestions.length > 0) {
+        let correctPacket = 0;
+        for (const pq of packetAnalysisQuestions) {
+          if (packetAnswersMap[pq.id] === pq.correctOption || answersMap[pq.id] === pq.correctOption) {
+            correctPacket++;
+          }
+        }
+        packetAnalysisScore = Math.round((correctPacket / packetAnalysisQuestions.length) * 100);
+      }
+
+      const practicalScore = practicalBaseScore;
+
+      let finalScore = 0;
+      let passed = false;
+      const passingScore = scoringWeights.passingScore || configSnapshot.passingScore || 80;
+      const componentMinimum = scoringWeights.componentMinimum || 60;
+
+      if (isMultiDomain) {
+        const tw = scoringWeights.theoryWeight ?? 20;
+        const pw = scoringWeights.practicalWeight ?? 35;
+        const tbw = scoringWeights.troubleshootingWeight ?? 25;
+        const paw = scoringWeights.packetAnalysisWeight ?? 20;
+        const totalW = Math.max(1, tw + pw + tbw + paw);
+
+        const rawWeighted = (
+          (theoryScore * tw) +
+          (practicalScore * pw) +
+          (troubleshootingScore * tbw) +
+          (packetAnalysisScore * paw)
+        ) / totalW;
+
+        finalScore = Math.max(0, Math.round(rawWeighted - hintPenalty));
+
+        const allComponentsAboveMin = (
+          theoryScore >= componentMinimum &&
+          practicalScore >= componentMinimum &&
+          troubleshootingScore >= componentMinimum &&
+          packetAnalysisScore >= componentMinimum
+        );
+
+        passed = (
+          finalScore >= passingScore &&
+          evaluated.allCriticalPassed &&
+          allComponentsAboveMin &&
+          troubleshootingRemediated
+        );
+      } else {
+        finalScore = Math.max(0, practicalBaseScore - hintPenalty);
+        passed = finalScore >= passingScore && evaluated.allCriticalPassed;
+      }
+
       const status = passed ? ExamAttemptStatus.PASSED : ExamAttemptStatus.FAILED;
 
       const updated = await this.prisma.examAttempt.update({
@@ -1202,20 +1756,32 @@ export class CertificationsService {
           passed,
           submittedAt: now,
           resultMetadataJson: {
-            baseScore,
+            baseScore: practicalBaseScore,
             hintPenalty,
             finalScore,
             passingScore,
             allCriticalPassed: evaluated.allCriticalPassed,
             objectiveResults: evaluated.objectiveResults,
             hintsUsed,
+            isMultiDomain,
+            theoryScore,
+            practicalScore,
+            troubleshootingScore,
+            packetAnalysisScore,
+            troubleshootingRemediated,
+            componentScores: {
+              theory: theoryScore,
+              practical: practicalScore,
+              troubleshooting: troubleshootingScore,
+              packetAnalysis: packetAnalysisScore,
+            },
             submittedAt: now,
           },
         },
       });
 
       this.logger.log(
-        `Final Practical Exam Attempt [${attemptId}] submitted by user ${userId}. Score: ${finalScore}% (Base: ${baseScore}%, Hint Penalty: -${hintPenalty}%, Critical Passed: ${evaluated.allCriticalPassed}). Result: ${status}`
+        `Final Practical Exam Attempt [${attemptId}] submitted by user ${userId}. Score: ${finalScore}% (Theory: ${theoryScore}%, Practical: ${practicalScore}%, Troubleshooting: ${troubleshootingScore}%, Packet: ${packetAnalysisScore}%, Hint Penalty: -${hintPenalty}%, Critical Passed: ${evaluated.allCriticalPassed}). Result: ${status}`
       );
 
       return {
@@ -1226,9 +1792,19 @@ export class CertificationsService {
         score: updated.score,
         passed: updated.passed,
         submittedAt: updated.submittedAt,
-        baseScore,
+        baseScore: practicalBaseScore,
         hintPenalty,
         finalScore,
+        theoryScore,
+        practicalScore,
+        troubleshootingScore,
+        packetAnalysisScore,
+        componentScores: {
+          theory: theoryScore,
+          practical: practicalScore,
+          troubleshooting: troubleshootingScore,
+          packetAnalysis: packetAnalysisScore,
+        },
         allCriticalPassed: evaluated.allCriticalPassed,
         objectiveResults: evaluated.objectiveResults,
         hintsUsed,
@@ -1320,6 +1896,197 @@ export class CertificationsService {
       correctCount,
       incorrectCount,
       totalQuestionsCount,
+    };
+  }
+
+  async claimCertificationCertificate(userId: string, certificationCode: string) {
+    if (!userId) {
+      throw new BadRequestException('Authentication is required to claim a certification certificate.');
+    }
+
+    const code = (certificationCode || 'NV-NET').toUpperCase();
+    const certDef = await this.prisma.certificationDefinition.findUnique({
+      where: { code },
+    });
+
+    if (!certDef) {
+      throw new NotFoundException(`Certification definition "${code}" not found.`);
+    }
+
+    // Verify candidate has a PASSED exam attempt for this certification
+    const passedAttempt = await this.prisma.examAttempt.findFirst({
+      where: {
+        userId,
+        certificationCode: code,
+        status: ExamAttemptStatus.PASSED,
+        passed: true,
+      },
+      orderBy: { submittedAt: 'desc' },
+    });
+
+    if (!passedAttempt) {
+      throw new BadRequestException(
+        `Certificate claim denied. You have not yet completed and passed the official examination for ${certDef.title} (${code}).`
+      );
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, username: true, fullName: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User "${userId}" not found.`);
+    }
+
+    // Check if certificate already exists for user and certificationCode
+    let existingCert = await this.prisma.certificate.findFirst({
+      where: {
+        userId,
+        certificationCode: code,
+      },
+    });
+
+    if (existingCert) {
+      const meta: any = existingCert.metadataJson || {};
+      return {
+        id: existingCert.id,
+        code: existingCert.code,
+        credentialId: existingCert.credentialId,
+        verificationCode: existingCert.verificationCode,
+        status: existingCert.status,
+        issuedAt: existingCert.issuedAt,
+        recipientName: existingCert.recipientName || user.fullName || user.username,
+        certificationTitle: existingCert.certificationTitle || certDef.title,
+        certificationCode: existingCert.certificationCode || code,
+        grade: meta.grade || 'Passed',
+        score: meta.overallScore || passedAttempt.score,
+        componentScores: meta.componentScores,
+        skillsAssessed: meta.skillsAssessed || [],
+        isVerified: true,
+      };
+    }
+
+    const attemptScore = passedAttempt.score || 80;
+    let grade = 'Passed';
+    if (attemptScore >= 95) grade = 'Pass with High Distinction';
+    else if (attemptScore >= 90) grade = 'Pass with Distinction';
+    else if (attemptScore >= 85) grade = 'Pass with Merit';
+
+    const resultMeta: any = passedAttempt.resultMetadataJson || {};
+    const componentScores = resultMeta.componentScores || {
+      theory: resultMeta.theoryScore ?? 85,
+      practical: resultMeta.practicalScore ?? 90,
+      troubleshooting: resultMeta.troubleshootingScore ?? 100,
+      packetAnalysis: resultMeta.packetAnalysisScore ?? 90,
+    };
+
+    const skillsAssessed = [
+      'IPv4 CIDR Subnetting & Network Addressing',
+      'VLAN Segmentation & Access Switch Port Provisioning',
+      'Layer 3 Routing & Default Gateway Path Selection',
+      'Perimeter Firewall Access Control List (ACL) Policies',
+      'OSPF Link-State Adjacency & Routing Diagnostics',
+      'Spanning Tree Protocol (STP) Loop Prevention',
+      'Wireshark TCP/IP 3-Way Handshake & Packet Dissection',
+      'Core IP Infrastructure Protocols (ARP, DNS, DHCP, ICMP)',
+    ];
+
+    const uniqueSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const credentialId = `NV-NET-2026-${uniqueSuffix}`;
+    const verificationCode = `NV-VERIFY-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+
+    const certData = {
+      userId,
+      credentialId,
+      verificationCode,
+      certificationCode: code,
+      certificationTitle: certDef.title,
+      recipientName: user.fullName || user.username,
+      status: 'ACTIVE',
+      metadataJson: {
+        candidateName: user.fullName || user.username,
+        certificationTitle: certDef.title,
+        certificationCode: code,
+        credentialId,
+        verificationCode,
+        issueDate: new Date().toISOString(),
+        grade,
+        overallScore: attemptScore,
+        componentScores,
+        skillsAssessed,
+      },
+    };
+
+    const createdCert = await this.prisma.certificate.create({
+      data: certData,
+    });
+
+    return {
+      id: createdCert.id,
+      code: createdCert.code,
+      credentialId: createdCert.credentialId,
+      verificationCode: createdCert.verificationCode,
+      status: createdCert.status,
+      issuedAt: createdCert.issuedAt,
+      recipientName: createdCert.recipientName,
+      certificationTitle: createdCert.certificationTitle,
+      certificationCode: createdCert.certificationCode,
+      grade,
+      score: attemptScore,
+      componentScores,
+      skillsAssessed,
+      isVerified: true,
+    };
+  }
+
+  async verifyCertificate(credentialIdOrCode: string) {
+    if (!credentialIdOrCode) {
+      throw new BadRequestException('Credential ID or Verification Code is required.');
+    }
+
+    const cert = await this.prisma.certificate.findFirst({
+      where: {
+        OR: [
+          { credentialId: credentialIdOrCode },
+          { code: credentialIdOrCode },
+          { verificationCode: credentialIdOrCode },
+          { id: credentialIdOrCode },
+        ],
+      },
+      include: {
+        user: { select: { fullName: true, username: true } },
+        course: { select: { title: true, slug: true, code: true } },
+      },
+    });
+
+    if (!cert) {
+      throw new NotFoundException(`Certificate credential "${credentialIdOrCode}" not found.`);
+    }
+
+    const meta: any = cert.metadataJson || {};
+    return {
+      id: cert.id,
+      code: cert.code,
+      credentialId: cert.credentialId || cert.code,
+      verificationCode: cert.verificationCode || cert.code,
+      status: cert.status || 'ACTIVE',
+      issuedAt: cert.issuedAt,
+      recipientName: cert.recipientName || cert.user?.fullName || cert.user?.username || 'Verified Candidate',
+      certificationTitle: cert.certificationTitle || (cert.course ? cert.course.title : 'NetVision Certified Network Administrator'),
+      certificationCode: cert.certificationCode || cert.course?.code || 'NV-NET',
+      courseTitle: cert.course?.title || null,
+      courseSlug: cert.course?.slug || null,
+      grade: meta.grade || 'Passed',
+      score: meta.overallScore || null,
+      componentScores: meta.componentScores || null,
+      skillsAssessed: meta.skillsAssessed || [
+        'Computer Networking Fundamentals',
+        'TCP/IP Protocol Suite & Handshakes',
+        'IP Subnetting & Routing',
+        'Network Diagnostics & Packet Analysis',
+      ],
+      isVerified: true,
     };
   }
 }

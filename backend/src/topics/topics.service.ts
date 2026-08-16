@@ -1744,19 +1744,42 @@ export class TopicsService {
 
   async getCertificateById(certificateIdOrCode: string) {
     const cert = await this.prisma.certificate.findFirst({
-      where: { OR: [{ id: certificateIdOrCode }, { code: certificateIdOrCode }] },
+      where: {
+        OR: [
+          { id: certificateIdOrCode },
+          { code: certificateIdOrCode },
+          { credentialId: certificateIdOrCode },
+          { verificationCode: certificateIdOrCode },
+        ],
+      },
       include: { user: { select: { username: true, fullName: true } }, course: true },
     });
     if (!cert) {
       throw new NotFoundException(`Certificate "${certificateIdOrCode}" not found.`);
     }
+    const meta: any = cert.metadataJson || {};
     return {
       id: cert.id,
       code: cert.code,
+      credentialId: cert.credentialId || cert.code,
+      verificationCode: cert.verificationCode || cert.code,
+      status: cert.status || 'ACTIVE',
       issuedAt: cert.issuedAt,
-      recipientName: cert.user.fullName || cert.user.username,
-      courseTitle: cert.course.title,
-      courseSlug: cert.course.slug,
+      recipientName: cert.recipientName || cert.user?.fullName || cert.user?.username || 'Verified Candidate',
+      certificationTitle: cert.certificationTitle || (cert.course ? cert.course.title : 'NetVision Certified Network Administrator'),
+      certificationCode: cert.certificationCode || cert.course?.code || 'NV-NET',
+      courseTitle: cert.course?.title || cert.certificationTitle || 'NetVision Certified Network Administrator',
+      courseSlug: cert.course?.slug || 'nv-net',
+      grade: meta.grade || 'Passed',
+      score: meta.overallScore || null,
+      componentScores: meta.componentScores || null,
+      skillsAssessed: meta.skillsAssessed || [
+        'Computer Networking Fundamentals',
+        'TCP/IP Protocol Suite & Handshakes',
+        'IP Subnetting & Routing',
+        'Network Diagnostics & Packet Analysis',
+      ],
+      isVerified: true,
     };
   }
 }

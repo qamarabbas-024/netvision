@@ -766,8 +766,32 @@ export async function claimCertificateApi(courseId: string) {
   });
 }
 
+export async function claimCertificationCertificateApi(code: string) {
+  return await fetchApi<any>(`/certifications/${code}/claim-certificate`, {
+    method: 'POST',
+  });
+}
+
 export async function getCertificateByIdApi(idOrCode: string) {
   return await fetchApi<any>(`/certificates/${idOrCode}`);
+}
+
+export async function verifyCertificateApi(credentialId: string) {
+  return await fetchApi<any>(`/certificates/verify/${credentialId}`);
+}
+
+export async function executeTroubleshootingActionApi(attemptId: string, payload: any) {
+  return await fetchApi<any>(`/exams/practical/${attemptId}/troubleshoot`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function answerPacketQuestionApi(attemptId: string, payload: any) {
+  return await fetchApi<any>(`/exams/practical/${attemptId}/packet-answer`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
 }
 
 export interface AchievementItem {
