@@ -25,14 +25,14 @@ The following metrics represent the actual verified database records seeded via 
 | **Legacy Preserved Courses** | **22** | Pre-migration course shells preserved for backward compatibility |
 | **Total Database Courses** | **38** | 16 Target + 22 Legacy |
 | **Total Active Modules** | **38** | Organized sequentially across target and foundation paths |
-| **Total Active Lessons** | **38** | Complete with analogies, technical explanations, and cheatsheets |
-| **Total Quizzes** | **38** | Associated with lessons (passing score threshold: 80%) |
-| **Total Quiz Questions** | **50** | Cognitive levels: Recall, Understanding, Application, Troubleshooting |
-| **Total Interactive Labs** | **38** | Guided packet manipulation, CIDR calculation, and Wireshark forensics |
+| **Total Active Lessons** | **40** | Complete with analogies, technical explanations, and cheatsheets |
+| **Total Quizzes** | **40** | Associated with lessons (passing score threshold: 80%) |
+| **Total Quiz Questions** | **193** | Assessment 2.0: Recall (37), Understanding (60), Application (55), Troubleshooting (38), Expert Reasoning (3) |
+| **Total Interactive Labs** | **40** | Guided packet manipulation, CIDR calculation, and Wireshark forensics |
 | **Command References** | Embedded | Commands embedded in lesson JSON and lab validation rules |
 | **Gamification Achievements** | **10** | Spanning Learning, Assessment, Practical, Skill, and Milestone tiers |
-| **Certification Definitions** | **1** | `NETVISION-CERT-FOUNDATIONS` (NetVision Certified Networking Foundations) |
-| **Active Simulation Engines** | **5+** | TCP 3-Way Handshake, Packet Encapsulation, Subnetting, ARP, DNS/DHCP |
+| **Certification Definitions** | **1** | `NV-NET` (NetVision Certified Network Administrator) |
+| **Active Simulation Engines** | **5+** | TCP 3-Way Handshake, Packet Encapsulation, Subnetting, ARP, DNS/DHCP, STP, OSPF |
 
 ---
 
@@ -157,8 +157,7 @@ To prevent learner cognitive overload, future content expansion should adhere to
 
 ## 7. Recommended Next Content Priorities
 
-1. **Expand Quiz Question Bank** from 60 to 150+ questions across the 16 target courses.
-2. **Seed the Global Command Reference Table** with 50+ Cisco IOS / Linux / Windows CLI commands.
-3. **Develop IPv6 Transition Lab** (Dual-stack and NAT64 simulation).
-4. **Add Comprehensive Multi-Course Theory & Practical Exams** to support the `NETVISION-CERT-FOUNDATIONS` certification track.
-5. **Develop Multi-Area OSPF & BGP Advanced Scenarios**.
+1. **Seed the Global Command Reference Table** with 50+ Cisco IOS / Linux / Windows CLI commands.
+2. **Develop IPv6 Transition Lab** (Dual-stack and NAT64 simulation).
+3. **Develop Multi-Area OSPF & BGP Advanced Scenarios**.
+4. **Interactive Network Topology Designer Lab Expansion**.

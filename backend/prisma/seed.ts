@@ -2,26 +2,12 @@ import { PrismaClient, CourseLevel, LessonType, Role, AchievementCategory } from
 import * as argon2 from 'argon2';
 import { TARGET_16_COURSES } from '../src/topics/curriculum-migration';
 import { BENCHMARK_LESSONS_FULL } from '../src/topics/benchmark-lessons-content';
+import { EXPANDED_ASSESSMENT_QUESTION_BANK } from '../src/topics/assessment-question-bank';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Executing Phase 12C Curriculum Migration & Seed (16 Progressive Target Courses + Data Preservation)...');
-
-  // Helper builder function for questions
-  const createQ = (
-    text: string,
-    opts: string[],
-    correctIdx: number,
-    whyCorrect: string,
-    wrongWhys: Record<number, string>
-  ) => ({
-    questionText: text,
-    optionsJson: opts,
-    correctOption: correctIdx,
-    explanation: whyCorrect,
-    explanationsJson: wrongWhys,
-  });
 
   // 1. Create / Upsert Users (Environment Controlled for Production Safety)
   const isProd = process.env.NODE_ENV === 'production';
@@ -126,7 +112,7 @@ async function main() {
     console.log(`  ✓ Course [${cDef.code}] "${cDef.title}" (${cDef.level}) -> Module [${mod.title}]`);
   }
 
-  // 3. Upsert Benchmark Deep Lessons (NET-101, NET-202, NET-404)
+  // 3. Upsert Benchmark Deep Lessons (NET-101, NET-202, NET-404, NET-302, NET-304)
   console.log('📌 Upserting Benchmark Lessons with Full 18-Step Architecture, Questions & Labs...');
   for (const bDef of BENCHMARK_LESSONS_FULL) {
     const targetCourseId = courseMap.get(bDef.courseCode);
@@ -159,35 +145,11 @@ async function main() {
     });
 
     // Upsert Benchmark Quiz
-    const quiz = await prisma.quiz.upsert({
+    await prisma.quiz.upsert({
       where: { id: `quiz-${bDef.slug}` },
       update: { lessonId: bLesson.id, title: `${bDef.title} Quiz Assessment` },
       create: { id: `quiz-${bDef.slug}`, lessonId: bLesson.id, title: `${bDef.title} Quiz Assessment` },
     });
-
-    // Upsert Benchmark Quiz Questions
-    for (const qDef of bDef.questions) {
-      const existingQ = await prisma.quizQuestion.findFirst({
-        where: { quizId: quiz.id, questionText: qDef.text },
-      });
-
-      if (!existingQ) {
-        await prisma.quizQuestion.create({
-          data: {
-            quizId: quiz.id,
-            questionText: qDef.text,
-            optionsJson: qDef.options,
-            correctOption: qDef.correctOption,
-            explanation: qDef.explanation,
-            explanationsJson: qDef.explanationsJson,
-            difficulty: qDef.difficulty,
-            cognitiveLevel: qDef.cognitiveLevel,
-            questionType: qDef.questionType,
-            concept: qDef.concept,
-          },
-        });
-      }
-    }
 
     // Upsert Benchmark Lab
     const existingLab = await prisma.lessonLab.findFirst({
@@ -208,7 +170,7 @@ async function main() {
       });
     }
 
-    console.log(`  ✓ Benchmark Deep Lesson [${bDef.courseCode}] "${bDef.title}" (${bDef.questions.length} questions, 1 lab)`);
+    console.log(`  ✓ Benchmark Deep Lesson [${bDef.courseCode}] "${bDef.title}" (1 lab)`);
   }
 
   // 4. Seed Legacy 22 Courses & Map 35 Lessons to Target Modules
@@ -285,32 +247,11 @@ async function main() {
     });
 
     // Quiz Check
-    const quiz = await prisma.quiz.upsert({
+    await prisma.quiz.upsert({
       where: { id: `quiz-${lDef.slug}` },
       update: { lessonId: lesson.id, title: `${lDef.title} Quiz` },
       create: { id: `quiz-${lDef.slug}`, lessonId: lesson.id, title: `${lDef.title} Quiz` },
     });
-
-    const qCount = await prisma.quizQuestion.count({ where: { quizId: quiz.id } });
-    if (qCount === 0) {
-      const q1 = createQ(
-        `[EASY] What is the primary purpose of ${lDef.title}?`,
-        ['To facilitate network communication', 'To hardware format disk drives', 'To CPU clock boost', 'To replace electricity'],
-        0,
-        'Networking concepts facilitate digital communication.',
-        { 1: 'Formatting is disk storage.', 2: 'CPU clock is hardware performance.', 3: 'Electricity is physical power.' }
-      );
-      await prisma.quizQuestion.create({
-        data: {
-          quizId: quiz.id,
-          questionText: q1.questionText,
-          optionsJson: q1.optionsJson,
-          correctOption: q1.correctOption,
-          explanation: q1.explanation,
-          explanationsJson: q1.explanationsJson,
-        },
-      });
-    }
 
     // Guided Lab Check
     const labCount = await prisma.lessonLab.count({ where: { lessonId: lesson.id } });
@@ -404,32 +345,11 @@ async function main() {
     });
 
     // Quiz Check
-    const quiz = await prisma.quiz.upsert({
+    await prisma.quiz.upsert({
       where: { id: `quiz-${tDef.lessonSlug}` },
       update: { lessonId: lesson.id, title: `${tDef.title} Quiz` },
       create: { id: `quiz-${tDef.lessonSlug}`, lessonId: lesson.id, title: `${tDef.title} Quiz` },
     });
-
-    const qCount = await prisma.quizQuestion.count({ where: { quizId: quiz.id } });
-    if (qCount === 0) {
-      const q1 = createQ(
-        `[EASY] What is the primary concept behind ${tDef.title}?`,
-        ['Network protocol standards', 'Computer monitor colors', 'Hard drive sector size', 'Keyboard layout'],
-        0,
-        'Networking protocols govern digital communications.',
-        { 1: 'Monitor colors are display specs.', 2: 'Hard drive sectors are disk storage.', 3: 'Keyboard layout is input hardware.' }
-      );
-      await prisma.quizQuestion.create({
-        data: {
-          quizId: quiz.id,
-          questionText: q1.questionText,
-          optionsJson: q1.optionsJson,
-          correctOption: q1.correctOption,
-          explanation: q1.explanation,
-          explanationsJson: q1.explanationsJson,
-        },
-      });
-    }
 
     // Guided Lab Check
     const labCount = await prisma.lessonLab.count({ where: { lessonId: lesson.id } });
@@ -445,7 +365,57 @@ async function main() {
     }
   }
 
-  // 5. Seed Achievement Catalog
+  // 5. Seed Assessment 2.0 Question Bank (170 Comprehensive Questions)
+  console.log('📝 Seeding Assessment 2.0 Question Bank (170 High-Quality Questions)...');
+  // Clean up legacy placeholder questions
+  const deletedPlaceholders = await prisma.quizQuestion.deleteMany({
+    where: { questionText: { startsWith: '[EASY]' } },
+  });
+  if (deletedPlaceholders.count > 0) {
+    console.log(`  🧹 Removed ${deletedPlaceholders.count} legacy placeholder questions.`);
+  }
+
+  let seededQCount = 0;
+  for (const qDef of EXPANDED_ASSESSMENT_QUESTION_BANK) {
+    const existingQ = await prisma.quizQuestion.findFirst({
+      where: { quizId: qDef.quizId, questionText: qDef.text },
+    });
+
+    if (existingQ) {
+      await prisma.quizQuestion.update({
+        where: { id: existingQ.id },
+        data: {
+          optionsJson: qDef.options,
+          correctOption: qDef.correctOption,
+          explanation: qDef.explanation,
+          explanationsJson: qDef.explanationsJson,
+          difficulty: qDef.difficulty,
+          cognitiveLevel: qDef.cognitiveLevel,
+          questionType: qDef.questionType,
+          concept: qDef.concept,
+          points: qDef.points ?? 10,
+        },
+      });
+    } else {
+      await prisma.quizQuestion.create({
+        data: {
+          quizId: qDef.quizId,
+          questionText: qDef.text,
+          optionsJson: qDef.options,
+          correctOption: qDef.correctOption,
+          explanation: qDef.explanation,
+          explanationsJson: qDef.explanationsJson,
+          difficulty: qDef.difficulty,
+          cognitiveLevel: qDef.cognitiveLevel,
+          questionType: qDef.questionType,
+          concept: qDef.concept,
+          points: qDef.points ?? 10,
+        },
+      });
+    }
+    seededQCount++;
+  }
+  console.log(`  ✓ Successfully seeded/updated ${seededQCount} questions across 40 curriculum quizzes!`);
   console.log('🏆 Seeding Achievement Catalog...');
   const achievementsData = [
     { slug: 'FIRST_STEP', title: 'First Step', description: 'Completed your first interactive networking lesson.', badgeIcon: 'Zap', category: AchievementCategory.LEARNING, points: 50, isActive: true, criteriaJson: { type: 'LESSON_COMPLETED', count: 1 } },
