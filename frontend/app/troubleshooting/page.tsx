@@ -1,0 +1,229 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { AppSidebar } from '@/components/ui/Sidebar';
+import { AppTopbar } from '@/components/ui/Topbar';
+import { Card } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { getTroubleshootingScenariosApi } from '@/lib/api';
+import {
+  ShieldAlert,
+  Terminal,
+  Search,
+  ArrowRight,
+  Clock,
+  Layers,
+  Wrench,
+  Activity,
+  AlertTriangle,
+} from 'lucide-react';
+
+export default function TroubleshootingCatalogPage() {
+  const [scenarios, setScenarios] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('ALL');
+  const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
+
+  useEffect(() => {
+    async function loadScenarios() {
+      setIsLoading(true);
+      try {
+        const data = await getTroubleshootingScenariosApi();
+        setScenarios(data || []);
+      } catch (err) {
+        console.error('Failed to load troubleshooting scenarios:', err);
+        setScenarios([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadScenarios();
+  }, []);
+
+  const categories = ['ALL', 'Core IP Services', 'IP Addressing & Subnetting', 'Layer 2 Ethernet & ARP', 'VLANs & Trunking', 'Layer 2 Switching & STP', 'Dynamic Routing & OSPF', 'IP Routing & Forwarding', 'Layer 1/2 Physical & Data Link', 'Transport & PMTUD', 'QoS & Performance', 'Transport & Sockets'];
+
+  const filteredScenarios = scenarios.filter((s) => {
+    const matchesSearch =
+      !searchQuery ||
+      s.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.incidentDescription?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.networkingConcepts?.some((c: string) => c.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesDifficulty =
+      selectedDifficulty === 'ALL' || s.difficulty?.toUpperCase() === selectedDifficulty.toUpperCase();
+
+    const matchesCategory =
+      selectedCategory === 'ALL' || s.category === selectedCategory;
+
+    return matchesSearch && matchesDifficulty && matchesCategory;
+  });
+
+  return (
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+        <AppSidebar />
+
+        <div className="flex-1 flex flex-col min-w-0">
+          <AppTopbar />
+
+          <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+            <div className="max-w-7xl mx-auto flex flex-col gap-8">
+              {/* Header Banner */}
+              <div className="glass-panel p-8 rounded-3xl border border-[#272732] flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-rose-500/10 via-[#00f0ff]/10 to-transparent pointer-events-none rounded-full blur-3xl" />
+
+                <div className="max-w-3xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-mono text-rose-400 uppercase tracking-widest font-semibold flex items-center gap-1.5">
+                      <ShieldAlert className="w-4 h-4" /> Live Incident Simulation Engine
+                    </span>
+                    <Badge variant="rose">12 Scenarios Ready</Badge>
+                  </div>
+                  <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                    Network Troubleshooting & Break-Fix
+                  </h1>
+                  <p className="text-sm text-zinc-300 mt-2 leading-relaxed">
+                    Investigate realistic enterprise network outages. Inspect symptoms, discover telemetry evidence, formulate root cause hypotheses, apply configuration fixes, and verify service restoration.
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2 shrink-0">
+                  <div className="p-3 rounded-2xl bg-black/40 border border-[#272732] flex items-center gap-3">
+                    <Activity className="w-5 h-5 text-[#00f0ff]" />
+                    <div className="text-xs">
+                      <span className="font-bold text-white block">Anti-Guessing Scoring</span>
+                      <span className="text-zinc-400">Evidence + Diagnosis + Fix</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters & Search Controls */}
+              <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+                {/* Search input */}
+                <div className="relative flex-1 max-w-md">
+                  <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search incidents by concept, protocol, or symptom..."
+                    className="w-full bg-[#121216] border border-[#272732] rounded-2xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#00f0ff]"
+                  />
+                </div>
+
+                {/* Difficulty Filters */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                  {['ALL', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED'].map((lvl) => (
+                    <button
+                      key={lvl}
+                      onClick={() => setSelectedDifficulty(lvl)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-mono font-semibold transition-all ${
+                        selectedDifficulty === lvl
+                          ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
+                          : 'bg-[#121216] text-zinc-400 hover:text-white border border-[#272732]'
+                      }`}
+                    >
+                      {lvl}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Scenarios Grid */}
+              {isLoading ? (
+                <div className="py-20 flex justify-center text-zinc-500">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 border-2 border-[#00f0ff] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-xs font-mono">Loading Troubleshooting Scenarios...</span>
+                  </div>
+                </div>
+              ) : filteredScenarios.length === 0 ? (
+                <div className="p-12 text-center text-zinc-500 glass-panel rounded-3xl border border-[#272732]">
+                  <Wrench className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm font-semibold">No troubleshooting incidents match your filter.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredScenarios.map((scen) => (
+                    <Card
+                      key={scen.id || scen.slug}
+                      className="p-6 flex flex-col justify-between border-[#272732] hover:border-[#00f0ff]/40 transition-all group bg-[#0e0e12]"
+                    >
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between">
+                          <Badge
+                            variant={
+                              scen.difficulty === 'ADVANCED'
+                                ? 'purple'
+                                : scen.difficulty === 'INTERMEDIATE'
+                                ? 'cyan'
+                                : 'neutral'
+                            }
+                          >
+                            {scen.difficulty}
+                          </Badge>
+                          <span className="text-xs font-mono text-zinc-400 flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5 text-zinc-500" /> {scen.estimatedMinutes}m
+                          </span>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block mb-1">
+                            {scen.category}
+                          </span>
+                          <h3 className="text-base font-bold text-white group-hover:text-[#00f0ff] transition-colors leading-snug">
+                            {scen.title}
+                          </h3>
+                          <p className="text-xs text-zinc-400 mt-2 line-clamp-3 leading-relaxed">
+                            {scen.incidentDescription}
+                          </p>
+                        </div>
+
+                        {/* Reported Symptoms Preview */}
+                        {scen.initialSymptoms && scen.initialSymptoms.length > 0 && (
+                          <div className="p-2.5 rounded-xl bg-rose-500/5 border border-rose-500/10 text-[11px] text-rose-300 flex items-start gap-2">
+                            <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                            <span className="line-clamp-2">{scen.initialSymptoms[0]}</span>
+                          </div>
+                        )}
+
+                        {/* Concepts tags */}
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {scen.networkingConcepts?.slice(0, 3).map((c: string, idx: number) => (
+                            <span
+                              key={idx}
+                              className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800/80 text-zinc-300 border border-zinc-700/50"
+                            >
+                              {c}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-6 border-t border-[#272732]/60 mt-4 flex items-center justify-between">
+                        <span className="text-xs font-mono text-zinc-500 flex items-center gap-1">
+                          <Layers className="w-3.5 h-3.5" /> {scen.nodeCount || 2} Nodes
+                        </span>
+
+                        <Link href={`/troubleshooting/${scen.slug || scen.id}`}>
+                          <Button variant="cyan" size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                            Investigate Incident
+                          </Button>
+                        </Link>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+}

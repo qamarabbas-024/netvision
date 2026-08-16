@@ -21,6 +21,21 @@ const COURSE_SLUGS = [
   'net-404-packet-capture-wireshark-troubleshooting',
 ];
 
+const TROUBLESHOOTING_SLUGS = [
+  'dns-resolution-failure',
+  'dhcp-failure',
+  'incorrect-subnet-mask',
+  'arp-resolution-failure',
+  'vlan-mismatch',
+  'stp-loop-blocking-issue',
+  'ospf-neighbor-problem',
+  'incorrect-routing-table',
+  'packet-loss-duplex-mismatch',
+  'mtu-mismatch-pmtud-blackhole',
+  'high-latency-bufferbloat',
+  'tcp-connection-failure',
+];
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const currentDate = new Date();
 
@@ -33,6 +48,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${BASE_URL}/courses`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: `${BASE_URL}/troubleshooting`,
       lastModified: currentDate,
       changeFrequency: 'daily',
       priority: 0.9,
@@ -88,5 +109,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...courseRoutes];
+  const troubleshootingRoutes: MetadataRoute.Sitemap = TROUBLESHOOTING_SLUGS.map((slug) => ({
+    url: `${BASE_URL}/troubleshooting/${slug}`,
+    lastModified: currentDate,
+    changeFrequency: 'weekly',
+    priority: 0.8,
+  }));
+
+  return [...staticRoutes, ...courseRoutes, ...troubleshootingRoutes];
 }

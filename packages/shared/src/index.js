@@ -18,6 +18,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.API_ROUTES = void 0;
 __exportStar(require("./models/KnowledgeModel"), exports);
 __exportStar(require("./models/SandboxModel"), exports);
+__exportStar(require("./models/TroubleshootingModel"), exports);
 exports.API_ROUTES = {
     AUTH: {
         LOGIN: '/auth/login',
@@ -33,5 +34,15 @@ exports.API_ROUTES = {
     USER: {
         PROFILE: '/users/profile',
         PROGRESS: '/users/progress',
+    },
+    TROUBLESHOOTING: {
+        SCENARIOS: '/troubleshooting/scenarios',
+        DETAIL: (slug) => `/troubleshooting/scenarios/${slug}`,
+        START_SESSION: '/troubleshooting/session/start',
+        EXECUTE_COMMAND: '/troubleshooting/session/execute',
+        DIAGNOSE: '/troubleshooting/session/diagnose',
+        REMEDIATE: '/troubleshooting/session/remediate',
+        VERIFY: '/troubleshooting/session/verify',
+        POST_MORTEM: (slug) => `/troubleshooting/scenarios/${slug}/post-mortem`,
     },
 };

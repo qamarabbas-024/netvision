@@ -2,6 +2,7 @@
 
 export * from './models/KnowledgeModel';
 export * from './models/SandboxModel';
+export * from './models/TroubleshootingModel';
 
 export const API_ROUTES = {
   AUTH: {
@@ -18,5 +19,15 @@ export const API_ROUTES = {
   USER: {
     PROFILE: '/users/profile',
     PROGRESS: '/users/progress',
+  },
+  TROUBLESHOOTING: {
+    SCENARIOS: '/troubleshooting/scenarios',
+    DETAIL: (slug: string) => `/troubleshooting/scenarios/${slug}`,
+    START_SESSION: '/troubleshooting/session/start',
+    EXECUTE_COMMAND: '/troubleshooting/session/execute',
+    DIAGNOSE: '/troubleshooting/session/diagnose',
+    REMEDIATE: '/troubleshooting/session/remediate',
+    VERIFY: '/troubleshooting/session/verify',
+    POST_MORTEM: (slug: string) => `/troubleshooting/scenarios/${slug}/post-mortem`,
   },
 } as const;

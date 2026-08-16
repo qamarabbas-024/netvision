@@ -817,4 +817,59 @@ export async function getCourseAssessmentApi(courseSlug: string): Promise<Course
   return await fetchApi<CourseAssessmentStatus>(`/courses/${courseSlug}/assessment`);
 }
 
+// Troubleshooting Engine API Client Methods
 
+export async function getTroubleshootingScenariosApi(): Promise<any[]> {
+  try {
+    return await fetchApi<any[]>('/troubleshooting/scenarios');
+  } catch {
+    return [];
+  }
+}
+
+export async function getTroubleshootingScenarioDetailApi(idOrSlug: string): Promise<any> {
+  return await fetchApi<any>(`/troubleshooting/scenarios/${idOrSlug}`);
+}
+
+export async function getTroubleshootingPostMortemApi(idOrSlug: string): Promise<any> {
+  return await fetchApi<any>(`/troubleshooting/scenarios/${idOrSlug}/post-mortem`);
+}
+
+export async function startTroubleshootingSessionApi(scenarioId: string): Promise<any> {
+  return await fetchApi<any>('/troubleshooting/session/start', {
+    method: 'POST',
+    body: JSON.stringify({ scenarioId }),
+  });
+}
+
+export async function getTroubleshootingSessionStatusApi(sessionId: string): Promise<any> {
+  return await fetchApi<any>(`/troubleshooting/session/${sessionId}`);
+}
+
+export async function executeTroubleshootingCommandApi(sessionId: string, scenarioId: string, command: string): Promise<any> {
+  return await fetchApi<any>('/troubleshooting/session/execute', {
+    method: 'POST',
+    body: JSON.stringify({ sessionId, scenarioId, command }),
+  });
+}
+
+export async function submitTroubleshootingDiagnosisApi(sessionId: string, scenarioId: string, diagnosisId: string): Promise<any> {
+  return await fetchApi<any>('/troubleshooting/session/diagnose', {
+    method: 'POST',
+    body: JSON.stringify({ sessionId, scenarioId, diagnosisId }),
+  });
+}
+
+export async function applyTroubleshootingRemediationApi(sessionId: string, scenarioId: string, remediationId: string): Promise<any> {
+  return await fetchApi<any>('/troubleshooting/session/remediate', {
+    method: 'POST',
+    body: JSON.stringify({ sessionId, scenarioId, remediationId }),
+  });
+}
+
+export async function runTroubleshootingVerificationApi(sessionId: string, scenarioId: string): Promise<any> {
+  return await fetchApi<any>('/troubleshooting/session/verify', {
+    method: 'POST',
+    body: JSON.stringify({ sessionId, scenarioId }),
+  });
+}

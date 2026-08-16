@@ -18,7 +18,8 @@
     "test:email": "ts-node scripts/test-email.ts",
     "test:email:suite": "ts-node scripts/test-email-suite.ts",
     "test:beta:auth": "ts-node scripts/test-beta-auth.ts",
-    "test:deployment": "ts-node scripts/test-deployment-readiness.ts"
+    "test:deployment": "ts-node scripts/test-deployment-readiness.ts",
+    "test:troubleshooting": "ts-node scripts/test-network-troubleshooting-engine.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

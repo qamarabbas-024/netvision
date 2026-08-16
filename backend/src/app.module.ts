@@ -9,6 +9,7 @@ import { AdminModule } from './admin/admin.module';
 import { SandboxModule } from './sandbox/sandbox.module';
 import { AchievementsModule } from './achievements/achievements.module';
 import { CertificationsModule } from './certifications/certifications.module';
+import { TroubleshootingModule } from './troubleshooting/troubleshooting.module';
 import { RateLimiterModule } from './security/rate-limiter/rate-limiter.module';
 import { AppRateLimitGuard } from './security/rate-limiter/app-rate-limit.guard';
 
@@ -26,6 +27,7 @@ import { AppRateLimitGuard } from './security/rate-limiter/app-rate-limit.guard'
     SandboxModule,
     AchievementsModule,
     CertificationsModule,
+    TroubleshootingModule,
   ],
   controllers: [AppController],
   providers: [
