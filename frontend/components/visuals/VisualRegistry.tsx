@@ -13,6 +13,7 @@ import { IPAddressingVisual } from './IPAddressingVisual';
 import { ClientServerVisual } from './ClientServerVisual';
 import { STPVisual } from './STPVisual';
 import { OSPFVisual } from './OSPFVisual';
+import { MultiAreaOSPFVisual } from './MultiAreaOSPFVisual';
 import { IPv6Visual } from './IPv6Visual';
 
 export interface VisualRegistryProps {
@@ -22,6 +23,9 @@ export interface VisualRegistryProps {
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
 
+  if (slug.includes('multi-area') || slug.includes('multi_area') || slug.includes('redistribution')) {
+    return <MultiAreaOSPFVisual />;
+  }
   if (slug.includes('ipv6') || slug.includes('slaac') || slug.includes('compressor')) {
     return <IPv6Visual />;
   }

@@ -23,6 +23,7 @@
     "test:security": "ts-node scripts/test-oauth-otp-security.ts",
     "test:monitoring": "ts-node scripts/test-monitoring-observability.ts",
     "test:ipv6": "ts-node scripts/test-ipv6-curriculum.ts",
+    "test:ospf:multi-area": "ts-node scripts/test-multi-area-ospf.ts",
     "test:all": "ts-node scripts/test-oauth-otp-security.ts && ts-node scripts/test-monitoring-observability.ts && ts-node scripts/test-email-suite.ts && ts-node scripts/test-deployment-readiness.ts && ts-node scripts/test-network-troubleshooting-engine.ts && ts-node scripts/test-beta-auth.ts"
   },
   "prisma": {
