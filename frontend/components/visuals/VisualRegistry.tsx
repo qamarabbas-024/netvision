@@ -13,6 +13,7 @@ import { IPAddressingVisual } from './IPAddressingVisual';
 import { ClientServerVisual } from './ClientServerVisual';
 import { STPVisual } from './STPVisual';
 import { OSPFVisual } from './OSPFVisual';
+import { IPv6Visual } from './IPv6Visual';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -21,6 +22,9 @@ export interface VisualRegistryProps {
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
 
+  if (slug.includes('ipv6') || slug.includes('slaac') || slug.includes('compressor')) {
+    return <IPv6Visual />;
+  }
   if (slug.includes('ospf') || slug.includes('net-304') || slug.includes('link-state')) {
     return <OSPFVisual />;
   }
