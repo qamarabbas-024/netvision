@@ -35,15 +35,16 @@ async function verifyNetworkAutomation() {
 
   const components = meta.step5_technicalAnatomy.components;
   const compNames = components.map((c) => c.name);
-  assert(compNames.some((n) => n.includes('Idempotency')), 'Anatomy includes Idempotency');
-  assert(compNames.some((n) => n.includes('Declarative vs Imperative')), 'Anatomy includes Declarative vs Imperative');
-  assert(compNames.some((n) => n.includes('Configuration Drift')), 'Anatomy includes Configuration Drift');
-  assert(compNames.some((n) => n.includes('REST API')), 'Anatomy includes REST APIs & HTTP Methods');
-  assert(compNames.some((n) => n.includes('JSON Data')), 'Anatomy includes Structured JSON Data');
-  assert(compNames.some((n) => n.includes('Python Automation')), 'Anatomy includes Python Automation Workflow');
-  assert(compNames.some((n) => n.includes('Dry Run')), 'Anatomy includes Pre-Deployment Dry Run');
-  assert(compNames.some((n) => n.includes('Telemetry')), 'Anatomy includes Model-Driven Telemetry');
-  assert(compNames.some((n) => n.includes('SDN')), 'Anatomy includes SDN & Intent-Based Controllers');
+  assert(compNames.some((n) => n.includes('Why Automation Exists')), '1. Anatomy includes Why Network Automation Exists');
+  assert(compNames.some((n) => n.includes('Manual vs Automated')), '2. Anatomy includes Manual vs Automated Workflows');
+  assert(compNames.some((n) => n.includes('Configuration Drift')), '3. Anatomy includes Configuration Drift');
+  assert(compNames.some((n) => n.includes('Idempotency')), '4. Anatomy includes Idempotency');
+  assert(compNames.some((n) => n.includes('Declarative vs Imperative')), '5. Anatomy includes Declarative vs Imperative');
+  assert(compNames.some((n) => n.includes('Network APIs')), '6. Anatomy includes Network APIs');
+  assert(compNames.some((n) => n.includes('REST Basics')), '7. Anatomy includes REST Basics');
+  assert(compNames.some((n) => n.includes('HTTP Methods')), '8. Anatomy includes HTTP Methods');
+  assert(compNames.some((n) => n.includes('JSON Data Structure')), '9. Anatomy includes JSON Data Structure');
+  assert(compNames.some((n) => n.includes('Safe Automation Workflow')), '10. Anatomy includes Safe Automation Workflow');
   console.log('  ✓ All 10 core architectural automation components verified.');
 
   // [TEST 3] Verify REST Methods & Python JSON Parsing
@@ -54,27 +55,35 @@ async function verifyNetworkAutomation() {
   console.log('  ✓ REST API methods, status codes, and Python JSON dictionary parsing verified.');
 
   // [TEST 4] Verify Safe Automation Pipeline & Pre-Flight Checks
-  console.log('\n[TEST 4] Verifying Safe Automation Pipeline Stages...');
+  console.log('\n[TEST 4] Verifying Safe Automation Pipeline Stages (Inspect -> Validate -> Dry-Run -> Apply -> Verify -> Log)...');
   assert(!!meta.step6_howItWorks, 'How it works steps defined');
-  assert(meta.step6_howItWorks.steps.length >= 5, `Contains >=5 pipeline stages (found: ${meta.step6_howItWorks.steps.length})`);
+  assert(meta.step6_howItWorks.steps.length >= 6, `Contains 6 pipeline stages (found: ${meta.step6_howItWorks.steps.length})`);
   const stepTitles = meta.step6_howItWorks.steps.map((s) => s.title);
-  assert(stepTitles.some((t) => t.includes('Intended State')), 'Stage 1: Intended State defined');
-  assert(stepTitles.some((t) => t.includes('Validation')), 'Stage 2: Schema Validation defined');
+  assert(stepTitles.some((t) => t.includes('Inspect')), 'Stage 1: Inspect Current State defined');
+  assert(stepTitles.some((t) => t.includes('Validate')), 'Stage 2: Schema Validation defined');
   assert(stepTitles.some((t) => t.includes('Dry-Run')), 'Stage 3: Dry-Run Diffing defined');
-  assert(stepTitles.some((t) => t.includes('Deployment')), 'Stage 4: Atomic Deployment defined');
-  assert(stepTitles.some((t) => t.includes('Verification') || t.includes('Telemetry')), 'Stage 5: Telemetry Verification defined');
-  console.log('  ✓ 5-stage safe automation deployment pipeline verified.');
+  assert(stepTitles.some((t) => t.includes('Apply')), 'Stage 4: Apply Changes defined');
+  assert(stepTitles.some((t) => t.includes('Verify')), 'Stage 5: Verify Operational State defined');
+  assert(stepTitles.some((t) => t.includes('Log')), 'Stage 6: Log Audit Trail defined');
+  console.log('  ✓ 6-stage safe automation deployment pipeline verified.');
 
-  // [TEST 5] Verify Assessment Questions across 4 Cognitive Levels
+  // [TEST 5] Verify Assessment Question Bank (6-8 Questions Across 4 Cognitive Tiers)
   console.log('\n[TEST 5] Verifying Assessment Question Bank & Cognitive Levels...');
   const questions = lesson!.questions;
-  assert(questions.length >= 4, `At least 4 questions defined (found: ${questions.length})`);
+  assert(questions.length >= 6 && questions.length <= 8, `Assessment contains 6–8 questions (found: ${questions.length})`);
 
   const cognitiveLevels = questions.map((q) => q.cognitiveLevel);
   assert(cognitiveLevels.includes('RECALL' as any), 'Contains RECALL question (HTTP GET read-only)');
-  assert(cognitiveLevels.includes('UNDERSTANDING' as any), 'Contains UNDERSTANDING question (Idempotency)');
-  assert(cognitiveLevels.includes('APPLICATION' as any), 'Contains APPLICATION question (JSON parsing in Python)');
-  assert(cognitiveLevels.includes('TROUBLESHOOTING' as any), 'Contains TROUBLESHOOTING question (Schema pre-flight validation)');
+  assert(cognitiveLevels.includes('UNDERSTANDING' as any), 'Contains UNDERSTANDING question (Idempotency & Declarative)');
+  assert(cognitiveLevels.includes('APPLICATION' as any), 'Contains APPLICATION question (JSON interpretation & Drift)');
+  assert(cognitiveLevels.includes('TROUBLESHOOTING' as any), 'Contains TROUBLESHOOTING question (Pre-flight validation & Unsafe practices)');
+
+  // Verify mandatory concept coverage
+  const concepts = questions.map((q) => q.concept.toLowerCase());
+  assert(concepts.some((c) => c.includes('idempotency')), 'Question exists testing Idempotency');
+  assert(concepts.some((c) => c.includes('rest') || c.includes('http')), 'Question exists testing REST / HTTP Methods');
+  assert(concepts.some((c) => c.includes('json')), 'Question exists testing JSON Interpretation');
+  assert(concepts.some((c) => c.includes('safe') || c.includes('unsafe') || c.includes('validation')), 'Question exists testing Safe Automation Practices');
 
   questions.forEach((q, idx) => {
     assert(q.options.length === 4, `Question ${idx + 1} has exactly 4 options`);
@@ -82,7 +91,7 @@ async function verifyNetworkAutomation() {
     assert(!!q.explanation, `Question ${idx + 1} has explanation`);
     assert(Object.keys(q.explanationsJson).length >= 3, `Question ${idx + 1} has distractor explanations`);
   });
-  console.log(`  ✓ ${questions.length} assessment questions verified covering Idempotency, REST, JSON parsing, and Pre-Flight validation.`);
+  console.log(`  ✓ ${questions.length} assessment questions verified covering Idempotency, REST methods, JSON parsing, and Safe Automation.`);
 
   // [TEST 6] Verify Safe Simulated Lab (Zero Host Execution)
   console.log('\n[TEST 6] Verifying Safe Simulation Lab Structure...');

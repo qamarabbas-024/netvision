@@ -169,30 +169,44 @@ export const NetworkAutomationVisual: React.FC = () => {
     {
       id: 1,
       prompt:
-        'An engineer configures a network script where executing the exact same script 5 times produces the exact same end state without duplicating resources or throwing errors. What core automation property is this? (Type "Idempotency", "Imperative", or "Telemetry")',
-      expected: 'Idempotency',
-      hints: 'Idempotency guarantees that repeated execution of an automation task yields the exact same target state without unintended side effects.',
-    },
-    {
-      id: 2,
-      prompt:
-        'Which HTTP method should an automation script send to a REST API endpoint to retrieve interface telemetry without modifying device state? (Type GET, POST, PATCH, or DELETE)',
-      expected: 'GET',
-      hints: 'HTTP GET is a safe, read-only method used to query data from a server or network device.',
-    },
-    {
-      id: 3,
-      prompt:
-        'A network team discovers that engineers made undocumented manual CLI changes on 4 edge switches, causing live running configs to diverge from the central repository. What is this condition called? (Type "Configuration Drift", "Idempotency", or "Dry Run")',
+        'A network team discovers that engineers made undocumented manual CLI changes directly on edge switches, causing live running configs to diverge from the central Git repository. What is this condition called? (Type "Configuration Drift", "Idempotency", or "Dry Run")',
       expected: 'Configuration Drift',
       hints: 'Configuration drift occurs when manual interventions or out-of-band changes cause production device state to diverge from intended source-of-truth definitions.',
     },
     {
-      id: 4,
+      id: 2,
       prompt:
         'In a declarative automation model, does the engineer specify the step-by-step commands to execute, or the desired final target state? (Type "Final State" or "Commands")',
       expected: 'Final State',
       hints: 'Declarative automation describes WHAT the desired end-state should be, allowing the automation engine to compute necessary actions.',
+    },
+    {
+      id: 3,
+      prompt:
+        'In the JSON payload `{"vlans": [{"id": 10, "name": "Eng"}]}`, what data structure is used for the `vlans` field? (Type "List", "Dictionary", or "String")',
+      expected: 'List',
+      hints: 'In JSON, square brackets `[...]` represent an ordered List (array) of elements.',
+    },
+    {
+      id: 4,
+      prompt:
+        'Which HTTP method should an automation script send to a REST API endpoint to retrieve operational interface telemetry without modifying device state? (Type GET, POST, PUT, PATCH, or DELETE)',
+      expected: 'GET',
+      hints: 'HTTP GET is a safe, read-only method used to query data from a server or network device without side effects.',
+    },
+    {
+      id: 5,
+      prompt:
+        'Is pushing unvalidated configuration changes directly to 500 production devices without dry-run diffs considered a "Safe" or "Unsafe" automation practice? (Type "Safe" or "Unsafe")',
+      expected: 'Unsafe',
+      hints: 'Unvalidated global deployments without dry-run verification or automated rollback violate safety guidelines.',
+    },
+    {
+      id: 6,
+      prompt:
+        'Why does idempotency matter in network automation? Because executing the same script multiple times produces the exact same end state without errors or duplicate changes. What is this property called? (Type "Idempotency", "Telemetry", or "Drift")',
+      expected: 'Idempotency',
+      hints: 'Idempotency ensures that re-running automation routines produces predictable, non-disruptive results.',
     },
   ];
 
