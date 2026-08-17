@@ -698,93 +698,93 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-level-0-network-packets-data-framing',
     lessonSlug: 'level-0-network-packets-data-framing',
-    text: 'What is the correct hierarchical order of Protocol Data Units (PDUs) during data encapsulation from Layer 4 down to Layer 1?',
+    text: 'Why must large application data streams (such as a 50 MegaByte video file) be divided into smaller Transport Segments rather than being transmitted as a single monolithic block across the network?',
     options: [
-      'Segment (Layer 4) → Packet (Layer 3) → Frame (Layer 2) → Bits (Layer 1)',
-      'Packet (Layer 4) → Frame (Layer 3) → Segment (Layer 2) → Bits (Layer 1)',
-      'Bits (Layer 4) → Frame (Layer 3) → Packet (Layer 2) → Segment (Layer 1)',
-      'Frame (Layer 4) → Segment (Layer 3) → Packet (Layer 2) → Bits (Layer 1)'
+      'To prevent a single transmission error from requiring the retransmission of the entire 50 MB file, prevent network link monopoly, and conform to the physical link Maximum Transmission Unit (MTU)',
+      'Because physical copper cables physically melt if a single packet contains more than 1 Kilobyte of data',
+      'Because the Internet only supports ASCII text characters and cannot transmit binary video files',
+      'Because routers require every byte of data to be assigned its own individual MAC address'
     ],
     correctOption: 0,
-    explanation: 'As data moves down the stack during transmission: Layer 4 creates a Segment (or Datagram), Layer 3 encapsulates it into a Packet, Layer 2 encapsulates it into a Frame (with header and FCS trailer), and Layer 1 transmits it as raw Bits on the wire.',
+    explanation: 'Segmenting data streams into manageable chunks (MSS) ensures fair queue sharing among competing flows, bounds serialization latency, complies with physical link MTU limits (typically 1500 bytes), and ensures that if a bit error occurs in transit, only that single 1460-byte segment needs retransmission.',
     explanationsJson: {
-      1: 'Packet is Layer 3 and Segment is Layer 4; this sequence is inverted.',
-      2: 'Bits are Layer 1 physical signals, not Layer 4 transport units.',
-      3: 'Frame is Layer 2, not Layer 4.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.RECALL,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'PDU Encapsulation Hierarchy',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-network-packets-data-framing',
-    lessonSlug: 'level-0-network-packets-data-framing',
-    text: 'What vital component does the Layer 2 Ethernet Frame append to the END of a data payload that does not exist in Layer 3 or Layer 4 headers?',
-    options: [
-      'Frame Check Sequence (FCS) containing a Cyclic Redundancy Check (CRC) error-detection checksum',
-      'The destination web server SSL/TLS private encryption key',
-      'The user email password in plain text for authentication',
-      'The BGP Autonomous System path attribute list'
-    ],
-    correctOption: 0,
-    explanation: 'Ethernet Layer 2 appends a 4-byte Frame Check Sequence (FCS) trailer containing a CRC-32 checksum. The receiving NIC recalculates the CRC; if it does not match, the corrupted frame is dropped immediately.',
-    explanationsJson: {
-      1: 'Private keys are confidential cryptographic credentials stored securely on the server, never sent in frame trailers.',
-      2: 'Authentication credentials belong in application layer payloads, not Layer 2 trailers.',
-      3: 'BGP AS-Path attributes exist in Layer 7/BGP routing updates, not Layer 2 Ethernet trailers.'
+      1: 'Packet size has no effect on copper cable thermal temperature.',
+      2: 'The Internet routes arbitrary binary payloads across all telecommunication layers.',
+      3: 'MAC addresses identify hardware network interfaces, not individual data payload bytes.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Frame Check Sequence & CRC',
+    concept: 'Transport Layer Segmentation Purpose',
     points: 10
   },
   {
     quizId: 'quiz-level-0-network-packets-data-framing',
     lessonSlug: 'level-0-network-packets-data-framing',
-    text: 'What is the standard Maximum Transmission Unit (MTU) size for standard Ethernet II frames, and what happens if an unfragmented packet exceeds this boundary?',
+    text: 'On a standard Ethernet link with an MTU of 1500 bytes, what is the maximum TCP payload capacity (Maximum Segment Size - MSS) for standard IPv4 traffic, and what mathematical formula defines it?',
     options: [
-      '1500 bytes; if a packet with the Don’t Fragment (DF) flag set exceeds MTU, the router drops it and returns an ICMP "Fragmentation Needed" error',
-      '64 bytes; excess bytes are automatically deleted without notification',
-      '65535 bytes; all Ethernet switches automatically compress payload by 90%',
-      '1000000 bytes; Ethernet cables expand their physical diameter to accommodate larger packets'
+      'MSS = 1460 Bytes (Formula: MSS = MTU (1500) - IPv4 Header (20) - TCP Header (20))',
+      'MSS = 1500 Bytes (Formula: MSS = MTU)',
+      'MSS = 1480 Bytes (Formula: MSS = MTU - IPv4 Header (20))',
+      'MSS = 64 Bytes (Formula: Minimum Frame Size)'
     ],
     correctOption: 0,
-    explanation: 'The standard Ethernet MTU is 1500 bytes of IP payload. When a packet exceeds the outgoing interface MTU and the IPv4 Don’t Fragment (DF) bit is set to 1, the router drops the packet and transmits an ICMP Type 3 Code 4 message back to the sender.',
+    explanation: 'Maximum Segment Size (MSS) is the largest pure application data payload TCP can put into a single segment. Under standard IPv4 (20-byte IP header + 20-byte TCP header = 40 bytes overhead): MSS = 1500 - 40 = 1460 bytes.',
     explanationsJson: {
-      1: '64 bytes is the minimum valid Ethernet frame size (including header/FCS), not the maximum MTU.',
-      2: '65535 bytes is the theoretical maximum IPv4 total length, not standard Ethernet MTU (1500 bytes).',
-      3: 'Physical cables have fixed physical properties and cannot expand to alter MTU.'
+      1: '1500 bytes is the total Layer 3 MTU, including the 20-byte IP and 20-byte TCP headers.',
+      2: '1480 bytes subtracts only the IP header, neglecting the 20-byte Layer 4 TCP header.',
+      3: '64 bytes is the minimum Layer 2 Ethernet frame size.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Ethernet MTU & Fragmentation',
+    concept: 'MSS vs MTU Calculation',
     points: 10
   },
   {
     quizId: 'quiz-level-0-network-packets-data-framing',
     lessonSlug: 'level-0-network-packets-data-framing',
-    text: 'A network engineer observes high "CRC Error" and "Frame Drop" counters on a switch interface connected to a 90-meter copper run. What is the most probable cause?',
+    text: 'How does the receiving host TCP transport stack reconstruct an original continuous file from hundreds of individual segments that arrive out-of-order over an IP network?',
     options: [
-      'Physical layer electromagnetic interference (EMI) or damaged copper cabling causing bit corruption detected by the FCS trailer',
-      'The destination host has configured an incorrect DNS server IP address',
-      'The web server has enabled HTTP/2 compression',
-      'The client has opened too many browser tabs simultaneously'
+      'The receiver buffers incoming segments and reassembles them in exact sequence using the 32-bit TCP Sequence Numbers in each segment header',
+      'The receiver discards all out-of-order packets and requests the user to reboot the operating system',
+      'The receiver changes its IP address to match the packet arrival order',
+      'The receiver sends an email to the Internet Service Provider to rearrange the packets'
     ],
     correctOption: 0,
-    explanation: 'CRC errors occur when the binary bits received at Layer 1 differ from the checksum computed in the Layer 2 FCS trailer, almost always caused by physical cabling flaws, EMI, loose terminations, or bad transceivers.',
+    explanation: 'TCP tracks every single byte transmitted using a 32-bit Sequence Number. The receiving host stores incoming segments in a reassembly buffer, arranges them by their sequence numbers, and passes the reconstructed stream to the application.',
     explanationsJson: {
-      1: 'DNS misconfigurations cause name resolution failures, not physical Layer 2 CRC checksum errors.',
-      2: 'HTTP/2 compression is an application layer feature that does not cause L2 CRC framing errors.',
-      3: 'Browser tabs increase HTTP concurrency but do not cause bitwise electrical corruption on the physical wire.'
+      1: 'TCP does not require rebooting; it buffers out-of-order segments and uses selective/cumulative ACKs.',
+      2: 'IP addresses are logical host endpoints and do not change based on packet arrival sequence.',
+      3: 'Packet reassembly is performed in real-time by the host OS kernel network stack.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
-    questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'CRC Error Troubleshooting',
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Transport Stream Reassembly & Sequence Numbers',
+    points: 10
+  },
+  {
+    quizId: 'quiz-level-0-network-packets-data-framing',
+    lessonSlug: 'level-0-network-packets-data-framing',
+    text: 'How does Path MTU Discovery (PMTUD, RFC 1191) enable a sending host to automatically adapt to an intermediate link with a smaller MTU (such as a 1400-byte VPN tunnel) without causing IP fragmentation?',
+    options: [
+      'The sender sets the Don’t Fragment (DF = 1) bit; when a packet exceeds the tunnel MTU, the router drops it and returns an ICMP "Fragmentation Needed" message with the next-hop MTU, prompting the sender to lower its MSS',
+      'The sender sends a probe packet that physically expands the router interface buffers',
+      'The sender automatically converts all TCP packets into UDP datagrams',
+      'The sender encrypts the packet twice so the router cannot measure its size'
+    ],
+    correctOption: 0,
+    explanation: 'PMTUD sets the IPv4 DF bit (Don\'t Fragment). When an intermediate router cannot forward the 1500-byte packet across a 1400-byte link, it drops the packet and transmits an ICMP Type 3 Code 4 message containing the next-hop MTU (1400). The sender receives this and lowers its TCP MSS to 1360 bytes.',
+    explanationsJson: {
+      1: 'Software probe packets cannot physically alter hardware router interfaces.',
+      2: 'PMTUD adjusts TCP segment sizing; it does not switch transport protocols to UDP.',
+      3: 'Encryption increases header overhead and does not bypass MTU limits.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Path MTU Discovery (PMTUD) Mechanics',
     points: 10
   },
 
@@ -2329,98 +2329,98 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   },
 
   // -------------------------------------------------------------------------
-  // Topic 11: DHCP & DNS Overview
+  // Topic 11: The Integrated Host Boot-Up Lifecycle
   // -------------------------------------------------------------------------
   {
     quizId: 'quiz-dhcp-dns-overview',
     lessonSlug: 'dhcp-dns-overview',
-    text: 'When a client subnet is separated from the centralized enterprise DHCP Server by a Layer 3 router, what feature must be enabled on the router interface to allow DHCP requests to cross the router boundary?',
+    text: 'What is the correct chronological sequence of protocol events that must execute when an unconfigured computer boots up, connects to Ethernet, and sends its first HTTPS web request?',
     options: [
-      'DHCP Relay Agent (`ip helper-address`) to convert client Layer 2 broadcasts into unicast packets directed to the DHCP server',
-      'Static NAT translation mapping port 80 to port 443',
-      'Spanning Tree BPDU Guard on the router gateway port',
-      'Disabling the routing table on the gateway router'
+      'Physical Link Up -> DHCP Lease Acquisition -> Gratuitous ARP (DAD) -> Default Gateway ARP Resolution -> DNS Name Resolution -> Outbound TCP 3-Way Handshake & HTTPS GET',
+      'HTTPS GET -> DNS Resolution -> TCP Handshake -> DHCP Lease -> Physical Link Up',
+      'DNS Resolution -> Default Gateway ARP -> DHCP Lease -> Physical Link Up -> TCP Handshake',
+      'Default Gateway ARP -> DNS Resolution -> Physical Link Up -> DHCP Lease -> HTTPS GET'
     ],
     correctOption: 0,
-    explanation: 'Because routers drop Layer 2 broadcasts by default, a DHCP Relay Agent (configured via `ip helper-address` on Cisco routers) intercepts client DHCPDISCOVER broadcasts and forwards them as unicast UDP packets directly to the central DHCP server.',
+    explanation: 'A host must first establish Physical Link Up (PHY negotiation), acquire its IP configuration via DHCP (DORA), verify IP uniqueness via Gratuitous ARP, resolve the Default Gateway MAC via ARP, resolve the target domain name via DNS, and finally initiate the TCP 3-way handshake and HTTPS GET request.',
     explanationsJson: {
-      1: 'NAT port redirection does not forward DHCP broadcast discovery packets.',
-      2: 'BPDU Guard is a Spanning Tree switch feature that shuts down ports receiving BPDUs.',
-      3: 'Disabling routing breaks network packet forwarding.'
+      1: 'Reversed sequence; application requests cannot occur before physical link and IP configuration.',
+      2: 'DNS requires an IP address and default gateway route before it can query a DNS server.',
+      3: 'A host cannot ARP for its gateway before learning its gateway IP address via DHCP.'
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Integrated Host Boot-Up Sequence',
+    points: 10
+  },
+  {
+    quizId: 'quiz-dhcp-dns-overview',
+    lessonSlug: 'dhcp-dns-overview',
+    text: 'During the host boot-up lifecycle, why must the client resolve the MAC address of its Default Gateway via ARP before it can send a DNS query to public DNS resolver 8.8.8.8?',
+    options: [
+      'Because 8.8.8.8 is on a remote subnet; the client must encapsulate the DNS IP packet inside an Ethernet frame addressed to the local Default Gateway router MAC',
+      'Because DNS root servers require the gateway MAC address to look up domain names',
+      'Because ARP assigns the client its IPv4 address before DNS can run',
+      'Because DHCP servers only accept DNS queries that are signed by the gateway'
+    ],
+    correctOption: 0,
+    explanation: 'When a host determines that the destination IP (8.8.8.8) is off-subnet, it knows it must forward the packet through its local Default Gateway. The host sends an ARP Request for the Gateway IP to obtain the Gateway MAC needed for the Layer 2 Ethernet frame.',
+    explanationsJson: {
+      1: 'DNS root servers process DNS query payloads; they do not inspect client Layer 2 gateway MAC headers.',
+      2: 'DHCP leases IP addresses, not ARP.',
+      3: 'DHCP and DNS are distinct protocols operating on UDP ports 67/68 and 53.'
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'DHCP Relay Agent (ip helper-address)',
+    concept: 'Gateway ARP Resolution for Off-Subnet DNS',
     points: 10
   },
   {
     quizId: 'quiz-dhcp-dns-overview',
     lessonSlug: 'dhcp-dns-overview',
-    text: 'What occurs when a client DHCP lease reaches 50% (T1 timer) of its total lease duration?',
+    text: 'When a client host (192.168.1.50, MAC 00:AA) transmits an outbound HTTPS request to web server 93.184.216.34 via default gateway 192.168.1.1 (MAC 00:BB), what are the Layer 2 and Layer 3 destination addresses in the transmitted frame?',
     options: [
-      'The client sends a unicast DHCPREQUEST directly to the leasing DHCP server to request a lease renewal',
-      'The client immediately releases its IP address and loses network connectivity',
-      'The client changes its MAC address to extend the lease',
-      'The DHCP server shuts down the client switch port'
+      'Layer 3 Destination IP: 93.184.216.34 | Layer 2 Destination MAC: 00:BB (Default Gateway MAC)',
+      'Layer 3 Destination IP: 192.168.1.1 | Layer 2 Destination MAC: 00:AA',
+      'Layer 3 Destination IP: 93.184.216.34 | Layer 2 Destination MAC: FF:FF:FF:FF:FF:FF (Broadcast)',
+      'Layer 3 Destination IP: 255.255.255.255 | Layer 2 Destination MAC: 00:BB'
     ],
     correctOption: 0,
-    explanation: 'At T1 (50% of lease time), the client attempts to renew its lease by sending a unicast DHCPREQUEST to the specific DHCP server. If no response is received by T2 (87.5%), it broadcasts a DHCPREQUEST to any available server.',
+    explanation: 'The Layer 3 Destination IP always identifies the ultimate end-to-end destination server (93.184.216.34) and does not change. The Layer 2 Destination MAC identifies the next-hop physical interface (the Default Gateway router MAC 00:BB) on the local broadcast domain.',
     explanationsJson: {
-      1: 'Clients do not release IPs at 50%; they continue using the IP while renewing in the background.',
-      2: 'MAC addresses are physical hardware attributes and do not change for lease renewals.',
-      3: 'DHCP servers do not control switch port administrative states.'
+      1: '192.168.1.1 is the gateway router IP, not the web server target IP.',
+      2: 'Unicast web traffic is never broadcast to FF:FF:FF:FF:FF:FF.',
+      3: '255.255.255.255 is a Layer 3 broadcast, invalid for unicast HTTPS.'
     },
     difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'DHCP Lease Renewal (T1 & T2 Timers)',
+    concept: 'Destination IP vs Destination MAC in Outbound Traffic',
     points: 10
   },
   {
     quizId: 'quiz-dhcp-dns-overview',
     lessonSlug: 'dhcp-dns-overview',
-    text: 'What is the distinction between an Iterative DNS query and a Recursive DNS query?',
+    text: 'A user boots their computer and cannot load websites. An engineer diagnoses the sequential lifecycle: (1) Link LED is solid green, (2) `ipconfig` shows IP 192.168.1.50 and Gateway 192.168.1.1, (3) `ping 192.168.1.1` succeeds, (4) `ping 8.8.8.8` succeeds, (5) `nslookup google.com` times out. At which stage of the boot lifecycle did the failure occur?',
     options: [
-      'In a Recursive query, the contacted server must return the final answer (or error); in an Iterative query, the contacted server returns the best referral to the next name server in the hierarchy',
-      'Recursive queries use UDP, while Iterative queries only use fiber optic lasers',
-      'Recursive queries only work for `.org` domains, while Iterative queries only work for `.com` domains',
-      'Iterative queries can only resolve IP addresses to MAC addresses'
+      'Phase 5: DNS Name Resolution failed, because IP routing and gateway reachability are fully operational but domain name lookup is timing out',
+      'Phase 1: Physical Link Up failed',
+      'Phase 2: DHCP Lease Acquisition failed',
+      'Phase 4: Default Gateway ARP Resolution failed'
     ],
     correctOption: 0,
-    explanation: 'In recursive resolution (client to local resolver), the resolver takes full responsibility for finding the answer. In iterative resolution (resolver to root/TLD/authoritative servers), each server responds with a referral to the next authoritative server down the tree.',
+    explanation: 'Because link up (Phase 1), DHCP IP assignment (Phase 2), Gateway ARP (Phase 4), and IP routing to public 8.8.8.8 all succeeded, the failure is isolated specifically to Phase 5 (DNS Name Resolution), pointing to an uncontactable or misconfigured DNS server.',
     explanationsJson: {
-      1: 'Both query types operate over standard UDP/TCP port 53.',
-      2: 'DNS query mechanics are universal across all top-level domains (.com, .org, .net, .edu).',
-      3: 'Resolving IPs to MACs is ARP, not DNS.'
-    },
-    difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Recursive vs Iterative DNS Queries',
-    points: 10
-  },
-  {
-    quizId: 'quiz-dhcp-dns-overview',
-    lessonSlug: 'dhcp-dns-overview',
-    text: 'An engineer migrates a web application to a new public server IP address (`203.0.113.80`) and updates the DNS "A" record. However, some remote users still connect to the old IP (`198.51.100.10`) for several hours. Why does this occur?',
-    options: [
-      'Remote recursive resolvers and client OS caches respect the previous DNS record Time-to-Live (TTL) value and continue using cached records until the TTL expires',
-      'The new server IP address is blocked by the international root name servers',
-      'The web browser requires a hardware reboot of the router',
-      'The Ethernet cables connected to the old server still hold residual electrical packets'
-    ],
-    correctOption: 0,
-    explanation: 'DNS records include a TTL (Time to Live) specifying how many seconds resolvers may cache the record. Until the cached record TTL decrements to 0, resolvers will return the old cached IP address without querying authoritative servers.',
-    explanationsJson: {
-      1: 'Root servers delegate TLDs; they do not block individual application A records.',
-      2: 'Client browser caching is governed by DNS TTL timers, not router hardware rebooting.',
-      3: 'Physical cables do not store residual packets in memory.'
+      1: 'Solid green link LED and successful local pings prove Physical Link Up succeeded.',
+      2: 'A valid 192.168.1.50 IP proves DHCP leasing succeeded.',
+      3: 'Successful ping to the gateway proves Gateway ARP and Layer 2 forwarding succeeded.'
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
     questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'DNS TTL Caching Propagation Delay',
+    concept: 'Host Boot Lifecycle Fault Isolation',
     points: 10
   },
 
