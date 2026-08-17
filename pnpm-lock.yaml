@@ -165,6 +165,15 @@ importers:
 
   frontend:
     dependencies:
+      '@netvision/shared':
+        specifier: workspace:*
+        version: link:../packages/shared
+      '@netvision/simulation-engine':
+        specifier: workspace:*
+        version: link:../packages/simulation-engine
+      '@netvision/ui':
+        specifier: workspace:*
+        version: link:../packages/ui
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
