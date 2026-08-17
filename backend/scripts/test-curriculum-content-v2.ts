@@ -96,8 +96,35 @@ async function verifyCurriculumContentV2() {
   assert(lessonsWithoutLabs.length > 0, 'Some lessons appropriately omit labs (e.g. digital fundamentals)');
   console.log(`  ✓ Modular structure verified: ${lessonsWithLabs.length} lessons with labs, ${lessonsWithoutLabs.length} lessons with focused non-lab practice.`);
 
+  // [TEST 7] Verify Batch 1 Migrated Foundational Lessons (P0)
+  console.log('\n[TEST 7] Verifying Batch 1 Migrated Foundational Lessons (P0)...');
+  const batch1Slugs = [
+    'level-0-what-is-a-computer-network',
+    'level-0-client-and-server-architecture',
+    'level-0-lan-wan-internet-boundaries',
+    'level-0-network-protocols-standards',
+    'network-topologies-overview',
+  ];
+
+  for (const slug of batch1Slugs) {
+    const lesson = LESSONS_NET100.find((l) => l.slug === slug);
+    assert(!!lesson, `Batch 1 lesson exists: ${slug}`);
+    assert(!!lesson!.contentV2, `Batch 1 lesson has contentV2: ${slug}`);
+    assert(typeof lesson!.contentV2!.objective === 'string', `${slug} has objective`);
+    assert(typeof lesson!.contentV2!.explanation === 'string', `${slug} has explanation`);
+    assert(Array.isArray(lesson!.contentV2!.recap) && lesson!.contentV2!.recap.length > 0, `${slug} has recap`);
+    assert(lesson!.questions.length >= 3, `${slug} has at least 3 high-quality assessment questions`);
+    // Ensure no forced bloat / fake sections
+    assert(!lesson!.contentV2!.cliTooling, `${slug} does not have forced CLI tooling`);
+    assert(!lesson!.contentV2!.packetHeaderView, `${slug} does not have forced fake packet header view`);
+    assert(!lesson!.contentV2!.troubleshooting, `${slug} does not have forced unrelated troubleshooting`);
+    assert(!lesson!.contentV2!.security, `${slug} does not have forced unrelated security`);
+    assert(!lesson!.lab, `${slug} does not have forced synthetic lab`);
+  }
+  console.log(`  ✓ All ${batch1Slugs.length} Batch 1 foundational lessons verified with clean V2 structure and zero forced filler.`);
+
   console.log('\n================================================================');
-  console.log('🎉 ALL 6 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 7 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 

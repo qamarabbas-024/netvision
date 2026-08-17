@@ -258,101 +258,61 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'NETWORK_GRAPH',
     introduction:
       'Discover the fundamental principles of data telecommunications: how autonomous computing nodes connect across shared media, the Sender-Receiver-Message-Medium-Protocol communication model, and transmission modes (Simplex, Half-Duplex, Full-Duplex).',
-    stepMetadata: {
-      step1_objective:
+    contentV2: {
+      objective:
         'Understand what constitutes a computer network, analyze the 5 foundational elements of communication (Sender, Receiver, Medium, Message, Protocol), and differentiate between Simplex, Half-Duplex, and Full-Duplex transmission modes.',
-      step2_prerequisites: ['net-101-bits-bytes-binary-hex'],
-      step3_whyItMatters:
-        'All modern computing relies on standard communication models and duplex synchronization.',
-      step4_coreConcept:
-        'A computer network connects autonomous endpoints to share data and resources over communication links. Every communication transaction requires: Sender, Receiver, Medium, Message, and Protocol. Transmission modes: Simplex (one-way), Half-Duplex (two-way turn-taking), and Full-Duplex (simultaneous bidirectional).',
-      step5_technicalAnatomy: {
-        title: 'Communication Framework & Transmission Duplex Modes',
-        description: 'The 5 elements and directional modes of telecommunication.',
-        components: [
-          { name: 'Sender', detail: 'Source endpoint that generates and transmits the message.' },
-          { name: 'Receiver', detail: 'Destination endpoint that captures and decodes the message.' },
-          { name: 'Medium', detail: 'Guided (copper/fiber) or unguided (wireless RF) transmission channel.' },
-          { name: 'Message', detail: 'The digital payload (data, text, audio, video).' },
-          { name: 'Protocol', detail: 'Rules governing syntax, semantics, and timing.' },
-          { name: 'Duplex Modes', detail: 'Simplex (1-way), Half-Duplex (2-way sequential), Full-Duplex (2-way simultaneous).' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Encoding', action: 'Sender encodes digital data into physical signals.' },
-          { stepNumber: 2, title: 'Channel Propagation', action: 'Signals traverse physical medium.' },
-          { stepNumber: 3, title: 'Decoding', action: 'Receiver decodes signals back into data.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'Communication Model & Duplex Classification',
-        fields: [
-          { fieldName: 'Sender / Receiver', bitLength: 'Endpoints', hexSample: 'Host A -> Host B', description: 'Communication endpoints.' },
-          { fieldName: 'Channel Mode', bitLength: 'Full-Duplex', hexSample: 'Simultaneous Tx/Rx', description: 'Bidirectional non-blocking transmission.' },
-        ],
-      },
-      step8_visualExplanation: {
+      prerequisites: ['net-101-bits-bytes-binary-hex'],
+      whyItMatters:
+        'Every distributed software application, cloud service, and internet communication relies on interconnected nodes, physical transmission media, and standardized communication protocols. Understanding the foundational communication model is essential before learning addressing, switching, or routing.',
+      explanation:
+        'A computer network is an interconnected collection of autonomous computing devices (nodes) capable of exchanging digital data and sharing computing resources across physical or wireless communication links. Every communication transaction in networking requires five foundational elements: (1) Sender (the source node creating the message), (2) Receiver (the destination node receiving the message), (3) Medium (the physical pathway—copper cable, optical glass fiber, or wireless radio frequency spectrum—over which the signal travels), (4) Message (the digital information or data payload being conveyed), and (5) Protocol (the agreed-upon set of rules governing message syntax, meaning, and synchronization).\n\nData telecommunication across a medium operates in one of three directional transmission modes: Simplex (strictly one-way communication where the sender only transmits and the receiver only listens, such as keyboard input or traditional broadcast radio), Half-Duplex (two-way communication where both parties can transmit and receive, but only one at a time to prevent collisions, such as a walkie-talkie or legacy shared Ethernet hubs), and Full-Duplex (simultaneous bidirectional communication where both nodes transmit and receive concurrently without contention, as in modern switched Ethernet and telephone calls).',
+      components: [
+        { name: '1. Network Nodes & Devices', detail: 'End-user devices (workstations, servers, smartphones, IoT sensors) and intermediate infrastructure (switches, routers, access points) that originate, route, and terminate digital data.' },
+        { name: '2. Communication Links & Media', detail: 'Guided physical channels (copper twisted pair, coaxial, optical fiber) and unguided wireless channels (radio frequency, microwave, infrared) connecting nodes.' },
+        { name: '3. Sender & Receiver', detail: 'The communicating endpoints. The sender encodes information into physical signals; the receiver captures the signals and reconstructs the data.' },
+        { name: '4. Message / Data Payload', detail: 'The digital information conveyed across the network, ranging from single sensor readings and text characters to high-definition video frames and database records.' },
+        { name: '5. Communication Protocol', detail: 'A formal set of rules defining the format, timing, sequencing, and error-handling mechanisms that allow heterogeneous hardware to interoperate reliably.' },
+        { name: '6. Transmission Duplex Modes', detail: 'Simplex (unidirectional only), Half-Duplex (bidirectional turn-taking), and Full-Duplex (simultaneous bidirectional without blocking).' },
+      ],
+      howItWorks: [
+        { stepNumber: 1, title: 'Data Formulation & Encoding', action: 'The sender application produces a message payload and prepares it for transmission using a shared communication protocol.' },
+        { stepNumber: 2, title: 'Signal Transmission Across Medium', action: 'The sender network interface transforms the binary data into physical signals (electrical voltages, light pulses, or radio waves) traveling across the medium.' },
+        { stepNumber: 3, title: 'Signal Reception & Protocol Decoding', action: 'The receiver captures the physical signals from the medium, decodes them back into binary bits, validates the protocol rules, and delivers the message to the destination application.' },
+      ],
+      visualizer: {
         type: 'NETWORK_GRAPH',
-        title: 'Network Communication Flow & Duplex Visualizer',
-        description: 'Observe message flow and toggle Simplex, Half-Duplex, and Full-Duplex modes.',
+        title: 'Interactive Network Communication Flow & Duplex Mode Simulator',
+        description: 'Visualize how data packets flow between sender and receiver across different physical media, and toggle between Simplex, Half-Duplex, and Full-Duplex transmission modes.',
       },
-      step9_workedExample: {
-        title: 'Half-Duplex vs Full-Duplex Throughput',
-        problemStatement: 'Compare 100 Mbps Half-Duplex vs 100 Mbps Full-Duplex.',
+      workedExample: {
+        title: 'Classifying Telecommunication Systems by Directional Duplex Mode',
+        problemStatement: 'Classify each real-world system into Simplex, Half-Duplex, or Full-Duplex:\n1. FM Radio broadcast from a radio tower to car receivers.\n2. Push-to-Talk (PTT) walkie-talkie communication between security guards.\n3. Modern Gigabit Ethernet connection between a PC and a network switch.',
         stepByStepSolution: [
-          'Half-Duplex shares 1 channel; hosts take turns; aggregate capacity = 100 Mbps.',
-          'Full-Duplex has dedicated Tx and Rx channels; simultaneous 100 Mbps each way = 200 Mbps aggregate capacity.',
+          '1. FM Radio: The radio station tower broadcasts signals to car radios, but cars cannot transmit back to the tower. Transmission is strictly unidirectional -> Simplex.',
+          '2. Walkie-Talkie: Both guards can speak and listen over the shared radio frequency, but when one presses the button to talk, the other must wait and listen to avoid audio overlap -> Half-Duplex.',
+          '3. Gigabit Ethernet: Modern switches use dedicated transmit (Tx) and receive (Rx) wire pairs, allowing the PC and switch to send and receive frames simultaneously at 1 Gbps each way without collisions -> Full-Duplex.',
         ],
-        finalResult: 'Full-Duplex provides 200 Mbps aggregate collision-free capacity.',
+        finalResult: '1: Simplex (one-way). 2: Half-Duplex (two-way sequential). 3: Full-Duplex (two-way simultaneous).',
       },
-      step10_realWorldScenario: {
-        topology: 'Duplex Mismatch Outage',
-        scenarioText: 'Printer on Half-Duplex connected to Full-Duplex switch suffers late collisions and packet loss.',
-        engineeringContext: 'Duplex mismatches cause severe packet drops.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Autonegotiates speed and duplex upon link up.',
-        nicBehavior: 'Uses separate wire pairs for Tx (pins 1,2) and Rx (pins 3,6) in full duplex.',
-        switchOrRouterBehavior: 'Maintains independent ingress and egress buffers per port.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'powershell -Command "Get-NetAdapter | Select-Object Name, Status, LinkSpeed, FullDuplex"',
-          description: 'Checks host adapter link speed and full-duplex status.',
-          expectedOutput: 'Ethernet  Up  1 Gbps  True',
-          proofExplanation: 'Verifies 1 Gbps Full-Duplex operation.',
+          id: 1,
+          prompt: 'Identify the five foundational elements present in an email transaction between a user laptop and an office mail server.',
+          expected: 'Sender (laptop), Receiver (mail server), Medium (Ethernet/Wi-Fi link), Message (email payload), Protocol (SMTP/IMAP/TCP/IP).',
+          hints: 'Recall the 5 communication elements: Sender, Receiver, Medium, Message, Protocol.',
+        },
+        {
+          id: 2,
+          prompt: 'Why does Full-Duplex Ethernet achieve twice the aggregate throughput of Half-Duplex Ethernet at the same clock speed?',
+          expected: 'Full-Duplex uses separate transmit and receive channels, enabling simultaneous 100 Mbps transmission in both directions (200 Mbps total) without collisions.',
+          hints: 'Consider simultaneous bidirectional transmission vs turn-taking.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'High CRC errors and late collisions.',
-          possibleCauses: ['Duplex mismatch between switch port and host NIC'],
-          diagnosticSteps: ['Check duplex on switch and host adapter.'],
-          remediation: 'Configure matching Full-Duplex or enable Auto-Negotiation on both ends.',
-        },
+      recap: [
+        'A computer network connects autonomous computing devices to exchange data and share resources over communication channels.',
+        'Every telecommunication transaction requires five elements: Sender, Receiver, Medium, Message, and Protocol.',
+        'Transmission modes govern direction: Simplex (one-way only), Half-Duplex (bidirectional turn-taking), and Full-Duplex (simultaneous bidirectional).',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Thinking Half-Duplex is Simplex.', correction: 'Half-Duplex is bidirectional (one at a time); Simplex is strictly one-way.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Eavesdropping on shared hub media.',
-        mitigationStrategy: 'Use full-duplex switches to microsegment traffic.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['5 elements: Sender, Receiver, Medium, Message, Protocol.', 'Simplex, Half-Duplex, Full-Duplex.'],
-        frequentTraps: ['Confusing Half-Duplex with Simplex.'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Network Node Discovery & Duplex Verification',
-        scenario: 'Verify 5 communication elements and full-duplex status.',
-        tasks: ['Verify link speed and full-duplex status on host network adapter.'],
-        verificationMethod: 'Confirm 1000 Mbps Full-Duplex with 0 collisions.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['A network connects autonomous nodes to share data.', 'Full-Duplex provides simultaneous bidirectional transmission.'],
-        nextLessonBridge: 'Proceed to NET-102 Lesson 2 for Client-Server and Peer-to-Peer models.',
-      },
     },
     questions: [
       {
@@ -371,15 +331,39 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'Network Definition',
       },
+      {
+        text: 'In the foundational 5-element model of telecommunications (Sender, Receiver, Medium, Message, Protocol), what is the specific role of the Protocol?',
+        options: [
+          'It defines the formal rules, syntax, and timing governing how data is formatted and interpreted by communicating devices',
+          'It is the physical glass fiber cable connecting the buildings',
+          'It is the electrical battery powering the network switch',
+          'It is the human user reading the screen',
+        ],
+        correctOption: 0,
+        explanation: 'A protocol is the set of rules governing data telecommunication, specifying message format (syntax), meaning (semantics), and synchronization (timing).',
+        explanationsJson: { 1: 'That is the transmission medium.', 2: 'That is power supply.', 3: 'That is the end user.' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Protocol Definition & Role',
+      },
+      {
+        text: 'Two network devices communicate over a channel where both devices can send and receive data, but only one device is permitted to transmit at any given instant. Which transmission mode is this?',
+        options: [
+          'Half-Duplex',
+          'Simplex',
+          'Full-Duplex',
+          'Multiplexing',
+        ],
+        correctOption: 0,
+        explanation: 'Half-Duplex allows bidirectional communication, but only one direction at a time (turn-taking). Full-Duplex allows simultaneous bidirectional transmission, while Simplex is strictly one-way.',
+        explanationsJson: { 1: 'Simplex is strictly one-way (transmit-only or receive-only).', 2: 'Full-Duplex transmits in both directions simultaneously.', 3: 'Multiplexing is combining multiple signals on one channel.' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Transmission Modes: Duplex Classification',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Network Node Discovery & Duplex Verification',
-      instructions: '1. Inspect simulated link.\n2. Verify 5 components of communication.\n3. Check full-duplex status.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { hostA: 'PC-1', hostB: 'PC-2', medium: 'Cat6', duplex: 'Full-Duplex' },
-      tasks: ['Verify 1 Gbps Full-Duplex.'],
-    },
   },
 
   // -------------------------------------------------------------------------
@@ -395,126 +379,111 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'CLIENT_SERVER_FLOW',
     introduction:
       'Master the core architectural models of distributed networking: Centralized Client-Server request/response systems vs Decentralized Peer-to-Peer (P2P) resource sharing, comparing scalability, administration, and fault tolerance.',
-    stepMetadata: {
-      step1_objective:
-        'Understand Client and Server roles, analyze Request/Response transaction cycles, and evaluate Client-Server vs Peer-to-Peer (P2P) architectural trade-offs.',
-      step2_prerequisites: ['level-0-what-is-a-computer-network'],
-      step3_whyItMatters:
-        'Distributed systems are designed around either centralized client-server or decentralized P2P models.',
-      step4_coreConcept:
-        'Client-Server: asymmetric model where Clients send requests to centralized Servers that passively listen on designated ports. Provides central management and security, but the server is a Single Point of Failure (SPOF). P2P: symmetric decentralized model where peers act simultaneously as clients and servers, scaling capacity dynamically with active users.',
-      step5_technicalAnatomy: {
-        title: 'Centralized vs Decentralized Architecture Anatomy',
-        description: 'Comparison of server daemons vs peer swarms.',
-        components: [
-          { name: 'Client Node', detail: 'Initiates service requests; uses ephemeral outgoing ports.' },
-          { name: 'Server Daemon', detail: 'Passively listens on standard well-known ports (e.g. 80/443, 53) to serve requests.' },
-          { name: 'Request / Response', detail: 'Synchronous/asynchronous exchange of parameters and payloads.' },
-          { name: 'P2P Peer Node', detail: 'Symmetric node acting as both client and server.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Server Listening', action: 'Server daemon binds to IP and port, listening for incoming connections.' },
-          { stepNumber: 2, title: 'Client Request', action: 'Client initiates connection and transmits request payload.' },
-          { stepNumber: 3, title: 'Server Response', action: 'Server processes request and returns status code and data.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'Client-Server vs P2P Flow',
-        fields: [
-          { fieldName: 'Client (Initiator)', bitLength: 'Source', hexSample: 'Ephemeral Port', description: 'Initiates request.' },
-          { fieldName: 'Server (Listener)', bitLength: 'Destination', hexSample: 'Port 80/443', description: 'Processes request.' },
-        ],
-      },
-      step8_visualExplanation: {
+    contentV2: {
+      objective:
+        'Understand Client and Server roles, analyze the Request/Response transaction cycle, evaluate Peer-to-Peer (P2P) decentralized swarms, and compare administrative control and Single Point of Failure (SPOF) tradeoffs.',
+      prerequisites: ['level-0-what-is-a-computer-network'],
+      whyItMatters:
+        'Every internet application—from web browsing and mobile banking to streaming media and distributed blockchains—is architected around either a centralized Client-Server or decentralized Peer-to-Peer model. Selecting the right architecture determines system resilience, administrative control, and scaling cost under heavy user load.',
+      explanation:
+        'In distributed computing, software systems organize device roles into two primary architectural models: Client-Server and Peer-to-Peer (P2P).\n\nThe Client-Server model is an asymmetric architecture where roles are strictly divided. A Client is an active requester (such as a web browser or mobile app) that initiates communication to ask for a service or resource. A Server is a specialized, high-availability host running background software (a daemon) that passively listens on a designated network address for incoming client requests, executes business logic or database queries, and transmits a response payload back to the client. This centralized structure provides strong administrative control, centralized security auditing, and unified data consistency, but makes the server a potential bottleneck and Single Point of Failure (SPOF).\n\nThe Peer-to-Peer (P2P) model is a symmetric, decentralized architecture where every participating node (peer) possesses equivalent privileges and responsibilities. Each peer operates simultaneously as both a client (downloading pieces of data from other peers) and a server (uploading pieces to neighboring peers). As more peers join the P2P swarm, aggregate bandwidth and system capacity increase dynamically without requiring expensive central datacenter scaling.',
+      components: [
+        { name: '1. Client Endpoint', detail: 'The active initiator of a network transaction. Sends formatted requests to servers and renders or processes returned responses.' },
+        { name: '2. Server Daemon', detail: 'A long-running program that passively listens on a network port, authenticates clients, enforces business logic, and serves resources.' },
+        { name: '3. Request-Response Transaction Cycle', detail: 'The fundamental communication cycle: Client sends request parameters -> Server validates and processes -> Server transmits response status and data.' },
+        { name: '4. Peer-to-Peer (P2P) Node', detail: 'A decentralized computing node that concurrently acts as both client (requester) and server (resource provider) within a distributed swarm.' },
+        { name: '5. Centralized vs Decentralized Architecture Tradeoffs', detail: 'Client-Server offers simple management and strict data consistency but has SPOF risks; P2P offers self-scaling capacity and fault tolerance but lacks centralized governance.' },
+      ],
+      howItWorks: [
+        { stepNumber: 1, title: 'Server Passive Listening', action: 'The server initializes its service daemon, binds to a network IP address, and passively awaits incoming client connection requests.' },
+        { stepNumber: 2, title: 'Client Request Initiation', action: 'A client application constructs a structured service request and transmits it across the network to the server.' },
+        { stepNumber: 3, title: 'Server Execution & Response Delivery', action: 'The server receives the request, processes the query or file retrieval, and transmits a formatted response containing the requested data or status code.' },
+      ],
+      visualizer: {
         type: 'CLIENT_SERVER_FLOW',
-        title: 'Client-Server vs P2P Architecture Simulator',
-        description: 'Simulate server bottleneck under load vs P2P swarm distribution.',
+        title: 'Interactive Client-Server vs P2P Swarm Architecture Simulator',
+        description: 'Simulate how centralized servers handle increasing client request load, observe single-point-of-failure bottlenecks, and contrast with decentralized P2P swarm scaling.',
       },
-      step9_workedExample: {
-        title: 'Bandwidth Scaling: 1 GB File to 1,000 Users',
-        problemStatement: 'Server has 1 Gbps (125 MB/s) upload. Users have 20 Mbps (2.5 MB/s) upload.',
+      workedExample: {
+        title: 'Distributing a 1 GB Software Update to 1,000 Users: Client-Server vs P2P',
+        problemStatement: 'A software company must distribute a 1 GB file to 1,000 users. The central server has 1 Gbps (125 MB/s) upload bandwidth. In P2P, each user contributes 20 Mbps (2.5 MB/s) upload bandwidth. Compare total distribution time.',
         stepByStepSolution: [
-          'Client-Server: 1,000 GB / 125 MB/s = 8,000 seconds (2.22 hours) server bottleneck.',
-          'P2P: Aggregate upload capacity reaches 1,000 * 2.5 MB/s = 2,500 MB/s, distributing in minutes.',
+          '1. Client-Server Model: The central server must independently upload the entire 1 GB file 1,000 times (Total data = 1,000 GB). At 125 MB/s upload: 1,000,000 MB / 125 MB/s = 8,000 seconds (~2.22 hours) server bottleneck.',
+          '2. Peer-to-Peer Model: The server only needs to seed the initial chunks into the swarm. Once users receive chunks, they immediately upload them to other peers. 1,000 users * 2.5 MB/s = 2,500 MB/s aggregate swarm upload capacity.',
+          '3. Distribution Time: With 2,500 MB/s aggregate bandwidth, 1,000 GB distributes across all peers in approximately 400 seconds (under 7 minutes).',
         ],
-        finalResult: 'Client-Server is constrained by server upload bandwidth; P2P aggregates user bandwidth.',
+        finalResult: 'Client-Server distribution is limited by central server bandwidth (2.2 hours); P2P aggregates user upload bandwidth to finish in under 7 minutes.',
       },
-      step10_realWorldScenario: {
-        topology: 'Web Server Crash under Traffic Spike',
-        scenarioText: 'E-commerce website crashes from flash sale; adding CDN edge caches offloads 95% of traffic.',
-        engineeringContext: 'CDNs distribute client-server workloads across edge nodes.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Clients allocate ephemeral ports (49152-65535).',
-        nicBehavior: 'Server NICs use RSS to distribute interrupts across CPU cores.',
-        switchOrRouterBehavior: 'Load balancers distribute requests across server pools.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'curl -I https://www.google.com',
-          description: 'Issues an HTTP HEAD request and displays response headers.',
-          expectedOutput: 'HTTP/2 200\nserver: gws',
-          proofExplanation: 'Demonstrates request and 200 OK response.',
+          id: 1,
+          prompt: 'State two primary advantages and one major disadvantage of a centralized Client-Server architecture compared to P2P.',
+          expected: 'Advantages: Centralized data consistency/management, simplified access control/security. Disadvantage: Server is a Single Point of Failure (SPOF) and performance bottleneck under high load.',
+          hints: 'Think about administrative control versus single points of failure.',
+        },
+        {
+          id: 2,
+          prompt: 'Why does a Peer-to-Peer system naturally scale up in capacity when thousands of new users join?',
+          expected: 'Because every new peer contributes its own computing and upload bandwidth to the swarm, increasing total system capacity alongside demand.',
+          hints: 'Remember that peers act as both clients and servers.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: '504 Gateway Timeout or Connection Refused.',
-          possibleCauses: ['Server daemon down or connection queue saturated'],
-          diagnosticSteps: ['Check service status and listening ports.'],
-          remediation: 'Restart daemon or scale backend server capacity.',
-        },
+      recap: [
+        'Client-Server is asymmetric: Clients initiate requests; Servers passively listen and serve responses.',
+        'Client-Server provides strong centralized control but suffers from single-point-of-failure (SPOF) risks and server bandwidth bottlenecks.',
+        'Peer-to-Peer (P2P) is symmetric: Peers act simultaneously as clients and servers, dynamically self-scaling as more participants join.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Assuming servers must be giant mainframe hardware.', correction: 'A server is a software role; any computer running a listening service is a server.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Centralized server DDoS floods.',
-        mitigationStrategy: 'Deploy reverse proxies, rate limiting, and Anycast CDNs.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['Client initiates; Server listens.', 'Client-Server SPOF risk vs P2P swarm scalability.'],
-        frequentTraps: ['Thinking P2P cannot transfer files rapidly.'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Client-Server Request Inspection & P2P Swarm Analysis',
-        scenario: 'Inspect HTTP requests and server socket states.',
-        tasks: ['Execute curl client request and verify 200 OK.'],
-        verificationMethod: 'Verify HTTP 200 OK response.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['Client-Server centralizes management but has SPOF risk.', 'P2P distributes load across all peers.'],
-        nextLessonBridge: 'Proceed to NET-102 Lesson 3 for geographic scopes (LAN to WAN).',
-      },
     },
     questions: [
       {
-        text: 'In the classic Client-Server networking model, what is the primary role of a Server?',
+        text: 'In the classic Client-Server networking model, what is the primary operational role of a Server?',
         options: [
-          'To passively listen on a designated network port, process incoming client requests, and return appropriate response data',
-          'To continuously initiate random outgoing connections to client laptops',
-          'To convert optical light into household electricity',
-          'To physically terminate Ethernet cables in a building',
+          'To passively listen on a designated network address, process incoming client requests, and return appropriate response data',
+          'To continuously initiate random outgoing connections to client laptops without user prompting',
+          'To convert optical light signals directly into AC electrical voltage',
+          'To act only as a physical patch panel terminating copper cables',
         ],
         correctOption: 0,
-        explanation: 'A server runs a daemon listening on a known port to process incoming client requests and return responses.',
-        explanationsJson: { 1: 'Clients initiate connections.', 2: 'Power is utility.', 3: 'Patch panels terminate cables.' },
+        explanation: 'A server runs a service daemon listening on a known address/port to process incoming client requests and return formatted responses.',
+        explanationsJson: { 1: 'Clients initiate connections; servers passively listen.', 2: 'That describes a power supply, not a software server role.', 3: 'A patch panel is passive cabling hardware.' },
         difficulty: CourseLevel.FOUNDATIONAL,
         cognitiveLevel: CognitiveLevel.UNDERSTANDING,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'Server Role & Passive Listening',
       },
+      {
+        text: 'What is a major architectural vulnerability inherent to centralized Client-Server networks that is mitigated by Peer-to-Peer (P2P) designs?',
+        options: [
+          'The central server represents a Single Point of Failure (SPOF) and bandwidth bottleneck if it goes offline or is overwhelmed',
+          'Client-Server networks cannot use copper cables',
+          'Client devices in a client-server network must be identical hardware models',
+          'Servers cannot store more than 10 files simultaneously',
+        ],
+        correctOption: 0,
+        explanation: 'If a centralized server crashes or becomes overwhelmed by traffic, all clients lose access to the service (Single Point of Failure). P2P distributes resources across all peers so no single node outage halts the network.',
+        explanationsJson: { 1: 'Client-server runs over any network media.', 2: 'Networks are heterogeneous.', 3: 'Servers can store millions of files.' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Single Point of Failure in Client-Server',
+      },
+      {
+        text: 'Which statement accurately describes node behavior in a true Peer-to-Peer (P2P) network?',
+        options: [
+          'Each participating peer acts simultaneously as both a client requesting data and a server uploading data to other peers',
+          'Every node must register with a central government mainframe before transmitting',
+          'Peers can only receive data and are strictly prohibited from uploading',
+          'All communication must route through a dedicated central corporate database server',
+        ],
+        correctOption: 0,
+        explanation: 'In P2P architectures, peers have symmetric roles: they download data from others (acting as clients) while concurrently uploading data chunks to others (acting as servers).',
+        explanationsJson: { 1: 'P2P is decentralized and requires no central mainframe.', 2: 'Peers upload and download concurrently.', 3: 'Routing through a central server describes client-server, not P2P.' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Peer-to-Peer Symmetric Behavior',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Client-Server Request Inspection & P2P Swarm Analysis',
-      instructions: '1. Inspect client-server request/response flow.\n2. Execute curl request.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { client: 'Client-Browser', server: 'Web-Server-01', port: 443 },
-      tasks: ['Issue HTTP client request.'],
-    },
   },
 
   // -------------------------------------------------------------------------
@@ -530,128 +499,113 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'INTERNET_HIERARCHY_MAP',
     introduction:
       'Master the classification of networks by geographic scale (PAN, LAN, CAN, MAN, WAN) and explore the global architectural hierarchy of the Internet: Tier 1 Global Backbones, Tier 2 Regional Providers, Tier 3 Access ISPs, and Internet Exchange Points (IXPs).',
-    stepMetadata: {
-      step1_objective:
-        'Understand geographic network categories (PAN, LAN, CAN, MAN, WAN) and master the tiered routing hierarchy and peering infrastructure of the global Internet.',
-      step2_prerequisites: ['level-0-what-is-a-computer-network'],
-      step3_whyItMatters:
-        'Cabling, routing protocols, and costs depend heavily on whether designing a local LAN or a global WAN.',
-      step4_coreConcept:
-        'Geographic scopes: PAN (~1-10m, Bluetooth), LAN (building, Ethernet/Wi-Fi), CAN (campus, private fiber), MAN (city, Metro Ethernet), WAN (global, leased circuits). The Internet is hierarchical: Tier 1 ISPs peer settlement-free forming the global core; Tier 2 are regional; Tier 3 are local access providers. IXPs enable direct settlement-free peering between networks to bypass transit hops.',
-      step5_technicalAnatomy: {
-        title: 'Geographic Network Classifications & Tiered Internet Architecture',
-        description: 'Network scales and ISP peering hierarchy.',
-        components: [
-          { name: 'PAN', detail: 'Personal scale (1-10m, Bluetooth/USB).' },
-          { name: 'LAN', detail: 'Local single room/building owned by organization (1-10 Gbps).' },
-          { name: 'CAN', detail: 'Campus multi-building private fiber network.' },
-          { name: 'MAN', detail: 'Metropolitan city-wide network (5-50km).' },
-          { name: 'WAN', detail: 'Spans regions/continents over carrier leased circuits.' },
-          { name: 'Tier 1/2/3 ISPs & IXPs', detail: 'Tier 1 global settlement-free core; Tier 2 regional; Tier 3 access; IXP peering facility.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'LAN Egress', action: 'Host sends packet to local default gateway router.' },
-          { stepNumber: 2, title: 'Access ISP Uplink', action: 'Gateway routes packet to Tier 3 Access ISP.' },
-          { stepNumber: 3, title: 'IXP Direct Peering', action: 'If destination is at local IXP, packet peers directly; otherwise ascends to Tier 2/1 transit.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'Geographic Scale Metrics & ISP Hierarchy',
-        fields: [
-          { fieldName: 'LAN Domain', bitLength: 'Single Building', hexSample: 'Private Ownership', description: 'Switched local infrastructure.' },
-          { fieldName: 'Tier 1 Core', bitLength: 'Global Backbone', hexSample: 'BGP Peering', description: 'Settlement-free autonomous transit.' },
-        ],
-      },
-      step8_visualExplanation: {
+    contentV2: {
+      objective:
+        'Classify networks across geographic scopes (PAN, LAN, CAN, MAN, WAN) based on distance, ownership, and media, and understand the tiered routing hierarchy and peering infrastructure (Tier 1/2/3 ISPs and IXPs) that powers the global Internet.',
+      prerequisites: ['level-0-what-is-a-computer-network'],
+      whyItMatters:
+        'A network architect designs a local office LAN completely differently from a global multi-region enterprise WAN. Understanding geographic boundaries, autonomous systems, ISP transit tiers, and peering exchanges is critical for troubleshooting end-to-end latency, path routing, and carrier bandwidth costs.',
+      explanation:
+        'Networks are classified by their physical span and organizational ownership into distinct geographic scopes:\n- Personal Area Network (PAN): Spans immediate individual workspace (~1–10 meters) using short-range technologies like Bluetooth, Zigbee, or USB.\n- Local Area Network (LAN): Connects devices within a single room, floor, or building under unified organizational control, operating at high speeds (1–10 Gbps) over Ethernet and Wi-Fi.\n- Campus Area Network (CAN): Interconnects multiple localized LANs across contiguous buildings (such as a university or hospital campus) using privately owned optical fiber without crossing public rights-of-way.\n- Metropolitan Area Network (MAN): Covers an entire city or municipal region (5–50 km) utilizing carrier-provided Metro Ethernet or dark fiber.\n- Wide Area Network (WAN): Spans vast geographical regions, countries, or continents by interconnecting distributed LANs across public rights-of-way over leased telecommunications carrier infrastructure.\n\nThe global Internet is a decentralized "network of networks" organized into a three-tier hierarchy: Tier 1 ISPs form the global backbone core, interconnecting through settlement-free peering (exchanging traffic without paying transit fees). Tier 2 ISPs are regional carriers that peer with each other and pay Tier 1 providers for global transit. Tier 3 ISPs are local access providers (commercial and residential broadband) that sell Internet access to end users. Internet Exchange Points (IXPs) are dedicated physical facilities where ISPs, content providers (e.g. Google, Netflix), and CDNs peer traffic directly to reduce latency and eliminate expensive transit fees.',
+      components: [
+        { name: '1. Personal Area Network (PAN)', detail: 'Individual reach (~1-10 meters). Connects peripherals, smartwatches, and smartphones via Bluetooth, BLE, or USB.' },
+        { name: '2. Local Area Network (LAN)', detail: 'Confined to a single room or building owned by one entity. High bandwidth (1-10 Gbps), low latency, private Ethernet/Wi-Fi infrastructure.' },
+        { name: '3. Campus Area Network (CAN)', detail: 'Multiple adjacent buildings on private land (universities, corporate parks) linked via private fiber cabling.' },
+        { name: '4. Metropolitan Area Network (MAN)', detail: 'City-wide span (5-50 km). Connects municipal offices and financial districts via Metro Ethernet or dark fiber.' },
+        { name: '5. Wide Area Network (WAN)', detail: 'Interconnects distributed geographic sites across public lands using leased carrier circuits, satellite, and undersea cables.' },
+        { name: '6. Tier 1, 2, and 3 ISPs', detail: 'Tier 1: Global settlement-free transit core. Tier 2: Regional carriers with partial transit. Tier 3: Local retail access providers.' },
+        { name: '7. Internet Exchange Points (IXPs)', detail: 'Physical switching centers where independent networks connect to exchange traffic directly via settlement-free peering.' },
+      ],
+      howItWorks: [
+        { stepNumber: 1, title: 'Local LAN Ingress & Gateway Egress', action: 'An endpoint generates packets on its local LAN; if destination is external, packets forward to the local default gateway router.' },
+        { stepNumber: 2, title: 'Access ISP Uplink (Tier 3)', action: 'The local gateway transmits the packet across the subscriber broadband connection to the Tier 3 Access ISP.' },
+        { stepNumber: 3, title: 'Transit Ascent or Direct IXP Peering', action: 'If the destination network peers at a shared local IXP, traffic crosses directly between providers. Otherwise, traffic ascends to Tier 2/Tier 1 backbones for global transit.' },
+      ],
+      visualizer: {
         type: 'INTERNET_HIERARCHY_MAP',
-        title: 'Internet Hierarchy & Geographic Scope Explorer',
-        description: 'Explore PAN, LAN, CAN, MAN, WAN and trace packet flow across Tier 1, 2, 3 ISPs and IXPs.',
+        title: 'Interactive Internet Hierarchy & Geographic Scope Explorer',
+        description: 'Explore geographic boundaries from PAN and LAN to global WAN, and trace how packets route across Tier 1, 2, and 3 ISPs and Internet Exchange Points (IXPs).',
       },
-      step9_workedExample: {
-        title: 'Tracing Packet Flow: Direct IXP Peering vs Tier 1 Transit',
-        problemStatement: 'Compare London ISP fetching video via LINX IXP vs Tier 1 transit.',
+      workedExample: {
+        title: 'Evaluating Network Latency and Transit Cost: Direct IXP Peering vs Tier 1 Transit',
+        problemStatement: 'An ISP in London serves 50,000 users streaming video hosted in London. Compare routing traffic via a local IXP (LINX) vs routing via paid upstream Tier 1 transit across the Atlantic.',
         stepByStepSolution: [
-          'IXP Peering: 4 router hops, 4 ms latency, $0 transit fees.',
-          'Tiered Transit: 9+ router hops, 35 ms latency, paid per-megabit transit fees.',
+          '1. Direct IXP Peering: The ISP and the video provider connect to LINX switch fabric in London. Traffic travels directly across the local exchange: 4 router hops, 3 ms latency, $0 incremental per-gigabit transit fee.',
+          '2. Upstream Transit: If not peering locally, traffic routes from the London ISP -> Tier 2 transit -> Tier 1 transatlantic backbone -> Tier 2 -> Video server: 10+ router hops, 45 ms latency, paid per-Mbps transit fees.',
+          '3. Architectural Advantage: Direct peering at an IXP reduces latency by 42 ms (over 90%), eliminates transit costs, and shields local users from international link congestion.',
         ],
-        finalResult: 'IXP direct peering saves 5 hops, reduces latency by 31ms, and eliminates transit costs.',
+        finalResult: 'Direct IXP peering reduces hop count from 10+ to 4, cuts latency from 45ms to 3ms, and eliminates transit bandwidth fees.',
       },
-      step10_realWorldScenario: {
-        topology: 'Global SD-WAN Enterprise',
-        scenarioText: 'Enterprise connects NY, London, and Tokyo branch LANs via SD-WAN over global carrier circuits.',
-        engineeringContext: 'SD-WAN manages traffic across hybrid WAN connections.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Transmits off-subnet packets to local default gateway.',
-        nicBehavior: 'Operates in local Layer 1/2 domain.',
-        switchOrRouterBehavior: 'Border routers run BGP-4 to exchange prefixes across IXPs and transit links.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'tracert 8.8.8.8',
-          description: 'Traces router hops from local LAN to internet core.',
-          expectedOutput: '1  <1 ms  192.168.1.1\n2   8 ms  10.20.0.1\n3  11 ms  ixp-peer.google.com',
-          proofExplanation: 'Shows LAN egress, ISP hop, and IXP peering.',
+          id: 1,
+          prompt: 'A hospital system has 6 medical buildings across a 2-square-mile private campus connected by private optical fiber conduits. What geographic network classification applies?',
+          expected: 'Campus Area Network (CAN). It spans multiple contiguous buildings on private property using private cabling without crossing public leased carrier infrastructure.',
+          hints: 'Contrast single building (LAN) with multi-building private campus (CAN) and leased public land (WAN).',
+        },
+        {
+          id: 2,
+          prompt: 'What defines a Tier 1 Internet Service Provider (ISP) and how does it reach other Tier 1 providers?',
+          expected: 'A Tier 1 ISP owns a global backbone network capable of reaching the entire Internet without purchasing transit. Tier 1 providers connect to each other via settlement-free peering agreements.',
+          hints: 'Focus on settlement-free peering and absence of transit fees.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Local internet works but remote branch cannot be reached.',
-          possibleCauses: ['WAN IPsec tunnel down or ISP routing failure'],
-          diagnosticSteps: ['Trace route to remote branch IP to find failure point.'],
-          remediation: 'Restart VPN tunnel or failover to secondary WAN link.',
-        },
+      recap: [
+        'Geographic scopes range from PAN (~10m) and LAN (single building) to CAN (campus), MAN (city), and WAN (global leased spans).',
+        'The global Internet is organized into a 3-tier hierarchy: Tier 1 (settlement-free core), Tier 2 (regional providers), and Tier 3 (retail access ISPs).',
+        'Internet Exchange Points (IXPs) allow networks to peer traffic directly, reducing end-to-end latency and eliminating transit costs.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Thinking CAN is WAN.', correction: 'CAN is private multi-building campus; WAN crosses public land via carrier circuits.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Eavesdropping on public WAN circuits.',
-        mitigationStrategy: 'Enforce IPsec or MACsec encryption on all WAN links.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['PAN (1-10m), LAN (building), CAN (campus), MAN (city), WAN (global).', 'Tier 1 = settlement-free backbone.'],
-        frequentTraps: ['Selecting WAN for a university campus (it is a CAN).'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Network Scope Classification & Traceroute Transit Analysis',
-        scenario: 'Classify network scopes and trace ISP hops.',
-        tasks: ['Classify PAN, LAN, MAN, and WAN scopes.', 'Run tracert 8.8.8.8.'],
-        verificationMethod: 'Identify local gateway vs ISP hops.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['Networks are classified by scale from PAN to WAN.', 'The Internet is a 3-tier ISP hierarchy optimized by IXP peering.'],
-        nextLessonBridge: 'Proceed to NET-102 Lesson 4 for Network Topologies.',
-      },
     },
     questions: [
       {
         text: 'How is a Campus Area Network (CAN) fundamentally distinguished from a Wide Area Network (WAN)?',
         options: [
           'A CAN interconnects multiple contiguous buildings on private property using private fiber, whereas a WAN spans vast distances across public property using leased carrier infrastructure',
-          'A CAN operates only over satellite while a WAN uses copper',
-          'A CAN does not use IP addresses',
-          'A CAN is limited to 10 users',
+          'A CAN operates only over satellite links while a WAN uses copper twisted pair',
+          'A CAN does not use IP addresses or routing protocols',
+          'A CAN is limited to a maximum of 10 connected computers',
         ],
         correctOption: 0,
-        explanation: 'CAN connects buildings on private campus property; WAN spans long distances across public rights-of-way using leased circuits.',
-        explanationsJson: { 1: 'Both use fiber/copper.', 2: 'Both use IP.', 3: 'User count is irrelevant.' },
+        explanation: 'A CAN connects buildings on private campus property without crossing public rights-of-way; a WAN spans long distances across public regions using leased telecommunications provider infrastructure.',
+        explanationsJson: { 1: 'Both CANs and WANs use fiber, wireless, and copper as appropriate.', 2: 'Both use standard IP routing.', 3: 'CANs routinely support tens of thousands of users.' },
         difficulty: CourseLevel.FOUNDATIONAL,
         cognitiveLevel: CognitiveLevel.UNDERSTANDING,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'CAN vs WAN Classification',
       },
+      {
+        text: 'What is the primary function of an Internet Exchange Point (IXP) in the global internetworking architecture?',
+        options: [
+          'To provide a shared physical switching facility where ISPs and content providers peer directly with each other to bypass upstream transit fees and reduce latency',
+          'To act as a central power generator during electrical grid blackouts',
+          'To assign MAC addresses to newly manufactured network interface cards',
+          'To store physical paper copies of all internet traffic for 10 years',
+        ],
+        correctOption: 0,
+        explanation: 'IXPs are dedicated physical interconnection hubs that allow participating networks to exchange traffic directly via settlement-free peering, keeping local traffic local and cutting transit expenses.',
+        explanationsJson: { 1: 'IXPs are network switches, not utility power plants.', 2: 'IEEE assigns OUI prefixes, not IXPs.', 3: 'IXPs switch packets in nanoseconds and do not store paper copies.' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Internet Exchange Point (IXP) Role',
+      },
+      {
+        text: 'Which category of Internet Service Provider (ISP) owns a global backbone network that can reach every destination on the Internet through settlement-free peering alone without paying for transit?',
+        options: [
+          'Tier 1 ISP',
+          'Tier 3 Access ISP',
+          'Tier 2 Regional ISP',
+          'Personal Area Network Provider',
+        ],
+        correctOption: 0,
+        explanation: 'Tier 1 ISPs form the top of the Internet hierarchy. They own massive global backbone networks and peer with all other Tier 1 providers without paying transit fees.',
+        explanationsJson: { 1: 'Tier 3 ISPs are local retail providers that purchase transit.', 2: 'Tier 2 ISPs purchase transit from Tier 1 providers.', 3: 'PAN is a local personal device scope.' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Tier 1 ISP Hierarchy & Peering',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Network Scope Classification & Traceroute Transit Analysis',
-      instructions: '1. Classify scopes.\n2. Run tracert 8.8.8.8.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { localGateway: '192.168.1.1', targetDns: '8.8.8.8' },
-      tasks: ['Run tracert 8.8.8.8.'],
-    },
   },
 
   // -------------------------------------------------------------------------
@@ -667,100 +621,61 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'TOPOLOGY_SIMULATOR',
     introduction:
       'Master the structural design of computer networks: Physical vs Logical topologies, Star, Full Mesh, Partial Mesh, Bus, Ring, and Tree architectures, evaluating fault tolerance, redundancy, single points of failure (SPOF), and cabling cost trade-offs.',
-    stepMetadata: {
-      step1_objective:
-        'Understand Physical vs Logical topologies, analyze Star, Mesh, Bus, Ring, and Tree topologies, and calculate mesh link counts and SPOFs.',
-      step2_prerequisites: ['level-0-what-is-a-computer-network'],
-      step3_whyItMatters:
-        'Topology design dictates fault tolerance, cabling cost, and high-availability architecture.',
-      step4_coreConcept:
-        'Physical topology is the physical cabling layout; Logical topology is the signal/data path. Star: central switch with point-to-point links (LAN standard; switch is SPOF). Full Mesh: every node connects to all others ($N(N-1)/2$ links, maximum fault tolerance). Bus: shared cable requiring 50Ω termination. Ring: closed sequential loop. Tree: hierarchical multi-tier design.',
-      step5_technicalAnatomy: {
-        title: 'Topology Comparison & Link Equations',
-        description: 'Formulas, fault tolerance, and SPOF trade-offs.',
-        components: [
-          { name: 'Star Topology', detail: 'Central switch; single cable failure affects 1 host; switch is SPOF.' },
-          { name: 'Full Mesh ($N(N-1)/2$)', detail: 'Max redundancy formula: $L = \\frac{N(N-1)}{2}$; no SPOF; high cost.' },
-          { name: 'Partial Mesh', detail: 'Redundant links added only between critical core routers.' },
-          { name: 'Bus Topology', detail: 'Shared cable; requires 50Ω terminating resistors to absorb reflections.' },
-          { name: 'Ring Topology', detail: 'Closed token loop; break halts traffic unless dual-ring.' },
-          { name: 'Tree / Hierarchical', detail: 'Core, Distribution, and Access tiers for structured scaling.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Mesh Calculation', action: 'Calculate links for 6 nodes: $6 \\times 5 / 2 = 15$ links.' },
-          { stepNumber: 2, title: 'SPOF Audit', action: 'Identify non-redundant switches or single uplinks.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'Topology Design Metrics',
-        fields: [
-          { fieldName: 'Mesh Formula', bitLength: 'N(N-1)/2', hexSample: 'Full Redundancy', description: 'Calculates full mesh link requirements.' },
-          { fieldName: 'Bus Terminator', bitLength: '50 Ohms', hexSample: 'Absorption', description: 'Eliminates signal reflection.' },
-        ],
-      },
-      step8_visualExplanation: {
+    contentV2: {
+      objective:
+        'Understand the distinction between Physical and Logical topologies, evaluate Star, Bus, Ring, Full Mesh, Partial Mesh, and Tree architectures, calculate full mesh link requirements using N(N-1)/2, and assess single points of failure (SPOF) and fault tolerance.',
+      prerequisites: ['level-0-what-is-a-computer-network'],
+      whyItMatters:
+        'Topology design dictates network survivability, cabling expense, and performance bottlenecks. In an enterprise, an improperly architected topology can cause widespread outages from a single cable cut, whereas an engineered resilient topology provides automatic alternate paths.',
+      explanation:
+        'A network topology defines how nodes and links are arranged and how data signals traverse the infrastructure. Topology must be analyzed from two distinct perspectives:\n- Physical Topology: The actual geometric physical arrangement of cables, patch cords, racks, and hardware devices.\n- Logical Topology: The logical path and access method that data signals follow as they travel from node to node across the medium, regardless of physical cabling layout.\n\nClassic Network Topologies:\n1. Star: All peripheral devices connect via individual point-to-point links to a central networking device (switch). This is the ubiquitous standard for modern LANs. A single cable break impacts only one host, but the central switch is a Single Point of Failure (SPOF).\n2. Bus: All devices share a single linear trunk cable. Requires 50-ohm terminating resistors at each physical end to absorb signals and prevent reflections. If the trunk cable is severed, the entire network fails.\n3. Ring: Devices connect sequentially in a closed physical loop. Data circulates unidirectionally around the ring. A single break halts all communication unless configured with dual-ring counter-rotating redundancy (e.g. FDDI).\n4. Full Mesh: Every node connects directly to every other node via dedicated point-to-point links. Provides maximum redundancy and zero single points of failure, but link counts grow quadratically according to $L = \\frac{N(N-1)}{2}$.\n5. Partial Mesh: Dedicated redundant links are added only between critical core routers and high-traffic nodes, balancing fault tolerance against cabling and interface expense.\n6. Tree / Hierarchical: A tiered multi-layer structure (Access, Distribution, Core) where groups of star topologies connect into higher-tier switches, enabling modular enterprise scaling.',
+      components: [
+        { name: '1. Physical vs Logical Topology', detail: 'Physical is the tangible cable blueprint; Logical is the signal flow and protocol data path.' },
+        { name: '2. Star Topology', detail: 'Central switch with dedicated home-run cabling to each node. LAN industry standard; isolates link failures but central switch is SPOF.' },
+        { name: '3. Bus Topology', detail: 'Single shared backbone cable with BNC T-connectors and terminating resistors. High collision rate and fragile trunk.' },
+        { name: '4. Ring Topology', detail: 'Closed circular sequential token-passing loop. Predictable latency but single cable break causes complete failure.' },
+        { name: '5. Full Mesh Topology', detail: 'Maximum fault tolerance. Formula $L = \\frac{N(N-1)}{2}$. Every node has a direct dedicated link to every other node.' },
+        { name: '6. Partial Mesh & Hierarchical Tree', detail: 'Partial Mesh protects critical core routes; Tree hierarchy scales campus networks into Core, Distribution, and Access tiers.' },
+      ],
+      howItWorks: [
+        { stepNumber: 1, title: 'Physical Cabling Distribution', action: 'Physical cables are routed from end nodes to central patch panels, distribution switches, or adjacent mesh peers.' },
+        { stepNumber: 2, title: 'Link Count & Redundancy Calculation', action: 'Designers apply the mesh formula $L = \\frac{N(N-1)}{2}$ to calculate physical interfaces and transceiver requirements.' },
+        { stepNumber: 3, title: 'Failure Isolation & Alternate Routing', action: 'When a cable breaks or a node fails, star networks isolate the impact to that single host, while mesh networks automatically route traffic across alternate active links.' },
+      ],
+      visualizer: {
         type: 'TOPOLOGY_SIMULATOR',
-        title: 'Network Topology & Failure Mode Simulator',
-        description: 'Simulate link cuts and node failures across Star, Mesh, Bus, and Ring topologies.',
+        title: 'Interactive Network Topology & Failure Mode Simulator',
+        description: 'Simulate packet transmission across Star, Full Mesh, Partial Mesh, Bus, and Ring topologies. Test node failures and cable cuts to observe single points of failure and fault tolerance in real time.',
       },
-      step9_workedExample: {
-        title: 'Full Mesh Calculation for 8 Core Routers',
-        problemStatement: 'Calculate links and cost difference between Full Mesh and Star for 8 routers ($5k/link).',
+      workedExample: {
+        title: 'Cabling & Cost Comparison: Connecting 8 Core Routers in Full Mesh vs Star',
+        problemStatement: 'An enterprise datacenter must interconnect 8 core routers. Each 10 Gbps optical fiber link and transceiver port costs $4,000 to deploy. Compare link count, total cost, and fault tolerance for Full Mesh vs Star (using a central core switch).',
         stepByStepSolution: [
-          'Full Mesh: $8 \\times 7 / 2 = 28$ links ($140,000/yr).',
-          'Star: 8 links ($40,000/yr) with a central switch SPOF.',
+          '1. Full Mesh Link Calculation: $L = \\frac{N(N-1)}{2} = \\frac{8 \\times 7}{2} = \\frac{56}{2} = 28 \\text{ dedicated links}$. Total cost = $28 \\times \\$4,000 = \\$112,000$. Fault tolerance: Any link can fail and routers will forward over remaining alternate paths (Zero SPOF).',
+          '2. Star Topology Calculation: 8 routers each connect via 1 link to a central core switch ($L = 8 \\text{ links}$). Total cost = $8 \\times \\$4,000 + \\$12,000 \\text{ (switch)} = \\$44,000$. Fault tolerance: Lower cost, but if the central switch fails, all 8 routers lose connectivity.',
+          '3. Architectural Decision: For mission-critical core datacenter backbones, enterprises use Full or Partial Mesh to guarantee zero downtime.',
         ],
-        finalResult: 'Full mesh requires 28 links ($140k/yr); Star requires 8 links ($40k/yr).',
+        finalResult: 'Full Mesh requires 28 links ($112k) with zero SPOF; Star requires 8 links ($44k) but has a single point of failure at the central switch.',
       },
-      step10_realWorldScenario: {
-        topology: 'Coaxial Bus Break Outage',
-        scenarioText: 'Unplugged BNC T-connector halts entire wing; migrating to switched Star isolates faults.',
-        engineeringContext: 'Star topologies provide cable fault isolation.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Transmits on dedicated link to switch in star networks.',
-        nicBehavior: 'Operates in full duplex without collisions.',
-        switchOrRouterBehavior: 'Isolates each port into its own collision domain.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'show cdp neighbors',
-          description: 'Discovers adjacent directly connected switches and routers.',
-          expectedOutput: 'Device ID  Local Intrfce  Capability  Platform\nDist-SW1   Gig 1/0/24     S I         WS-C3850',
-          proofExplanation: 'Maps physical topology links.',
+          id: 1,
+          prompt: 'Calculate the total number of physical point-to-point links required to connect 10 datacenter routers in a Full Mesh topology.',
+          expected: 'Formula: L = N(N - 1) / 2 = 10 * 9 / 2 = 45 physical links.',
+          hints: 'Use the Full Mesh formula: N * (N - 1) / 2.',
+        },
+        {
+          id: 2,
+          prompt: 'Why can a physical star network behave as a logical bus?',
+          expected: 'When devices connect to a legacy hub (physical star cabling), the hub electrically broadcasts every incoming bit to all ports simultaneously, creating a single shared collision domain (logical bus).',
+          hints: 'Distinguish between physical wire layout and internal electronic signal broadcasting.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Single host disconnect crashes entire floor.',
-          possibleCauses: ['Legacy bus topology without termination or loop bridge'],
-          diagnosticSteps: ['Inspect cabling infrastructure.'],
-          remediation: 'Migrate to standard home-run star cabling to managed switch.',
-        },
+      recap: [
+        'Physical topology represents the tangible cable arrangement; Logical topology defines the data path and medium access method.',
+        'Star topology is the LAN standard because individual cable breaks do not bring down the entire network.',
+        'Full Mesh provides maximum fault tolerance without SPOFs, requiring $L = \\frac{N(N-1)}{2}$ links.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Physical and logical topologies are always identical.', correction: 'Physical is cable layout; Logical is data path.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Sniffing on shared bus.',
-        mitigationStrategy: 'Switches microsegment unicast frames.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['Mesh formula: $N(N-1)/2$.', 'Star is LAN standard.', 'Bus requires 50Ω termination.'],
-        frequentTraps: ['Forgetting to divide by 2 in mesh formula.'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Physical & Logical Topology Auditing and Mesh Calculation',
-        scenario: 'Calculate mesh links and audit CDP neighbors.',
-        tasks: ['Calculate links for 6 full mesh routers using N*(N-1)/2.'],
-        verificationMethod: 'Confirm calculated 15 links.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['Star is ubiquitous in LANs; Full Mesh ($N(N-1)/2$) for core redundancy.'],
-        nextLessonBridge: 'Proceed to NET-102 Lesson 5 for Wireless Networking.',
-      },
     },
     questions: [
       {
@@ -772,22 +687,46 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
           'Formula: 2 * N = 12 physical links',
         ],
         correctOption: 0,
-        explanation: 'Full mesh formula is $\\frac{N(N-1)}{2}$. For 6 routers: $\\frac{6 \\times 5}{2} = 15$ links.',
-        explanationsJson: { 1: 'N*N overcounts.', 2: 'N-1 is tree.', 3: '2N is dual ring.' },
+        explanation: 'The full mesh link formula is N(N-1)/2. For 6 routers: (6 * 5) / 2 = 15 physical links.',
+        explanationsJson: { 1: 'N*N counts self-connections and duplicates.', 2: 'N-1 is for a linear bus or tree topology.', 3: '2N is for a dual ring.' },
         difficulty: CourseLevel.FOUNDATIONAL,
         cognitiveLevel: CognitiveLevel.APPLICATION,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'Full Mesh Link Calculation',
       },
+      {
+        text: 'What is the operational distinction between a Physical Topology and a Logical Topology?',
+        options: [
+          'Physical topology describes the physical layout of cables and hardware, whereas Logical topology describes how signals and data actually travel across the network',
+          'Physical topology is for wireless networks only, while Logical topology is for copper cabling',
+          'Physical topology applies only to computers made by Cisco, while Logical topology applies to Linux servers',
+          'There is no distinction; they are always identical in every network',
+        ],
+        correctOption: 0,
+        explanation: 'Physical topology describes physical cable routing and port connections. Logical topology defines the actual data path and transmission behavior across those links.',
+        explanationsJson: { 1: 'Both concepts apply to all media.', 2: 'Vendor-independent networking fundamentals.', 3: 'They can be completely different (e.g., physical star with logical bus). ' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Physical vs Logical Topology',
+      },
+      {
+        text: 'Which network topology provides the highest level of fault tolerance and eliminates single points of failure (SPOF) at the cost of high cabling and interface complexity?',
+        options: [
+          'Full Mesh Topology',
+          'Linear Bus Topology',
+          'Single Star Topology',
+          'Single Ring Topology',
+        ],
+        correctOption: 0,
+        explanation: 'Full Mesh provides dedicated point-to-point connections between every node pair, ensuring that multiple link or node failures will not isolate remaining active nodes.',
+        explanationsJson: { 1: 'Bus has a single trunk failure point.', 2: 'Star has a single switch failure point.', 3: 'Single ring halts on a single cable cut.' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Topology Fault Tolerance & SPOF',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Physical & Logical Topology Auditing and Mesh Calculation',
-      instructions: '1. Calculate mesh links.\n2. Run show cdp neighbors.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { nodeCount: 6, calculatedLinks: 15 },
-      tasks: ['Calculate mesh links for 6 nodes.'],
-    },
   },
 
   // -------------------------------------------------------------------------
@@ -1071,100 +1010,60 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'STANDARDS_ECOSYSTEM',
     introduction:
       'Master the concept of network protocols (Syntax, Semantics, Timing), the role of open global standards bodies (IETF, IEEE, ISO, ITU-T), the Request for Comments (RFC) publication lifecycle, and how modular protocol layering prevents vendor lock-in.',
-    stepMetadata: {
-      step1_objective:
-        'Understand what defines a network protocol (Syntax, Semantics, Timing), analyze the roles of standard bodies (IETF, IEEE, ISO), and explore the RFC standardization lifecycle.',
-      step2_prerequisites: ['level-0-what-is-a-computer-network'],
-      step3_whyItMatters:
-        'Without open global standards, multi-vendor equipment cannot communicate, resulting in proprietary silos and vendor lock-in.',
-      step4_coreConcept:
-        'A protocol is a formal set of rules governing data telecommunication consisting of Syntax (message structure/format), Semantics (meaning of control bits and error fields), and Timing (speed matching and sequencing). Global standards organizations ensure interoperability: IETF (Internet Engineering Task Force, creates RFCs for IP/TCP/DNS/HTTP), IEEE (Institute of Electrical and Electronics Engineers, creates 802.3 Ethernet and 802.11 Wi-Fi standards), ISO (created OSI model), and ITU-T (telecom standards). RFCs evolve through maturity levels: Proposed Standard to Internet Standard.',
-      step5_technicalAnatomy: {
-        title: 'Protocol Triad & Standards Organizations',
-        description: 'Syntax, Semantics, Timing, and governing standards bodies.',
-        components: [
-          { name: 'Protocol Syntax', detail: 'Data format, field boundaries, and bit lengths (e.g. 32-bit IP address field).' },
-          { name: 'Protocol Semantics', detail: 'Meaning of control values (e.g. SYN flag = initiate connection).' },
-          { name: 'Protocol Timing / Synchronization', detail: 'Speed matching, sequencing, and retransmission timeout rules.' },
-          { name: 'IETF & RFC Lifecycle', detail: 'Internet Engineering Task Force publishes RFC documents defining core internet protocols.' },
-          { name: 'IEEE Standards', detail: 'Defines physical and data link standards: IEEE 802.3 (Ethernet) and 802.11 (Wi-Fi).' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Draft Submission', action: 'Internet-Draft submitted to IETF working group for review.' },
-          { stepNumber: 2, title: 'RFC Publication', action: 'Peer reviewed, revised, and published as a numbered RFC (e.g. RFC 791 for IPv4).' },
-          { stepNumber: 3, title: 'Interoperability Verification', action: 'Independent vendors implement RFC specifications in software/hardware.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'RFC Document Structure & Protocol Syntax',
-        fields: [
-          { fieldName: 'RFC Number', bitLength: 'Document ID', hexSample: 'RFC 793 (TCP)', description: 'Authoritative open technical specification.' },
-          { fieldName: 'Standard Organization', bitLength: 'IETF / IEEE', hexSample: 'Open Global Standard', description: 'Non-proprietary governing body.' },
-        ],
-      },
-      step8_visualExplanation: {
+    contentV2: {
+      objective:
+        'Understand what defines a network communication protocol (the triad of Syntax, Semantics, and Timing), analyze the roles of open global standards organizations (IETF, IEEE, ISO, ITU-T), and explore the RFC standardization lifecycle.',
+      prerequisites: ['level-0-what-is-a-computer-network'],
+      whyItMatters:
+        'Without open global standards, hardware and software produced by different vendors cannot communicate, creating proprietary walled gardens. Understanding how protocols and RFCs are standardized enables network engineers to design vendor-agnostic architectures and accurately interpret technical specifications.',
+      explanation:
+        'A network protocol is a formal set of rules and conventions that govern how computing devices exchange information across a network. Every complete protocol specification defines three essential elements:\n1. Syntax: The structure and format of the data being transmitted, specifying field boundaries, bit lengths, byte order, and delimiter characters.\n2. Semantics: The precise meaning of each control field, flag bit, or command value, and the explicit action or state transition required upon receiving it.\n3. Timing / Synchronization: The sequencing rules, speed matching, session establishment, and timeout/retransmission behavior between communicating nodes.\n\nTo ensure global interoperability and prevent proprietary lock-in, international non-profit standards bodies govern networking specifications:\n- IETF (Internet Engineering Task Force): Develops and maintains core Internet protocols (IP, TCP, UDP, DNS, BGP, HTTP) published as open "Request for Comments" (RFC) documents.\n- IEEE (Institute of Electrical and Electronics Engineers): Standardizes physical cabling, electrical signaling, and media access control, notably IEEE 802.3 (Ethernet) and IEEE 802.11 (Wi-Fi).\n- ISO (International Organization for Standardization): Created the 7-layer OSI reference model.\n- ITU-T (International Telecommunication Union): Standardizes global telecommunications, optical transport, and carrier backbones.\n\nThe IETF RFC Lifecycle moves technical proposals from initial Internet-Drafts through peer review and real-world multi-vendor testing into Proposed Standards and formally ratified Internet Standards.',
+      components: [
+        { name: '1. Protocol Syntax', detail: 'The physical structure, encoding format, and bit/byte layouts of transmitted messages.' },
+        { name: '2. Protocol Semantics', detail: 'The operational meaning and logic associated with control values, error flags, and state handlers.' },
+        { name: '3. Protocol Timing & Synchronization', detail: 'Speed coordination, transmission sequencing, flow control, and timeout thresholds.' },
+        { name: '4. IETF & RFC Publication Architecture', detail: 'Open collaborative engineering body that defines Internet standards published as numbered RFCs (e.g. RFC 791 IPv4, RFC 793 TCP).' },
+        { name: '5. IEEE 802 Standards Committees', detail: 'Defines Layer 1 and Layer 2 physical and data link standards: IEEE 802.3 (Ethernet), 802.11 (Wi-Fi), 802.1Q (VLANs).' },
+      ],
+      howItWorks: [
+        { stepNumber: 1, title: 'Internet-Draft Submission', action: 'Engineers submit an open technical specification (Internet-Draft) detailing syntax, semantics, and operation to an IETF working group.' },
+        { stepNumber: 2, title: 'Peer Review & Running Code Verification', action: 'Global engineers review, debate, and produce independent software/hardware implementations to verify interoperability.' },
+        { stepNumber: 3, title: 'RFC Publication as Open Standard', action: 'The specification is assigned a permanent, immutable RFC number (e.g. RFC 793) and published freely for worldwide implementation.' },
+      ],
+      visualizer: {
         type: 'STANDARDS_ECOSYSTEM',
-        title: 'Standards Bodies & RFC Lifecycle Explorer',
-        description: 'Explore IETF, IEEE, ISO, and ITU-T domains, and trace how RFC proposals become global standards.',
+        title: 'Interactive Standards Bodies & RFC Lifecycle Explorer',
+        description: 'Explore the domains of IETF, IEEE, ISO, and ITU-T, and trace how draft protocol proposals advance through peer review to become global Internet Standards.',
       },
-      step9_workedExample: {
-        title: 'Analyzing Protocol Syntax vs Semantics in IPv4 Header',
-        problemStatement: 'Identify syntax and semantics of the 8-bit TTL field in IPv4 (RFC 791).',
+      workedExample: {
+        title: 'Deconstructing a Protocol Header into Syntax, Semantics, and Timing',
+        problemStatement: 'Analyze the 8-bit Time-to-Live (TTL) field in the IPv4 header (RFC 791) and break it down into Syntax, Semantics, and Timing.',
         stepByStepSolution: [
-          'Syntax: 8-bit field located at byte offset 8 in IPv4 header.',
-          'Semantics: Decremented by 1 at each router hop; if value reaches 0, packet is discarded and ICMP Time Exceeded returned.',
+          '1. Syntax: An 8-bit unsigned integer located at byte offset 8 in the IPv4 header (values 0–255).',
+          '2. Semantics: Represents the maximum remaining hop count for the packet. Each router processing the packet MUST decrement the TTL value by 1. If the value drops to 0, the router MUST discard the packet and generate an ICMP Time Exceeded message.',
+          '3. Timing: Prevents infinite routing loops by ensuring undeliverable packets expire deterministically within a bounded number of transmission hops.',
         ],
-        finalResult: 'Syntax defines bit size/position; Semantics defines operational meaning and hop decrement logic.',
+        finalResult: 'Syntax specifies the 8-bit position; Semantics specifies hop-decrement logic; Timing prevents circulating routing loops.',
       },
-      step10_realWorldScenario: {
-        topology: 'Multi-Vendor Enterprise Interoperability',
-        scenarioText: 'Cisco switches, Juniper routers, Linux servers, and Apple laptops communicate seamlessly because all strictly follow IETF RFCs and IEEE 802.3/802.11 standards.',
-        engineeringContext: 'Open standards eliminate proprietary vendor lock-in.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Implements standard RFC socket APIs.',
-        nicBehavior: 'Conforms to IEEE 802.3 framing and electrical specifications.',
-        switchOrRouterBehavior: 'Processes standard packet headers independently of hardware vendor.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'powershell -Command "Invoke-WebRequest -Uri https://www.rfc-editor.org/rfc/rfc791.txt -Method Head"',
-          description: 'Fetches metadata for official RFC 791 (IPv4 specification).',
-          expectedOutput: 'StatusCode : 200\nStatusDescription : OK',
-          proofExplanation: 'Proves access to official IETF RFC repository.',
+          id: 1,
+          prompt: 'Match the standardizing body (IETF or IEEE) to each protocol/standard: (a) HTTP/2, (b) 802.11ax Wi-Fi 6, (c) BGP-4, (d) 802.3 Fast Ethernet.',
+          expected: '(a) HTTP/2 -> IETF (RFC 7540), (b) 802.11ax -> IEEE, (c) BGP-4 -> IETF (RFC 4271), (d) 802.3 -> IEEE.',
+          hints: 'IETF standardizes Internet software protocols; IEEE standardizes physical cabling and wireless radios.',
+        },
+        {
+          id: 2,
+          prompt: 'What are the three components that define a network protocol, and what role does each play?',
+          expected: 'Syntax (structure and format of data), Semantics (meaning of control fields and actions), Timing (synchronization, speed matching, and sequencing).',
+          hints: 'Remember the protocol triad: Syntax, Semantics, Timing.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Vendor proprietary protocol feature breaks multi-vendor communication.',
-          possibleCauses: ['Use of proprietary extensions rather than standard RFC mode'],
-          diagnosticSteps: ['Verify protocol compliance in configuration.'],
-          remediation: 'Configure standard open RFC mode (e.g. standard LACP vs proprietary EtherChannel).',
-        },
+      recap: [
+        'A protocol is formally defined by Syntax (data format), Semantics (control meaning), and Timing (sequencing and synchronization).',
+        'Open standards organizations (IETF, IEEE, ISO) ensure multi-vendor interoperability and prevent proprietary vendor lock-in.',
+        'IETF standards are published as open, freely accessible Request for Comments (RFC) documents.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Thinking RFCs are proprietary trade secrets.', correction: 'RFCs are freely accessible public open standards published online.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Protocol Ambiguity Exploits',
-        mitigationStrategy: 'Strict conformance to RFC validation rules prevents malformed packet attacks.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['3 protocol elements: Syntax (structure), Semantics (meaning), Timing (speed/sequencing).', 'IETF publishes RFCs; IEEE defines 802.3/802.11.'],
-        frequentTraps: ['Confusing IETF (Layer 3-7 software) with IEEE (Layer 1-2 hardware).'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: RFC Document Inspection & Protocol Standards Analysis',
-        scenario: 'Explore RFC specifications and identify protocol syntax.',
-        tasks: ['Identify the standards body responsible for Ethernet (IEEE) vs IP (IETF).'],
-        verificationMethod: 'Verify standards mapping.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['Protocols define syntax, semantics, and timing.', 'IETF RFCs and IEEE 802 standards ensure multi-vendor interoperability.'],
-        nextLessonBridge: 'Proceed to NET-103 Lesson 2 for the 7-Layer OSI Reference Model.',
-      },
     },
     questions: [
       {
@@ -1172,8 +1071,8 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
         options: [
           'Syntax (message structure), Semantics (meaning of control fields), and Timing (speed matching and sequencing)',
           'Voltage, Amperage, and Resistance',
-          'CPU, RAM, and Storage',
-          'Router, Switch, and Firewall',
+          'CPU, RAM, and Storage capacity',
+          'Router, Switch, and Firewall hardware',
         ],
         correctOption: 0,
         explanation: 'A protocol is formally defined by Syntax (data format and structure), Semantics (meaning and interpretation of control bits), and Timing (sequencing, synchronization, and speed matching).',
@@ -1183,15 +1082,39 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'Protocol Definition Triad',
       },
+      {
+        text: 'Which standards organization is responsible for creating and maintaining core Internet protocols (such as IP, TCP, DNS, and BGP) published as Request for Comments (RFC) documents?',
+        options: [
+          'Internet Engineering Task Force (IETF)',
+          'Institute of Electrical and Electronics Engineers (IEEE)',
+          'Federal Communications Commission (FCC)',
+          'Underwriters Laboratories (UL)',
+        ],
+        correctOption: 0,
+        explanation: 'The IETF (Internet Engineering Task Force) develops and publishes the official RFC specifications that define core internet protocols like IP, TCP, and DNS.',
+        explanationsJson: { 1: 'IEEE standardizes physical/data-link protocols like Ethernet (802.3) and Wi-Fi (802.11).', 2: 'FCC is a government regulatory agency.', 3: 'UL is a safety certification company.' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'IETF & RFC Responsibilities',
+      },
+      {
+        text: 'Why are open international networking standards (such as IETF RFCs and IEEE 802 standards) vital for enterprise computing?',
+        options: [
+          'They ensure that computing devices from different manufacturers can interoperate seamlessly without vendor lock-in',
+          'They mandate that every network device must be replaced every 6 months',
+          'They restrict network cables to a maximum length of 1 meter',
+          'They eliminate the need for electricity in networking',
+        ],
+        correctOption: 0,
+        explanation: 'Open standards define vendor-neutral rules so devices from Cisco, Juniper, Apple, Linux, Microsoft, and others communicate flawlessly across shared networks.',
+        explanationsJson: { 1: 'Standards extend equipment longevity.', 2: 'Ethernet runs up to 100m, fiber up to 40km.', 3: 'Electronic networking requires electricity.' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Open Standards & Interoperability',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: RFC Document Inspection & Protocol Standards Analysis',
-      instructions: '1. Inspect standards bodies.\n2. Map protocols to IETF and IEEE.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { standardsBody: 'IETF', coreDocument: 'RFC 791' },
-      tasks: ['Map protocol standards.'],
-    },
   },
 
   // -------------------------------------------------------------------------
