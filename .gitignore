@@ -10,6 +10,8 @@ build/
 out/
 .turbo/
 *.tsbuildinfo
+packages/*/src/**/*.js
+packages/*/src/**/*.d.ts
 
 # Environment variables
 .env

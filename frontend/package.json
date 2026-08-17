@@ -13,8 +13,6 @@
     "@netvision/shared": "workspace:*",
     "@netvision/simulation-engine": "workspace:*",
     "@netvision/ui": "workspace:*",
-    "@tanstack/react-query": "^5.40.0",
-    "@xyflow/react": "^12.0.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.2.10",
     "lucide-react": "^0.395.0",
