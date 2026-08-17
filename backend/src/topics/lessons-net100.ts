@@ -19,51 +19,35 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'BINARY_CONVERTER',
     introduction:
       'Master the foundational digital alphabet of computer networking: Base-2 binary bits, 8-bit bytes (octets), 4-bit nibbles, Base-16 hexadecimal notation, positional number conversions, and data rate bandwidth units (bps vs B/s).',
-    stepMetadata: {
-      step1_objective:
+    contentV2: {
+      objective:
         'Understand how all digital network communication is constructed from binary bits, how 8 bits form a byte, how hexadecimal notation concisely compresses binary data, and how to convert accurately between decimal, binary, and hexadecimal representations.',
-      step2_prerequisites: [
+      prerequisites: [
         'Basic arithmetic (addition, subtraction, multiplication, division)',
         'Understanding of decimal (Base-10) positional value (units, tens, hundreds)',
       ],
-      step3_whyItMatters:
+      whyItMatters:
         'Every physical wire and radio wave carries binary states (high/low voltage, light on/off). Network addresses (MAC and IPv6) are written in hexadecimal, while network link speeds are measured in bits per second (bps) and storage in Bytes (B). Fluency in binary, hex, and bandwidth units is the essential starting point for all networking.',
-      step4_coreConcept:
+      explanation:
         'Digital systems use Binary (Base-2) because electronic circuits reliably differentiate between two electrical voltage states: 0 (Off/Low) and 1 (On/High). A single binary digit is a Bit. Eight contiguous bits form one Byte (also called an Octet in networking), which can represent 256 distinct values (0 to 255). Hexadecimal (Base-16) uses 16 digits (0–9 and A–F) to represent a 4-bit Nibble in a single character, allowing a full 8-bit byte to be written with just 2 hex characters.',
-      step5_technicalAnatomy: {
-        title: 'Positional Digital Numbering Systems & Units Architecture',
-        description:
-          'In positional notation, each column represents a base raised to an increasing power from right to left. Binary uses base 2 ($2^0=1, 2^1=2, 2^2=4, 2^3=8, 2^4=16, 2^5=32, 2^6=64, 2^7=128$). Hexadecimal uses base 16 ($16^0=1, 16^1=16$), where values 10 through 15 are mapped to letters A through F.',
-        components: [
-          { name: 'Bit (b)', detail: 'The fundamental unit of digital information. Represents a single 0 or 1 binary state.' },
-          { name: 'Nibble', detail: 'A group of 4 contiguous bits (0000 to 1111). Exactly equal to one hexadecimal digit (0 to F).' },
-          { name: 'Byte / Octet (B)', detail: 'A group of 8 contiguous bits (00000000 to 11111111). Exactly equal to two hexadecimal digits (00 to FF). Values range from decimal 0 to 255 ($2^8 = 256$ states).' },
-          { name: 'Bandwidth vs Storage Units', detail: 'Network transmission speed is measured in bits per second (bps, Kbps, Mbps, Gbps). Data storage and file sizes are measured in Bytes (B, KB, MB, GB). 1 Byte = 8 bits.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Decimal to Binary (Subtraction Method)', action: 'Compare the decimal number against the 8 positional weights (128, 64, 32, 16, 8, 4, 2, 1). If the number is greater than or equal to the weight, place a 1 and subtract the weight; otherwise place a 0. Repeat through weight 1.' },
-          { stepNumber: 2, title: 'Binary to Decimal (Summation Method)', action: 'Multiply each binary bit (0 or 1) by its positional column weight and sum all products (e.g., 11000000 = 128 + 64 = 192).' },
-          { stepNumber: 3, title: 'Binary to Hexadecimal (Nibble Split)', action: 'Split the 8-bit byte into two 4-bit nibbles. Calculate the decimal value of each nibble (using weights 8, 4, 2, 1) and substitute the corresponding hex symbol (0-9 or A=10, B=11, C=12, D=13, E=14, F=15).' },
-          { stepNumber: 4, title: 'Bandwidth Throughput Calculation', action: 'Convert network link rate in bits per second to Byte download speed by dividing by 8 (e.g., 100 Mbps / 8 = 12.5 MB/s maximum theoretical download speed).' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'Digital Byte Architecture & Hexadecimal Representation',
-        fields: [
-          { fieldName: '1 Bit (Binary State)', bitLength: '1 bit', hexSample: '0 or 1', description: 'Fundamental binary unit representing electrical signal high or low.' },
-          { fieldName: '1 Nibble (4 Bits)', bitLength: '4 bits', hexSample: '0xA (1010)', description: 'Half a byte, represented by a single hexadecimal digit (0-F).' },
-          { fieldName: '1 Byte / Octet (8 Bits)', bitLength: '8 bits', hexSample: '0xFF (11111111)', description: 'Two hex digits spanning decimal 0 to 255.' },
-          { fieldName: 'Data Rate Unit (Mbps)', bitLength: 'Mega-bits/sec', hexSample: '100 Mbps = 12.5 MB/s', description: 'Network line speed expressed in bits per second vs Bytes per second.' },
-        ],
-      },
-      step8_visualExplanation: {
+      components: [
+        { name: 'Bit (b)', detail: 'The fundamental unit of digital information. Represents a single 0 or 1 binary state.' },
+        { name: 'Nibble', detail: 'A group of 4 contiguous bits (0000 to 1111). Exactly equal to one hexadecimal digit (0 to F).' },
+        { name: 'Byte / Octet (B)', detail: 'A group of 8 contiguous bits (00000000 to 11111111). Exactly equal to two hexadecimal digits (00 to FF). Values range from decimal 0 to 255 (256 distinct states).' },
+        { name: 'Bandwidth vs Storage Units', detail: 'Network transmission speed is measured in bits per second (bps, Kbps, Mbps, Gbps). Data storage and file sizes are measured in Bytes (B, KB, MB, GB). 1 Byte = 8 bits.' },
+      ],
+      howItWorks: [
+        { stepNumber: 1, title: 'Decimal to Binary (Subtraction Method)', action: 'Compare the decimal number against the 8 positional weights (128, 64, 32, 16, 8, 4, 2, 1). If the number is greater than or equal to the weight, place a 1 and subtract the weight; otherwise place a 0. Repeat through weight 1.' },
+        { stepNumber: 2, title: 'Binary to Decimal (Summation Method)', action: 'Multiply each binary bit (0 or 1) by its positional column weight and sum all products (e.g., 11000000 = 128 + 64 = 192).' },
+        { stepNumber: 3, title: 'Binary to Hexadecimal (Nibble Split)', action: 'Split the 8-bit byte into two 4-bit nibbles. Calculate the decimal value of each nibble (using weights 8, 4, 2, 1) and substitute the corresponding hex symbol (0-9 or A=10, B=11, C=12, D=13, E=14, F=15).' },
+        { stepNumber: 4, title: 'Bandwidth Throughput Calculation', action: 'Convert network link rate in bits per second to Byte download speed by dividing by 8 (e.g., 100 Mbps / 8 = 12.5 MB/s maximum theoretical download speed).' },
+      ],
+      visualizer: {
         type: 'BINARY_CONVERTER',
         title: 'Interactive 8-Bit Positional Binary & Hex Converter',
         description: 'Toggle each of the 8 bit switches (128, 64, 32, 16, 8, 4, 2, 1) to observe real-time decimal summation, nibble division, and hexadecimal notation updates.',
       },
-      step9_workedExample: {
+      workedExample: {
         title: 'Converting Decimal 202 to Binary and Hexadecimal & Calculating Download Speed',
         problemStatement: '1. Convert decimal number 202 into 8-bit binary and 2-digit hexadecimal.\n2. If an Internet connection has a bandwidth of 80 Mbps, what is the maximum theoretical download rate in MegaBytes per second (MB/s)?',
         stepByStepSolution: [
@@ -73,75 +57,61 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
         ],
         finalResult: 'Decimal 202 = Binary 11001010 = Hexadecimal 0xCA. Bandwidth of 80 Mbps = 10 MB/s file transfer speed.',
       },
-      step10_realWorldScenario: {
-        topology: 'Home Broadband User Downloading a 1 GigaByte (1 GB) File on a 100 Mbps Line',
-        scenarioText: 'A user subscribes to a 100 Mbps connection and downloads a 1 GB file in ~80 seconds, observing that 100 Mbps is 12.5 MB/s.',
-        engineeringContext: 'ISPs market in bits/sec (b); operating systems display in Bytes/sec (B).',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'CPU and memory process octets and words.',
-        nicBehavior: 'NIC encodes binary bits into physical voltages or optical pulses.',
-        switchOrRouterBehavior: 'ASIC hardware logic gates inspect binary bit patterns in nanoseconds.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'powershell -Command "[Convert]::ToString(202, 2).PadLeft(8, \'0\')"',
-          description: 'Converts decimal 202 to an 8-bit padded binary string.',
-          expectedOutput: '11001010',
-          proofExplanation: 'Proves decimal 202 is 11001010 binary.',
+          id: 1,
+          prompt: 'Convert decimal 192 into an 8-bit binary string.',
+          expected: '11000000',
+          hints: '192 = 128 + 64.',
+        },
+        {
+          id: 2,
+          prompt: 'Convert binary 11111111 into 2-digit hexadecimal.',
+          expected: 'FF',
+          hints: 'Left nibble 1111 = 15 (F), right nibble 1111 = 15 (F).',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'User expects 500 MB/s on a 500 Mbps connection.',
-          possibleCauses: ['Confusion between Mbps and MB/s'],
-          diagnosticSteps: ['Divide 500 by 8 (62.5 MB/s).'],
-          remediation: 'Explain that 62.5 MB/s is the 100% theoretical maximum for 500 Mbps.',
-        },
+      recap: [
+        'Binary is Base-2 (bits 0 and 1); Hexadecimal is Base-16 (0-9 and A-F).',
+        '1 Byte = 8 bits = 2 Hex digits (00-FF), representing decimal values 0 to 255.',
+        'Network bandwidth is measured in bits/sec (bps); divide Mbps by 8 to determine download rate in MB/s.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Confusing 1 Byte with 1 Bit.', correction: '1 Byte = 8 bits. Always divide Mbps by 8 to find MB/s.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Bit corruption in transit.',
-        mitigationStrategy: 'Check sums and CRC error detection codes.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['Weights: 128, 64, 32, 16, 8, 4, 2, 1.', 'Hex: A=10, B=11, C=12, D=13, E=14, F=15.', 'Mbps / 8 = MB/s.'],
-        frequentTraps: ['Forgetting that 1 hex digit is 4 bits (1 nibble).'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Binary & Hexadecimal Conversions and Bandwidth Calculations',
-        scenario: 'Convert values and calculate download times.',
-        tasks: ['Convert decimal 192 and 202 to binary.', 'Convert binary 11001010 to hexadecimal.'],
-        verificationMethod: 'Verify mathematical accuracy.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['Binary is Base-2, Hexadecimal is Base-16.', '1 Byte = 8 bits = 2 Hex digits (00-FF).', 'Divide Mbps by 8 for MB/s.'],
-        nextLessonBridge: 'Proceed to NET-101 Lesson 2 for physical interfaces, cabling media, and transceivers.',
-      },
     },
     questions: [
       {
         text: 'What is the binary representation of decimal integer 192?',
         options: ['11000000', '10101010', '11100000', '10000000'],
         correctOption: 0,
-        explanation: 'Decimal 192 = 128 + 64 (11000000).',
+        explanation: 'Decimal 192 = 128 + 64 (11000000 in positional binary notation).',
         explanationsJson: { 1: '10101010 = 170.', 2: '11100000 = 224.', 3: '10000000 = 128.' },
         difficulty: CourseLevel.FOUNDATIONAL,
         cognitiveLevel: CognitiveLevel.RECALL,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'Binary Conversion',
       },
+      {
+        text: 'A user has an Internet connection rated at 80 Mbps (Mega-bits per second). What is the maximum theoretical download speed in MegaBytes per second (MB/s)?',
+        options: ['10 MB/s', '80 MB/s', '8 MB/s', '640 MB/s'],
+        correctOption: 0,
+        explanation: 'There are 8 bits in 1 Byte. 80 Mbps / 8 = 10 MB/s.',
+        explanationsJson: { 1: '80 MB/s assumes 1 bit equals 1 Byte.', 2: 'Incorrect calculation.', 3: 'Multiplied instead of dividing.' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Bandwidth vs Storage Units',
+      },
+      {
+        text: 'How many bits are in a single hexadecimal character (such as "A" or "F")?',
+        options: ['4 bits (1 nibble)', '8 bits (1 byte)', '16 bits', '2 bits'],
+        correctOption: 0,
+        explanation: 'Each hexadecimal digit represents a 4-bit nibble (values 0000 to 1111 / decimal 0 to 15).',
+        explanationsJson: { 1: '8 bits is 1 byte, represented by TWO hex digits.', 2: '16 bits is 2 bytes (4 hex digits).', 3: '2 bits has only 4 states (0-3).' },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Hexadecimal to Binary Relationship',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Binary & Hexadecimal Conversions and Bandwidth Calculations',
-      instructions: '1. Convert decimal octets to binary.\n2. Convert binary bytes to hex.\n3. Calculate MB/s from Mbps.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { hostName: 'Workstation', ip: '192.168.1.10', lineSpeed: '100 Mbps' },
-      tasks: ['Convert decimal 192 and 202 to binary.'],
-    },
   },
 
   // -------------------------------------------------------------------------

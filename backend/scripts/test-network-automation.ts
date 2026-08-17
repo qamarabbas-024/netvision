@@ -24,45 +24,48 @@ async function verifyNetworkAutomation() {
 
   // [TEST 2] Verify Core Automation Concepts
   console.log('\n[TEST 2] Verifying Core Automation Concepts & Principles...');
-  const meta = lesson!.stepMetadata;
-  assert(!!meta, 'Lesson contains stepMetadata');
-  assert(!!meta.step1_objective, 'Objective defined');
-  assert(meta.step4_coreConcept.includes('Idempotency') || meta.step4_coreConcept.includes('idempotent'), 'Core concept defines Idempotency');
-  assert(meta.step4_coreConcept.includes('Declarative') || meta.step4_coreConcept.includes('declarative'), 'Core concept defines Declarative vs Imperative');
-  assert(meta.step4_coreConcept.includes('Configuration drift') || meta.step4_coreConcept.includes('drift'), 'Core concept covers Configuration Drift');
-  assert(meta.step4_coreConcept.includes('REST API') || meta.step4_coreConcept.includes('REST'), 'Core concept covers REST APIs');
-  assert(meta.step4_coreConcept.includes('JSON'), 'Core concept covers JSON structured data');
+  const content = (lesson!.contentV2 || lesson!.stepMetadata) as any;
+  assert(!!content, 'Lesson contains content definition');
+  const objective = content.objective || content.step1_objective;
+  assert(!!objective, 'Objective defined');
+  const coreConcept = content.explanation || content.step4_coreConcept;
+  assert(coreConcept.includes('Idempotency') || coreConcept.includes('idempotent'), 'Core concept defines Idempotency');
+  assert(coreConcept.includes('Declarative') || coreConcept.includes('declarative'), 'Core concept defines Declarative vs Imperative');
+  assert(coreConcept.includes('Configuration drift') || coreConcept.includes('drift'), 'Core concept covers Configuration Drift');
+  assert(coreConcept.includes('REST API') || coreConcept.includes('REST'), 'Core concept covers REST APIs');
+  assert(coreConcept.includes('JSON'), 'Core concept covers JSON structured data');
 
-  const components = meta.step5_technicalAnatomy.components;
-  const compNames = components.map((c) => c.name);
-  assert(compNames.some((n) => n.includes('Why Automation Exists')), '1. Anatomy includes Why Network Automation Exists');
-  assert(compNames.some((n) => n.includes('Manual vs Automated')), '2. Anatomy includes Manual vs Automated Workflows');
-  assert(compNames.some((n) => n.includes('Configuration Drift')), '3. Anatomy includes Configuration Drift');
-  assert(compNames.some((n) => n.includes('Idempotency')), '4. Anatomy includes Idempotency');
-  assert(compNames.some((n) => n.includes('Declarative vs Imperative')), '5. Anatomy includes Declarative vs Imperative');
-  assert(compNames.some((n) => n.includes('Network APIs')), '6. Anatomy includes Network APIs');
-  assert(compNames.some((n) => n.includes('REST Basics')), '7. Anatomy includes REST Basics');
-  assert(compNames.some((n) => n.includes('HTTP Methods')), '8. Anatomy includes HTTP Methods');
-  assert(compNames.some((n) => n.includes('JSON Data Structure')), '9. Anatomy includes JSON Data Structure');
-  assert(compNames.some((n) => n.includes('Safe Automation Workflow')), '10. Anatomy includes Safe Automation Workflow');
+  const components = content.components || content.step5_technicalAnatomy?.components;
+  const compNames = components.map((c: any) => c.name);
+  assert(compNames.some((n: string) => n.includes('Why Automation Exists')), '1. Anatomy includes Why Network Automation Exists');
+  assert(compNames.some((n: string) => n.includes('Manual vs Automated')), '2. Anatomy includes Manual vs Automated Workflows');
+  assert(compNames.some((n: string) => n.includes('Configuration Drift')), '3. Anatomy includes Configuration Drift');
+  assert(compNames.some((n: string) => n.includes('Idempotency')), '4. Anatomy includes Idempotency');
+  assert(compNames.some((n: string) => n.includes('Declarative vs Imperative')), '5. Anatomy includes Declarative vs Imperative');
+  assert(compNames.some((n: string) => n.includes('Network APIs')), '6. Anatomy includes Network APIs');
+  assert(compNames.some((n: string) => n.includes('REST Basics')), '7. Anatomy includes REST Basics');
+  assert(compNames.some((n: string) => n.includes('HTTP Methods')), '8. Anatomy includes HTTP Methods');
+  assert(compNames.some((n: string) => n.includes('JSON Data Structure')), '9. Anatomy includes JSON Data Structure');
+  assert(compNames.some((n: string) => n.includes('Safe Automation Workflow')), '10. Anatomy includes Safe Automation Workflow');
   console.log('  ✓ All 10 core architectural automation components verified.');
 
   // [TEST 3] Verify REST Methods & Python JSON Parsing
   console.log('\n[TEST 3] Verifying REST Methods, HTTP Verbs & Python Data Structures...');
-  assert(meta.step4_coreConcept.includes('GET') && meta.step4_coreConcept.includes('POST') && meta.step4_coreConcept.includes('PATCH') && meta.step4_coreConcept.includes('DELETE'), 'Covers GET, POST, PATCH, and DELETE HTTP methods');
-  assert(!!meta.step9_workedExample, 'Worked example defined');
-  assert(meta.step9_workedExample.problemStatement.includes('GET /api/v1/interfaces'), 'Worked example models REST API GET/PATCH interaction');
+  assert(coreConcept.includes('GET') && coreConcept.includes('POST') && coreConcept.includes('PATCH') && coreConcept.includes('DELETE'), 'Covers GET, POST, PATCH, and DELETE HTTP methods');
+  const workedEx = content.workedExample || content.step9_workedExample;
+  assert(!!workedEx, 'Worked example defined');
+  assert(workedEx.problemStatement.includes('GET /api/v1/interfaces'), 'Worked example models REST API GET/PATCH interaction');
   console.log('  ✓ REST API methods, status codes, and Python JSON dictionary parsing verified.');
 
   // [TEST 4] Verify Safe Automation Pipeline & Pre-Flight Checks
   console.log('\n[TEST 4] Verifying Safe Automation Pipeline Stages (Inspect -> Validate -> Dry-Run -> Apply -> Verify -> Log)...');
-  assert(!!meta.step6_howItWorks, 'How it works steps defined');
-  assert(meta.step6_howItWorks.steps.length >= 6, `Contains 6 pipeline stages (found: ${meta.step6_howItWorks.steps.length})`);
-  const stepTitles = meta.step6_howItWorks.steps.map((s) => s.title);
-  assert(stepTitles.some((t) => t.includes('Inspect')), 'Stage 1: Inspect Current State defined');
-  assert(stepTitles.some((t) => t.includes('Validate')), 'Stage 2: Schema Validation defined');
-  assert(stepTitles.some((t) => t.includes('Dry-Run')), 'Stage 3: Dry-Run Diffing defined');
-  assert(stepTitles.some((t) => t.includes('Apply')), 'Stage 4: Apply Changes defined');
+  const steps = content.howItWorks || content.step6_howItWorks?.steps;
+  assert(Array.isArray(steps) && steps.length >= 6, `Contains 6 pipeline stages (found: ${steps?.length})`);
+  const stepTitles = steps.map((s: any) => s.title);
+  assert(stepTitles.some((t: string) => t.includes('Inspect')), 'Stage 1: Inspect Current State defined');
+  assert(stepTitles.some((t: string) => t.includes('Validate')), 'Stage 2: Schema Validation defined');
+  assert(stepTitles.some((t: string) => t.includes('Dry-Run')), 'Stage 3: Dry-Run Diffing defined');
+  assert(stepTitles.some((t: string) => t.includes('Apply')), 'Stage 4: Apply Changes defined');
   assert(stepTitles.some((t) => t.includes('Verify')), 'Stage 5: Verify Operational State defined');
   assert(stepTitles.some((t) => t.includes('Log')), 'Stage 6: Log Audit Trail defined');
   console.log('  ✓ 6-stage safe automation deployment pipeline verified.');

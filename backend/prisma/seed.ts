@@ -129,7 +129,7 @@ async function main() {
         order: bDef.order,
         visualizationType: bDef.visualizationType,
         introduction: bDef.introduction,
-        contentJson: bDef.stepMetadata as any,
+        contentJson: ((bDef as any).contentV2 || bDef.stepMetadata) as any,
       },
       create: {
         moduleId: targetModId,
@@ -140,7 +140,7 @@ async function main() {
         order: bDef.order,
         visualizationType: bDef.visualizationType,
         introduction: bDef.introduction,
-        contentJson: bDef.stepMetadata as any,
+        contentJson: ((bDef as any).contentV2 || bDef.stepMetadata) as any,
       },
     });
 
@@ -151,26 +151,28 @@ async function main() {
       create: { id: `quiz-${bDef.slug}`, lessonId: bLesson.id, title: `${bDef.title} Quiz Assessment` },
     });
 
-    // Upsert Benchmark Lab
-    const existingLab = await prisma.lessonLab.findFirst({
-      where: { lessonId: bLesson.id },
-    });
-
-    if (!existingLab) {
-      await prisma.lessonLab.create({
-        data: {
-          lessonId: bLesson.id,
-          title: bDef.lab.title,
-          instructions: bDef.lab.instructions,
-          difficulty: bDef.lab.difficulty,
-          estimatedMinutes: bDef.lab.estimatedMinutes,
-          initialTopologyJson: bDef.lab.initialTopologyJson,
-          objectivesJson: bDef.lab.tasks,
-        },
+    // Upsert Benchmark Lab if defined
+    if (bDef.lab) {
+      const existingLab = await prisma.lessonLab.findFirst({
+        where: { lessonId: bLesson.id },
       });
+
+      if (!existingLab) {
+        await prisma.lessonLab.create({
+          data: {
+            lessonId: bLesson.id,
+            title: bDef.lab.title,
+            instructions: bDef.lab.instructions,
+            difficulty: bDef.lab.difficulty,
+            estimatedMinutes: bDef.lab.estimatedMinutes,
+            initialTopologyJson: bDef.lab.initialTopologyJson,
+            objectivesJson: bDef.lab.tasks,
+          },
+        });
+      }
     }
 
-    console.log(`  ✓ Benchmark Deep Lesson [${bDef.courseCode}] "${bDef.title}" (1 lab)`);
+    console.log(`  ✓ Benchmark Deep Lesson [${bDef.courseCode}] "${bDef.title}"${bDef.lab ? ' (1 lab)' : ''}`);
   }
 
   // 4. Seed Legacy 22 Courses & Map 35 Lessons to Target Modules

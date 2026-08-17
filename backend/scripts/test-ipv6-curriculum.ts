@@ -64,39 +64,59 @@ async function verifyIpv6Curriculum() {
   assert(ipv6Lesson!.visualizationType === 'IPV6_COMPRESSOR_ENGINE', 'Visualization type is IPV6_COMPRESSOR_ENGINE');
   console.log(`  ✓ Lesson "${ipv6Lesson!.title}" verified in NET-203.`);
 
-  // [TEST 2] Verify IPv6-specific learning outcomes & core concepts
+  // [TEST 2] Verify IPv6-specific learning outcomes & domain concepts
   console.log('\n[TEST 2] Verifying IPv6 Core Learning Outcomes & Domain Concepts...');
-  const meta = ipv6Lesson!.stepMetadata;
-  assert(!!meta, 'Lesson contains stepMetadata');
-  assert(!!meta.step1_objective, 'Step 1: Objective defined');
-  assert(meta.step1_objective.includes('128-bit') && meta.step1_objective.includes('SLAAC'), 'Objective covers 128-bit & SLAAC');
-  assert(!!meta.step2_prerequisites && meta.step2_prerequisites.length > 0, 'Step 2: Prerequisites defined');
-  assert(!!meta.step3_whyItMatters, 'Step 3: Why It Matters defined');
-  assert(meta.step3_whyItMatters.includes('exhausted') || meta.step3_whyItMatters.includes('IPv4'), 'Why It Matters explains IPv4 exhaustion');
-  assert(!!meta.step4_coreConcept, 'Step 4: Core Concept defined');
-  assert(meta.step4_coreConcept.includes('128 bits') && meta.step4_coreConcept.includes('RFC 5952'), 'Core concept includes 128-bit architecture & RFC 5952');
-  assert(meta.step4_coreConcept.includes('SLAAC') && meta.step4_coreConcept.includes('DAD'), 'Core concept covers SLAAC and DAD');
-  assert(!!meta.step5_technicalAnatomy, 'Step 5: Technical Anatomy defined');
+  const content = (ipv6Lesson!.contentV2 || ipv6Lesson!.stepMetadata) as any;
+  assert(!!content, 'Lesson contains content definition');
+  const objective = content.objective || content.step1_objective;
+  assert(!!objective, 'Objective defined');
+  assert(objective.includes('128-bit') && objective.includes('SLAAC'), 'Objective covers 128-bit & SLAAC');
+  const prerequisites = content.prerequisites || content.step2_prerequisites;
+  assert(!!prerequisites && prerequisites.length > 0, 'Prerequisites defined');
+  const whyItMatters = content.whyItMatters || content.step3_whyItMatters;
+  assert(!!whyItMatters, 'Why It Matters defined');
+  assert(whyItMatters.includes('exhausted') || whyItMatters.includes('IPv4'), 'Why It Matters explains IPv4 exhaustion');
+  const coreConcept = content.explanation || content.step4_coreConcept;
+  assert(!!coreConcept, 'Core Concept / Explanation defined');
+  assert(coreConcept.includes('128 bits') && coreConcept.includes('RFC 5952'), 'Core concept includes 128-bit architecture & RFC 5952');
+  assert(coreConcept.includes('SLAAC') && coreConcept.includes('DAD'), 'Core concept covers SLAAC and DAD');
 
-  const components = meta.step5_technicalAnatomy.components;
-  const compNames = components.map((c) => c.name);
-  assert(compNames.some((n) => n.includes('128-Bit')), 'Anatomy includes 128-Bit Structure');
-  assert(compNames.some((n) => n.includes('RFC 5952')), 'Anatomy includes RFC 5952 Compression Rules');
-  assert(compNames.some((n) => n.includes('Global Unicast')), 'Anatomy includes Global Unicast Address');
-  assert(compNames.some((n) => n.includes('Link-Local')), 'Anatomy includes Link-Local Address');
-  assert(compNames.some((n) => n.includes('Multicast')), 'Anatomy includes Multicast & Anycast');
-  assert(compNames.some((n) => n.includes('SLAAC')), 'Anatomy includes SLAAC');
-  assert(compNames.some((n) => n.includes('Dual-Stack')), 'Anatomy includes Dual-Stack');
+  const components = content.components || content.step5_technicalAnatomy?.components;
+  assert(!!components, 'Technical components defined');
 
-  assert(!!meta.step6_howItWorks && meta.step6_howItWorks.steps.length >= 4, 'Step 6: SLAAC workflow defined with >=4 steps');
-  assert(!!meta.step8_visualExplanation, 'Step 8: Visual Explanation defined');
-  assert(meta.step8_visualExplanation.type === 'IPV6_COMPRESSOR_ENGINE', 'Visualizer type is IPV6_COMPRESSOR_ENGINE');
-  assert(!!meta.step9_workedExample, 'Step 9: RFC 5952 Worked Example defined');
-  assert(!!meta.step18_masterySummary, 'Step 18: Mastery Summary defined');
-  console.log('  ✓ All IPv6 core learning outcomes and domain concepts verified.');
+  const compNames = components.map((c: any) => c.name);
+  assert(compNames.some((n: string) => n.includes('128-Bit')), 'Anatomy includes 128-Bit Structure');
+  assert(compNames.some((n: string) => n.includes('RFC 5952')), 'Anatomy includes RFC 5952 Compression Rules');
+  assert(compNames.some((n: string) => n.includes('Global Unicast')), 'Anatomy includes Global Unicast Address');
+  assert(compNames.some((n: string) => n.includes('Link-Local')), 'Anatomy includes Link-Local Address');
+  assert(compNames.some((n: string) => n.includes('SLAAC')), 'Anatomy includes SLAAC');
+  assert(compNames.some((n: string) => n.includes('Duplicate Address Detection') || n.includes('DAD')), 'Anatomy includes DAD');
+  assert(compNames.some((n: string) => n.includes('Dual-Stack')), 'Anatomy includes Dual-Stack Coexistence');
+  console.log('  ✓ IPv6 core concepts, scopes, SLAAC, DAD, and dual-stack verified.');
 
-  // [TEST 3] Verify Assessment Questions across 4 Cognitive Levels
-  console.log('\n[TEST 3] Verifying Assessment Question Bank & Cognitive Levels...');
+  // [TEST 3] Verify SLAAC Workflow Steps
+  console.log('\n[TEST 3] Verifying SLAAC / NDP Process Steps...');
+  const steps = content.howItWorks || content.step6_howItWorks?.steps;
+  assert(Array.isArray(steps) && steps.length >= 4, 'How It Works includes SLAAC workflow steps');
+  assert(steps.some((s: any) => s.title.includes('Router Solicitation') || s.action.includes('RS') || s.action.includes('Router Solicitation')), 'Workflow includes RS');
+  assert(steps.some((s: any) => s.title.includes('Router Advertisement') || s.action.includes('RA') || s.action.includes('Router Advertisement')), 'Workflow includes RA');
+  assert(steps.some((s: any) => s.title.includes('DAD') || s.action.includes('DAD') || s.action.includes('Duplicate Address Detection')), 'Workflow includes DAD');
+  console.log('  ✓ SLAAC RS/RA/DAD exchange flow verified.');
+
+  // [TEST 4] Verify Visualizer & Worked Example
+  console.log('\n[TEST 4] Verifying Visualizer & Worked Example...');
+  const visualizer = content.visualizer || content.step8_visualExplanation;
+  assert(!!visualizer, 'Visual explanation exists');
+  assert(visualizer.type === 'IPV6_COMPRESSOR_ENGINE', 'Visualizer is IPV6_COMPRESSOR_ENGINE');
+
+  const workedEx = content.workedExample || content.step9_workedExample;
+  assert(!!workedEx, 'Worked example exists');
+  assert(workedEx.problemStatement.includes('2001:0db8:0000:0000:0000:0000:0000:0001'), 'Worked example compresses sample address');
+  assert(workedEx.finalResult.includes('2001:db8::1'), 'Worked example produces canonical 2001:db8::1');
+  console.log('  ✓ Interactive visualizer and RFC 5952 worked example verified.');
+
+  // [TEST 5] Verify Assessment Questions across 4 Cognitive Levels
+  console.log('\n[TEST 5] Verifying Assessment Question Bank & Cognitive Levels...');
   const questions = ipv6Lesson!.questions;
   assert(questions.length >= 4, `At least 4 questions defined (found: ${questions.length})`);
 

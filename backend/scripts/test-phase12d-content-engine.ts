@@ -42,31 +42,30 @@ async function runPhase12dContentEngineTests() {
     assert(b202!.module.course.code === 'NET-202' && b202!.module.course.level === CourseLevel.BEGINNER, 'Lesson 202 associated with course NET-202 (BEGINNER).');
     assert(b404!.module.course.code === 'NET-404' && b404!.module.course.level === CourseLevel.ADVANCED, 'Lesson 404 associated with course NET-404 (ADVANCED).');
 
-    // 3. Verify All 18 Content Architecture Sections Exist & Non-Empty
+    // 3. Verify Content Quality Standards (Objective, Core Concepts, Visuals, Worked Examples, Recap)
     const benchmarkLessons = [b101!, b202!, b404!];
 
     for (const bLesson of benchmarkLessons) {
-      const content = bLesson.contentJson as unknown as LessonStepMetadata;
+      const content = bLesson.contentJson as any;
       assert(!!content, `Lesson "${bLesson.slug}" contentJson exists.`);
 
-      assert(typeof content.step1_objective === 'string' && content.step1_objective.length > 20, `Step 1 Objective exists for ${bLesson.slug}.`);
-      assert(Array.isArray(content.step2_prerequisites) && content.step2_prerequisites.length > 0, `Step 2 Prerequisites exist for ${bLesson.slug}.`);
-      assert(typeof content.step3_whyItMatters === 'string' && content.step3_whyItMatters.length > 30, `Step 3 Why It Matters exists for ${bLesson.slug}.`);
-      assert(typeof content.step4_coreConcept === 'string' && content.step4_coreConcept.length > 50, `Step 4 Core Concept exists for ${bLesson.slug}.`);
-      assert(!!content.step5_technicalAnatomy && content.step5_technicalAnatomy.components.length > 0, `Step 5 Technical Anatomy components exist for ${bLesson.slug}.`);
-      assert(!!content.step6_howItWorks && content.step6_howItWorks.steps.length > 0, `Step 6 How It Works steps exist for ${bLesson.slug}.`);
-      assert(!!content.step7_packetHeaderView && content.step7_packetHeaderView.fields.length > 0, `Step 7 Packet Header View fields exist for ${bLesson.slug}.`);
-      assert(!!content.step8_visualExplanation && typeof content.step8_visualExplanation.type === 'string', `Step 8 Visual Explanation configuration exists for ${bLesson.slug}.`);
-      assert(!!content.step9_workedExample && content.step9_workedExample.stepByStepSolution.length > 0, `Step 9 Worked Example exists for ${bLesson.slug}.`);
-      assert(!!content.step10_realWorldScenario && typeof content.step10_realWorldScenario.scenarioText === 'string', `Step 10 Real World Scenario exists for ${bLesson.slug}.`);
-      assert(!!content.step11_deviceBehavior && typeof content.step11_deviceBehavior.hostBehavior === 'string', `Step 11 Device Behavior descriptions exist for ${bLesson.slug}.`);
-      assert(Array.isArray(content.step12_cliTooling) && content.step12_cliTooling.length > 0, `Step 12 CLI Tooling commands exist for ${bLesson.slug}.`);
-      assert(Array.isArray(content.step13_troubleshooting) && content.step13_troubleshooting.length > 0, `Step 13 Troubleshooting scenarios exist for ${bLesson.slug}.`);
-      assert(Array.isArray(content.step14_commonMistakes) && content.step14_commonMistakes.length > 0, `Step 14 Common Mistakes exist for ${bLesson.slug}.`);
-      assert(!!content.step15_securityPerspective && typeof content.step15_securityPerspective.threatOrVulnerability === 'string', `Step 15 Security Perspective exists for ${bLesson.slug}.`);
-      assert(!!content.step16_examPrep && content.step16_examPrep.keyExamPoints.length > 0, `Step 16 Exam Prep key points exist for ${bLesson.slug}.`);
-      assert(!!content.step17_practicalLabRef && content.step17_practicalLabRef.tasks.length > 0, `Step 17 Practical Lab Reference tasks exist for ${bLesson.slug}.`);
-      assert(!!content.step18_masterySummary && content.step18_masterySummary.summaryPoints.length > 0, `Step 18 Mastery Summary points exist for ${bLesson.slug}.`);
+      const objective = content.objective || content.step1_objective;
+      assert(typeof objective === 'string' && objective.length > 20, `Objective exists for ${bLesson.slug}.`);
+
+      const coreConcept = content.explanation || content.step4_coreConcept;
+      assert(typeof coreConcept === 'string' && coreConcept.length > 50, `Core Concept / Explanation exists for ${bLesson.slug}.`);
+
+      const components = content.components || content.step5_technicalAnatomy?.components;
+      assert(Array.isArray(components) && components.length > 0, `Technical components exist for ${bLesson.slug}.`);
+
+      const visualizer = content.visualizer || content.step8_visualExplanation;
+      assert(!!visualizer && typeof visualizer.type === 'string', `Visual Explanation configuration exists for ${bLesson.slug}.`);
+
+      const workedEx = content.workedExample || content.step9_workedExample;
+      assert(!!workedEx && (Array.isArray(workedEx.stepByStepSolution) || typeof workedEx.finalResult === 'string'), `Worked Example exists for ${bLesson.slug}.`);
+
+      const recap = content.recap || content.step18_masterySummary?.summaryPoints;
+      assert(Array.isArray(recap) && recap.length > 0, `Summary Recap exists for ${bLesson.slug}.`);
     }
 
     // 4. Verify Assessment Questions per Benchmark Lesson (5 per benchmark)

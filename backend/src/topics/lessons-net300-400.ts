@@ -1,5 +1,5 @@
 import { CourseLevel, LessonType, CognitiveLevel, QuestionType } from '@prisma/client';
-import { LessonStepMetadata } from './lesson-content.interface';
+import { LessonStepMetadata, LessonContentV2 } from './lesson-content.interface';
 
 export interface BenchmarkQuestionDef {
   text: string;
@@ -29,11 +29,12 @@ export interface BenchmarkLessonFullDefinition {
   type: LessonType;
   durationMinutes: number;
   order: number;
-  visualizationType: string;
+  visualizationType?: string;
   introduction: string;
-  stepMetadata: LessonStepMetadata;
+  contentV2?: LessonContentV2;
+  stepMetadata?: LessonStepMetadata;
   questions: BenchmarkQuestionDef[];
-  lab: BenchmarkLabDef;
+  lab?: BenchmarkLabDef;
 }
 
 export const LESSONS_NET300_400: BenchmarkLessonFullDefinition[] = [
@@ -468,65 +469,63 @@ export const LESSONS_NET300_400: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'MULTI_AREA_OSPF_ENGINE',
     introduction:
       'Scale link-state routing across enterprise networks: Hierarchical multi-area design, Area 0 Backbone transit, Area Border Routers (ABR), Autonomous System Boundary Routers (ASBR), LSA Types 1 through 5 propagation, inter-area route summarization, stub area types, and external route redistribution.',
-    stepMetadata: {
-      step1_objective:
+    contentV2: {
+      objective:
         'Master multi-area OSPF hierarchical design principles, explain why large networks segment into areas to contain LSDB size and SPF calculation overhead, classify LSA Types 1 through 5, configure inter-area route summarization at ABRs, and evaluate external route redistribution and metric types (E1 vs E2) at ASBRs.',
-      step2_prerequisites: ['net-304-single-area-ospf-routing', 'net-202-ipv4-addressing-cidr'],
-      step3_whyItMatters:
+      prerequisites: ['net-304-single-area-ospf-routing', 'net-202-ipv4-addressing-cidr'],
+      whyItMatters:
         'In a single-area OSPF network with hundreds of routers, a single link flap triggers SPF recalculation on every router across the autonomous system and floods thousands of LSAs. Segmenting the topology into areas limits the Link-State Database (LSDB) size and restricts SPF tree calculations strictly to the local area, ensuring high stability and rapid convergence.',
-      step4_coreConcept:
+      explanation:
         'Multi-Area OSPF structures an Autonomous System (AS) into a two-level hierarchy centered around a contiguous Area 0 (Backbone Area). In standard hierarchical design, all regular non-backbone areas (e.g. Area 1, Area 2) connect directly to Area 0 to maintain a loop-free hub-and-spoke inter-area topology. Routers with all interfaces inside a single area are Internal Routers. Routers with interfaces attached to Area 0 and at least one regular area are Area Border Routers (ABRs). An ABR maintains a separate Link-State Database (LSDB) and executes an independent Dijkstra SPF calculation for each connected area. Intra-area topology details (Type 1 Router LSAs and Type 2 Network LSAs) are strictly confined to their originating area. The ABR takes subnet reachability computed from its local LSDB and originates new Type 3 Summary LSAs into adjacent areas, appearing in routing tables as Inter-Area routes (`O IA`). Autonomous System Boundary Routers (ASBRs) redistribute routes from foreign routing domains or external sources (e.g. BGP, static routes, directly connected interfaces outside OSPF) into OSPF, originating Type 5 External LSAs (`O E1` or `O E2`) that flood across all standard non-stub areas. Because routers in other areas lack the ASBR’s Type 1 LSA, the ABR originates Type 4 ASBR Summary LSAs into those areas to advertise the intra-area metric cost to reach the ASBR Router ID. Route summarization at the ABR (`area <id> range <prefix> <mask>`) aggregates multiple specific subnets into a single Type 3 Summary LSA, reducing LSDB memory and shielding downstream areas from local link flaps.',
-      step5_technicalAnatomy: {
-        title: 'Multi-Area OSPF Hierarchy, Router Roles & LSA Classification',
-        description: 'Two-tier hierarchical architecture, router classifications, and LSA flooding scopes.',
-        components: [
-          { name: 'Area 0 (Backbone Transit Area)', detail: 'The central transit backbone (0.0.0.0). In standard design, all inter-area traffic passes through Area 0 to prevent inter-area routing loops.' },
-          { name: 'Area Border Router (ABR)', detail: 'Router with interfaces in Area 0 and one or more regular areas. Maintains independent LSDBs per area and originates Type 3 and Type 4 Summary LSAs.' },
-          { name: 'Autonomous System Boundary Router (ASBR)', detail: 'Router running OSPF that redistributes routes from external routing sources or foreign domains (BGP, Static, RIP) into OSPF via Type 5 LSAs.' },
-          { name: 'Type 1: Router LSA', detail: 'Originated by every router within its area; describes attached links, interface IPs, and neighbor link costs. Flooding scope is strictly Area-Local.' },
-          { name: 'Type 2: Network LSA', detail: 'Originated by the Designated Router (DR) on multi-access transit broadcast links. Lists attached routers. Flooding scope is strictly Area-Local.' },
-          { name: 'Type 3: Summary LSA', detail: 'Originated by ABRs to advertise reachable internal subnets into neighboring areas. Installed by recipient routers as Inter-Area (`O IA`) routes.' },
-          { name: 'Type 4: ASBR Summary LSA', detail: 'Originated by ABRs into non-ASBR areas to advertise the metric cost to reach the ASBR Router ID, enabling routers in other areas to reach the ASBR.' },
-          { name: 'Type 5: AS External LSA', detail: 'Originated by ASBRs to advertise external redistributed routes; flooded across all standard (normal) OSPF areas (blocked in stub and NSSA areas).' },
-          { name: 'Route Summarization', detail: 'Configured on ABRs (`area <id> range`) to aggregate internal subnets into one Type 3 LSA, or on ASBRs (`summary-address`) for external Type 5 LSAs.' },
-          { name: 'External Metric Types (E1 vs E2)', detail: 'E2 (default) maintains a constant external seed metric (default 20); E1 dynamically adds the internal OSPF path cost to the seed metric.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Intra-Area Link-State Flooding', action: 'Routers in Area 1 flood Type 1 and Type 2 LSAs. Every router in Area 1 builds an identical Area 1 LSDB and runs Dijkstra SPF to calculate intra-area shortest paths.' },
-          { stepNumber: 2, title: 'ABR Inter-Area LSA Origination', action: 'ABR-1 calculates shortest paths to Area 1 subnets, then originates new Type 3 Summary LSAs into Area 0 (Backbone) advertising prefix reachability and metric cost.' },
-          { stepNumber: 3, title: 'Backbone Transit & Re-Advertisement', action: 'ABR-2 in Area 0 receives the Type 3 Summary LSAs, installs `O IA` routes into its routing table, and originates corresponding Type 3 LSAs into Area 2.' },
-          { stepNumber: 4, title: 'ASBR External Redistribution & Type 4 LSAs', action: 'ASBR-1 redistributes external BGP/Static routes into Area 0 via Type 5 External LSAs. ABR-1 and ABR-2 originate Type 4 LSAs into their non-backbone areas to advertise the path to ASBR-1.' },
-        ],
-      },
-      step8_visualExplanation: {
+      components: [
+        { name: 'Area 0 (Backbone Transit Area)', detail: 'The central transit backbone (0.0.0.0). In standard design, all inter-area traffic passes through Area 0 to prevent inter-area routing loops.' },
+        { name: 'Area Border Router (ABR)', detail: 'Router with interfaces in Area 0 and one or more regular areas. Maintains independent LSDBs per area and originates Type 3 and Type 4 Summary LSAs.' },
+        { name: 'Autonomous System Boundary Router (ASBR)', detail: 'Router running OSPF that redistributes routes from external routing sources or foreign domains (BGP, Static, RIP) into OSPF via Type 5 LSAs.' },
+        { name: 'Type 1: Router LSA', detail: 'Originated by every router within its area; describes attached links, interface IPs, and neighbor link costs. Flooding scope is strictly Area-Local.' },
+        { name: 'Type 2: Network LSA', detail: 'Originated by the Designated Router (DR) on multi-access transit broadcast links. Lists attached routers. Flooding scope is strictly Area-Local.' },
+        { name: 'Type 3: Summary LSA', detail: 'Originated by ABRs to advertise reachable internal subnets into neighboring areas. Installed by recipient routers as Inter-Area (O IA) routes.' },
+        { name: 'Type 4: ASBR Summary LSA', detail: 'Originated by ABRs into non-ASBR areas to advertise the metric cost to reach the ASBR Router ID, enabling routers in other areas to reach the ASBR.' },
+        { name: 'Type 5: AS External LSA', detail: 'Originated by ASBRs to advertise external redistributed routes; flooded across all standard (normal) OSPF areas (blocked in stub and NSSA areas).' },
+        { name: 'Route Summarization', detail: 'Configured on ABRs (area range) to aggregate internal subnets into one Type 3 LSA, or on ASBRs (summary-address) for external Type 5 LSAs.' },
+        { name: 'External Metric Types (E1 vs E2)', detail: 'E2 (default) maintains a constant external seed metric (default 20); E1 dynamically adds the internal OSPF path cost to the seed metric.' },
+      ],
+      howItWorks: [
+        { stepNumber: 1, title: 'Intra-Area Link-State Flooding', action: 'Routers in Area 1 flood Type 1 and Type 2 LSAs. Every router in Area 1 builds an identical Area 1 LSDB and runs Dijkstra SPF to calculate intra-area shortest paths.' },
+        { stepNumber: 2, title: 'ABR Inter-Area LSA Origination', action: 'ABR-1 calculates shortest paths to Area 1 subnets, then originates new Type 3 Summary LSAs into Area 0 (Backbone) advertising prefix reachability and metric cost.' },
+        { stepNumber: 3, title: 'Backbone Transit & Re-Advertisement', action: 'ABR-2 in Area 0 receives the Type 3 Summary LSAs, installs O IA routes into its routing table, and originates corresponding Type 3 LSAs into Area 2.' },
+        { stepNumber: 4, title: 'ASBR External Redistribution & Type 4 LSAs', action: 'ASBR-1 redistributes external BGP/Static routes into Area 0 via Type 5 External LSAs. ABR-1 and ABR-2 originate Type 4 LSAs into their non-backbone areas to advertise the path to ASBR-1.' },
+      ],
+      visualizer: {
         type: 'MULTI_AREA_OSPF_ENGINE',
         title: 'Interactive Multi-Area OSPF Topology, LSA Inspector & Summarization Engine',
         description: 'Explore multi-area topology spanning Area 0, Area 1, and Area 2, inspect LSA Types 1 through 5 flooding scopes and originators, toggle ABR route summarization, and compare E1 vs E2 redistribution metrics.',
       },
-      step9_workedExample: {
+      workedExample: {
         title: 'Calculating Inter-Area and External Path Costs across ABR and ASBR',
         problemStatement:
           'Router R1 in Area 1 needs to route packets to Server Subnet 10.2.2.0/24 in Area 2. Path costs: R1 -> ABR1 (Cost 10), ABR1 -> ABR2 across Area 0 (Cost 5), ABR2 -> R2 (Cost 10). Additionally, ASBR in Area 0 redistributes 172.16.0.0/12 with seed metric 20 (E1 vs E2). Determine the routing table entry on R1.',
         stepByStepSolution: [
-          'Step 1 (Inter-Area Cost to 10.2.2.0/24): Sum intra-area cost (10) + backbone transit cost (5) + destination area cost (10) = Total Cost 25. Route installed as `O IA 10.2.2.0/24 [110/25]`.',
-          'Step 2 (External E2 Route to 172.16.0.0/12): Metric Type 2 ignores internal path cost and displays only the seed metric: `O E2 172.16.0.0/12 [110/20]`.',
-          'Step 3 (External E1 Route to 172.16.0.0/12): Metric Type 1 adds internal path cost (R1 -> ABR1 -> ASBR = 10 + 5 = 15) to seed metric 20: `O E1 172.16.0.0/12 [110/35]`.',
+          'Step 1 (Inter-Area Cost to 10.2.2.0/24): Sum intra-area cost (10) + backbone transit cost (5) + destination area cost (10) = Total Cost 25. Route installed as O IA 10.2.2.0/24 [110/25].',
+          'Step 2 (External E2 Route to 172.16.0.0/12): Metric Type 2 ignores internal path cost and displays only the seed metric: O E2 172.16.0.0/12 [110/20].',
+          'Step 3 (External E1 Route to 172.16.0.0/12): Metric Type 1 adds internal path cost (R1 -> ABR1 -> ASBR = 10 + 5 = 15) to seed metric 20: O E1 172.16.0.0/12 [110/35].',
         ],
         finalResult:
-          'Inter-area route is `O IA 10.2.2.0/24 [110/25]`. External route is `O E2 172.16.0.0/12 [110/20]` (or `[110/35]` under E1).',
+          'Inter-area route is O IA 10.2.2.0/24 [110/25]. External route is O E2 172.16.0.0/12 [110/20] (or [110/35] under E1).',
       },
-      step18_masterySummary: {
-        summaryPoints: [
-          'Multi-Area OSPF uses a two-tier hierarchy centered around a contiguous Area 0 Backbone to contain LSDB size and isolate local SPF calculations.',
-          'ABRs connect regular areas to Area 0, originating Type 3 Summary LSAs (`O IA`) to advertise inter-area network reachability.',
-          'ASBRs inject external routes into standard areas via Type 5 LSAs (`O E1`/`O E2`), while ABRs originate Type 4 LSAs enabling other areas to locate the ASBR.',
-          'Route summarization on ABRs (`area range`) aggregates subnets into a single Type 3 LSA, reducing memory and dampening flap churn.',
-        ],
-        nextLessonBridge:
-          'With enterprise interior routing mastered, proceed to NET-403 to master Border Gateway Protocol (BGP) and Autonomous System peering.',
-      },
+      troubleshooting: [
+        {
+          symptom: 'Area 1 routers cannot reach subnets in Area 2.',
+          possibleCauses: ['Area 1 not connected to Area 0', 'ABR not originating Type 3 Summary LSAs'],
+          diagnosticSteps: ['Check `show ip ospf database summary` on ABR', 'Verify Area 0 interface is UP'],
+          remediation: 'Ensure ABR has active interfaces in Area 0 and Area 1.',
+        },
+      ],
+      recap: [
+        'Multi-Area OSPF uses a two-tier hierarchy centered around a contiguous Area 0 Backbone to contain LSDB size and isolate local SPF calculations.',
+        'ABRs connect regular areas to Area 0, originating Type 3 Summary LSAs (O IA) to advertise inter-area network reachability.',
+        'ASBRs inject external routes into standard areas via Type 5 LSAs (O E1/O E2), while ABRs originate Type 4 LSAs enabling other areas to locate the ASBR.',
+        'Route summarization on ABRs (area range) aggregates subnets into a single Type 3 LSA, reducing memory and dampening flap churn.',
+      ],
     },
     questions: [
       {
@@ -644,46 +643,40 @@ export const LESSONS_NET300_400: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'NETWORK_AUTOMATION_PIPELINE',
     introduction:
       'Transition from error-prone manual CLI configuration to safe, reproducible, programmable network operations: Idempotency, declarative vs imperative models, REST APIs, JSON data structures, Python automation workflows, pre-deployment validation, dry-run diffs, telemetry, and controller architectures.',
-    stepMetadata: {
-      step1_objective:
+    contentV2: {
+      objective:
         'Master the foundational principles of network automation: transition from manual CLI terminal sessions to repeatable, programmable network operations, distinguish declarative target-state models from imperative command sequences, eliminate configuration drift, structure JSON network objects, execute standard REST API methods (GET, POST, PUT, PATCH, DELETE), and enforce a safe 6-stage deployment workflow (inspect -> validate -> dry-run -> apply -> verify -> log).',
-      step2_prerequisites: ['net-202-ipv4-addressing-cidr', 'net-303-routing-fundamentals-overview', 'net-301-enterprise-switching-vlans'],
-      step3_whyItMatters:
+      prerequisites: ['net-202-ipv4-addressing-cidr', 'net-303-routing-fundamentals-overview', 'net-301-enterprise-switching-vlans'],
+      whyItMatters:
         'Manual device-by-device CLI configuration does not scale across enterprise infrastructure and accounts for over 70% of network outages caused by human syntax typos. Automated programmable workflows enable consistent, verifiable changes across hundreds of devices in seconds while preventing configuration drift and guaranteeing safe rollbacks.',
-      step4_coreConcept:
+      explanation:
         'Network Automation replaces manual terminal sessions with structured, programmatic interactions. Traditional CLI management is imperative (specifying every sequential command string to execute) and vulnerable to configuration drift (where live physical device configurations diverge from intended designs due to undocumented ad-hoc changes). Modern network programmability relies on declarative models (specifying the desired end-state) and Idempotency—a core property ensuring that executing an automation workflow multiple times yields the exact same target state without redundant reconfigurations or service disruptions. Programmable devices expose REST APIs operating over HTTP/HTTPS. Automation scripts interact with devices using standard HTTP methods: `GET` to inspect operational state without modifications, `POST` to create new resources, `PUT` to replace an entire configuration, `PATCH` to apply partial updates, and `DELETE` to remove resources. Data is exchanged in structured JSON formats consisting of nested key-value objects and arrays, eliminating fragile terminal screen-scraping. Safe network automation enforces a strict 6-stage workflow: 1) Inspect current state, 2) Validate JSON schema and syntax, 3) Preview dry-run diffs against live state, 4) Apply validated changes atomically, 5) Verify post-change operational state, and 6) Log an immutable audit trail.',
-      step5_technicalAnatomy: {
-        title: 'Network Automation Core Principles & REST Architecture',
-        description: 'The 10 essential pillars of programmable network engineering.',
-        components: [
-          { name: '1. Why Automation Exists', detail: 'Eliminates repetitive human manual CLI errors, accelerates deployment speed, and provides consistent configuration across fleet devices.' },
-          { name: '2. Manual vs Automated Workflows', detail: 'Manual CLI relies on ad-hoc interactive sessions; automation uses version-controlled, repeatable scripts interacting with device APIs.' },
-          { name: '3. Configuration Drift', detail: 'The divergence between the documented source-of-truth configuration and the actual running state on physical network hardware.' },
-          { name: '4. Idempotency', detail: 'The property where executing an operation repeatedly with identical parameters produces the exact same end state without side effects.' },
-          { name: '5. Declarative vs Imperative', detail: 'Declarative defines WHAT the target end-state should be; imperative specifies HOW to execute step-by-step CLI commands.' },
-          { name: '6. Network APIs', detail: 'Programmatic interfaces exposed by network operating systems to allow structured machine-to-machine communication over standard transport.' },
-          { name: '7. REST Basics', detail: 'Representational State Transfer: stateless, resource-oriented architecture using standard HTTP requests and URI endpoints.' },
-          { name: '8. HTTP Methods (GET/POST/PUT/PATCH/DELETE)', detail: 'GET (read state), POST (create resource), PUT (replace resource), PATCH (partial update), DELETE (remove resource).' },
-          { name: '9. JSON Data Structure', detail: 'Lightweight, human-readable data format using key-value pairs (objects) and ordered lists (arrays) to represent network configurations.' },
-          { name: '10. Safe Automation Workflow', detail: '6-stage deployment lifecycle: Inspect -> Validate -> Dry-Run -> Apply -> Verify -> Log.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Inspect Current State', action: 'Query device state using HTTP GET to retrieve running configuration and operational telemetry.' },
-          { stepNumber: 2, title: 'Validate Schema & Syntax', action: 'Verify JSON payload formatting, IP address syntax, and VLAN ID boundaries (1-4094) before touching devices.' },
-          { stepNumber: 3, title: 'Preview Dry-Run Diff', action: 'Compare live running state against intended declarative JSON and generate a diff of pending changes.' },
-          { stepNumber: 4, title: 'Apply Changes Atomically', action: 'Send authenticated PATCH/PUT request containing the validated payload to the device REST API endpoint.' },
-          { stepNumber: 5, title: 'Verify Operational State', action: 'Query post-change telemetry to confirm interface is UP/UP, routes are present, and zero packet loss occurs.' },
-          { stepNumber: 6, title: 'Log Audit Trail', action: 'Record execution timestamp, user identity, change payload, and device response in central logs.' },
-        ],
-      },
-      step8_visualExplanation: {
+      components: [
+        { name: '1. Why Automation Exists', detail: 'Eliminates repetitive human manual CLI errors, accelerates deployment speed, and provides consistent configuration across fleet devices.' },
+        { name: '2. Manual vs Automated Workflows', detail: 'Manual CLI relies on ad-hoc interactive sessions; automation uses version-controlled, repeatable scripts interacting with device APIs.' },
+        { name: '3. Configuration Drift', detail: 'The divergence between the documented source-of-truth configuration and the actual running state on physical network hardware.' },
+        { name: '4. Idempotency', detail: 'The property where executing an operation repeatedly with identical parameters produces the exact same end state without side effects.' },
+        { name: '5. Declarative vs Imperative', detail: 'Declarative defines WHAT the target end-state should be; imperative specifies HOW to execute step-by-step CLI commands.' },
+        { name: '6. Network APIs', detail: 'Programmatic interfaces exposed by network operating systems to allow structured machine-to-machine communication over standard transport.' },
+        { name: '7. REST Basics', detail: 'Representational State Transfer: stateless, resource-oriented architecture using standard HTTP requests and URI endpoints.' },
+        { name: '8. HTTP Methods (GET/POST/PUT/PATCH/DELETE)', detail: 'GET (read state), POST (create resource), PUT (replace resource), PATCH (partial update), DELETE (remove resource).' },
+        { name: '9. JSON Data Structure', detail: 'Lightweight, human-readable data format using key-value pairs (objects) and ordered lists (arrays) to represent network configurations.' },
+        { name: '10. Safe Automation Workflow', detail: '6-stage deployment lifecycle: Inspect -> Validate -> Dry-Run -> Apply -> Verify -> Log.' },
+      ],
+      howItWorks: [
+        { stepNumber: 1, title: 'Inspect Current State', action: 'Query device state using HTTP GET to retrieve running configuration and operational telemetry.' },
+        { stepNumber: 2, title: 'Validate Schema & Syntax', action: 'Verify JSON payload formatting, IP address syntax, and VLAN ID boundaries (1-4094) before touching devices.' },
+        { stepNumber: 3, title: 'Preview Dry-Run Diff', action: 'Compare live running state against intended declarative JSON and generate a diff of pending changes.' },
+        { stepNumber: 4, title: 'Apply Changes Atomically', action: 'Send authenticated PATCH/PUT request containing the validated payload to the device REST API endpoint.' },
+        { stepNumber: 5, title: 'Verify Operational State', action: 'Query post-change telemetry to confirm interface is UP/UP, routes are present, and zero packet loss occurs.' },
+        { stepNumber: 6, title: 'Log Audit Trail', action: 'Record execution timestamp, user identity, change payload, and device response in central logs.' },
+      ],
+      visualizer: {
         type: 'NETWORK_AUTOMATION_PIPELINE',
         title: 'Interactive Network Automation Pipeline & REST API Workbench',
         description: 'Explore the 6-stage safe automation lifecycle (Inspect -> Validate -> Dry-Run -> Apply -> Verify -> Log), execute HTTP methods against device endpoints, parse JSON models, and test drift remediation.',
       },
-      step9_workedExample: {
+      workedExample: {
         title: 'Parsing Device JSON Telemetry and Constructing an Idempotent Interface Update',
         problemStatement:
           'A script queries a switch via `GET /api/v1/interfaces/GigabitEthernet0/1` and receives:\n`{"interface": "GigabitEthernet0/1", "vlan": 10, "admin_status": "DOWN"}`.\nWrite the logic to update the interface to VLAN 20 and UP if drift is detected.',
@@ -696,16 +689,12 @@ export const LESSONS_NET300_400: BenchmarkLessonFullDefinition[] = [
         finalResult:
           'Interface updated idempotently to VLAN 20 UP with HTTP 200 verification and audit log entry.',
       },
-      step18_masterySummary: {
-        summaryPoints: [
-          'Network automation shifts operations from imperative manual CLI sessions to declarative, version-controlled JSON data models.',
-          'Idempotency guarantees that executing an automation script repeatedly produces identical target states without service disruption.',
-          'REST APIs use standard HTTP methods (GET, POST, PUT, PATCH, DELETE) and JSON data to manage network device resources.',
-          'Safe automation requires a 6-stage pipeline: Inspect -> Validate -> Dry-Run -> Apply -> Verify -> Log.',
-        ],
-        nextLessonBridge:
-          'With programmability foundations mastered, proceed to NET-404 for Wireshark Packet Capture Analysis and deep forensic packet inspection.',
-      },
+      recap: [
+        'Network automation shifts operations from imperative manual CLI sessions to declarative, version-controlled JSON data models.',
+        'Idempotency guarantees that executing an automation script repeatedly produces identical target states without service disruption.',
+        'REST APIs use standard HTTP methods (GET, POST, PUT, PATCH, DELETE) and JSON data to manage network device resources.',
+        'Safe automation requires a 6-stage pipeline: Inspect -> Validate -> Dry-Run -> Apply -> Verify -> Log.',
+      ],
     },
     questions: [
       {

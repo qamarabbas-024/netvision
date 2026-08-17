@@ -716,65 +716,55 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'IPV6_COMPRESSOR_ENGINE',
     introduction:
       'Master the next-generation internetworking protocol: 128-bit IPv6 address architecture, hexadecimal hextet formatting, RFC 5952 canonical zero-compression rules, Global Unicast (GUA 2000::/3) vs Link-Local (LLA fe80::/10) vs Unique Local (ULA fc00::/7), Stateless Address Autoconfiguration (SLAAC RS/RA workflow), Neighbor Discovery Protocol (NDP), and Dual-Stack coexistence.',
-    stepMetadata: {
-      step1_objective:
+    contentV2: {
+      objective:
         'Master 128-bit IPv6 addressing and hexadecimal hextet notation, apply RFC 5952 zero compression rules, classify IPv6 address scopes (Global Unicast, Link-Local, Multicast, Anycast, Unique Local), understand Neighbor Discovery Protocol (RS/RA/NS/NA), trace SLAAC autoconfiguration and Duplicate Address Detection (DAD), and evaluate Dual-Stack coexistence.',
-      step2_prerequisites: ['net-202-ipv4-addressing-cidr', 'net-101-bits-bytes-binary-hex'],
-      step3_whyItMatters:
-        'The global 32-bit IPv4 address pool (~4.3 billion addresses) is exhausted. Modern 5G mobile networks, cloud providers, hyperscale data centers, and internet service providers deploy native IPv6 ($2^{128} = 3.4 \\times 10^{38}$ addresses) to provide every device on Earth with a globally unique routable address without NAT workarounds.',
-      step4_coreConcept:
+      prerequisites: ['net-202-ipv4-addressing-cidr', 'net-101-bits-bytes-binary-hex'],
+      whyItMatters:
+        'The global 32-bit IPv4 address pool (~4.3 billion addresses) is exhausted. Modern 5G mobile networks, cloud providers, hyperscale data centers, and internet service providers deploy native IPv6 (3.4 × 10³⁸ addresses) to provide every device on Earth with a globally unique routable address without NAT workarounds.',
+      explanation:
         'IPv6 expands address space to 128 bits, written as 8 hexadecimal hextets separated by colons (`2001:0db8:0000:0000:0000:0000:0000:0001`). RFC 5952 defines two compression rules: (1) omit leading zeros in every hextet (`:0db8:` -> `:db8:`), (2) replace the longest contiguous run of all-zero hextets with a single double-colon `::` (allowed only ONCE). An IPv6 unicast address consists of a 64-bit Network Prefix and a 64-bit Interface Identifier. Key address types: Global Unicast (GUA `2000::/3`, globally routable), Link-Local (LLA `fe80::/10`, auto-generated on every interface for local link communication), Multicast (`ff00::/8`, replaces broadcast with targeted groups like `ff02::1` All-Nodes and `ff02::2` All-Routers), Anycast (one-to-nearest routing), and Unique Local (ULA `fc00::/7`, private enterprise routing). Neighbor Discovery Protocol (NDP) replaces ARP and DHCP for basic configuration using ICMPv6: hosts multicast Router Solicitations (RS, Type 133) and routers respond with Router Advertisements (RA, Type 134). Under Stateless Address Autoconfiguration (SLAAC, RFC 4862), the host autonomously combines the advertised /64 prefix with its 64-bit Interface ID and verifies uniqueness via Duplicate Address Detection (DAD) using Neighbor Solicitations (NS, Type 135). Dual-stack operation enables hosts and routers to run IPv4 and IPv6 concurrently during global adoption.',
-      step5_technicalAnatomy: {
-        title: '128-Bit IPv6 Addressing, Scopes & Autoconfiguration Architecture',
-        description: 'Hextet structure, RFC 5952 compression rules, address scopes, and NDP mechanics.',
-        components: [
-          { name: '128-Bit Structure (8 Hextets)', detail: '8 groups of 16 bits each ($8 \\times 16 = 128$ bits), written as 4 hexadecimal digits per hextet separated by colons.' },
-          { name: 'RFC 5952 Compression Rules', detail: 'Rule 1: Drop leading zeros (`0042` -> `42`). Rule 2: Single `::` replaces the longest contiguous run of multiple all-zero hextets.' },
-          { name: 'Prefix vs Interface ID (/64)', detail: 'First 64 bits identify the subnet/routing path; remaining 64 bits identify the host NIC (Interface ID).' },
-          { name: 'Global Unicast Address (GUA)', detail: 'Prefix: `2000::/3` (2000:: to 3fff::). Publicly routable across the global Internet.' },
-          { name: 'Link-Local Address (LLA)', detail: 'Prefix: `fe80::/10` (fe80:: to febf::). Required on every IPv6 interface; used for local subnet routing and NDP; never routed.' },
-          { name: 'Multicast & Anycast', detail: 'Multicast (`ff00::/8`) replaces broadcast (`ff02::1` All-Nodes, `ff02::2` All-Routers). Anycast delivers to the nearest recipient sharing the same address.' },
-          { name: 'Unique Local Address (ULA)', detail: 'Prefix: `fc00::/7` (typically `fd00::/8`). Private enterprise internal address space analogous to RFC 1918 IPv4.' },
-          { name: 'SLAAC (Stateless Autoconfiguration)', detail: 'Host derives its GUA autonomously by combining the /64 prefix from an ICMPv6 Router Advertisement (RA) with its Interface ID.' },
-          { name: 'Duplicate Address Detection (DAD)', detail: 'Host sends ICMPv6 Neighbor Solicitation (NS) for its own tentative address to verify uniqueness before binding.' },
-          { name: 'DHCPv6 vs SLAAC', detail: 'SLAAC provides stateless prefix allocation; DHCPv6 can operate in stateless mode (options only like DNS) or stateful mode (managed address leases).' },
-          { name: 'Dual-Stack Coexistence', detail: 'Hosts and routers maintain concurrent IPv4 and IPv6 protocol stacks on the same physical interfaces.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Link-Local Address Self-Generation', action: 'On interface activation, the host automatically assigns a Link-Local address (`fe80::...`) to enable local link communication.' },
-          { stepNumber: 2, title: 'Router Solicitation (RS - ICMPv6 Type 133)', action: 'Host multicasts an ICMPv6 Router Solicitation to `ff02::2` (All-Routers multicast) requesting local network prefix configuration.' },
-          { stepNumber: 3, title: 'Router Advertisement (RA - ICMPv6 Type 134)', action: 'Local router responds with an ICMPv6 Router Advertisement to `ff02::1` (All-Nodes multicast) containing the /64 subnet prefix and default gateway address.' },
-          { stepNumber: 4, title: 'SLAAC Address Formation & DAD Validation', action: 'Host combines the /64 prefix with its 64-bit Interface ID to form its Global Unicast Address, then verifies uniqueness via Duplicate Address Detection (DAD).' },
-        ],
-      },
-      step8_visualExplanation: {
+      components: [
+        { name: '128-Bit Structure (8 Hextets)', detail: '8 groups of 16 bits each (8 × 16 = 128 bits), written as 4 hexadecimal digits per hextet separated by colons.' },
+        { name: 'RFC 5952 Compression Rules', detail: 'Rule 1: Drop leading zeros (0042 -> 42). Rule 2: Single :: replaces the longest contiguous run of multiple all-zero hextets.' },
+        { name: 'Prefix vs Interface ID (/64)', detail: 'First 64 bits identify the subnet/routing path; remaining 64 bits identify the host NIC (Interface ID).' },
+        { name: 'Global Unicast Address (GUA)', detail: 'Prefix: 2000::/3 (2000:: to 3fff::). Publicly routable across the global Internet.' },
+        { name: 'Link-Local Address (LLA)', detail: 'Prefix: fe80::/10 (fe80:: to febf::). Required on every IPv6 interface; used for local subnet routing and NDP; never routed.' },
+        { name: 'Multicast & Anycast', detail: 'Multicast (ff00::/8) replaces broadcast (ff02::1 All-Nodes, ff02::2 All-Routers). Anycast delivers to the nearest recipient sharing the same address.' },
+        { name: 'Unique Local Address (ULA)', detail: 'Prefix: fc00::/7 (typically fd00::/8). Private enterprise internal address space analogous to RFC 1918 IPv4.' },
+        { name: 'SLAAC (Stateless Autoconfiguration)', detail: 'Host derives its GUA autonomously by combining the /64 prefix from an ICMPv6 Router Advertisement (RA) with its Interface ID.' },
+        { name: 'Duplicate Address Detection (DAD)', detail: 'Host sends ICMPv6 Neighbor Solicitation (NS) for its own tentative address to verify uniqueness before binding.' },
+        { name: 'DHCPv6 vs SLAAC', detail: 'SLAAC provides stateless prefix allocation; DHCPv6 can operate in stateless mode (options only like DNS) or stateful mode (managed address leases).' },
+        { name: 'Dual-Stack Coexistence', detail: 'Hosts and routers maintain concurrent IPv4 and IPv6 protocol stacks on the same physical interfaces.' },
+      ],
+      howItWorks: [
+        { stepNumber: 1, title: 'Link-Local Address Self-Generation', action: 'On interface activation, the host automatically assigns a Link-Local address (fe80::...) to enable local link communication.' },
+        { stepNumber: 2, title: 'Router Solicitation (RS - ICMPv6 Type 133)', action: 'Host multicasts an ICMPv6 Router Solicitation to ff02::2 (All-Routers multicast) requesting local network prefix configuration.' },
+        { stepNumber: 3, title: 'Router Advertisement (RA - ICMPv6 Type 134)', action: 'Local router responds with an ICMPv6 Router Advertisement to ff02::1 (All-Nodes multicast) containing the /64 subnet prefix and default gateway address.' },
+        { stepNumber: 4, title: 'SLAAC Address Formation & DAD Validation', action: 'Host combines the /64 prefix with its 64-bit Interface ID to form its Global Unicast Address, then verifies uniqueness via Duplicate Address Detection (DAD).' },
+      ],
+      visualizer: {
         type: 'IPV6_COMPRESSOR_ENGINE',
         title: 'Interactive RFC 5952 IPv6 Zero Compressor & SLAAC Animator',
         description: 'Input uncompressed IPv6 addresses to see canonical RFC 5952 zero compression applied live, explore address scopes, and trace the SLAAC RS/RA autoconfiguration exchange.',
       },
-      step9_workedExample: {
+      workedExample: {
         title: 'Compressing `2001:0db8:0000:0000:0000:0000:0000:0001` per RFC 5952',
         problemStatement: 'Compress IPv6 address `2001:0db8:0000:0000:0000:0000:0000:0001` to canonical RFC 5952 form.',
         stepByStepSolution: [
-          'Step 1 (Omit Leading Zeros): Hextet 2 (`0db8` -> `db8`). Hextet 8 (`0001` -> `1`). Address becomes `2001:db8:0:0:0:0:0:1`.',
-          'Step 2 (Double-Colon Replacement): Hextets 3 through 7 are all zeros (5 contiguous zero hextets). Replace with `::`.',
-          'Result: `2001:db8::1`.',
+          'Step 1 (Omit Leading Zeros): Hextet 2 (0db8 -> db8). Hextet 8 (0001 -> 1). Address becomes 2001:db8:0:0:0:0:0:1.',
+          'Step 2 (Double-Colon Replacement): Hextets 3 through 7 are all zeros (5 contiguous zero hextets). Replace with ::.',
+          'Result: 2001:db8::1.',
         ],
         finalResult: '`2001:db8::1` is the official canonical compressed format.',
       },
-      step18_masterySummary: {
-        summaryPoints: [
-          'IPv6 provides 128-bit addresses ($3.4 \\times 10^{38}$) to overcome IPv4 exhaustion.',
-          'RFC 5952 defines canonical compression: drop leading zeros and use a single `::` for the longest contiguous zero run.',
-          'Address scopes separate Global Unicast (GUA `2000::/3`), Link-Local (LLA `fe80::/10`), Multicast (`ff00::/8`), and Unique Local (ULA `fc00::/7`).',
-          'SLAAC enables autonomous host configuration via ICMPv6 Router Solicitations and Router Advertisements with DAD validation.',
-          'Dual-Stack allows seamless concurrent IPv4 and IPv6 operation during global adoption.',
-        ],
-        nextLessonBridge:
-          'With Layer 2 and Layer 3 foundations mastered, proceed to NET-204 to master Layer 4 Transport Protocols (TCP & UDP).',
-      },
+      recap: [
+        'IPv6 provides 128-bit addresses (3.4 × 10³⁸) to overcome IPv4 exhaustion.',
+        'RFC 5952 defines canonical compression: drop leading zeros and use a single :: for the longest contiguous zero run.',
+        'Address scopes separate Global Unicast (GUA 2000::/3), Link-Local (LLA fe80::/10), Multicast (ff00::/8), and Unique Local (ULA fc00::/7).',
+        'SLAAC enables autonomous host configuration via ICMPv6 Router Solicitations and Router Advertisements with DAD validation.',
+        'Dual-Stack allows seamless concurrent IPv4 and IPv6 operation during global adoption.',
+      ],
     },
     questions: [
       {

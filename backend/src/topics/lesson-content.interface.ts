@@ -20,7 +20,7 @@ export interface CliToolingItem {
   command: string;
   description: string;
   expectedOutput: string;
-  proofExplanation: string;
+  proofExplanation?: string;
 }
 
 export interface TroubleshootingItem {
@@ -33,14 +33,79 @@ export interface TroubleshootingItem {
 export interface CommonMistakeItem {
   misconception: string;
   correction: string;
+  whyWrong?: string;
 }
 
+export interface WorkedExampleItem {
+  title: string;
+  problemStatement: string;
+  stepByStepSolution: string[];
+  finalResult: string;
+}
+
+export interface RealWorldScenarioItem {
+  topology: string;
+  scenarioText: string;
+  engineeringContext: string;
+}
+
+export interface SecurityPerspectiveItem {
+  threatOrVulnerability: string;
+  mitigationStrategy: string;
+}
+
+export interface PracticeExerciseItem {
+  id?: number | string;
+  prompt: string;
+  expected: string;
+  hints?: string;
+}
+
+/**
+ * CURRICULUM CONTENT ARCHITECTURE V2: TOPIC-DRIVEN CONTENT MODEL
+ *
+ * Every lesson contains only the components educationally appropriate for that topic.
+ * No generic filler, fake CLI commands, or forced empty blocks.
+ */
+export interface LessonContentV2 {
+  // Core Metadata & Fundamentals (Required)
+  objective: string;
+  prerequisites?: string[];
+  whyItMatters?: string;
+  explanation: string;
+  recap: string[] | { summaryPoints: string[]; nextLessonBridge?: string };
+
+  // Optional Components (Present ONLY when pedagogically appropriate)
+  components?: TechnicalComponent[];
+  howItWorks?: HowItWorksStep[];
+  packetHeaderView?: {
+    protocol: string;
+    fields: HeaderFieldView[];
+    headerDiagramAscii?: string;
+  };
+  visualizer?: {
+    type: string;
+    title: string;
+    description: string;
+  };
+  workedExample?: WorkedExampleItem;
+  cliTooling?: CliToolingItem[];
+  troubleshooting?: TroubleshootingItem[];
+  commonMistakes?: CommonMistakeItem[];
+  security?: SecurityPerspectiveItem;
+  realWorldScenario?: RealWorldScenarioItem;
+  practice?: PracticeExerciseItem[];
+}
+
+/**
+ * Legacy 18-step metadata interface preserved for backwards compatibility.
+ */
 export interface LessonStepMetadata {
-  step1_objective: string;
-  step2_prerequisites: string[];
-  step3_whyItMatters: string;
-  step4_coreConcept: string;
-  step5_technicalAnatomy: {
+  step1_objective?: string;
+  step2_prerequisites?: string[];
+  step3_whyItMatters?: string;
+  step4_coreConcept?: string;
+  step5_technicalAnatomy?: {
     title: string;
     description: string;
     components: TechnicalComponent[];
@@ -92,7 +157,7 @@ export interface LessonStepMetadata {
     tasks: string[];
     verificationMethod: string;
   };
-  step18_masterySummary: {
+  step18_masterySummary?: {
     summaryPoints: string[];
     nextLessonBridge: string;
   };

@@ -195,15 +195,27 @@ export class TopicsService {
 
     const contentObj = (lesson.contentJson as Record<string, any>) || {};
 
-    // Fallback extraction for backwards compatibility with legacy contentJson
+    // V2 / V1 Unified Normalization Layer
+    const objectiveText =
+      contentObj.objective ||
+      contentObj.step1_objective ||
+      (lesson.objectives.length > 0 ? lesson.objectives[0].text : null);
+
     const objectives =
       lesson.objectives.length > 0
         ? lesson.objectives.map((o) => ({ id: o.id, text: o.text, order: o.order }))
+        : objectiveText
+        ? [{ id: 'obj-1', text: objectiveText, order: 0 }]
         : (contentObj.keyConcepts || []).map((text: string, idx: number) => ({
             id: `obj-fallback-${idx}`,
             text,
             order: idx,
           }));
+
+    const rawComponents =
+      contentObj.components ||
+      contentObj.step5_technicalAnatomy?.components ||
+      [];
 
     const concepts =
       lesson.concepts.length > 0
@@ -215,15 +227,29 @@ export class TopicsService {
             technicalDetails: c.technicalDetails,
             order: c.order,
           }))
-        : (contentObj.keyConcepts || []).map((kc: string, idx: number) => ({
-            id: `concept-fallback-${idx}`,
-            title: `Core Principle ${idx + 1}`,
-            summary: kc,
-            explanation: kc,
+        : rawComponents.length > 0
+        ? rawComponents.map((c: any, idx: number) => ({
+            id: `comp-${idx}`,
+            title: c.name,
+            summary: c.detail,
+            explanation: c.detail,
             technicalDetails: null,
             order: idx,
-          }));
+          }))
+        : contentObj.explanation || contentObj.step4_coreConcept || contentObj.theory
+        ? [
+            {
+              id: 'concept-core',
+              title: lesson.title,
+              summary: contentObj.shortExplanation || 'Core technical concept.',
+              explanation: contentObj.explanation || contentObj.step4_coreConcept || contentObj.theory,
+              technicalDetails: null,
+              order: 0,
+            },
+          ]
+        : [];
 
+    const workedEx = contentObj.workedExample || contentObj.step9_workedExample;
     const examples =
       lesson.examples.length > 0
         ? lesson.examples.map((e) => ({
@@ -233,6 +259,18 @@ export class TopicsService {
             explanation: e.explanation,
             order: e.order,
           }))
+        : workedEx
+        ? [
+            {
+              id: 'worked-ex-1',
+              title: workedEx.title || 'Worked Example',
+              scenario: workedEx.problemStatement,
+              explanation: Array.isArray(workedEx.stepByStepSolution)
+                ? workedEx.stepByStepSolution.join('\n') + (workedEx.finalResult ? `\nResult: ${workedEx.finalResult}` : '')
+                : workedEx.finalResult || '',
+              order: 0,
+            },
+          ]
         : (contentObj.examples || []).map((ex: string, idx: number) => ({
             id: `ex-fallback-${idx}`,
             title: `Scenario Example ${idx + 1}`,
@@ -241,6 +279,7 @@ export class TopicsService {
             order: idx,
           }));
 
+    const rawCli = contentObj.cliTooling || contentObj.step12_cliTooling || [];
     const commands =
       lesson.commands.length > 0
         ? lesson.commands.map((cmd) => ({
@@ -251,16 +290,16 @@ export class TopicsService {
             category: cmd.category,
             order: cmd.order,
           }))
-        : [
-            {
-              id: 'cmd-fallback-1',
-              command: `ping 192.168.1.1`,
-              description: 'Verify connectivity to default gateway',
-              exampleOutput: 'PING 192.168.1.1: 64 bytes from 192.168.1.1: icmp_seq=0 ttl=64 time=1.2ms',
-              category: 'Diagnostics',
-              order: 0,
-            },
-          ];
+        : rawCli.length > 0
+        ? rawCli.map((cmd: any, idx: number) => ({
+            id: `cli-${idx}`,
+            command: cmd.command,
+            description: cmd.description,
+            exampleOutput: cmd.expectedOutput,
+            category: 'CLI Diagnostics',
+            order: idx,
+          }))
+        : [];
 
     const labs =
       lesson.labs.length > 0
@@ -287,6 +326,7 @@ export class TopicsService {
           ]
         : [];
 
+    const rawMistakes = contentObj.commonMistakes || contentObj.step14_commonMistakes || [];
     const mistakes =
       lesson.mistakes.length > 0
         ? lesson.mistakes.map((m) => ({
@@ -296,22 +336,34 @@ export class TopicsService {
             correctApproach: m.correctApproach,
             order: m.order,
           }))
-        : [
-            {
-              id: 'mistake-fallback-1',
-              mistake: 'Confusing Layer 2 MAC address with Layer 3 IP address',
-              whyWrong: 'MAC addresses are physical unroutable hardware addresses; IP addresses are logical routed addresses.',
-              correctApproach: 'Use MAC for local Ethernet framing and IP for logical internet routing.',
-              order: 0,
-            },
-          ];
+        : rawMistakes.length > 0
+        ? rawMistakes.map((m: any, idx: number) => ({
+            id: `mistake-${idx}`,
+            mistake: m.misconception || m.mistake,
+            whyWrong: m.whyWrong || 'Common misconception in networking.',
+            correctApproach: m.correction || m.correctApproach,
+            order: idx,
+          }))
+        : [];
+
+    const rawRecap =
+      contentObj.recap?.summaryPoints ||
+      (Array.isArray(contentObj.recap) ? contentObj.recap : null) ||
+      contentObj.step18_masterySummary?.summaryPoints ||
+      [];
 
     const recaps =
       lesson.recaps.length > 0
         ? lesson.recaps.map((r) => ({ id: r.id, point: r.point, order: r.order }))
+        : rawRecap.length > 0
+        ? rawRecap.map((pt: string, idx: number) => ({
+            id: `recap-${idx}`,
+            point: pt,
+            order: idx,
+          }))
         : [
             {
-              id: 'recap-fallback-1',
+              id: 'recap-core',
               point: lesson.title + ' is a core pillar of networking architecture.',
               order: 0,
             },
@@ -327,12 +379,12 @@ export class TopicsService {
       content: lesson.contentJson,
 
       // Rich Curriculum Architecture Fields
-      introduction: lesson.introduction || contentObj.shortExplanation || contentObj.theory || null,
-      simpleExplanation: lesson.simpleExplanation || contentObj.shortExplanation || contentObj.theory || null,
+      introduction: lesson.introduction || contentObj.shortExplanation || contentObj.explanation || contentObj.theory || null,
+      simpleExplanation: lesson.simpleExplanation || contentObj.shortExplanation || contentObj.explanation || contentObj.theory || null,
       analogy: lesson.analogy || contentObj.analogy || null,
-      technicalExplanation: lesson.technicalExplanation || contentObj.theory || null,
+      technicalExplanation: lesson.technicalExplanation || contentObj.explanation || contentObj.step4_coreConcept || contentObj.theory || null,
       cheatsheet: lesson.cheatsheetJson || null,
-      visualizationType: lesson.visualizationType || lesson.slug,
+      visualizationType: lesson.visualizationType || contentObj.visualizer?.type || contentObj.step8_visualExplanation?.type || lesson.slug,
       masteryScoreRequired: lesson.masteryScoreRequired || 80,
 
       objectives,
@@ -342,6 +394,13 @@ export class TopicsService {
       labs,
       mistakes,
       recaps,
+
+      // Direct V2 Normalized Components for frontend
+      components: rawComponents,
+      howItWorks: contentObj.howItWorks || contentObj.step6_howItWorks?.steps || null,
+      troubleshooting: contentObj.troubleshooting || contentObj.step13_troubleshooting || null,
+      security: contentObj.security || contentObj.step15_securityPerspective || null,
+      practice: contentObj.practice || null,
 
       isCompleted,
       score,
