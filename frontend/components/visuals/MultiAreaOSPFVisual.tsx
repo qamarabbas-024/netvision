@@ -68,43 +68,43 @@ export const MultiAreaOSPFVisual: React.FC = () => {
     {
       id: 'ASBR',
       name: 'ASBR-1 (Autonomous System Boundary)',
-      role: 'ASBR (External Gateway)',
+      role: 'ASBR (Redistributes External Routes into OSPF)',
       area: 'Area 0',
-      interfaces: ['10.0.0.3/24 (Area 0)', '192.168.100.1/30 (BGP WAN Peer)'],
+      interfaces: ['10.0.0.3/24 (Area 0)', '192.168.100.1/30 (External BGP WAN)'],
       routes: ['10.0.0.0/24 [O]', '10.1.0.0/16 [O IA]', '10.2.0.0/16 [O IA]', '172.16.0.0/12 [BGP / Connected]'],
-      lsasOriginated: ['Type 1 (Area 0)', 'Type 5 External LSA (172.16.0.0/12 domain-wide)'],
+      lsasOriginated: ['Type 1 (Area 0)', 'Type 5 External LSA (172.16.0.0/12 across standard areas)'],
     },
   ];
 
   const activeRouter = routers.find((r) => r.id === selectedRouterId) || routers[1];
 
-  // LSA Definitions
+  // LSA Definitions with Strict Technical Precision
   const lsaDefinitions = [
     {
       type: 1,
       name: 'Type 1: Router LSA',
-      floodingScope: 'Area-Local (does NOT cross ABR)',
-      originator: 'Every OSPF router for each area it belongs to',
+      floodingScope: 'Area-Local (strictly confined within originating area)',
+      originator: 'Every OSPF router for each area it has interfaces in',
       purpose: 'Describes the router’s direct links, interface IPs, and neighbor link costs.',
-      example: 'R1 advertises link 10.1.1.0/24 and 10.1.12.0/30 within Area 1 only.',
+      example: 'R1 advertises links 10.1.1.0/24 and 10.1.12.0/30 within Area 1 only.',
       routingCode: 'O (Intra-Area)',
     },
     {
       type: 2,
       name: 'Type 2: Network LSA',
-      floodingScope: 'Area-Local (does NOT cross ABR)',
+      floodingScope: 'Area-Local (strictly confined within originating area)',
       originator: 'Designated Router (DR) on multi-access broadcast transit links',
-      purpose: 'Lists all routers attached to a multi-access broadcast subnet (Ethernet).',
+      purpose: 'Lists all attached adjacent routers on a multi-access broadcast subnet (Ethernet).',
       example: 'DR on 10.0.0.0/24 announces attached routers (ABR1, ABR2, ASBR).',
       routingCode: 'O (Intra-Area transit)',
     },
     {
       type: 3,
       name: 'Type 3: Summary LSA',
-      floodingScope: 'Inter-Area (Originated by ABR into other areas)',
+      floodingScope: 'Inter-Area (Originated by ABR into connected areas)',
       originator: 'Area Border Router (ABR)',
-      purpose: 'Advertises internal subnets from one area into other areas as distance-vector summaries.',
-      example: 'ABR1 generates Type 3 LSA for 10.1.0.0/16 into Area 0; ABR2 regenerates it into Area 2.',
+      purpose: 'Advertises internal subnets and path costs computed from the ABR’s local SPF calculation into neighboring areas.',
+      example: 'ABR1 originates Type 3 LSA for 10.1.0.0/16 into Area 0; ABR2 receives it and originates a corresponding Type 3 LSA into Area 2.',
       routingCode: 'O IA (Inter-Area)',
     },
     {
@@ -112,17 +112,17 @@ export const MultiAreaOSPFVisual: React.FC = () => {
       name: 'Type 4: ASBR Summary LSA',
       floodingScope: 'Inter-Area (Originated by ABR into non-ASBR areas)',
       originator: 'Area Border Router (ABR)',
-      purpose: 'Advertises the host route and metric cost to reach the ASBR Router ID.',
-      example: 'ABR1 advertises cost to reach ASBR (RID 10.0.0.3) into Area 1 so R1 knows how to exit the AS.',
-      routingCode: 'Infrastructure routing to ASBR',
+      purpose: 'Advertises the intra-area host metric cost to reach the ASBR Router ID (routers inside the ASBR’s area already have the ASBR’s Type 1 LSA and do not need Type 4).',
+      example: 'ABR1 advertises the metric cost to reach ASBR (RID 10.0.0.3) into Area 1 so R1 can compute the total path to exit the AS.',
+      routingCode: 'Infrastructure route to ASBR',
     },
     {
       type: 5,
       name: 'Type 5: AS External LSA',
-      floodingScope: 'Domain-Wide (Flooded across ALL non-stub areas)',
+      floodingScope: 'Domain-Wide across standard areas (blocked in Stub/NSSA areas)',
       originator: 'Autonomous System Boundary Router (ASBR)',
-      purpose: 'Advertises routes redistributed from external sources (BGP, Static, RIP, Connected).',
-      example: 'ASBR redistributes 172.16.0.0/12 into Area 0; flooded unchanged to Area 1 and Area 2.',
+      purpose: 'Advertises external network prefixes redistributed from foreign domains or other routing sources (BGP, Static, RIP, Connected) into OSPF.',
+      example: 'ASBR redistributes 172.16.0.0/12 into Area 0; flooded across all normal areas (Area 1 and Area 2).',
       routingCode: 'O E1 (Cumulative cost) or O E2 (Fixed seed cost)',
     },
   ];

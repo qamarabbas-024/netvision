@@ -475,35 +475,35 @@ export const LESSONS_NET300_400: BenchmarkLessonFullDefinition[] = [
       step3_whyItMatters:
         'In a single-area OSPF network with hundreds of routers, a single link flap triggers SPF recalculation on every router across the autonomous system and floods thousands of LSAs. Segmenting the topology into areas limits the Link-State Database (LSDB) size and restricts SPF tree calculations strictly to the local area, ensuring high stability and rapid convergence.',
       step4_coreConcept:
-        'Multi-Area OSPF structures an Autonomous System (AS) into a two-level hierarchy centered around a contiguous Area 0 (Backbone Area). All regular non-backbone areas (e.g. Area 1, Area 2) must connect directly to Area 0. Routers whose interfaces reside entirely within one area are Internal Routers. Routers with interfaces in Area 0 and at least one regular area are Area Border Routers (ABRs). ABRs maintain a separate Link-State Database (LSDB) for each connected area and run Dijkstra SPF independently per area. Intra-area topology details (Type 1 Router LSAs and Type 2 Network LSAs) are stopped at the ABR boundary. The ABR generates Type 3 Summary LSAs to advertise reachable subnets into neighboring areas, appearing in routing tables as Inter-Area routes (`O IA`). Autonomous System Boundary Routers (ASBRs) connect the OSPF domain to external routing domains (BGP, Static, RIP, Connected) and flood Type 5 External LSAs (`O E1` or `O E2`) domain-wide. ABRs originate Type 4 ASBR Summary LSAs to inform other areas of the metric cost to reach the ASBR Router ID. Route summarization at the ABR (`area <id> range <prefix> <mask>`) collapses multiple specific subnets into a single Type 3 Summary LSA, dramatically reducing routing table memory and dampening downstream SPF recalculations.',
+        'Multi-Area OSPF structures an Autonomous System (AS) into a two-level hierarchy centered around a contiguous Area 0 (Backbone Area). In standard hierarchical design, all regular non-backbone areas (e.g. Area 1, Area 2) connect directly to Area 0 to maintain a loop-free hub-and-spoke inter-area topology. Routers with all interfaces inside a single area are Internal Routers. Routers with interfaces attached to Area 0 and at least one regular area are Area Border Routers (ABRs). An ABR maintains a separate Link-State Database (LSDB) and executes an independent Dijkstra SPF calculation for each connected area. Intra-area topology details (Type 1 Router LSAs and Type 2 Network LSAs) are strictly confined to their originating area. The ABR takes subnet reachability computed from its local LSDB and originates new Type 3 Summary LSAs into adjacent areas, appearing in routing tables as Inter-Area routes (`O IA`). Autonomous System Boundary Routers (ASBRs) redistribute routes from foreign routing domains or external sources (e.g. BGP, static routes, directly connected interfaces outside OSPF) into OSPF, originating Type 5 External LSAs (`O E1` or `O E2`) that flood across all standard non-stub areas. Because routers in other areas lack the ASBR’s Type 1 LSA, the ABR originates Type 4 ASBR Summary LSAs into those areas to advertise the intra-area metric cost to reach the ASBR Router ID. Route summarization at the ABR (`area <id> range <prefix> <mask>`) aggregates multiple specific subnets into a single Type 3 Summary LSA, reducing LSDB memory and shielding downstream areas from local link flaps.',
       step5_technicalAnatomy: {
         title: 'Multi-Area OSPF Hierarchy, Router Roles & LSA Classification',
         description: 'Two-tier hierarchical architecture, router classifications, and LSA flooding scopes.',
         components: [
-          { name: 'Area 0 (Backbone Transit Area)', detail: 'The core transit hub (0.0.0.0). All inter-area traffic must traverse Area 0 to prevent link-state routing loops.' },
-          { name: 'Area Border Router (ABR)', detail: 'Router with interfaces in Area 0 and one or more regular areas. Maintains independent LSDBs per area and generates Type 3 and Type 4 LSAs.' },
-          { name: 'Autonomous System Boundary Router (ASBR)', detail: 'Router that redistributes routes from external routing sources (BGP, Static, RIP) into OSPF via Type 5 External LSAs.' },
-          { name: 'Type 1: Router LSA', detail: 'Originated by every router within its area; describes attached links and metrics. Flooding scope is strictly Area-Local.' },
-          { name: 'Type 2: Network LSA', detail: 'Originated by the Designated Router (DR) on multi-access transit broadcast links. Flooding scope is strictly Area-Local.' },
-          { name: 'Type 3: Summary LSA', detail: 'Originated by ABRs to advertise internal networks from one area into other areas. Installed as `O IA` routes.' },
-          { name: 'Type 4: ASBR Summary LSA', detail: 'Originated by ABRs into non-ASBR areas to advertise the host route and metric cost to reach the ASBR Router ID.' },
-          { name: 'Type 5: AS External LSA', detail: 'Originated by ASBRs; flooded across all non-stub areas in the entire OSPF AS. Installed as `O E1` or `O E2` routes.' },
-          { name: 'Route Summarization', detail: 'Configured on ABRs (`area <id> range`) to aggregate subnets into one Type 3 LSA, or on ASBRs (`summary-address`) for Type 5 LSAs.' },
-          { name: 'External Metric Types (E1 vs E2)', detail: 'E2 (default) maintains constant seed metric (default 20); E1 dynamically adds internal link costs along the path.' },
+          { name: 'Area 0 (Backbone Transit Area)', detail: 'The central transit backbone (0.0.0.0). In standard design, all inter-area traffic passes through Area 0 to prevent inter-area routing loops.' },
+          { name: 'Area Border Router (ABR)', detail: 'Router with interfaces in Area 0 and one or more regular areas. Maintains independent LSDBs per area and originates Type 3 and Type 4 Summary LSAs.' },
+          { name: 'Autonomous System Boundary Router (ASBR)', detail: 'Router running OSPF that redistributes routes from external routing sources or foreign domains (BGP, Static, RIP) into OSPF via Type 5 LSAs.' },
+          { name: 'Type 1: Router LSA', detail: 'Originated by every router within its area; describes attached links, interface IPs, and neighbor link costs. Flooding scope is strictly Area-Local.' },
+          { name: 'Type 2: Network LSA', detail: 'Originated by the Designated Router (DR) on multi-access transit broadcast links. Lists attached routers. Flooding scope is strictly Area-Local.' },
+          { name: 'Type 3: Summary LSA', detail: 'Originated by ABRs to advertise reachable internal subnets into neighboring areas. Installed by recipient routers as Inter-Area (`O IA`) routes.' },
+          { name: 'Type 4: ASBR Summary LSA', detail: 'Originated by ABRs into non-ASBR areas to advertise the metric cost to reach the ASBR Router ID, enabling routers in other areas to reach the ASBR.' },
+          { name: 'Type 5: AS External LSA', detail: 'Originated by ASBRs to advertise external redistributed routes; flooded across all standard (normal) OSPF areas (blocked in stub and NSSA areas).' },
+          { name: 'Route Summarization', detail: 'Configured on ABRs (`area <id> range`) to aggregate internal subnets into one Type 3 LSA, or on ASBRs (`summary-address`) for external Type 5 LSAs.' },
+          { name: 'External Metric Types (E1 vs E2)', detail: 'E2 (default) maintains a constant external seed metric (default 20); E1 dynamically adds the internal OSPF path cost to the seed metric.' },
         ],
       },
       step6_howItWorks: {
         steps: [
-          { stepNumber: 1, title: 'Intra-Area Link-State Flooding', action: 'Routers in Area 1 flood Type 1 and Type 2 LSAs. Every router in Area 1 builds an identical Area 1 LSDB and runs Dijkstra SPF.' },
-          { stepNumber: 2, title: 'ABR Inter-Area LSA Translation', action: 'ABR-1 receives Area 1 Type 1/2 LSAs, extracts subnet reachability, and generates Type 3 Summary LSAs into Area 0 (Backbone).' },
-          { stepNumber: 3, title: 'Backbone Transit to Adjacent Areas', action: 'ABR-2 in Area 0 receives the Type 3 Summary LSAs, installs `O IA` routes into its routing table, and regenerates Type 3 LSAs into Area 2.' },
-          { stepNumber: 4, title: 'External Route Redistribution', action: 'ASBR-1 redistributes BGP/Static routes as Type 5 LSAs into Area 0. ABR-1 and ABR-2 generate Type 4 LSAs advertising the path to ASBR-1.' },
+          { stepNumber: 1, title: 'Intra-Area Link-State Flooding', action: 'Routers in Area 1 flood Type 1 and Type 2 LSAs. Every router in Area 1 builds an identical Area 1 LSDB and runs Dijkstra SPF to calculate intra-area shortest paths.' },
+          { stepNumber: 2, title: 'ABR Inter-Area LSA Origination', action: 'ABR-1 calculates shortest paths to Area 1 subnets, then originates new Type 3 Summary LSAs into Area 0 (Backbone) advertising prefix reachability and metric cost.' },
+          { stepNumber: 3, title: 'Backbone Transit & Re-Advertisement', action: 'ABR-2 in Area 0 receives the Type 3 Summary LSAs, installs `O IA` routes into its routing table, and originates corresponding Type 3 LSAs into Area 2.' },
+          { stepNumber: 4, title: 'ASBR External Redistribution & Type 4 LSAs', action: 'ASBR-1 redistributes external BGP/Static routes into Area 0 via Type 5 External LSAs. ABR-1 and ABR-2 originate Type 4 LSAs into their non-backbone areas to advertise the path to ASBR-1.' },
         ],
       },
       step8_visualExplanation: {
         type: 'MULTI_AREA_OSPF_ENGINE',
         title: 'Interactive Multi-Area OSPF Topology, LSA Inspector & Summarization Engine',
-        description: 'Explore multi-area topology spanning Area 0, Area 1, and Area 2, inspect LSA Types 1 through 5 flooding scopes, toggle ABR route summarization, and compare E1 vs E2 redistribution metrics.',
+        description: 'Explore multi-area topology spanning Area 0, Area 1, and Area 2, inspect LSA Types 1 through 5 flooding scopes and originators, toggle ABR route summarization, and compare E1 vs E2 redistribution metrics.',
       },
       step9_workedExample: {
         title: 'Calculating Inter-Area and External Path Costs across ABR and ASBR',
@@ -519,10 +519,10 @@ export const LESSONS_NET300_400: BenchmarkLessonFullDefinition[] = [
       },
       step18_masterySummary: {
         summaryPoints: [
-          'Multi-Area OSPF uses a two-tier hierarchy centered around a contiguous Area 0 Backbone to scale LSDB size and isolate SPF churn.',
-          'ABRs connect non-backbone areas to Area 0, translating Type 1/2 LSAs into Type 3 Summary LSAs (`O IA`).',
-          'ASBRs inject external routes via Type 5 LSAs (`O E1`/`O E2`), with ABRs providing Type 4 LSAs locating the ASBR.',
-          'Route summarization on ABRs (`area range`) aggregates subnets into a single Type 3 LSA, optimizing memory and convergence.',
+          'Multi-Area OSPF uses a two-tier hierarchy centered around a contiguous Area 0 Backbone to contain LSDB size and isolate local SPF calculations.',
+          'ABRs connect regular areas to Area 0, originating Type 3 Summary LSAs (`O IA`) to advertise inter-area network reachability.',
+          'ASBRs inject external routes into standard areas via Type 5 LSAs (`O E1`/`O E2`), while ABRs originate Type 4 LSAs enabling other areas to locate the ASBR.',
+          'Route summarization on ABRs (`area range`) aggregates subnets into a single Type 3 LSA, reducing memory and dampening flap churn.',
         ],
         nextLessonBridge:
           'With enterprise interior routing mastered, proceed to NET-403 to master Border Gateway Protocol (BGP) and Autonomous System peering.',

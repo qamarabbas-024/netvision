@@ -36,21 +36,31 @@ async function verifyMultiAreaOspf() {
   assert(compNames.some((n) => n.includes('Autonomous System Boundary Router') || n.includes('ASBR')), 'Anatomy includes ASBR');
   console.log('  ✓ Multi-Area topology (Area 0, Area 1, Area 2, ABR, ASBR) verified.');
 
-  // [TEST 3] Verify LSA Types 1-5 Mappings
-  console.log('\n[TEST 3] Verifying LSA Types 1 through 5 Classification...');
+  // [TEST 3] Verify LSA Types 1-5 Technical Precision
+  console.log('\n[TEST 3] Verifying LSA Types 1 through 5 Classification & Scopes...');
   assert(compNames.some((n) => n.includes('Type 1')), 'Anatomy includes Type 1 Router LSA');
   assert(compNames.some((n) => n.includes('Type 2')), 'Anatomy includes Type 2 Network LSA');
   assert(compNames.some((n) => n.includes('Type 3')), 'Anatomy includes Type 3 Summary LSA');
   assert(compNames.some((n) => n.includes('Type 4')), 'Anatomy includes Type 4 ASBR Summary LSA');
   assert(compNames.some((n) => n.includes('Type 5')), 'Anatomy includes Type 5 AS External LSA');
-  console.log('  ✓ LSA Types 1 through 5 flooding scopes and originators correctly mapped.');
 
-  // [TEST 4] Verify Route Summarization & Redistribution Concepts
-  console.log('\n[TEST 4] Verifying Route Summarization & ASBR Redistribution...');
+  const type3Def = components.find((c) => c.name.includes('Type 3'));
+  assert(type3Def!.detail.includes('ABR') && type3Def!.detail.includes('O IA'), 'Type 3 LSA accurately attributed to ABR origination and O IA routes');
+
+  const type4Def = components.find((c) => c.name.includes('Type 4'));
+  assert(type4Def!.detail.includes('ABR') && type4Def!.detail.includes('ASBR'), 'Type 4 LSA accurately attributed to ABR advertising ASBR reachability');
+
+  const type5Def = components.find((c) => c.name.includes('Type 5'));
+  assert(type5Def!.detail.includes('ASBR') && (type5Def!.detail.includes('standard') || type5Def!.detail.includes('stub')), 'Type 5 LSA accurately attributed to ASBR with stub/standard scope qualification');
+  console.log('  ✓ LSA Types 1 through 5 flooding scopes and originators correctly mapped with technical precision.');
+
+  // [TEST 4] Verify Route Summarization, Redistribution & Metric Calculations
+  console.log('\n[TEST 4] Verifying Route Summarization & ASBR Redistribution Metrics...');
   assert(compNames.some((n) => n.includes('Route Summarization')), 'Anatomy includes Route Summarization');
   assert(compNames.some((n) => n.includes('External Metric Types')), 'Anatomy includes External Metric Types (E1 vs E2)');
   assert(meta.step4_coreConcept.includes('area') && meta.step4_coreConcept.includes('range'), 'Core concept covers ABR area range summarization');
-  assert(meta.step4_coreConcept.includes('E1') || meta.step4_coreConcept.includes('E2'), 'Core concept covers E1/E2 metric types');
+  assert(meta.step4_coreConcept.includes('E1') && meta.step4_coreConcept.includes('E2'), 'Core concept covers both E1 and E2 metric types');
+  assert(meta.step4_coreConcept.includes('BGP') || meta.step4_coreConcept.includes('static'), 'Core concept accurately attributes ASBR to external routing domains (BGP/Static)');
   console.log('  ✓ ABR route summarization and ASBR external redistribution concepts verified.');
 
   // [TEST 5] Verify Assessment Questions across 4 Cognitive Levels
