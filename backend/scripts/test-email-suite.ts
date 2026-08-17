@@ -38,34 +38,53 @@ async function runEmailTestSuite() {
   // --------------------------------------------------------------------------
   console.log('[TEST 1] NestJS Dependency Injection Resolution & Factory Verification');
   {
-    const moduleRef: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({
-          isGlobal: true,
-          ignoreEnvFile: true,
-          load: [
-            () => ({
-              NODE_ENV: 'development',
-              RESEND_API_KEY: 're_test_key_di',
-              EMAIL_PROVIDER: 'resend',
-            }),
-          ],
-        }),
-        MailModule,
-      ],
-    }).compile();
+    const oldEmailProvider = process.env.EMAIL_PROVIDER;
+    const oldResendApiKey = process.env.RESEND_API_KEY;
+    const oldNodeEnv = process.env.NODE_ENV;
 
-    const emailService = moduleRef.get<EmailService>(EmailService);
-    const emailProvider = moduleRef.get<EmailProvider>(EMAIL_PROVIDER);
+    process.env.NODE_ENV = 'development';
+    process.env.EMAIL_PROVIDER = 'resend';
+    process.env.RESEND_API_KEY = 're_test_key_di';
 
-    assert(emailService !== null && emailService !== undefined, 'EmailService resolved from Nest DI container');
-    assert(emailProvider !== null && emailProvider !== undefined, 'EMAIL_PROVIDER token resolved from Nest DI container');
-    assert(emailService.getActiveProviderName() === 'Resend (HTTPS API)', 'EmailService successfully delegates to injected ResendProvider');
-    assert(emailService.isConfigured() === true, 'EmailService reports configured status');
+    try {
+      const moduleRef: TestingModule = await Test.createTestingModule({
+        imports: [
+          ConfigModule.forRoot({
+            isGlobal: true,
+            ignoreEnvFile: true,
+            load: [
+              () => ({
+                NODE_ENV: 'development',
+                RESEND_API_KEY: 're_test_key_di',
+                EMAIL_PROVIDER: 'resend',
+              }),
+            ],
+          }),
+          MailModule,
+        ],
+      }).compile();
 
-    await moduleRef.close();
-    console.log('  ✓ Passed: NestJS DI container resolves EmailService and EMAIL_PROVIDER token without Object/unknown errors');
-    passedCount++;
+      const emailService = moduleRef.get<EmailService>(EmailService);
+      const emailProvider = moduleRef.get<EmailProvider>(EMAIL_PROVIDER);
+
+      assert(emailService !== null && emailService !== undefined, 'EmailService resolved from Nest DI container');
+      assert(emailProvider !== null && emailProvider !== undefined, 'EMAIL_PROVIDER token resolved from Nest DI container');
+      assert(emailService.getActiveProviderName() === 'Resend (HTTPS API)', 'EmailService successfully delegates to injected ResendProvider');
+      assert(emailService.isConfigured() === true, 'EmailService reports configured status');
+
+      await moduleRef.close();
+      console.log('  ✓ Passed: NestJS DI container resolves EmailService and EMAIL_PROVIDER token without Object/unknown errors');
+      passedCount++;
+    } finally {
+      if (oldEmailProvider !== undefined) process.env.EMAIL_PROVIDER = oldEmailProvider;
+      else delete process.env.EMAIL_PROVIDER;
+
+      if (oldResendApiKey !== undefined) process.env.RESEND_API_KEY = oldResendApiKey;
+      else delete process.env.RESEND_API_KEY;
+
+      if (oldNodeEnv !== undefined) process.env.NODE_ENV = oldNodeEnv;
+      else delete process.env.NODE_ENV;
+    }
   }
 
   // --------------------------------------------------------------------------

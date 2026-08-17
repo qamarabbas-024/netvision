@@ -14,6 +14,7 @@ import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { EmailService } from '../mail/email.service';
 import { RateLimiterService } from '../security/rate-limiter/rate-limiter.service';
+import { MonitoringService } from '../monitoring/monitoring.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
@@ -46,7 +47,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
-    @Optional() private readonly rateLimiterService?: RateLimiterService
+    @Optional() private readonly rateLimiterService?: RateLimiterService,
+    @Optional() private readonly monitoringService?: MonitoringService
   ) {}
 
   getDevOtpForTest(email: string): string | null {
@@ -136,6 +138,10 @@ export class AuthService {
 
     // Public Beta Mode (EMAIL_VERIFICATION_ENABLED=false):
     // Account is immediately active and usable with JWT tokens issued directly.
+    this.monitoringService?.recordAuthEvent('REGISTER_SUCCESS', {
+      ip: clientIp,
+      userIdentifier: normalizedEmail,
+    });
     const tokens = await this.generateTokens(user.id, user.email, user.role);
 
     return {
@@ -290,12 +296,22 @@ export class AuthService {
 
     if (!user) {
       this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
+      this.monitoringService?.recordAuthEvent('LOGIN_FAILED', {
+        ip: clientIp,
+        userIdentifier: normalizedEmail,
+        details: { reason: 'UserNotFound' },
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
     const isPasswordValid = await argon2.verify(user.passwordHash, dto.password);
     if (!isPasswordValid) {
       this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
+      this.monitoringService?.recordAuthEvent('LOGIN_FAILED', {
+        ip: clientIp,
+        userIdentifier: normalizedEmail,
+        details: { reason: 'InvalidPassword' },
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -332,6 +348,10 @@ export class AuthService {
 
     // Clear failed backoff records on successful credentials
     this.rateLimiterService?.recordSuccessfulAuth(clientIp, normalizedEmail);
+    this.monitoringService?.recordAuthEvent('LOGIN_SUCCESS', {
+      ip: clientIp,
+      userIdentifier: normalizedEmail,
+    });
 
     const tokens = await this.generateTokens(user.id, user.email, user.role);
 
@@ -463,6 +483,11 @@ export class AuthService {
 
     if (existingOAuth) {
       const user = existingOAuth.user;
+      this.monitoringService?.recordAuthEvent('OAUTH_SUCCESS', {
+        ip: 'oauth-callback',
+        userIdentifier: normalizedEmail,
+        details: { provider: profile.provider },
+      });
       const tokens = await this.generateTokens(user.id, user.email, user.role);
       return { user, ...tokens };
     }

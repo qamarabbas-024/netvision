@@ -1,4 +1,5 @@
 import { GuestProgressService } from '@/services/GuestProgressService';
+import { telemetry } from '@/lib/telemetry';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
@@ -31,7 +32,10 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.message || `API request failed with status ${res.status}`);
+      const requestId = res.headers.get('x-request-id') || undefined;
+      const errorMsg = errorData.message || `API request failed with status ${res.status}`;
+      telemetry.captureApiError(endpoint, res.status, errorMsg, requestId);
+      throw new Error(errorMsg);
     }
 
     return await res.json();

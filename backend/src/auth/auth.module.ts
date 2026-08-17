@@ -8,6 +8,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GithubStrategy } from './strategies/github.strategy';
 import { MailModule } from '../mail/mail.module';
+import { MonitoringModule } from '../monitoring/monitoring.module';
 
 import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
 
@@ -15,6 +16,7 @@ import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
   imports: [
     PassportModule,
     MailModule,
+    MonitoringModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

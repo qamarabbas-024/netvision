@@ -107,6 +107,9 @@ jobs:
       - name: Run Security & OAuth/OTP Hardening Tests
         run: pnpm --filter netvision-backend test:security
 
+      - name: Run Monitoring & Observability Test Suite
+        run: pnpm --filter netvision-backend test:monitoring
+
       - name: Run Resend HTTPS Email & Mock Suite
         run: pnpm --filter netvision-backend test:email:suite
 
