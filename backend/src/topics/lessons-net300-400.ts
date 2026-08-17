@@ -632,6 +632,197 @@ export const LESSONS_NET300_400: BenchmarkLessonFullDefinition[] = [
   },
 
   // =========================================================================
+  // BENCHMARK LESSON: NET-403 (Network Automation & Programmability Foundations)
+  // =========================================================================
+  {
+    courseCode: 'NET-403',
+    slug: 'net-403-network-automation-programmability-foundations',
+    title: 'Network Automation & Programmability Foundations',
+    type: LessonType.THEORY,
+    durationMinutes: 45,
+    order: 1,
+    visualizationType: 'NETWORK_AUTOMATION_PIPELINE',
+    introduction:
+      'Transition from error-prone manual CLI configuration to safe, reproducible, programmable network operations: Idempotency, declarative vs imperative models, REST APIs, JSON data structures, Python automation workflows, pre-deployment validation, dry-run diffs, telemetry, and controller architectures.',
+    stepMetadata: {
+      step1_objective:
+        'Master core principles of network automation and programmability: distinguish declarative target-state models from imperative step-by-step scripts, eliminate configuration drift through version-controlled sources of truth, format structured JSON network payloads, execute REST API methods (GET, POST, PATCH, DELETE) with token authentication, parse network dictionaries in Python, and enforce safe deployment pipelines with dry-run diffs and operational telemetry verification.',
+      step2_prerequisites: ['net-202-ipv4-addressing-cidr', 'net-303-routing-fundamentals-overview', 'net-301-enterprise-switching-vlans'],
+      step3_whyItMatters:
+        'Manual device-by-device CLI configuration is slow, does not scale across enterprise infrastructure, and accounts for over 70% of network outages caused by human syntax and typing errors. Automated programmable pipelines enable consistent changes across thousands of devices in minutes while guaranteeing idempotency, automated rollbacks, and complete audit logging.',
+      step4_coreConcept:
+        'Network Automation replaces manual terminal sessions with structured, programmatic interactions. Traditional CLI management is imperative (specifying every individual command string to execute) and susceptible to configuration drift (where live device states diverge from documented intent due to undocumented ad-hoc changes). Modern network programmability relies on declarative models (specifying the desired end-state) and Idempotency—a core property ensuring that executing an automation workflow multiple times yields the exact same device state without redundant reconfigurations or service disruptions. Programmable devices expose REST APIs and model-driven interfaces (RESTCONF / NETCONF) operating over HTTP/HTTPS. Automation scripts interact with devices using standard HTTP methods: `GET` to query operational telemetry without state changes, `POST` to instantiate new resources, `PUT`/`PATCH` to idempotently update interface/routing parameters, and `DELETE` to remove configurations. Data is exchanged in structured JSON formats consisting of nested key-value dictionaries and arrays, allowing Python scripts (`requests`, `json.loads`) to extract and validate network parameters reliably without fragile regex screen-scraping. Enterprise automation enforces strict safe deployment pipelines: 1) Syntax and schema validation, 2) Dry-run diff preview against live state, 3) Atomic deployment, 4) Post-check operational verification via streaming telemetry, and 5) Centralized audit logging. Controller-based Software-Defined Networking (SDN) centralizes this intent, translating high-level business policies into automated southbound device configurations.',
+      step5_technicalAnatomy: {
+        title: 'Network Automation Architecture, Protocols & Data Models',
+        description: 'Core components of modern programmable network infrastructure.',
+        components: [
+          { name: 'Idempotency', detail: 'The architectural property where an operation can be executed repeatedly with the same parameters without changing the result beyond the initial application.' },
+          { name: 'Declarative vs Imperative', detail: 'Declarative defines WHAT the final intended state should be (target JSON model); imperative specifies HOW to achieve it step-by-step (CLI commands).' },
+          { name: 'Configuration Drift', detail: 'The divergence between the documented source-of-truth configuration (Git/NetBox) and the actual running state on physical network hardware.' },
+          { name: 'REST APIs & HTTP Methods', detail: 'Stateless HTTP interfaces: GET (read telemetry), POST (create resource), PATCH (idempotent update), DELETE (remove resource).' },
+          { name: 'Structured JSON Data', detail: 'Standardized key-value object format used by network APIs to represent interface lists, VLAN mappings, and routing tables without screen-scraping.' },
+          { name: 'API Authentication', detail: 'Securing programmatic endpoints via Bearer tokens, API keys, or OAuth headers rather than hardcoded plaintext passwords.' },
+          { name: 'Python Automation Workflow', detail: 'Using Python (`requests`, `json`) to structure API requests, handle HTTP status codes, and iterate over returned device telemetry objects.' },
+          { name: 'Pre-Deployment Dry Run', detail: 'Comparing intended state against current running state to generate a preview diff before committing changes to production devices.' },
+          { name: 'Model-Driven Telemetry', detail: 'Continuous push-based streaming of real-time operational data from device hardware, replacing legacy SNMP polling.' },
+          { name: 'SDN & Intent-Based Controllers', detail: 'Centralized software controllers that maintain global network state and push configuration to physical fabric devices via southbound APIs.' },
+        ],
+      },
+      step6_howItWorks: {
+        steps: [
+          { stepNumber: 1, title: 'Define Intended State (Source of Truth)', action: 'Engineers define network configuration in structured JSON/YAML files stored in version control (e.g. Git repository).' },
+          { stepNumber: 2, title: 'Schema & Syntax Pre-Flight Validation', action: 'Automation pipeline checks JSON syntax, verifies IP prefix formatting, and confirms VLAN numbers are within legal bounds (1-4094).' },
+          { stepNumber: 3, title: 'Dry-Run State Diffing', action: 'Script queries the device via GET, compares running state against intended JSON, and outputs a preview diff of pending additions and removals.' },
+          { stepNumber: 4, title: 'Atomic REST API Deployment', action: 'Script sends authenticated PATCH request containing the validated payload to the device RESTCONF/REST API endpoint.' },
+          { stepNumber: 5, title: 'Post-Change Operational Verification & Telemetry', action: 'Script queries streaming telemetry/health endpoints to confirm interface is UP/UP, routes converged, and zero packet drops occur.' },
+        ],
+      },
+      step8_visualExplanation: {
+        type: 'NETWORK_AUTOMATION_PIPELINE',
+        title: 'Interactive Network Automation Pipeline, REST API Workbench & Drift Inspector',
+        description: 'Simulate a 6-stage safe network deployment pipeline, test REST API methods (GET, POST, PATCH, DELETE) against simulated switch interfaces, parse JSON network models, and evaluate configuration drift remediations.',
+      },
+      step9_workedExample: {
+        title: 'Parsing Device JSON Telemetry and Constructing an Idempotent Interface Update',
+        problemStatement:
+          'A Python script queries switch `sw-core-01` via `GET /api/v1/interfaces/GigabitEthernet0/1` and receives the following payload:\n`{"interface": "GigabitEthernet0/1", "vlan": 10, "admin_status": "DOWN"}`.\nWrite the logic to check if the interface is in VLAN 20 and UP, and construct the idempotent PATCH payload if changes are required.',
+        stepByStepSolution: [
+          'Step 1 (Parse Received State): `data = json.loads(response.text)` extracts `data["vlan"] = 10` and `data["admin_status"] = "DOWN"`.',
+          'Step 2 (Evaluate Desired vs Current): Target is VLAN 20 and UP. Current state diverges (Configuration Drift detected).',
+          'Step 3 (Construct Idempotent Payload): Build JSON update object: `payload = {"vlan": 20, "admin_status": "UP"}`.',
+          'Step 4 (Deploy & Verify): Send `requests.patch(url, json=payload, headers=auth_headers)`. Verify HTTP status code 200 OK and re-query to confirm oper_status is UP.',
+        ],
+        finalResult:
+          'Payload updated idempotently from VLAN 10 DOWN to VLAN 20 UP with HTTP 200 verification.',
+      },
+      step18_masterySummary: {
+        summaryPoints: [
+          'Network automation shifts operations from imperative manual CLI commands to declarative, version-controlled JSON data models.',
+          'Idempotency ensures running an automation script repeatedly produces identical target states without unintended side effects.',
+          'REST APIs use standard HTTP methods (GET, POST, PATCH, DELETE) and JSON data to enable robust programmable device management.',
+          'Safe automation pipelines require schema validation, dry-run diff previews, post-change verification, and automated rollbacks.',
+        ],
+        nextLessonBridge:
+          'With programmability fundamentals mastered, proceed to NET-404 for Wireshark Packet Capture Analysis and deep forensic packet inspection.',
+      },
+    },
+    questions: [
+      {
+        text: 'A network engineer runs an automated provisioning script against 50 access switches. When executed a second time immediately after completion, the script verifies that all devices already match the intended target state and makes zero disruptive changes. What fundamental automation property is demonstrated?',
+        options: [
+          'Idempotency',
+          'Imperative Scripting',
+          'Configuration Drift',
+          'Promiscuous Mode',
+        ],
+        correctOption: 0,
+        explanation: 'Idempotency is the property where an operation can be applied multiple times without changing the result beyond the initial application, ensuring safety and predictability in automated workflows.',
+        explanationsJson: {
+          1: 'Incorrect: Imperative scripts blindly execute sequential commands regardless of initial state, often throwing errors or causing duplicate entries upon re-run.',
+          2: 'Incorrect: Configuration drift is the divergence of device state over time, not a safe execution property.',
+          3: 'Incorrect: Promiscuous mode is a packet capture NIC setting.',
+        },
+        difficulty: CourseLevel.ADVANCED,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Idempotency in Network Automation',
+      },
+      {
+        text: 'Which HTTP method should an automation script send to a network device REST API endpoint to retrieve operational routing table entries without modifying any configuration or state on the device?',
+        options: [
+          'GET',
+          'POST',
+          'PATCH',
+          'DELETE',
+        ],
+        correctOption: 0,
+        explanation: 'HTTP GET is a safe, read-only method used to query data from a server or network device without producing side effects or modifying configuration.',
+        explanationsJson: {
+          1: 'Incorrect: POST is used to create new resources on the device.',
+          2: 'Incorrect: PATCH is used to modify existing configuration resources.',
+          3: 'Incorrect: DELETE removes resources from the device.',
+        },
+        difficulty: CourseLevel.ADVANCED,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'REST API HTTP Methods for Network Operations',
+      },
+      {
+        text: 'A Python automation script receives the following JSON payload from a core router:\n`{"router_id": "10.0.0.1", "interfaces": [{"name": "Gi0/1", "ip": "10.1.1.1", "status": "up"}, {"name": "Gi0/2", "ip": "10.2.1.1", "status": "down"}]}`\nWhich Python expression correctly extracts the IP address of the first interface ("Gi0/1")?',
+        options: [
+          'data["interfaces"][0]["ip"]',
+          'data["interfaces"]["Gi0/1"]["ip"]',
+          'data["router_id"]["interfaces"][0]',
+          'data.get("interfaces").get("ip")[0]',
+        ],
+        correctOption: 0,
+        explanation: 'In Python, `data["interfaces"]` accesses the list of interfaces. `[0]` accesses the first dictionary in the list, and `["ip"]` extracts the string value `"10.1.1.1"`.',
+        explanationsJson: {
+          1: 'Incorrect: `interfaces` is a list, so integer index `[0]` must be used instead of string key `["Gi0/1"]`.',
+          2: 'Incorrect: `router_id` is a string scalar, not a parent container of `interfaces`.',
+          3: 'Incorrect: `interfaces` is a list and does not have a `.get()` method.',
+        },
+        difficulty: CourseLevel.ADVANCED,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'JSON Data Structure Parsing in Python',
+      },
+      {
+        text: 'Troubleshooting: An enterprise network team experiences an outage when an engineer pushes an untested automation template directly to 200 switches, applying an invalid subnet mask that severed management connectivity. What safe automation pipeline practice would have prevented this outage?',
+        options: [
+          'Executing pre-deployment schema validation and a dry-run diff preview against a single canary device before wide rollout.',
+          'Converting all switch interfaces from routed mode to unmanaged hub mode.',
+          'Increasing the SSH session timeout on all devices to 24 hours.',
+          'Manually typing the configuration into every switch simultaneously using keyboard macros.',
+        ],
+        correctOption: 0,
+        explanation: 'A robust automation pipeline enforces pre-deployment schema validation to catch syntax errors (such as invalid subnet masks) and executes dry-run previews on canary devices to verify non-disruptive behavior before wide-scale production deployment.',
+        explanationsJson: {
+          1: 'Incorrect: Hubs lack switching intelligence and worsen broadcast storms.',
+          2: 'Incorrect: SSH timeout does not catch invalid configuration parameters.',
+          3: 'Incorrect: Unvalidated manual macros propagate human errors rapidly without validation.',
+        },
+        difficulty: CourseLevel.ADVANCED,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Safe Automation Pipelines & Pre-Flight Validation',
+      },
+    ],
+    lab: {
+      title: 'Guided Practice: Simulated Network Automation Pipeline & REST API Configuration',
+      instructions:
+        '1. Inspect current switch interface state via simulated REST API endpoint (`GET /api/v1/interfaces/GigabitEthernet0/1`).\n2. Construct an intended declarative JSON configuration payload for VLAN 100 and IP 10.100.1.1/30.\n3. Execute schema pre-flight validation.\n4. Run a simulated dry-run diff preview to detect configuration drift.\n5. Apply the validated configuration via `PATCH`.\n6. Verify the operational state (UP/UP) and confirm automated telemetry audit logging.',
+      difficulty: CourseLevel.ADVANCED,
+      estimatedMinutes: 30,
+      initialTopologyJson: {
+        device: {
+          hostname: 'sw-core-01',
+          managementIp: '192.168.1.10',
+          apiEndpoint: '/api/v1/interfaces/GigabitEthernet0/1',
+        },
+        currentState: {
+          interface: 'GigabitEthernet0/1',
+          adminStatus: 'DOWN',
+          vlan: 1,
+          ip: null,
+        },
+        targetState: {
+          interface: 'GigabitEthernet0/1',
+          adminStatus: 'UP',
+          vlan: 100,
+          ip: '10.100.1.1/30',
+        },
+      },
+      tasks: [
+        'Query device state via simulated GET request.',
+        'Construct declarative JSON configuration object for GigabitEthernet0/1.',
+        'Validate JSON schema and execute dry-run diff comparison.',
+        'Apply configuration via idempotent PATCH request and verify resulting UP/UP state.',
+      ],
+    },
+  },
+
+  // =========================================================================
   // BENCHMARK LESSON: NET-404 (Wireshark Packet Capture Analysis)
   // =========================================================================
   {
