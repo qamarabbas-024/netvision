@@ -220,10 +220,16 @@ async function main() {
     { title: '14. Basic Network Troubleshooting Workflow', slug: 'level-0-basic-network-troubleshooting-workflow', targetCode: 'NET-404' },
   ];
 
+  const benchmarkSlugs = new Set(BENCHMARK_LESSONS_FULL.map((b) => b.slug));
+
   for (let idx = 0; idx < level0Lessons.length; idx++) {
     const lDef = level0Lessons[idx];
     const targetCId = courseMap.get(lDef.targetCode) || defaultTargetCourseId;
     const targetMId = targetModuleMap.get(targetCId) || level0Mod.id;
+
+    if (benchmarkSlugs.has(lDef.slug)) {
+      continue; // Handled with full 18-step metadata by BENCHMARK_LESSONS_FULL
+    }
 
     const lesson = await prisma.lesson.upsert({
       where: { slug: lDef.slug },
@@ -319,6 +325,10 @@ async function main() {
       update: { courseId: legCourse.id, title: `Module 1: ${tDef.title}` },
       create: { id: `mod-legacy-${tDef.slug}`, courseId: legCourse.id, title: `Module 1: ${tDef.title}`, description: tDef.title, order: 1 },
     });
+
+    if (benchmarkSlugs.has(tDef.lessonSlug)) {
+      continue; // Handled with full 18-step metadata by BENCHMARK_LESSONS_FULL
+    }
 
     const targetCId = courseMap.get(tDef.targetCode) || defaultTargetCourseId;
     const targetMId = targetModuleMap.get(targetCId) || legMod.id;

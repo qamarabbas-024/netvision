@@ -405,98 +405,98 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   },
 
   // -------------------------------------------------------------------------
-  // Lesson 5: IP Addresses & Logical Location
+  // Lesson 5: Special-Use IPv4 Ranges & Enterprise Address Allocation
   // -------------------------------------------------------------------------
   {
     quizId: 'quiz-level-0-ip-addresses-logical-location',
     lessonSlug: 'level-0-ip-addresses-logical-location',
-    text: 'What is the bit length and format of an IPv4 address compared to an IPv6 address?',
+    text: 'Which of the following IPv4 address blocks is an official RFC 1918 Private address range that is non-routable on the public Internet?',
     options: [
-      'IPv4 is 32 bits (4 octets in dotted-decimal), whereas IPv6 is 128 bits (8 groups of 4 hexadecimal characters in colon-hex)',
-      'IPv4 is 48 bits (6 hex bytes), whereas IPv6 is 64 bits (8 octets)',
-      'IPv4 is 128 bits, whereas IPv6 is 256 bits',
-      'IPv4 and IPv6 are both 32-bit addresses with different subnet masks'
+      '172.20.0.0/16',
+      '172.35.0.0/16',
+      '192.170.0.0/16',
+      '11.0.0.0/8'
     ],
     correctOption: 0,
-    explanation: 'IPv4 addresses consist of 32 binary bits divided into four 8-bit octets (e.g. 192.168.1.1). IPv6 addresses are 128 bits long, written as eight 16-bit blocks in hexadecimal notation separated by colons (e.g. 2001:db8::1).',
+    explanation: 'RFC 1918 Class B private space covers `172.16.0.0` through `172.31.255.255` (/12). `172.20.0.0/16` falls directly within this private range.',
     explanationsJson: {
-      1: '48 bits is the length of an Ethernet MAC address, not an IPv4 address.',
-      2: 'IPv4 is 32 bits, not 128 bits.',
-      3: 'IPv4 is 32 bits and IPv6 is 128 bits; they are entirely distinct protocol architectures.'
+      1: '172.35.0.0/16 is outside the private 172.16-172.31 range and is a publicly routable IP.',
+      2: '192.170.0.0/16 is outside the private 192.168.0.0/16 range and is public.',
+      3: '11.0.0.0/8 is public (only 10.0.0.0/8 is private in the 10.x space).'
     },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.RECALL,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'IPv4 vs IPv6 Structure',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-ip-addresses-logical-location',
-    lessonSlug: 'level-0-ip-addresses-logical-location',
-    text: 'Why are IP addresses classified as "Logical" addresses while MAC addresses are classified as "Physical" addresses?',
-    options: [
-      'IP addresses indicate a device topological location in a hierarchical network structure and change when moving subnets, whereas MAC addresses are burned into the hardware NIC',
-      'IP addresses can only be processed by software emulators, whereas MAC addresses are stored in CPU registers',
-      'IP addresses never change across the entire life of a computer, whereas MAC addresses change every time the PC reboots',
-      'IP addresses operate exclusively at the physical cabling layer, whereas MAC addresses operate at the application layer'
-    ],
-    correctOption: 0,
-    explanation: 'IP addresses represent logical, hierarchical location on an IP internetwork (allowing routers to aggregate and direct traffic). When a laptop moves to a new Wi-Fi network, its IP changes. Its MAC address is a permanent Layer 2 hardware identity.',
-    explanationsJson: {
-      1: 'Hardware routers and ASICs inspect and forward IP addresses in high-speed hardware silicon.',
-      2: 'IP addresses change based on network attachment; MAC addresses remain burned-in to the NIC.',
-      3: 'IP is a Layer 3 (Network Layer) protocol; MAC is a Layer 2 (Data Link Layer) addressing scheme.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Logical vs Physical Addressing',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-ip-addresses-logical-location',
-    lessonSlug: 'level-0-ip-addresses-logical-location',
-    text: 'Which of the following IPv4 addresses belongs to the RFC 1918 Private IP address space reserved exclusively for internal LAN use?',
-    options: [
-      '10.150.20.5',
-      '8.8.8.8',
-      '151.101.1.69',
-      '208.67.222.222'
-    ],
-    correctOption: 0,
-    explanation: 'RFC 1918 defines three private non-routable address ranges: 10.0.0.0/8 (10.0.0.0 - 10.255.255.255), 172.16.0.0/12 (172.16.0.0 - 172.31.255.255), and 192.168.0.0/16 (192.168.0.0 - 192.168.255.255).',
-    explanationsJson: {
-      1: '8.8.8.8 is a publicly routable IP belonging to Google Public DNS.',
-      2: '151.101.1.69 is a publicly routable IP address.',
-      3: '208.67.222.222 is a publicly routable IP address belonging to Cisco OpenDNS.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
+    difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'RFC 1918 Private Addressing',
+    concept: 'RFC 1918 Private Address Ranges',
     points: 10
   },
   {
     quizId: 'quiz-level-0-ip-addresses-logical-location',
     lessonSlug: 'level-0-ip-addresses-logical-location',
-    text: 'A host is assigned IP address `192.168.1.50` with subnet mask `255.255.255.0`. It attempts to send a packet to destination IP `192.168.2.50`. How does the host determine how to forward this packet?',
+    text: 'A network technician runs `ipconfig` on a workstation that cannot access the Internet and sees IPv4 address `169.254.88.19` with subnet mask `255.255.0.0`. What does this address indicate?',
     options: [
-      'It performs a bitwise AND between destination IP and its subnet mask, discovers the Network ID (192.168.2.0) is different from its own (192.168.1.0), and forwards the packet to its Default Gateway',
-      'It immediately broadcasts an ARP request across the local switch asking for 192.168.2.50 MAC address directly',
-      'It drops the packet immediately because hosts cannot communicate with IP addresses that differ in the third octet',
-      'It modifies its own IP address to 192.168.2.50 so the networks match'
+      'The workstation failed to contact a DHCP server and self-assigned an APIPA Link-Local address',
+      'The workstation successfully obtained a private corporate IP lease from the domain controller',
+      'The workstation has been assigned a public Carrier-Grade NAT address by the ISP',
+      'The workstation network interface card is defective and must be physically replaced'
     ],
     correctOption: 0,
-    explanation: 'The host performs bitwise AND masking. Because 192.168.2.0 does not match the local network 192.168.1.0, the host knows the destination is remote and must be forwarded to the Default Gateway router MAC address.',
+    explanation: 'Addresses in `169.254.0.0/16` are Automatic Private IP Addressing (APIPA) link-local addresses, assigned by the operating system when DHCP Discover broadcasts receive no reply.',
     explanationsJson: {
-      1: 'Hosts do not ARP for off-subnet remote destination IPs; they ARP for their local Default Gateway IP.',
-      2: 'Hosts do not drop remote packets; routing exists specifically to forward cross-subnet traffic.',
-      3: 'A host never dynamically alters its own IP address to match a destination.'
+      1: 'Corporate DHCP leases use RFC 1918 private spaces (10.x, 172.16-31.x, 192.168.x), not APIPA.',
+      2: 'Carrier-Grade NAT uses 100.64.0.0/10, not 169.254.x.x.',
+      3: 'APIPA indicates a DHCP server/network connectivity failure, not necessarily hardware failure.'
     },
-    difficulty: CourseLevel.FOUNDATIONAL,
+    difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
     questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'Subnet Boundary Evaluation',
+    concept: 'APIPA / Link-Local Troubleshooting',
+    points: 10
+  },
+  {
+    quizId: 'quiz-level-0-ip-addresses-logical-location',
+    lessonSlug: 'level-0-ip-addresses-logical-location',
+    text: 'What is the primary purpose of the `100.64.0.0/10` IPv4 address block defined in RFC 6598?',
+    options: [
+      'Carrier-Grade NAT (CGNAT) Shared Address Space used by ISPs to connect customers without colliding with RFC 1918 subnets',
+      'Multicast streaming for public Internet radio broadcasts',
+      'Internal loopback testing for multi-core CPUs',
+      'Direct satellite uplink routing for military defense networks'
+    ],
+    correctOption: 0,
+    explanation: 'RFC 6598 designates `100.64.0.0/10` as Shared Address Space for Carrier-Grade NAT (CGNAT), allowing service providers to NAT subscriber traffic without conflicting with internal customer 10.x or 192.168.x subnets.',
+    explanationsJson: {
+      1: 'Multicast uses Class D 224.0.0.0/4 (224.0.0.0 to 239.255.255.255).',
+      2: 'Loopback uses 127.0.0.0/8.',
+      3: 'Military defense historically received legacy Class A blocks (e.g. 6.0.0.0/8, 11.0.0.0/8).'
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Carrier-Grade NAT (RFC 6598 Shared Space)',
+    points: 10
+  },
+  {
+    quizId: 'quiz-level-0-ip-addresses-logical-location',
+    lessonSlug: 'level-0-ip-addresses-logical-location',
+    text: 'When an engineer executes `ping 127.0.0.1` in a command terminal, where do the generated ICMP packets physically travel?',
+    options: [
+      'They are processed entirely within the local host operating system TCP/IP software stack in RAM and never reach the network card or wire',
+      'They travel out the physical Ethernet port to the local default gateway and return',
+      'They are broadcast to all devices on the local Layer 2 switch',
+      'They query the nearest public DNS root server'
+    ],
+    correctOption: 0,
+    explanation: 'The entire `127.0.0.0/8` range is reserved for node-local loopback. Traffic sent to 127.0.0.1 is routed internally within the kernel network driver to verify protocol stack integrity without hitting physical transceivers.',
+    explanationsJson: {
+      1: 'Loopback packets never egress the physical NIC interface.',
+      2: 'Loopback traffic is strictly node-local and is never flooded as a switch broadcast.',
+      3: 'Loopback has no interaction with external DNS servers.'
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Loopback Interface Mechanics (127.0.0.1)',
     points: 10
   },
 
@@ -1369,194 +1369,194 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   // =========================================================================
 
   // -------------------------------------------------------------------------
-  // Topic 1: What is Computer Networking?
+  // Topic 1: Network Performance Metrics (what-is-computer-networking)
   // -------------------------------------------------------------------------
   {
     quizId: 'quiz-what-is-computer-networking',
     lessonSlug: 'what-is-computer-networking',
-    text: 'In modern enterprise data communication, what is the primary role of network protocols?',
+    text: 'What is the key technical difference between Throughput and Goodput in network performance analysis?',
     options: [
-      'Defining standardized rules, message formats, and timing semantics so heterogeneous computing devices can reliably exchange data',
-      'Increasing the physical CPU frequency of connected workstations',
-      'Converting digital data packets into high-voltage alternating electrical power',
-      'Restricting all internet communications strictly to ASCII text characters'
+      'Throughput measures total bits delivered including protocol headers and retransmissions, whereas Goodput measures only the usable application data delivered',
+      'Throughput applies only to wireless networks while Goodput applies only to optical fiber',
+      'Throughput is measured in bits per second while Goodput is measured in CPU cycles',
+      'There is no difference; both terms are 100% interchangeable'
     ],
     correctOption: 0,
-    explanation: 'Protocols define syntax (data format), semantics (meaning of control fields), and synchronization (timing and error recovery) allowing devices from different manufacturers to interoperate reliably.',
+    explanation: 'Throughput represents all raw bits passing over the wire (including Ethernet, IP, and TCP headers plus retransmitted packets). Goodput measures strictly the actual usable payload delivered to the destination application.',
     explanationsJson: {
-      1: 'Protocols govern data exchange, not hardware processor clock speeds.',
-      2: 'Data telecommunications signals are low-voltage signals or optical pulses, not AC power distribution.',
-      3: 'Protocols transport arbitrary binary data, audio, video, and encrypted streams, not merely ASCII text.'
+      1: 'Both metrics apply universally to all physical and logical networks.',
+      2: 'Both Throughput and Goodput are measured in bits per second (bps) or Bytes per second (B/s).',
+      3: 'Goodput is a distinct metric that subtracts protocol overhead and duplicate retransmissions.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Protocol Definition & Purpose',
+    concept: 'Throughput vs Goodput Definition',
     points: 10
   },
   {
     quizId: 'quiz-what-is-computer-networking',
     lessonSlug: 'what-is-computer-networking',
-    text: 'Which network topology provides maximum fault tolerance by connecting every node directly to every other node with dedicated redundant links?',
+    text: 'Calculate the Serialization (Transmission) Delay for a 1,500-Byte Ethernet packet being pushed onto a 100 Mbps FastEthernet interface:',
     options: [
-      'Full Mesh Topology',
-      'Bus Topology',
-      'Star Topology',
-      'Ring Topology'
+      '0.12 milliseconds (120 microseconds)',
+      '1.20 milliseconds',
+      '15.0 milliseconds',
+      '0.015 milliseconds'
     ],
     correctOption: 0,
-    explanation: 'In a Full Mesh topology, every node has a point-to-point link to every other node ($N(N-1)/2$ links). If any single link or node fails, traffic routes around it with zero disruption to unaffected nodes.',
+    explanation: 'Convert 1,500 Bytes to bits: $1,500 \\times 8 = 12,000 \\text{ bits}$. Divide by bandwidth in bps: $12,000 / 100,000,000 \\text{ bps} = 0.00012 \\text{ seconds} = 0.12 \\text{ ms}$ (120 microseconds).',
     explanationsJson: {
-      1: 'Bus topologies share a single backbone cable; a break in the cable brings down the entire network.',
-      2: 'Star topologies depend on a central switch; failure of the central switch disconnects all nodes.',
-      3: 'Ring topologies pass tokens sequentially; a single break can halt communication unless a dual-ring is used.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.RECALL,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Mesh Topology Fault Tolerance',
-    points: 10
-  },
-  {
-    quizId: 'quiz-what-is-computer-networking',
-    lessonSlug: 'what-is-computer-networking',
-    text: 'A network design team must calculate the total number of physical point-to-point links required to connect 6 core datacenter routers in a Full Mesh topology. What is the correct formula and link count?',
-    options: [
-      'Formula: N * (N - 1) / 2 = 6 * 5 / 2 = 15 physical links',
-      'Formula: N * N = 6 * 6 = 36 physical links',
-      'Formula: N - 1 = 6 - 1 = 5 physical links',
-      'Formula: 2 * N = 2 * 6 = 12 physical links'
-    ],
-    correctOption: 0,
-    explanation: 'The formula for physical links in a full mesh network of $N$ nodes is $\\frac{N(N-1)}{2}$. For 6 routers: $\\frac{6 \\times 5}{2} = 15$ links.',
-    explanationsJson: {
-      1: 'N * N = 36 overcounts links and ignores self-connections and bidirectional pairing.',
-      2: 'N - 1 = 5 links describes a minimal tree or hub-and-spoke star, not a full mesh.',
-      3: '2 * N = 12 links describes a dual ring, not a full mesh.'
+      1: '1.20 ms is the serialization delay on a 10 Mbps link, not 100 Mbps.',
+      2: '15.0 ms occurs if you divide 1,500 by 100 without converting Bytes to bits and units properly.',
+      3: '0.015 ms is calculated with an incorrect power of 10.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Full Mesh Link Calculation',
+    concept: 'Serialization Delay Calculation',
     points: 10
   },
   {
     quizId: 'quiz-what-is-computer-networking',
     lessonSlug: 'what-is-computer-networking',
-    text: 'An office with 20 workstations connected in a legacy Bus topology experiences total network loss whenever a user unplugs their computer from the coaxial wall T-connector. What caused the entire network to fail?',
+    text: 'Why does high Jitter (latency variance) cause severe distortion in real-time VoIP voice calls even when total average bandwidth is more than sufficient?',
     options: [
-      'Unplugging the T-connector broke the continuous electrical bus line and removed the 50-ohm terminating resistor, causing signal reflection across the entire cable',
-      'The central router detected a missing MAC address and executed an emergency shutdown',
-      'The workstations ran out of IP addresses because of the missing device',
-      'The Ethernet frame preamble reversed its binary polarity'
+      'Voice packets arrive at unpredictable intervals, causing receiver de-jitter playback buffers to either underflow (dropped words) or overflow',
+      'Jitter permanently corrupts the IP address in packet headers',
+      'Jitter causes copper cables to overheat and drop electrical signals',
+      'Jitter forces routers to reboot into diagnostic recovery mode'
     ],
     correctOption: 0,
-    explanation: 'Legacy coaxial Bus topologies (10BASE2) require terminating resistors at both ends to absorb electrical signals. Breaking the bus creates an open circuit where signals reflect back, colliding with and destroying all transmitted frames.',
+    explanation: 'Real-time VoIP relies on constant, rhythmic playback. When packets arrive with wildly varying latency (high jitter), the receiver buffer runs out of packets to play (buffer underrun), resulting in choppy audio and dropped syllables.',
     explanationsJson: {
-      1: 'Bus topologies lack intelligent central routers monitoring individual coax drops.',
-      2: 'Removing a device does not deplete IP address allocations.',
-      3: 'Frame preambles are generated by transmitting NICs and do not reverse polarity in disconnected cables.'
+      1: 'Jitter affects arrival timing, not header address integrity.',
+      2: 'Jitter is a timing metric and has zero thermal impact on physical cables.',
+      3: 'Routers do not reboot due to packet jitter.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
-    questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'Bus Topology Termination Failure',
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Jitter Impact on Real-Time Voice/Video',
+    points: 10
+  },
+  {
+    quizId: 'quiz-what-is-computer-networking',
+    lessonSlug: 'what-is-computer-networking',
+    text: 'Which of the four latency delay components is directly determined by the physical length of the cable divided by the speed of light in the medium?',
+    options: [
+      'Propagation Delay ($D_{prop}$)',
+      'Serialization Delay ($D_{trans}$)',
+      'Queueing Delay ($D_{queue}$)',
+      'Processing Delay ($D_{proc}$)'
+    ],
+    correctOption: 0,
+    explanation: 'Propagation delay ($D_{prop} = \\text{Distance} / \\text{Speed of Light}$) is the time for physical photons or electrons to travel across the distance of the wire, independent of packet size or link bandwidth.',
+    explanationsJson: {
+      1: 'Serialization delay is determined by packet size and link bandwidth ($L/R$).',
+      2: 'Queueing delay is determined by router buffer congestion.',
+      3: 'Processing delay is determined by router CPU and ASIC lookup speed.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Propagation Delay vs Other Delay Components',
     points: 10
   },
 
   // -------------------------------------------------------------------------
-  // Topic 2: Network Devices Overview
+  // Topic 2: Physical Network Interfaces, Media & Transceivers (network-devices-overview)
   // -------------------------------------------------------------------------
   {
     quizId: 'quiz-network-devices-overview',
     lessonSlug: 'network-devices-overview',
-    text: 'At which OSI layers do a standard Layer 2 Switch, a standard Router, and a Physical Repeater operate respectively?',
+    text: 'A network engineer needs to connect two switches located in separate campus buildings 800 meters apart with a 10 Gbps uplink. Which cabling and transceiver standard should be selected?',
     options: [
-      'Switch at Layer 2 (Data Link), Router at Layer 3 (Network), Repeater at Layer 1 (Physical)',
-      'Switch at Layer 1, Router at Layer 2, Repeater at Layer 3',
-      'Switch at Layer 3, Router at Layer 7, Repeater at Layer 4',
-      'Switch at Layer 4, Router at Layer 2, Repeater at Layer 7'
+      'Single-Mode Fiber (SMF) with 10GBASE-LR SFP+ transceivers',
+      'Cat6a Copper UTP with RJ-45 connectors',
+      'Multi-Mode Fiber (MMF) with 10GBASE-SR SFP+ transceivers',
+      'Cat5e Shielded STP cable with PoE injectors'
     ],
     correctOption: 0,
-    explanation: 'Repeaters operate at Layer 1 (amplifying electrical/optical bits), switches operate at Layer 2 (forwarding frames based on MAC addresses), and routers operate at Layer 3 (routing packets based on IP addresses).',
+    explanation: 'The 800-meter distance exceeds the 100m limit for copper and the 300-400m limit for Multi-Mode Fiber (10GBASE-SR). Single-Mode Fiber (10GBASE-LR) is rated for up to 10 kilometers and is the correct choice.',
     explanationsJson: {
-      1: 'Switches operate at Layer 2 and Repeaters at Layer 1; this sequence is incorrect.',
-      2: 'Standard routers operate at Layer 3, not Layer 7.',
-      3: 'Standard switches operate at Layer 2, not Layer 4.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.RECALL,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Device OSI Layer Mapping',
-    points: 10
-  },
-  {
-    quizId: 'quiz-network-devices-overview',
-    lessonSlug: 'network-devices-overview',
-    text: 'How does an Access Point (AP) in infrastructure mode connect wireless 802.11 clients to the wired enterprise network?',
-    options: [
-      'It bridges 802.11 wireless frames into 802.3 Ethernet frames at Layer 2 and transmits them onto the wired switch infrastructure',
-      'It acts as an analog dial-up modem converting RF frequencies into telephone audio tones',
-      'It assigns a unique public Class A IP address to every single wireless frame',
-      'It routes packets at Layer 7 using BGP path vector algorithms'
-    ],
-    correctOption: 0,
-    explanation: 'A Wireless Access Point (WAP) functions as a Layer 2 media bridge, converting wireless 802.11 RF radio frames into wired 802.3 Ethernet frames so wireless clients can communicate seamlessly with wired LAN servers.',
-    explanationsJson: {
-      1: 'WAPs bridge 802.11 to 802.3; they do not use analog telephone modem tones.',
-      2: 'WAPs operate at Layer 2; they do not assign Class A public IPs to individual frames.',
-      3: 'BGP is an inter-autonomous system Layer 3/4 routing protocol, not an AP bridging mechanism.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Wireless Access Point Bridging',
-    points: 10
-  },
-  {
-    quizId: 'quiz-network-devices-overview',
-    lessonSlug: 'network-devices-overview',
-    text: 'An engineer connects 8 computers to an 8-port Ethernet switch. How many collision domains and how many broadcast domains exist in this default single-VLAN configuration?',
-    options: [
-      '8 Collision Domains and 1 Broadcast Domain',
-      '1 Collision Domain and 8 Broadcast Domains',
-      '8 Collision Domains and 8 Broadcast Domains',
-      '1 Collision Domain and 1 Broadcast Domain'
-    ],
-    correctOption: 0,
-    explanation: 'Each switch port forms its own independent, isolated Collision Domain (8 ports = 8 collision domains). By default, all ports belong to VLAN 1, forming 1 shared Broadcast Domain.',
-    explanationsJson: {
-      1: 'Switches break up collision domains per port, not broadcast domains (unless VLANs are configured).',
-      2: 'A single unpartitioned switch forms 1 broadcast domain, not 8.',
-      3: '1 collision domain and 1 broadcast domain describes an 8-port legacy Hub, not a Switch.'
+      1: 'Cat6a copper is strictly limited to a maximum channel distance of 100 meters.',
+      2: 'Multi-Mode Fiber (10GBASE-SR) is limited to approximately 300-400 meters.',
+      3: 'Cat5e is limited to 100 meters and cannot carry 10 Gbps over 800m.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Collision vs Broadcast Domain Calculation',
+    concept: 'Media Selection: Distance and Bandwidth',
     points: 10
   },
   {
     quizId: 'quiz-network-devices-overview',
     lessonSlug: 'network-devices-overview',
-    text: 'A network administrator replaces a 24-port hub with a 24-port managed full-duplex switch. What immediate technical change will users observe during simultaneous large file transfers?',
+    text: 'What fundamental physical characteristic distinguishes Single-Mode Fiber (SMF) from Multi-Mode Fiber (MMF)?',
     options: [
-      'Network throughput increases dramatically and frame collisions drop to zero because each port has dedicated full-duplex bandwidth',
-      'Workstations can no longer use IP addresses and must switch to NetBEUI',
-      'All workstations must be rebooted into safe mode to negotiate new MAC addresses',
-      'The Ethernet cables will overheat due to the lack of electrical collisions'
+      'SMF has a narrow ~9 µm core carrying a single straight laser ray, whereas MMF has a wider 50/62.5 µm core carrying multiple light rays subject to modal dispersion',
+      'SMF carries electrical current while MMF carries optical light',
+      'SMF uses RJ-45 connectors while MMF uses USB-C connectors',
+      'SMF is limited to 100 meters while MMF reaches 50 kilometers'
     ],
     correctOption: 0,
-    explanation: 'Replacing a shared half-duplex hub with a full-duplex switch provides microsegmentation: each workstation receives dedicated collision-free bandwidth on its port, eliminating CSMA/CD backoff bottlenecks.',
+    explanation: 'Single-Mode Fiber features a tiny 9-micron core that permits only one mode of light to propagate, virtually eliminating modal dispersion. Multi-Mode has a 50-62.5 micron core where light bounces at multiple angles.',
     explanationsJson: {
-      1: 'IP addressing works identically across switches and hubs.',
-      2: 'MAC addresses are burned into NIC hardware and do not require safe-mode rebooting.',
-      3: 'Ethernet cables operate at micro-watt signal levels and do not overheat from collision elimination.'
+      1: 'All optical fiber carries photons (light), never electrical voltage.',
+      2: 'Fiber uses LC, SC, or ST optical connectors, not RJ-45 or USB.',
+      3: 'SMF achieves much greater distances (tens of km) than MMF (hundreds of meters).'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
-    questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'Hub-to-Switch Migration Impact',
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Single-Mode vs Multi-Mode Core Architecture',
+    points: 10
+  },
+  {
+    quizId: 'quiz-network-devices-overview',
+    lessonSlug: 'network-devices-overview',
+    text: 'An administrator connects a new Wi-Fi 6 Access Point requiring 24 Watts of DC power to an enterprise switch. Which Power over Ethernet standard must the switch support on that port?',
+    options: [
+      'IEEE 802.3at (PoE+ - up to 30W output / 25.5W delivered)',
+      'IEEE 802.3af (PoE - up to 15.4W output)',
+      'IEEE 802.1Q (VLAN tagging)',
+      'IEEE 802.3ad (Link Aggregation)'
+    ],
+    correctOption: 0,
+    explanation: 'IEEE 802.3at (PoE+) supplies up to 30W of power from the switch port (delivering up to 25.5W at the device), which satisfies the 24W requirement. Legacy 802.3af only supplies 15.4W.',
+    explanationsJson: {
+      1: '802.3af only supplies 15.4W, which is insufficient for a 24W access point.',
+      2: '802.1Q is a Layer 2 VLAN encapsulation protocol, not a power standard.',
+      3: '802.3ad is Link Aggregation (LACP), not a power standard.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Power over Ethernet Standards (802.3af/at/bt)',
+    points: 10
+  },
+  {
+    quizId: 'quiz-network-devices-overview',
+    lessonSlug: 'network-devices-overview',
+    text: 'Why are fiber optic cables completely immune to Electromagnetic Interference (EMI) and Radio Frequency Interference (RFI)?',
+    options: [
+      'Fiber optic cables transmit information using non-conductive light photons through glass cores rather than electrical voltages over copper',
+      'Fiber optic cables are coated with thick lead shielding that absorbs all radio waves',
+      'Fiber optic cables operate at zero volts electrical ground',
+      'Fiber optic transceivers automatically filter out high-voltage magnetic fields using software'
+    ],
+    correctOption: 0,
+    explanation: 'Optical fiber carries data as pulses of light through dielectric glass fibers. Because light photons do not interact with electromagnetic fields, fiber is 100% immune to electromagnetic noise, motors, and lightning.',
+    explanationsJson: {
+      1: 'Standard fiber jackets are plastic, not lead; immunity is due to light transmission.',
+      2: 'Fiber does not conduct electricity; voltage grounding is irrelevant.',
+      3: 'Immunity is an inherent physical property of light in glass, not software filtering.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Fiber Optic Immunity to EMI',
     points: 10
   },
 
@@ -1849,194 +1849,194 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   },
 
   // -------------------------------------------------------------------------
-  // Topic 6: IP Addressing (IPv4) Overview
+  // Topic 6: Classful IPv4 History & The Architectural Necessity of CIDR (ip-addressing-ipv4-overview)
   // -------------------------------------------------------------------------
   {
     quizId: 'quiz-ip-addressing-ipv4-overview',
     lessonSlug: 'ip-addressing-ipv4-overview',
-    text: 'Which traditional IPv4 class provides a default subnet mask of 255.0.0.0 (/8) and is identified by a first octet ranging from 1 to 126?',
+    text: 'In legacy classful IPv4 addressing (RFC 791), what default subnet mask and host capacity were assigned to all Class B network blocks (first octet 128 to 191)?',
     options: [
-      'Class A',
-      'Class B',
-      'Class C',
-      'Class D (Multicast)'
+      'Default Mask: 255.255.0.0 (/16) supporting 65,534 usable host IPs',
+      'Default Mask: 255.0.0.0 (/8) supporting 16,777,214 usable host IPs',
+      'Default Mask: 255.255.255.0 (/24) supporting 254 usable host IPs',
+      'Default Mask: 255.255.255.240 (/28) supporting 14 usable host IPs'
     ],
     correctOption: 0,
-    explanation: 'Class A addresses span 1.0.0.0 to 126.255.255.255 with default mask 255.0.0.0 (/8), supporting up to 16,777,214 hosts per network. (127.0.0.0/8 is reserved for loopback).',
+    explanation: 'Class B addresses (128.0.0.0 to 191.255.255.255) had a default 16-bit network prefix (/16, 255.255.0.0) leaving 16 host bits ($2^{16} - 2 = 65,534$ usable host addresses).',
     explanationsJson: {
-      1: 'Class B addresses span 128.0.0.0 to 191.255.255.255 with default mask 255.255.0.0 (/16).',
-      2: 'Class C addresses span 192.0.0.0 to 223.255.255.255 with default mask 255.255.255.0 (/24).',
-      3: 'Class D spans 224.0.0.0 to 239.255.255.255 and is reserved for Multicast groups.'
+      1: '255.0.0.0 (/8) is the default mask for Class A networks.',
+      2: '255.255.255.0 (/24) is the default mask for Class C networks.',
+      3: '/28 is a modern classless CIDR subnet mask, not a legacy classful default.'
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'IPv4 Classful Architecture',
+    concept: 'Classful IPv4 Class B Architecture',
     points: 10
   },
   {
     quizId: 'quiz-ip-addressing-ipv4-overview',
     lessonSlug: 'ip-addressing-ipv4-overview',
-    text: 'What is the specific architectural purpose of the Time-to-Live (TTL) field in an IPv4 header?',
+    text: 'What was the primary architectural crisis in the early 1990s that forced the IETF to replace Classful addressing with Classless Inter-Domain Routing (CIDR, RFC 1519)?',
     options: [
-      'To prevent packets from endlessly looping in the network by decrementing by 1 at every router hop and dropping the packet when TTL reaches 0',
-      'To record the exact real-time clock timestamp when the packet was created',
-      'To measure the physical distance of the fiber optic cable in kilometers',
-      'To indicate how many seconds the user has left on their internet subscription'
+      'Rapid exhaustion of Class B address blocks and exponential explosion of the global Internet routing table due to rigid /8, /16, /24 allocation boundaries',
+      'Ethernet switches were invented and could not process 32-bit IP addresses',
+      'Classful addressing only worked on fiber optic cables and failed on copper wires',
+      'The United States government mandated that all IP addresses must contain exactly 128 bits'
     ],
     correctOption: 0,
-    explanation: 'The 8-bit TTL field prevents routing loops from consuming infinite bandwidth. Each router decrements TTL by 1. When TTL reaches 0, the router discards the packet and sends an ICMP Type 11 (Time Exceeded) message to the sender.',
+    explanation: 'Because Class C (/24, 254 hosts) was too small for most organizations, companies were allocated full Class B (/16, 65K hosts) blocks, wasting over 90% of allocated space and rapidly exhausting IPv4 space while bloating global routing tables.',
     explanationsJson: {
-      1: 'Timestamps are recorded in specialized IP option headers or application payloads, not the standard 8-bit TTL field.',
-      2: 'TTL is a logical hop counter, not a physical metric measurement.',
-      3: 'TTL has no relation to ISP billing subscriptions.'
+      1: 'Ethernet switches operate at Layer 2 (MAC addresses) and are agnostic to IP class structure.',
+      2: 'Layer 3 IP operates independently of Layer 1 physical media.',
+      3: '128-bit addresses describe IPv6, which was developed later (RFC 2460).'
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'IPv4 TTL Field Loop Prevention',
+    concept: 'The Historical Necessity of CIDR',
     points: 10
   },
   {
     quizId: 'quiz-ip-addressing-ipv4-overview',
     lessonSlug: 'ip-addressing-ipv4-overview',
-    text: 'A host is assigned the IP address `172.20.15.100` with subnet mask `255.255.0.0`. Is this an RFC 1918 Private IP address, and why?',
+    text: 'An organization in 1992 required 350 usable IP addresses. Under Classful rules, it was assigned an entire Class B block. How many IP addresses were wasted in this single allocation?',
     options: [
-      'Yes, because it falls within the RFC 1918 Class B private address block (172.16.0.0 to 172.31.255.255)',
-      'No, because only 192.168.x.x addresses are private',
-      'No, because all addresses beginning with 172 are public Internet addresses',
-      'Yes, but only if the host is running a Linux operating system'
+      '65,184 addresses (65,534 usable - 350 needed)',
+      '254 addresses',
+      '16,777,214 addresses',
+      'Zero addresses were wasted'
     ],
     correctOption: 0,
-    explanation: 'RFC 1918 defines the 172.16.0.0/12 block as private, which encompasses all IP addresses from 172.16.0.0 through 172.31.255.255. 172.20.15.100 falls directly inside this range.',
+    explanation: 'A Class B network contains 65,534 usable host addresses. Needing only 350 addresses means $65,534 - 350 = 65,184$ addresses were wasted (99.47% waste).',
     explanationsJson: {
-      1: '10.0.0.0/8 and 172.16.0.0/12 are also standard RFC 1918 private spaces in addition to 192.168.0.0/16.',
-      2: '172.16.0.0 through 172.31.255.255 is private; only addresses outside this range (e.g. 172.15.x.x or 172.32.x.x) are public.',
-      3: 'RFC 1918 IP address classifications are standard across all operating systems and hardware.'
+      1: '254 is the capacity of one Class C network.',
+      2: '16.7 million is the capacity of a Class A network.',
+      3: 'Massive waste occurred because fractional Class B allocations were impossible under classful rules.'
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'RFC 1918 Class B Verification',
+    concept: 'Classful Address Allocation Waste Calculation',
     points: 10
   },
   {
     quizId: 'quiz-ip-addressing-ipv4-overview',
     lessonSlug: 'ip-addressing-ipv4-overview',
-    text: 'Two workstations on the same switch are manually configured with the exact same IP address (`192.168.1.50/24`). What error will occur and how is it detected by the operating systems?',
+    text: 'How does modern Classless Inter-Domain Routing (CIDR) eliminate the address waste of the legacy Classful system?',
     options: [
-      'A Duplicate IP Address Conflict occurs; modern OSes detect this during boot by transmitting a Gratuitous ARP (ARP Probe) and receiving an unexpected ARP reply',
-      'The switch splits the bandwidth equally between both PCs without any errors',
-      'Both computers immediately delete their operating system kernels',
-      'The router automatically renumbers one of the PCs to 10.0.0.1'
+      'CIDR decouples network boundaries from 8-bit octet boundaries, allowing arbitrary prefix lengths (/1 to /32) tailored to exact host requirements',
+      'CIDR converts all IPv4 addresses into 48-bit MAC addresses',
+      'CIDR forces all computers on the Internet to share a single public IP address',
+      'CIDR eliminates the need for routers by using satellite broadcasts'
     ],
     correctOption: 0,
-    explanation: 'When an interface initializes with an IP, it sends an ARP Probe (Gratuitous ARP). If another host replies, the OS detects an IP address conflict, disables the IP configuration, and alerts the user.',
+    explanation: 'CIDR allows network masks of any bit length (/22, /23, /27, /30), enabling network engineers to allocate exact subnet sizes (e.g. /23 for 500 hosts) and aggregate multiple routes into compact supernets.',
     explanationsJson: {
-      1: 'Duplicate IPs cause CAM table flapping and erratic packet delivery, resulting in communication failure on both nodes.',
-      2: 'IP conflicts cause network layer errors, not kernel file deletion.',
-      3: 'Standard routers do not automatically reconfigure statically assigned host IP addresses.'
+      1: 'CIDR is an IPv4 Layer 3 prefix scheme, not a Layer 2 MAC conversion.',
+      2: 'Sharing a single public IP is NAT/PAT, not CIDR prefix notation.',
+      3: 'Routers remain the core forwarding devices of CIDR internetworks.'
     },
     difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
-    questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'Duplicate IP Conflict Detection',
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'CIDR Prefix Decoupling Principle',
     points: 10
   },
 
   // -------------------------------------------------------------------------
-  // Topic 7: Subnetting & CIDR Overview
+  // Topic 7: VLSM Design & Multi-Department Address Allocation (subnetting-cidr-overview)
   // -------------------------------------------------------------------------
   {
     quizId: 'quiz-subnetting-cidr-overview',
     lessonSlug: 'subnetting-cidr-overview',
-    text: 'Given the IPv4 network block `192.168.10.0/27`, what is the Subnet Mask, Network ID, Broadcast ID, and total number of usable host IP addresses?',
+    text: 'What is the Cardinal Rule that must be followed when designing a Variable Length Subnet Masking (VLSM) address plan to prevent address fragmentation and overlapping subnets?',
     options: [
-      'Subnet Mask: 255.255.255.224 | Network ID: 192.168.10.0 | Broadcast: 192.168.10.31 | Usable Hosts: 30',
-      'Subnet Mask: 255.255.255.192 | Network ID: 192.168.10.0 | Broadcast: 192.168.10.63 | Usable Hosts: 62',
-      'Subnet Mask: 255.255.255.240 | Network ID: 192.168.10.0 | Broadcast: 192.168.10.15 | Usable Hosts: 14',
-      'Subnet Mask: 255.255.255.0 | Network ID: 192.168.10.0 | Broadcast: 192.168.10.255 | Usable Hosts: 254'
+      'Always sort all departmental host requirements from LARGEST to SMALLEST before assigning subnet address blocks',
+      'Always allocate small point-to-point /30 links first at the beginning of the address block',
+      'Assign identical /24 subnet masks to every department regardless of host count',
+      'Allocate addresses alphabetically based on department name'
     ],
     correctOption: 0,
-    explanation: 'Prefix `/27` means 27 network bits (mask 255.255.255.224). Host bits H = 32 - 27 = 5. Block size = 2^5 = 32. Range: 192.168.10.0 to 192.168.10.31. Usable hosts = 32 - 2 = 30 (192.168.10.1 to 192.168.10.30).',
+    explanation: 'The fundamental rule of VLSM design is to allocate from largest host requirement to smallest. Larger subnets (e.g. /26) must align with larger power-of-2 boundaries (0, 64, 128, 192), which is only possible if smaller subnets do not fragment the space first.',
     explanationsJson: {
-      1: '255.255.255.192 corresponds to a /26 prefix with 62 usable hosts.',
-      2: '255.255.255.240 corresponds to a /28 prefix with 14 usable hosts.',
-      3: '255.255.255.0 corresponds to a /24 prefix with 254 usable hosts.'
+      1: 'Allocating small /30 links first fragments the space and prevents placing larger /26 or /27 subnets cleanly.',
+      2: 'Assigning identical masks is FLSM (Fixed Length Subnet Masking), not VLSM.',
+      3: 'Department names have no mathematical relation to binary block boundaries.'
     },
     difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'CIDR Subnet Calculation (/27)',
+    concept: 'The Cardinal Rule of VLSM Allocation',
     points: 10
   },
   {
     quizId: 'quiz-subnetting-cidr-overview',
     lessonSlug: 'subnetting-cidr-overview',
-    text: 'An administrator needs to create a point-to-point link between two core routers requiring exactly 2 usable host IP addresses. Which CIDR subnet mask prefix conserves maximum IP address space?',
+    text: 'Given base network `192.168.10.0/24`, the Engineering department is assigned the first subnet `192.168.10.0/26` (62 usable hosts). What is the exact starting Network ID and Subnet Mask for the next department (Sales) which requires 25 usable hosts?',
     options: [
-      '/30 (Subnet Mask: 255.255.255.252)',
-      '/29 (Subnet Mask: 255.255.255.248)',
-      '/28 (Subnet Mask: 255.255.255.240)',
-      '/24 (Subnet Mask: 255.255.255.0)'
+      'Network ID: 192.168.10.64 with Subnet Mask 255.255.255.224 (/27)',
+      'Network ID: 192.168.10.63 with Subnet Mask 255.255.255.192 (/26)',
+      'Network ID: 192.168.10.128 with Subnet Mask 255.255.255.240 (/28)',
+      'Network ID: 192.168.10.32 with Subnet Mask 255.255.255.224 (/27)'
     ],
     correctOption: 0,
-    explanation: 'A `/30` subnet has 2 host bits (2^2 = 4 total IPs). Subtracting 2 (Network ID and Broadcast ID) leaves exactly 2 usable host IPs, making /30 the classic point-to-point mask conserving address space.',
+    explanation: 'Subnet 1 (`192.168.10.0/26`) has block size 64 and spans `.0` to `.63`. The next available address is `192.168.10.64`. For 25 hosts, we need block size 32 ($2^5 = 32$), which is prefix `/27` (mask 255.255.255.224). Range is `192.168.10.64/27` (.64 to .95).',
     explanationsJson: {
-      1: '/29 provides 6 usable hosts (2^3 - 2), wasting 4 addresses for a 2-node link.',
-      2: '/28 provides 14 usable hosts, wasting 12 addresses.',
-      3: '/24 provides 254 usable hosts, wasting 252 addresses.'
+      1: '.63 is the broadcast address of the first subnet and cannot be a Network ID.',
+      2: '.128 skips unallocated address space and /28 only supports 14 hosts (Sales needs 25).',
+      3: '.32 falls inside the first /26 subnet (.0 to .63), creating a catastrophic address overlap.'
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Point-to-Point /30 Subnetting',
+    concept: 'VLSM Subnet Block Progression',
     points: 10
   },
   {
     quizId: 'quiz-subnetting-cidr-overview',
     lessonSlug: 'subnetting-cidr-overview',
-    text: 'A workstation is configured with IP `10.50.120.45/20`. What is the Network ID (Subnet Address) for this host?',
+    text: 'An enterprise network requires two point-to-point router WAN links requiring exactly 2 usable host IP addresses each. Which two non-overlapping subnets immediately follow `192.168.10.96/28` (.96 to .111)?',
     options: [
-      '10.50.112.0',
-      '10.50.120.0',
-      '10.50.0.0',
-      '10.50.128.0'
+      'WAN Link 1: 192.168.10.112/30 and WAN Link 2: 192.168.10.116/30',
+      'WAN Link 1: 192.168.10.111/30 and WAN Link 2: 192.168.10.115/30',
+      'WAN Link 1: 192.168.10.128/30 and WAN Link 2: 192.168.10.132/30',
+      'WAN Link 1: 192.168.10.112/29 and WAN Link 2: 192.168.10.120/29'
     ],
     correctOption: 0,
-    explanation: 'A `/20` prefix has mask 255.255.240.0. The 3rd octet block size is 256 - 240 = 16. Multiples of 16 in the 3rd octet: 0, 16, 32, 48, 64, 80, 96, 112, 128... Octet value 120 falls between 112 and 128. Therefore, Network ID = 10.50.112.0.',
+    explanation: 'The prior `/28` subnet ends at `.111`. The next available IP is `.112`. A /30 has block size 4: WAN 1 is `192.168.10.112/30` (.112-.115). WAN 2 begins at `.116`: `192.168.10.116/30` (.116-.119). Both are perfectly contiguous with zero overlap.',
     explanationsJson: {
-      1: '10.50.120.0 is not a multiple of block size 16 in the 3rd octet.',
-      2: '10.50.0.0 is a different subnet block (10.50.0.0 to 10.50.15.255).',
-      3: '10.50.128.0 is the start of the next subnet block.'
+      1: '.111 is the broadcast address of the prior subnet and cannot be used.',
+      2: '.128 unnecessarily skips valid address space (.112 to .127).',
+      3: '/29 subnets have block size 8 (6 usable hosts), wasting 4 addresses per link when /30 is optimal.'
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Multi-Octet Subnet Calculation (/20)',
+    concept: 'Point-to-Point /30 VLSM Allocation',
     points: 10
   },
   {
     quizId: 'quiz-subnetting-cidr-overview',
     lessonSlug: 'subnetting-cidr-overview',
-    text: 'A host is configured with IP `192.168.5.63` and subnet mask `255.255.255.192 (/26)`. When the user attempts to assign this IP statically, the operating system rejects it with an error. Why?',
+    text: 'A network administrator configures a host with IP `192.168.10.95/27` on the Sales subnet. The host is unable to communicate with any other workstation. What is the root cause of this failure?',
     options: [
-      '`192.168.5.63` is the reserved Directed Broadcast Address of the `192.168.5.0/26` subnet and cannot be assigned to an individual host NIC',
-      '`192.168.5.63` is an odd number and all IP addresses must end in an even number',
-      '`192.168.5.63` is reserved exclusively for the United States Department of Defense',
-      'Subnet mask 255.255.255.192 is an invalid subnet mask format'
+      '`192.168.10.95` is the reserved Broadcast Address of the `192.168.10.64/27` subnet (block size 32, range .64 to .95) and cannot be assigned to an individual host',
+      'A /27 subnet mask is invalid on Ethernet networks',
+      'The host requires an optical transceiver to use IP addresses ending in 95',
+      'The IP address belongs to the public Internet space'
     ],
     correctOption: 0,
-    explanation: 'For subnet `192.168.5.0/26`, the block size is 64 (range 0-63). IP `192.168.5.0` is the Network ID, and IP `192.168.5.63` has all host bits set to 1, making it the Broadcast Address. Both are reserved and cannot be assigned to hosts.',
+    explanation: 'Subnet `192.168.10.64/27` has block size 32. The range is 192.168.10.64 (Network ID) through 192.168.10.95 (Broadcast ID). Usable host IPs are strictly .65 through .94. Assigning .95 assigns the broadcast address, which operating systems reject.',
     explanationsJson: {
-      1: 'IP addresses can be odd or even numbers; host assignment is governed by subnet bit boundaries.',
-      2: '192.168.0.0/16 is RFC 1918 private space, not DoD reserved.',
-      3: '255.255.255.192 (/26) is a valid, standard subnet mask.'
+      1: '/27 is a standard, valid subnet mask.',
+      2: 'Physical transceivers have no relation to IP octet values.',
+      3: '192.168.x.x is private RFC 1918 space, not public Internet.'
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
     questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'Broadcast Address Assignment Rejection',
+    concept: 'Broadcast Address Assignment Error in VLSM',
     points: 10
   },
 
@@ -3424,77 +3424,67 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Hexadecimal to Decimal',
+    concept: 'Hexadecimal to Decimal Conversion',
     points: 10
   },
   {
     quizId: 'quiz-net-101-bits-bytes-binary-hex',
     lessonSlug: 'net-101-bits-bytes-binary-hex',
-    text: 'A network packet contains IP `192.168.1.130` and Subnet Mask `255.255.255.192`. What is the result of a bitwise AND operation on the 4th octet (130 AND 192)?',
-    options: ['128', '192', '130', '64'],
+    text: 'How many binary bits are represented by a single hexadecimal character (a nibble)?',
+    options: ['4 bits', '8 bits', '2 bits', '16 bits'],
     correctOption: 0,
-    explanation: '130 in binary is `10000010`. 192 in binary is `11000000`. Bitwise AND: 1 AND 1 = 1 (bit 128); all other bits have a 0 in at least one operand -> `10000000` = 128.',
+    explanation: 'Each hexadecimal digit represents a 4-bit nibble ($2^4 = 16$ distinct states: 0 to F). Two hex characters form an 8-bit byte.',
     explanationsJson: {
-      1: '192 requires bit 64 to be 1 in both operands, but 130 has bit 64 as 0.',
-      2: '130 is the input host octet, not the masked network octet.',
-      3: '64 would require bit 128 to be 0, which is false.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Bitwise AND Logic',
-    points: 10
-  },
-  {
-    quizId: 'quiz-net-101-bits-bytes-binary-hex',
-    lessonSlug: 'net-101-bits-bytes-binary-hex',
-    text: 'An Ethernet interface has MAC address `00:1A:2B:3C:4D:5E`. How many total binary bits and how many hexadecimal digits constitute this address?',
-    options: [
-      '48 binary bits represented by 12 hexadecimal digits (each hex digit = 4 bits)',
-      '32 binary bits represented by 8 hexadecimal digits',
-      '64 binary bits represented by 16 hexadecimal digits',
-      '128 binary bits represented by 32 hexadecimal digits'
-    ],
-    correctOption: 0,
-    explanation: 'An Ethernet MAC address is 48 bits long (6 bytes). Each byte is represented by 2 hexadecimal digits (1 nibble = 4 bits), resulting in 6 * 2 = 12 hex characters.',
-    explanationsJson: {
-      1: '32 bits describes an IPv4 address, not a 48-bit MAC address.',
-      2: '64 bits is an EUI-64 identifier, not standard Ethernet MAC-48.',
-      3: '128 bits describes an IPv6 address.'
+      1: '8 bits is one full Byte (represented by two hex characters).',
+      2: '2 bits can only represent 4 states (0-3).',
+      3: '16 bits is a two-byte word (represented by four hex characters).'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'MAC Bit Architecture',
+    concept: 'Nibble and Hexadecimal Architecture',
     points: 10
   },
   {
     quizId: 'quiz-net-101-bits-bytes-binary-hex',
     lessonSlug: 'net-101-bits-bytes-binary-hex',
-    text: 'A network technician analyzes a raw binary capture displaying byte `11111110`. What is the decimal value and hexadecimal representation of this byte?',
-    options: [
-      'Decimal 254 | Hexadecimal 0xFE',
-      'Decimal 255 | Hexadecimal 0xFF',
-      'Decimal 252 | Hexadecimal 0xFC',
-      'Decimal 248 | Hexadecimal 0xF8'
-    ],
+    text: 'A user downloads a 200 MegaByte (200 MB) file over a 160 MegaBit per second (160 Mbps) Internet connection. What is the theoretical minimum download time assuming 100% link utilization?',
+    options: ['10 seconds', '1.25 seconds', '80 seconds', '25 seconds'],
     correctOption: 0,
-    explanation: '11111110 has all bits set except bit 1 (255 - 1 = 254). Left nibble `1111` = 15 = F; Right nibble `1110` = 14 = E. Hex = `0xFE`.',
+    explanation: 'First convert bandwidth from bits to Bytes: 160 Mbps / 8 = 20 MB/s. Then divide file size by throughput: 200 MB / 20 MB/s = 10 seconds.',
     explanationsJson: {
-      1: 'Decimal 255 is 11111111 (0xFF).',
-      2: 'Decimal 252 is 11111100 (0xFC).',
-      3: 'Decimal 248 is 11111000 (0xF8).'
+      1: '1.25 seconds occurs if you erroneously divide 200 by 160 without converting bits to Bytes.',
+      2: '80 seconds is calculated by incorrectly multiplying by 8.',
+      3: '25 seconds is calculated with an incorrect conversion factor.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Binary to Decimal and Hex Conversion',
+    concept: 'Bandwidth vs Storage Conversion (Mbps to MB/s)',
     points: 10
   },
   {
     quizId: 'quiz-net-101-bits-bytes-binary-hex',
     lessonSlug: 'net-101-bits-bytes-binary-hex',
-    text: 'A host is assigned IP `10.1.1.1` on an unmanaged network. When checking raw network frames, the technician notices that 1 byte of data is transmitted every 1 millisecond. What is the transmission rate in bits per second (bps)?',
+    text: 'What hexadecimal string represents the 8-bit binary value `11101111`?',
+    options: ['0xEF', '0xFE', '0xEE', '0xDF'],
+    correctOption: 0,
+    explanation: 'Split into two 4-bit nibbles: Upper nibble 1110 = 8+4+2 = 14 = E. Lower nibble 1111 = 8+4+2+1 = 15 = F. Hex string is 0xEF.',
+    explanationsJson: {
+      1: '0xFE is binary 11111110.',
+      2: '0xEE is binary 11101110.',
+      3: '0xDF is binary 11011111.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Binary Nibble to Hex Conversion',
+    points: 10
+  },
+  {
+    quizId: 'quiz-net-101-bits-bytes-binary-hex',
+    lessonSlug: 'net-101-bits-bytes-binary-hex',
+    text: 'When checking data transfer rates, an engineer observes that 1 Byte of data is transmitted every 1 millisecond. What is the transmission rate in bits per second (bps)?',
     options: [
       '8,000 bits per second (8 kbps)',
       '1,000 bits per second (1 kbps)',

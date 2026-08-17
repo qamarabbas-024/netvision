@@ -28,7 +28,7 @@ The following metrics represent the actual verified database records seeded via 
 | **Total Active Lessons** | **40** | Complete with analogies, technical explanations, and cheatsheets |
 | **Total Quizzes** | **40** | Associated with lessons (passing score threshold: 80%) |
 | **Total Quiz Questions** | **193** | Assessment 2.0: Recall (37), Understanding (60), Application (55), Troubleshooting (38), Expert Reasoning (3) |
-| **Total Interactive Labs** | **40** | Guided packet manipulation, CIDR calculation, and Wireshark forensics |
+| **Total Interactive Labs** | **41** | Guided packet manipulation, CIDR calculation, and Wireshark forensics |
 | **Command References** | Embedded | Commands embedded in lesson JSON and lab validation rules |
 | **Gamification Achievements** | **10** | Spanning Learning, Assessment, Practical, Skill, and Milestone tiers |
 | **Certification Definitions** | **1** | `NV-NET` (NetVision Certified Network Administrator) |
