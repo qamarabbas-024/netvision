@@ -33,7 +33,7 @@ async function runOtpDiagnostic() {
   console.log(`   ✓ User created (ID: ${user.id}, isVerified: ${user.isVerified})`);
 
   console.log('2. Testing OTP Generation & Database Storage...');
-  const rawOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const rawOtp = crypto.randomInt(100000, 1000000).toString();
   const otpHash = hashToken(rawOtp);
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 

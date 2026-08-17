@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { SandboxStatus } from '@prisma/client';
 import {
   ISandboxProvider,
@@ -48,7 +49,7 @@ export class SimulatedSandboxProvider implements ISandboxProvider {
     this.logger.log(`Created Simulated Network Sandbox Session for user ${userId} (Lab: ${labId || 'General Sandbox'})`);
 
     return {
-      providerSessionId: `sim-sess-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      providerSessionId: `sim-sess-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
       status: SandboxStatus.RUNNING,
       expiresAt,
       resourceLimits: defaultLimits,

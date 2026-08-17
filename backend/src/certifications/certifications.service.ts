@@ -5,6 +5,7 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { ExamType, ExamAttemptStatus } from '@prisma/client';
 
@@ -1940,7 +1941,7 @@ export class CertificationsService {
     }
 
     // Check if certificate already exists for user and certificationCode
-    let existingCert = await this.prisma.certificate.findFirst({
+    const existingCert = await this.prisma.certificate.findFirst({
       where: {
         userId,
         certificationCode: code,
@@ -1992,9 +1993,9 @@ export class CertificationsService {
       'Core IP Infrastructure Protocols (ARP, DNS, DHCP, ICMP)',
     ];
 
-    const uniqueSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const uniqueSuffix = crypto.randomBytes(4).toString('hex').toUpperCase();
     const credentialId = `NV-NET-2026-${uniqueSuffix}`;
-    const verificationCode = `NV-VERIFY-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    const verificationCode = `NV-VERIFY-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
 
     const certData = {
       userId,

@@ -14,7 +14,6 @@ function OAuthCallbackContent() {
 
   useEffect(() => {
     async function processOAuthCallback() {
-      const token = searchParams.get('token');
       const errParam = searchParams.get('error');
 
       if (errParam) {
@@ -23,25 +22,18 @@ function OAuthCallbackContent() {
         return;
       }
 
-      if (!token) {
-        setError('No authentication token received from OAuth provider.');
-        setTimeout(() => router.push('/login'), 3000);
-        return;
-      }
-
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1'}/auth/me`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+        const response = await fetch(`${apiBase}/auth/me`, {
+          credentials: 'include',
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch user profile post-authentication');
+          throw new Error('Authentication session could not be verified.');
         }
 
         const user = await response.json();
-        setAuth(user, token, true);
+        setAuth(user, 'cookie-session', true);
         router.push('/dashboard');
       } catch (err: any) {
         setError(err.message || 'Error processing authentication session.');

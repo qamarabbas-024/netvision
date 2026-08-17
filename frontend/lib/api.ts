@@ -21,6 +21,7 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
   const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   try {
     const res = await fetch(url, {
+      credentials: 'include',
       ...options,
       headers: {
         ...getAuthHeaders(),

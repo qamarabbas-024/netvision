@@ -82,7 +82,17 @@ export class AuthController {
     if (!token) {
       return res.redirect(`${frontendUrl}/login?error=OAuthAuthenticationFailed`);
     }
-    return res.redirect(`${frontendUrl}/auth/callback?token=${encodeURIComponent(token)}`);
+
+    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
+    res.cookie('netvision_auth_token', token, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+    });
+
+    return res.redirect(`${frontendUrl}/auth/callback`);
   }
 
   // GitHub OAuth Initiate & Callback
@@ -100,7 +110,24 @@ export class AuthController {
     if (!token) {
       return res.redirect(`${frontendUrl}/login?error=OAuthAuthenticationFailed`);
     }
-    return res.redirect(`${frontendUrl}/auth/callback?token=${encodeURIComponent(token)}`);
+
+    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
+    res.cookie('netvision_auth_token', token, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+    });
+
+    return res.redirect(`${frontendUrl}/auth/callback`);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('netvision_auth_token', { path: '/' });
+    return { message: 'Logged out successfully.' };
   }
 
   @UseGuards(JwtAuthGuard)

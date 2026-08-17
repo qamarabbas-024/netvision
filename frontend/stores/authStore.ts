@@ -51,6 +51,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.removeItem('netvision_user');
       sessionStorage.removeItem('netvision_token');
       sessionStorage.removeItem('netvision_user');
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      fetch(`${apiBase}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      }).catch(() => {});
     }
     set({ user: null, token: null, isAuthenticated: false, isLoading: false });
   },
@@ -62,20 +67,21 @@ export const useAuthStore = create<AuthState>((set) => ({
     const token = localStorage.getItem('netvision_token') || sessionStorage.getItem('netvision_token');
     const storedUserJson = localStorage.getItem('netvision_user') || sessionStorage.getItem('netvision_user');
 
-    if (!token) {
-      set({ user: null, token: null, isAuthenticated: false, isLoading: false });
-      return;
-    }
-
     try {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      const headers: Record<string, string> = {};
+      if (token && token !== 'cookie-session') {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${apiBase}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers,
+        credentials: 'include',
       });
 
       if (res.ok) {
         const userData = await res.json();
-        set({ user: userData, token, isAuthenticated: true, isLoading: false });
+        set({ user: userData, token: token || 'cookie-session', isAuthenticated: true, isLoading: false });
       } else {
         localStorage.removeItem('netvision_token');
         localStorage.removeItem('netvision_user');
@@ -84,7 +90,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ user: null, token: null, isAuthenticated: false, isLoading: false });
       }
     } catch (err) {
-      if (storedUserJson) {
+      if (token && storedUserJson) {
         try {
           const parsedUser = JSON.parse(storedUserJson);
           set({ user: parsedUser, token, isAuthenticated: true, isLoading: false });

@@ -38,7 +38,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        (req: any) => {
+          if (req && req.cookies) {
+            return req.cookies['netvision_auth_token'] || req.cookies['accessToken'] || null;
+          }
+          return null;
+        },
+      ]),
       ignoreExpiration: false,
       secretOrKey: secret || 'super_secret_netvision_jwt_key',
     });

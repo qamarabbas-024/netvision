@@ -101,8 +101,8 @@ export class AuthService {
 
     // If email verification is enabled, generate and dispatch OTP
     if (emailVerificationEnabled) {
-      // Generate secure 6-digit numeric OTP
-      const rawOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      // Generate cryptographically secure 6-digit numeric OTP
+      const rawOtp = crypto.randomInt(100000, 1000000).toString();
       const otpHash = this.hashToken(rawOtp);
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
 
@@ -254,7 +254,7 @@ export class AuthService {
       throw new BadRequestException('Please wait 60 seconds before requesting another verification code.');
     }
 
-    const rawOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    const rawOtp = crypto.randomInt(100000, 1000000).toString();
     const otpHash = this.hashToken(rawOtp);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
@@ -301,7 +301,7 @@ export class AuthService {
 
     // If email verification is enabled and user is not verified, require OTP verification
     if (this.isEmailVerificationEnabled() && !user.isVerified) {
-      const rawOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      const rawOtp = crypto.randomInt(100000, 1000000).toString();
       const otpHash = this.hashToken(rawOtp);
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 

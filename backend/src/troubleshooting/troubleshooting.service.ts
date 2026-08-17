@@ -5,6 +5,7 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { AchievementsService } from '../achievements/achievements.service';
 import { TROUBLESHOOTING_SCENARIOS } from './troubleshooting-scenarios.catalog';
@@ -107,7 +108,7 @@ export class TroubleshootingService {
     }
 
     const scenario = this.getScenarioBySlugOrId(scenarioIdOrSlug, true);
-    const sessionId = `tb-sess-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const sessionId = `tb-sess-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
 
     const sessionState: TroubleshootingSessionState & { userId?: string; anonymousId?: string } = {
       sessionId,
