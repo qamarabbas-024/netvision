@@ -23,7 +23,7 @@ function VerifyOtpContent() {
   const [isResending, setIsResending] = useState(false);
 
   useEffect(() => {
-    const queryEmail = searchParams.get('email');
+    const queryEmail = searchParams?.get('email');
     if (queryEmail) {
       setEmail(queryEmail.trim().toLowerCase());
     }

@@ -22,7 +22,7 @@ function LoginContent() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const errorParam = searchParams.get('error');
+    const errorParam = searchParams?.get('error');
     if (errorParam === 'GoogleOAuthNotConfigured') {
       setError('Google OAuth is not configured on this server yet. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in backend/.env.');
     } else if (errorParam === 'OAuthAuthenticationFailed') {

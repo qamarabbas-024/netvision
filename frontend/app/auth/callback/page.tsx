@@ -14,7 +14,7 @@ function OAuthCallbackContent() {
 
   useEffect(() => {
     async function processOAuthCallback() {
-      const errParam = searchParams.get('error');
+      const errParam = searchParams?.get('error');
 
       if (errParam) {
         setError('Social authentication was cancelled or failed. Please try again.');

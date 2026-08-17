@@ -70,7 +70,7 @@ export const AppSidebar: React.FC = () => {
             Menu
           </span>
           {filteredItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+            const isActive = !!pathname && (pathname === item.href || pathname.startsWith(item.href + '/'));
             return (
               <Link
                 key={item.href}
@@ -149,7 +149,7 @@ export const MobileSidebarDrawer: React.FC<{ isOpen: boolean; onClose: () => voi
               Menu
             </span>
             {filteredItems.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+              const isActive = !!pathname && (pathname === item.href || pathname.startsWith(item.href + '/'));
               return (
                 <Link
                   key={item.href}
