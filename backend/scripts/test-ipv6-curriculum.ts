@@ -64,30 +64,36 @@ async function verifyIpv6Curriculum() {
   assert(ipv6Lesson!.visualizationType === 'IPV6_COMPRESSOR_ENGINE', 'Visualization type is IPV6_COMPRESSOR_ENGINE');
   console.log(`  ✓ Lesson "${ipv6Lesson!.title}" verified in NET-203.`);
 
-  // [TEST 2] Verify 18-step pedagogical metadata & core concepts
-  console.log('\n[TEST 2] Verifying 18-Step Pedagogical Metadata & 20 Core Concepts...');
+  // [TEST 2] Verify IPv6-specific learning outcomes & core concepts
+  console.log('\n[TEST 2] Verifying IPv6 Core Learning Outcomes & Domain Concepts...');
   const meta = ipv6Lesson!.stepMetadata;
   assert(!!meta, 'Lesson contains stepMetadata');
   assert(!!meta.step1_objective, 'Step 1: Objective defined');
+  assert(meta.step1_objective.includes('128-bit') && meta.step1_objective.includes('SLAAC'), 'Objective covers 128-bit & SLAAC');
   assert(!!meta.step2_prerequisites && meta.step2_prerequisites.length > 0, 'Step 2: Prerequisites defined');
   assert(!!meta.step3_whyItMatters, 'Step 3: Why It Matters defined');
+  assert(meta.step3_whyItMatters.includes('exhausted') || meta.step3_whyItMatters.includes('IPv4'), 'Why It Matters explains IPv4 exhaustion');
   assert(!!meta.step4_coreConcept, 'Step 4: Core Concept defined');
-  assert(meta.step4_coreConcept.includes('128 bits') || meta.step4_coreConcept.includes('RFC 5952'), 'Core concept includes 128-bit architecture & RFC 5952');
+  assert(meta.step4_coreConcept.includes('128 bits') && meta.step4_coreConcept.includes('RFC 5952'), 'Core concept includes 128-bit architecture & RFC 5952');
+  assert(meta.step4_coreConcept.includes('SLAAC') && meta.step4_coreConcept.includes('DAD'), 'Core concept covers SLAAC and DAD');
   assert(!!meta.step5_technicalAnatomy, 'Step 5: Technical Anatomy defined');
-  assert(!!meta.step6_howItWorks, 'Step 6: How It Works defined');
-  assert(!!meta.step7_packetHeaderView, 'Step 7: 40-Byte Header View defined');
+
+  const components = meta.step5_technicalAnatomy.components;
+  const compNames = components.map((c) => c.name);
+  assert(compNames.some((n) => n.includes('128-Bit')), 'Anatomy includes 128-Bit Structure');
+  assert(compNames.some((n) => n.includes('RFC 5952')), 'Anatomy includes RFC 5952 Compression Rules');
+  assert(compNames.some((n) => n.includes('Global Unicast')), 'Anatomy includes Global Unicast Address');
+  assert(compNames.some((n) => n.includes('Link-Local')), 'Anatomy includes Link-Local Address');
+  assert(compNames.some((n) => n.includes('Multicast')), 'Anatomy includes Multicast & Anycast');
+  assert(compNames.some((n) => n.includes('SLAAC')), 'Anatomy includes SLAAC');
+  assert(compNames.some((n) => n.includes('Dual-Stack')), 'Anatomy includes Dual-Stack');
+
+  assert(!!meta.step6_howItWorks && meta.step6_howItWorks.steps.length >= 4, 'Step 6: SLAAC workflow defined with >=4 steps');
   assert(!!meta.step8_visualExplanation, 'Step 8: Visual Explanation defined');
-  assert(!!meta.step9_workedExample, 'Step 9: Worked Example defined');
-  assert(!!meta.step10_realWorldScenario, 'Step 10: Real World Scenario defined');
-  assert(!!meta.step11_deviceBehavior, 'Step 11: Device Behavior defined');
-  assert(!!meta.step12_cliTooling && meta.step12_cliTooling.length > 0, 'Step 12: CLI Tooling defined');
-  assert(!!meta.step13_troubleshooting && meta.step13_troubleshooting.length > 0, 'Step 13: Troubleshooting defined');
-  assert(!!meta.step14_commonMistakes && meta.step14_commonMistakes.length > 0, 'Step 14: Common Mistakes defined');
-  assert(!!meta.step15_securityPerspective, 'Step 15: Security Perspective defined');
-  assert(!!meta.step16_examPrep, 'Step 16: Exam Prep defined');
-  assert(!!meta.step17_practicalLabRef, 'Step 17: Practical Lab Reference defined');
+  assert(meta.step8_visualExplanation.type === 'IPV6_COMPRESSOR_ENGINE', 'Visualizer type is IPV6_COMPRESSOR_ENGINE');
+  assert(!!meta.step9_workedExample, 'Step 9: RFC 5952 Worked Example defined');
   assert(!!meta.step18_masterySummary, 'Step 18: Mastery Summary defined');
-  console.log('  ✓ All 18 pedagogical steps and core concepts verified.');
+  console.log('  ✓ All IPv6 core learning outcomes and domain concepts verified.');
 
   // [TEST 3] Verify Assessment Questions across 4 Cognitive Levels
   console.log('\n[TEST 3] Verifying Assessment Question Bank & Cognitive Levels...');

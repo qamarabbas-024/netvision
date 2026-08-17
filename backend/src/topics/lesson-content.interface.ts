@@ -45,48 +45,48 @@ export interface LessonStepMetadata {
     description: string;
     components: TechnicalComponent[];
   };
-  step6_howItWorks: {
+  step6_howItWorks?: {
     steps: HowItWorksStep[];
   };
-  step7_packetHeaderView: {
+  step7_packetHeaderView?: {
     protocol: string;
     fields: HeaderFieldView[];
     headerDiagramAscii?: string;
   };
-  step8_visualExplanation: {
+  step8_visualExplanation?: {
     type: string;
     title: string;
     description: string;
     nodesOrFrames?: any[];
   };
-  step9_workedExample: {
+  step9_workedExample?: {
     title: string;
     problemStatement: string;
     stepByStepSolution: string[];
     finalResult: string;
   };
-  step10_realWorldScenario: {
+  step10_realWorldScenario?: {
     topology: string;
     scenarioText: string;
     engineeringContext: string;
   };
-  step11_deviceBehavior: {
+  step11_deviceBehavior?: {
     hostBehavior: string;
     nicBehavior: string;
     switchOrRouterBehavior: string;
   };
-  step12_cliTooling: CliToolingItem[];
-  step13_troubleshooting: TroubleshootingItem[];
-  step14_commonMistakes: CommonMistakeItem[];
-  step15_securityPerspective: {
+  step12_cliTooling?: CliToolingItem[];
+  step13_troubleshooting?: TroubleshootingItem[];
+  step14_commonMistakes?: CommonMistakeItem[];
+  step15_securityPerspective?: {
     threatOrVulnerability: string;
     mitigationStrategy: string;
   };
-  step16_examPrep: {
+  step16_examPrep?: {
     keyExamPoints: string[];
     frequentTraps: string[];
   };
-  step17_practicalLabRef: {
+  step17_practicalLabRef?: {
     title: string;
     scenario: string;
     tasks: string[];

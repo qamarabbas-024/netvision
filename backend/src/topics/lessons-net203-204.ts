@@ -718,62 +718,41 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
       'Master the next-generation internetworking protocol: 128-bit IPv6 address architecture, hexadecimal hextet formatting, RFC 5952 canonical zero-compression rules, Global Unicast (GUA 2000::/3) vs Link-Local (LLA fe80::/10) vs Unique Local (ULA fc00::/7), Stateless Address Autoconfiguration (SLAAC RS/RA workflow), Neighbor Discovery Protocol (NDP), and Dual-Stack coexistence.',
     stepMetadata: {
       step1_objective:
-        'Master 128-bit IPv6 addressing, apply RFC 5952 zero compression rules, classify GUA, LLA, and ULA address scopes, understand SLAAC autoconfiguration (Router Solicitation / Router Advertisement), and analyze Dual-Stack coexistence.',
+        'Master 128-bit IPv6 addressing and hexadecimal hextet notation, apply RFC 5952 zero compression rules, classify IPv6 address scopes (Global Unicast, Link-Local, Multicast, Anycast, Unique Local), understand Neighbor Discovery Protocol (RS/RA/NS/NA), trace SLAAC autoconfiguration and Duplicate Address Detection (DAD), and evaluate Dual-Stack coexistence.',
       step2_prerequisites: ['net-202-ipv4-addressing-cidr', 'net-101-bits-bytes-binary-hex'],
       step3_whyItMatters:
-        'IPv4 address space is exhausted worldwide. All major cloud providers, 5G cellular networks, and modern enterprise backbones operate native IPv6 infrastructure.',
+        'The global 32-bit IPv4 address pool (~4.3 billion addresses) is exhausted. Modern 5G mobile networks, cloud providers, hyperscale data centers, and internet service providers deploy native IPv6 ($2^{128} = 3.4 \\times 10^{38}$ addresses) to provide every device on Earth with a globally unique routable address without NAT workarounds.',
       step4_coreConcept:
-        'IPv6 expands address space from 32 bits ($4.3 \\times 10^9$) to 128 bits ($2^{128} = 3.4 \\times 10^{38}$ addresses). Addresses are written as 8 hexadecimal hextets separated by colons (e.g. `2001:0db8:0000:0000:0000:ff00:0042:8329`). RFC 5952 defines two compression rules: (1) Omit all leading zeros in every hextet (`:0db8:` -> `:db8:`), (2) Replace the longest contiguous run of multiple all-zero hextets with a single double-colon `::` (allowed only ONCE per address). Key address scopes: Global Unicast Address (GUA, `2000::/3`, globally routable), Link-Local Address (LLA, `fe80::/10`, auto-generated on every interface for local segment communication), Unique Local (ULA, `fc00::/7`, private internal LANs), Loopback (`::1/128`), and Multicast (`ff00::/8`). SLAAC (Stateless Address Autoconfiguration, RFC 4862) allows hosts to configure their own GUA automatically by receiving ICMPv6 Router Advertisements (RA) from local routers without needing a DHCP server.',
+        'IPv6 expands address space to 128 bits, written as 8 hexadecimal hextets separated by colons (`2001:0db8:0000:0000:0000:0000:0000:0001`). RFC 5952 defines two compression rules: (1) omit leading zeros in every hextet (`:0db8:` -> `:db8:`), (2) replace the longest contiguous run of all-zero hextets with a single double-colon `::` (allowed only ONCE). An IPv6 unicast address consists of a 64-bit Network Prefix and a 64-bit Interface Identifier. Key address types: Global Unicast (GUA `2000::/3`, globally routable), Link-Local (LLA `fe80::/10`, auto-generated on every interface for local link communication), Multicast (`ff00::/8`, replaces broadcast with targeted groups like `ff02::1` All-Nodes and `ff02::2` All-Routers), Anycast (one-to-nearest routing), and Unique Local (ULA `fc00::/7`, private enterprise routing). Neighbor Discovery Protocol (NDP) replaces ARP and DHCP for basic configuration using ICMPv6: hosts multicast Router Solicitations (RS, Type 133) and routers respond with Router Advertisements (RA, Type 134). Under Stateless Address Autoconfiguration (SLAAC, RFC 4862), the host autonomously combines the advertised /64 prefix with its 64-bit Interface ID and verifies uniqueness via Duplicate Address Detection (DAD) using Neighbor Solicitations (NS, Type 135). Dual-stack operation enables hosts and routers to run IPv4 and IPv6 concurrently during global adoption.',
       step5_technicalAnatomy: {
-        title: '128-Bit IPv6 Address Architecture & Address Scopes',
-        description: 'Hextet formatting, RFC 5952 compression rules, and scope prefixes.',
+        title: '128-Bit IPv6 Addressing, Scopes & Autoconfiguration Architecture',
+        description: 'Hextet structure, RFC 5952 compression rules, address scopes, and NDP mechanics.',
         components: [
-          { name: '128-Bit Structure (8 Hextets)', detail: '8 groups of 16 bits each ($8 \\times 16 = 128$ bits total), written as 4 hexadecimal digits per hextet.' },
-          { name: 'RFC 5952 Compression Rules', detail: 'Rule 1: Drop leading zeros (`0042` -> `42`). Rule 2: Single `::` for longest sequence of all-zero hextets.' },
+          { name: '128-Bit Structure (8 Hextets)', detail: '8 groups of 16 bits each ($8 \\times 16 = 128$ bits), written as 4 hexadecimal digits per hextet separated by colons.' },
+          { name: 'RFC 5952 Compression Rules', detail: 'Rule 1: Drop leading zeros (`0042` -> `42`). Rule 2: Single `::` replaces the longest contiguous run of multiple all-zero hextets.' },
+          { name: 'Prefix vs Interface ID (/64)', detail: 'First 64 bits identify the subnet/routing path; remaining 64 bits identify the host NIC (Interface ID).' },
           { name: 'Global Unicast Address (GUA)', detail: 'Prefix: `2000::/3` (2000:: to 3fff::). Publicly routable across the global Internet.' },
-          { name: 'Link-Local Address (LLA)', detail: 'Prefix: `fe80::/10` (fe80:: to febf::). Required on every IPv6 interface; used for local routing and NDP; never routed.' },
-          { name: 'Unique Local Address (ULA)', detail: 'Prefix: `fc00::/7` (typically fd00::/8). Private enterprise address space analogous to RFC 1918 IPv4.' },
-          { name: 'SLAAC (Stateless Autoconfiguration)', detail: 'Host sends ICMPv6 Router Solicitation (RS); router replies with Router Advertisement (RA) containing /64 prefix.' },
-          { name: 'Dual-Stack Architecture', detail: 'Host NIC and routers run IPv4 and IPv6 protocol stacks simultaneously side-by-side.' },
+          { name: 'Link-Local Address (LLA)', detail: 'Prefix: `fe80::/10` (fe80:: to febf::). Required on every IPv6 interface; used for local subnet routing and NDP; never routed.' },
+          { name: 'Multicast & Anycast', detail: 'Multicast (`ff00::/8`) replaces broadcast (`ff02::1` All-Nodes, `ff02::2` All-Routers). Anycast delivers to the nearest recipient sharing the same address.' },
+          { name: 'Unique Local Address (ULA)', detail: 'Prefix: `fc00::/7` (typically `fd00::/8`). Private enterprise internal address space analogous to RFC 1918 IPv4.' },
+          { name: 'SLAAC (Stateless Autoconfiguration)', detail: 'Host derives its GUA autonomously by combining the /64 prefix from an ICMPv6 Router Advertisement (RA) with its Interface ID.' },
+          { name: 'Duplicate Address Detection (DAD)', detail: 'Host sends ICMPv6 Neighbor Solicitation (NS) for its own tentative address to verify uniqueness before binding.' },
+          { name: 'DHCPv6 vs SLAAC', detail: 'SLAAC provides stateless prefix allocation; DHCPv6 can operate in stateless mode (options only like DNS) or stateful mode (managed address leases).' },
+          { name: 'Dual-Stack Coexistence', detail: 'Hosts and routers maintain concurrent IPv4 and IPv6 protocol stacks on the same physical interfaces.' },
         ],
       },
       step6_howItWorks: {
         steps: [
-          { stepNumber: 1, title: 'Link-Local Generation', action: 'On interface initialization, host automatically configures a Link-Local address (`fe80::...`) on the interface.' },
-          { stepNumber: 2, title: 'Router Solicitation (RS)', action: 'Host multicasts an ICMPv6 Router Solicitation (RS, Type 133) to `ff02::2` (All-Routers multicast).' },
-          { stepNumber: 3, title: 'Router Advertisement (RA)', action: 'Router returns ICMPv6 Router Advertisement (RA, Type 134) containing the /64 network prefix and default gateway address.' },
-          { stepNumber: 4, title: 'SLAAC Address Generation & DAD', action: 'Host combines the /64 prefix with its 64-bit Interface ID and performs Duplicate Address Detection (DAD).' },
+          { stepNumber: 1, title: 'Link-Local Address Self-Generation', action: 'On interface activation, the host automatically assigns a Link-Local address (`fe80::...`) to enable local link communication.' },
+          { stepNumber: 2, title: 'Router Solicitation (RS - ICMPv6 Type 133)', action: 'Host multicasts an ICMPv6 Router Solicitation to `ff02::2` (All-Routers multicast) requesting local network prefix configuration.' },
+          { stepNumber: 3, title: 'Router Advertisement (RA - ICMPv6 Type 134)', action: 'Local router responds with an ICMPv6 Router Advertisement to `ff02::1` (All-Nodes multicast) containing the /64 subnet prefix and default gateway address.' },
+          { stepNumber: 4, title: 'SLAAC Address Formation & DAD Validation', action: 'Host combines the /64 prefix with its 64-bit Interface ID to form its Global Unicast Address, then verifies uniqueness via Duplicate Address Detection (DAD).' },
         ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'IPv6 Fixed 40-Byte Header (RFC 8200)',
-        fields: [
-          { fieldName: 'Version', bitLength: '4 bits', hexSample: '0x6', description: 'IPv6 version identifier.' },
-          { fieldName: 'Traffic Class & Flow Label', bitLength: '28 bits', hexSample: '0x000000', description: 'QoS and packet flow labeling.' },
-          { fieldName: 'Payload Length', bitLength: '16 bits', hexSample: '0x05DC (1500B)', description: 'Size of payload excluding 40-byte base header.' },
-          { fieldName: 'Next Header', bitLength: '8 bits', hexSample: '0x06 (TCP) / 0x3A (ICMPv6)', description: 'Replaces IPv4 Protocol field.' },
-          { fieldName: 'Hop Limit', bitLength: '8 bits', hexSample: '64', description: 'Replaces IPv4 TTL field (decremented at each router).' },
-          { fieldName: 'Source & Destination Address', bitLength: '128 bits each', hexSample: '2001:db8::1 -> 2001:db8::2', description: '128-bit source and target.' },
-        ],
-        headerDiagramAscii: `
-+-------------------------------------------------------------------------------+
-|                      RFC 5952 IPV6 ZERO COMPRESSION RULES                     |
-+-------------------------------------------------------------------------------+
-| Uncompressed 128-Bit IPv6 Address (39 Characters):                            |
-| 2001 : 0db8 : 0000 : 0000 : 0000 : 0000 : 0000 : 0001                        |
-|                                                                               |
-| Step 1: Omit leading zeros in every hextet:                                   |
-| 2001 : db8  : 0    : 0    : 0    : 0    : 0    : 1                            |
-|                                                                               |
-| Step 2: Replace longest contiguous run of zero hextets with a single "::":     |
-| 2001:db8::1                                                                   |
-+-------------------------------------------------------------------------------+
-`,
       },
       step8_visualExplanation: {
         type: 'IPV6_COMPRESSOR_ENGINE',
         title: 'Interactive RFC 5952 IPv6 Zero Compressor & SLAAC Animator',
-        description: 'Input uncompressed IPv6 addresses to see canonical RFC 5952 zero compression applied live, and trace the SLAAC RS/RA autoconfiguration exchange.',
+        description: 'Input uncompressed IPv6 addresses to see canonical RFC 5952 zero compression applied live, explore address scopes, and trace the SLAAC RS/RA autoconfiguration exchange.',
       },
       step9_workedExample: {
         title: 'Compressing `2001:0db8:0000:0000:0000:0000:0000:0001` per RFC 5952',
@@ -785,63 +764,13 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
         ],
         finalResult: '`2001:db8::1` is the official canonical compressed format.',
       },
-      step10_realWorldScenario: {
-        topology: 'Enterprise Transition to IPv6 Dual-Stack',
-        scenarioText: 'An enterprise network enables Dual-Stack: routers and web servers run IPv4 and IPv6 simultaneously. Mobile clients on 5G cellular access the web servers over native IPv6, while legacy branch offices connect over IPv4, ensuring 100% backward compatibility during the multi-year global transition.',
-        engineeringContext: 'Dual-Stack is the primary co-existence mechanism during IPv6 migration.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Prioritizes IPv6 over IPv4 (RFC 6724 / Happy Eyeballs RFC 8305) when DNS returns both A and AAAA records.',
-        nicBehavior: 'Operates with multiple IPv6 addresses (at least one LLA and one GUA per interface).',
-        switchOrRouterBehavior: 'Routers transmit periodic ICMPv6 Router Advertisements (RA) every 200 seconds to support SLAAC.',
-      },
-      step12_cliTooling: [
-        {
-          command: 'powershell -Command "Get-NetIPAddress -AddressFamily IPv6 | Select-Object IPAddress, InterfaceAlias, PrefixOrigin"',
-          description: 'Displays active IPv6 Link-Local and Global Unicast addresses and autoconfiguration origin on Windows.',
-          expectedOutput:
-            'IPAddress                                InterfaceAlias PrefixOrigin\n---------                                -------------- ------------\nfe80::1a2b:3c4d:5e6f%12                  Ethernet       WellKnown   \n2001:db8:acad:1::50                      Ethernet       RouterAdvertisement',
-          proofExplanation: 'Confirms active Link-Local (fe80::) and SLAAC Router Advertisement (2001:db8::) configuration.',
-        },
-      ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Host has Link-Local address (fe80::) but no Global Unicast IPv6 address.',
-          possibleCauses: ['Local router not configured with `ipv6 unicast-routing` or blocking ICMPv6 RA messages'],
-          diagnosticSteps: ['Verify router IPv6 routing status and check ICMPv6 firewall rules.'],
-          remediation: 'Enable `ipv6 unicast-routing` on the default gateway router.',
-        },
-      ],
-      step14_commonMistakes: [
-        { misconception: 'Using double-colons (::) multiple times in the same IPv6 address (e.g. `2001::db8::1`).', correction: 'Double-colon `::` can ONLY appear ONCE per address; multiple uses create mathematical ambiguity in hextet counts.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Rogue IPv6 Router Advertisement (RA) Attacks',
-        mitigationStrategy: 'Enable IPv6 RA Guard on switchports to drop unauthorized ICMPv6 Router Advertisements from rogue endpoints.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'IPv6 = 128 bits (8 hextets of 16 bits each).',
-          'RFC 5952 rules: Drop leading zeros; single `::` for longest all-zero run.',
-          'GUA = 2000::/3; LLA = fe80::/10; ULA = fc00::/7; Loopback = ::1/128.',
-          'SLAAC uses ICMPv6 RS (Type 133) and RA (Type 134).',
-        ],
-        frequentTraps: [
-          'Using `::` twice in one address.',
-          'Thinking IPv6 uses ARP (IPv6 uses ICMPv6 Neighbor Discovery Protocol, not ARP).',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: IPv6 Zero Compression & SLAAC Interface Verification',
-        scenario: 'Apply RFC 5952 zero compression and inspect IPv6 Link-Local and SLAAC addresses.',
-        tasks: ['Compress 2001:0db8:0000:0000:0000:0000:0000:0001.', 'Verify IPv6 addresses with Get-NetIPAddress.'],
-        verificationMethod: 'Verify matching compressed string 2001:db8::1.',
-      },
       step18_masterySummary: {
         summaryPoints: [
-          'IPv6 provides 128-bit addresses to solve IPv4 exhaustion.',
-          'RFC 5952 defines canonical zero compression (`::` used once).',
-          'SLAAC enables automatic address configuration via ICMPv6 RA messages.',
+          'IPv6 provides 128-bit addresses ($3.4 \\times 10^{38}$) to overcome IPv4 exhaustion.',
+          'RFC 5952 defines canonical compression: drop leading zeros and use a single `::` for the longest contiguous zero run.',
+          'Address scopes separate Global Unicast (GUA `2000::/3`), Link-Local (LLA `fe80::/10`), Multicast (`ff00::/8`), and Unique Local (ULA `fc00::/7`).',
+          'SLAAC enables autonomous host configuration via ICMPv6 Router Solicitations and Router Advertisements with DAD validation.',
+          'Dual-Stack allows seamless concurrent IPv4 and IPv6 operation during global adoption.',
         ],
         nextLessonBridge:
           'With Layer 2 and Layer 3 foundations mastered, proceed to NET-204 to master Layer 4 Transport Protocols (TCP & UDP).',
