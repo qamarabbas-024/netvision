@@ -43,7 +43,7 @@ import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
         return {
           secret: secret || 'super_secret_netvision_jwt_key',
           signOptions: {
-            expiresIn: configService.get<string>('JWT_EXPIRATION', '7d'),
+            expiresIn: configService.get<string>('JWT_EXPIRATION', '7d') as any,
           },
         };
       },

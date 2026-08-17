@@ -17,7 +17,8 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
       callbackURL: `${configService.get<string>('API_URL', 'http://localhost:4000/api/v1')}/auth/github/callback`,
       scope: ['user:email'],
       store: new CookieStateStore(),
-    });
+      passReqToCallback: false,
+    } as any);
   }
 
   async validate(
