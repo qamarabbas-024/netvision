@@ -24,34 +24,48 @@ import {
 export default function TroubleshootingCatalogPage() {
   const [scenarios, setScenarios] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('ALL');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
-  useEffect(() => {
-    async function loadScenarios() {
-      setIsLoading(true);
-      try {
-        const data = await getTroubleshootingScenariosApi();
-        setScenarios(data || []);
-      } catch (err) {
-        console.error('Failed to load troubleshooting scenarios:', err);
-        setScenarios([]);
-      } finally {
-        setIsLoading(false);
-      }
+  const loadScenarios = async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const data = await getTroubleshootingScenariosApi();
+      setScenarios(data || []);
+    } catch (err: any) {
+      console.error('Failed to load troubleshooting scenarios:', err);
+      setLoadError(err?.message || 'Failed to load troubleshooting scenarios from server.');
+      setScenarios([]);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadScenarios();
   }, []);
 
-  const categories = ['ALL', 'Core IP Services', 'IP Addressing & Subnetting', 'Layer 2 Ethernet & ARP', 'VLANs & Trunking', 'Layer 2 Switching & STP', 'Dynamic Routing & OSPF', 'IP Routing & Forwarding', 'Layer 1/2 Physical & Data Link', 'Transport & PMTUD', 'QoS & Performance', 'Transport & Sockets'];
+  const resetFilters = () => {
+    setSearchQuery('');
+    setSelectedDifficulty('ALL');
+    setSelectedCategory('ALL');
+  };
+
+  const isFilteringActive = searchQuery.trim() !== '' || selectedDifficulty !== 'ALL' || selectedCategory !== 'ALL';
 
   const filteredScenarios = scenarios.filter((s) => {
+    const q = searchQuery.toLowerCase().trim();
     const matchesSearch =
-      !searchQuery ||
-      s.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.incidentDescription?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.networkingConcepts?.some((c: string) => c.toLowerCase().includes(searchQuery.toLowerCase()));
+      !q ||
+      s.title?.toLowerCase().includes(q) ||
+      s.incidentDescription?.toLowerCase().includes(q) ||
+      s.category?.toLowerCase().includes(q) ||
+      s.difficulty?.toLowerCase().includes(q) ||
+      s.initialSymptoms?.some((sym: string) => sym.toLowerCase().includes(q)) ||
+      s.networkingConcepts?.some((c: string) => c.toLowerCase().includes(q));
 
     const matchesDifficulty =
       selectedDifficulty === 'ALL' || s.difficulty?.toUpperCase() === selectedDifficulty.toUpperCase();
@@ -81,7 +95,13 @@ export default function TroubleshootingCatalogPage() {
                     <span className="text-xs font-mono text-rose-400 uppercase tracking-widest font-semibold flex items-center gap-1.5">
                       <ShieldAlert className="w-4 h-4" /> Live Incident Simulation Engine
                     </span>
-                    <Badge variant="rose">12 Scenarios Ready</Badge>
+                    <Badge variant="rose">
+                      {isLoading
+                        ? 'Loading...'
+                        : isFilteringActive
+                        ? `${filteredScenarios.length} of ${scenarios.length} Scenarios`
+                        : `${scenarios.length} ${scenarios.length === 1 ? 'Scenario' : 'Scenarios'} Ready`}
+                    </Badge>
                   </div>
                   <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
                     Network Troubleshooting & Break-Fix
@@ -142,10 +162,32 @@ export default function TroubleshootingCatalogPage() {
                     <span className="text-xs font-mono">Loading Troubleshooting Scenarios...</span>
                   </div>
                 </div>
-              ) : filteredScenarios.length === 0 ? (
+              ) : loadError ? (
+                <div className="p-12 text-center text-zinc-400 glass-panel rounded-3xl border border-rose-500/30 flex flex-col items-center gap-4">
+                  <AlertTriangle className="w-10 h-10 text-rose-400" />
+                  <div>
+                    <h3 className="text-base font-bold text-white mb-1">Unable to Load Incidents</h3>
+                    <p className="text-xs text-zinc-400">{loadError}</p>
+                  </div>
+                  <Button variant="cyan" size="sm" onClick={loadScenarios}>
+                    Retry Connection
+                  </Button>
+                </div>
+              ) : scenarios.length === 0 ? (
                 <div className="p-12 text-center text-zinc-500 glass-panel rounded-3xl border border-[#272732]">
                   <Wrench className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm font-semibold">No troubleshooting incidents match your filter.</p>
+                  <p className="text-sm font-semibold">No troubleshooting incidents available.</p>
+                </div>
+              ) : filteredScenarios.length === 0 ? (
+                <div className="p-12 text-center text-zinc-500 glass-panel rounded-3xl border border-[#272732] flex flex-col items-center gap-4">
+                  <Wrench className="w-8 h-8 mx-auto opacity-50" />
+                  <div>
+                    <p className="text-sm font-semibold text-zinc-300">No troubleshooting incidents match your filter.</p>
+                    <p className="text-xs text-zinc-500 mt-1">Try adjusting your search terms or difficulty selection.</p>
+                  </div>
+                  <Button variant="secondary" size="sm" onClick={resetFilters}>
+                    Reset All Filters
+                  </Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

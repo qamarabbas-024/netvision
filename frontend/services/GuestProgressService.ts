@@ -165,10 +165,30 @@ export class GuestProgressService {
   }
 
   /**
+   * Reset anonymous learner identity with a fresh UUID
+   */
+  static resetLearnerId(): string {
+    if (typeof window === 'undefined') return '';
+    const newId = this.generateUuid();
+    localStorage.setItem(ANON_ID_KEY, newId);
+    return newId;
+  }
+
+  /**
    * Clear local guest storage after successful account claim merge
    */
   static clearLocalGuestProgress(): void {
     if (typeof window === 'undefined') return;
     localStorage.removeItem(GUEST_PROGRESS_KEY);
+  }
+
+  /**
+   * Clear all local guest storage and reset anonymous identity
+   * Prevents previous guest progress from being retained or reclaimed after logout
+   */
+  static clearAllGuestData(): void {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem(GUEST_PROGRESS_KEY);
+    localStorage.removeItem(ANON_ID_KEY);
   }
 }

@@ -1503,52 +1503,62 @@ export class TopicsService {
 
       let claimedProgressCount = 0;
       for (const p of anonProgress) {
+        const currentAnonProg = await tx.userProgress.findFirst({
+          where: { id: p.id, anonymousId },
+        });
+        if (!currentAnonProg) continue;
+
         const existingUserProg = await tx.userProgress.findFirst({
-          where: { userId, lessonId: p.lessonId },
+          where: { userId, lessonId: currentAnonProg.lessonId },
         });
 
         if (existingUserProg) {
           let earliestCompletedAt = existingUserProg.completedAt;
-          if (existingUserProg.completedAt && p.completedAt) {
+          if (existingUserProg.completedAt && currentAnonProg.completedAt) {
             earliestCompletedAt =
-              new Date(existingUserProg.completedAt).getTime() <= new Date(p.completedAt).getTime()
+              new Date(existingUserProg.completedAt).getTime() <= new Date(currentAnonProg.completedAt).getTime()
                 ? existingUserProg.completedAt
-                : p.completedAt;
+                : currentAnonProg.completedAt;
           } else {
-            earliestCompletedAt = existingUserProg.completedAt || p.completedAt;
+            earliestCompletedAt = existingUserProg.completedAt || currentAnonProg.completedAt;
           }
 
           const existingWeak = Array.isArray(existingUserProg.weakConceptsJson)
             ? (existingUserProg.weakConceptsJson as string[])
             : [];
-          const guestWeak = Array.isArray(p.weakConceptsJson)
-            ? (p.weakConceptsJson as string[])
+          const guestWeak = Array.isArray(currentAnonProg.weakConceptsJson)
+            ? (currentAnonProg.weakConceptsJson as string[])
             : [];
           const mergedWeakConcepts = Array.from(new Set([...existingWeak, ...guestWeak]));
 
           await tx.userProgress.update({
             where: { id: existingUserProg.id },
             data: {
-              started: existingUserProg.started || p.started,
-              viewed: existingUserProg.viewed || p.viewed,
-              practicalCompleted: existingUserProg.practicalCompleted || p.practicalCompleted,
-              completed: existingUserProg.completed || p.completed,
-              score: Math.max(existingUserProg.score || 0, p.score || 0),
-              bestScore: Math.max(existingUserProg.bestScore || 0, p.bestScore || 0),
-              masteryScore: Math.max(existingUserProg.masteryScore || 0, p.masteryScore || 0),
-              quizAttemptsCount: (existingUserProg.quizAttemptsCount || 0) + (p.quizAttemptsCount || 0),
+              started: existingUserProg.started || currentAnonProg.started,
+              viewed: existingUserProg.viewed || currentAnonProg.viewed,
+              practicalCompleted: existingUserProg.practicalCompleted || currentAnonProg.practicalCompleted,
+              completed: existingUserProg.completed || currentAnonProg.completed,
+              score: Math.max(existingUserProg.score || 0, currentAnonProg.score || 0),
+              bestScore: Math.max(existingUserProg.bestScore || 0, currentAnonProg.bestScore || 0),
+              masteryScore: Math.max(existingUserProg.masteryScore || 0, currentAnonProg.masteryScore || 0),
+              quizAttemptsCount: (existingUserProg.quizAttemptsCount || 0) + (currentAnonProg.quizAttemptsCount || 0),
               completedAt: earliestCompletedAt,
               weakConceptsJson: mergedWeakConcepts,
             },
-          });
-          await tx.userProgress.delete({ where: { id: p.id } });
+          }).catch(() => null);
+          const { count: delCount } = await tx.userProgress.deleteMany({ where: { id: currentAnonProg.id } });
+          if (delCount > 0) {
+            claimedProgressCount++;
+          }
         } else {
-          await tx.userProgress.update({
-            where: { id: p.id },
+          const { count: updCount } = await tx.userProgress.updateMany({
+            where: { id: currentAnonProg.id, anonymousId },
             data: { userId, anonymousId: null },
           });
+          if (updCount > 0) {
+            claimedProgressCount++;
+          }
         }
-        claimedProgressCount++;
       }
 
       const { count: claimedQuizCount } = await tx.quizAttempt.updateMany({
@@ -1564,17 +1574,29 @@ export class TopicsService {
       const anonSaved = await tx.savedLesson.findMany({
         where: { anonymousId },
       });
+      let claimedSavedCount = 0;
       for (const s of anonSaved) {
+        const currentSaved = await tx.savedLesson.findFirst({
+          where: { id: s.id, anonymousId },
+        });
+        if (!currentSaved) continue;
+
         const existingSaved = await tx.savedLesson.findFirst({
-          where: { userId, lessonId: s.lessonId },
+          where: { userId, lessonId: currentSaved.lessonId },
         });
         if (existingSaved) {
-          await tx.savedLesson.delete({ where: { id: s.id } });
+          const { count: delSavedCount } = await tx.savedLesson.deleteMany({ where: { id: currentSaved.id } });
+          if (delSavedCount > 0) {
+            claimedSavedCount++;
+          }
         } else {
-          await tx.savedLesson.update({
-            where: { id: s.id },
+          const { count: updSavedCount } = await tx.savedLesson.updateMany({
+            where: { id: currentSaved.id, anonymousId },
             data: { userId, anonymousId: null },
           });
+          if (updSavedCount > 0) {
+            claimedSavedCount++;
+          }
         }
       }
 
@@ -1589,10 +1611,11 @@ export class TopicsService {
       });
 
       if (anonLearner) {
-        await tx.anonymousLearner.delete({ where: { id: anonymousId } }).catch(() => null);
+        await tx.anonymousLearner.deleteMany({ where: { id: anonymousId } });
       }
 
-      const totalClaimed = claimedProgressCount + claimedQuizCount + claimedLabCount + anonSaved.length + claimedAchievementCount;
+      const totalClaimed =
+        claimedProgressCount + claimedQuizCount + claimedLabCount + claimedSavedCount + claimedAchievementCount;
 
       return {
         success: true,

@@ -37,9 +37,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Merge & claim guest progress into authenticated user account
       const anonId = GuestProgressService.getLearnerId();
       if (anonId) {
-        claimAnonymousProgressApi(anonId).then(() => {
-          GuestProgressService.clearLocalGuestProgress();
-        });
+        claimAnonymousProgressApi(anonId)
+          .catch(() => {})
+          .finally(() => {
+            GuestProgressService.clearAllGuestData();
+          });
       }
     }
     set({ user, token, isAuthenticated: true, isLoading: false });
@@ -51,6 +53,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.removeItem('netvision_user');
       sessionStorage.removeItem('netvision_token');
       sessionStorage.removeItem('netvision_user');
+      GuestProgressService.clearAllGuestData();
       const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
       fetch(`${apiBase}/auth/logout`, {
         method: 'POST',

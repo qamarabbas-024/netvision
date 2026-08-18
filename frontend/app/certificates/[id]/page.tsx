@@ -11,29 +11,88 @@ export default function CertificateDetailPage() {
   const params = useParams();
   const certId = params?.id as string;
   const [certData, setCertData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadCert() {
-      if (!certId) return;
+      if (!certId) {
+        setIsLoading(false);
+        setError('No certificate ID provided.');
+        return;
+      }
+      setIsLoading(true);
+      setError(null);
       try {
         const data = await getCertificateByIdApi(certId);
-        setCertData(data);
-      } catch {
-        // Fallback gracefully to default demonstration view
+        if (data && (data.id || data.code || data.credentialId)) {
+          setCertData(data);
+        } else {
+          setError(`Certificate "${certId}" could not be verified on the server.`);
+        }
+      } catch (err: any) {
+        setError(err?.message || `Certificate credential "${certId}" not found or invalid.`);
+      } finally {
+        setIsLoading(false);
       }
     }
     loadCert();
   }, [certId]);
 
-  const candidateName = certData?.recipientName || 'Alex Rivers';
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col items-center justify-center p-6 bg-net-grid-pattern">
+        <div className="w-10 h-10 border-2 border-[#00f0ff] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-xs font-mono text-zinc-400">Verifying Cryptographic Credential Record...</p>
+      </div>
+    );
+  }
+
+  if (error || !certData) {
+    return (
+      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col justify-between p-6 sm:p-10 bg-net-grid-pattern">
+        <div className="max-w-5xl mx-auto w-full mb-8">
+          <Link href="/certificates" className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-[#00f0ff] transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Certificates
+          </Link>
+        </div>
+        <div className="max-w-xl mx-auto w-full glass-panel p-8 sm:p-12 rounded-3xl border border-rose-500/30 text-center my-auto flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <h1 className="text-2xl font-bold text-white">Certificate Not Verified</h1>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            {error || `The requested credential ID "${certId}" was not found or does not represent an active certified credential.`}
+          </p>
+          <div className="pt-4 flex gap-3">
+            <Link href="/certificates">
+              <Button variant="secondary" size="sm">
+                Browse Certifications
+              </Button>
+            </Link>
+            <Link href="/dashboard">
+              <Button variant="cyan" size="sm">
+                Go to Dashboard
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <div className="text-center text-xs text-zinc-500 pt-8">
+          <p>© 2026 NetVision Platform. Cryptographically verifiable, anti-tamper learning credential.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const candidateName = certData.recipientName || 'Verified Candidate';
   const certificationTitle =
-    certData?.certificationTitle || certData?.courseTitle || 'NetVision Certified Network Administrator (NCNA 2.0)';
-  const issueDateFormatted = certData?.issuedAt
+    certData.certificationTitle || certData.courseTitle || 'NetVision Certified Network Administrator';
+  const issueDateFormatted = certData.issuedAt
     ? new Date(certData.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-    : 'August 16, 2026';
-  const credentialId = certData?.credentialId || certData?.code || certId || 'NV-NET-2026-CERT';
-  const grade = certData?.grade || (certData?.score ? `${certData.score}% — Passed` : 'Pass with Distinction');
-  const skillsAssessed: string[] = certData?.skillsAssessed || [
+    : 'Recently Issued';
+  const credentialId = certData.credentialId || certData.code || certId;
+  const grade = certData.grade || (certData.score ? `${certData.score}% — Passed` : 'Passed');
+  const skillsAssessed: string[] = certData.skillsAssessed || [
     'IPv4 CIDR Subnetting & Network Addressing',
     'VLAN Segmentation & Switch Port Provisioning',
     'Layer 3 Routing & Default Gateway Path Selection',
