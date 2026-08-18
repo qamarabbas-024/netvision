@@ -11,60 +11,107 @@ export class TopicsService {
     private readonly achievementsService: AchievementsService
   ) {}
 
-  async getCourses(userId?: string, level?: CourseLevel, category?: string) {
+  private getLevelWeight(level: string): number {
+    switch (level?.toUpperCase()) {
+      case 'FOUNDATIONAL':
+      case 'LEVEL_0':
+        return 0;
+      case 'BEGINNER':
+      case 'LEVEL_1':
+        return 1;
+      case 'INTERMEDIATE':
+      case 'LEVEL_2':
+        return 2;
+      case 'ADVANCED':
+      case 'LEVEL_3':
+        return 3;
+      default:
+        return 4;
+    }
+  }
+
+  async getCourses(
+    identityInput?: string | { userId?: string; anonymousId?: string },
+    level?: CourseLevel,
+    category?: string
+  ) {
     const where: any = { published: true };
     if (level) where.level = level;
     if (category && category !== 'All') where.category = category;
+
+    const userId = typeof identityInput === 'string' ? identityInput : identityInput?.userId;
+    const anonymousId = typeof identityInput === 'object' ? identityInput?.anonymousId : undefined;
 
     const courses = await this.prisma.course.findMany({
       where,
       include: {
         modules: {
+          orderBy: { order: 'asc' },
           include: {
-            lessons: true,
+            lessons: {
+              orderBy: { order: 'asc' },
+            },
           },
         },
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
     });
 
-    let userProgressMap: Record<string, boolean> = {};
-    if (userId) {
+    let userProgressMap: Record<string, { completed: boolean; score: number | null }> = {};
+    if (userId || anonymousId) {
       const progressRecords = await this.prisma.userProgress.findMany({
-        where: { userId, completed: true },
-        select: { lessonId: true },
+        where: userId ? { userId } : { anonymousId: anonymousId! },
+        select: { lessonId: true, completed: true, score: true },
       });
       userProgressMap = progressRecords.reduce((acc, p) => {
-        acc[p.lessonId] = true;
+        acc[p.lessonId] = { completed: p.completed, score: p.score };
         return acc;
-      }, {} as Record<string, boolean>);
+      }, {} as Record<string, { completed: boolean; score: number | null }>);
     }
 
-    return courses.map((course) => {
+    const mapped = courses.map((course) => {
       const allLessons = course.modules.flatMap((m) => m.lessons);
       const lessonsCount = allLessons.length;
-      const completedCount = allLessons.filter((l) => userProgressMap[l.id]).length;
+      const completedCount = allLessons.filter((l) => userProgressMap[l.id]?.completed).length;
       const progressPercent = lessonsCount > 0 ? Math.round((completedCount / lessonsCount) * 100) : 0;
+      const totalDurationMinutes =
+        allLessons.length > 0
+          ? allLessons.reduce((sum, l) => sum + (l.durationMinutes || 15), 0)
+          : course.estimatedHours
+          ? Math.round(course.estimatedHours * 60)
+          : 60;
+      const calculatedHours = Math.max(1, Math.round((totalDurationMinutes / 60) * 10) / 10);
 
       return {
         id: course.id,
         slug: course.slug,
+        code: course.code,
         title: course.title,
         tagline: course.tagline,
         category: course.category,
         description: course.description,
         level: course.level,
         icon: course.icon,
-        estimatedHours: course.estimatedHours,
+        order: course.order,
+        durationMinutes: totalDurationMinutes,
+        estimatedHours: calculatedHours || course.estimatedHours,
         modulesCount: course.modules.length,
         lessonsCount,
         completedLessons: completedCount,
         progressPercent,
       };
     });
+
+    // Sort strictly by difficulty hierarchy: FOUNDATIONAL -> BEGINNER -> INTERMEDIATE -> ADVANCED
+    return mapped.sort((a, b) => {
+      const weightDiff = this.getLevelWeight(a.level) - this.getLevelWeight(b.level);
+      if (weightDiff !== 0) return weightDiff;
+      if ((a.order || 0) !== (b.order || 0)) return (a.order || 0) - (b.order || 0);
+      return a.title.localeCompare(b.title);
+    });
   }
 
-  async getCourseBySlug(slug: string, userId?: string) {
+  async getCourseBySlug(slug: string, identityInput?: string | { userId?: string; anonymousId?: string }) {
     const course = await this.prisma.course.findUnique({
       where: { slug },
       include: {
@@ -86,57 +133,88 @@ export class TopicsService {
       throw new NotFoundException(`Course with slug "${slug}" not found.`);
     }
 
-    let userProgressMap: Record<string, { completed: boolean; score: number | null }> = {};
-    if (userId) {
+    const userId = typeof identityInput === 'string' ? identityInput : identityInput?.userId;
+    const anonymousId = typeof identityInput === 'object' ? identityInput?.anonymousId : undefined;
+
+    let userProgressMap: Record<string, { completed: boolean; score: number | null; started: boolean; viewed: boolean }> = {};
+    if (userId || anonymousId) {
       const progressRecords = await this.prisma.userProgress.findMany({
-        where: { userId },
+        where: userId ? { userId } : { anonymousId: anonymousId! },
       });
       userProgressMap = progressRecords.reduce((acc, p) => {
-        acc[p.lessonId] = { completed: p.completed, score: p.score };
+        acc[p.lessonId] = { completed: p.completed, score: p.score, started: p.started, viewed: p.viewed };
         return acc;
-      }, {} as Record<string, { completed: boolean; score: number | null }>);
+      }, {} as Record<string, { completed: boolean; score: number | null; started: boolean; viewed: boolean }>);
     }
 
-    const modules = course.modules.map((mod) => ({
-      id: mod.id,
-      title: mod.title,
-      description: mod.description,
-      order: mod.order,
-      lessons: mod.lessons.map((lesson) => ({
-        id: lesson.id,
-        slug: lesson.slug,
-        title: lesson.title,
-        type: lesson.type,
-        durationMinutes: lesson.durationMinutes,
-        order: lesson.order,
-        completed: userProgressMap[lesson.id]?.completed ?? false,
-        score: userProgressMap[lesson.id]?.score ?? null,
-        quizId: lesson.quizzes[0]?.id || null,
-      })),
-    }));
+    const modules = course.modules.map((mod) => {
+      const modLessons = mod.lessons.map((lesson) => {
+        const prog = userProgressMap[lesson.id];
+        const isCompleted = prog?.completed ?? false;
+        const isStarted = (prog?.started || prog?.viewed) ?? false;
+        const status = isCompleted ? 'COMPLETED' : isStarted ? 'IN_PROGRESS' : 'NOT_STARTED';
+
+        return {
+          id: lesson.id,
+          slug: lesson.slug,
+          title: lesson.title,
+          type: lesson.type,
+          durationMinutes: lesson.durationMinutes,
+          order: lesson.order,
+          completed: isCompleted,
+          status,
+          score: prog?.score ?? null,
+          quizId: lesson.quizzes[0]?.id || null,
+        };
+      });
+
+      const modCompletedCount = modLessons.filter((l) => l.completed).length;
+      const modProgressPercent = modLessons.length > 0 ? Math.round((modCompletedCount / modLessons.length) * 100) : 0;
+      const modStatus = modProgressPercent === 100 ? 'COMPLETED' : modProgressPercent > 0 ? 'IN_PROGRESS' : 'NOT_STARTED';
+
+      return {
+        id: mod.id,
+        title: mod.title,
+        description: mod.description,
+        order: mod.order,
+        progressPercent: modProgressPercent,
+        status: modStatus,
+        lessons: modLessons,
+      };
+    });
 
     const allLessons = modules.flatMap((m) => m.lessons);
     const completedCount = allLessons.filter((l) => l.completed).length;
+    const totalDurationMinutes =
+      allLessons.length > 0
+        ? allLessons.reduce((sum, l) => sum + (l.durationMinutes || 15), 0)
+        : course.estimatedHours
+        ? Math.round(course.estimatedHours * 60)
+        : 60;
+    const calculatedHours = Math.max(1, Math.round((totalDurationMinutes / 60) * 10) / 10);
+    const progressPercent = allLessons.length > 0 ? Math.round((completedCount / allLessons.length) * 100) : 0;
 
     return {
       id: course.id,
       slug: course.slug,
+      code: course.code,
       title: course.title,
       tagline: course.tagline,
       category: course.category,
       description: course.description,
       level: course.level,
       icon: course.icon,
-      estimatedHours: course.estimatedHours,
+      durationMinutes: totalDurationMinutes,
+      estimatedHours: calculatedHours || course.estimatedHours,
       modulesCount: modules.length,
       lessonsCount: allLessons.length,
       completedLessons: completedCount,
-      progressPercent: allLessons.length > 0 ? Math.round((completedCount / allLessons.length) * 100) : 0,
+      progressPercent,
       modules,
     };
   }
 
-  async getLessonBySlug(slug: string, userId?: string) {
+  async getLessonBySlug(slug: string, identityInput?: string | { userId?: string; anonymousId?: string }) {
     const lesson = await this.prisma.lesson.findUnique({
       where: { slug },
       include: {
@@ -164,14 +242,16 @@ export class TopicsService {
       throw new NotFoundException(`Lesson with slug "${slug}" was not found.`);
     }
 
+    const userId = typeof identityInput === 'string' ? identityInput : identityInput?.userId;
+    const anonymousId = typeof identityInput === 'object' ? identityInput?.anonymousId : undefined;
+
     let isCompleted = false;
     let score: number | null = null;
-    if (userId) {
+    if (userId || anonymousId) {
       const progress = await this.prisma.userProgress.findFirst({
-        where: {
-          userId,
-          lessonId: lesson.id,
-        },
+        where: userId
+          ? { userId, lessonId: lesson.id }
+          : { anonymousId: anonymousId!, lessonId: lesson.id },
       });
       if (progress) {
         isCompleted = progress.completed;
@@ -1863,5 +1943,36 @@ export class TopicsService {
       ],
       isVerified: true,
     };
+  }
+
+  async getUserCertificates(userId: string) {
+    if (!userId) return [];
+    const certs = await this.prisma.certificate.findMany({
+      where: { userId },
+      include: {
+        course: { select: { title: true, slug: true } },
+      },
+      orderBy: { issuedAt: 'desc' },
+    });
+
+    return certs.map((c) => {
+      const meta: any = c.metadataJson || {};
+      return {
+        id: c.id,
+        code: c.code,
+        credentialId: c.credentialId || c.code || c.id,
+        verificationCode: c.verificationCode || c.code || c.id,
+        title: c.certificationTitle || (c.course ? c.course.title : 'NetVision Certified Network Administrator'),
+        certificationCode: c.certificationCode || 'NV-NET',
+        recipientName: c.recipientName,
+        issuedAt: c.issuedAt,
+        courseTitle: c.course?.title || c.certificationTitle,
+        courseSlug: c.course?.slug || 'networking-fundamentals',
+        status: c.status || 'ACTIVE',
+        grade: meta.grade || 'Passed',
+        score: meta.overallScore || null,
+        metadata: meta,
+      };
+    });
   }
 }

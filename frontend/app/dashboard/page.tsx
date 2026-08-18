@@ -277,35 +277,46 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="flex flex-col gap-3">
-                    {(userProgress?.recentLessons?.length ? userProgress.recentLessons : [
-                      { id: '1', title: 'Binary Numbers & Bitwise Fundamentals', courseTitle: 'Digital Information Foundations', durationMinutes: 15, status: 'COMPLETED' },
-                      { id: '2', title: 'The 7-Layer OSI & 4-Layer TCP/IP Reference Models', courseTitle: 'The OSI & TCP/IP Reference Models', durationMinutes: 20, status: 'IN_PROGRESS' },
-                    ]).map((item: any) => (
-                      <div
-                        key={item.id}
-                        className="glass-panel p-4 rounded-2xl border border-[#272732] hover:border-[#00f0ff]/30 transition-colors flex items-center justify-between gap-4"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <RouterIcon size={16} />
-                          <div className="min-w-0">
-                            <h4 className="text-sm font-bold text-white truncate">{item.title}</h4>
-                            <span className="text-xs text-zinc-500 font-mono">
-                              {item.courseTitle || 'Networking'} • {item.durationMinutes || 15} min
-                            </span>
+                    {userProgress?.recentLessons && userProgress.recentLessons.length > 0 ? (
+                      userProgress.recentLessons.map((item: any) => (
+                        <Link
+                          key={item.id}
+                          href={`/courses/${item.courseSlug || 'networking-fundamentals'}/lessons/${item.slug || item.id}`}
+                          className="glass-panel p-4 rounded-2xl border border-[#272732] hover:border-[#00f0ff]/40 transition-colors flex items-center justify-between gap-4 cursor-pointer group"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <RouterIcon size={16} />
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-bold text-white group-hover:text-[#00f0ff] transition-colors truncate">{item.title}</h4>
+                              <span className="text-xs text-zinc-500 font-mono">
+                                {item.courseTitle || 'Networking'} • {item.durationMinutes || 15} min
+                              </span>
+                            </div>
                           </div>
-                        </div>
 
+                          <div>
+                            {item.status === 'COMPLETED' ? (
+                              <Badge variant="emerald">Completed</Badge>
+                            ) : item.status === 'IN_PROGRESS' ? (
+                              <Badge variant="cyan">In Progress</Badge>
+                            ) : (
+                              <Badge variant="neutral">Up Next</Badge>
+                            )}
+                          </div>
+                        </Link>
+                      ))
+                    ) : (
+                      <div className="glass-panel p-6 rounded-2xl border border-[#272732] text-center flex flex-col items-center gap-3">
+                        <BookOpen className="w-8 h-8 text-zinc-500" />
                         <div>
-                          {item.status === 'COMPLETED' ? (
-                            <Badge variant="emerald">Completed</Badge>
-                          ) : item.status === 'IN_PROGRESS' ? (
-                            <Badge variant="cyan">In Progress</Badge>
-                          ) : (
-                            <Badge variant="neutral">Up Next</Badge>
-                          )}
+                          <h4 className="text-sm font-bold text-white mb-1">No Lessons Started Yet</h4>
+                          <p className="text-xs text-zinc-400">Choose a course from the curriculum to begin learning.</p>
                         </div>
+                        <Link href="/courses">
+                          <Button variant="cyan" size="sm">Explore Syllabus →</Button>
+                        </Link>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
 

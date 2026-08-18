@@ -1,16 +1,42 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Award, Flame, Trophy, User } from 'lucide-react';
+import { Award, Flame, Trophy, User, ShieldCheck, CheckCircle2, Lock, Zap } from 'lucide-react';
+import { getMyAchievementsApi, getUserProgressApi, AchievementItem } from '@/lib/api';
 
 export default function AchievementsPage() {
+  const [achievements, setAchievements] = useState<AchievementItem[]>([]);
+  const [userStats, setUserStats] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([
+      getMyAchievementsApi(),
+      getUserProgressApi(),
+    ]).then(([achData, progData]) => {
+      if (achData?.achievements) {
+        setAchievements(achData.achievements);
+      }
+      if (progData) {
+        setUserStats(progData);
+      }
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
+    });
+  }, []);
+
+  const unlockedCount = achievements.filter((a) => a.unlocked).length;
+  const totalCount = achievements.length || 10;
+  const totalPoints = achievements.filter((a) => a.unlocked).reduce((sum, a) => sum + a.points, 0);
+
   const leaderboard = [
-    { rank: 1, name: 'Alex Rivers', xp: '4,850 XP', streak: '14 Days', level: 'Lvl 8' },
+    { rank: 1, name: 'Jordan Blake', xp: '4,850 XP', streak: '14 Days', level: 'Lvl 8' },
     { rank: 2, name: 'Elena Rostova', xp: '4,200 XP', streak: '12 Days', level: 'Lvl 7' },
     { rank: 3, name: 'Marcus Vance', xp: '3,950 XP', streak: '9 Days', level: 'Lvl 6' },
     { rank: 4, name: 'Sarah Chen', xp: '3,600 XP', streak: '7 Days', level: 'Lvl 6' },
@@ -24,15 +50,97 @@ export default function AchievementsPage() {
         <div className="flex-1 flex flex-col min-w-0">
           <AppTopbar />
 
-          <main className="p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+          <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
             <div className="max-w-6xl mx-auto flex flex-col gap-8">
               <div>
                 <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
-                  Gamification & XP Rankings
+                  Gamification & Mastery
                 </span>
                 <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                  Leaderboard & Achievements
+                  Achievements & Leaderboard
                 </h1>
+                <p className="text-sm text-zinc-400 mt-1 max-w-xl">
+                  Unlock official networking achievement badges through hands-on practice, quiz mastery, and curriculum progression.
+                </p>
+              </div>
+
+              {/* User Achievements Summary Banner */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Card className="p-6 glass-panel-glow border-[#00f0ff]/30 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center text-[#00f0ff] shrink-0">
+                    <Award className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-mono text-zinc-400 block">BADGES UNLOCKED</span>
+                    <span className="text-2xl font-bold text-white font-mono">{unlockedCount} / {totalCount}</span>
+                  </div>
+                </Card>
+
+                <Card className="p-6 glass-panel border-[#272732] flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                    <Zap className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-mono text-zinc-400 block">ACHIEVEMENT XP</span>
+                    <span className="text-2xl font-bold text-white font-mono">{totalPoints} XP</span>
+                  </div>
+                </Card>
+
+                <Card className="p-6 glass-panel border-[#272732] flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                    <Flame className="w-6 h-6 fill-amber-400" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-mono text-zinc-400 block">ACTIVE STREAK</span>
+                    <span className="text-2xl font-bold text-white font-mono">{userStats?.studyStreak ?? 0} Days</span>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Achievement Badges Catalog Grid */}
+              <div>
+                <h2 className="text-xl font-bold text-white mb-4">Curriculum Achievement Badges</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {achievements.map((ach) => (
+                    <div
+                      key={ach.id}
+                      className={`p-5 rounded-2xl border transition-all ${
+                        ach.unlocked
+                          ? 'glass-panel-glow border-[#00f0ff]/40 bg-[#00f0ff]/5'
+                          : 'glass-panel border-[#272732] opacity-75'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                          ach.unlocked
+                            ? 'bg-[#00f0ff]/20 text-[#00f0ff] border border-[#00f0ff]/40'
+                            : 'bg-zinc-800 text-zinc-500 border border-zinc-700'
+                        }`}>
+                          <Award className="w-5 h-5" />
+                        </div>
+                        <Badge variant={ach.unlocked ? 'cyan' : 'neutral'}>
+                          {ach.unlocked ? `+${ach.points} XP` : `${ach.points} XP`}
+                        </Badge>
+                      </div>
+
+                      <h3 className="text-sm font-bold text-white mb-1">{ach.title}</h3>
+                      <p className="text-xs text-zinc-400 leading-relaxed mb-3">{ach.description}</p>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-[#272732] text-[11px] font-mono">
+                        <span className="text-zinc-500 uppercase">{ach.category}</span>
+                        {ach.unlocked ? (
+                          <span className="text-emerald-400 flex items-center gap-1 font-bold">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Unlocked
+                          </span>
+                        ) : (
+                          <span className="text-zinc-500 flex items-center gap-1">
+                            <Lock className="w-3.5 h-3.5" /> Locked
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Global Leaderboard Table */}

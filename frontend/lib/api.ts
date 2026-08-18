@@ -142,6 +142,37 @@ export async function getCertificateByIdApi(idOrCode: string) {
   return await fetchApi<any>(`/certificates/${idOrCode}`);
 }
 
+export async function getUserCertificatesApi(): Promise<any[]> {
+  try {
+    return await fetchApi<any[]>('/certificates');
+  } catch {
+    return [];
+  }
+}
+
+export async function getSavedLessonsApi(): Promise<any[]> {
+  try {
+    return await fetchApi<any[]>('/progress/saved-lessons');
+  } catch {
+    return [];
+  }
+}
+
+export async function toggleSaveLessonApi(lessonId: string): Promise<any> {
+  return await fetchApi<any>('/progress/save-lesson', {
+    method: 'POST',
+    body: JSON.stringify({ lessonId }),
+  });
+}
+
+export async function getMyAchievementsApi(): Promise<any> {
+  try {
+    return await fetchApi<any>('/achievements/me');
+  } catch {
+    return { achievements: [], unlockedCount: 0, totalPointsEarned: 0 };
+  }
+}
+
 export interface AchievementItem {
   id: string;
   slug: string;

@@ -13,7 +13,7 @@ import { GuidedPracticeTerminal } from './blocks/GuidedPracticeTerminal';
 import { BreakFixScenarioCard } from './blocks/BreakFixScenarioCard';
 import { LessonContentRenderer } from './LessonContentRenderer';
 import { LearningSidebar } from './LearningSidebar';
-import { completeLessonApi } from '@/lib/api';
+import { completeLessonApi, toggleSaveLessonApi, getSavedLessonsApi } from '@/lib/api';
 import { GuestProgressService } from '@/services/GuestProgressService';
 import { useAuthStore } from '@/stores/authStore';
 import {
@@ -95,11 +95,22 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
 
   useEffect(() => {
-    // Check local guest bookmark status
+    // Check bookmark status from local guest state and server state
     const guestState = GuestProgressService.getProgress();
     if (guestState.bookmarkedLessonIds.includes(lesson.id)) {
       setIsBookmarked(true);
     }
+    // Check server saved lessons
+    getSavedLessonsApi()
+      .then((savedList) => {
+        if (Array.isArray(savedList)) {
+          const found = savedList.some(
+            (s: any) => s.lessonId === lesson.id || s.lesson?.id === lesson.id || s.id === lesson.id
+          );
+          if (found) setIsBookmarked(true);
+        }
+      })
+      .catch(() => null);
   }, [lesson.id]);
 
   const markStageDone = (stg: StageType) => {
@@ -139,9 +150,14 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
     }
   };
 
-  const handleToggleBookmark = () => {
+  const handleToggleBookmark = async () => {
     const nextState = GuestProgressService.toggleBookmark(lesson.id);
     setIsBookmarked(nextState);
+    try {
+      await toggleSaveLessonApi(lesson.id);
+    } catch (e) {
+      console.warn('Backend bookmark toggle failed:', e);
+    }
   };
 
   // Build sidebar course modules structure safely
@@ -501,7 +517,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                   STAGE 8: LESSON MASTERY ACHIEVED
                 </Badge>
                 <h2 className="text-3xl font-extrabold text-white mb-2">
-                  Lesson Completed!
+                  Lesson Complete
                 </h2>
                 <p className="text-sm text-zinc-400 max-w-md mx-auto">
                   You have successfully completed the technical evaluation for{' '}
@@ -512,7 +528,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
               <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-[#272732] w-full justify-center">
                 <Link href={`/courses/${lesson.course.slug}`}>
                   <Button variant="secondary" leftIcon={<BookOpen className="w-4 h-4" />}>
-                    Back to Course Syllabus
+                    Course Syllabus
                   </Button>
                 </Link>
 
@@ -523,17 +539,17 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                       size="lg"
                       rightIcon={<ArrowRight className="w-4 h-4" />}
                     >
-                      Continue to Next Lesson
+                      Next Lesson →
                     </Button>
                   </Link>
                 ) : (
-                  <Link href="/courses">
+                  <Link href={`/courses/${lesson.course.slug}`}>
                     <Button
                       variant="cyan"
                       size="lg"
-                      rightIcon={<ArrowRight className="w-4 h-4" />}
+                      rightIcon={<CheckCircle2 className="w-4 h-4" />}
                     >
-                      Browse Course Catalog
+                      Finish / Module Complete
                     </Button>
                   </Link>
                 )}

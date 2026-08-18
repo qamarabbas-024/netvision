@@ -37,6 +37,7 @@ export class TopicsController {
   }
 
   @ApiOperation({ summary: 'Get all curriculum topics & courses' })
+  @ApiOperation({ summary: 'Get all curriculum topics & courses' })
   @ApiQuery({ name: 'level', enum: CourseLevel, required: false })
   @ApiQuery({ name: 'category', type: String, required: false })
   @UseGuards(OptionalJwtAuthGuard)
@@ -46,7 +47,7 @@ export class TopicsController {
     @Query('level') level?: CourseLevel,
     @Query('category') category?: string
   ) {
-    return this.topicsService.getCourses(identity.userId || undefined, level, category);
+    return this.topicsService.getCourses(identity, level, category);
   }
 
   @ApiOperation({ summary: 'Get topic or course by slug' })
@@ -56,7 +57,7 @@ export class TopicsController {
     @LearnerIdentity() identity: LearnerIdentityContext,
     @Param('slug') slug: string
   ) {
-    return this.topicsService.getCourseBySlug(slug, identity.userId || undefined);
+    return this.topicsService.getCourseBySlug(slug, identity);
   }
 
   @ApiOperation({ summary: 'Get course assessment status and average score for requester' })
@@ -77,7 +78,7 @@ export class TopicsController {
     @Query('level') level?: CourseLevel,
     @Query('category') category?: string
   ) {
-    return this.topicsService.getCourses(identity.userId || undefined, level, category);
+    return this.topicsService.getCourses(identity, level, category);
   }
 
   @ApiOperation({ summary: 'Alias route: Get topic by ID or slug' })
@@ -87,7 +88,7 @@ export class TopicsController {
     @LearnerIdentity() identity: LearnerIdentityContext,
     @Param('slug') slug: string
   ) {
-    return this.topicsService.getCourseBySlug(slug, identity.userId || undefined);
+    return this.topicsService.getCourseBySlug(slug, identity);
   }
 
   @ApiOperation({ summary: 'Get full lesson details by slug' })
@@ -97,7 +98,7 @@ export class TopicsController {
     @LearnerIdentity() identity: LearnerIdentityContext,
     @Param('slug') slug: string
   ) {
-    return this.topicsService.getLessonBySlug(slug, identity.userId || undefined);
+    return this.topicsService.getLessonBySlug(slug, identity);
   }
 
   @ApiOperation({ summary: 'Get quiz details and questions' })
@@ -259,6 +260,13 @@ export class TopicsController {
   @Post('certificates/claim')
   async claimCertificate(@Body() dto: ClaimCertificateDto, @Req() req: any) {
     return this.topicsService.claimCertificate(req.user.id, dto.courseId);
+  }
+
+  @ApiOperation({ summary: 'List all earned certificates for the authenticated user' })
+  @UseGuards(JwtAuthGuard)
+  @Get('certificates')
+  async getUserCertificates(@Req() req: any) {
+    return this.topicsService.getUserCertificates(req.user.id);
   }
 
   @ApiOperation({ summary: 'Get certificate details by ID or verification code' })

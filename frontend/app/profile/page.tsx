@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
@@ -8,10 +8,22 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { useAuthStore } from '@/stores/authStore';
-import { Calendar, Flame, Award, BookOpen, Clock } from 'lucide-react';
+import { getUserProgressApi, StudentDashboardMetrics } from '@/lib/api';
+import { Flame, Award, BookOpen, Clock, ShieldCheck, User as UserIcon } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
+  const [metrics, setMetrics] = useState<StudentDashboardMetrics | null>(null);
+
+  useEffect(() => {
+    getUserProgressApi().then((data) => {
+      if (data) setMetrics(data);
+    });
+  }, []);
+
+  const displayName = user?.fullName || user?.username || (isAuthenticated ? 'NetVision Learner' : 'Guest Learner');
+  const displayHandle = user?.username ? `@${user.username}` : (isAuthenticated ? '@learner' : '@guest');
+  const roleLabel = user?.role || (isAuthenticated ? 'STUDENT' : 'GUEST');
 
   return (
     <ProtectedRoute>
@@ -25,15 +37,15 @@ export default function ProfilePage() {
             <div className="max-w-6xl mx-auto flex flex-col gap-8">
               {/* Profile Banner */}
               <div className="glass-panel p-8 rounded-3xl border border-[#00f0ff]/30 shadow-glow-cyan flex flex-col sm:flex-row items-center gap-6">
-                <Avatar name={user?.username || 'Alex Rivers'} size="lg" status="online" className="w-20 h-20 text-2xl" />
+                <Avatar name={displayName} size="lg" status={isAuthenticated ? 'online' : 'offline'} className="w-20 h-20 text-2xl" />
                 <div className="flex-1 text-center sm:text-left">
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-2">
-                    <h1 className="text-2xl font-extrabold text-white">{user?.fullName || 'Alex Rivers'}</h1>
-                    <Badge variant="cyan">@{user?.username || 'alex_netrunner'}</Badge>
-                    <Badge variant="emerald">{user?.role || 'STUDENT'}</Badge>
+                    <h1 className="text-2xl font-extrabold text-white">{displayName}</h1>
+                    <Badge variant="cyan">{displayHandle}</Badge>
+                    <Badge variant={roleLabel === 'ADMIN' ? 'rose' : 'emerald'}>{roleLabel}</Badge>
                   </div>
                   <p className="text-xs text-zinc-400 font-mono">
-                    Member since August 2026 • Computer Science Major
+                    {isAuthenticated ? 'Authenticated NetVision Learner • Progress Synced' : 'Guest Learner • Local Session'}
                   </p>
                 </div>
               </div>
@@ -42,26 +54,26 @@ export default function ProfilePage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                 <Card className="p-6 text-center">
                   <Flame className="w-6 h-6 text-amber-400 mx-auto mb-2 fill-amber-400" />
-                  <span className="text-2xl font-bold font-mono text-white block">7 Days</span>
+                  <span className="text-2xl font-bold font-mono text-white block">{metrics?.studyStreak ?? 0} Days</span>
                   <span className="text-xs text-zinc-400">Current Streak</span>
                 </Card>
 
                 <Card className="p-6 text-center">
                   <Award className="w-6 h-6 text-[#00f0ff] mx-auto mb-2" />
-                  <span className="text-2xl font-bold font-mono text-white block">1,450 XP</span>
+                  <span className="text-2xl font-bold font-mono text-white block">{metrics?.totalXp ?? 0} XP</span>
                   <span className="text-xs text-zinc-400">Total Experience</span>
                 </Card>
 
                 <Card className="p-6 text-center">
                   <BookOpen className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                  <span className="text-2xl font-bold font-mono text-white block">18</span>
+                  <span className="text-2xl font-bold font-mono text-white block">{metrics?.completedLessons ?? 0}</span>
                   <span className="text-xs text-zinc-400">Lessons Completed</span>
                 </Card>
 
                 <Card className="p-6 text-center">
-                  <Clock className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
-                  <span className="text-2xl font-bold font-mono text-white block">24 hrs</span>
-                  <span className="text-xs text-zinc-400">Study Time</span>
+                  <ShieldCheck className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
+                  <span className="text-2xl font-bold font-mono text-white block">{metrics?.certificatesEarned ?? 0}</span>
+                  <span className="text-xs text-zinc-400">Certificates Earned</span>
                 </Card>
               </div>
             </div>

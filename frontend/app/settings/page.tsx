@@ -36,9 +36,9 @@ export default function SettingsPage() {
                 <h2 className="text-lg font-bold text-white border-b border-[#272732] pb-3">Profile Information</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input label="Full Name" defaultValue={user?.fullName || 'Alex Rivers'} />
-                  <Input label="Username" defaultValue={user?.username || 'alex_netrunner'} />
-                  <Input label="Email Address" defaultValue={user?.email || 'alex@university.edu'} type="email" />
+                  <Input label="Full Name" defaultValue={user?.fullName || ''} placeholder="Your full name" />
+                  <Input label="Username" defaultValue={user?.username || ''} placeholder="your_username" />
+                  <Input label="Email Address" defaultValue={user?.email || ''} type="email" placeholder="your.email@example.com" />
                 </div>
 
                 <div className="flex justify-end">
