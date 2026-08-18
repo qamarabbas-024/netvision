@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -16,6 +16,9 @@ import {
   Layers,
   Info,
   Wrench,
+  HelpCircle,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 export interface LessonContentRendererProps {
@@ -95,6 +98,57 @@ export interface LessonContentRendererProps {
   onStartLab?: () => void;
   onProceedToQuiz?: () => void;
 }
+
+const PracticeCard: React.FC<{
+  item: { id?: number | string; prompt: string; expected: string; hints?: string };
+  index: number;
+}> = ({ item, index }) => {
+  const [showAnswer, setShowAnswer] = useState(false);
+
+  return (
+    <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-2.5">
+          <span className="w-5 h-5 rounded-md bg-[#00f0ff]/10 text-[#00f0ff] font-mono font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">
+            P{index + 1}
+          </span>
+          <p className="text-xs sm:text-sm font-medium text-white leading-relaxed">{item.prompt}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowAnswer(!showAnswer)}
+          className="px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[#272732] text-zinc-400 hover:text-white hover:border-[#00f0ff]/40 transition-all shrink-0 flex items-center gap-1.5"
+        >
+          {showAnswer ? (
+            <>
+              <EyeOff className="w-3.5 h-3.5 text-zinc-400" />
+              Hide
+            </>
+          ) : (
+            <>
+              <Eye className="w-3.5 h-3.5 text-[#00f0ff]" />
+              Reveal
+            </>
+          )}
+        </button>
+      </div>
+
+      {showAnswer && (
+        <div className="p-3.5 rounded-xl bg-[#0e0e13] border border-[#00f0ff]/30 text-xs space-y-1.5 animate-fadeIn">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono uppercase font-bold text-emerald-400">Target Value:</span>
+            <span className="font-mono font-bold text-white bg-white/10 px-2 py-0.5 rounded text-xs">{item.expected}</span>
+          </div>
+          {item.hints && (
+            <p className="text-zinc-400 text-[11px] leading-relaxed">
+              <strong className="text-zinc-300">Analysis: </strong> {item.hints}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
   lesson,
@@ -192,6 +246,12 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
       correctApproach: m.correction || m.correctApproach,
     }));
   const labItem = lesson.labs && lesson.labs.length > 0 ? lesson.labs[0] : null;
+
+  const practiceList =
+    lesson.practice ||
+    content.practice ||
+    content.step16_guidedPractice?.exercises ||
+    [];
 
   const rawRecap =
     content.recap?.summaryPoints ||
@@ -505,7 +565,28 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </Card>
       )}
 
-      {/* 12. RECAP & KEY TAKEAWAYS (Rendered only when defined) */}
+      {/* 12. GUIDED SELF-PACED PRACTICE (Rendered when practice is defined) */}
+      {practiceList.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-[#00f0ff]" />
+              Self-Paced Practice & Skill Check
+            </h2>
+            <span className="text-xs font-mono text-zinc-400">
+              {practiceList.length} Practice Questions
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {practiceList.map((item: any, idx: number) => (
+              <PracticeCard key={item.id || idx} item={item} index={idx} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 13. RECAP & KEY TAKEAWAYS (Rendered only when defined) */}
       {recapsList.length > 0 && (
         <Card className="p-6 glass-panel border-[#00f0ff]/30 rounded-3xl space-y-4">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
