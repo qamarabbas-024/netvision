@@ -16,6 +16,7 @@ import { OSPFVisual } from './OSPFVisual';
 import { MultiAreaOSPFVisual } from './MultiAreaOSPFVisual';
 import { IPv6Visual } from './IPv6Visual';
 import { NetworkAutomationVisual } from './NetworkAutomationVisual';
+import { BinaryConverterVisual } from './BinaryConverterVisual';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -23,6 +24,15 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (
+    slug.includes('binary') ||
+    slug.includes('hex') ||
+    slug.includes('bits-bytes') ||
+    slug.includes('net-101-bits')
+  ) {
+    return <BinaryConverterVisual />;
+  }
 
   if (slug.includes('automation') || slug.includes('programmability') || slug.includes('pipeline') || slug.includes('rest-api')) {
     return <NetworkAutomationVisual />;

@@ -1348,17 +1348,17 @@ export class TopicsService {
       select: { id: true, slug: true },
     });
 
-    let completedCoursesCount = 0;
-    for (const course of publishedCourses) {
-      try {
-        const assessment = await this.getCourseAssessment(identity, course.id);
-        if (assessment.eligibleForCertificate) {
-          completedCoursesCount++;
+    const courseAssessmentResults = await Promise.all(
+      publishedCourses.map(async (course) => {
+        try {
+          const assessment = await this.getCourseAssessment(identity, course.id);
+          return assessment.eligibleForCertificate ? 1 : 0;
+        } catch {
+          return 0;
         }
-      } catch {
-        // Ignore
-      }
-    }
+      })
+    );
+    const completedCoursesCount = courseAssessmentResults.reduce((sum: number, count: number) => sum + count, 0);
 
     // 8. Recent Lessons
     const recentLessons = progressList.slice(0, 5).map((p) => ({

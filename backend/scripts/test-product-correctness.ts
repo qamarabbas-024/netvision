@@ -6,8 +6,8 @@ import { TroubleshootingService } from '../src/troubleshooting/troubleshooting.s
 import { PrismaService } from '../src/database/prisma.service';
 import * as crypto from 'crypto';
 
-const prisma = new PrismaClient();
 const prismaService = new PrismaService();
+const prisma = prismaService;
 const achievementsService = new AchievementsService(prismaService);
 const certificationsService = new CertificationsService(prismaService);
 const topicsService = new TopicsService(prismaService, achievementsService);
@@ -25,6 +25,8 @@ async function runProductCorrectnessTests() {
   console.log('🛡️ NETVISION — V1 P0 PRODUCT CORRECTNESS & AUDIT TEST SUITE');
   console.log('================================================================\n');
 
+  await prisma.$connect();
+
   let passedTests = 0;
 
   try {
@@ -37,7 +39,7 @@ async function runProductCorrectnessTests() {
       await prisma.anonymousLearner.create({ data: { id: anonId } });
 
       let course = await prisma.course.findFirst({
-        where: { published: true },
+        where: { code: 'NET-404' },
         include: { modules: { include: { lessons: true } } },
       });
       assert(!!course && course.modules.length > 0, 'Course exists for test');
@@ -113,8 +115,8 @@ async function runProductCorrectnessTests() {
       });
 
       let course = await prisma.course.findFirst({
-        where: { published: true },
-        include: { modules: { include: { lessons: true } } },
+        where: { code: 'NET-404' },
+        include: { modules: { include: { lessons: { orderBy: { order: 'asc' } } } } },
       });
       const allLessons = course!.modules.flatMap((m) => m.lessons);
       const lesson1 = allLessons[0];
@@ -273,7 +275,6 @@ async function runProductCorrectnessTests() {
     // --------------------------------------------------------------------------
     console.log('\n[P0 #7] Course Difficulty Ordering (FOUNDATIONAL -> BEGINNER -> INTERMEDIATE -> ADVANCED)');
     {
-      const courses = await topicsService.getCourses();
       const levelRank: Record<string, number> = {
         FOUNDATIONAL: 0,
         BEGINNER: 1,
@@ -281,6 +282,7 @@ async function runProductCorrectnessTests() {
         ADVANCED: 3,
       };
 
+      const courses = await topicsService.getCourses();
       for (let i = 0; i < courses.length - 1; i++) {
         const currRank = levelRank[courses[i].level] ?? 99;
         const nextRank = levelRank[courses[i + 1].level] ?? 99;
@@ -300,7 +302,7 @@ async function runProductCorrectnessTests() {
       await prisma.anonymousLearner.create({ data: { id: anonId } });
 
       let course = await prisma.course.findFirst({
-        where: { published: true },
+        where: { code: 'NET-404' },
         include: { modules: { include: { lessons: true } } },
       });
       const lesson = course!.modules[0].lessons[0];

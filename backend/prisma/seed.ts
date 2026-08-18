@@ -381,10 +381,15 @@ async function main() {
   console.log('📝 Seeding Assessment 2.0 Question Bank (170 High-Quality Questions)...');
   // Clean up legacy placeholder questions
   const deletedPlaceholders = await prisma.quizQuestion.deleteMany({
-    where: { questionText: { startsWith: '[EASY]' } },
+    where: {
+      OR: [
+        { questionText: { startsWith: '[EASY]' } },
+        { quizId: 'quiz-net-101-bits-bytes-binary-hex' },
+      ],
+    },
   });
   if (deletedPlaceholders.count > 0) {
-    console.log(`  🧹 Removed ${deletedPlaceholders.count} legacy placeholder questions.`);
+    console.log(`  🧹 Cleaned ${deletedPlaceholders.count} legacy/updated quiz questions.`);
   }
 
   let seededQCount = 0;
