@@ -147,8 +147,34 @@ async function verifyCurriculumContentV2() {
   assert(!net101Media!.contentV2!.explanation.includes('modal dispersion'), 'NET-101 Lesson 2 avoids modal dispersion physics jargon');
   console.log('  ✓ NET-101 Lesson 2 verified with clean Content V2 structure, beginner-level pedagogy, 6 practice items, 6 quiz questions, and zero forced filler.');
 
+  // [TEST 9] Verify NET-103 Lesson 2: The 7-Layer OSI Reference Model
+  console.log('\n[TEST 9] Verifying NET-103 Lesson 2 (The 7-Layer OSI Reference Model)...');
+  const net103Osi = LESSONS_NET100.find((l) => l.slug === 'osi-model-7-layers');
+  assert(!!net103Osi, 'NET-103 Lesson 2 (osi-model-7-layers) exists');
+  assert(!!net103Osi!.contentV2, 'NET-103 Lesson 2 has Content V2 structure');
+  assert(net103Osi!.courseCode === 'NET-103', 'NET-103 Lesson 2 has courseCode NET-103');
+  assert(net103Osi!.order === 2, 'NET-103 Lesson 2 is correctly ordered as lesson 2 in NET-103');
+  assert(typeof net103Osi!.contentV2!.objective === 'string', 'NET-103 Lesson 2 has clear objective');
+  assert(net103Osi!.contentV2!.explanation.includes('Application Layer'), 'NET-103 Lesson 2 explains Application layer');
+  assert(net103Osi!.contentV2!.explanation.includes('Presentation Layer'), 'NET-103 Lesson 2 explains Presentation layer');
+  assert(net103Osi!.contentV2!.explanation.includes('Session Layer'), 'NET-103 Lesson 2 explains Session layer');
+  assert(net103Osi!.contentV2!.explanation.includes('Transport Layer'), 'NET-103 Lesson 2 explains Transport layer');
+  assert(net103Osi!.contentV2!.explanation.includes('Network Layer'), 'NET-103 Lesson 2 explains Network layer');
+  assert(net103Osi!.contentV2!.explanation.includes('Data Link Layer'), 'NET-103 Lesson 2 explains Data Link layer');
+  assert(net103Osi!.contentV2!.explanation.includes('Physical Layer'), 'NET-103 Lesson 2 explains Physical layer');
+  assert(net103Osi!.contentV2!.explanation.includes('Encapsulation'), 'NET-103 Lesson 2 explains Encapsulation');
+  assert(net103Osi!.contentV2!.explanation.includes('Decapsulation'), 'NET-103 Lesson 2 explains Decapsulation');
+  assert(net103Osi!.contentV2!.components.length === 7, 'NET-103 Lesson 2 has 7 layer components');
+  assert(Array.isArray(net103Osi!.contentV2!.practice) && net103Osi!.contentV2!.practice.length >= 6, 'NET-103 Lesson 2 has 6 practice exercises');
+  assert(net103Osi!.questions.length >= 6, 'NET-103 Lesson 2 has 6 aligned quiz questions');
+  assert(!net103Osi!.contentV2!.packetHeaderView, 'NET-103 Lesson 2 has no fake packet header');
+  assert(!net103Osi!.contentV2!.cliTooling, 'NET-103 Lesson 2 has no forced CLI bloat');
+  assert(!net103Osi!.contentV2!.security, 'NET-103 Lesson 2 has no generic security filler');
+  assert(!net103Osi!.lab, 'NET-103 Lesson 2 has no phantom CLI lab');
+  console.log('  ✓ NET-103 Lesson 2 verified with clean Content V2 structure, all 7 layers, encapsulation/decapsulation, 6 practice items, 6 quiz questions, and zero forced filler.');
+
   console.log('\n================================================================');
-  console.log('🎉 ALL 8 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 9 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 

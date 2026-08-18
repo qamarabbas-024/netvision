@@ -1708,93 +1708,139 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-osi-model-7-layers',
     lessonSlug: 'osi-model-7-layers',
-    text: 'What are the 7 layers of the OSI Reference Model in exact sequence from Layer 1 (bottom) to Layer 7 (top)?',
+    text: 'Why was the 7-Layer OSI Reference Model created, and how does it help network engineers?',
     options: [
-      '1. Physical, 2. Data Link, 3. Network, 4. Transport, 5. Session, 6. Presentation, 7. Application',
-      '1. Application, 2. Presentation, 3. Session, 4. Transport, 5. Network, 6. Data Link, 7. Physical',
-      '1. Physical, 2. Network, 3. Data Link, 4. Session, 5. Transport, 6. Presentation, 7. Application',
-      '1. Hardware, 2. Software, 3. Internet, 4. Routing, 5. Sockets, 6. Encryption, 7. Browser'
+      'It provides a standard vendor-neutral framework dividing network communication into 7 distinct layers for learning and troubleshooting',
+      'It is a physical piece of hardware installed in all network switches and routers',
+      'It forces every computer in the world to run the exact same operating system',
+      'It replaces the need for physical network cables and wireless antennas'
     ],
     correctOption: 0,
-    explanation: 'The 7 layers from Layer 1 to 7 are: 1. Physical, 2. Data Link, 3. Network, 4. Transport, 5. Session, 6. Presentation, 7. Application (mnemonic: "Please Do Not Throw Sausage Pizza Away").',
+    explanation: 'The OSI model standardizes network communication into 7 functional layers, allowing different vendors to create compatible products and giving engineers a structured model for learning and troubleshooting.',
     explanationsJson: {
-      1: 'This sequence is reversed (Layer 7 down to Layer 1).',
-      2: 'Data Link is Layer 2 and Network is Layer 3; Transport is Layer 4 and Session is Layer 5.',
-      3: 'Hardware/Software/Internet/Browser are informal terms, not official ISO/OSI model layers.'
+      1: 'OSI is a conceptual reference model, not a physical hardware device.',
+      2: 'OSI allows heterogeneous systems running different OSs to interoperate.',
+      3: 'Physical media (Layer 1) are still essential for transmission.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'OSI 7 Layers Order',
+    concept: 'OSI Model Purpose and Architecture',
     points: 10
   },
   {
     quizId: 'quiz-osi-model-7-layers',
     lessonSlug: 'osi-model-7-layers',
-    text: 'Which OSI layer is responsible for data representation, syntax translation, compression, and encryption/decryption (such as TLS/SSL and ASCII/JPEG formatting)?',
+    text: 'What is the correct sequence of the 7 OSI layers from bottom to top (Layer 1 to Layer 7)?',
     options: [
-      'Layer 6 — Presentation Layer',
-      'Layer 3 — Network Layer',
-      'Layer 2 — Data Link Layer',
-      'Layer 1 — Physical Layer'
+      '1. Physical, 2. Data Link, 3. Network, 4. Transport, 5. Session, 6. Presentation, 7. Application',
+      '1. Application, 2. Presentation, 3. Session, 4. Transport, 5. Network, 6. Data Link, 7. Physical',
+      '1. Physical, 2. Network, 3. Data Link, 4. Transport, 5. Session, 6. Presentation, 7. Application',
+      '1. Hardware, 2. Driver, 3. Internet, 4. Port, 5. App, 6. Screen, 7. User'
     ],
     correctOption: 0,
-    explanation: 'The Presentation Layer (Layer 6) formats and translates data between the application layer and network formats, handling serialization, character code translation (ASCII/EBCDIC), data compression, and cryptographic encryption/decryption.',
+    explanation: 'From Layer 1 (bottom) to Layer 7 (top), the layers are: 1. Physical, 2. Data Link, 3. Network, 4. Transport, 5. Session, 6. Presentation, 7. Application (mnemonic: "Please Do Not Throw Sausage Pizza Away").',
     explanationsJson: {
-      1: 'Layer 3 (Network) handles logical IP addressing and routing.',
-      2: 'Layer 2 (Data Link) handles physical framing, MAC addressing, and link-level error checking.',
-      3: 'Layer 1 (Physical) transmits raw electrical, optical, or radio bits.'
+      1: 'This order is reversed (Layer 7 down to Layer 1).',
+      2: 'Data Link is Layer 2 and Network is Layer 3.',
+      3: 'These are informal hardware/software terms, not official ISO/OSI model layers.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'OSI 7 Layers Sequence',
+    points: 10
+  },
+  {
+    quizId: 'quiz-osi-model-7-layers',
+    lessonSlug: 'osi-model-7-layers',
+    text: 'Which OSI layer is responsible for logical addressing (IP addresses) and determining the path to route packets across different networks?',
+    options: [
+      'Layer 3 — Network Layer',
+      'Layer 1 — Physical Layer',
+      'Layer 4 — Transport Layer',
+      'Layer 7 — Application Layer'
+    ],
+    correctOption: 0,
+    explanation: 'The Network Layer (Layer 3) handles logical addressing (IPv4 and IPv6) and path determination (routing) to deliver packets across interconnected networks.',
+    explanationsJson: {
+      1: 'Layer 1 (Physical) deals only with raw physical bits and cables.',
+      2: 'Layer 4 (Transport) handles port numbers and end-to-end transport delivery.',
+      3: 'Layer 7 (Application) interfaces with user software applications.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Presentation Layer Functionality',
+    concept: 'Network Layer Responsibilities',
     points: 10
   },
   {
     quizId: 'quiz-osi-model-7-layers',
     lessonSlug: 'osi-model-7-layers',
-    text: 'A user downloads an encrypted file over HTTPS. At which OSI layer does the TCP protocol ensure that lost packets are retransmitted and received in the exact correct sequence?',
+    text: 'Which OSI layer handles physical hardware addressing (MAC addresses) and packages data into frames to transmit between directly connected devices on a local network?',
     options: [
-      'Layer 4 — Transport Layer',
       'Layer 2 — Data Link Layer',
+      'Layer 5 — Session Layer',
       'Layer 3 — Network Layer',
-      'Layer 7 — Application Layer'
+      'Layer 6 — Presentation Layer'
     ],
     correctOption: 0,
-    explanation: 'The Transport Layer (Layer 4), through protocols like TCP, provides end-to-end reliability, segment sequencing, acknowledgments, retransmissions, and flow control.',
+    explanation: 'The Data Link Layer (Layer 2) manages physical MAC addressing, framing, and local hop-to-hop transfer across local Ethernet switches or Wi-Fi links.',
     explanationsJson: {
-      1: 'Layer 2 provides hop-by-hop framing on a local link, not end-to-end transport retransmission across routers.',
-      2: 'Layer 3 (IP) is connectionless and "best-effort"; it does not track sequence numbers or guarantee delivery.',
-      3: 'Layer 7 defines user applications (HTTP, FTP); underlying segment retransmission is handled by Layer 4.'
+      1: 'Layer 5 (Session) manages dialogs and sessions between applications.',
+      2: 'Layer 3 (Network) handles logical IP addresses, not physical MAC addresses.',
+      3: 'Layer 6 (Presentation) handles formatting and data encryption.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Data Link Layer Responsibilities',
+    points: 10
+  },
+  {
+    quizId: 'quiz-osi-model-7-layers',
+    lessonSlug: 'osi-model-7-layers',
+    text: 'What occurs during data encapsulation as an outgoing message travels down the OSI stack on a sending device?',
+    options: [
+      'Each layer adds its own specific protocol header information to the data as it moves downward toward Layer 1',
+      'The sending device strips all headers to make the packet as small as possible',
+      'The data is converted directly into a wireless radio wave at Layer 7',
+      'The computer deletes the payload and sends only blank test signals'
+    ],
+    correctOption: 0,
+    explanation: 'During encapsulation, each layer on the sender adds its own header (and trailer at Layer 2) containing necessary control information as data travels downward from Layer 7 to Layer 1.',
+    explanationsJson: {
+      1: 'Stripping headers is decapsulation, which occurs on the receiving device.',
+      2: 'Physical signaling occurs at Layer 1, not Layer 7.',
+      3: 'Encapsulation preserves and transports the actual application data payload.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Encapsulation Mechanics',
+    points: 10
+  },
+  {
+    quizId: 'quiz-osi-model-7-layers',
+    lessonSlug: 'osi-model-7-layers',
+    text: 'A user cannot browse the web. A technician notices that the network cable is completely unplugged and no link lights are glowing on the computer network port. At which OSI layer does this problem originate?',
+    options: [
+      'Layer 1 — Physical Layer',
+      'Layer 7 — Application Layer',
+      'Layer 4 — Transport Layer',
+      'Layer 6 — Presentation Layer'
+    ],
+    correctOption: 0,
+    explanation: 'Physical cables, connectors, link lights, and electrical signals belong to Layer 1 (Physical Layer). An unplugged cable is a Layer 1 fault.',
+    explanationsJson: {
+      1: 'While the web browser (Layer 7) fails to load, the root cause is the unplugged physical cable.',
+      2: 'Transport (Layer 4) cannot function without an active physical connection.',
+      3: 'Presentation (Layer 6) deals with data formatting, not physical cable connections.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Transport Layer Reliability',
-    points: 10
-  },
-  {
-    quizId: 'quiz-osi-model-7-layers',
-    lessonSlug: 'osi-model-7-layers',
-    text: 'During a network security audit, an engineer identifies that a rogue device is intercepting traffic by corrupting Layer 2 MAC address tables (ARP Cache Poisoning). At which OSI layer must mitigation controls (such as Dynamic ARP Inspection) be implemented?',
-    options: [
-      'Layer 2 — Data Link Layer',
-      'Layer 7 — Application Layer',
-      'Layer 4 — Transport Layer',
-      'Layer 1 — Physical Layer'
-    ],
-    correctOption: 0,
-    explanation: 'ARP operates at the boundary of Layer 2 and Layer 3, mapping IP to MAC addresses. Mitigations like Dynamic ARP Inspection (DAI) and Port Security are enforced on Layer 2 switches.',
-    explanationsJson: {
-      1: 'Layer 7 application filters cannot prevent local switch CAM table or ARP cache poisoning.',
-      2: 'Layer 4 transport firewalls filter port numbers, not Layer 2 Ethernet frame MAC bindings.',
-      3: 'Layer 1 cabling cannot validate ARP payload inspection rules.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
-    questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'Layer 2 Security Architecture',
+    concept: 'Layered Troubleshooting Scenario',
     points: 10
   },
 

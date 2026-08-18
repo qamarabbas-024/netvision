@@ -1381,138 +1381,261 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     slug: 'osi-model-7-layers',
     title: 'The 7-Layer OSI Reference Model',
     type: LessonType.THEORY,
-    durationMinutes: 30,
+    durationMinutes: 20,
     order: 2,
     visualizationType: 'OSI_STACK_FLOW',
     introduction:
-      'Master the theoretical framework of computer networking: The ISO 7-Layer Open Systems Interconnection (OSI) Reference Model, the responsibilities of each layer, Protocol Data Units (PDUs: Bits, Frame, Packet, Segment, Data), and vertical Encapsulation/Decapsulation mechanics.',
-    stepMetadata: {
-      step1_objective:
-        'Master all 7 layers of the OSI model, identify the Protocol Data Unit (PDU) at each layer, and understand vertical Encapsulation (downward) and Decapsulation (upward) workflows.',
-      step2_prerequisites: ['level-0-network-protocols-standards'],
-      step3_whyItMatters:
-        'The OSI model is the universal language of network engineering. When troubleshooting, isolating whether a problem is Layer 1 (cable), Layer 3 (routing), or Layer 7 (application) is essential.',
-      step4_coreConcept:
-        'The OSI model standardizes network communication into 7 distinct functional layers: Layer 7 Application (user interfaces, HTTP/DNS), Layer 6 Presentation (formatting, encryption, TLS/compression), Layer 5 Session (dialog management/RPC), Layer 4 Transport (end-to-end reliability, ports, TCP/UDP), Layer 3 Network (logical addressing, routing, IP), Layer 2 Data Link (physical MAC addressing, framing, CRC, Ethernet), Layer 1 Physical (electrical/optical bit signaling). PDUs: Layers 7-5 = Data, Layer 4 = Segment, Layer 3 = Packet, Layer 2 = Frame, Layer 1 = Bits. Encapsulation adds headers as data moves down; Decapsulation strips headers as data moves up.',
-      step5_technicalAnatomy: {
-        title: 'The 7 Layers, PDUs & Core Functions',
-        description: 'Layer numbers, names, PDU types, and functions.',
-        components: [
-          { name: 'Layer 7: Application', detail: 'PDU: Data. User interface protocols: HTTP, HTTPS, DNS, DHCP, SSH, SMTP.' },
-          { name: 'Layer 6: Presentation', detail: 'PDU: Data. Data formatting, syntax translation, compression, and encryption (TLS/SSL, JPEG, ASCII).' },
-          { name: 'Layer 5: Session', detail: 'PDU: Data. Establishes, manages, and terminates application sessions and dialog synchronization.' },
-          { name: 'Layer 4: Transport', detail: 'PDU: Segment. End-to-end communication, port addressing (0-65535), segmentation, flow control (TCP/UDP).' },
-          { name: 'Layer 3: Network', detail: 'PDU: Packet. Logical addressing (IPv4/IPv6), path determination, and inter-network routing.' },
-          { name: 'Layer 2: Data Link', detail: 'PDU: Frame. Physical hardware addressing (MAC), framing, hop-to-hop transfer, CRC error checking (Ethernet/Wi-Fi).' },
-          { name: 'Layer 1: Physical', detail: 'PDU: Bits. Electrical voltages, radio waves, light pulses, cables, transceivers, and connectors.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Encapsulation (Sender Downward Flow)', action: 'Application data is wrapped with L4 TCP header (Segment), L3 IP header (Packet), L2 Ethernet header + FCS trailer (Frame), and converted to L1 Bits.' },
-          { stepNumber: 2, title: 'Decapsulation (Receiver Upward Flow)', action: 'Receiver reads L1 bits, strips L2 frame header/trailer after CRC check, strips L3 IP header, strips L4 TCP header, and delivers payload to Application.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'OSI Protocol Data Unit (PDU) Hierarchy',
-        fields: [
-          { fieldName: 'L4 PDU', bitLength: 'Segment', hexSample: 'TCP / UDP Header + Data', description: 'Transport layer segment.' },
-          { fieldName: 'L3 PDU', bitLength: 'Packet', hexSample: 'IP Header + Segment', description: 'Network layer packet.' },
-          { fieldName: 'L2 PDU', bitLength: 'Frame', hexSample: 'Ethernet Header + Packet + FCS', description: 'Data link frame.' },
-          { fieldName: 'L1 PDU', bitLength: 'Bits', hexSample: 'Physical 1s and 0s', description: 'Physical layer bitstream.' },
-        ],
-      },
-      step8_visualExplanation: {
+      'Learn how computers structure network communication using the 7-Layer Open Systems Interconnection (OSI) Reference Model. Discover the purpose of each layer (from Physical to Application), how data moves down and up the stack through encapsulation and decapsulation, and how the model simplifies network design and troubleshooting.',
+    contentV2: {
+      objective:
+        'Understand why layered networking models exist, identify all 7 layers of the OSI Reference Model and their core responsibilities, explain the mechanics of encapsulation and decapsulation, and apply the model to isolate simple network problems.',
+      prerequisites: [
+        'net-101-bits-bytes-binary-hex',
+        'level-0-what-is-a-computer-network',
+      ],
+      whyItMatters:
+        'Modern computer networks involve thousands of hardware and software components built by different manufacturers. Without a common model, diagnosing network issues or designing interoperable software would be chaotic. The OSI model provides a universal roadmap that network engineers use daily to describe protocols and isolate troubleshooting problems (such as determining whether an issue is a broken cable at Layer 1, a routing failure at Layer 3, or a web server issue at Layer 7).',
+      explanation:
+        'Networking is complex. Breaking communication into modular layers allows hardware and software developers to build components independently—for example, a web browser developer does not need to worry about whether the physical cable is copper, optical fiber, or Wi-Fi.\n\n1. What the OSI Model Is:\nCreated by the International Organization for Standardization (ISO), the Open Systems Interconnection (OSI) model organizes network communication into 7 distinct functional layers, numbered from Layer 1 (bottom) to Layer 7 (top).\n\n2. The 7 Layers Explained:\n- Layer 7 — Application Layer: The interface between user software and the network. Provides network services directly to user applications (Examples: HTTP/HTTPS for web browsing, DNS for domain lookups, SMTP for email).\n- Layer 6 — Presentation Layer: Handles how data is formatted, translated, compressed, and encrypted so both sender and receiver understand the data format (Examples: TLS/SSL encryption, JPEG/PNG images, ASCII text encoding).\n- Layer 5 — Session Layer: Manages the establishment, maintenance, and termination of communication sessions and dialogs between applications.\n- Layer 4 — Transport Layer: Responsible for end-to-end communication, dividing data into manageable chunks (segments), tracking port numbers, and managing flow control (Examples: TCP for reliable delivery, UDP for fast real-time streaming).\n- Layer 3 — Network Layer: Responsible for logical addressing (IP addresses) and path determination (routing) to move data (packets) across different interconnected networks (Examples: IPv4, IPv6, Routers).\n- Layer 2 — Data Link Layer: Responsible for physical hardware addressing (MAC addresses) and packaging data into frames to move between directly connected devices on the same local network (Examples: Ethernet, Wi-Fi frames, Network Switches).\n- Layer 1 — Physical Layer: Responsible for transmitting raw binary bits (1s and 0s) as physical electrical voltages, light pulses, or radio signals across transmission media (Examples: Copper cables, optical fiber, radio antennas, network connectors).\n\n3. Encapsulation and Decapsulation:\n- Encapsulation (Sender Downward Flow): When you send data, it starts at Layer 7. As it travels down the stack, each layer wraps the payload with its own header containing crucial control information (e.g., Layer 4 adds port numbers, Layer 3 adds IP addresses, Layer 2 adds MAC addresses and an error check trailer). Finally, Layer 1 converts everything into physical bits on the wire.\n- Decapsulation (Receiver Upward Flow): When the receiving computer receives the raw bits at Layer 1, it reads the data upward. Each layer reads its specific header, validates the information, strips the header off, and passes the remaining payload up to the next higher layer until the application receives the original message.\n\n4. Troubleshooting with the Model:\nNetwork technicians frequently troubleshoot "bottom-up"—starting at Layer 1 to check cables and link lights, moving to Layer 2 to check local switch connectivity, Layer 3 to check IP reachability with ping, and up to Layer 7 to check application servers.',
+      components: [
+        {
+          name: 'Layer 7: Application Layer',
+          detail: 'Direct interface with user software applications. Handles protocols like HTTP/HTTPS for web pages, DNS for name resolution, and SSH/SMTP for remote management and email.',
+        },
+        {
+          name: 'Layer 6: Presentation Layer',
+          detail: 'Translates, formats, compresses, and encrypts data (such as TLS/SSL encryption and ASCII/JPEG formatting) so software on different operating systems understands the format.',
+        },
+        {
+          name: 'Layer 5: Session Layer',
+          detail: 'Opens, manages, and closes communication sessions and dialogs between applications across network endpoints.',
+        },
+        {
+          name: 'Layer 4: Transport Layer',
+          detail: 'Handles end-to-end communication, port numbers (identifying specific applications), and segment management (TCP for reliable delivery, UDP for fast streaming).',
+        },
+        {
+          name: 'Layer 3: Network Layer',
+          detail: 'Handles logical addressing (IPv4 and IPv6 addresses) and path determination (routing) to deliver packets across different interconnected networks.',
+        },
+        {
+          name: 'Layer 2: Data Link Layer',
+          detail: 'Handles physical hardware addressing (MAC addresses), frame creation, and error checking between directly connected devices on a local network (Ethernet switches).',
+        },
+        {
+          name: 'Layer 1: Physical Layer',
+          detail: 'Transmits raw binary 1s and 0s (bits) as physical electrical voltages, optical light pulses, or radio signals across copper cables, fiber strands, and wireless links.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Application Data Creation (Layers 7–5)',
+          action: 'The sender application produces message data, the presentation layer formats and encrypts it, and the session layer establishes the connection.',
+        },
+        {
+          stepNumber: 2,
+          title: 'Transport & Network Packaging (Layers 4–3)',
+          action: 'The transport layer adds port numbers (Segment); the network layer adds source and destination IP addresses (Packet).',
+        },
+        {
+          stepNumber: 3,
+          title: 'Framing & Physical Bit Transmission (Layers 2–1)',
+          action: 'The data link layer adds MAC addresses and an error-checking trailer (Frame); the physical layer converts the frame into physical electrical or optical signals (Bits).',
+        },
+      ],
+      visualizer: {
         type: 'OSI_STACK_FLOW',
-        title: 'Interactive 7-Layer OSI Encapsulation & Decapsulation Engine',
-        description: 'Watch an application message travel down the 7 layers acquiring headers, traverse the physical medium, and decapsulate up the receiver stack.',
+        title: 'Interactive 7-Layer OSI Model Stack',
+        description: 'Explore the 7 layers of the OSI model, inspect protocols at each layer, and toggle between Sender Encapsulation (downward) and Receiver Decapsulation (upward).',
       },
-      step9_workedExample: {
-        title: 'Tracing Encapsulation of an HTTPS GET Request',
-        problemStatement: 'Trace PDU names and headers added as a browser sends an HTTPS GET request.',
+      workedExample: {
+        title: 'Tracing Web Browsing Down and Up the OSI Stack',
+        problemStatement: 'Trace how a web browser request (https://example.com) is encapsulated by a user laptop and decapsulated by the web server.',
         stepByStepSolution: [
-          'Layer 7-5: Application generates HTTPS GET payload (Data).',
-          'Layer 4: Adds TCP Header with Source Port 51234 and Dst Port 443 (Segment).',
-          'Layer 3: Adds IPv4 Header with Source IP and Destination IP (Packet).',
-          'Layer 2: Adds Ethernet Header with Source MAC, Dst MAC, and FCS Trailer (Frame).',
-          'Layer 1: Encodes Frame into optical light pulses or electrical voltages (Bits).',
+          '1. Layer 7–5 (Application): The web browser creates an HTTPS GET request and encrypts it with TLS.',
+          '2. Layer 4 (Transport): Adds a TCP header with destination port 443 (forming a Transport Segment).',
+          '3. Layer 3 (Network): Adds an IPv4 header with the laptop IP and web server IP (forming an IP Packet).',
+          '4. Layer 2 (Data Link): Adds an Ethernet header with source and destination MAC addresses plus an error-checking FCS trailer (forming an Ethernet Frame).',
+          '5. Layer 1 (Physical): Converts the frame into electrical voltage pulses transmitted over the copper Ethernet cable.',
+          '6. Receiver Decapsulation: The web server receives the bits at Layer 1, strips the Ethernet frame at Layer 2, strips the IP packet header at Layer 3, reads port 443 at Layer 4, and delivers the decrypted HTTPS request to the web server software at Layer 7.',
         ],
-        finalResult: 'Data -> Segment -> Packet -> Frame -> Bits.',
+        finalResult: 'Sender: Data -> Segment -> Packet -> Frame -> Bits. Receiver: Bits -> Frame -> Packet -> Segment -> Data.',
       },
-      step10_realWorldScenario: {
-        topology: 'Layered Network Troubleshooting Methodology',
-        scenarioText: 'User cannot open webpage. Engineer troubleshoots bottom-up: verifies link light (L1), checks MAC table (L2), pings default gateway (L3), tests TCP port 443 (L4), and tests web server response (L7).',
-        engineeringContext: 'Bottom-up troubleshooting eliminates lower-layer faults systematically.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Operates across all 7 layers (NIC L1/L2, Kernel L3/L4, Apps L5-L7).',
-        nicBehavior: 'Processes Layer 1 bits and Layer 2 frames.',
-        switchOrRouterBehavior: 'Layer 2 switches inspect frames (L2); Layer 3 routers inspect packets (L3).',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'Test-NetConnection -ComputerName 8.8.8.8 -Port 53',
-          description: 'Tests Layer 3 IP reachability and Layer 4 TCP port connectivity.',
-          expectedOutput: 'PingSucceeded : True\nTcpTestSucceeded : True',
-          proofExplanation: 'Confirms Layer 3 and Layer 4 operational status.',
+          id: 1,
+          prompt: 'Which OSI layer is responsible for logical addressing (such as IPv4 and IPv6 addresses) and routing packets between different networks?',
+          expected: 'Layer 3 — Network Layer.',
+          hints: 'Think about which layer uses IP addresses and routers.',
+        },
+        {
+          id: 2,
+          prompt: 'Which OSI layer handles physical hardware addressing (MAC addresses) and packages data into frames for local network communication?',
+          expected: 'Layer 2 — Data Link Layer.',
+          hints: 'Think about local network switches and Ethernet MAC addresses.',
+        },
+        {
+          id: 3,
+          prompt: 'What happens during data encapsulation on a sending computer as data travels down the OSI stack?',
+          expected: 'Each layer adds its own protocol header information to the data as it moves downward toward Layer 1.',
+          hints: 'Recall how headers are added layer by layer from Layer 7 to Layer 1.',
+        },
+        {
+          id: 4,
+          prompt: 'At which OSI layer do protocols like TCP and UDP operate to manage port numbers and end-to-end data delivery?',
+          expected: 'Layer 4 — Transport Layer.',
+          hints: 'Consider which layer handles reliable delivery, segments, and port numbers.',
+        },
+        {
+          id: 5,
+          prompt: 'If a network cable is unplugged or severed, at which OSI layer has the failure occurred?',
+          expected: 'Layer 1 — Physical Layer.',
+          hints: 'Consider the layer that deals with physical cables, connectors, and electrical/optical signals.',
+        },
+        {
+          id: 6,
+          prompt: 'Which OSI layer directly interacts with end-user software applications such as web browsers and email clients?',
+          expected: 'Layer 7 — Application Layer.',
+          hints: 'Think of the top layer closest to the human user (HTTP, DNS, SMTP).',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Ping works (L3) but web browsing fails (L7).',
-          possibleCauses: ['Layer 4 port blocked by firewall or Layer 7 DNS/web server failure'],
-          diagnosticSteps: ['Test TCP port 443 and verify DNS resolution.'],
-          remediation: 'Restart web daemon or update firewall policy.',
-        },
+      recap: [
+        'The OSI Reference Model organizes network communication into 7 modular layers from Layer 1 (Physical) to Layer 7 (Application).',
+        'Layer 1 (Physical) transmits bits; Layer 2 (Data Link) uses MAC addresses and frames; Layer 3 (Network) uses IP addresses and packets.',
+        'Layer 4 (Transport) manages port numbers and segment delivery (TCP/UDP); Layers 5–7 manage sessions, data formatting/encryption, and user applications (HTTP/DNS).',
+        'Encapsulation adds headers as data moves down the stack on the sender; Decapsulation strips headers as data moves up the stack on the receiver.',
+        'The model provides a common language for network design and systematic bottom-up troubleshooting.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Calling an IP PDU a "Frame" or an Ethernet PDU a "Packet".', correction: 'L2 is Frame; L3 is Packet; L4 is Segment.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Layer-Specific Security Attacks',
-        mitigationStrategy: 'Deploy defense-in-depth: 802.1X (L2), IPsec/ACLs (L3), stateful firewalls (L4), WAF (L7).',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['Mnemonic: All People Seem To Need Data Processing (7 to 1).', 'PDUs: Data, Segment, Packet, Frame, Bits.'],
-        frequentTraps: ['Forgetting that Presentation Layer handles encryption/formatting.'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: OSI 7-Layer PDU & Encapsulation Mapping',
-        scenario: 'Map protocol fields and PDU transitions across the 7 layers.',
-        tasks: ['Trace encapsulation order from Layer 7 to Layer 1.'],
-        verificationMethod: 'Verify correct PDU identification at each layer.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['OSI model defines 7 layers from Physical (L1) to Application (L7).', 'Encapsulation wraps data in Segments, Packets, and Frames.'],
-        nextLessonBridge: 'Proceed to NET-103 Lesson 3 for the TCP/IP 4-Layer Model and comparative mapping.',
-      },
     },
     questions: [
       {
-        text: 'What is the correct technical name for the Protocol Data Unit (PDU) at Layer 3 (Network Layer) and Layer 2 (Data Link Layer) of the OSI model?',
+        text: 'Why was the 7-Layer OSI Reference Model created, and how does it help network engineers?',
         options: [
-          'Layer 3 = Packet; Layer 2 = Frame',
-          'Layer 3 = Frame; Layer 2 = Packet',
-          'Layer 3 = Segment; Layer 2 = Bits',
-          'Layer 3 = Data; Layer 2 = Segment',
+          'It provides a standard vendor-neutral framework dividing network communication into 7 distinct layers for learning and troubleshooting',
+          'It is a physical piece of hardware installed in all network switches and routers',
+          'It forces every computer in the world to run the exact same operating system',
+          'It replaces the need for physical network cables and wireless antennas',
         ],
         correctOption: 0,
-        explanation: 'At Layer 3 (Network), the PDU is called a Packet (e.g. IP packet). At Layer 2 (Data Link), the PDU is called a Frame (e.g. Ethernet frame).',
-        explanationsJson: { 1: 'Reversed.', 2: 'Segment is L4; Bits is L1.', 3: 'Data is L7-5; Segment is L4.' },
+        explanation:
+          'The OSI model standardizes network communication into 7 functional layers, allowing different vendors to create compatible products and giving engineers a structured model for learning and troubleshooting.',
+        explanationsJson: {
+          1: 'OSI is a conceptual reference model, not a physical hardware device.',
+          2: 'OSI allows heterogeneous systems running different OSs to interoperate.',
+          3: 'Physical media (Layer 1) are still essential for transmission.',
+        },
         difficulty: CourseLevel.FOUNDATIONAL,
         cognitiveLevel: CognitiveLevel.RECALL,
         questionType: QuestionType.MULTIPLE_CHOICE,
-        concept: 'OSI Protocol Data Units (PDUs)',
+        concept: 'OSI Model Purpose and Architecture',
+      },
+      {
+        text: 'What is the correct sequence of the 7 OSI layers from bottom to top (Layer 1 to Layer 7)?',
+        options: [
+          '1. Physical, 2. Data Link, 3. Network, 4. Transport, 5. Session, 6. Presentation, 7. Application',
+          '1. Application, 2. Presentation, 3. Session, 4. Transport, 5. Network, 6. Data Link, 7. Physical',
+          '1. Physical, 2. Network, 3. Data Link, 4. Transport, 5. Session, 6. Presentation, 7. Application',
+          '1. Hardware, 2. Driver, 3. Internet, 4. Port, 5. App, 6. Screen, 7. User',
+        ],
+        correctOption: 0,
+        explanation:
+          'From Layer 1 (bottom) to Layer 7 (top), the layers are: 1. Physical, 2. Data Link, 3. Network, 4. Transport, 5. Session, 6. Presentation, 7. Application (mnemonic: "Please Do Not Throw Sausage Pizza Away").',
+        explanationsJson: {
+          1: 'This order is reversed (Layer 7 down to Layer 1).',
+          2: 'Data Link is Layer 2 and Network is Layer 3.',
+          3: 'These are informal hardware/software terms, not official ISO/OSI model layers.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'OSI 7 Layers Sequence',
+      },
+      {
+        text: 'Which OSI layer is responsible for logical addressing (IP addresses) and determining the path to route packets across different networks?',
+        options: [
+          'Layer 3 — Network Layer',
+          'Layer 1 — Physical Layer',
+          'Layer 4 — Transport Layer',
+          'Layer 7 — Application Layer',
+        ],
+        correctOption: 0,
+        explanation:
+          'The Network Layer (Layer 3) handles logical addressing (IPv4 and IPv6) and path determination (routing) to deliver packets across interconnected networks.',
+        explanationsJson: {
+          1: 'Layer 1 (Physical) deals only with raw physical bits and cables.',
+          2: 'Layer 4 (Transport) handles port numbers and end-to-end transport delivery.',
+          3: 'Layer 7 (Application) interfaces with user software applications.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Network Layer Responsibilities',
+      },
+      {
+        text: 'Which OSI layer handles physical hardware addressing (MAC addresses) and packages data into frames to transmit between directly connected devices on a local network?',
+        options: [
+          'Layer 2 — Data Link Layer',
+          'Layer 5 — Session Layer',
+          'Layer 3 — Network Layer',
+          'Layer 6 — Presentation Layer',
+        ],
+        correctOption: 0,
+        explanation:
+          'The Data Link Layer (Layer 2) manages physical MAC addressing, framing, and local hop-to-hop transfer across local Ethernet switches or Wi-Fi links.',
+        explanationsJson: {
+          1: 'Layer 5 (Session) manages dialogs and sessions between applications.',
+          2: 'Layer 3 (Network) handles logical IP addresses, not physical MAC addresses.',
+          3: 'Layer 6 (Presentation) handles formatting and data encryption.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Data Link Layer Responsibilities',
+      },
+      {
+        text: 'What occurs during data encapsulation as an outgoing message travels down the OSI stack on a sending device?',
+        options: [
+          'Each layer adds its own specific protocol header information to the data as it moves downward toward Layer 1',
+          'The sending device strips all headers to make the packet as small as possible',
+          'The data is converted directly into a wireless radio wave at Layer 7',
+          'The computer deletes the payload and sends only blank test signals',
+        ],
+        correctOption: 0,
+        explanation:
+          'During encapsulation, each layer on the sender adds its own header (and trailer at Layer 2) containing necessary control information as data travels downward from Layer 7 to Layer 1.',
+        explanationsJson: {
+          1: 'Stripping headers is decapsulation, which occurs on the receiving device.',
+          2: 'Physical signaling occurs at Layer 1, not Layer 7.',
+          3: 'Encapsulation preserves and transports the actual application data payload.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Encapsulation Mechanics',
+      },
+      {
+        text: 'A user cannot browse the web. A technician notices that the network cable is completely unplugged and no link lights are glowing on the computer network port. At which OSI layer does this problem originate?',
+        options: [
+          'Layer 1 — Physical Layer',
+          'Layer 7 — Application Layer',
+          'Layer 4 — Transport Layer',
+          'Layer 6 — Presentation Layer',
+        ],
+        correctOption: 0,
+        explanation:
+          'Physical cables, connectors, link lights, and electrical signals belong to Layer 1 (Physical Layer). An unplugged cable is a Layer 1 fault.',
+        explanationsJson: {
+          1: 'While the web browser (Layer 7) fails to load, the root cause is the unplugged physical cable.',
+          2: 'Transport (Layer 4) cannot function without an active physical connection.',
+          3: 'Presentation (Layer 6) deals with data formatting, not physical cable connections.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Layered Troubleshooting Scenario',
       },
     ],
-    lab: {
-      title: 'Guided Practice: OSI 7-Layer PDU & Encapsulation Mapping',
-      instructions: '1. Map 7 layers.\n2. Trace encapsulation flow.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { layers: ['Physical', 'Data Link', 'Network', 'Transport', 'Session', 'Presentation', 'Application'] },
-      tasks: ['Trace encapsulation sequence.'],
-    },
   },
 
   // -------------------------------------------------------------------------
