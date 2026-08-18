@@ -1470,139 +1470,139 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-network-devices-overview',
     lessonSlug: 'network-devices-overview',
-    text: 'A network engineer needs to connect two switches located in separate campus buildings 800 meters apart with a 10 Gbps uplink. Which cabling and transceiver standard should be selected?',
+    text: 'What is the practical maximum distance limit for standard copper twisted-pair Ethernet cables (such as Cat5e or Cat6)?',
     options: [
-      'Single-Mode Fiber (SMF) with 10GBASE-LR SFP+ transceivers',
-      'Cat6a Copper UTP with RJ-45 connectors',
-      'Multi-Mode Fiber (MMF) with 10GBASE-SR SFP+ transceivers',
-      'Cat5e Shielded STP cable with PoE injectors'
+      '100 meters (about 328 feet)',
+      '500 meters (about 1,640 feet)',
+      '50 meters (about 164 feet)',
+      '1,000 meters (1 kilometer)'
     ],
     correctOption: 0,
-    explanation: 'The 800-meter distance exceeds the 100m limit for copper and the 300-400m limit for Multi-Mode Fiber (10GBASE-SR). Single-Mode Fiber (10GBASE-LR) is rated for up to 10 kilometers and is the correct choice.',
+    explanation: 'Standard copper twisted-pair Ethernet cables (Cat5e, Cat6, Cat6a) have a practical maximum channel limit of 100 meters due to electrical signal attenuation.',
     explanationsJson: {
-      1: 'Cat6a copper is strictly limited to a maximum channel distance of 100 meters.',
-      2: 'Multi-Mode Fiber (10GBASE-SR) is limited to approximately 300-400 meters.',
-      3: 'Cat5e is limited to 100 meters and cannot carry 10 Gbps over 800m.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Media Selection: Distance and Bandwidth',
-    points: 10
-  },
-  {
-    quizId: 'quiz-network-devices-overview',
-    lessonSlug: 'network-devices-overview',
-    text: 'What fundamental physical characteristic distinguishes Single-Mode Fiber (SMF) from Multi-Mode Fiber (MMF)?',
-    options: [
-      'SMF has a narrow ~9 µm core carrying a single straight laser ray, whereas MMF has a wider 50/62.5 µm core carrying multiple light rays subject to modal dispersion',
-      'SMF carries electrical current while MMF carries optical light',
-      'SMF uses RJ-45 connectors while MMF uses USB-C connectors',
-      'SMF is limited to 100 meters while MMF reaches 50 kilometers'
-    ],
-    correctOption: 0,
-    explanation: 'Single-Mode Fiber features a tiny 9-micron core that permits only one mode of light to propagate, virtually eliminating modal dispersion. Multi-Mode has a 50-62.5 micron core where light bounces at multiple angles.',
-    explanationsJson: {
-      1: 'All optical fiber carries photons (light), never electrical voltage.',
-      2: 'Fiber uses LC, SC, or ST optical connectors, not RJ-45 or USB.',
-      3: 'SMF achieves much greater distances (tens of km) than MMF (hundreds of meters).'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Single-Mode vs Multi-Mode Core Architecture',
-    points: 10
-  },
-  {
-    quizId: 'quiz-network-devices-overview',
-    lessonSlug: 'network-devices-overview',
-    text: 'An administrator connects a new Wi-Fi 6 Access Point requiring 24 Watts of DC power to an enterprise switch. Which Power over Ethernet standard must the switch support on that port?',
-    options: [
-      'IEEE 802.3at (PoE+ - up to 30W output / 25.5W delivered)',
-      'IEEE 802.3af (PoE - up to 15.4W output)',
-      'IEEE 802.1Q (VLAN tagging)',
-      'IEEE 802.3ad (Link Aggregation)'
-    ],
-    correctOption: 0,
-    explanation: 'IEEE 802.3at (PoE+) supplies up to 30W of power from the switch port (delivering up to 25.5W at the device), which satisfies the 24W requirement. Legacy 802.3af only supplies 15.4W.',
-    explanationsJson: {
-      1: '802.3af only supplies 15.4W, which is insufficient for a 24W access point.',
-      2: '802.1Q is a Layer 2 VLAN encapsulation protocol, not a power standard.',
-      3: '802.3ad is Link Aggregation (LACP), not a power standard.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Power over Ethernet Standards (802.3af/at/bt)',
-    points: 10
-  },
-  {
-    quizId: 'quiz-network-devices-overview',
-    lessonSlug: 'network-devices-overview',
-    text: 'Why are fiber optic cables completely immune to Electromagnetic Interference (EMI) and Radio Frequency Interference (RFI)?',
-    options: [
-      'Fiber optic cables transmit information using non-conductive light photons through glass cores rather than electrical voltages over copper',
-      'Fiber optic cables are coated with thick lead shielding that absorbs all radio waves',
-      'Fiber optic cables operate at zero volts electrical ground',
-      'Fiber optic transceivers automatically filter out high-voltage magnetic fields using software'
-    ],
-    correctOption: 0,
-    explanation: 'Optical fiber carries data as pulses of light through dielectric glass fibers. Because light photons do not interact with electromagnetic fields, fiber is 100% immune to electromagnetic noise, motors, and lightning.',
-    explanationsJson: {
-      1: 'Standard fiber jackets are plastic, not lead; immunity is due to light transmission.',
-      2: 'Fiber does not conduct electricity; voltage grounding is irrelevant.',
-      3: 'Immunity is an inherent physical property of light in glass, not software filtering.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Fiber Optic Immunity to EMI',
-    points: 10
-  },
-  {
-    quizId: 'quiz-network-devices-overview',
-    lessonSlug: 'network-devices-overview',
-    text: 'What is the maximum certified channel distance for standard Category 5e, Category 6, and Category 6a copper twisted-pair Ethernet cables?',
-    options: [
-      '100 meters (328 feet)',
-      '500 meters (1,640 feet)',
-      '50 meters (164 feet)',
-      '1,000 meters (1 km)'
-    ],
-    correctOption: 0,
-    explanation: 'According to TIA/EIA and IEEE 802.3 standards, the maximum allowable channel distance for Category 5e, 6, and 6a copper twisted-pair cabling is 100 meters (90 meters of permanent horizontal cable plus 10 meters total of stranded patch cords).',
-    explanationsJson: {
-      1: '500m far exceeds copper electrical limits and requires optical fiber.',
-      2: '50m is a sub-limit for 10 Gbps on Cat6, but the standard channel specification is 100m.',
-      3: '1,000m is only achievable using Single-Mode fiber optics.'
+      1: '500 meters far exceeds copper limits and requires optical fiber.',
+      2: 'While Cat6 has a 55m limit for 10 Gbps, standard 1 Gbps runs reach 100 meters.',
+      3: '1,000 meters requires long-distance Single-Mode optical fiber.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Copper Channel Distance Limits',
+    concept: 'Copper Cable Distance Limits',
     points: 10
   },
   {
     quizId: 'quiz-network-devices-overview',
     lessonSlug: 'network-devices-overview',
-    text: 'What is the primary operational role of a Small Form-factor Pluggable (SFP / SFP+) modular transceiver in network switches?',
+    text: 'When choosing between optical fiber types, which one is designed for much longer distances across campuses or between buildings?',
     options: [
-      'It provides a hot-swappable interface that allows a switch port to adapt to different media types (copper or fiber) and transmission speeds',
-      'It provides uninterruptible battery backup power to the switch during electrical blackouts',
-      'It converts AC wall current into low-voltage DC power for internal switch motherboards',
-      'It dynamically encrypts operating system logs stored on local hard drives'
+      'Single-Mode Fiber (SMF)',
+      'Multimode Fiber (MMF)',
+      'Cat5e Copper Cable',
+      'Coaxial Cable'
     ],
     correctOption: 0,
-    explanation: 'An SFP/SFP+ transceiver is a modular, hot-swappable hardware module that slots into a switch cage. It allows network administrators to choose between copper (RJ-45), Multi-Mode fiber (SR), or Single-Mode fiber (LR) without replacing the underlying switch.',
+    explanation: 'Single-Mode Fiber (SMF) carries light along a single direct path, allowing it to span long distances between buildings or across cities.',
     explanationsJson: {
-      1: 'Battery backup is provided by an Uninterruptible Power Supply (UPS).',
-      2: 'Power supplies (PSUs) convert AC wall power to DC current.',
-      3: 'Disk encryption is a software/storage feature unrelated to port transceivers.'
+      1: 'Multimode Fiber (MMF) is designed for shorter runs within buildings or server rooms.',
+      2: 'Cat5e is copper cabling limited to 100 meters.',
+      3: 'Coaxial cable is copper cabling used primarily for legacy connections.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Modular SFP Transceivers',
+    concept: 'Single-Mode vs Multimode Fiber Purpose',
+    points: 10
+  },
+  {
+    quizId: 'quiz-network-devices-overview',
+    lessonSlug: 'network-devices-overview',
+    text: 'Why is optical fiber cable immune to electromagnetic interference (EMI) caused by power lines or heavy machinery?',
+    options: [
+      'Fiber transmits signals using pulses of light through glass rather than electrical current over copper wire',
+      'Fiber cables are wrapped in thick lead shielding that absorbs all radio signals',
+      'Fiber cables operate at zero electrical resistance',
+      'Fiber switches automatically filter out electrical noise using software'
+    ],
+    correctOption: 0,
+    explanation: 'Because optical fiber carries data as light through non-conductive glass strands, electromagnetic fields from power lines and motors cannot interfere with the signal.',
+    explanationsJson: {
+      1: 'Fiber jackets are standard plastic; immunity comes from light transmission in glass.',
+      2: 'Fiber does not carry electrical current.',
+      3: 'Immunity is a physical property of light in glass, not software filtering.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Fiber Immunity to Electrical Noise',
+    points: 10
+  },
+  {
+    quizId: 'quiz-network-devices-overview',
+    lessonSlug: 'network-devices-overview',
+    text: 'What is the primary benefit of a modular transceiver such as an SFP or SFP+ module in a network switch?',
+    options: [
+      'It allows a switch port to be adapted to different cable types (copper or fiber) and transmission speeds',
+      'It provides battery backup power to the switch during electrical outages',
+      'It converts AC wall power into DC power for the switch motherboard',
+      'It speeds up internet connection speeds by compressing web pages'
+    ],
+    correctOption: 0,
+    explanation: 'An SFP/SFP+ modular transceiver slots into a switch port cage, giving the flexibility to connect copper cables, multimode fiber, or single-mode fiber as needed.',
+    explanationsJson: {
+      1: 'Battery backup is provided by a UPS unit.',
+      2: 'Power conversion is performed by the power supply unit (PSU).',
+      3: 'Transceivers handle physical media conversion, not web compression.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Modular Transceiver Purpose',
+    points: 10
+  },
+  {
+    quizId: 'quiz-network-devices-overview',
+    lessonSlug: 'network-devices-overview',
+    text: 'What is the main advantage of Power over Ethernet (PoE) when connecting devices like Wi-Fi access points and IP cameras?',
+    options: [
+      'It delivers electrical power and network data over the same Ethernet cable, removing the need for separate electrical power outlets',
+      'It doubles the maximum cable distance of copper cables to 200 meters',
+      'It automatically converts copper signals into optical fiber light',
+      'It encrypts all network data sent through the cable'
+    ],
+    correctOption: 0,
+    explanation: 'Power over Ethernet (PoE) sends low-voltage DC power through the copper Ethernet cable alongside data, allowing devices to be installed in ceilings or outdoors without dedicated power outlets.',
+    explanationsJson: {
+      1: 'PoE does not change the 100-meter copper distance limit.',
+      2: 'PoE delivers power over copper; it does not convert to fiber.',
+      3: 'PoE provides electrical power, not data encryption.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Power over Ethernet Purpose',
+    points: 10
+  },
+  {
+    quizId: 'quiz-network-devices-overview',
+    lessonSlug: 'network-devices-overview',
+    text: 'A desktop computer is located 15 meters from an office network switch in a normal room. Which physical medium is the most practical choice?',
+    options: [
+      'Copper twisted-pair cabling (Cat5e or Cat6) with RJ-45 connectors',
+      'Single-Mode optical fiber with long-haul transceivers',
+      'Undersea submarine optical cable',
+      'Shielded coaxial cable with BNC connectors'
+    ],
+    correctOption: 0,
+    explanation: 'For short indoor desktop connections under 100 meters, copper twisted-pair (Cat5e or Cat6) with standard RJ-45 plugs is standard, inexpensive, and easy to install.',
+    explanationsJson: {
+      1: 'Single-mode fiber is unnecessary and expensive for a 15-meter office desk connection.',
+      2: 'Submarine cables are for trans-oceanic backbones.',
+      3: 'Coaxial BNC cabling is legacy and not used for modern desktop Ethernet.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Practical Media Selection',
     points: 10
   },
 

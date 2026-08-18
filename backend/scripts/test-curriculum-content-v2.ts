@@ -133,7 +133,7 @@ async function verifyCurriculumContentV2() {
   assert(net101Media!.contentV2!.explanation.includes('Copper Twisted-Pair'), 'NET-101 Lesson 2 explains copper');
   assert(net101Media!.contentV2!.explanation.includes('Optical Fiber'), 'NET-101 Lesson 2 explains fiber');
   assert(net101Media!.contentV2!.explanation.includes('Single-Mode Fiber'), 'NET-101 Lesson 2 explains SMF');
-  assert(net101Media!.contentV2!.explanation.includes('Multi-Mode Fiber'), 'NET-101 Lesson 2 explains MMF');
+  assert(net101Media!.contentV2!.explanation.includes('Multimode Fiber'), 'NET-101 Lesson 2 explains MMF');
   assert(net101Media!.contentV2!.explanation.includes('Power over Ethernet'), 'NET-101 Lesson 2 explains PoE');
   assert(net101Media!.contentV2!.components.length >= 6, 'NET-101 Lesson 2 has 6 technical components');
   assert(Array.isArray(net101Media!.contentV2!.practice) && net101Media!.contentV2!.practice.length >= 6, 'NET-101 Lesson 2 has 6 practice exercises');
@@ -142,10 +142,13 @@ async function verifyCurriculumContentV2() {
   assert(!net101Media!.contentV2!.cliTooling, 'NET-101 Lesson 2 has no forced CLI bloat');
   assert(!net101Media!.contentV2!.security, 'NET-101 Lesson 2 has no generic security filler');
   assert(!net101Media!.lab, 'NET-101 Lesson 2 has no phantom CLI lab');
-  console.log('  ✓ NET-101 Lesson 2 verified with clean Content V2 structure, 6 practice items, 6 quiz questions, and zero forced filler.');
+  // Verify simplified beginner tone (no overly complex specs)
+  assert(!net101Media!.contentV2!.explanation.includes('VCSEL'), 'NET-101 Lesson 2 avoids advanced VCSEL jargon');
+  assert(!net101Media!.contentV2!.explanation.includes('modal dispersion'), 'NET-101 Lesson 2 avoids modal dispersion physics jargon');
+  console.log('  ✓ NET-101 Lesson 2 verified with clean Content V2 structure, beginner-level pedagogy, 6 practice items, 6 quiz questions, and zero forced filler.');
 
   console.log('\n================================================================');
-  console.log('🎉 ALL 7 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 8 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 
