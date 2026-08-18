@@ -251,127 +251,254 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     slug: 'network-devices-overview',
     title: 'Physical Network Interfaces, Media & Transceivers',
     type: LessonType.THEORY,
-    durationMinutes: 25,
-    order: 3,
+    durationMinutes: 20,
+    order: 2,
     visualizationType: 'MEDIA_INSPECTOR',
     introduction:
-      'Explore Layer 1 physical infrastructure: copper twisted pair cabling (Cat5e/Cat6/Cat6a, RJ-45), optical fiber media (Single-Mode vs Multi-Mode), modular optical transceivers (SFP/SFP+/QSFP), and Power over Ethernet (PoE 802.3af/at/bt).',
-    stepMetadata: {
-      step1_objective:
-        'Understand copper twisted pair, optical fiber types (SMF vs MMF), modular optical transceivers (SFP/SFP+), and Power over Ethernet (PoE) standards.',
-      step2_prerequisites: ['net-101-bits-bytes-binary-hex'],
-      step3_whyItMatters:
-        'Selecting the wrong cable or transceiver causes link down errors, signal attenuation, and underpowered access points.',
-      step4_coreConcept:
-        'Copper twisted pair (RJ-45) uses electrical pulses up to 100 meters. Optical fiber uses light pulses inside glass cores, providing long distance and zero EMI. SFP/SFP+ transceivers adapt switch ports to media types. PoE supplies DC power over Ethernet cables.',
-      step5_technicalAnatomy: {
-        title: 'Cabling Categories, Fiber Types & Modular Transceiver Specifications',
-        description: 'Comparison of copper standards, optical propagation, and transceivers.',
-        components: [
-          { name: 'Twisted Pair Copper (Cat5e/6/6a)', detail: '8 conductors in 4 pairs, RJ-45, 100m channel limit.' },
-          { name: 'Single-Mode Fiber (SMF)', detail: '9µm core, 1310/1550nm laser, long-haul (10-40km+), yellow jacket.' },
-          { name: 'Multi-Mode Fiber (MMF)', detail: '50/62.5µm core, 850nm LED/VCSEL, 300-550m, aqua/orange jacket.' },
-          { name: 'SFP / SFP+ / QSFP', detail: 'SFP (1G), SFP+ (10G), QSFP+ (40G), QSFP28 (100G).' },
-          { name: 'PoE Standards', detail: '802.3af (15.4W), 802.3at (PoE+ 30W), 802.3bt (PoE++ 60-90W).' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Media Selection', action: 'Evaluate distance (<100m copper, <400m MMF, >400m SMF) and PoE requirements.' },
-          { stepNumber: 2, title: 'Transceiver Insertion', action: 'Insert matching SFP/SFP+ module into switch cage and connect patch cable.' },
-          { stepNumber: 3, title: 'PoE Negotiation', action: 'Switch detects PD signature resistance and applies power.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'Physical Media & PoE Specifications',
-        fields: [
-          { fieldName: 'Copper Limit', bitLength: '100m', hexSample: 'Cat6/6a', description: 'Max copper channel distance.' },
-          { fieldName: 'PoE+ 802.3at', bitLength: '30W Output', hexSample: '50-57V DC', description: 'Delivers up to 25.5W to powered devices.' },
-        ],
-      },
-      step8_visualExplanation: {
+      'Master Layer 1 physical networking infrastructure: copper twisted-pair cabling (Cat5e/Cat6/Cat6a, RJ-45), optical fiber media (Single-Mode vs Multi-Mode), modular transceivers (SFP/SFP+/QSFP), and Power over Ethernet (PoE 802.3af/at/bt).',
+    contentV2: {
+      objective:
+        'Understand the physical transmission media connecting networks, compare copper twisted-pair (Cat5e/6/6a, RJ-45) and optical fiber (SMF vs MMF), analyze hot-swappable transceivers (SFP/SFP+/QSFP), and evaluate Power over Ethernet (PoE) deployment requirements.',
+      prerequisites: [
+        'net-101-bits-bytes-binary-hex',
+        'Basic understanding of binary digital signals (bits and bytes)',
+      ],
+      whyItMatters:
+        'Physical cables and transceivers form Layer 1 of every network. Exceeding distance limits, deploying mismatched transceivers, or underestimating power budgets causes immediate link failure, packet loss, or hardware malfunction. Choosing the correct medium is the first decision in network engineering.',
+      explanation:
+        'Network communication relies on physical transmission media to convey binary 1s and 0s between devices. These media fall into two primary categories: guided media (physical cables such as copper wire and glass optical fiber) and unguided media (wireless radio waves).\n\n1. Copper Twisted-Pair Cabling: Uses copper conductors carrying electrical voltage pulses. Wires are twisted into 4 pairs (8 conductors total) to cancel out electromagnetic interference and crosstalk from adjacent pairs. The standard connector is the 8P8C modular connector, universally known as RJ-45. All standard twisted-pair Ethernet cables have a strict maximum channel distance limit of 100 meters (328 feet).\n- Cat5e: Supports up to 1 Gbps at 100 MHz bandwidth.\n- Cat6: Supports up to 1 Gbps up to 100m, and 10 Gbps up to 55m.\n- Cat6a: Features enhanced shielding and 500 MHz bandwidth, supporting full 10 Gbps up to 100m.\n\n2. Optical Fiber Media: Transmits binary data as light pulses through microscopic flexible glass cores. Because fiber uses light rather than electricity, it is 100% immune to Electromagnetic Interference (EMI) and lightning strikes.\n- Single-Mode Fiber (SMF): Features an extremely narrow ~9 µm glass core carrying a single straight laser light ray. Because there is virtually no modal dispersion, SMF achieves long-distance runs from 10 km to over 40 km (standard yellow jacket).\n- Multi-Mode Fiber (MMF): Features a wider 50 µm or 62.5 µm glass core carrying light from LED or VCSEL sources. Light bounces at multiple angles (modal dispersion), limiting distances to 300m–550m (standard aqua or orange jacket).\n\n3. Modular Pluggable Transceivers: Modern switches feature modular cages (SFP/SFP+/QSFP) that accept hot-swappable transceiver modules. This allows a single switch port to connect to copper RJ-45 patch cables, Multi-Mode fiber (SR), or Single-Mode fiber (LR) simply by inserting the matching module.\n- SFP: Small Form-factor Pluggable (1 Gbps).\n- SFP+: Enhanced SFP (10 Gbps).\n- QSFP+ / QSFP28: Quad SFP (40 Gbps / 100 Gbps).\n\n4. Power over Ethernet (PoE): Enables switches to deliver low-voltage DC electrical power alongside digital data over standard 4-pair copper cables. This powers ceiling Wi-Fi access points, IP surveillance cameras, and VoIP desk phones without requiring dedicated AC electrical outlets.\n- IEEE 802.3af (PoE): Up to 15.4W output (12.95W delivered).\n- IEEE 802.3at (PoE+): Up to 30W output (25.5W delivered).\n- IEEE 802.3bt (PoE++): Type 3 (60W) and Type 4 (90W) for high-draw equipment.',
+      components: [
+        {
+          name: '1. Copper Twisted-Pair (Cat5e / Cat6 / Cat6a)',
+          detail: '4 twisted pairs of copper wire (8 conductors). Cat5e (1G), Cat6 (10G up to 55m), Cat6a (10G up to 100m). All strictly limited to 100 meters maximum channel distance.',
+        },
+        {
+          name: '2. RJ-45 (8P8C) Modular Connector',
+          detail: 'Standard modular plug and jack used for twisted-pair Ethernet connections on network switches, routers, patch panels, and computer network cards.',
+        },
+        {
+          name: '3. Single-Mode Optical Fiber (SMF)',
+          detail: '~9 µm core diameter, laser light source (1310/1550 nm), zero modal dispersion, yellow outer jacket. Reach: 10 km to 40 km+ for campus backbones and service providers.',
+        },
+        {
+          name: '4. Multi-Mode Optical Fiber (MMF)',
+          detail: '50/62.5 µm core diameter, LED/VCSEL light source (850 nm), aqua/orange jacket. Reach: 300m to 550m for intra-building links and datacenter switch interconnects.',
+        },
+        {
+          name: '5. Pluggable Transceivers (SFP, SFP+, QSFP)',
+          detail: 'Hot-swappable modules that adapt switch cages to copper or fiber media. SFP (1 Gbps), SFP+ (10 Gbps), QSFP+ (40 Gbps), QSFP28 (100 Gbps). Uses duplex LC optical connectors.',
+        },
+        {
+          name: '6. Power over Ethernet (PoE / PoE+ / PoE++)',
+          detail: 'Supplies DC electricity over twisted-pair copper cabling. 802.3af (15.4W for VoIP), 802.3at (30W for Wi-Fi APs and PTZ cameras), 802.3bt (60-90W for smart lighting and Wi-Fi 7).',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Evaluate Link Distance & Environment',
+          action: 'Measure physical cable run length. If under 100m without high EMI, choose copper. If exceeding 100m or in heavy EMI industrial environments, choose optical fiber.',
+        },
+        {
+          stepNumber: 2,
+          title: 'Select Fiber Mode & Transceiver Optics',
+          action: 'For building backbones under 400m, select Multi-Mode Fiber (MMF) with 10GBASE-SR SFP+. For inter-building campus runs over 400m, select Single-Mode Fiber (SMF) with 10GBASE-LR SFP+.',
+        },
+        {
+          stepNumber: 3,
+          title: 'Determine Power Delivery & Port Requirements',
+          action: 'Check if the endpoint device requires Power over Ethernet (PoE). Verify the switch port PoE standard (802.3af 15.4W, 802.3at 30W, 802.3bt 90W) matches the device power draw.',
+        },
+      ],
+      visualizer: {
         type: 'MEDIA_INSPECTOR',
-        title: 'Physical Media & Transceiver Selection Guide',
-        description: 'Interactive comparison of copper, SMF, MMF, SFP+ transceivers, and PoE budgets.',
+        title: 'Interactive Network Media & Transceiver Inspector',
+        description: 'Explore technical specs of copper vs fiber, compare SMF vs MMF light propagation, inspect SFP/SFP+ transceiver modules, and audit PoE power budgets.',
       },
-      step9_workedExample: {
-        title: 'Campus 450m Uplink & PoE Budgeting',
-        problemStatement: 'Connect two buildings 450m apart at 10G and power 24 APs (22W each).',
+      workedExample: {
+        title: 'Media and Interface Selection Scenarios',
+        problemStatement: 'Evaluate requirements and select the optimal physical medium, interface, and power delivery for each scenario:\n1. Workstation in an office cubicle 30 meters from the floor switch.\n2. Backbone link connecting two campus buildings 800 meters apart at 10 Gbps.\n3. Ceiling-mounted Wi-Fi 6 Access Point drawing 22 Watts with no nearby electrical wall outlet.',
         stepByStepSolution: [
-          'Distance 450m exceeds copper (100m) and MMF (300-400m); select SMF (10GBASE-LR).',
-          '24 APs * 22W = 528W usable -> IEEE 802.3at (PoE+) with >=600W switch budget.',
+          '1. Office Workstation (30m): Distance is well within the 100m copper limit. Cat6 copper twisted-pair with RJ-45 connectors is standard, inexpensive, and easy to terminate.',
+          '2. Campus Backbone (800m): Distance exceeds copper (100m) and MMF (300-400m). Deploy Single-Mode Fiber (SMF) with 10GBASE-LR SFP+ optical transceivers (rated up to 10 km).',
+          '3. Wi-Fi 6 AP (22W): Connect via Cat6 copper twisted-pair to an IEEE 802.3at (PoE+) enabled switch port (provides up to 30W of DC power over the Ethernet cable).',
         ],
-        finalResult: '10GBASE-LR SMF with 802.3at PoE+ switch.',
+        finalResult: '1: Cat6 Copper (RJ-45). 2: Single-Mode Fiber (10GBASE-LR SFP+). 3: Cat6 with IEEE 802.3at PoE+.',
       },
-      step10_realWorldScenario: {
-        topology: 'Industrial Plant EMI',
-        scenarioText: 'Replacing UTP with optical fiber eliminates packet drops from motor electrical noise.',
-        engineeringContext: 'Fiber optic media is 100% immune to electromagnetic interference.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Autonegotiates speed and duplex.',
-        nicBehavior: 'PHY encodes bits into electrical or optical signals.',
-        switchOrRouterBehavior: 'Monitors optical Rx levels in dBm and PoE power per port.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'show interface status',
-          description: 'Displays link speed, duplex, and transceiver type.',
-          expectedOutput: 'Gi1/0/1  Uplink  connected  10G  10Gbase-LR',
-          proofExplanation: 'Confirms 10G Single-Mode fiber connection.',
+          id: 1,
+          prompt: 'A desktop computer is located 25 meters from a network switch. Which cabling type and connector should be deployed?',
+          expected: 'Cat6 (or Cat5e) copper twisted-pair cabling with standard RJ-45 (8P8C) connectors.',
+          hints: 'Consider standard commercial office cabling within 100 meters.',
+        },
+        {
+          id: 2,
+          prompt: 'What is the maximum certified channel distance for Category 5e, Category 6, and Category 6a copper Ethernet cables?',
+          expected: '100 meters (328 feet).',
+          hints: 'All standard twisted-pair Ethernet cables share the same maximum distance limitation.',
+        },
+        {
+          id: 3,
+          prompt: 'Two campus buildings located 1,200 meters (1.2 km) apart need a 10 Gbps connection. Why must Single-Mode Fiber (SMF) be used instead of Multi-Mode Fiber (MMF)?',
+          expected: 'Multi-Mode Fiber is limited to approximately 300-400 meters due to modal dispersion, whereas Single-Mode Fiber can transmit up to 10-40 km without repeater equipment.',
+          hints: 'Compare the maximum transmission distances and core diameters of SMF vs MMF.',
+        },
+        {
+          id: 4,
+          prompt: 'Why is optical fiber cabling preferred over copper twisted-pair cabling in high-voltage industrial manufacturing facilities with heavy electric motors?',
+          expected: 'Optical fiber transmits light photons through glass cores, making it 100% immune to Electromagnetic Interference (EMI) generated by heavy electric machinery.',
+          hints: 'Consider how electrical vs optical signals interact with electromagnetic fields.',
+        },
+        {
+          id: 5,
+          prompt: 'What is the purpose of an SFP / SFP+ modular transceiver cage on an enterprise switch?',
+          expected: 'It provides a hot-swappable modular interface that allows network engineers to adapt a switch port to copper (RJ-45), Multi-Mode fiber, or Single-Mode fiber at various speeds (1G/10G).',
+          hints: 'Think about why modularity is preferred over fixed switch ports.',
+        },
+        {
+          id: 6,
+          prompt: 'An IP surveillance camera draws 22 Watts of power. Which Power over Ethernet standard must the switch port support?',
+          expected: 'IEEE 802.3at (PoE+), which supplies up to 30 Watts of power per port (legacy 802.3af only supplies 15.4W).',
+          hints: 'Compare 802.3af (15.4W) vs 802.3at (30W) power limits.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Fiber link down with dark LED.',
-          possibleCauses: ['Tx and Rx fiber strands reversed'],
-          diagnosticSteps: ['Swap Tx and Rx strands on duplex LC connector.'],
-          remediation: 'Reverse patch polarity.',
-        },
+      recap: [
+        'Copper twisted-pair cables (Cat5e/Cat6/Cat6a) use RJ-45 connectors and have a strict 100-meter maximum channel distance limit.',
+        'Cat6 supports 10 Gbps up to 55m; Cat6a supports full 10 Gbps up to the complete 100m channel distance.',
+        'Optical fiber transmits light pulses through glass: Single-Mode Fiber (SMF, 9 µm core, laser) is used for long distances (10 km+); Multi-Mode Fiber (MMF, 50 µm core, LED) is used for building backbones (300-550m).',
+        'Optical fiber is 100% immune to Electromagnetic Interference (EMI) and electrical noise.',
+        'SFP and SFP+ modular transceivers allow switch ports to adapt dynamically to copper or fiber media, and PoE (802.3af/at/bt) delivers DC power over Ethernet cables.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Running copper past 100 meters.', correction: 'Standard copper Ethernet maxes out at 100 meters.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Physical cable wiretapping.',
-        mitigationStrategy: 'Lock wiring closets; use fiber optics for sensitive spans.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['Copper: 100m.', 'SMF: 9µm laser long haul.', 'MMF: 50µm LED short haul.', 'PoE: af 15.4W, at 30W, bt 90W.'],
-        frequentTraps: ['Selecting Cat6 for a 150m run (max is 100m).'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Enterprise Physical Media & PoE Power Budget Calculation',
-        scenario: 'Audit transceivers and PoE budgets.',
-        tasks: ['Select correct fiber type for 600m link.', 'Audit switch PoE output.'],
-        verificationMethod: 'Verify show interface status output.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['Copper is standard for <100m; Fiber for >100m and high-EMI.', 'PoE powers devices over twisted pair.'],
-        nextLessonBridge: 'Proceed to NET-102 for Network Architecture and Topologies.',
-      },
     },
     questions: [
       {
-        text: 'A network engineer needs to connect two buildings 800 meters apart at 10 Gbps. Which media should be selected?',
-        options: ['Single-Mode Fiber (SMF) with 10GBASE-LR SFP+', 'Cat6a Copper UTP', 'Multi-Mode Fiber (MMF) with 10GBASE-SR', 'Cat5e Shielded STP'],
+        text: 'What is the maximum certified channel distance for standard Category 5e, Category 6, and Category 6a copper twisted-pair Ethernet cables?',
+        options: [
+          '100 meters (328 feet)',
+          '500 meters (1,640 feet)',
+          '50 meters (164 feet)',
+          '1,000 meters (1 km)',
+        ],
         correctOption: 0,
-        explanation: '800 meters exceeds copper (100m) and MMF (300-400m). Single-Mode Fiber (10GBASE-LR) is rated for up to 10 km.',
-        explanationsJson: { 1: 'Cat6a is limited to 100m.', 2: 'MMF is limited to ~300-400m.', 3: 'Cat5e is limited to 100m.' },
+        explanation:
+          'According to TIA/EIA and IEEE 802.3 standards, the maximum allowable channel distance for Category 5e, 6, and 6a copper twisted-pair cabling is 100 meters (90 meters of permanent horizontal cable plus 10 meters total of patch cords).',
+        explanationsJson: {
+          1: '500m far exceeds copper electrical limits and requires optical fiber.',
+          2: '50m is a sub-limit for 10 Gbps on Cat6, but the standard channel specification is 100m.',
+          3: '1,000m is only achievable using Single-Mode fiber optics.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Copper Channel Distance Limits',
+      },
+      {
+        text: 'What fundamental structural characteristic distinguishes Single-Mode Fiber (SMF) from Multi-Mode Fiber (MMF)?',
+        options: [
+          'SMF has a narrow ~9 µm core carrying a single straight laser ray, whereas MMF has a wider 50/62.5 µm core carrying multiple light rays subject to modal dispersion',
+          'SMF carries electrical current while MMF carries optical light',
+          'SMF uses RJ-45 connectors while MMF uses USB-C connectors',
+          'SMF is limited to 100 meters while MMF reaches 50 kilometers',
+        ],
+        correctOption: 0,
+        explanation:
+          'Single-Mode Fiber features a tiny 9-micron core that permits only one mode of light to propagate, virtually eliminating modal dispersion. Multi-Mode has a 50-62.5 micron core where light bounces at multiple angles.',
+        explanationsJson: {
+          1: 'All optical fiber carries photons (light), never electrical voltage.',
+          2: 'Fiber uses LC, SC, or ST optical connectors, not RJ-45 or USB.',
+          3: 'SMF achieves much greater distances (tens of km) than MMF (hundreds of meters).',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Single-Mode vs Multi-Mode Core Architecture',
+      },
+      {
+        text: 'A network engineer needs to connect two switches located in separate campus buildings 800 meters apart with a 10 Gbps uplink. Which cabling and transceiver standard should be selected?',
+        options: [
+          'Single-Mode Fiber (SMF) with 10GBASE-LR SFP+ transceivers',
+          'Cat6a Copper UTP with RJ-45 connectors',
+          'Multi-Mode Fiber (MMF) with 10GBASE-SR SFP+ transceivers',
+          'Cat5e Shielded STP cable with PoE injectors',
+        ],
+        correctOption: 0,
+        explanation:
+          'The 800-meter distance exceeds the 100m limit for copper and the 300-400m limit for Multi-Mode Fiber (10GBASE-SR). Single-Mode Fiber (10GBASE-LR) is rated for up to 10 kilometers and is the correct choice.',
+        explanationsJson: {
+          1: 'Cat6a copper is strictly limited to a maximum channel distance of 100 meters.',
+          2: 'Multi-Mode Fiber (10GBASE-SR) is limited to approximately 300-400 meters.',
+          3: 'Cat5e is limited to 100 meters and cannot carry 10 Gbps over 800m.',
+        },
         difficulty: CourseLevel.FOUNDATIONAL,
         cognitiveLevel: CognitiveLevel.APPLICATION,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'Media Selection: Distance and Bandwidth',
       },
+      {
+        text: 'Why are optical fiber cables completely immune to Electromagnetic Interference (EMI) and Radio Frequency Interference (RFI)?',
+        options: [
+          'Fiber optic cables transmit information using non-conductive light photons through glass cores rather than electrical voltages over copper',
+          'Fiber optic cables are coated with thick lead shielding that absorbs all radio waves',
+          'Fiber optic cables operate at zero volts electrical ground',
+          'Fiber optic transceivers automatically filter out high-voltage magnetic fields using software',
+        ],
+        correctOption: 0,
+        explanation:
+          'Optical fiber carries data as pulses of light through dielectric glass fibers. Because light photons do not interact with electromagnetic fields, fiber is 100% immune to electromagnetic noise, motors, and lightning.',
+        explanationsJson: {
+          1: 'Standard fiber jackets are plastic, not lead; immunity is due to light transmission.',
+          2: 'Fiber does not conduct electricity; voltage grounding is irrelevant.',
+          3: 'Immunity is an inherent physical property of light in glass, not software filtering.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Fiber Optic Immunity to EMI',
+      },
+      {
+        text: 'What is the primary operational role of a Small Form-factor Pluggable (SFP / SFP+) modular transceiver in network switches?',
+        options: [
+          'It provides a hot-swappable interface that allows a switch port to adapt to different media types (copper or fiber) and transmission speeds',
+          'It provides uninterruptible battery backup power to the switch during electrical blackouts',
+          'It converts AC wall current into low-voltage DC power for internal switch motherboards',
+          'It dynamically encrypts operating system logs stored on local hard drives',
+        ],
+        correctOption: 0,
+        explanation:
+          'An SFP/SFP+ transceiver is a modular, hot-swappable hardware module that slots into a switch cage. It allows network administrators to choose between copper (RJ-45), Multi-Mode fiber (SR), or Single-Mode fiber (LR) without replacing the underlying switch.',
+        explanationsJson: {
+          1: 'Battery backup is provided by an Uninterruptible Power Supply (UPS).',
+          2: 'Power supplies (PSUs) convert AC wall power to DC current.',
+          3: 'Disk encryption is a software/storage feature unrelated to port transceivers.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Modular SFP Transceivers',
+      },
+      {
+        text: 'An administrator connects a new Wi-Fi 6 Access Point requiring 24 Watts of DC power to an enterprise switch. Which Power over Ethernet standard must the switch support on that port?',
+        options: [
+          'IEEE 802.3at (PoE+ - up to 30W output / 25.5W delivered)',
+          'IEEE 802.3af (PoE - up to 15.4W output)',
+          'IEEE 802.1Q (VLAN tagging)',
+          'IEEE 802.3ad (Link Aggregation)',
+        ],
+        correctOption: 0,
+        explanation:
+          'IEEE 802.3at (PoE+) supplies up to 30W of power from the switch port (delivering up to 25.5W at the device), which satisfies the 24W requirement. Legacy 802.3af only supplies 15.4W.',
+        explanationsJson: {
+          1: '802.3af only supplies 15.4W, which is insufficient for a 24W access point.',
+          2: '802.1Q is a Layer 2 VLAN encapsulation protocol, not a power standard.',
+          3: '802.3ad is Link Aggregation (LACP), not a power standard.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Power over Ethernet Standards (802.3af/at/bt)',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Enterprise Physical Media & PoE Power Budget Calculation',
-      instructions: '1. Inspect switch port media with show interface status.\n2. Audit PoE with show power inline.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { switchName: 'Core-SW1', ports: [{ port: 'Gi1/0/1', type: '10Gbase-LR' }] },
-      tasks: ['Run show interface status.'],
-    },
   },
 
   // -------------------------------------------------------------------------

@@ -123,6 +123,27 @@ async function verifyCurriculumContentV2() {
   }
   console.log(`  ✓ All ${batch1Slugs.length} Batch 1 foundational lessons verified with clean V2 structure and zero forced filler.`);
 
+  // [TEST 8] Verify NET-101 Lesson 2: Physical Media & Transceivers
+  console.log('\n[TEST 8] Verifying NET-101 Lesson 2 (Physical Media & Transceivers)...');
+  const net101Media = LESSONS_NET100.find((l) => l.slug === 'network-devices-overview');
+  assert(!!net101Media, 'NET-101 Lesson 2 (network-devices-overview) exists');
+  assert(!!net101Media!.contentV2, 'NET-101 Lesson 2 has Content V2 structure');
+  assert(net101Media!.order === 2, 'NET-101 Lesson 2 is correctly ordered as lesson 2 in NET-101');
+  assert(typeof net101Media!.contentV2!.objective === 'string', 'NET-101 Lesson 2 has clear objective');
+  assert(net101Media!.contentV2!.explanation.includes('Copper Twisted-Pair'), 'NET-101 Lesson 2 explains copper');
+  assert(net101Media!.contentV2!.explanation.includes('Optical Fiber'), 'NET-101 Lesson 2 explains fiber');
+  assert(net101Media!.contentV2!.explanation.includes('Single-Mode Fiber'), 'NET-101 Lesson 2 explains SMF');
+  assert(net101Media!.contentV2!.explanation.includes('Multi-Mode Fiber'), 'NET-101 Lesson 2 explains MMF');
+  assert(net101Media!.contentV2!.explanation.includes('Power over Ethernet'), 'NET-101 Lesson 2 explains PoE');
+  assert(net101Media!.contentV2!.components.length >= 6, 'NET-101 Lesson 2 has 6 technical components');
+  assert(Array.isArray(net101Media!.contentV2!.practice) && net101Media!.contentV2!.practice.length >= 6, 'NET-101 Lesson 2 has 6 practice exercises');
+  assert(net101Media!.questions.length >= 6, 'NET-101 Lesson 2 has 6 aligned quiz questions');
+  assert(!net101Media!.contentV2!.packetHeaderView, 'NET-101 Lesson 2 has no fake packet header');
+  assert(!net101Media!.contentV2!.cliTooling, 'NET-101 Lesson 2 has no forced CLI bloat');
+  assert(!net101Media!.contentV2!.security, 'NET-101 Lesson 2 has no generic security filler');
+  assert(!net101Media!.lab, 'NET-101 Lesson 2 has no phantom CLI lab');
+  console.log('  ✓ NET-101 Lesson 2 verified with clean Content V2 structure, 6 practice items, 6 quiz questions, and zero forced filler.');
+
   console.log('\n================================================================');
   console.log('🎉 ALL 7 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');

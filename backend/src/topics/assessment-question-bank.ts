@@ -1559,6 +1559,52 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     concept: 'Fiber Optic Immunity to EMI',
     points: 10
   },
+  {
+    quizId: 'quiz-network-devices-overview',
+    lessonSlug: 'network-devices-overview',
+    text: 'What is the maximum certified channel distance for standard Category 5e, Category 6, and Category 6a copper twisted-pair Ethernet cables?',
+    options: [
+      '100 meters (328 feet)',
+      '500 meters (1,640 feet)',
+      '50 meters (164 feet)',
+      '1,000 meters (1 km)'
+    ],
+    correctOption: 0,
+    explanation: 'According to TIA/EIA and IEEE 802.3 standards, the maximum allowable channel distance for Category 5e, 6, and 6a copper twisted-pair cabling is 100 meters (90 meters of permanent horizontal cable plus 10 meters total of stranded patch cords).',
+    explanationsJson: {
+      1: '500m far exceeds copper electrical limits and requires optical fiber.',
+      2: '50m is a sub-limit for 10 Gbps on Cat6, but the standard channel specification is 100m.',
+      3: '1,000m is only achievable using Single-Mode fiber optics.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Copper Channel Distance Limits',
+    points: 10
+  },
+  {
+    quizId: 'quiz-network-devices-overview',
+    lessonSlug: 'network-devices-overview',
+    text: 'What is the primary operational role of a Small Form-factor Pluggable (SFP / SFP+) modular transceiver in network switches?',
+    options: [
+      'It provides a hot-swappable interface that allows a switch port to adapt to different media types (copper or fiber) and transmission speeds',
+      'It provides uninterruptible battery backup power to the switch during electrical blackouts',
+      'It converts AC wall current into low-voltage DC power for internal switch motherboards',
+      'It dynamically encrypts operating system logs stored on local hard drives'
+    ],
+    correctOption: 0,
+    explanation: 'An SFP/SFP+ transceiver is a modular, hot-swappable hardware module that slots into a switch cage. It allows network administrators to choose between copper (RJ-45), Multi-Mode fiber (SR), or Single-Mode fiber (LR) without replacing the underlying switch.',
+    explanationsJson: {
+      1: 'Battery backup is provided by an Uninterruptible Power Supply (UPS).',
+      2: 'Power supplies (PSUs) convert AC wall power to DC current.',
+      3: 'Disk encryption is a software/storage feature unrelated to port transceivers.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Modular SFP Transceivers',
+    points: 10
+  },
 
   // -------------------------------------------------------------------------
   // Topic 3: Network Topologies Overview

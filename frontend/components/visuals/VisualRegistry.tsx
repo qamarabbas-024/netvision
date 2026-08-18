@@ -17,6 +17,7 @@ import { MultiAreaOSPFVisual } from './MultiAreaOSPFVisual';
 import { IPv6Visual } from './IPv6Visual';
 import { NetworkAutomationVisual } from './NetworkAutomationVisual';
 import { BinaryConverterVisual } from './BinaryConverterVisual';
+import { MediaInspectorVisual } from './MediaInspectorVisual';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -32,6 +33,18 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
     slug.includes('net-101-bits')
   ) {
     return <BinaryConverterVisual />;
+  }
+
+  if (
+    slug.includes('physical-media') ||
+    slug.includes('transceiver') ||
+    slug.includes('media-inspector') ||
+    slug.includes('network-devices-overview') ||
+    slug.includes('network-devices') ||
+    slug.includes('copper') ||
+    slug.includes('fiber')
+  ) {
+    return <MediaInspectorVisual />;
   }
 
   if (slug.includes('automation') || slug.includes('programmability') || slug.includes('pipeline') || slug.includes('rest-api')) {
