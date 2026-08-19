@@ -18,6 +18,7 @@ import { IPv6Visual } from './IPv6Visual';
 import { NetworkAutomationVisual } from './NetworkAutomationVisual';
 import { BinaryConverterVisual } from './BinaryConverterVisual';
 import { MediaInspectorVisual } from './MediaInspectorVisual';
+import { PerformanceMetricsVisual } from './PerformanceMetricsVisual';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -90,7 +91,7 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
     return <ClientServerVisual />;
   }
   if (slug.includes('performance') || slug.includes('metrics') || slug.includes('latency')) {
-    return <PacketJourneyVisual />;
+    return <PerformanceMetricsVisual />;
   }
 
   // Fallback to Packet Journey Visual for other networking topics
