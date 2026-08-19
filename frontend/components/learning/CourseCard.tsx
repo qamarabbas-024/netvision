@@ -185,7 +185,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         )}
 
         {/* Metadata Badges Row */}
-        <div className="flex items-center justify-between text-[11px] text-zinc-400 font-mono">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-400 font-mono">
           <span className="flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-zinc-500" />
             {course.estimatedHours}h Total

@@ -139,18 +139,19 @@ export default function CertificateDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col justify-between p-6 sm:p-10 bg-net-grid-pattern print:p-0 print:bg-white print:text-black">
+    <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col justify-between p-4 sm:p-10 bg-net-grid-pattern print:p-0 print:bg-white print:text-black">
       {/* Top Navigation */}
-      <div className="max-w-5xl mx-auto w-full flex items-center justify-between mb-8 print:hidden">
+      <div className="max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8 print:hidden">
         <Link href="/certificates" className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-[#00f0ff] transition-colors">
           <ArrowLeft className="w-4 h-4" /> Back to Certificates
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <Button
             variant="secondary"
             size="sm"
             onClick={handleShare}
             leftIcon={<Share2 className="w-4 h-4" />}
+            className="flex-1 sm:flex-initial"
           >
             {copied ? 'Link Copied! ✓' : 'Share Credential'}
           </Button>
@@ -159,6 +160,7 @@ export default function CertificateDetailPage() {
             size="sm"
             onClick={handleDownload}
             leftIcon={<Download className="w-4 h-4" />}
+            className="flex-1 sm:flex-initial"
           >
             Download PDF / Print
           </Button>
@@ -166,7 +168,7 @@ export default function CertificateDetailPage() {
       </div>
 
       {/* Certificate Frame */}
-      <div className="max-w-4xl mx-auto w-full glass-panel-glow p-8 sm:p-12 rounded-3xl border-2 border-[#00f0ff]/40 shadow-glow-cyan flex flex-col items-center text-center relative overflow-hidden my-auto print:border print:border-zinc-300 print:shadow-none print:bg-white print:text-black">
+      <div className="max-w-4xl mx-auto w-full glass-panel-glow p-5 sm:p-12 rounded-3xl border-2 border-[#00f0ff]/40 shadow-glow-cyan flex flex-col items-center text-center relative overflow-hidden my-auto print:border print:border-zinc-300 print:shadow-none print:bg-white print:text-black">
         {/* Subtle Decorative Background Glow */}
         <div className="absolute -top-32 -right-32 w-64 h-64 bg-[#00f0ff]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />

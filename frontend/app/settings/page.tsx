@@ -21,18 +21,18 @@ export default function SettingsPage() {
         <div className="flex-1 flex flex-col min-w-0">
           <AppTopbar />
 
-          <main className="p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
-            <div className="max-w-4xl mx-auto flex flex-col gap-8">
+          <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+            <div className="max-w-4xl mx-auto flex flex-col gap-6 sm:gap-8">
               <div>
                 <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
                   Preferences & Security
                 </span>
-                <h1 className="text-3xl font-extrabold text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
                   Account Settings
                 </h1>
               </div>
 
-              <Card className="p-8 flex flex-col gap-6">
+              <Card className="p-5 sm:p-8 flex flex-col gap-6">
                 <h2 className="text-lg font-bold text-white border-b border-[#272732] pb-3">Profile Information</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -42,11 +42,11 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="flex justify-end">
-                  <Button variant="cyan">Save Changes</Button>
+                  <Button variant="cyan" className="w-full sm:w-auto">Save Changes</Button>
                 </div>
               </Card>
 
-              <Card className="p-8 flex flex-col gap-6">
+              <Card className="p-5 sm:p-8 flex flex-col gap-6">
                 <h2 className="text-lg font-bold text-white border-b border-[#272732] pb-3">Theme & Appearance</h2>
 
                 <div className="flex items-center justify-between">
