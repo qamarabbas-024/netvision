@@ -10,14 +10,18 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['var(--font-mono)', 'JetBrains Mono', 'Fira Code', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+      },
       colors: {
         brand: {
-          50: '#e6faff',
-          100: '#b3f3ff',
-          400: '#00d5ff',
+          50: '#ecfeff',
+          100: '#cffaff',
+          400: '#22d3ee',
           500: '#00f0ff',
-          600: '#00b8cc',
-          900: '#003a43',
+          600: '#0891b2',
+          900: '#164e63',
         },
         net: {
           bg: '#09090b',
@@ -28,32 +32,25 @@ const config: Config = {
           blue: '#3b82f6',
           purple: '#8b5cf6',
           emerald: '#10b981',
-          rose: '#f43f5e',
+          rose: '#ef4444',
           amber: '#f59e0b',
         },
       },
       backgroundImage: {
-        'net-grid': 'radial-gradient(circle, rgba(0, 240, 255, 0.07) 1px, transparent 1px)',
-        'net-gradient': 'linear-gradient(to right, #00f0ff, #3b82f6, #8b5cf6)',
-        'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
+        'net-grid': 'linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
       },
       boxShadow: {
-        'glow-cyan': '0 0 25px -5px rgba(0, 240, 255, 0.3)',
-        'glow-blue': '0 0 25px -5px rgba(59, 130, 246, 0.3)',
-        'glow-purple': '0 0 25px -5px rgba(139, 92, 246, 0.3)',
+        'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.4)',
+        'elevated': '0 4px 12px -2px rgba(0, 0, 0, 0.6), 0 2px 4px -1px rgba(0, 0, 0, 0.4)',
+        'focus-cyan': '0 0 0 2px rgba(0, 240, 255, 0.25)',
       },
       animation: {
         'packet-flow': 'packetFlow 2s linear infinite',
-        'pulse-glow': 'pulseGlow 3s ease-in-out infinite',
       },
       keyframes: {
         packetFlow: {
           '0%': { offsetDistance: '0%' },
           '100%': { offsetDistance: '100%' },
-        },
-        pulseGlow: {
-          '0%, 100%': { opacity: '0.4' },
-          '50%': { opacity: '0.8' },
         },
       },
     },

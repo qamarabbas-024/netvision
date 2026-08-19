@@ -19,10 +19,10 @@ export const Progress: React.FC<ProgressProps> = ({
   const normalizedValue = Math.min(100, Math.max(0, value));
 
   const fillColors = {
-    cyan: 'bg-[#00f0ff] shadow-glow-cyan',
-    blue: 'bg-blue-500 shadow-glow-blue',
+    cyan: 'bg-[#00f0ff]',
+    blue: 'bg-blue-500',
     emerald: 'bg-emerald-500',
-    purple: 'bg-purple-500 shadow-glow-purple',
+    purple: 'bg-purple-500',
   };
 
   return (

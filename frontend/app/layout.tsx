@@ -1,6 +1,19 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ClientProviders } from '@/components/providers/ClientProviders';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+});
 
 const SITE_URL = 'https://netvision-three.vercel.app';
 
@@ -112,7 +125,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark scroll-smooth">
+    <html lang="en" className={`dark scroll-smooth ${inter.variable} ${jetbrainsMono.variable}`}>
       <head>
         <script
           type="application/ld+json"
