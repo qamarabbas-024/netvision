@@ -8,6 +8,7 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  Res,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { CertificationsService, AnswerQuestionDto } from './certifications.service';
@@ -158,6 +159,21 @@ export class CertificationsController {
     @Param('credentialId') credentialId: string
   ) {
     return this.certsService.verifyCertificate(credentialId);
+  }
+
+  @ApiOperation({ summary: 'Download official certificate PDF document (Authorized Owner Only)' })
+  @UseGuards(JwtAuthGuard)
+  @Get('certificates/:id/download')
+  async downloadCertificate(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Res() res: any
+  ) {
+    const { buffer, filename, contentType } = await this.certsService.generateCertificateDownload(req.user.id, id);
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buffer.length.toString());
+    res.status(200).send(buffer);
   }
 
   @ApiOperation({ summary: 'Execute state configuration or diagnostic action on practical exam topology' })

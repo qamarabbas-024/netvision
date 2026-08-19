@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { CourseLevel } from '@prisma/client';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
@@ -1958,8 +1959,40 @@ export class TopicsService {
     });
 
     if (!certificate) {
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      const uniqueSuffix = crypto.randomBytes(6).toString('hex').toUpperCase();
+      const credentialId = `NV-NET-2026-${uniqueSuffix}`;
+      const verificationCode = `NV-VERIFY-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+
+      const metadataJson = {
+        candidateName: user?.fullName || user?.username || 'Candidate',
+        certificationTitle: course.title,
+        certificationCode: course.code || 'NV-NET',
+        credentialId,
+        verificationCode,
+        issueDate: new Date().toISOString(),
+        grade: assessment.assessmentAverage >= 90 ? 'Pass with Distinction' : 'Passed',
+        overallScore: assessment.assessmentAverage,
+        skillsAssessed: [
+          'Computer Networking Fundamentals',
+          'TCP/IP Protocol Suite & Handshakes',
+          'IP Subnetting & Routing',
+          'Network Diagnostics & Packet Analysis',
+        ],
+      };
+
       certificate = await this.prisma.certificate.create({
-        data: { userId, courseId: course.id },
+        data: {
+          userId,
+          courseId: course.id,
+          credentialId,
+          verificationCode,
+          certificationCode: course.code || 'NV-NET',
+          certificationTitle: course.title,
+          recipientName: user?.fullName || user?.username || 'Candidate',
+          status: 'ACTIVE',
+          metadataJson,
+        },
         include: { user: { select: { id: true, username: true, fullName: true } }, course: true },
       });
 

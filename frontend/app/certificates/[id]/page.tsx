@@ -113,8 +113,27 @@ export default function CertificateDetailPage() {
     }
   };
 
-  const handleDownload = () => {
-    if (typeof window !== 'undefined') {
+  const handleDownload = async () => {
+    try {
+      const token = sessionStorage.getItem('netvision_token') || localStorage.getItem('netvision_token');
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      const res = await fetch(`${apiBase}/certificates/${credentialId}/download`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!res.ok) {
+        window.print();
+        return;
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `NetVision-Certificate-${credentialId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
       window.print();
     }
   };

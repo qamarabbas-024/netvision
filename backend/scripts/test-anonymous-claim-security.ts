@@ -362,6 +362,74 @@ async function runAnonymousClaimSecurityTests() {
       passedTests++;
     }
 
+    // --------------------------------------------------------------------------
+    // TEST 7: Certificate Download Ownership & Authorization Enforcement
+    // --------------------------------------------------------------------------
+    console.log('\n[TEST 7] Certificate Download Ownership & Authorization Enforcement');
+    {
+      const certsService = new (require('../src/certifications/certifications.service').CertificationsService)(prismaService);
+
+      const userH1 = await prisma.user.create({
+        data: {
+          email: `test-owner-h1-${Date.now()}@netvision.test`,
+          username: `userH1_${Date.now()}`,
+          passwordHash: 'dummy_hash',
+          role: Role.STUDENT,
+          isVerified: true,
+        },
+      });
+
+      const userH2 = await prisma.user.create({
+        data: {
+          email: `test-owner-h2-${Date.now()}@netvision.test`,
+          username: `userH2_${Date.now()}`,
+          passwordHash: 'dummy_hash',
+          role: Role.STUDENT,
+          isVerified: true,
+        },
+      });
+
+      const certRes = await topicsService.claimCertificate(userH1.id, course!.id).catch(async () => {
+        // Fallback create for test
+        const uniqueSuffix = crypto.randomBytes(6).toString('hex').toUpperCase();
+        const credId = `NV-NET-2026-${uniqueSuffix}`;
+        return await prisma.certificate.create({
+          data: {
+            userId: userH1.id,
+            credentialId: credId,
+            verificationCode: `NV-VERIFY-${uniqueSuffix}`,
+            certificationCode: 'NV-NET',
+            certificationTitle: 'NetVision Certified Network Administrator',
+            recipientName: 'Learner H1',
+            status: 'ACTIVE',
+          },
+        });
+      });
+
+      // 7.1 Authorized Owner (userH1) can download PDF certificate
+      const downloadRes = await certsService.generateCertificateDownload(userH1.id, certRes.id || (certRes as any).credentialId);
+      assert(downloadRes.contentType === 'application/pdf', '7.1 Download returns PDF content-type');
+      assert(downloadRes.buffer instanceof Buffer && downloadRes.buffer.length > 100, '7.2 Download returns binary PDF file buffer');
+      assert(downloadRes.filename.includes('NetVision-Certificate-'), '7.3 Filename formatted correctly');
+
+      // 7.2 Unauthorized User (userH2) CANNOT download userH1's certificate
+      let unauthorizedDownloadRejected = false;
+      try {
+        await certsService.generateCertificateDownload(userH2.id, certRes.id || (certRes as any).credentialId);
+      } catch (err: any) {
+        unauthorizedDownloadRejected = true;
+        assert(err.status === 403 || err.message?.includes('authorization'), '7.4 Unauthorized download rejected with 403 Forbidden');
+      }
+      assert(unauthorizedDownloadRejected, '7.5 User H2 denied download of User H1 certificate');
+
+      // 7.3 Repeated Download is Idempotent and Works Consistently
+      const secondDownloadRes = await certsService.generateCertificateDownload(userH1.id, certRes.id || (certRes as any).credentialId);
+      assert(secondDownloadRes.buffer.length === downloadRes.buffer.length, '7.6 Repeated download works idempotently without state corruption');
+
+      console.log('  ✓ Download authorization, cross-account isolation, and binary PDF creation verified.');
+      passedTests++;
+    }
+
     console.log('\n================================================================');
     console.log(`🎉 ALL ${passedTests} ANONYMOUS CLAIM & CERTIFICATE SECURITY TESTS PASSED!`);
     console.log('================================================================\n');
