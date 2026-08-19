@@ -1117,136 +1117,228 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
   },
 
   // -------------------------------------------------------------------------
-  // 8. NET-102: Network Performance Metrics (what-is-computer-networking)
+  // 8. NET-102: Network Performance Metrics (net-102-network-performance)
   // -------------------------------------------------------------------------
   {
     courseCode: 'NET-102',
-    slug: 'what-is-computer-networking',
+    slug: 'net-102-network-performance',
     title: 'Network Performance Metrics: Latency, Throughput & Packet Loss',
     type: LessonType.THEORY,
     durationMinutes: 20,
     order: 6,
     visualizationType: 'PERFORMANCE_METRICS_ENGINE',
     introduction:
-      'Master the physics and telemetry of network performance: Bandwidth vs Throughput vs Goodput, the 4 components of end-to-end latency ($D_{trans}, D_{prop}, D_{proc}, D_{queue}$), Jitter buffer mechanics, and Packet Loss causes.',
-    stepMetadata: {
-      step1_objective:
-        'Differentiate between Bandwidth, Throughput, and Goodput, calculate the 4 components of end-to-end delay, and understand Jitter and Packet Loss impacts on real-time applications.',
-      step2_prerequisites: ['net-101-bits-bytes-binary-hex', 'level-0-what-is-a-computer-network'],
-      step3_whyItMatters:
-        'High bandwidth does not guarantee good user experience if latency, jitter, or packet loss are excessive.',
-      step4_coreConcept:
-        'Bandwidth is theoretical maximum raw link capacity. Throughput is actual delivered rate. Goodput is net application payload delivered after removing protocol headers. Total Delay = $D_{trans} (L/R) + D_{prop} (d/s) + D_{proc} + D_{queue}$. Jitter is latency variance. Packet Loss occurs when buffers overflow or CRC errors occur.',
-      step5_technicalAnatomy: {
-        title: 'Performance Telemetry & Mathematical Delay Decomposition',
-        description: 'Formulas and metrics for network performance measurement.',
-        components: [
-          { name: 'Bandwidth vs Throughput vs Goodput', detail: 'Bandwidth = max link rating; Throughput = observed rate; Goodput = payload data without headers.' },
-          { name: 'Serialization Delay ($D_{trans} = L/R$)', detail: 'Time to push packet bits onto wire: Packet Length (bits) / Link Rate (bps).' },
-          { name: 'Propagation Delay ($D_{prop} = d/s$)', detail: 'Time for signal to traverse distance $d$ at propagation speed $s$ (~$2 \\times 10^8$ m/s).' },
-          { name: 'Processing & Queueing Delay', detail: 'CPU routing lookup time and buffer wait time in router egress queues.' },
-          { name: 'Jitter & Packet Loss', detail: 'Jitter = packet arrival variance; Packet Loss = dropped frames from buffer bloat or CRC errors.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Delay Calculation', action: 'Calculate serialization ($L/R$) and propagation ($d/s$) delays.' },
-          { stepNumber: 2, title: 'Goodput Measurement', action: 'Deduct protocol headers (Ethernet + IP + TCP = 54 bytes) from payload throughput.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'Network Telemetry & Delay Metrics',
-        fields: [
-          { fieldName: 'Total Latency Formula', bitLength: 'End-to-End Delay', hexSample: 'D_trans + D_prop + D_proc + D_queue', description: 'Decomposed delay components.' },
-        ],
-      },
-      step8_visualExplanation: {
+      'Master fundamental network performance metrics: Latency (Transmission vs Propagation delay), Throughput vs Goodput, Packet Loss, and Jitter with simple formulas and real-world scenarios.',
+    contentV2: {
+      objective:
+        'Understand key network performance metrics—Latency, Transmission Delay, Propagation Delay, Throughput, Goodput, Packet Loss, and Jitter—and reason about performance in real-world scenarios using simple calculations.',
+      explanation:
+        'Network performance determines how fast and reliably data moves across a network. Rather than just raw link speed, overall user experience depends on several distinct metrics working together.\n\n### Core Performance Metrics\n- **Latency (Total Delay)**: The overall time experienced from when data is sent until it reaches its destination or a response is observed. Total delay consists of Transmission Delay, Propagation Delay, Processing Delay, and Queueing Delay.\n- **Transmission Delay ($D_{trans}$)**: The time required to push (serialize) all bits of a packet onto the physical link ($D_{trans} = \\text{Packet Length } L / \\text{Link Rate } R$).\n- **Propagation Delay ($D_{prop}$)**: The time required for the physical signal to travel across the medium distance ($D_{prop} = \\text{Distance } d / \\text{Propagation Speed } s$).\n- **Throughput**: The actual observed rate of successful data transfer across a network link (measured in bits per second, e.g., Mbps or Gbps).\n- **Goodput**: The net rate of useful application data payload delivered, excluding protocol headers (Ethernet, IP, TCP) and retransmitted packets.\n- **Packet Loss**: The percentage of transmitted packets that fail to reach their destination due to network buffer overflows or physical signal corruption.\n- **Jitter**: The variation or inconsistency in packet delay over time, which causes audio/video stuttering in real-time applications.\n\n### Simple Delay Calculations\n1. **Transmission Delay Example**:\n   Pushing a 1,000-byte (8,000 bits) packet onto a 1 Mbps (1,000,000 bits/sec) link:\n   $$D_{trans} = \\frac{8,000 \\text{ bits}}{1,000,000 \\text{ bits/s}} = 0.008 \\text{ s} = 8 \\text{ ms}$$\n\n2. **Propagation Delay Example**:\n   A signal traveling 2,000 km ($2 \\times 10^6 \\text{ meters}$) through fiber optic cable ($s \\approx 2 \\times 10^8 \\text{ m/s}$):\n   $$D_{prop} = \\frac{2 \\times 10^6 \\text{ m}}{2 \\times 10^8 \\text{ m/s}} = 0.01 \\text{ s} = 10 \\text{ ms}$$\n\n### Real-World Scenarios & Metric Tradeoffs\n- **Real-Time Voice / Video Calls**: Require **low latency** and **low jitter**. High jitter causes choppy audio, even if total link throughput is massive.\n- **Large File Downloads**: Require high **throughput** and high **goodput**. Delay variation (jitter) matters little as long as data transfers rapidly.\n- **Congested Networks**: When router egress queues fill up, **queueing delay** increases total latency and leads to **packet loss** when buffers overflow.',
+      components: [
+        {
+          name: 'Latency & Total Delay',
+          detail: 'Overall time for data transmission. Decomposed into Transmission ($L/R$), Propagation ($d/s$), Processing, and Queueing delays.',
+        },
+        {
+          name: 'Transmission Delay ($D_{trans} = L/R$)',
+          detail: 'Time needed to put packet bits onto the link. Proportional to packet size and inversely proportional to link rate.',
+        },
+        {
+          name: 'Propagation Delay ($D_{prop} = d/s$)',
+          detail: 'Time for the physical signal to cross the medium distance at light speed in cable/fiber (~$2 \\times 10^8$ m/s).',
+        },
+        {
+          name: 'Throughput vs Goodput',
+          detail: 'Throughput is total raw bit rate delivered; Goodput is net usable application payload rate after stripping headers.',
+        },
+        {
+          name: 'Packet Loss & Jitter',
+          detail: 'Packet loss occurs when router queues overflow. Jitter is delay variance over time affecting real-time streaming/VoIP.',
+        },
+      ],
+      visualizer: {
         type: 'PERFORMANCE_METRICS_ENGINE',
-        title: 'Interactive Network Performance & Delay Calculator',
-        description: 'Adjust distance, packet size, link rate, and buffer depth to calculate latency components.',
+        title: 'Interactive Network Performance & Traversal Visualizer',
+        description: 'Visualize end-to-end packet traversal, latency components, and delivery telemetry across network nodes.',
       },
-      step9_workedExample: {
-        title: 'Calculating Serialization Delay for 1500-Byte Packet on 100 Mbps Link',
-        problemStatement: 'Calculate $D_{trans}$ for 1500 Bytes ($12,000$ bits) on 100 Mbps ($10^8$ bps) link.',
+      workedExample: {
+        title: 'Calculating Transmission Delay for a 1,000-Byte Packet',
+        problemStatement: 'Calculate the transmission delay ($D_{trans}$) for a 1,000-byte packet sent across a 1 Mbps link.',
         stepByStepSolution: [
-          '$D_{trans} = \\frac{L}{R} = \\frac{12,000 \\text{ bits}}{100,000,000 \\text{ bps}} = 0.00012 \\text{ seconds} = 0.12 \\text{ ms} = 120 \\ \\mu\\text{s}$.',
+          '1. Convert packet size from Bytes to bits: $1,000 \\text{ Bytes} \\times 8 = 8,000 \\text{ bits}$.',
+          '2. Express link rate in bits per second: $1 \\text{ Mbps} = 1,000,000 \\text{ bits/second}$.',
+          '3. Apply Transmission Delay formula $D_{trans} = \\frac{L}{R} = \\frac{8,000 \\text{ bits}}{1,000,000 \\text{ bits/s}} = 0.008 \\text{ seconds}$.',
+          '4. Convert seconds to milliseconds: $0.008 \\text{ s} \\times 1000 = 8 \\text{ ms}$.',
         ],
-        finalResult: 'Serialization delay is $0.12 \\text{ ms}$ ($120 \\ \\mu\\text{s}$).',
+        finalResult: 'The transmission delay to push the 1,000-byte packet onto the 1 Mbps link is 8 ms.',
       },
-      step10_realWorldScenario: {
-        topology: 'VoIP Call Stutter from Buffer Bloat',
-        scenarioText: 'Large file download fills router queue; voice packets suffer high queueing delay and jitter.',
-        engineeringContext: 'QoS priority queuing protects latency-sensitive voice traffic.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Measures round-trip time (RTT) via TCP ACK timestamps.',
-        nicBehavior: 'Buffers packets in DMA rings.',
-        switchOrRouterBehavior: 'Drops packets via Tail Drop or WRED when queues fill.',
-      },
-      step12_cliTooling: [
+      recap: [
+        'Latency is overall delay ($D_{trans} + D_{prop} + D_{proc} + D_{queue}$).',
+        'Transmission delay ($L/R$) depends on packet size and link rate; Propagation delay ($d/s$) depends on distance and speed of light.',
+        'Throughput is total actual transfer rate; Goodput is net usable application payload rate.',
+        'Jitter is delay variation over time; Packet loss occurs when buffers overflow or signals corrupt.',
+      ],
+      practice: [
         {
-          command: 'ping 8.8.8.8 -n 5',
-          description: 'Measures ICMP round-trip latency, jitter, and packet loss.',
-          expectedOutput: 'Minimum = 12ms, Maximum = 15ms, Average = 13ms, Loss = 0%',
-          proofExplanation: 'Verifies 13ms average latency and 0% loss.',
+          id: 1,
+          prompt: 'Which network performance metric measures the overall time elapsed between sending data and receiving a response at the destination?',
+          expected: 'Latency (Total Delay).',
+          hints: 'Think about total time elapsed from request to response.',
+        },
+        {
+          id: 2,
+          prompt: 'What is the key difference between Throughput and Goodput?',
+          expected: 'Throughput is the total actual rate of raw data transferred (including headers and retransmissions); Goodput is the net rate of useful application payload delivered.',
+          hints: 'Remember that protocol headers (Ethernet/IP/TCP) are excluded from Goodput.',
+        },
+        {
+          id: 3,
+          prompt: 'Which metric measures the variation or inconsistency in packet arrival delay over time?',
+          expected: 'Jitter.',
+          hints: 'Think of the variation in packet arrival timing that causes audio stuttering in VoIP calls.',
+        },
+        {
+          id: 4,
+          prompt: 'Calculate the transmission delay ($D_{trans}$) for a 1,000-byte packet transmitted over a 1 Mbps link.',
+          expected: '8 ms (8,000 bits / 1,000,000 bits/s = 0.008 s = 8 ms).',
+          hints: 'Convert 1,000 bytes to 8,000 bits, then divide by 1,000,000 bits/s.',
+        },
+        {
+          id: 5,
+          prompt: 'What primarily causes packet loss in a congested network router?',
+          expected: 'Router buffer overflow (when incoming traffic exceeds link egress capacity and memory queues fill up completely).',
+          hints: 'Consider what happens when a router receives more packets than its memory buffers can hold.',
+        },
+        {
+          id: 6,
+          prompt: 'For a live voice or video conference call, which performance metrics are most critical to prevent stuttering and dropouts?',
+          expected: 'Low Latency and Low Jitter (along with low packet loss).',
+          hints: 'Real-time applications require steady, low-delay arrival of packets rather than massive burst throughput.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Voice calls drop words despite 1 Gbps broadband.',
-          possibleCauses: ['High jitter or burst packet loss in router buffers'],
-          diagnosticSteps: ['Test with ping and iperf3.'],
-          remediation: 'Configure QoS priority queuing for voice traffic.',
-        },
-      ],
-      step14_commonMistakes: [
-        { misconception: 'Assuming high bandwidth fixes high latency.', correction: 'Bandwidth is pipe width; propagation delay is governed by the speed of light over distance.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Buffer exhaustion DDoS attacks.',
-        mitigationStrategy: 'Deploy rate-limiting and active queue management.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['$D_{trans} = L/R$.', '$D_{prop} = d/s$.', 'Goodput < Throughput < Bandwidth.'],
-        frequentTraps: ['Confusing serialization delay with propagation delay.'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Network Latency & Throughput Diagnostics',
-        scenario: 'Analyze ping latency and calculate serialization delays.',
-        tasks: ['Run ping 8.8.8.8 and calculate serialization delay for 1500-byte packets.'],
-        verificationMethod: 'Verify mathematical latency breakdown.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['Latency = $D_{trans} + D_{prop} + D_{proc} + D_{queue}$.', 'Goodput is usable application payload rate.'],
-        nextLessonBridge: 'Proceed to NET-103 for Network Models & Protocols.',
-      },
     },
     questions: [
       {
         text: 'What is the operational distinction between Throughput and Goodput in network performance analysis?',
         options: [
           'Throughput is the actual rate of total data transmitted (including protocol headers and retransmissions), whereas Goodput is the net rate of usable application payload delivered to the end user',
-          'Throughput applies only to wireless while Goodput applies only to fiber',
+          'Throughput applies only to wireless networks while Goodput applies only to optical fiber',
           'Throughput is measured in Bytes while Goodput is measured in volts',
-          'There is no difference',
+          'There is no operational difference between Throughput and Goodput',
         ],
         correctOption: 0,
-        explanation: 'Throughput measures all raw bits delivered across the physical link. Goodput measures only the application payload delivered after stripping protocol headers (Ethernet, IP, TCP) and discarding duplicate retransmissions.',
-        explanationsJson: { 1: 'Applies to all media.', 2: 'Both are data rates.', 3: 'They are fundamentally different.' },
+        explanation: 'Throughput measures all raw bits delivered across the physical link. Goodput measures only the net application payload delivered after stripping protocol headers and discarding retransmissions.',
+        explanationsJson: {
+          1: 'Both metrics apply universally to all network media.',
+          2: 'Both are data rate metrics measured in bits per second.',
+          3: 'They measure fundamentally different data rates.',
+        },
         difficulty: CourseLevel.FOUNDATIONAL,
         cognitiveLevel: CognitiveLevel.UNDERSTANDING,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'Throughput vs Goodput',
       },
+      {
+        text: 'What is Transmission Delay (D_trans) in network latency decomposition?',
+        options: [
+          'The time required to push (serialize) all bits of a packet onto the physical communication link',
+          'The time required for a physical signal to travel across the distance of a cable',
+          'The time a router takes to inspect a packet header and lookup a route',
+          'The variation in arrival time between consecutive packets',
+        ],
+        correctOption: 0,
+        explanation: 'Transmission delay (D_trans = L / R) is the time needed to serialize all bits of a packet of length L onto a link of rate R.',
+        explanationsJson: {
+          1: 'Signal traversal time across distance is Propagation Delay (D_prop).',
+          2: 'Router header inspection time is Processing Delay (D_proc).',
+          3: 'Variation in arrival time is Jitter.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Transmission Delay Definition',
+      },
+      {
+        text: 'How is Transmission Delay (D_trans) calculated for a packet of length L bits on a link of rate R bits per second?',
+        options: [
+          'D_trans = L / R',
+          'D_trans = L * R',
+          'D_trans = Distance / Speed of Light',
+          'D_trans = R / L',
+        ],
+        correctOption: 0,
+        explanation: 'Transmission Delay is calculated by dividing packet size L in bits by link rate R in bits per second (D_trans = L / R).',
+        explanationsJson: {
+          1: 'Multiplying length by rate yields incorrect units.',
+          2: 'Distance / Speed of Light is the formula for Propagation Delay.',
+          3: 'Rate divided by length is the inverse frequency, not delay.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Transmission Delay Formula',
+      },
+      {
+        text: 'What performance metric measures the variation or inconsistency in packet delay over time?',
+        options: [
+          'Jitter',
+          'Goodput',
+          'Bandwidth',
+          'Propagation Delay',
+        ],
+        correctOption: 0,
+        explanation: 'Jitter is the measure of delay variance over time. High jitter causes packet arrival irregularities, severely disrupting real-time VoIP and video calls.',
+        explanationsJson: {
+          1: 'Goodput measures net application payload delivery rate.',
+          2: 'Bandwidth measures maximum link capacity.',
+          3: 'Propagation delay measures signal travel time over distance.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Jitter Definition',
+      },
+      {
+        text: 'What is the primary cause of Packet Loss in a congested network router?',
+        options: [
+          'Router queue buffer overflow when incoming packet arrival rate exceeds outgoing link capacity',
+          'Operating system kernel updating firewall rules',
+          'Web browser downloading a large static image file',
+          'High speed of light in fiber optic cables',
+        ],
+        correctOption: 0,
+        explanation: 'When network congestion occurs and router egress memory queues fill completely, newly arriving packets are dropped, resulting in packet loss.',
+        explanationsJson: {
+          1: 'Updating firewall rules does not cause buffer overflows.',
+          2: 'Downloading files consumes bandwidth but only causes loss if buffers overflow.',
+          3: 'Speed of light affects propagation delay, not packet loss.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Packet Loss Causes',
+      },
+      {
+        text: 'A user experiences choppy audio and dropped words during a live video call. Which pair of network performance metrics is most likely degraded?',
+        options: [
+          'High Latency and High Jitter',
+          'High Bandwidth and High Goodput',
+          'Low Transmission Delay and High Goodput',
+          'Low Propagation Delay and Zero Packet Loss',
+        ],
+        correctOption: 0,
+        explanation: 'Real-time interactive audio and video applications are highly sensitive to high latency and high jitter (delay variation), causing choppy audio and stuttering.',
+        explanationsJson: {
+          1: 'High bandwidth and high goodput improve transfer rates, not degrade them.',
+          2: 'Low transmission delay improves performance.',
+          3: 'Low propagation delay and zero packet loss represent ideal network conditions.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Real-World Performance Scenario Reasoning',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Network Latency & Throughput Diagnostics',
-      instructions: '1. Run ping 8.8.8.8.\n2. Calculate serialization delay.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { host: 'PC-1', target: '8.8.8.8', rttAvg: '13ms' },
-      tasks: ['Run ping 8.8.8.8.'],
-    },
   },
 
   // =========================================================================

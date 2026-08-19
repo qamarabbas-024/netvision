@@ -89,6 +89,9 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
   if (slug.includes('http') || slug.includes('https')) {
     return <ClientServerVisual />;
   }
+  if (slug.includes('performance') || slug.includes('metrics') || slug.includes('latency')) {
+    return <PacketJourneyVisual />;
+  }
 
   // Fallback to Packet Journey Visual for other networking topics
   return <PacketJourneyVisual />;

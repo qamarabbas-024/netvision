@@ -196,8 +196,31 @@ async function verifyCurriculumContentV2() {
   assert(!net103TcpIp!.lab, 'NET-103 Lesson 3 has no phantom CLI lab');
   console.log('  ✓ NET-103 Lesson 3 verified with clean Content V2 structure, 4 TCP/IP layers, OSI conceptual mapping, encapsulation flow, 6 practice items, 6 quiz questions, and zero forced filler.');
 
+  // [TEST 11] Verify NET-102 Network Performance Metrics (net-102-network-performance)
+  console.log('\n[TEST 11] Verifying NET-102 Network Performance Metrics...');
+  const net102Perf = LESSONS_NET100.find((l) => l.slug === 'net-102-network-performance');
+  assert(!!net102Perf, 'NET-102 Network Performance (net-102-network-performance) exists');
+  assert(!!net102Perf!.contentV2, 'NET-102 Network Performance has Content V2 structure');
+  assert(net102Perf!.courseCode === 'NET-102', 'NET-102 has courseCode NET-102');
+  assert(typeof net102Perf!.contentV2!.objective === 'string', 'NET-102 has clear objective');
+  assert(net102Perf!.contentV2!.explanation.includes('Latency'), 'NET-102 explains Latency');
+  assert(net102Perf!.contentV2!.explanation.includes('Transmission Delay'), 'NET-102 explains Transmission Delay');
+  assert(net102Perf!.contentV2!.explanation.includes('Propagation Delay'), 'NET-102 explains Propagation Delay');
+  assert(net102Perf!.contentV2!.explanation.includes('Throughput'), 'NET-102 explains Throughput');
+  assert(net102Perf!.contentV2!.explanation.includes('Goodput'), 'NET-102 explains Goodput');
+  assert(net102Perf!.contentV2!.explanation.includes('Packet Loss'), 'NET-102 explains Packet Loss');
+  assert(net102Perf!.contentV2!.explanation.includes('Jitter'), 'NET-102 explains Jitter');
+  assert(net102Perf!.contentV2!.components.length >= 5, 'NET-102 has at least 5 performance components');
+  assert(Array.isArray(net102Perf!.contentV2!.practice) && net102Perf!.contentV2!.practice.length >= 6, 'NET-102 has 6 practice exercises');
+  assert(net102Perf!.questions.length >= 6, 'NET-102 has 6 aligned quiz questions');
+  assert(!net102Perf!.contentV2!.packetHeaderView, 'NET-102 has no fake packet header');
+  assert(!net102Perf!.contentV2!.cliTooling, 'NET-102 has no forced CLI bloat');
+  assert(!net102Perf!.contentV2!.security, 'NET-102 has no generic security filler');
+  assert(!net102Perf!.lab, 'NET-102 has no phantom CLI lab');
+  console.log('  ✓ NET-102 Network Performance verified with clean Content V2 structure, latency delay breakdown, throughput/goodput distinction, packet loss & jitter, 6 practice items, 6 quiz questions, and zero forced filler.');
+
   console.log('\n================================================================');
-  console.log('🎉 ALL 10 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 11 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 

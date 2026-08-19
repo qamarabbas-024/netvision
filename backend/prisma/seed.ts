@@ -277,7 +277,7 @@ async function main() {
 
   // 21 Additional Legacy Topics Mapping
   const legacyTopics = [
-    { slug: 'networking-fundamentals', title: 'What is Computer Networking?', targetCode: 'NET-102', lessonSlug: 'what-is-computer-networking' },
+    { slug: 'networking-fundamentals', title: 'What is Computer Networking?', targetCode: 'NET-102', lessonSlug: 'net-102-network-performance' },
     { slug: 'network-devices', title: 'Network Devices', targetCode: 'NET-101', lessonSlug: 'network-devices-overview' },
     { slug: 'network-topologies', title: 'Network Topologies', targetCode: 'NET-102', lessonSlug: 'network-topologies-overview' },
     { slug: 'osi-model', title: 'OSI Model', targetCode: 'NET-103', lessonSlug: 'osi-model-7-layers' },
