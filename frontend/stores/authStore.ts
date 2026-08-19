@@ -41,6 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
           .catch(() => {})
           .finally(() => {
             GuestProgressService.clearAllGuestData();
+            GuestProgressService.resetLearnerId();
           });
       }
     }
@@ -54,6 +55,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       sessionStorage.removeItem('netvision_token');
       sessionStorage.removeItem('netvision_user');
       GuestProgressService.clearAllGuestData();
+      GuestProgressService.resetLearnerId();
       const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
       fetch(`${apiBase}/auth/logout`, {
         method: 'POST',

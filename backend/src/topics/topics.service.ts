@@ -1685,10 +1685,36 @@ export class TopicsService {
         data: { userId, anonymousId: null },
       });
 
-      const { count: claimedAchievementCount } = await tx.userAchievement.updateMany({
+      const anonAchievements = await tx.userAchievement.findMany({
         where: { anonymousId },
-        data: { userId, anonymousId: null },
       });
+      let claimedAchievementCount = 0;
+      for (const a of anonAchievements) {
+        const currentAch = await tx.userAchievement.findFirst({
+          where: { id: a.id, anonymousId },
+        });
+        if (!currentAch) continue;
+
+        const existingAch = await tx.userAchievement.findFirst({
+          where: { userId, achievementId: currentAch.achievementId },
+        });
+        if (existingAch) {
+          const { count: delAchCount } = await tx.userAchievement.deleteMany({
+            where: { id: currentAch.id },
+          });
+          if (delAchCount > 0) {
+            claimedAchievementCount++;
+          }
+        } else {
+          const { count: updAchCount } = await tx.userAchievement.updateMany({
+            where: { id: currentAch.id, anonymousId },
+            data: { userId, anonymousId: null },
+          });
+          if (updAchCount > 0) {
+            claimedAchievementCount++;
+          }
+        }
+      }
 
       if (anonLearner) {
         await tx.anonymousLearner.deleteMany({ where: { id: anonymousId } });
