@@ -127,64 +127,64 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ topics }) 
       </div>
 
       {/* Tier Selector Tabs: Level 0 -> Level 1 -> Level 2 -> Level 3 */}
-      <div className="flex items-center gap-2.5 p-1.5 glass-panel rounded-2xl border border-[#272732] overflow-x-auto">
+      <div className="flex items-center gap-2 p-1.5 glass-panel rounded-xl border border-[#272732] overflow-x-auto">
         <button
           onClick={() => setActiveTier('ALL')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap ${
+          className={`px-3.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2 whitespace-nowrap font-mono ${
             activeTier === 'ALL'
-              ? 'bg-[#00f0ff] text-black shadow-glow-cyan font-extrabold'
+              ? 'bg-[#00f0ff] text-black font-extrabold'
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <BookOpen className="w-4 h-4" />
+          <BookOpen className="w-3.5 h-3.5" />
           All Levels ({topics.length})
         </button>
 
         <button
           onClick={() => setActiveTier('FOUNDATIONAL')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap ${
+          className={`px-3.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2 whitespace-nowrap font-mono ${
             activeTier === 'FOUNDATIONAL'
-              ? 'bg-blue-500 text-white shadow-glow-blue font-extrabold'
+              ? 'bg-blue-600 text-white font-extrabold'
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <Compass className="w-4 h-4 text-blue-400" />
+          <Compass className="w-3.5 h-3.5 text-blue-400" />
           Level 0: Foundations ({foundationalCount})
         </button>
 
         <button
           onClick={() => setActiveTier('BEGINNER')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap ${
+          className={`px-3.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2 whitespace-nowrap font-mono ${
             activeTier === 'BEGINNER'
-              ? 'bg-[#00f0ff] text-black shadow-glow-cyan font-extrabold'
+              ? 'bg-[#00f0ff] text-black font-extrabold'
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <Zap className="w-4 h-4 text-[#00f0ff]" />
+          <Zap className="w-3.5 h-3.5 text-[#00f0ff]" />
           Level 1: Beginner ({beginnerCount})
         </button>
 
         <button
           onClick={() => setActiveTier('INTERMEDIATE')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap ${
+          className={`px-3.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2 whitespace-nowrap font-mono ${
             activeTier === 'INTERMEDIATE'
-              ? 'bg-purple-500 text-white shadow-glow-purple font-extrabold'
+              ? 'bg-purple-600 text-white font-extrabold'
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <Layers className="w-4 h-4 text-purple-400" />
+          <Layers className="w-3.5 h-3.5 text-purple-400" />
           Level 2: Intermediate ({intermediateCount})
         </button>
 
         <button
           onClick={() => setActiveTier('ADVANCED')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap ${
+          className={`px-3.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors flex items-center gap-2 whitespace-nowrap font-mono ${
             activeTier === 'ADVANCED'
-              ? 'bg-rose-500 text-white shadow-glow-rose font-extrabold'
+              ? 'bg-rose-600 text-white font-extrabold'
               : 'text-zinc-400 hover:text-white'
           }`}
         >
-          <ShieldCheck className="w-4 h-4 text-rose-400" />
+          <ShieldCheck className="w-3.5 h-3.5 text-rose-400" />
           Level 3: Advanced ({advancedCount})
         </button>
       </div>

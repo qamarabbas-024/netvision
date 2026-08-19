@@ -1,63 +1,53 @@
 'use client';
 
 import React from 'react';
-import { Star } from 'lucide-react';
-import { Avatar } from '@/components/ui/Avatar';
 
 export const TestimonialsSection: React.FC = () => {
-  const testimonials = [
+  const pillars = [
     {
-      name: 'Sarah Chen',
-      role: 'Computer Science Undergrad @ MIT',
-      quote:
-        'I spent weeks struggling with TCP 3-way handshakes and ARP resolution until I opened NetVision. Seeing the actual packets move between nodes made everything click in 10 minutes.',
+      title: 'Visual Packet Tracing',
+      desc: 'Watch packets flow between switches and routers in real time. Inspect header fields, protocol flags, and payloads at every hop.',
+      tag: 'VISUAL INSTRUCTION',
     },
     {
-      name: 'Marcus Vance',
-      role: 'Junior Network Engineer @ Cisco',
-      quote:
-        'The interactive sandbox lab feels like a modern web-native Packet Tracer. It is incredibly responsive, lightweight, and perfect for testing static routing topologies.',
+      title: 'Deterministic CLI Sandbox',
+      desc: 'Practice real terminal commands (`ping`, `traceroute`, `show ip route`) inside a lightweight, browser-based simulation engine.',
+      tag: 'HANDS-ON PRACTICE',
     },
     {
-      name: 'Elena Rostova',
-      role: 'Cybersecurity Analyst',
-      quote:
-        'NetVision visual packet inspection is the best learning tool out there. Watching firewall rules drop unauthorized packets visually is ten times better than reading a textbook.',
+      title: 'Server-Authoritative Credentials',
+      desc: 'Earn verifiable digital certificates backed by server-validated exam submissions and anti-cheat progress checks.',
+      tag: 'VERIFIABLE MASTERY',
     },
   ];
 
   return (
-    <section className="py-20 relative">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+    <section className="py-16 sm:py-20 relative bg-[#09090b]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
           <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold mb-2 block">
-            Student Feedback
+            Core Philosophy
           </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
-            Loved By Learners Worldwide
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-3 font-sans">
+            Built for Technical Clarity & Deep Understanding
           </h2>
+          <p className="text-sm text-zinc-300 font-sans">
+            Designed from the ground up to replace passive reading with active, visual, hands-on networking practice.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((t, idx) => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          {pillars.map((p, idx) => (
             <div
               key={idx}
-              className="glass-panel p-8 rounded-2xl border border-[#272732] flex flex-col justify-between hover:border-[#00f0ff]/40 transition-colors"
+              className="glass-panel p-6 rounded-xl border border-[#272732] flex flex-col justify-between hover:border-zinc-700 transition-colors"
             >
               <div>
-                <div className="flex items-center gap-1 text-amber-400 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-amber-400" />
-                  ))}
-                </div>
-                <p className="text-sm text-zinc-300 leading-relaxed italic mb-6">"{t.quote}"</p>
-              </div>
-              <div className="flex items-center gap-3 pt-4 border-t border-[#272732]/60">
-                <Avatar name={t.name} size="sm" />
-                <div>
-                  <h4 className="text-xs font-bold text-white">{t.name}</h4>
-                  <p className="text-[11px] text-zinc-500">{t.role}</p>
-                </div>
+                <span className="text-[11px] font-mono text-[#00f0ff] uppercase tracking-wider font-semibold mb-3 block">
+                  {p.tag}
+                </span>
+                <h3 className="text-lg font-bold text-white mb-2 font-sans">{p.title}</h3>
+                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">{p.desc}</p>
               </div>
             </div>
           ))}

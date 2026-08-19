@@ -27,32 +27,32 @@ export const HowItWorksSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 relative">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+    <section className="py-16 sm:py-20 relative bg-[#09090b]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
           <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold mb-2 block">
-            Simple 4-Step Pathway
+            4-Step Learning Pathway
           </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-3 font-sans">
             How NetVision Works
           </h2>
-          <p className="text-zinc-400 text-base sm:text-lg">
-            From zero networking knowledge to building and troubleshooting complex network topologies.
+          <p className="text-zinc-300 text-sm font-sans">
+            Progress from digital foundations to building, inspecting, and troubleshooting live networking topologies.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {steps.map((s, idx) => (
             <div
               key={idx}
-              className="glass-panel p-8 rounded-2xl border border-[#272732] flex flex-col justify-between hover:border-[#00f0ff]/40 transition-colors group"
+              className="glass-panel p-6 rounded-xl border border-[#272732] flex flex-col justify-between hover:border-zinc-700 transition-colors"
             >
               <div>
-                <span className="text-4xl font-extrabold text-[#00f0ff] font-mono mb-4 block group-hover:scale-110 transition-transform">
+                <span className="text-3xl font-extrabold text-[#00f0ff] font-mono mb-3 block">
                   {s.step}
                 </span>
-                <h3 className="text-lg font-bold text-white mb-2">{s.title}</h3>
-                <p className="text-xs text-zinc-400 leading-relaxed">{s.desc}</p>
+                <h3 className="text-base font-bold text-white mb-2 font-sans">{s.title}</h3>
+                <p className="text-xs text-zinc-300 leading-relaxed font-sans">{s.desc}</p>
               </div>
             </div>
           ))}

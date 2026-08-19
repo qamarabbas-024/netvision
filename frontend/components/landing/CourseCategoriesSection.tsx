@@ -8,46 +8,36 @@ import { ArrowRight, BookOpen } from 'lucide-react';
 export const CourseCategoriesSection: React.FC = () => {
   const categories = [
     {
-      title: 'Networking Fundamentals',
-      desc: 'OSI Model 7 Layers, Ethernet frames, MAC addresses, and physical layer basics.',
-      level: 'BEGINNER',
-      lessonsCount: 12,
+      title: 'Level 0: Digital & Info Foundations',
+      desc: 'Bits, bytes, binary arithmetic, hex notation, physical media transceivers, network topology, and performance metrics (latency, throughput, loss, jitter).',
+      level: 'FOUNDATIONAL',
+      lessonsCount: 5,
       badgeVariant: 'cyan' as const,
+      code: 'NET-101 & NET-102',
     },
     {
-      title: 'TCP/IP & Protocol Suite',
-      desc: 'Deep dive into IP addressing, TCP 3-way handshake, UDP datagrams, and ICMP Ping.',
+      title: 'Level 1: Fundamentals & LAN Architecture',
+      desc: 'OSI 7-layer reference model, TCP/IP 4-layer architecture, Ethernet framing, MAC address resolution, and IPv4 CIDR subnetting calculations.',
       level: 'BEGINNER',
-      lessonsCount: 15,
+      lessonsCount: 8,
       badgeVariant: 'emerald' as const,
+      code: 'NET-103 & NET-104',
     },
     {
-      title: 'IP Subnetting & Routing',
-      desc: 'Master IPv4/IPv6 CIDR subnetting, default gateways, and static routing tables.',
+      title: 'Level 2: Transport & Network Protocol Mechanics',
+      desc: 'TCP 3-way handshake, state transitions, UDP datagrams, ICMP ping/traceroute diagnostics, DNS hierarchy, and DHCP lease allocations.',
       level: 'INTERMEDIATE',
-      lessonsCount: 18,
+      lessonsCount: 9,
       badgeVariant: 'purple' as const,
+      code: 'NET-201 — NET-204',
     },
     {
-      title: 'Core Network Services',
-      desc: 'DNS resolution, DHCP lease allocations, NAT translation, and ARP tables.',
-      level: 'INTERMEDIATE',
-      lessonsCount: 14,
-      badgeVariant: 'amber' as const,
-    },
-    {
-      title: 'Cyber Security & Firewalls',
-      desc: 'Stateful packet inspection, access control lists (ACLs), VPN tunnels, and DDoS mitigation.',
+      title: 'Level 3: Enterprise Routing & Security Policy',
+      desc: 'Single-area and multi-area OSPF, 802.1Q VLAN trunking, stateful firewall ACL inspection rules, BGP path selection, and network automation.',
       level: 'ADVANCED',
-      lessonsCount: 20,
+      lessonsCount: 8,
       badgeVariant: 'rose' as const,
-    },
-    {
-      title: 'Switching & VLANs',
-      desc: 'Broadcast domains, 802.1Q trunking, Spanning Tree Protocol (STP), and Port Security.',
-      level: 'ADVANCED',
-      lessonsCount: 16,
-      badgeVariant: 'cyan' as const,
+      code: 'NET-301 — NET-404',
     },
   ];
 
@@ -68,29 +58,29 @@ export const CourseCategoriesSection: React.FC = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-6">
           {categories.map((c, idx) => (
             <div
               key={idx}
-              className="glass-panel p-5 sm:p-8 rounded-2xl border border-[#272732] hover:border-[#00f0ff]/40 transition-all flex flex-col justify-between group"
+              className="glass-panel p-5 rounded-xl border border-[#272732] hover:border-[#00f0ff]/40 transition-all flex flex-col justify-between group"
             >
               <div>
-                <div className="flex items-center justify-between mb-4 gap-2">
+                <div className="flex items-center justify-between mb-3 gap-2">
                   <Badge variant={c.badgeVariant}>{c.level}</Badge>
-                  <span className="text-xs font-mono text-zinc-500">{c.lessonsCount} Lessons</span>
+                  <span className="text-xs font-mono text-[#00f0ff] font-semibold">{c.code}</span>
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-white mb-2 group-hover:text-[#00f0ff] transition-colors flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-zinc-400 group-hover:text-[#00f0ff] shrink-0" />
+                <h3 className="text-base font-bold text-white mb-2 group-hover:text-[#00f0ff] transition-colors flex items-start gap-2 font-sans">
+                  <BookOpen className="w-4 h-4 text-zinc-400 group-hover:text-[#00f0ff] shrink-0 mt-1" />
                   <span>{c.title}</span>
                 </h3>
-                <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed mb-6">{c.desc}</p>
+                <p className="text-xs text-zinc-300 leading-relaxed mb-4 font-sans">{c.desc}</p>
               </div>
               <Link
                 href="/courses"
-                className="inline-flex items-center gap-2 text-xs font-semibold text-[#00f0ff] group-hover:translate-x-1 transition-transform"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#00f0ff] hover:underline pt-3 border-t border-[#272732]"
               >
-                <span>Start Learning Pathway</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Start Pathway</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
           ))}

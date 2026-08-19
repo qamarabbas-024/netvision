@@ -21,43 +21,43 @@ export const HeroSection: React.FC = () => {
           className="lg:col-span-7 flex flex-col items-start text-left"
         >
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#00f0ff]/30 bg-[#00f0ff]/5 text-[#00f0ff] text-xs font-semibold uppercase tracking-wider mb-6 shadow-glow-cyan">
-            <Zap className="w-3.5 h-3.5 animate-pulse" />
-            <span>The World's Best Free Visual Learning Platform</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-[#00f0ff]/30 bg-[#00f0ff]/10 text-[#00f0ff] text-xs font-mono font-semibold uppercase tracking-wider mb-6">
+            <Zap className="w-3.5 h-3.5" />
+            <span>Interactive Computer Networking Platform</span>
           </div>
 
           {/* Main Display Title */}
-          <h1 className="text-3xl sm:text-5xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1] mb-6">
-            Learn Networking by <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#00f0ff] via-[#3b82f6] to-[#8b5cf6]">
-              Seeing It In Action.
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15] mb-6 font-sans">
+            Master Computer Networking <br />
+            <span className="text-[#00f0ff]">
+              By Seeing It In Action.
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-base sm:text-xl text-zinc-400 font-normal leading-relaxed max-w-xl mb-8">
-            Stop memorizing dry theory. Watch packets flow in real-time, build live network topologies, simulate protocols step-by-step, and repair broken networks.
+          <p className="text-base sm:text-lg text-zinc-300 font-normal leading-relaxed max-w-xl mb-8 font-sans">
+            Watch real-time packet movement across network topologies, inspect protocol headers step-by-step, configure live CLI diagnostic labs, and build lasting technical intuition.
           </p>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-12">
-            <Link href="/register" className="w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-10">
+            <Link href="/courses" className="w-full sm:w-auto">
               <Button size="lg" variant="cyan" rightIcon={<ArrowRight className="w-5 h-5" />} className="w-full sm:w-auto justify-center">
-                Start Learning Free
+                Start Learning
               </Button>
             </Link>
-            <a href="#demo" className="w-full sm:w-auto">
+            <Link href="/sandbox" className="w-full sm:w-auto">
               <Button size="lg" variant="secondary" leftIcon={<PlayCircle className="w-5 h-5 text-[#00f0ff]" />} className="w-full sm:w-auto justify-center">
-                Try Interactive Demo
+                Explore Sandbox
               </Button>
-            </a>
+            </Link>
           </div>
 
           {/* Trust Highlights */}
-          <div className="flex flex-wrap items-center gap-3 sm:gap-6 pt-6 border-t border-[#272732]/60 text-xs text-zinc-400 font-medium w-full">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-6 border-t border-[#272732] text-xs text-zinc-400 font-medium w-full">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>100% Free Forever</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>Instant Guest Access</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#00f0ff]" />
@@ -65,7 +65,7 @@ export const HeroSection: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-purple-400" />
-              <span>Beginner Friendly</span>
+              <span>Interactive CLI Sandbox</span>
             </div>
           </div>
         </motion.div>

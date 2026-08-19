@@ -45,29 +45,29 @@ export const FeaturesSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 bg-net-grid-pattern relative">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+    <section className="py-16 sm:py-20 bg-net-grid-pattern relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
           <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold mb-2 block">
-            Engineered For Visual Understanding
+            Engineered For Visual Intuition
           </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
-            Everything You Need To Master Networking
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-3 font-sans">
+            Core Learning Engine Features
           </h2>
-          <p className="text-zinc-400 text-base sm:text-lg">
-            Designed for Computer Science, IT, and Cybersecurity students who want to build real mental models.
+          <p className="text-zinc-300 text-sm font-sans">
+            Replace abstract textbook diagrams with interactive simulations, real terminal commands, and immediate feedback.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {features.map((f, idx) => (
-            <Card key={idx} glowColor={f.glow} interactive className="p-8">
-              <CardHeader>
-                <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+            <Card key={idx} glowColor={f.glow} interactive className="p-6">
+              <CardHeader className="mb-2">
+                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3 shrink-0">
                   {f.icon}
                 </div>
-                <CardTitle className="text-xl mb-2">{f.title}</CardTitle>
-                <CardDescription className="text-sm leading-relaxed">{f.desc}</CardDescription>
+                <CardTitle className="text-base font-bold text-white mb-1.5 font-sans">{f.title}</CardTitle>
+                <CardDescription className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">{f.desc}</CardDescription>
               </CardHeader>
             </Card>
           ))}

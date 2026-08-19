@@ -65,9 +65,9 @@ export const Navbar: React.FC<{ items?: NavItem[] }> = ({ items = defaultNavItem
               Sign In
             </Button>
           </Link>
-          <Link href="/register">
+          <Link href="/courses">
             <Button variant="cyan" size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
-              Get Started Free
+              Start Learning
             </Button>
           </Link>
         </div>
@@ -113,9 +113,9 @@ export const Navbar: React.FC<{ items?: NavItem[] }> = ({ items = defaultNavItem
                 Sign In
               </Button>
             </Link>
-            <Link href="/register" onClick={() => setMobileOpen(false)}>
+            <Link href="/courses" onClick={() => setMobileOpen(false)}>
               <Button variant="cyan" className="w-full justify-center min-h-[44px]">
-                Get Started Free
+                Start Learning
               </Button>
             </Link>
           </div>
