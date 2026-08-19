@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { NodeType } from '@/types';
-import { RouterIcon, SwitchIcon, FirewallIcon, ServerIcon, PCIcon, CloudIcon } from '@/components/ui/Icons';
+import { RouterIcon, SwitchIcon, FirewallIcon, ServerIcon, PCIcon, CloudIcon, DNSIcon, LaptopIcon, DHCPIcon, AccessPointIcon } from '@/components/ui/Icons';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,12 +14,16 @@ export const DevicePalette: React.FC<DevicePaletteProps> = ({ onAddDevice }) => 
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
   const paletteItems: { type: NodeType; label: string; icon: React.ReactNode }[] = [
-    { type: 'pc', label: 'Client PC', icon: <PCIcon size={20} /> },
-    { type: 'server', label: 'Server Node', icon: <ServerIcon size={20} /> },
-    { type: 'router', label: 'Gateway Router', icon: <RouterIcon size={20} /> },
-    { type: 'switch', label: 'L2/L3 Switch', icon: <SwitchIcon size={20} /> },
-    { type: 'firewall', label: 'Stateful Firewall', icon: <FirewallIcon size={20} /> },
-    { type: 'cloud', label: 'Internet WAN', icon: <CloudIcon size={20} /> },
+    { type: 'pc', label: 'Desktop PC', icon: <PCIcon size={18} /> },
+    { type: 'laptop', label: 'Laptop Client', icon: <LaptopIcon size={18} /> },
+    { type: 'switch', label: 'L2 Switch', icon: <SwitchIcon size={18} /> },
+    { type: 'router', label: 'Gateway Router', icon: <RouterIcon size={18} /> },
+    { type: 'firewall', label: 'Firewall ACL', icon: <FirewallIcon size={18} /> },
+    { type: 'server', label: 'Web Server', icon: <ServerIcon size={18} /> },
+    { type: 'dns', label: 'DNS Server', icon: <DNSIcon size={18} /> },
+    { type: 'dhcp', label: 'DHCP Server', icon: <DHCPIcon size={18} /> },
+    { type: 'ap', label: 'Access Point', icon: <AccessPointIcon size={18} /> },
+    { type: 'cloud', label: 'Internet WAN', icon: <CloudIcon size={18} /> },
   ];
 
   return (

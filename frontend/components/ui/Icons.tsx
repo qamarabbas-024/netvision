@@ -49,6 +49,24 @@ export const DNSIcon: React.FC<NetworkIconProps> = ({ className, size = 20 }) =>
   </div>
 );
 
+export const LaptopIcon: React.FC<NetworkIconProps> = ({ className, size = 20 }) => (
+  <div className={cn('p-2 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-400 inline-flex items-center justify-center', className)}>
+    <Monitor size={size} />
+  </div>
+);
+
+export const DHCPIcon: React.FC<NetworkIconProps> = ({ className, size = 20 }) => (
+  <div className={cn('p-2 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 inline-flex items-center justify-center', className)}>
+    <Server size={size} />
+  </div>
+);
+
+export const AccessPointIcon: React.FC<NetworkIconProps> = ({ className, size = 20 }) => (
+  <div className={cn('p-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 inline-flex items-center justify-center', className)}>
+    <Radio size={size} />
+  </div>
+);
+
 export const PacketIcon: React.FC<NetworkIconProps> = ({ className, size = 20 }) => (
   <div className={cn('p-2 rounded-xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-[#00f0ff] inline-flex items-center justify-center shadow-glow-cyan animate-pulse', className)}>
     <Activity size={size} />

@@ -1,6 +1,6 @@
 // --- NETWORKING CORE TYPES ---
 
-export type NodeType = 'pc' | 'server' | 'router' | 'switch' | 'firewall' | 'dns' | 'cloud' | 'internet';
+export type NodeType = 'pc' | 'laptop' | 'server' | 'router' | 'switch' | 'firewall' | 'dns' | 'dhcp' | 'ap' | 'cloud' | 'internet';
 
 export type PacketProtocol = 'ARP' | 'DNS' | 'ICMP' | 'HTTP' | 'HTTPS' | 'TCP' | 'UDP' | 'DHCP';
 
