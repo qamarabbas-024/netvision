@@ -55,6 +55,7 @@ export interface LessonViewerProps {
     examples?: any[];
     commands?: any[];
     labs?: any[];
+    practice?: any[];
     mistakes?: any[];
     recaps?: any[];
     quiz?: any;
@@ -72,20 +73,12 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
 }) => {
   const { isAuthenticated } = useAuthStore();
 
-  const stages = [
-    'learn',
-    'understand',
-    'see',
-    'interact',
-    'practice',
-    'breakfix',
-    'quiz',
-    'mastery',
-  ] as const;
+  // 4 Core Flow Stages: Learn -> Practice -> Quiz -> Mastery
+  const stages = ['learn', 'practice', 'quiz', 'mastery'] as const;
   type StageType = (typeof stages)[number];
 
   const defaultStage =
-    initialStage && stages.includes(initialStage as StageType)
+    initialStage && (stages as readonly string[]).includes(initialStage)
       ? (initialStage as StageType)
       : 'learn';
 
@@ -136,12 +129,10 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
   }, [activeStage]);
 
   useEffect(() => {
-    // Check bookmark status from local guest state and server state
     const guestState = GuestProgressService.getProgress();
     if (guestState.bookmarkedLessonIds.includes(lesson.id)) {
       setIsBookmarked(true);
     }
-    // Check server saved lessons
     getSavedLessonsApi()
       .then((savedList) => {
         if (Array.isArray(savedList)) {
@@ -162,8 +153,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
     markStageDone(activeStage);
     const currentIndex = stages.indexOf(activeStage);
     if (currentIndex < stages.length - 1) {
-      const nextStg = stages[currentIndex + 1];
-      setActiveStage(nextStg);
+      setActiveStage(stages[currentIndex + 1]);
     }
   };
 
@@ -191,7 +181,6 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
     }
   };
 
-  // Build sidebar course modules structure safely
   const sidebarModules = lesson.course.modules && lesson.course.modules.length > 0
     ? lesson.course.modules.map((m: any) => ({
         id: m.id,
@@ -205,7 +194,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
           durationMinutes: l.durationMinutes || 15,
           completed: l.completed ?? false,
           active: l.slug === lesson.slug,
-          locked: false, // Completed lessons always reviewable!
+          locked: false,
         })),
       }))
     : [
@@ -236,53 +225,70 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
     modules: sidebarModules,
   };
 
+  const hasPractice = !!(
+    (lesson.practice && lesson.practice.length > 0) ||
+    (lesson.content?.practice && lesson.content.practice.length > 0) ||
+    (lesson.labs && lesson.labs.length > 0)
+  );
+
   return (
-    <div className="flex flex-col gap-6">
-      {/* Top Bar Header */}
-      <header className="glass-panel border-b border-[#272732]/80 p-3.5 sm:p-4 rounded-3xl flex items-center justify-between gap-3 sm:gap-4 sticky top-4 z-30 backdrop-blur-md">
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+    <div className="flex flex-col gap-6 font-sans">
+      {/* Lesson Header */}
+      <header className="glass-panel p-3.5 sm:p-4 rounded-xl border border-[#272732] flex items-center justify-between gap-4 sticky top-4 z-30 bg-[#09090b]/90">
+        <div className="flex items-center gap-3 min-w-0">
           <Link
             href={`/courses/${lesson.course.slug}`}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors shrink-0"
+            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors shrink-0"
             title="Back to Course Syllabus"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] sm:text-[11px] font-mono text-zinc-400 truncate">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] font-mono text-zinc-400 truncate">
                 {lesson.course.title}
               </span>
               <span className="text-zinc-600">•</span>
-              <span className="text-[10px] sm:text-[11px] font-mono text-[#00f0ff] uppercase shrink-0 font-bold">
-                {lesson.course.level}
+              <Badge variant="purple">{lesson.course.level}</Badge>
+              <span className="text-xs font-mono text-zinc-400">
+                {lesson.durationMinutes || 15} Min
               </span>
+              {isInitiallyCompleted && (
+                <Badge variant="emerald">Lesson Complete ✓</Badge>
+              )}
             </div>
-            <h1 className="text-sm sm:text-base font-bold text-white tracking-tight truncate">
+            <h1 className="text-base sm:text-lg font-bold text-white tracking-tight truncate mt-0.5">
               {lesson.title}
             </h1>
           </div>
         </div>
 
-        {/* Stepper Navigation */}
-        <div className="hidden xl:flex items-center gap-1 glass-panel p-1 rounded-2xl border border-[#272732]">
+        {/* Streamlined Stepper Tabs */}
+        <div className="hidden lg:flex items-center gap-1 glass-panel p-1 rounded-lg border border-[#272732]">
           {stages.map((stg, idx) => {
             const isDone = completedStages.has(stg);
             const isActive = activeStage === stg;
+            const labels = {
+              learn: '1. Learn & See',
+              practice: '2. Practice',
+              quiz: '3. Quiz',
+              mastery: '4. Complete',
+            };
+
             return (
               <button
                 key={stg}
                 onClick={() => setActiveStage(stg)}
-                className={`px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-semibold uppercase tracking-wider transition-all flex items-center gap-1 ${
+                className={`px-3 py-1 rounded text-xs font-mono font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5 ${
                   isActive
-                    ? 'bg-[#00f0ff] text-black shadow-glow-cyan font-bold'
+                    ? 'bg-[#00f0ff] text-black font-extrabold'
                     : isDone
                     ? 'text-emerald-400 hover:text-white'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                {isDone && !isActive && <CheckCircle2 className="w-3 h-3 text-emerald-400" />}
-                {idx + 1}. {stg}
+                {isDone && !isActive && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+                {labels[stg]}
               </button>
             );
           })}
@@ -290,219 +296,82 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
 
         <button
           onClick={handleToggleBookmark}
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-[#00f0ff] transition-colors shrink-0"
+          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-[#00f0ff] transition-colors shrink-0"
           title="Bookmark Lesson"
         >
           <Bookmark
-            className={`w-4 h-4 sm:w-5 sm:h-5 ${
+            className={`w-4 h-4 ${
               isBookmarked ? 'text-[#00f0ff] fill-[#00f0ff]' : ''
             }`}
           />
         </button>
       </header>
 
-      {/* Mobile Stepper Selector */}
-      <div className="xl:hidden flex items-center justify-between gap-2 p-2.5 rounded-2xl glass-panel border border-[#272732]">
-        <span className="text-xs font-mono font-bold text-[#00f0ff] uppercase px-1 truncate">
-          Stage {stages.indexOf(activeStage) + 1} / {stages.length}: {activeStage.toUpperCase()}
-        </span>
-        <select
-          value={activeStage}
-          onChange={(e) => setActiveStage(e.target.value as StageType)}
-          className="bg-[#121217] text-white border border-[#272732] rounded-xl px-2.5 py-1 text-xs font-semibold focus:outline-none focus:border-[#00f0ff] shrink-0"
-        >
-          {stages.map((stg, idx) => (
-            <option key={stg} value={stg}>
-              {idx + 1}. {stg.toUpperCase()} {completedStages.has(stg) ? '✓' : ''}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Main Two-Column Layout: Collapsible Sidebar + Lesson Content */}
+      {/* Main Two-Column Layout */}
       <div className="flex gap-6 items-start">
-        {/* IDE-Style Collapsible Sidebar */}
+        {/* Collapsible Sidebar */}
         <LearningSidebar course={sidebarCourse} currentLessonSlug={lesson.slug} />
 
-        {/* Main Lesson Content Area */}
+        {/* Main Content Body */}
         <main className="flex-1 min-w-0">
-          {/* STAGE 1: LEARN (THEORY & TECHNICAL BREAKDOWN) */}
+          {/* STAGE 1: LEARN & SEE */}
           {activeStage === 'learn' && (
             <div className="space-y-6">
               <LessonContentRenderer
                 lesson={lesson}
-                onStartLab={() => setActiveStage('practice')}
-                onProceedToQuiz={() => setActiveStage('quiz')}
+                onStartLab={() => setActiveStage(hasPractice ? 'practice' : 'quiz')}
+                onProceedToQuiz={() => setActiveStage(hasPractice ? 'practice' : 'quiz')}
               />
-            </div>
-          )}
-
-          {/* STAGE 2: UNDERSTAND (MENTAL MODEL & ANALOGY) */}
-          {activeStage === 'understand' && (
-            <Card className="p-8 glass-panel-glow border-[#00f0ff]/30 flex flex-col gap-6">
-              <Badge variant="purple">STAGE 2: UNDERSTAND (MENTAL MODEL)</Badge>
-              <h2 className="text-2xl font-extrabold text-white">
-                Intuitive Mental Model & Real-World Analogy
-              </h2>
-
-              <div className="p-6 rounded-3xl bg-purple-500/10 border border-purple-500/30 flex items-start gap-4">
-                <Sparkles className="w-8 h-8 text-purple-400 shrink-0 mt-1" />
-                <div className="space-y-2">
-                  <h3 className="text-base font-bold text-white">Real-World Parallel</h3>
-                  <p className="text-sm text-purple-200 leading-relaxed">
-                    {lesson.content?.analogy ||
-                      'Think of packet switching like an international mailing system: addresses ensure delivery while routing hubs transfer parcels.'}
-                  </p>
-                </div>
-              </div>
-
-              {lesson.content?.keyConcepts && (
-                <div className="flex flex-col gap-3">
-                  <h3 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
-                    Key Architectural Principles
-                  </h3>
-                  {lesson.content.keyConcepts.map((kc: string, idx: number) => (
-                    <div
-                      key={idx}
-                      className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 text-xs text-zinc-300"
-                    >
-                      <CheckCircle2 className="w-4 h-4 text-[#00f0ff] shrink-0" />
-                      <span>{kc}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
 
               <div className="flex items-center justify-between pt-4 border-t border-[#272732]">
-                <Button
-                  variant="ghost"
-                  onClick={handlePrevStage}
-                  leftIcon={<ArrowLeft className="w-4 h-4" />}
-                >
-                  Previous
-                </Button>
+                <span className="text-xs text-zinc-400 font-mono">Stage 1 of 4: Theory & Visuals</span>
                 <Button
                   variant="cyan"
-                  size="lg"
-                  onClick={handleNextStage}
-                  rightIcon={<ArrowRight className="w-5 h-5" />}
+                  size="md"
+                  onClick={() => setActiveStage(hasPractice ? 'practice' : 'quiz')}
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  Next: Protocol Visualizer →
-                </Button>
-              </div>
-            </Card>
-          )}
-
-          {/* STAGE 3: SEE (PROTOCOL ANIMATION) */}
-          {activeStage === 'see' && (
-            <Card className="p-8 glass-panel-glow border-[#00f0ff]/30 flex flex-col gap-6">
-              <div className="flex items-center justify-between">
-                <Badge variant="cyan">STAGE 3: SEE (VISUAL FLOW)</Badge>
-                <span className="text-xs font-mono text-zinc-400 flex items-center gap-1">
-                  <Eye className="w-3.5 h-3.5 text-[#00f0ff]" /> Live Packet Protocol Flow
-                </span>
-              </div>
-
-              <h2 className="text-2xl font-extrabold text-white">
-                Interactive Visual Protocol Flow
-              </h2>
-
-              <VisualRegistry topicSlug={lesson.slug} />
-
-              <div className="flex items-center justify-between pt-4 border-t border-[#272732]">
-                <Button
-                  variant="ghost"
-                  onClick={handlePrevStage}
-                  leftIcon={<ArrowLeft className="w-4 h-4" />}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="cyan"
-                  size="lg"
-                  onClick={handleNextStage}
-                  rightIcon={<ArrowRight className="w-5 h-5" />}
-                >
-                  Next: Parameter Controls →
-                </Button>
-              </div>
-            </Card>
-          )}
-
-          {/* STAGE 4: INTERACT (DYNAMIC CONTROL PANEL) */}
-          {activeStage === 'interact' && (
-            <div className="flex flex-col gap-6">
-              <InteractiveControlPanel topicSlug={lesson.slug} />
-
-              <div className="flex items-center justify-between p-4 rounded-2xl glass-panel border border-[#272732]">
-                <Button
-                  variant="ghost"
-                  onClick={handlePrevStage}
-                  leftIcon={<ArrowLeft className="w-4 h-4" />}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="cyan"
-                  size="lg"
-                  onClick={handleNextStage}
-                  rightIcon={<ArrowRight className="w-5 h-5" />}
-                >
-                  Next: Guided CLI Practice →
+                  {hasPractice ? 'Next: Practice & Skill Check →' : 'Next: Knowledge Check Quiz →'}
                 </Button>
               </div>
             </div>
           )}
 
-          {/* STAGE 5: PRACTICE (GUIDED CLI TERMINAL) */}
+          {/* STAGE 2: PRACTICE */}
           {activeStage === 'practice' && (
-            <div className="flex flex-col gap-6">
+            <div className="space-y-6">
+              <Card className="p-6 glass-panel border-[#272732] space-y-4">
+                <div className="flex items-center justify-between">
+                  <Badge variant="cyan">STAGE 2: PRACTICE & SKILL CHECK</Badge>
+                  <span className="text-xs font-mono text-zinc-400">Interactive Evaluation</span>
+                </div>
+                <h2 className="text-xl font-bold text-white">Self-Paced Practice & Terminal Diagnostics</h2>
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  Review scenario problems, reveal target values, and test diagnostic execution.
+                </p>
+              </Card>
+
               <GuidedPracticeTerminal
                 topicSlug={lesson.slug}
                 instructions={
                   lesson.content?.practicalActivity?.instructions ||
-                  `Run diagnostic commands in the simulated terminal below to verify configuration.`
+                  `Run diagnostic commands in the terminal to verify protocol configuration.`
                 }
               />
 
-              <div className="flex items-center justify-between p-4 rounded-2xl glass-panel border border-[#272732]">
+              <div className="flex items-center justify-between pt-4 border-t border-[#272732]">
                 <Button
                   variant="ghost"
-                  onClick={handlePrevStage}
+                  onClick={() => setActiveStage('learn')}
                   leftIcon={<ArrowLeft className="w-4 h-4" />}
                 >
-                  Previous
+                  Back to Theory
                 </Button>
                 <Button
                   variant="cyan"
-                  size="lg"
-                  onClick={handleNextStage}
-                  rightIcon={<ArrowRight className="w-5 h-5" />}
-                >
-                  Next: Troubleshooting Scenario →
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* STAGE 6: BREAK / FIX (TROUBLESHOOTING) */}
-          {activeStage === 'breakfix' && (
-            <div className="flex flex-col gap-6">
-              <BreakFixScenarioCard topicSlug={lesson.slug} />
-
-              <div className="flex items-center justify-between p-4 rounded-2xl glass-panel border border-[#272732]">
-                <Button
-                  variant="ghost"
-                  onClick={handlePrevStage}
-                  leftIcon={<ArrowLeft className="w-4 h-4" />}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="cyan"
-                  size="lg"
-                  onClick={handleNextStage}
-                  rightIcon={<ArrowRight className="w-5 h-5" />}
+                  size="md"
+                  onClick={() => setActiveStage('quiz')}
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
                   Next: Knowledge Check Quiz →
                 </Button>
@@ -510,9 +379,9 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
             </div>
           )}
 
-          {/* STAGE 7: QUIZ (CHALLENGE-FOCUSED KNOWLEDGE CHECK) */}
+          {/* STAGE 3: QUIZ */}
           {activeStage === 'quiz' && (
-            <div className="flex flex-col gap-6">
+            <div className="space-y-6">
               {lesson.quiz ? (
                 <Quiz
                   quiz={lesson.quiz}
@@ -520,12 +389,12 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                   onContinueLesson={() => setActiveStage('mastery')}
                 />
               ) : (
-                <Card className="p-8 text-center space-y-4 glass-panel border-[#272732]">
-                  <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-                  <h3 className="text-xl font-bold text-white">
+                <Card className="p-6 text-center space-y-3 glass-panel border-[#272732]">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
+                  <h3 className="text-lg font-bold text-white">
                     No Quiz Required for this Lesson
                   </h3>
-                  <p className="text-xs text-zinc-400 max-w-sm mx-auto">
+                  <p className="text-xs text-zinc-300 max-w-sm mx-auto">
                     You have reviewed all technical concepts and can proceed directly to mastery summary.
                   </p>
                   <Button variant="cyan" onClick={() => setActiveStage('mastery')}>
@@ -536,27 +405,27 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
             </div>
           )}
 
-          {/* STAGE 8: MASTERY (SUMMARY & NEXT LESSON NAVIGATION) */}
+          {/* STAGE 4: MASTERY & COMPLETION */}
           {activeStage === 'mastery' && (
-            <Card className="p-8 glass-panel-glow border-[#00f0ff]/30 text-center flex flex-col items-center gap-6">
-              <div className="w-20 h-20 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center shadow-glow-emerald">
-                <Award className="w-10 h-10" />
+            <Card className="p-8 glass-panel border-[#00f0ff]/40 text-center flex flex-col items-center gap-6">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center">
+                <Award className="w-8 h-8" />
               </div>
 
               <div>
-                <Badge variant="emerald" className="mb-2">
-                  STAGE 8: LESSON MASTERY ACHIEVED
+                <Badge variant="emerald" className="mb-2 font-mono">
+                  LESSON MASTERY ACHIEVED
                 </Badge>
-                <h2 className="text-3xl font-extrabold text-white mb-2">
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
                   Lesson Complete
                 </h2>
-                <p className="text-sm text-zinc-400 max-w-md mx-auto">
-                  You have successfully completed the technical evaluation for{' '}
+                <p className="text-xs sm:text-sm text-zinc-300 max-w-md mx-auto">
+                  You have completed the technical evaluation for{' '}
                   <strong className="text-white">{lesson.title}</strong>.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-4 pt-4 border-t border-[#272732] w-full justify-center">
+              <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-[#272732] w-full justify-center">
                 <Link href={`/courses/${lesson.course.slug}`}>
                   <Button variant="secondary" leftIcon={<BookOpen className="w-4 h-4" />}>
                     Course Syllabus
@@ -567,7 +436,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                   <Link href={`/courses/${lesson.course.slug}/lessons/${resolvedNextLessonSlug}`}>
                     <Button
                       variant="cyan"
-                      size="lg"
+                      size="md"
                       rightIcon={<ArrowRight className="w-4 h-4" />}
                     >
                       Continue to Next Lesson →
@@ -577,7 +446,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                   <Link href={`/courses/${lesson.course.slug}`}>
                     <Button
                       variant="cyan"
-                      size="lg"
+                      size="md"
                       rightIcon={<CheckCircle2 className="w-4 h-4" />}
                     >
                       Module Complete ✓

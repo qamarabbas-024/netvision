@@ -297,50 +297,40 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
       : [];
 
   return (
-    <div className="flex flex-col gap-8 text-[#f4f4f5] max-w-5xl mx-auto">
-      {/* 1. LESSON HEADER & METADATA */}
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <Badge variant="cyan">CURRICULUM TOPIC</Badge>
-          <span className="text-xs font-mono text-zinc-400">
-            {lesson.durationMinutes || 15} Min Estimated Time
-          </span>
-          {lesson.course?.level && (
-            <Badge variant="purple">{lesson.course.level}</Badge>
-          )}
-        </div>
-
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+    <div className="flex flex-col gap-6 text-[#f4f4f5] max-w-5xl mx-auto font-sans">
+      {/* 1. LESSON TITLE & PURPOSE */}
+      <div className="space-y-3">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-sans">
           {lesson.title}
         </h1>
 
         {(content.shortExplanation || content.whyItMatters || content.step3_whyItMatters) && (
-          <div className="p-4 rounded-2xl bg-[#00f0ff]/5 border border-[#00f0ff]/20 text-sm text-zinc-300 leading-relaxed flex items-start gap-3">
-            <Info className="w-5 h-5 text-[#00f0ff] shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-[#00f0ff]/5 border border-[#00f0ff]/20 text-xs sm:text-sm text-zinc-300 leading-relaxed flex items-start gap-3">
+            <Info className="w-4 h-4 text-[#00f0ff] shrink-0 mt-0.5" />
             <div>
-              <strong className="text-white font-bold block mb-1">Why It Matters:</strong>
+              <strong className="text-white font-bold block mb-0.5">Why It Matters:</strong>
               {content.whyItMatters || content.step3_whyItMatters || content.shortExplanation}
             </div>
           </div>
         )}
       </div>
 
-      {/* 2. LEARNING OBJECTIVES (Rendered only when defined) */}
+      {/* 2. LEARNING OBJECTIVES */}
       {objectivesList.length > 0 && (
-        <Card className="p-6 glass-panel border-[#272732] space-y-4">
+        <Card className="p-4 sm:p-5 glass-panel border-[#272732] space-y-3">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-[#00f0ff]" />
+            <CheckCircle2 className="w-4 h-4 text-[#00f0ff]" />
             <h2 className="text-xs font-mono font-bold text-white uppercase tracking-wider">
               Learning Objectives
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {objectivesList.map((obj, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-start gap-2.5 text-xs text-zinc-300"
+                className="p-2.5 rounded-lg bg-white/5 border border-white/10 flex items-start gap-2 text-xs text-zinc-300"
               >
-                <span className="w-5 h-5 rounded-md bg-[#00f0ff]/10 text-[#00f0ff] font-mono font-bold flex items-center justify-center text-[10px] shrink-0">
+                <span className="w-4 h-4 rounded bg-[#00f0ff]/10 text-[#00f0ff] font-mono font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">
                   {idx + 1}
                 </span>
                 <span className="leading-snug">{obj}</span>
@@ -350,43 +340,43 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </Card>
       )}
 
-      {/* 3. INTUITIVE ANALOGY (Rendered only if defined) */}
+      {/* 3. INTUITIVE ANALOGY */}
       {content.analogy && (
-        <Card className="p-6 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 border border-purple-500/30 rounded-3xl space-y-3">
+        <Card className="p-4 sm:p-5 bg-purple-500/10 border border-purple-500/30 rounded-xl space-y-2">
           <div className="flex items-center gap-2 text-purple-400">
-            <Sparkles className="w-5 h-5" />
+            <Sparkles className="w-4 h-4" />
             <h3 className="text-xs font-mono font-bold uppercase tracking-wider">
               Intuitive Mental Model
             </h3>
           </div>
-          <p className="text-sm text-purple-200 leading-relaxed italic">
+          <p className="text-xs sm:text-sm text-purple-200 leading-relaxed italic">
             "{content.analogy}"
           </p>
         </Card>
       )}
 
-      {/* 4. INTERACTIVE VISUALIZER (Rendered cleanly via VisualRegistry) */}
-      <div className="space-y-3">
+      {/* 4. INTERACTIVE PROTOCOL VISUALIZER */}
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white tracking-tight flex items-center gap-2">
-            <Layers className="w-5 h-5 text-[#00f0ff]" />
-            Interactive Protocol Architecture & Visual Flow
+          <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2 font-sans">
+            <Layers className="w-4 h-4 text-[#00f0ff]" />
+            Interactive Visual Architecture
           </h2>
         </div>
         <VisualRegistry topicSlug={lesson.slug} />
       </div>
 
-      {/* 5. CORE EXPLANATION & CONCEPTS BREAKDOWN */}
+      {/* 5. CORE CONCEPTS BREAKDOWN */}
       {conceptsList.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-white tracking-tight">
+        <div className="space-y-3">
+          <h2 className="text-base sm:text-lg font-bold text-white tracking-tight font-sans">
             Technical Architecture & Deep Concepts
           </h2>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {conceptsList.map((concept: any, idx: number) => (
-              <Card key={concept.id || idx} className="p-6 glass-panel border-[#272732] space-y-3">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <Card key={concept.id || idx} className="p-4 sm:p-5 glass-panel border-[#272732] space-y-2.5">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2 font-sans">
                   <span className="font-mono text-xs text-[#00f0ff] font-bold">
                     0{idx + 1}.
                   </span>
@@ -394,19 +384,19 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
                 </h3>
 
                 {concept.summary && concept.summary !== concept.explanation && (
-                  <p className="text-xs font-semibold text-[#00f0ff]/90 bg-[#00f0ff]/5 p-3 rounded-xl border border-[#00f0ff]/20">
+                  <p className="text-xs font-semibold text-[#00f0ff] bg-[#00f0ff]/5 p-2.5 rounded-lg border border-[#00f0ff]/20">
                     {concept.summary}
                   </p>
                 )}
 
                 {concept.explanation && (
-                  <div className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+                  <div className="text-xs sm:text-sm text-zinc-300 leading-relaxed whitespace-pre-line font-sans">
                     {concept.explanation}
                   </div>
                 )}
 
                 {concept.technicalDetails && (
-                  <div className="mt-3 p-4 rounded-xl bg-black/40 border border-zinc-800 text-xs font-mono text-zinc-400 space-y-1">
+                  <div className="mt-2 p-3 rounded-lg bg-black/40 border border-zinc-800 text-[11px] font-mono text-zinc-400 space-y-1">
                     <span className="text-amber-400 font-bold block uppercase text-[10px]">
                       TECHNICAL SPECIFICATION
                     </span>
@@ -419,24 +409,24 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </div>
       )}
 
-      {/* 6. HOW IT WORKS / PROCESS STEPS (Rendered only when defined) */}
+      {/* 6. HOW IT WORKS STEPS */}
       {howItWorksSteps.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-white tracking-tight">
+        <div className="space-y-3">
+          <h2 className="text-base font-bold text-white tracking-tight font-sans">
             Step-by-Step Protocol Operation
           </h2>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {howItWorksSteps.map((step: any) => (
               <div
                 key={step.stepNumber}
-                className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-4"
+                className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex items-start gap-3"
               >
-                <span className="w-8 h-8 rounded-xl bg-[#00f0ff]/20 text-[#00f0ff] font-mono font-bold flex items-center justify-center text-sm shrink-0">
+                <span className="w-6 h-6 rounded-lg bg-[#00f0ff]/20 text-[#00f0ff] font-mono font-bold flex items-center justify-center text-xs shrink-0 mt-0.5">
                   {step.stepNumber}
                 </span>
-                <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-white">{step.title}</h4>
-                  <p className="text-xs text-zinc-300 leading-relaxed">{step.action}</p>
+                <div className="space-y-0.5">
+                  <h4 className="text-xs sm:text-sm font-bold text-white font-sans">{step.title}</h4>
+                  <p className="text-xs text-zinc-300 leading-relaxed font-sans">{step.action}</p>
                 </div>
               </div>
             ))}
@@ -444,19 +434,19 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </div>
       )}
 
-      {/* 7. WORKED ENGINEERING EXAMPLES (Rendered only when defined) */}
+      {/* 7. WORKED ENGINEERING EXAMPLES */}
       {examplesList.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-white tracking-tight">
+        <div className="space-y-3">
+          <h2 className="text-base font-bold text-white tracking-tight font-sans">
             Worked Engineering Scenarios & Solutions
           </h2>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {examplesList.map((ex: any) => (
-              <Card key={ex.id} className="p-6 glass-panel border-[#272732] space-y-4">
-                <h3 className="text-base font-bold text-white">{ex.title || 'Worked Scenario'}</h3>
+              <Card key={ex.id} className="p-4 sm:p-5 glass-panel border-[#272732] space-y-3">
+                <h3 className="text-sm font-bold text-white font-sans">{ex.title || 'Worked Scenario'}</h3>
                 {ex.scenario && (
-                  <div className="p-4 rounded-xl bg-black/40 border border-zinc-800 text-xs text-zinc-300">
+                  <div className="p-3 rounded-lg bg-black/40 border border-zinc-800 text-xs text-zinc-300 font-sans">
                     <strong className="text-[#00f0ff] block mb-1 font-mono text-[10px] uppercase">
                       PROBLEM STATEMENT:
                     </strong>
@@ -464,9 +454,9 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
                   </div>
                 )}
                 {ex.explanation && (
-                  <div className="p-4 rounded-xl bg-[#00f0ff]/5 border border-[#00f0ff]/20 text-xs text-zinc-300">
+                  <div className="p-3 rounded-lg bg-[#00f0ff]/5 border border-[#00f0ff]/20 text-xs text-zinc-300 font-sans">
                     <strong className="text-[#00f0ff] block mb-1 font-mono text-[10px] uppercase">
-                      STEP-BY-STEP ANALYSIS & RESOLUTION:
+                      SOLUTION ANALYSIS:
                     </strong>
                     <p className="whitespace-pre-line">{ex.explanation}</p>
                   </div>
@@ -477,25 +467,25 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </div>
       )}
 
-      {/* 8. CLI COMMAND SPECIFICATIONS (Rendered ONLY when commands exist) */}
+      {/* 8. CLI COMMAND SPECIFICATIONS */}
       {commandsList.length > 0 && (
-        <div className="space-y-4">
-          <div className="border-t border-[#272732] pt-6">
-            <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <Terminal className="w-5 h-5 text-[#00f0ff]" />
-              Relevant CLI Commands & Diagnostic Output
+        <div className="space-y-3">
+          <div className="border-t border-[#272732] pt-4">
+            <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2 font-sans">
+              <Terminal className="w-4 h-4 text-[#00f0ff]" />
+              CLI Diagnostic Commands & Output
             </h2>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {commandsList.map((cmd: any) => (
-              <Card key={cmd.id} className="p-6 glass-panel border-[#272732] space-y-3">
-                <p className="text-xs text-zinc-300 font-medium">{cmd.description}</p>
-                <div className="p-3.5 rounded-xl bg-[#09090b] border border-[#272732] font-mono text-xs text-[#00f0ff]">
+              <Card key={cmd.id} className="p-4 glass-panel border-[#272732] space-y-2">
+                <p className="text-xs text-zinc-300 font-medium font-sans">{cmd.description}</p>
+                <div className="p-2.5 rounded-lg bg-[#09090b] border border-[#272732] font-mono text-xs text-[#00f0ff]">
                   <code>{cmd.command}</code>
                 </div>
                 {cmd.exampleOutput && (
-                  <pre className="p-4 rounded-xl bg-black border border-zinc-800 font-mono text-xs text-emerald-400 overflow-x-auto whitespace-pre-wrap">
+                  <pre className="p-3 rounded-lg bg-black border border-zinc-800 font-mono text-[11px] text-emerald-400 overflow-x-auto whitespace-pre-wrap">
                     {cmd.exampleOutput}
                   </pre>
                 )}
@@ -505,26 +495,26 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </div>
       )}
 
-      {/* 9. TROUBLESHOOTING GUIDE (Rendered ONLY when defined) */}
+      {/* 9. TROUBLESHOOTING GUIDE */}
       {troubleshootingList.length > 0 && (
-        <div className="space-y-4">
-          <div className="border-t border-[#272732] pt-6">
-            <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <Wrench className="w-5 h-5 text-amber-400" />
-              Real-World Troubleshooting & Diagnostics
+        <div className="space-y-3">
+          <div className="border-t border-[#272732] pt-4">
+            <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2 font-sans">
+              <Wrench className="w-4 h-4 text-amber-400" />
+              Real-World Diagnostics & Remediation
             </h2>
           </div>
 
           <div className="space-y-3">
             {troubleshootingList.map((item: any, idx: number) => (
-              <Card key={idx} className="p-5 bg-amber-500/5 border border-amber-500/20 rounded-2xl space-y-3">
-                <h3 className="text-sm font-bold text-amber-300">
+              <Card key={idx} className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl space-y-2">
+                <h3 className="text-xs sm:text-sm font-bold text-amber-300 font-sans">
                   Symptom: {item.symptom}
                 </h3>
                 {item.possibleCauses && item.possibleCauses.length > 0 && (
-                  <div className="text-xs text-zinc-300">
-                    <strong className="text-zinc-400 block mb-1">Possible Causes:</strong>
-                    <ul className="list-disc list-inside space-y-0.5 text-zinc-400">
+                  <div className="text-xs text-zinc-300 font-sans">
+                    <strong className="text-zinc-400 block mb-0.5">Possible Causes:</strong>
+                    <ul className="list-disc list-inside space-y-0.5 text-zinc-400 text-[11px]">
                       {item.possibleCauses.map((c: string, i: number) => (
                         <li key={i}>{c}</li>
                       ))}
@@ -532,8 +522,8 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
                   </div>
                 )}
                 {item.remediation && (
-                  <div className="p-3 rounded-xl bg-black/40 border border-amber-500/20 text-xs text-emerald-300">
-                    <strong className="text-amber-400 block mb-0.5">Remediation:</strong>
+                  <div className="p-2.5 rounded-lg bg-black/40 border border-amber-500/20 text-xs text-emerald-300 font-sans">
+                    <strong className="text-amber-400 block mb-0.5 font-mono text-[10px]">REMEDIATION:</strong>
                     {item.remediation}
                   </div>
                 )}
@@ -543,25 +533,25 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </div>
       )}
 
-      {/* 10. COMMON MISTAKES (Rendered ONLY when defined) */}
+      {/* 10. COMMON MISTAKES */}
       {mistakesList.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center gap-2 text-amber-400">
-            <AlertTriangle className="w-5 h-5" />
-            <h2 className="text-lg font-bold text-white tracking-tight">
-              Common Technical Mistakes to Avoid
+            <AlertTriangle className="w-4 h-4" />
+            <h2 className="text-base font-bold text-white tracking-tight font-sans">
+              Common Mistakes to Avoid
             </h2>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {mistakesList.map((m: any) => (
-              <Card key={m.id} className="p-5 bg-amber-500/5 border border-amber-500/20 rounded-2xl space-y-2">
-                <h3 className="text-sm font-bold text-amber-300">Mistake: {m.mistake}</h3>
-                <p className="text-xs text-zinc-300">
+              <Card key={m.id} className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl space-y-1.5">
+                <h3 className="text-xs sm:text-sm font-bold text-amber-300 font-sans">Mistake: {m.mistake}</h3>
+                <p className="text-xs text-zinc-300 font-sans">
                   <strong className="text-rose-400 font-mono">Why Wrong: </strong>
                   {m.whyWrong}
                 </p>
-                <p className="text-xs text-emerald-300">
+                <p className="text-xs text-emerald-300 font-sans">
                   <strong className="text-emerald-400 font-mono">Correct Approach: </strong>
                   {m.correctApproach}
                 </p>
@@ -571,16 +561,16 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </div>
       )}
 
-      {/* 11. SECURITY PERSPECTIVE (Rendered ONLY when defined) */}
+      {/* 11. SECURITY PERSPECTIVE */}
       {securityItem && (
-        <Card className="p-6 bg-rose-500/5 border border-rose-500/20 rounded-2xl space-y-3">
+        <Card className="p-4 sm:p-5 bg-rose-500/5 border border-rose-500/20 rounded-xl space-y-2">
           <div className="flex items-center gap-2 text-rose-400">
-            <Shield className="w-5 h-5" />
+            <Shield className="w-4 h-4" />
             <h3 className="text-xs font-mono font-bold uppercase tracking-wider">
               Security Considerations
             </h3>
           </div>
-          <div className="space-y-2 text-xs text-zinc-300">
+          <div className="space-y-1 text-xs text-zinc-300 font-sans">
             <p>
               <strong className="text-rose-300 font-semibold">Threat: </strong>
               {securityItem.threatOrVulnerability}
@@ -593,16 +583,16 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </Card>
       )}
 
-      {/* 12. GUIDED SELF-PACED PRACTICE (Rendered when practice is defined) */}
+      {/* 12. GUIDED SELF-PACED PRACTICE */}
       {practiceList.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <HelpCircle className="w-5 h-5 text-[#00f0ff]" />
+            <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2 font-sans">
+              <HelpCircle className="w-4 h-4 text-[#00f0ff]" />
               Self-Paced Practice & Skill Check
             </h2>
             <span className="text-xs font-mono text-zinc-400">
-              {practiceList.length} Practice Questions
+              {practiceList.length} Questions
             </span>
           </div>
 
@@ -614,17 +604,17 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </div>
       )}
 
-      {/* 13. RECAP & KEY TAKEAWAYS (Rendered only when defined) */}
+      {/* 13. RECAP & KEY TAKEAWAYS */}
       {recapsList.length > 0 && (
-        <Card className="p-6 glass-panel border-[#00f0ff]/30 rounded-3xl space-y-4">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-[#00f0ff]" />
+        <Card className="p-5 glass-panel border-[#00f0ff]/30 rounded-xl space-y-3">
+          <h2 className="text-base font-bold text-white flex items-center gap-2 font-sans">
+            <BookOpen className="w-4 h-4 text-[#00f0ff]" />
             Lesson Recap & Key Takeaways
           </h2>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {recapsList.map((r: any, idx: number) => (
-              <div key={r.id || idx} className="flex items-start gap-2.5 text-xs text-zinc-300">
-                <CheckCircle2 className="w-4 h-4 text-[#00f0ff] shrink-0 mt-0.5" />
+              <div key={r.id || idx} className="flex items-start gap-2 text-xs text-zinc-300 font-sans">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#00f0ff] shrink-0 mt-0.5" />
                 <span>{r.point || r.summary || r.title}</span>
               </div>
             ))}
@@ -632,25 +622,25 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         </Card>
       )}
 
-      {/* 13. PRACTICAL LAB TRANSITION (Rendered ONLY when a lab exists) */}
+      {/* 14. PRACTICAL LAB TRANSITION (ONLY IF LAB EXISTS) */}
       {labItem && (
-        <Card className="p-8 glass-panel-glow border-[#00f0ff]/40 rounded-3xl space-y-6 bg-gradient-to-b from-[#00f0ff]/5 to-transparent">
+        <Card className="p-6 glass-panel border-[#00f0ff]/40 rounded-xl space-y-4">
           <div className="flex items-center justify-between">
             <Badge variant="cyan">PRACTICAL LAB</Badge>
-            <span className="text-xs font-mono text-zinc-400">Simulated Practice</span>
+            <span className="text-xs font-mono text-zinc-400">Interactive Terminal Lab</span>
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold text-white mb-2">{labItem.title}</h2>
-            <p className="text-xs text-zinc-400 max-w-xl">{labItem.instructions}</p>
+            <h2 className="text-lg font-bold text-white mb-1 font-sans">{labItem.title}</h2>
+            <p className="text-xs text-zinc-300 font-sans">{labItem.instructions}</p>
           </div>
 
-          <div className="flex items-center justify-end pt-4 border-t border-[#272732]">
+          <div className="flex items-center justify-end pt-3 border-t border-[#272732]">
             <Button
               variant="cyan"
-              size="lg"
+              size="md"
               onClick={onStartLab}
-              rightIcon={<ArrowRight className="w-5 h-5" />}
+              rightIcon={<ArrowRight className="w-4 h-4" />}
             >
               Start Lab →
             </Button>
@@ -663,9 +653,9 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
         <div className="flex justify-end pt-4 border-t border-[#272732]">
           <Button
             variant="cyan"
-            size="lg"
+            size="md"
             onClick={onProceedToQuiz}
-            rightIcon={<ArrowRight className="w-5 h-5" />}
+            rightIcon={<ArrowRight className="w-4 h-4" />}
           >
             Proceed to Knowledge Check →
           </Button>
