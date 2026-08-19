@@ -132,10 +132,20 @@ async function runProductCorrectnessTests() {
       const courseStarted = await topicsService.getCourseBySlug(course!.slug, { userId: userC.id });
       assert(courseStarted.modules[0].lessons[0].status === 'IN_PROGRESS', '2.3 Started lesson status is IN_PROGRESS');
 
-      // Complete lesson 1 (No lab requirement if no lab) -> COMPLETED
-      await topicsService.markLessonComplete(lesson1.id, { userId: userC.id });
+      // Complete lesson 1 -> COMPLETED
+      const initialCompleteRes = await topicsService.markLessonComplete(lesson1.id, { userId: userC.id });
+      const originalCompletedAt = initialCompleteRes.completedAt;
+
+      // Re-complete lesson 1 -> Idempotent check
+      const secondCompleteRes = await topicsService.markLessonComplete(lesson1.id, { userId: userC.id });
+      assert(secondCompleteRes.completed === true, '2.4a Re-completing lesson stays COMPLETED');
+      assert(
+        new Date(secondCompleteRes.completedAt).getTime() === new Date(originalCompletedAt).getTime(),
+        '2.4b Re-completing lesson preserves original completedAt timestamp'
+      );
+
       const courseCompleted1 = await topicsService.getCourseBySlug(course!.slug, { userId: userC.id });
-      assert(courseCompleted1.modules[0].lessons[0].status === 'COMPLETED', '2.4 Completed lesson status is COMPLETED');
+      assert(courseCompleted1.modules[0].lessons[0].status === 'COMPLETED', '2.4c Completed lesson status is COMPLETED');
       assert(courseCompleted1.completedLessons >= 1, '2.5 completedLessons count incremented');
 
       // Complete all lessons in module -> 100% module progress
@@ -147,13 +157,15 @@ async function runProductCorrectnessTests() {
       assert(courseModFull.modules[0].progressPercent === 100, '2.6 Completed module reaches exactly 100%');
       assert(courseModFull.modules[0].status === 'COMPLETED', '2.7 Completed module status is COMPLETED');
 
-      // Verify dashboard metrics: XP from achievements, streak >= 1
+      // Verify dashboard metrics: XP from achievements, streak >= 1, currentCourse match
       const dashMetrics = await topicsService.getStudentDashboardMetrics({ userId: userC.id });
       assert(dashMetrics.completedLessons >= firstMod.lessons.length, '2.8 Dashboard completedLessons accurate');
       assert(dashMetrics.studyStreak >= 1, '2.9 Dashboard study streak accurately calculated (streak >= 1)');
-      assert(dashMetrics.totalXp >= 50, '2.10 Dashboard XP accurately awarded from FIRST_STEP achievement');
+      assert(dashMetrics.totalXp === 50, '2.10 Dashboard XP accurately awarded exactly once (50 XP for FIRST_STEP)');
+      assert(dashMetrics.currentCourse !== null, '2.11 Dashboard currentCourse populated');
+      assert(dashMetrics.currentCourse?.slug === course!.slug, '2.12 Dashboard currentCourse matches active course slug');
 
-      console.log('  ✓ P0 #2 Passed: Canonical completion states, 100% module calculation, XP and streak verified.');
+      console.log('  ✓ P0 #2 Passed: Canonical completion states, 100% module calculation, XP, streak, and dashboard sync verified.');
       passedTests++;
     }
 

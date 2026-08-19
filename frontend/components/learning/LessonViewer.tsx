@@ -36,6 +36,7 @@ export interface LessonViewerProps {
     type: string;
     durationMinutes: number;
     isCompleted?: boolean;
+    completed?: boolean;
     score?: number | null;
     course: {
       id: string;
@@ -88,11 +89,51 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
       ? (initialStage as StageType)
       : 'learn';
 
+  const isInitiallyCompleted = lesson.isCompleted ?? lesson.completed ?? false;
   const [activeStage, setActiveStage] = useState<StageType>(defaultStage);
   const [completedStages, setCompletedStages] = useState<Set<string>>(
-    new Set(lesson.isCompleted ? stages : ['learn'])
+    new Set(isInitiallyCompleted ? stages : ['learn'])
   );
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
+
+  const resolvedNextLessonSlug =
+    nextLessonSlug ||
+    (() => {
+      if (!lesson.course?.modules) return undefined;
+      const allL: any[] = [];
+      lesson.course.modules.forEach((mod: any) => {
+        if (mod.lessons) {
+          mod.lessons.forEach((l: any) => allL.push(l));
+        }
+      });
+      const currentIndex = allL.findIndex((l) => l.slug === lesson.slug);
+      if (currentIndex !== -1 && currentIndex < allL.length - 1) {
+        return allL[currentIndex + 1].slug;
+      }
+      return undefined;
+    })();
+
+  const triggerLessonCompletion = async () => {
+    try {
+      if (!isAuthenticated) {
+        GuestProgressService.markLessonCompleted(lesson.id, lesson.slug);
+      } else {
+        await completeLessonApi(lesson.id);
+      }
+    } catch (e) {
+      console.warn('Lesson completion update failed:', e);
+    }
+    if (onMarkComplete) {
+      onMarkComplete();
+    }
+  };
+
+  useEffect(() => {
+    if (activeStage === 'mastery') {
+      setCompletedStages(new Set(stages));
+      triggerLessonCompletion();
+    }
+  }, [activeStage]);
 
   useEffect(() => {
     // Check bookmark status from local guest state and server state
@@ -121,7 +162,8 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
     markStageDone(activeStage);
     const currentIndex = stages.indexOf(activeStage);
     if (currentIndex < stages.length - 1) {
-      setActiveStage(stages[currentIndex + 1]);
+      const nextStg = stages[currentIndex + 1];
+      setActiveStage(nextStg);
     }
   };
 
@@ -135,18 +177,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
   const handleQuizComplete = async (score: number, passed: boolean) => {
     markStageDone('quiz');
     if (passed) {
-      try {
-        if (!isAuthenticated) {
-          GuestProgressService.markLessonCompleted(lesson.id, lesson.slug, score);
-        } else {
-          await completeLessonApi(lesson.id);
-        }
-      } catch (e) {
-        console.warn('Lesson completion update failed:', e);
-      }
-      if (onMarkComplete) {
-        onMarkComplete();
-      }
+      await triggerLessonCompletion();
     }
   };
 
@@ -532,14 +563,14 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                   </Button>
                 </Link>
 
-                {nextLessonSlug ? (
-                  <Link href={`/courses/${lesson.course.slug}/lessons/${nextLessonSlug}`}>
+                {resolvedNextLessonSlug ? (
+                  <Link href={`/courses/${lesson.course.slug}/lessons/${resolvedNextLessonSlug}`}>
                     <Button
                       variant="cyan"
                       size="lg"
                       rightIcon={<ArrowRight className="w-4 h-4" />}
                     >
-                      Next Lesson →
+                      Continue to Next Lesson →
                     </Button>
                   </Link>
                 ) : (
@@ -549,7 +580,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                       size="lg"
                       rightIcon={<CheckCircle2 className="w-4 h-4" />}
                     >
-                      Finish / Module Complete
+                      Module Complete ✓
                     </Button>
                   </Link>
                 )}

@@ -86,6 +86,14 @@ export interface StudentDashboardMetrics {
   quizAverageScore: number;
   certificatesEarned: number;
   completedCoursesCount: number;
+  currentCourse?: {
+    title: string;
+    slug: string;
+    completedLessons: number;
+    totalLessons: number;
+    progressPercent: number;
+    nextLessonSlug: string;
+  } | null;
   badges: {
     earned: number;
     total: number;

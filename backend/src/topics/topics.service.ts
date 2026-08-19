@@ -997,7 +997,7 @@ export class TopicsService {
             masteryScore: currentBest,
             quizAttemptsCount: currentAttempts,
             weakConceptsJson: weakConcepts,
-            completedAt: isCompleted ? new Date() : existingProgress.completedAt,
+            completedAt: isCompleted ? (existingProgress.completedAt || new Date()) : existingProgress.completedAt,
           },
         });
       } else {
@@ -1373,6 +1373,59 @@ export class TopicsService {
       completedAt: p.completedAt,
     }));
 
+    // 9. Current Active Course Dynamic Calculation
+    let currentCourse: {
+      title: string;
+      slug: string;
+      completedLessons: number;
+      totalLessons: number;
+      progressPercent: number;
+      nextLessonSlug: string;
+    } | null = null;
+
+    if (publishedCourses.length > 0) {
+      const courseSummaries = await Promise.all(
+        publishedCourses.map(async (c) => {
+          const detail = await this.prisma.course.findUnique({
+            where: { id: c.id },
+            include: {
+              modules: {
+                orderBy: { order: 'asc' },
+                include: { lessons: { orderBy: { order: 'asc' } } },
+              },
+            },
+          });
+          if (!detail) return null;
+          const allL = detail.modules.flatMap((m) => m.lessons);
+          const cCount = allL.filter((l) => {
+            const p = progressList.find((prog) => prog.lessonId === l.id);
+            return p?.completed ?? false;
+          }).length;
+          const pPercent = allL.length > 0 ? Math.round((cCount / allL.length) * 100) : 0;
+          const nextL = allL.find((l) => {
+            const p = progressList.find((prog) => prog.lessonId === l.id);
+            return !p?.completed;
+          }) || allL[allL.length - 1];
+
+          return {
+            title: detail.title,
+            slug: detail.slug,
+            completedLessons: cCount,
+            totalLessons: allL.length,
+            progressPercent: pPercent,
+            nextLessonSlug: nextL?.slug || detail.slug,
+          };
+        })
+      );
+
+      const valid = courseSummaries.filter((cs): cs is NonNullable<typeof cs> => cs !== null);
+      currentCourse =
+        valid.find((cs) => cs.progressPercent > 0 && cs.progressPercent < 100) ||
+        valid.find((cs) => cs.completedLessons > 0) ||
+        valid[0] ||
+        null;
+    }
+
     return {
       totalCourses,
       totalLessons,
@@ -1384,6 +1437,7 @@ export class TopicsService {
       quizAverageScore,
       certificatesEarned,
       completedCoursesCount,
+      currentCourse,
       badges: {
         earned: unlockedMap.size,
         total: activeAchievements.length,
