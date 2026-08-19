@@ -9,7 +9,10 @@ import { Badge } from '@/components/ui/Badge';
 import { Award, Flame, Trophy, User, ShieldCheck, CheckCircle2, Lock, Zap } from 'lucide-react';
 import { getMyAchievementsApi, getUserProgressApi, AchievementItem } from '@/lib/api';
 
+import { useAuthStore } from '@/stores/authStore';
+
 export default function AchievementsPage() {
+  const { user, isAuthenticated } = useAuthStore();
   const [achievements, setAchievements] = useState<AchievementItem[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,12 +38,9 @@ export default function AchievementsPage() {
   const totalCount = achievements.length || 10;
   const totalPoints = achievements.filter((a) => a.unlocked).reduce((sum, a) => sum + a.points, 0);
 
-  const leaderboard = [
-    { rank: 1, name: 'Jordan Blake', xp: '4,850 XP', streak: '14 Days', level: 'Lvl 8' },
-    { rank: 2, name: 'Elena Rostova', xp: '4,200 XP', streak: '12 Days', level: 'Lvl 7' },
-    { rank: 3, name: 'Marcus Vance', xp: '3,950 XP', streak: '9 Days', level: 'Lvl 6' },
-    { rank: 4, name: 'Sarah Chen', xp: '3,600 XP', streak: '7 Days', level: 'Lvl 6' },
-  ];
+  const currentLearnerName = user?.fullName || user?.username || (isAuthenticated ? 'Authenticated Learner' : 'Guest Learner');
+  const currentLearnerStreak = `${userStats?.studyStreak ?? 0} ${userStats?.studyStreak === 1 ? 'Day' : 'Days'}`;
+  const currentLearnerXp = `${totalPoints} XP`;
 
   return (
     <ProtectedRoute>
@@ -143,43 +143,42 @@ export default function AchievementsPage() {
                 </div>
               </div>
 
-              {/* Global Leaderboard Table */}
+              {/* Personal Learner Standing & Metrics */}
               <Card className="p-6">
                 <div className="flex items-center gap-2 mb-6">
                   <Trophy className="w-6 h-6 text-amber-400" />
-                  <h2 className="text-xl font-bold text-white">Global Learner Standings</h2>
+                  <h2 className="text-xl font-bold text-white">Your Learner Standing</h2>
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  {leaderboard.map((u) => (
-                    <div
-                      key={u.rank}
-                      className={`p-4 rounded-xl border flex items-center justify-between ${
-                        u.rank === 1 ? 'bg-[#00f0ff]/10 border-[#00f0ff]/40' : 'bg-[#181820] border-[#272732]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <span className={`w-8 h-8 rounded-full flex items-center justify-center font-mono font-bold text-xs ${u.rank === 1 ? 'bg-amber-400 text-black' : 'bg-zinc-800 text-zinc-400'}`}>
-                          #{u.rank}
-                        </span>
-                        <div className="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center text-white text-xs font-bold">
-                          <User className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-white">{u.name}</h4>
-                          <span className="text-xs text-zinc-500 font-mono">{u.level}</span>
-                        </div>
+                  <div className="p-4 rounded-xl border bg-[#00f0ff]/10 border-[#00f0ff]/40 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <span className="w-8 h-8 rounded-full flex items-center justify-center font-mono font-bold text-xs bg-amber-400 text-black">
+                        ★
+                      </span>
+                      <div className="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                        <User className="w-4 h-4" />
                       </div>
-
-                      <div className="flex items-center gap-6 font-mono text-xs">
-                        <span className="text-amber-400 flex items-center gap-1">
-                          <Flame className="w-4 h-4 fill-amber-400" /> {u.streak}
+                      <div>
+                        <h4 className="text-sm font-bold text-white">{currentLearnerName}</h4>
+                        <span className="text-xs text-zinc-500 font-mono">
+                          {isAuthenticated ? (user?.role === 'ADMIN' ? 'Administrator' : 'Active Learner') : 'Guest Session'}
                         </span>
-                        <span className="text-[#00f0ff] font-bold">{u.xp}</span>
                       </div>
                     </div>
-                  ))}
+
+                    <div className="flex items-center gap-6 font-mono text-xs">
+                      <span className="text-amber-400 flex items-center gap-1">
+                        <Flame className="w-4 h-4 fill-amber-400" /> {currentLearnerStreak}
+                      </span>
+                      <span className="text-[#00f0ff] font-bold">{currentLearnerXp}</span>
+                    </div>
+                  </div>
                 </div>
+
+                <p className="text-[11px] font-mono text-zinc-500 mt-4 text-center">
+                  Standings reflect server-verified achievement XP and activity streaks for your active session.
+                </p>
               </Card>
             </div>
           </main>

@@ -64,6 +64,18 @@ export const AppTopbar: React.FC = () => {
     results &&
     (results.courses.length > 0 || results.lessons.length > 0 || results.modules.length > 0);
 
+  const [streak, setStreak] = useState<number>(0);
+
+  useEffect(() => {
+    import('@/lib/api').then(({ getUserProgressApi }) => {
+      getUserProgressApi().then((data) => {
+        if (data && typeof data.studyStreak === 'number') {
+          setStreak(data.studyStreak);
+        }
+      }).catch(() => null);
+    });
+  }, []);
+
   return (
     <>
       <header className="w-full glass-panel border-b border-[#272732]/60 px-4 sm:px-6 py-3 flex items-center justify-between gap-3 relative z-30">
@@ -181,7 +193,7 @@ export const AppTopbar: React.FC = () => {
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold">
             <Flame className="w-3.5 h-3.5 fill-amber-400" />
-            <span>7 Days</span>
+            <span>{streak} {streak === 1 ? 'Day' : 'Days'}</span>
           </div>
 
           <div className="hidden lg:block">
