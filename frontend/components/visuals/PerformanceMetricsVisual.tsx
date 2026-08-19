@@ -44,8 +44,7 @@ export const PerformanceMetricsVisual: React.FC = () => {
 
   // Mode 2: Throughput calculations
   const effectiveGoodputMbps = rawLinkRateMbps * (1 - overheadPercent / 100);
-  const fileBits = fileSizeBytesMb * 8 * 1024 * 1024;
-  const transferTimeSecGoodput = fileBits / (effectiveGoodputMbps * 1000000);
+  const transferTimeSecGoodput = (fileSizeBytesMb * 8) / effectiveGoodputMbps;
 
   // Mode 3: Loss calculations
   const expectedLostPackets = Math.round((packetCount * lossRatePercent) / 100);
@@ -218,10 +217,10 @@ export const PerformanceMetricsVisual: React.FC = () => {
 
                 <div className="p-4 rounded-xl bg-[#00f0ff]/5 border border-[#00f0ff]/30 flex flex-col gap-1">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-bold text-white uppercase tracking-wider">Total End-to-End Latency ($D_{'{total}'}$):</span>
+                    <span className="text-xs font-bold text-white uppercase tracking-wider">Simplified Calculated Delay (D_prop + D_trans):</span>
                     <span className="text-xl font-mono font-extrabold text-[#00f0ff]">{totalDelayMs.toFixed(2)} ms</span>
                   </div>
-                  <span className="text-[11px] text-zinc-400 font-mono">($D_{'{total}'} = D_{'{prop}'} + D_{'{trans}'}$)</span>
+                  <span className="text-[11px] text-zinc-400 font-mono">(Excludes router processing D_proc & queueing D_queue delays)</span>
                 </div>
               </div>
 
@@ -232,15 +231,15 @@ export const PerformanceMetricsVisual: React.FC = () => {
                   <strong className="text-white block mb-1">Why did the result change?</strong>
                   {distanceKm > 10000 ? (
                     <span>
-                      Physical distance is the dominant component (D_prop = {propDelayMs.toFixed(1)} ms). Because signal propagation speed through optical fiber or free space is capped by physics (approx. 200,000 - 300,000 km/s), distance creates an unbypassable physical delay regardless of how fast your link speed (R) is.
+                      Physical distance is the dominant component (D_prop = {propDelayMs.toFixed(1)} ms). Because signal propagation speed through optical fiber or free space is capped by physics (approx. 200,000 - 300,000 km/s), distance creates an unbypassable physical delay regardless of how fast link speed (R) is. <em>Note: This simplified model excludes router processing (D_proc) and queueing (D_queue) delays.</em>
                     </span>
                   ) : linkRateMbps <= 100 && packetSizeBytes >= 1000 ? (
                     <span>
-                      On lower link rates (R = {linkRateMbps} Mbps), pushing a full MTU frame (1,500 Bytes) onto the wire requires significant serialization time (D_trans = {transDelayMs.toFixed(2)} ms). Upgrading link bandwidth directly reduces D_trans.
+                      On lower link rates (R = {linkRateMbps} Mbps), pushing a full MTU frame (1,500 Bytes) onto the wire requires significant serialization time (D_trans = {transDelayMs.toFixed(2)} ms). Upgrading link bandwidth directly reduces D_trans. <em>Note: Excludes router processing (D_proc) and queueing (D_queue) delays.</em>
                     </span>
                   ) : (
                     <span>
-                      Total delay is the sum of signal flight time (D_prop) plus hardware serialization time (D_trans). Increasing distance inflates D_prop, while increasing packet size or decreasing link speed inflates D_trans.
+                      Calculated delay is the sum of signal flight time (D_prop) plus hardware serialization time (D_trans). Increasing distance inflates D_prop, while increasing packet size or decreasing link speed inflates D_trans. <em>Note: Real-world end-to-end latency also includes router processing (D_proc) and queueing (D_queue) delays.</em>
                     </span>
                   )}
                 </div>
