@@ -173,8 +173,31 @@ async function verifyCurriculumContentV2() {
   assert(!net103Osi!.lab, 'NET-103 Lesson 2 has no phantom CLI lab');
   console.log('  ✓ NET-103 Lesson 2 verified with clean Content V2 structure, all 7 layers, encapsulation/decapsulation, 6 practice items, 6 quiz questions, and zero forced filler.');
 
+  // [TEST 10] Verify NET-103 Lesson 3: The TCP/IP 4-Layer Architecture & Model Mapping
+  console.log('\n[TEST 10] Verifying NET-103 Lesson 3 (The TCP/IP 4-Layer Architecture)...');
+  const net103TcpIp = LESSONS_NET100.find((l) => l.slug === 'tcp-ip-4-layers');
+  assert(!!net103TcpIp, 'NET-103 Lesson 3 (tcp-ip-4-layers) exists');
+  assert(!!net103TcpIp!.contentV2, 'NET-103 Lesson 3 has Content V2 structure');
+  assert(net103TcpIp!.courseCode === 'NET-103', 'NET-103 Lesson 3 has courseCode NET-103');
+  assert(net103TcpIp!.order === 3, 'NET-103 Lesson 3 is correctly ordered as lesson 3 in NET-103');
+  assert(typeof net103TcpIp!.contentV2!.objective === 'string', 'NET-103 Lesson 3 has clear objective');
+  assert(net103TcpIp!.contentV2!.explanation.includes('Application Layer'), 'NET-103 Lesson 3 explains Application layer');
+  assert(net103TcpIp!.contentV2!.explanation.includes('Transport Layer'), 'NET-103 Lesson 3 explains Transport layer');
+  assert(net103TcpIp!.contentV2!.explanation.includes('Internet Layer'), 'NET-103 Lesson 3 explains Internet layer');
+  assert(net103TcpIp!.contentV2!.explanation.includes('Network Access'), 'NET-103 Lesson 3 explains Network Access layer');
+  assert(net103TcpIp!.contentV2!.explanation.includes('Conceptual Mapping'), 'NET-103 Lesson 3 explains Conceptual Mapping to OSI');
+  assert(net103TcpIp!.contentV2!.explanation.includes('Encapsulation'), 'NET-103 Lesson 3 explains Encapsulation flow');
+  assert(net103TcpIp!.contentV2!.components.length === 4, 'NET-103 Lesson 3 has 4 layer components');
+  assert(Array.isArray(net103TcpIp!.contentV2!.practice) && net103TcpIp!.contentV2!.practice.length >= 6, 'NET-103 Lesson 3 has 6 practice exercises');
+  assert(net103TcpIp!.questions.length >= 6, 'NET-103 Lesson 3 has 6 aligned quiz questions');
+  assert(!net103TcpIp!.contentV2!.packetHeaderView, 'NET-103 Lesson 3 has no fake packet header');
+  assert(!net103TcpIp!.contentV2!.cliTooling, 'NET-103 Lesson 3 has no forced CLI bloat');
+  assert(!net103TcpIp!.contentV2!.security, 'NET-103 Lesson 3 has no generic security filler');
+  assert(!net103TcpIp!.lab, 'NET-103 Lesson 3 has no phantom CLI lab');
+  console.log('  ✓ NET-103 Lesson 3 verified with clean Content V2 structure, 4 TCP/IP layers, OSI conceptual mapping, encapsulation flow, 6 practice items, 6 quiz questions, and zero forced filler.');
+
   console.log('\n================================================================');
-  console.log('🎉 ALL 9 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 10 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 

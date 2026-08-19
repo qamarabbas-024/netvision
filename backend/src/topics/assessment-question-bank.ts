@@ -1850,93 +1850,139 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-tcp-ip-4-layers',
     lessonSlug: 'tcp-ip-4-layers',
-    text: 'How do the 4 layers of the standard TCP/IP Architecture (RFC 1122) map to the 7 layers of the OSI Reference Model?',
+    text: 'What is the primary difference between the 4-layer TCP/IP model and the 7-layer OSI model?',
     options: [
-      'Application (OSI 5,6,7) → Transport (OSI 4) → Internet (OSI 3) → Network Access / Link (OSI 1,2)',
-      'Application (OSI 7) → Internet (OSI 6) → Transport (OSI 5) → Physical (OSI 1,2,3,4)',
-      'Session (OSI 4) → Presentation (OSI 3) → Network (OSI 2) → Hardware (OSI 1)',
-      'Transport (OSI 7) → Application (OSI 6) → Link (OSI 5) → Internet (OSI 4)'
+      'TCP/IP is a practical operational model implemented in operating systems, while OSI is a conceptual reference framework',
+      'TCP/IP is purely theoretical and has never been implemented in real network hardware',
+      'TCP/IP replaces IP addresses with physical cable connectors',
+      'OSI is a 4-layer model and TCP/IP is a 7-layer model'
     ],
     correctOption: 0,
-    explanation: 'The TCP/IP 4-layer model consolidates OSI Layers 5, 6, and 7 into the Application Layer; OSI Layer 4 maps to Transport; OSI Layer 3 maps to Internet; and OSI Layers 1 and 2 map to Network Access (Link) Layer.',
+    explanation: 'The TCP/IP model (RFC 1122) represents the practical implementation suite used across the global Internet, whereas the OSI model is a theoretical 7-layer reference framework.',
     explanationsJson: {
-      1: 'Internet is Layer 3 equivalent, not Layer 6.',
-      2: 'Session and Presentation are not distinct layers in the 4-layer TCP/IP stack.',
-      3: 'Application is at the top of the TCP/IP stack, not Transport.'
+      1: 'TCP/IP is the actual operational suite of the Internet.',
+      2: 'TCP/IP uses IP addresses at the Internet layer.',
+      3: 'OSI has 7 layers and TCP/IP has 4 layers.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'OSI vs TCP/IP Mapping',
+    concept: 'TCP/IP Model Purpose',
     points: 10
   },
   {
     quizId: 'quiz-tcp-ip-4-layers',
     lessonSlug: 'tcp-ip-4-layers',
-    text: 'Which primary protocol suite operates at the "Internet Layer" of the TCP/IP model to provide logical addressing and packet routing across networks?',
+    text: 'What is the correct top-to-bottom sequence of the 4 TCP/IP model layers?',
     options: [
-      'IPv4, IPv6, ICMP, and ARP',
-      'TCP and UDP',
-      'HTTP, DNS, and SMTP',
-      'Ethernet, Wi-Fi, and PPP'
+      'Application → Transport → Internet → Network Access (Link)',
+      'Physical → Network → Transport → Application',
+      'Internet → Transport → Application → Network Access',
+      'Network Access → Internet → Transport → Application'
     ],
     correctOption: 0,
-    explanation: 'The Internet Layer in TCP/IP contains IPv4, IPv6, ICMP (diagnostic messaging), and ARP/IGMP, responsible for inter-network packet addressing and routing.',
+    explanation: 'The top-to-bottom order of the TCP/IP model layers is: Application (Layer 4), Transport (Layer 3), Internet (Layer 2), Network Access / Link (Layer 1).',
     explanationsJson: {
-      1: 'TCP and UDP operate at the Transport Layer of the TCP/IP model.',
-      2: 'HTTP, DNS, and SMTP operate at the Application Layer.',
-      3: 'Ethernet, Wi-Fi, and PPP operate at the Network Access / Link Layer.'
+      1: 'This lists OSI layer names, not the 4 TCP/IP layers.',
+      2: 'Application is at the top of the stack, not Internet.',
+      3: 'This order is reversed (bottom-to-top).'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Internet Layer Protocols',
+    concept: 'TCP/IP 4 Layers Sequence',
     points: 10
   },
   {
     quizId: 'quiz-tcp-ip-4-layers',
     lessonSlug: 'tcp-ip-4-layers',
-    text: 'When a web browser sends an HTTP GET request, what exact encapsulation headers are appended to the application data as it descends through the TCP/IP stack?',
+    text: 'Which TCP/IP layer is responsible for logical addressing (IP addresses) and routing packets across interconnected networks?',
     options: [
-      'TCP Header (Transport) → IP Header (Internet) → Ethernet Header & FCS Trailer (Network Access)',
-      'Ethernet Header → TCP Header → IP Header → Application Data',
-      'IP Header → Ethernet Header → TCP Header → DNS Header',
-      'FCS Trailer → IP Header → TCP Header → HTTP Payload'
+      'Internet Layer',
+      'Application Layer',
+      'Transport Layer',
+      'Network Access Layer'
     ],
     correctOption: 0,
-    explanation: 'Encapsulation occurs top-down: Application payload is wrapped in a Layer 4 TCP header (creating a Segment), wrapped in a Layer 3 IP header (creating a Packet), and finally wrapped in a Layer 2 Ethernet header and FCS trailer (creating a Frame).',
+    explanation: 'The Internet Layer handles IP addressing (IPv4/IPv6) and path determination (routing) to deliver packets across networks.',
     explanationsJson: {
-      1: 'Headers are added from inside out (Layer 4, then Layer 3, then Layer 2 outside).',
-      2: 'Ethernet headers surround the IP packet; they are not placed inside the IP header.',
-      3: 'The FCS trailer is appended at the end of the frame, not the front.'
+      1: 'Application Layer interfaces with software applications.',
+      2: 'Transport Layer handles port numbers and end-to-end communication.',
+      3: 'Network Access Layer handles MAC addressing and physical transmission.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'TCP/IP Header Encapsulation Flow',
+    concept: 'Internet Layer Responsibilities',
     points: 10
   },
   {
     quizId: 'quiz-tcp-ip-4-layers',
     lessonSlug: 'tcp-ip-4-layers',
-    text: 'A network packet analyzer captures a frame and displays: Ethernet II (Type: 0x0800) -> IPv4 (Protocol: 6) -> TCP (Port: 443). What does the `Protocol: 6` field in the IPv4 header indicate to the receiving operating system?',
+    text: 'Which protocols correctly match their corresponding TCP/IP layers?',
     options: [
-      'It instructs the Internet Layer to demultiplex the payload to the TCP Transport Layer protocol driver',
-      'It indicates the packet has passed through 6 router hops',
-      'It tells the switch to forward the packet out physical Port 6',
-      'It specifies that the IPv4 header length is 6 bytes'
+      'HTTP at Application, TCP at Transport, IP at Internet, Ethernet at Network Access',
+      'IP at Application, HTTP at Transport, Ethernet at Internet, TCP at Network Access',
+      'TCP at Application, Ethernet at Transport, IP at Internet, HTTP at Network Access',
+      'Ethernet at Application, IP at Transport, TCP at Internet, HTTP at Network Access'
     ],
     correctOption: 0,
-    explanation: 'The Protocol field in the IPv4 header identifies the next-level protocol in the payload: Protocol 6 indicates TCP, Protocol 17 indicates UDP, and Protocol 1 indicates ICMP.',
+    explanation: 'HTTP is an Application protocol, TCP is a Transport protocol, IP is an Internet protocol, and Ethernet is a Network Access protocol.',
     explanationsJson: {
-      1: 'Hop count is tracked by the TTL (Time to Live) field, not the Protocol field.',
-      2: 'Switches do not inspect the Layer 3 IPv4 Protocol field to select physical switch ports.',
-      3: 'IPv4 header length is defined by the 4-bit IHL field (typically 5, indicating 20 bytes), not the Protocol field.'
+      1: 'IP is Internet layer, HTTP is Application layer.',
+      2: 'TCP is Transport layer, Ethernet is Network Access layer.',
+      3: 'Ethernet is Network Access layer, HTTP is Application layer.'
     },
     difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
-    questionType: QuestionType.PACKET_ANALYSIS,
-    concept: 'IPv4 Protocol Demultiplexing',
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'TCP/IP Protocol Classification',
+    points: 10
+  },
+  {
+    quizId: 'quiz-tcp-ip-4-layers',
+    lessonSlug: 'tcp-ip-4-layers',
+    text: 'How does the TCP/IP 4-layer stack align conceptually with the 7-layer OSI model?',
+    options: [
+      'TCP/IP Application combines OSI Layers 5, 6, and 7; Transport maps to OSI Layer 4; Internet maps to OSI Layer 3; Network Access combines OSI Layers 1 and 2',
+      'TCP/IP combines all 7 OSI layers into 1 single layer',
+      'TCP/IP maps directly 1-to-1 with all 7 OSI layers',
+      'TCP/IP Network Access maps to OSI Layer 7 Application'
+    ],
+    correctOption: 0,
+    explanation: 'TCP/IP combines OSI Application, Presentation, and Session into Application; maps Transport to Transport, Internet to Network, and combines Data Link and Physical into Network Access.',
+    explanationsJson: {
+      1: 'TCP/IP has 4 functional layers.',
+      2: 'TCP/IP has 4 layers, while OSI has 7 layers.',
+      3: 'Network Access corresponds to OSI Layers 1 and 2, not Layer 7.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'OSI vs TCP/IP Conceptual Mapping',
+    points: 10
+  },
+  {
+    quizId: 'quiz-tcp-ip-4-layers',
+    lessonSlug: 'tcp-ip-4-layers',
+    text: 'What is the correct order of data encapsulation terms as an outgoing web request travels down the TCP/IP stack?',
+    options: [
+      'Application Data Payload → Transport Segment → Internet Packet → Network Access Frame',
+      'Frame → Packet → Segment → Application Payload',
+      'Internet Packet → Frame → Segment → Bits',
+      'Transport Segment → Frame → Packet → Payload'
+    ],
+    correctOption: 0,
+    explanation: 'As data descends the stack, the Application Payload is wrapped in a Transport Segment (TCP header), an Internet Packet (IP header), and a Network Access Frame (Ethernet header/trailer).',
+    explanationsJson: {
+      1: 'This is the decapsulation order (bottom-up).',
+      2: 'Application payload comes first at the top of the stack.',
+      3: 'Segment precedes Packet, which precedes Frame.'
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'TCP/IP Encapsulation Flow',
     points: 10
   },
 

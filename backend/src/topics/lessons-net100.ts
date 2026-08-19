@@ -1650,130 +1650,212 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     order: 3,
     visualizationType: 'TCPIP_OSI_COMPARATOR',
     introduction:
-      'Master the pragmatic implementation model of the global Internet: The TCP/IP 4-Layer Model (RFC 1122), direct side-by-side mapping against the 7-layer OSI model, why Session and Presentation layers were collapsed into Application, and how modern operating systems implement the stack.',
-    stepMetadata: {
-      step1_objective:
-        'Understand the 4 layers of the TCP/IP suite (Network Access, Internet, Transport, Application), map them directly to the 7 OSI layers, and understand how operating systems implement the stack.',
-      step2_prerequisites: ['osi-model-7-layers'],
-      step3_whyItMatters:
-        'While the OSI model is theoretical, TCP/IP is the actual operational protocol suite implemented inside every operating system kernel on Earth.',
-      step4_coreConcept:
-        'The TCP/IP model (RFC 1122) organizes networking into 4 functional layers: (1) Network Access (Link) Layer (combines OSI L1 & L2: Ethernet, Wi-Fi, MAC addresses), (2) Internet Layer (corresponds to OSI L3: IP, ICMP, ARP, routing), (3) Transport Layer (corresponds to OSI L4: TCP, UDP, port multiplexing), and (4) Application Layer (combines OSI L5, L6, and L7: HTTP, DNS, SSH, TLS). Session and Presentation were collapsed into Application because encryption, formatting, and session state are implemented inside application software (e.g. web browser / OpenSSL) rather than inside the operating system network kernel.',
-      step5_technicalAnatomy: {
-        title: 'TCP/IP vs OSI Mapping & OS Implementation Architecture',
-        description: 'Layer mapping, kernel space vs user space boundaries.',
-        components: [
-          { name: 'Application Layer (OSI L7, L6, L5)', detail: 'Runs in User Space software. Implements application logic, TLS encryption, and session state (HTTP, DNS, SSH).' },
-          { name: 'Transport Layer (OSI L4)', detail: 'Runs inside OS Kernel Space (`tcp.sys`, Linux stack). Manages end-to-end ports, TCP handshakes, and UDP sockets.' },
-          { name: 'Internet Layer (OSI L3)', detail: 'Runs inside OS Kernel Space. Handles IPv4/IPv6 packet construction, subnet masking, and routing tables.' },
-          { name: 'Network Access Layer (OSI L2, L1)', detail: 'Runs in NIC Driver & Hardware PHY. Handles Ethernet framing, MAC addressing, and physical bit transmission.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'User Space Preparation', action: 'Application creates payload and handles TLS encryption in user space.' },
-          { stepNumber: 2, title: 'Kernel Syscall Transition', action: 'App passes data to kernel socket; kernel builds TCP and IP headers.' },
-          { stepNumber: 3, title: 'NIC DMA & Transmission', action: 'NIC driver creates Ethernet frame and transmits bits onto wire.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'TCP/IP Protocol Stack Mapping',
-        fields: [
-          { fieldName: 'Application Layer', bitLength: 'User Space', hexSample: 'HTTP / DNS / TLS', description: 'OSI Layers 5, 6, 7 combined.' },
-          { fieldName: 'Transport Layer', bitLength: 'Kernel Space', hexSample: 'TCP / UDP', description: 'OSI Layer 4.' },
-          { fieldName: 'Internet Layer', bitLength: 'Kernel Space', hexSample: 'IPv4 / IPv6 / ICMP', description: 'OSI Layer 3.' },
-          { fieldName: 'Network Access Layer', bitLength: 'Hardware/Driver', hexSample: 'Ethernet / Wi-Fi', description: 'OSI Layers 1 & 2 combined.' },
-        ],
-      },
-      step8_visualExplanation: {
+      'Master the pragmatic implementation architecture of the global Internet: The TCP/IP 4-Layer Model (RFC 1122), its functional layers, real-world protocol examples, conceptual mapping to the 7-layer OSI model, and data encapsulation flow.',
+    contentV2: {
+      objective:
+        'Understand the 4 layers of the TCP/IP suite (Application, Transport, Internet, Network Access), learn common protocol examples for each layer, master the conceptual mapping to the 7-layer OSI model, and trace top-down data encapsulation.',
+      explanation:
+        'While the 7-layer OSI model serves as an ideal theoretical reference, the 4-layer TCP/IP model (RFC 1122) represents the pragmatic operational architecture powering the global Internet.\n\n### Why the TCP/IP Model Exists\nIn the 1970s and 1980s, the US Department of Defense (DARPA) created the TCP/IP protocol suite to build a resilient, real-world internetwork. Rather than strictly separating presentation formats and session state into dedicated layers, TCP/IP combined these functions into software applications running in user space. The result is a lean, 4-layer model implemented in modern operating system kernels.\n\n### The 4 TCP/IP Layers\n1. **Application Layer**: Provides network services directly to end-user software applications. It handles user data, data formatting, encryption (TLS), and session state. (Examples: HTTP, HTTPS, DNS, SSH, FTP, SMTP).\n2. **Transport Layer**: Manages end-to-end communication between hosts using port numbers to multiplex traffic. It offers reliable, connection-oriented transfer (TCP) or fast, lightweight transfer (UDP). (Examples: TCP, UDP).\n3. **Internet Layer**: Responsible for logical addressing and routing packets across interconnected networks. It determines the best path from source to destination IP address. (Examples: IP / IPv4 / IPv6, ICMP, ARP).\n4. **Network Access (Link) Layer**: Handles physical MAC addressing, framing, and transmission of raw signals across physical media. It combines OSI Layer 1 (Physical) and Layer 2 (Data Link). (Examples: Ethernet, Wi-Fi 802.11).\n\n### Conceptual Mapping: TCP/IP vs OSI Model\nThe TCP/IP model aligns conceptually with the 7-layer OSI reference model as follows:\n- **TCP/IP Application Layer** ↔ **OSI Application (L7), Presentation (L6), & Session (L5)**\n- **TCP/IP Transport Layer** ↔ **OSI Transport Layer (L4)**\n- **TCP/IP Internet Layer** ↔ **OSI Network Layer (L3)**\n- **TCP/IP Network Access Layer** ↔ **OSI Data Link (L2) & Physical Layer (L1)**\n\n*Note: This is a conceptual mapping to help engineers correlate theoretical concepts with practical protocols. The models were developed by different organizations and are not identical in design.*\n\n### Data Encapsulation in TCP/IP\nWhen an application sends data across a network:\n1. **Application Payload** (e.g. HTTP GET request) is generated in user space.\n2. **Transport Layer** adds a TCP or UDP header containing source/destination port numbers, creating a **Segment**.\n3. **Internet Layer** adds an IP header containing source/destination IP addresses, creating a **Packet**.\n4. **Network Access Layer** adds an Ethernet header (MAC addresses) and trailer (FCS), creating a **Frame**, which is transmitted as physical signals.',
+      components: [
+        {
+          name: 'Application Layer (OSI L7, L6, L5)',
+          detail: 'User-space software services, data formatting, TLS encryption, and session state. Protocols: HTTP, HTTPS, DNS, SSH, SMTP.',
+        },
+        {
+          name: 'Transport Layer (OSI L4)',
+          detail: 'End-to-end communication, port multiplexing, flow control, and reliability. Protocols: TCP (connection-oriented), UDP (connectionless).',
+        },
+        {
+          name: 'Internet Layer (OSI L3)',
+          detail: 'Logical IP addressing, packet formatting, and inter-network routing. Protocols: IPv4, IPv6, ICMP, ARP.',
+        },
+        {
+          name: 'Network Access / Link Layer (OSI L2, L1)',
+          detail: 'Physical MAC addressing, local framing, link-layer transfer, and physical bit transmission. Standards: Ethernet, Wi-Fi (802.11).',
+        },
+      ],
+      visualizer: {
         type: 'TCPIP_OSI_COMPARATOR',
-        title: 'Side-by-Side TCP/IP vs OSI Model Comparison Matrix',
-        description: 'Interactive comparison matrix aligning 4 TCP/IP layers with 7 OSI layers, showing protocol assignments and kernel/user space boundaries.',
+        title: 'Side-by-Side TCP/IP vs OSI Model Comparison',
+        description: 'Interactive side-by-side comparator mapping 4 TCP/IP layers to 7 OSI layers with real-world protocol assignments.',
       },
-      step9_workedExample: {
-        title: 'Mapping Protocol Stack for Web Browsing Session',
-        problemStatement: 'Map protocols used in browsing `https://example.com` to TCP/IP and OSI layers.',
+      workedExample: {
+        title: 'Tracing Encapsulation for an HTTPS Request',
+        problemStatement: 'Trace an outgoing HTTPS request to https://example.com through the 4 TCP/IP layers.',
         stepByStepSolution: [
-          'HTTPS / TLS: TCP/IP Application Layer <-> OSI Layers 7, 6, 5.',
-          'TCP: TCP/IP Transport Layer <-> OSI Layer 4.',
-          'IPv4: TCP/IP Internet Layer <-> OSI Layer 3.',
-          'Ethernet: TCP/IP Network Access Layer <-> OSI Layers 2, 1.',
+          '1. Application Layer: User browser constructs an HTTP GET request and encrypts it with TLS in user space.',
+          '2. Transport Layer: OS kernel wraps the HTTP payload with a TCP header specifying source port 51234 and destination port 443 (TCP Segment).',
+          '3. Internet Layer: OS kernel wraps the TCP Segment with an IPv4 header specifying source IP 192.168.1.100 and destination IP 93.184.216.34 (IP Packet).',
+          '4. Network Access Layer: Network Interface Card driver wraps the IP Packet with an Ethernet header (MAC addresses) and trailer (Frame), then converts bits into physical signals.',
         ],
-        finalResult: 'Complete vertical stack mapping verified.',
+        finalResult: 'The payload traverses the 4 TCP/IP layers, forming a complete Ethernet Frame ready for network transmission.',
       },
-      step10_realWorldScenario: {
-        topology: 'Operating System Network Stack Execution',
-        scenarioText: 'A web browser executes TLS encryption in user space, passes bytes via socket API to OS kernel (TCP/IP stack), and kernel DMA transmits to hardware NIC.',
-        engineeringContext: 'Understanding user space vs kernel space boundaries is critical for performance tuning.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Executes Application in user space; Transport and Internet in OS kernel.',
-        nicBehavior: 'Executes Network Access Layer in hardware ASIC and firmware.',
-        switchOrRouterBehavior: 'Switches operate at Network Access (L2); Routers at Internet Layer (L3).',
-      },
-      step12_cliTooling: [
+      recap: [
+        'The TCP/IP model consists of 4 pragmatic layers: Application, Transport, Internet, and Network Access (Link).',
+        'TCP/IP Application combines OSI Layers 5, 6, and 7; Network Access combines OSI Layers 1 and 2.',
+        'Common protocols include HTTP/DNS (Application), TCP/UDP (Transport), IP (Internet), and Ethernet/Wi-Fi (Network Access).',
+        'Data encapsulation wraps application data in headers at each layer as it travels down the stack.',
+      ],
+      practice: [
         {
-          command: 'netstat -ano',
-          description: 'Displays active kernel-level TCP/IP transport sockets and port mappings.',
-          expectedOutput: 'Proto Local Address  Foreign Address  State  PID\nTCP   192.168.1.10:51234  93.184.216.34:443  ESTABLISHED 4512',
-          proofExplanation: 'Shows kernel transport layer socket management.',
+          id: 1,
+          prompt: 'Map the following common protocols to their corresponding TCP/IP layers: (a) HTTP, (b) TCP, (c) IP, (d) Ethernet.',
+          expected: 'HTTP -> Application Layer; TCP -> Transport Layer; IP -> Internet Layer; Ethernet -> Network Access Layer.',
+          hints: 'Recall which protocols handle applications, ports, network addressing, and physical media framing.',
+        },
+        {
+          id: 2,
+          prompt: 'Which TCP/IP layers correspond to (a) OSI Layers 5, 6, and 7, (b) OSI Layer 3, and (c) OSI Layers 1 and 2?',
+          expected: '(a) Application Layer, (b) Internet Layer, (c) Network Access Layer.',
+          hints: 'Remember that TCP/IP combines the top three OSI layers and bottom two OSI layers.',
+        },
+        {
+          id: 3,
+          prompt: 'Explain the distinct functional roles of the Transport Layer (TCP/UDP) vs the Internet Layer (IP).',
+          expected: 'Transport Layer manages process-to-process communication using port numbers; Internet Layer manages host-to-host packet routing across networks using IP addresses.',
+          hints: 'Consider the difference between port numbers and IP addresses.',
+        },
+        {
+          id: 4,
+          prompt: 'List the 4 TCP/IP layers in correct top-to-bottom sequence starting from Layer 4 down to Layer 1.',
+          expected: 'Layer 4: Application → Layer 3: Transport → Layer 2: Internet → Layer 1: Network Access (Link).',
+          hints: 'Start at user software applications at the top down to physical link access at the bottom.',
+        },
+        {
+          id: 5,
+          prompt: 'Why does the TCP/IP model collapse OSI Session (L5) and Presentation (L6) functions into the Application layer?',
+          expected: 'Encryption (TLS), data formatting (JSON/HTML), and session state are implemented inside user-space application software rather than in separate OS network kernel modules.',
+          hints: 'Think about where web browsers and OpenSSL execute (user space vs OS kernel space).',
+        },
+        {
+          id: 6,
+          prompt: 'Trace the encapsulation Data Unit terms as an outgoing web request travels down the TCP/IP stack from Layer 4 to Layer 1.',
+          expected: 'Application Data Payload → Transport Segment → Internet Packet → Network Access Frame → Physical Signals/Bits.',
+          hints: 'Recall the PDU names: Payload, Segment, Packet, Frame.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Application hangs during socket initialization.',
-          possibleCauses: ['Kernel socket exhaustion or ephemeral port starvation'],
-          diagnosticSteps: ['Check netstat socket count and ephemeral port range.'],
-          remediation: 'Tune OS TCP socket timeout (TIME_WAIT) and expand ephemeral port range.',
-        },
-      ],
-      step14_commonMistakes: [
-        { misconception: 'Assuming TCP/IP and OSI are competing hardware products.', correction: 'OSI is a conceptual reference model; TCP/IP is the practical implementation suite.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Kernel Network Stack Vulnerabilities',
-        mitigationStrategy: 'Keep OS kernel updated to patch TCP/IP stack vulnerabilities.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['4 TCP/IP layers: Network Access, Internet, Transport, Application.', 'Session & Presentation collapsed into Application.'],
-        frequentTraps: ['Calling Layer 2 in TCP/IP "Data Link" (it is called Network Access or Link).'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: TCP/IP Suite Protocol Mapping & Socket Inspection',
-        scenario: 'Map real-world protocols across TCP/IP layers.',
-        tasks: ['Map HTTP, TCP, IP, and Ethernet to their TCP/IP layers.'],
-        verificationMethod: 'Verify socket mapping with netstat.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['TCP/IP is the 4-layer architecture of the Internet.', 'Application layer combines OSI layers 5-7 in user space.'],
-        nextLessonBridge: 'With digital fundamentals and models mastered in Tier 1, proceed to Tier 2 (NET-201) to master Ethernet and MAC Addresses.',
-      },
     },
     questions: [
       {
-        text: 'How does the pragmatic 4-layer TCP/IP model map to the theoretical 7-layer OSI reference model?',
+        text: 'What is the primary difference between the 4-layer TCP/IP model and the 7-layer OSI model?',
         options: [
-          'TCP/IP Application combines OSI Layers 5, 6, and 7; Transport maps to Layer 4; Internet maps to Layer 3; Network Access combines OSI Layers 1 and 2',
-          'TCP/IP has no Transport layer',
-          'TCP/IP is identical with 7 layers',
-          'TCP/IP combines all layers into 1 layer',
+          'TCP/IP is a practical operational model implemented in operating systems, while OSI is a conceptual reference framework',
+          'TCP/IP is purely theoretical and has never been implemented in real network hardware',
+          'TCP/IP replaces IP addresses with physical cable connectors',
+          'OSI is a 4-layer model and TCP/IP is a 7-layer model',
         ],
         correctOption: 0,
-        explanation: 'The TCP/IP suite combines OSI Application, Presentation, and Session into Application, maps Transport to Transport, Internet to Network, and combines Data Link and Physical into Network Access.',
-        explanationsJson: { 1: 'TCP/IP has Transport.', 2: 'TCP/IP has 4 layers.', 3: 'TCP/IP has 4 layers.' },
+        explanation: 'The TCP/IP model (RFC 1122) represents the practical implementation suite used across the global Internet, whereas the OSI model is a theoretical 7-layer reference framework.',
+        explanationsJson: {
+          1: 'TCP/IP is the actual operational suite of the Internet.',
+          2: 'TCP/IP uses IP addresses at the Internet layer.',
+          3: 'OSI has 7 layers and TCP/IP has 4 layers.',
+        },
         difficulty: CourseLevel.FOUNDATIONAL,
         cognitiveLevel: CognitiveLevel.UNDERSTANDING,
         questionType: QuestionType.MULTIPLE_CHOICE,
-        concept: 'TCP/IP vs OSI Mapping',
+        concept: 'TCP/IP Model Purpose',
+      },
+      {
+        text: 'What is the correct top-to-bottom sequence of the 4 TCP/IP model layers?',
+        options: [
+          'Application → Transport → Internet → Network Access (Link)',
+          'Physical → Network → Transport → Application',
+          'Internet → Transport → Application → Network Access',
+          'Network Access → Internet → Transport → Application',
+        ],
+        correctOption: 0,
+        explanation: 'The top-to-bottom order of the TCP/IP model layers is: Application (Layer 4), Transport (Layer 3), Internet (Layer 2), Network Access / Link (Layer 1).',
+        explanationsJson: {
+          1: 'This lists OSI layer names, not the 4 TCP/IP layers.',
+          2: 'Application is at the top of the stack, not Internet.',
+          3: 'This order is reversed (bottom-to-top).',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'TCP/IP 4 Layers Sequence',
+      },
+      {
+        text: 'Which TCP/IP layer is responsible for logical addressing (IP addresses) and routing packets across interconnected networks?',
+        options: [
+          'Internet Layer',
+          'Application Layer',
+          'Transport Layer',
+          'Network Access Layer',
+        ],
+        correctOption: 0,
+        explanation: 'The Internet Layer handles IP addressing (IPv4/IPv6) and path determination (routing) to deliver packets across networks.',
+        explanationsJson: {
+          1: 'Application Layer interfaces with software applications.',
+          2: 'Transport Layer handles port numbers and end-to-end communication.',
+          3: 'Network Access Layer handles MAC addressing and physical transmission.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Internet Layer Responsibilities',
+      },
+      {
+        text: 'Which protocols correctly match their corresponding TCP/IP layers?',
+        options: [
+          'HTTP at Application, TCP at Transport, IP at Internet, Ethernet at Network Access',
+          'IP at Application, HTTP at Transport, Ethernet at Internet, TCP at Network Access',
+          'TCP at Application, Ethernet at Transport, IP at Internet, HTTP at Network Access',
+          'Ethernet at Application, IP at Transport, TCP at Internet, HTTP at Network Access',
+        ],
+        correctOption: 0,
+        explanation: 'HTTP is an Application protocol, TCP is a Transport protocol, IP is an Internet protocol, and Ethernet is a Network Access protocol.',
+        explanationsJson: {
+          1: 'IP is Internet layer, HTTP is Application layer.',
+          2: 'TCP is Transport layer, Ethernet is Network Access layer.',
+          3: 'Ethernet is Network Access layer, HTTP is Application layer.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'TCP/IP Protocol Classification',
+      },
+      {
+        text: 'How does the TCP/IP 4-layer stack align conceptually with the 7-layer OSI model?',
+        options: [
+          'TCP/IP Application combines OSI Layers 5, 6, and 7; Transport maps to OSI Layer 4; Internet maps to OSI Layer 3; Network Access combines OSI Layers 1 and 2',
+          'TCP/IP combines all 7 OSI layers into 1 single layer',
+          'TCP/IP maps directly 1-to-1 with all 7 OSI layers',
+          'TCP/IP Network Access maps to OSI Layer 7 Application',
+        ],
+        correctOption: 0,
+        explanation: 'TCP/IP combines OSI Application, Presentation, and Session into Application; maps Transport to Transport, Internet to Network, and combines Data Link and Physical into Network Access.',
+        explanationsJson: {
+          1: 'TCP/IP has 4 functional layers.',
+          2: 'TCP/IP has 4 layers, while OSI has 7 layers.',
+          3: 'Network Access corresponds to OSI Layers 1 and 2, not Layer 7.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'OSI vs TCP/IP Conceptual Mapping',
+      },
+      {
+        text: 'What is the correct order of data encapsulation terms as an outgoing web request travels down the TCP/IP stack?',
+        options: [
+          'Application Data Payload → Transport Segment → Internet Packet → Network Access Frame',
+          'Frame → Packet → Segment → Application Payload',
+          'Internet Packet → Frame → Segment → Bits',
+          'Transport Segment → Frame → Packet → Payload',
+        ],
+        correctOption: 0,
+        explanation: 'As data descends the stack, the Application Payload is wrapped in a Transport Segment (TCP header), an Internet Packet (IP header), and a Network Access Frame (Ethernet header/trailer).',
+        explanationsJson: {
+          1: 'This is the decapsulation order (bottom-up).',
+          2: 'Application payload comes first at the top of the stack.',
+          3: 'Segment precedes Packet, which precedes Frame.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'TCP/IP Encapsulation Flow',
       },
     ],
-    lab: {
-      title: 'Guided Practice: TCP/IP Suite Protocol Mapping & Socket Inspection',
-      instructions: '1. Map protocols to 4 TCP/IP layers.\n2. Run netstat -ano.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { layers: ['Network Access', 'Internet', 'Transport', 'Application'] },
-      tasks: ['Run netstat -ano.'],
-    },
   },
 ];
