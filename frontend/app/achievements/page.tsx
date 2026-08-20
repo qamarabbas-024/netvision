@@ -56,7 +56,7 @@ export default function AchievementsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+      <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col min-w-0">
@@ -68,101 +68,101 @@ export default function AchievementsPage() {
                 <PulsePacketLoader label="Loading Achievement Badges & Learner Standing..." />
               </div>
             ) : loadError ? (
-              <div className="p-12 glass-panel rounded-3xl border border-rose-500/30 text-center flex flex-col items-center gap-4 max-w-md mx-auto my-auto">
-                <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+              <div className="p-8 surface-2 rounded-xl border border-[#ef4444]/30 text-center flex flex-col items-center gap-4 max-w-md mx-auto my-auto shadow-instrument">
+                <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
                   <AlertTriangle className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-1">Failed to Load Achievements</h3>
-                <p className="text-xs text-zinc-400 mb-2">{loadError}</p>
-                <Button variant="cyan" size="sm" onClick={loadAchievementsData} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
+                <h3 className="text-lg font-bold text-[#f4f5f7] mb-1">Failed to Load Achievements</h3>
+                <p className="text-xs text-[#8e95a5] mb-2">{loadError}</p>
+                <Button variant="primary" size="sm" onClick={loadAchievementsData} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
                   Retry Connection
                 </Button>
               </div>
             ) : (
-            <div className="max-w-6xl mx-auto flex flex-col gap-8">
+            <div className="max-w-6xl mx-auto flex flex-col gap-6 sm:gap-8">
               <div>
-                <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
-                  Gamification & Mastery
+                <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold block mb-1">
+                  MASTERY & MILESTONES
                 </span>
-                <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                  Achievements & Leaderboard
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight">
+                  Curriculum Achievements
                 </h1>
-                <p className="text-sm text-zinc-400 mt-1 max-w-xl">
-                  Unlock official networking achievement badges through hands-on practice, quiz mastery, and curriculum progression.
+                <p className="text-xs sm:text-sm text-[#8e95a5] mt-1 max-w-xl leading-relaxed">
+                  Earned recognition for completing technical milestones, diagnostic labs, and knowledge assessments.
                 </p>
               </div>
 
               {/* User Achievements Summary Banner */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Card className="p-6 glass-panel-glow border-[#00f0ff]/30 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center text-[#00f0ff] shrink-0">
+                <Card className="p-5 surface-2 border border-[#2a2e39] rounded-xl flex items-center gap-4 shadow-instrument">
+                  <div className="w-11 h-11 rounded-lg bg-[#38bdf8]/10 border border-[#38bdf8]/30 flex items-center justify-center text-[#38bdf8] shrink-0">
                     <Award className="w-6 h-6" />
                   </div>
                   <div>
-                    <span className="text-xs font-mono text-zinc-400 block">BADGES UNLOCKED</span>
-                    <span className="text-2xl font-bold text-white font-mono">{unlockedCount} / {totalCount}</span>
+                    <span className="text-[10px] font-mono text-[#8e95a5] uppercase block">Badges Unlocked</span>
+                    <span className="text-xl sm:text-2xl font-bold text-[#f4f5f7] font-mono">{unlockedCount} / {totalCount}</span>
                   </div>
                 </Card>
 
-                <Card className="p-6 glass-panel border-[#272732] flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                <Card className="p-5 surface-2 border border-[#2a2e39] rounded-xl flex items-center gap-4 shadow-instrument">
+                  <div className="w-11 h-11 rounded-lg bg-[#818cf8]/10 border border-[#818cf8]/30 flex items-center justify-center text-[#818cf8] shrink-0">
                     <Zap className="w-6 h-6" />
                   </div>
                   <div>
-                    <span className="text-xs font-mono text-zinc-400 block">ACHIEVEMENT XP</span>
-                    <span className="text-2xl font-bold text-white font-mono">{totalPoints} XP</span>
+                    <span className="text-[10px] font-mono text-[#8e95a5] uppercase block">Achievement XP</span>
+                    <span className="text-xl sm:text-2xl font-bold text-[#f4f5f7] font-mono">{totalPoints} XP</span>
                   </div>
                 </Card>
 
-                <Card className="p-6 glass-panel border-[#272732] flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                    <Flame className="w-6 h-6 fill-amber-400" />
+                <Card className="p-5 surface-2 border border-[#2a2e39] rounded-xl flex items-center gap-4 shadow-instrument">
+                  <div className="w-11 h-11 rounded-lg bg-[#f59e0b]/10 border border-[#f59e0b]/30 flex items-center justify-center text-[#f59e0b] shrink-0">
+                    <Flame className="w-6 h-6 fill-[#f59e0b]" />
                   </div>
                   <div>
-                    <span className="text-xs font-mono text-zinc-400 block">ACTIVE STREAK</span>
-                    <span className="text-2xl font-bold text-white font-mono">{userStats?.studyStreak ?? 0} Days</span>
+                    <span className="text-[10px] font-mono text-[#8e95a5] uppercase block">Active Streak</span>
+                    <span className="text-xl sm:text-2xl font-bold text-[#f4f5f7] font-mono">{userStats?.studyStreak ?? 0} Days</span>
                   </div>
                 </Card>
               </div>
 
               {/* Achievement Badges Catalog Grid */}
-              <div>
-                <h2 className="text-xl font-bold text-white mb-4">Curriculum Achievement Badges</h2>
+              <div className="space-y-4">
+                <h2 className="text-lg font-bold text-[#f4f5f7]">Milestone Badges</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {achievements.map((ach) => (
                     <div
                       key={ach.id}
-                      className={`p-5 rounded-2xl border transition-all ${
+                      className={`p-5 rounded-xl border transition-all surface-2 shadow-instrument ${
                         ach.unlocked
-                          ? 'glass-panel-glow border-[#00f0ff]/40 bg-[#00f0ff]/5'
-                          : 'glass-panel border-[#272732] opacity-75'
+                          ? 'border-[#38bdf8]/40 bg-[#1b1e26]'
+                          : 'border-[#2a2e39] opacity-75'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
                           ach.unlocked
-                            ? 'bg-[#00f0ff]/20 text-[#00f0ff] border border-[#00f0ff]/40'
-                            : 'bg-zinc-800 text-zinc-500 border border-zinc-700'
+                            ? 'bg-[#38bdf8]/10 text-[#38bdf8] border border-[#38bdf8]/30'
+                            : 'bg-[#14151a] text-[#646c7d] border border-[#2a2e39]'
                         }`}>
-                          <Award className="w-5 h-5" />
+                          <Award className="w-4 h-4" />
                         </div>
-                        <Badge variant={ach.unlocked ? 'cyan' : 'neutral'}>
+                        <Badge variant={ach.unlocked ? 'cyan' : 'neutral'} dot={ach.unlocked}>
                           {ach.unlocked ? `+${ach.points} XP` : `${ach.points} XP`}
                         </Badge>
                       </div>
 
-                      <h3 className="text-sm font-bold text-white mb-1">{ach.title}</h3>
-                      <p className="text-xs text-zinc-400 leading-relaxed mb-3">{ach.description}</p>
+                      <h3 className="text-sm font-bold text-[#f4f5f7] mb-1">{ach.title}</h3>
+                      <p className="text-xs text-[#8e95a5] leading-relaxed mb-3">{ach.description}</p>
 
-                      <div className="flex items-center justify-between pt-3 border-t border-[#272732] text-[11px] font-mono">
-                        <span className="text-zinc-500 uppercase">{ach.category}</span>
+                      <div className="flex items-center justify-between pt-3 border-t border-[#2a2e39] text-[10px] font-mono">
+                        <span className="text-[#8e95a5] uppercase">{ach.category}</span>
                         {ach.unlocked ? (
-                          <span className="text-emerald-400 flex items-center gap-1 font-bold">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Unlocked
+                          <span className="text-[#10b981] flex items-center gap-1 font-bold">
+                            <CheckCircle2 className="w-3 h-3" /> UNLOCKED
                           </span>
                         ) : (
-                          <span className="text-zinc-500 flex items-center gap-1">
-                            <Lock className="w-3.5 h-3.5" /> Locked
+                          <span className="text-[#646c7d] flex items-center gap-1">
+                            <Lock className="w-3 h-3" /> LOCKED
                           </span>
                         )}
                       </div>
@@ -171,40 +171,35 @@ export default function AchievementsPage() {
                 </div>
               </div>
 
-              {/* Personal Learner Standing & Metrics */}
-              <Card className="p-6">
-                <div className="flex items-center gap-2 mb-6">
-                  <Trophy className="w-6 h-6 text-amber-400" />
-                  <h2 className="text-xl font-bold text-white">Your Learner Standing</h2>
+              {/* Personal Learner Standing */}
+              <Card className="p-5 sm:p-6 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
+                <div className="flex items-center gap-2 mb-4 border-b border-[#2a2e39] pb-3">
+                  <Trophy className="w-5 h-5 text-[#f59e0b]" />
+                  <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7]">Learner Standing</h2>
                 </div>
 
-                <div className="flex flex-col gap-3">
-                  <div className="p-4 rounded-xl border bg-[#00f0ff]/10 border-[#00f0ff]/40 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <span className="w-8 h-8 rounded-full flex items-center justify-center font-mono font-bold text-xs bg-amber-400 text-black">
-                        ★
-                      </span>
-                      <div className="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center text-white text-xs font-bold">
-                        <User className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <h4 className="text-sm font-bold text-white">{currentLearnerName}</h4>
-                        <span className="text-xs text-zinc-500 font-mono">
-                          {isAuthenticated ? (user?.role === 'ADMIN' ? 'Administrator' : 'Active Learner') : 'Guest Session'}
-                        </span>
-                      </div>
+                <div className="p-4 rounded-lg bg-[#14151a] border border-[#2a2e39] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-9 h-9 rounded-lg bg-[#818cf8]/10 border border-[#818cf8]/30 flex items-center justify-center text-[#818cf8]">
+                      <User className="w-4 h-4" />
                     </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-[#f4f5f7]">{currentLearnerName}</h4>
+                      <span className="text-xs text-[#8e95a5] font-mono">
+                        {isAuthenticated ? (user?.role === 'ADMIN' ? 'Administrator' : 'Active Learner') : 'Guest Session'}
+                      </span>
+                    </div>
+                  </div>
 
-                    <div className="flex items-center gap-6 font-mono text-xs">
-                      <span className="text-amber-400 flex items-center gap-1">
-                        <Flame className="w-4 h-4 fill-amber-400" /> {currentLearnerStreak}
-                      </span>
-                      <span className="text-[#00f0ff] font-bold">{currentLearnerXp}</span>
-                    </div>
+                  <div className="flex items-center gap-6 font-mono text-xs">
+                    <span className="text-[#f59e0b] flex items-center gap-1">
+                      <Flame className="w-4 h-4 fill-[#f59e0b]" /> {currentLearnerStreak}
+                    </span>
+                    <span className="text-[#38bdf8] font-bold">{currentLearnerXp}</span>
                   </div>
                 </div>
 
-                <p className="text-[11px] font-mono text-zinc-500 mt-4 text-center">
+                <p className="text-[10px] font-mono text-[#646c7d] mt-3 text-center">
                   Standings reflect server-verified achievement XP and activity streaks for your active session.
                 </p>
               </Card>

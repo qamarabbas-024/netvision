@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
@@ -11,7 +12,7 @@ import { Badge } from '@/components/ui/Badge';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useAuthStore } from '@/stores/authStore';
 import { GuestProgressService } from '@/services/GuestProgressService';
-import { ShieldCheck, User, LogOut, Trash2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { ShieldCheck, User, LogOut, Trash2, CheckCircle2, AlertTriangle, KeyRound } from 'lucide-react';
 
 export default function SettingsPage() {
   const { user, isAuthenticated, logout } = useAuthStore();
@@ -48,22 +49,22 @@ export default function SettingsPage() {
             <div className="max-w-4xl mx-auto flex flex-col gap-6 sm:gap-8">
               <div>
                 <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold block mb-1">
-                  PREFERENCES & SECURITY
+                  ACCOUNT & PREFERENCES
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight">
-                  Account & Session Settings
+                  Settings
                 </h1>
                 <p className="text-xs sm:text-sm text-[#8e95a5] mt-1 leading-relaxed">
-                  Manage active authenticated session identity, interface themes, and local storage cache.
+                  Manage learner identity, interface appearance, session security, and local device storage.
                 </p>
               </div>
 
-              {/* Profile Information */}
+              {/* 1. Profile / Learner Identity */}
               <Card className="p-5 sm:p-6 flex flex-col gap-5 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
                 <div className="flex items-center justify-between border-b border-[#2a2e39] pb-3">
                   <div className="flex items-center gap-2.5">
                     <User className="w-5 h-5 text-[#38bdf8]" />
-                    <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7]">Learner Identity</h2>
+                    <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7]">Learner Profile</h2>
                   </div>
                   <Badge variant={isAuthenticated ? 'cyan' : 'neutral'} dot={true}>
                     {isAuthenticated ? (user?.role === 'ADMIN' ? 'ADMINISTRATOR' : 'VERIFIED LEARNER') : 'GUEST SESSION'}
@@ -104,29 +105,31 @@ export default function SettingsPage() {
                     </div>
                   )}
 
-                  <div className="flex justify-end">
-                    <Button variant="primary" type="submit" className="w-full sm:w-auto">
-                      Save Profile
-                    </Button>
-                  </div>
+                  {isAuthenticated && (
+                    <div className="flex justify-end">
+                      <Button variant="primary" type="submit" className="w-full sm:w-auto font-bold text-xs">
+                        Save Profile
+                      </Button>
+                    </div>
+                  )}
                 </form>
               </Card>
 
-              {/* Theme & Appearance */}
-              <Card className="p-5 sm:p-6 flex flex-col gap-5 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
+              {/* 2. Theme & Appearance */}
+              <Card className="p-5 sm:p-6 flex flex-col gap-4 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
                 <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7] border-b border-[#2a2e39] pb-3">Theme & Appearance</h2>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-sm font-bold text-[#f4f5f7]">Interface Theme Mode</h3>
-                    <p className="text-xs text-[#8e95a5]">Toggle between Dark Technical Mode (Default) and Light Mode</p>
+                    <h3 className="text-sm font-bold text-[#f4f5f7]">Interface Theme</h3>
+                    <p className="text-xs text-[#8e95a5]">Switch between dark technical palette and high-contrast light mode</p>
                   </div>
                   <ThemeToggle />
                 </div>
               </Card>
 
-              {/* Session Security & Authentication */}
-              <Card className="p-5 sm:p-6 flex flex-col gap-5 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
+              {/* 3. Session Security & Authentication */}
+              <Card className="p-5 sm:p-6 flex flex-col gap-4 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
                 <div className="flex items-center gap-2.5 border-b border-[#2a2e39] pb-3">
                   <ShieldCheck className="w-5 h-5 text-[#10b981]" />
                   <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7]">Security & Active Session</h2>
@@ -134,19 +137,27 @@ export default function SettingsPage() {
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-[#14151a] border border-[#2a2e39]">
                   <div>
-                    <div className="text-xs font-bold text-[#f4f5f7]">Current Session Status</div>
+                    <div className="text-xs font-bold text-[#f4f5f7]">Session Status</div>
                     <div className="text-xs text-[#8e95a5] font-mono mt-0.5">
-                      {isAuthenticated ? `Authenticated as ${user?.email || user?.username}` : 'Local Anonymous Guest Session'}
+                      {isAuthenticated ? `Authenticated as ${user?.email || user?.username}` : 'Local anonymous session (no credentials)'}
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={handleLogout} leftIcon={<LogOut className="w-4 h-4" />} className="text-[#f87171] hover:text-white hover:bg-[#ef4444]/10">
-                    Sign Out
-                  </Button>
+                  {isAuthenticated ? (
+                    <Button variant="ghost" size="sm" onClick={handleLogout} leftIcon={<LogOut className="w-4 h-4" />} className="text-[#ef4444] hover:text-white hover:bg-[#ef4444]/10 text-xs">
+                      Sign Out
+                    </Button>
+                  ) : (
+                    <Link href="/login">
+                      <Button variant="primary" size="sm" className="font-bold text-xs">
+                        Sign In / Register
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </Card>
 
-              {/* Danger Zone */}
-              <Card className="p-5 sm:p-6 flex flex-col gap-5 border-[#ef4444]/30 bg-[#ef4444]/5 rounded-xl">
+              {/* 4. Danger Zone */}
+              <Card className="p-5 sm:p-6 flex flex-col gap-4 border border-[#ef4444]/30 bg-[#ef4444]/5 rounded-xl">
                 <div className="flex items-center gap-2.5 border-b border-[#ef4444]/20 pb-3">
                   <AlertTriangle className="w-5 h-5 text-[#ef4444]" />
                   <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7]">Danger Zone</h2>
@@ -155,8 +166,8 @@ export default function SettingsPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <h3 className="text-sm font-bold text-[#f4f5f7]">Clear Local Guest Storage</h3>
-                    <p className="text-xs text-[#8e95a5] max-w-md">
-                      Purges local device storage cache and rotates anonymous guest session tokens.
+                    <p className="text-xs text-[#8e95a5] max-w-md mt-0.5">
+                      Purges locally cached progress and resets the anonymous guest learner ID on this browser.
                     </p>
                   </div>
                   <Button
@@ -164,7 +175,7 @@ export default function SettingsPage() {
                     size="sm"
                     onClick={handleClearGuestCache}
                     leftIcon={<Trash2 className="w-4 h-4" />}
-                    className="shrink-0"
+                    className="shrink-0 font-bold text-xs"
                   >
                     {clearedGuest ? 'Cache Purged! ✓' : 'Clear Local Cache'}
                   </Button>
