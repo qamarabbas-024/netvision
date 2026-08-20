@@ -708,6 +708,23 @@ export const SandboxCanvas: React.FC = () => {
                   </div>
                 </motion.div>
               )}
+              {/* Floating Cable Wiring Helper Overlay */}
+              {toolAction === 'cable' && cableSourceNode && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 px-3.5 py-1.5 rounded-lg bg-[#14151a]/95 border border-[#38bdf8]/50 shadow-elevated flex items-center gap-2 text-xs font-mono text-[#f4f5f7] backdrop-blur-sm animate-pulse">
+                  <LinkIcon className="w-3.5 h-3.5 text-[#38bdf8]" />
+                  <span>Wiring from <strong className="text-[#38bdf8]">{cableSourceNode.name}</strong>: Click target device to connect</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCableSourceNode(null);
+                      setToolAction('select');
+                    }}
+                    className="ml-2 px-1.5 py-0.5 rounded bg-[#2a2e39] text-[10px] text-[#8e95a5] hover:text-white"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
