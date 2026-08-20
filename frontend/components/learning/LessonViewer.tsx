@@ -233,12 +233,12 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
 
   return (
     <div className="flex flex-col gap-6 font-sans">
-      {/* Network Studio Lesson Header */}
-      <header className="bg-[#15181e] p-3.5 sm:p-4 rounded-xl border border-[#232732] flex items-center justify-between gap-4 sticky top-4 z-30 shadow-subtle">
+      {/* Network Instrument Lesson Header */}
+      <header className="bg-[#181a1f] p-3.5 sm:p-4 rounded-xl border border-[#2a2e39] flex items-center justify-between gap-4 sticky top-4 z-30 shadow-instrument">
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href={`/courses/${lesson.course.slug}`}
-            className="p-2 rounded-lg bg-[#111317] border border-[#232732] hover:border-[#00c8f8]/40 text-zinc-400 hover:text-white transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00c8f8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1115]"
+            className="p-2 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-[#38bdf8]/40 text-[#8e95a5] hover:text-white transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#121316]"
             aria-label="Back to Course Syllabus"
             title="Back to Course Syllabus"
           >
@@ -246,37 +246,37 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
           </Link>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap text-xs font-mono">
-              <span className="text-[#94a3b8] truncate">
+              <span className="text-[#8e95a5] truncate">
                 {lesson.course.title}
               </span>
               <span className="text-zinc-600">•</span>
-              <span className="px-1.5 py-0.5 rounded bg-[#111317] border border-[#232732] text-[10px] text-[#00c8f8] font-bold uppercase">
+              <span className="px-1.5 py-0.5 rounded bg-[#14151a] border border-[#2a2e39] text-[10px] text-[#38bdf8] font-bold uppercase">
                 {lesson.course.level}
               </span>
-              <span className="text-[#64748b]">
+              <span className="text-[#8e95a5]">
                 {lesson.durationMinutes || 15} MIN
               </span>
               {isInitiallyCompleted && (
                 <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold">
-                  COMPLETE ✓
+                  VERIFIED ✓
                 </span>
               )}
             </div>
-            <h1 className="text-base sm:text-lg font-bold text-[#f3f4f6] tracking-tight truncate mt-0.5 font-sans">
+            <h1 className="text-base sm:text-lg font-bold text-[#f4f5f7] tracking-tight truncate mt-0.5 font-sans">
               {lesson.title}
             </h1>
           </div>
         </div>
 
-        {/* Streamlined Stepper Tabs */}
-        <div className="hidden lg:flex items-center gap-1 bg-[#111317] p-1 rounded-lg border border-[#232732]" role="tablist" aria-label="Lesson Stages">
+        {/* Instrument Mode Tabs */}
+        <div className="hidden lg:flex items-center gap-1 bg-[#14151a] p-1 rounded-lg border border-[#2a2e39]" role="tablist" aria-label="Lesson Stages">
           {stages.map((stg) => {
             const isDone = completedStages.has(stg);
             const isActive = activeStage === stg;
             const labels = {
-              learn: '01 LEARN',
-              practice: '02 PRACTICE',
-              quiz: '03 QUIZ',
+              learn: '01 THEORY & MODEL',
+              practice: '02 LAB WORKBENCH',
+              quiz: '03 DIAGNOSTICS',
               mastery: '04 SUMMARY',
             };
 
@@ -287,12 +287,12 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActiveStage(stg)}
-                className={`px-3 py-1.5 rounded text-[11px] font-mono font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00c8f8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1115] ${
+                className={`px-3 py-1.5 rounded text-[11px] font-mono font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#121316] ${
                   isActive
-                    ? 'bg-[#00c8f8] text-[#0f1115] font-extrabold shadow-sm'
+                    ? 'bg-[#2563eb] text-white font-bold shadow-sm'
                     : isDone
                     ? 'text-emerald-400 hover:text-white'
-                    : 'text-[#94a3b8] hover:text-white'
+                    : 'text-[#8e95a5] hover:text-white'
                 }`}
               >
                 {isDone && !isActive && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />}
@@ -306,12 +306,12 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
           type="button"
           onClick={handleToggleBookmark}
           aria-label={isBookmarked ? 'Remove bookmark from lesson' : 'Bookmark lesson for review'}
-          className="p-2 rounded-lg bg-[#111317] border border-[#232732] hover:border-[#00c8f8]/40 text-zinc-400 hover:text-[#00c8f8] transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00c8f8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1115]"
+          className="p-2 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-[#38bdf8]/40 text-[#8e95a5] hover:text-[#38bdf8] transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#121316]"
           title="Bookmark Lesson"
         >
           <Bookmark
             className={`w-4 h-4 ${
-              isBookmarked ? 'text-[#00c8f8] fill-[#00c8f8]' : ''
+              isBookmarked ? 'text-[#38bdf8] fill-[#38bdf8]' : ''
             }`}
           />
         </button>

@@ -57,62 +57,71 @@ export const PerformanceMetricsVisual: React.FC = () => {
   const isVoipQualityOk = jitterVarianceMs <= 15 && !bufferOverflowDrop;
 
   return (
-    <div className="p-5 sm:p-7 rounded-2xl bg-[#0d0d12] border border-[#00f0ff]/30 shadow-[0_0_25px_rgba(0,240,255,0.1)] flex flex-col gap-6 font-sans">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#272732] pb-5">
+    <div className="p-5 sm:p-6 rounded-xl bg-[#181a1f] border border-[#2a2e39] shadow-instrument flex flex-col gap-6 font-sans">
+      {/* Instrument Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#2a2e39] pb-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-wider uppercase font-semibold bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/30">
-              Interactive Telemetry Visualizer
+          <div className="flex items-center gap-2 mb-1.5 font-mono">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-[#14151a] text-[#38bdf8] border border-[#2a2e39]">
+              INSTRUMENT: NET-102 // TELEMETRY_ANALYZER
             </span>
-            <span className="text-xs font-mono text-zinc-400">NET-102 Performance Engine</span>
+            <span className="text-[11px] text-[#8e95a5]">STATUS: ARMED • LIVE FEED</span>
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
-            <Activity className="w-6 h-6 text-[#00f0ff]" /> Interactive Network Performance Metrics
+          <h3 className="text-lg sm:text-xl font-bold text-[#f4f5f7] flex items-center gap-2">
+            <Activity className="w-5 h-5 text-[#38bdf8]" /> Network Performance Telemetry Analyzer
           </h3>
         </div>
 
-        {/* Metric Selector Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#121217] border border-[#272732] overflow-x-auto shrink-0">
+        {/* Instrument Channel Selector Tabs */}
+        <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#14151a] border border-[#2a2e39] overflow-x-auto shrink-0 font-mono" role="tablist" aria-label="Telemetry Channels">
           <button
+            role="tab"
+            aria-selected={activeTab === 'latency'}
             onClick={() => setActiveTab('latency')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+            className={`px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
               activeTab === 'latency'
-                ? 'bg-[#00f0ff] text-black shadow-[0_0_10px_rgba(0,240,255,0.4)]'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-[#2563eb] text-white shadow-sm font-bold'
+                : 'text-[#8e95a5] hover:text-white'
             }`}
           >
-            <Clock className="w-3.5 h-3.5" /> Latency & Delay
+            <Clock className="w-3.5 h-3.5" /> CH 1: Latency
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'throughput'}
             onClick={() => setActiveTab('throughput')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+            className={`px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
               activeTab === 'throughput'
-                ? 'bg-emerald-400 text-black shadow-[0_0_10px_rgba(52,211,153,0.4)]'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-[#10b981] text-black shadow-sm font-bold'
+                : 'text-[#8e95a5] hover:text-white'
             }`}
           >
-            <Gauge className="w-3.5 h-3.5" /> Throughput vs Goodput
+            <Gauge className="w-3.5 h-3.5" /> CH 2: Goodput
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'loss'}
             onClick={() => setActiveTab('loss')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+            className={`px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
               activeTab === 'loss'
-                ? 'bg-rose-400 text-black shadow-[0_0_10px_rgba(251,113,133,0.4)]'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-[#ef4444] text-white shadow-sm font-bold'
+                : 'text-[#8e95a5] hover:text-white'
             }`}
           >
-            <AlertTriangle className="w-3.5 h-3.5" /> Packet Loss
+            <AlertTriangle className="w-3.5 h-3.5" /> CH 3: Loss
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'jitter'}
             onClick={() => setActiveTab('jitter')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+            className={`px-3 py-1.5 rounded text-xs font-semibold transition-all flex items-center gap-1.5 shrink-0 ${
               activeTab === 'jitter'
-                ? 'bg-amber-400 text-black shadow-[0_0_10px_rgba(251,191,36,0.4)]'
-                : 'text-zinc-400 hover:text-white'
+                ? 'bg-[#f59e0b] text-black shadow-sm font-bold'
+                : 'text-[#8e95a5] hover:text-white'
             }`}
           >
-            <Radio className="w-3.5 h-3.5" /> Jitter & Variance
+            <Radio className="w-3.5 h-3.5" /> CH 4: Jitter
           </button>
         </div>
       </div>

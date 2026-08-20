@@ -3,12 +3,12 @@
 @import 'tailwindcss/utilities';
 
 :root {
-  --background: #0f1115;
-  --foreground: #f3f4f6;
-  --net-card: #15181e;
-  --net-surface: #1b1f27;
-  --net-border: #232732;
-  --net-cyan: #00c8f8;
+  --background: #121316;
+  --foreground: #f4f5f7;
+  --net-card: #181a1f;
+  --net-surface: #20232b;
+  --net-border: #2a2e39;
+  --net-cyan: #38bdf8;
 }
 
 * {
@@ -33,45 +33,46 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f1115;
+  background: #121316;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #232732;
+  background: #2a2e39;
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #333846;
+  background: #3b4150;
 }
 
-/* Studio Technical Panel Utility */
+/* Network Instrument Panel Utilities */
 .glass-panel {
-  background-color: #15181e;
-  border: 1px solid #232732;
+  background-color: #181a1f;
+  border: 1px solid #2a2e39;
 }
 
 .glass-panel-glow {
-  background-color: #15181e;
-  border: 1px solid #28303f;
+  background-color: #181a1f;
+  border: 1px solid #363c4a;
 }
 
-.studio-panel {
-  background-color: #15181e;
-  border: 1px solid #232732;
+.instrument-panel {
+  background-color: #181a1f;
+  border: 1px solid #2a2e39;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.studio-panel-subtle {
-  background-color: #111317;
-  border: 1px solid #1e222b;
+.instrument-panel-subtle {
+  background-color: #14151a;
+  border: 1px solid #242731;
 }
 
-/* Technical Architectural Grid Pattern */
+/* Technical Laboratory Calibration Grid */
 .bg-net-grid-pattern {
-  background-size: 40px 40px;
+  background-size: 36px 36px;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
 }
 
 /* Typography Utility Classes */

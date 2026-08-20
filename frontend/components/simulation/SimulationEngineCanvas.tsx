@@ -297,45 +297,58 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col gap-6">
-      {/* Guidance Notice Banner if Play clicked before Dispatch */}
+    <div className="w-full flex flex-col gap-5 font-sans">
+      {/* Guidance Notice Banner */}
       {guidanceNotice && (
-        <div className="p-3.5 rounded-2xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-xs text-[#00f0ff] flex items-center justify-between gap-3">
+        <div className="p-3 rounded-lg bg-[#14151a] border border-[#38bdf8]/40 text-xs text-[#38bdf8] flex items-center justify-between gap-3 font-mono">
           <div className="flex items-center gap-2">
-            <Info className="w-4 h-4 shrink-0" />
-            <span className="font-mono font-semibold">{guidanceNotice}</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8] animate-ping" />
+            <span className="font-semibold">{guidanceNotice}</span>
           </div>
-          <button onClick={() => setGuidanceNotice(null)} className="text-zinc-400 hover:text-white text-xs">
+          <button type="button" onClick={() => setGuidanceNotice(null)} className="text-[#8e95a5] hover:text-white text-xs">
             Dismiss
           </button>
         </div>
       )}
 
-      {/* Simulation Controls Toolbar */}
-      <div className="glass-panel p-3.5 sm:p-4 rounded-3xl border border-[#272732] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
+      {/* Simulation Controls Instrument Rack Toolbar */}
+      <div className="bg-[#181a1f] p-3 sm:p-3.5 rounded-xl border border-[#2a2e39] shadow-instrument flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4 font-mono">
         {/* Playback Buttons */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1.5">
           <Button
             variant="cyan"
             size="sm"
             onClick={handlePlayClick}
-            leftIcon={isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            leftIcon={isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            className="bg-[#2563eb] text-white hover:bg-[#3b82f6] text-xs font-bold rounded-lg px-3.5"
           >
-            {isPlaying ? 'Pause' : 'Play Sequence'}
+            {isPlaying ? 'PAUSE' : 'PLAY'}
           </Button>
 
-          <Button variant="ghost" size="sm" onClick={handleStepForward} leftIcon={<StepForward className="w-4 h-4" />}>
-            Step
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleStepForward}
+            leftIcon={<StepForward className="w-3.5 h-3.5" />}
+            className="bg-[#14151a] border border-[#2a2e39] text-[#8e95a5] hover:text-white text-xs rounded-lg"
+          >
+            STEP
           </Button>
 
-          <Button variant="ghost" size="sm" onClick={resetSimulation} leftIcon={<RotateCcw className="w-4 h-4" />}>
-            Reset
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={resetSimulation}
+            leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+            className="bg-[#14151a] border border-[#2a2e39] text-[#8e95a5] hover:text-white text-xs rounded-lg"
+          >
+            RESET
           </Button>
         </div>
 
         {/* Speed Selector */}
-        <div className="flex items-center gap-2 text-xs font-mono" role="group" aria-label="Simulation Playback Speed">
-          <span className="text-zinc-400">Speed:</span>
+        <div className="flex items-center gap-2 text-xs" role="group" aria-label="Simulation Playback Speed">
+          <span className="text-[#8e95a5] uppercase text-[11px]">CLK_RATE:</span>
           <div className="flex items-center gap-1">
             {[0.5, 1, 2, 4].map((s) => (
               <button
@@ -344,10 +357,10 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
                 aria-label={`Set simulation speed to ${s}x`}
                 aria-pressed={speedMultiplier === s}
                 onClick={() => setSpeedMultiplier(s)}
-                className={`px-2.5 py-1 rounded-lg font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] ${
+                className={`px-2 py-0.5 rounded text-[11px] font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#121316] ${
                   speedMultiplier === s
-                    ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
-                    : 'bg-white/5 text-zinc-400 hover:text-white'
+                    ? 'bg-[#38bdf8] text-[#121316]'
+                    : 'bg-[#14151a] border border-[#2a2e39] text-[#8e95a5] hover:text-white'
                 }`}
               >
                 {s}x
@@ -357,45 +370,51 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
         </div>
 
         {/* Failure State Simulation Toggle */}
-        <div className="flex items-center gap-2 text-xs font-mono">
+        <div className="flex items-center gap-2 text-xs">
           <button
             type="button"
             role="switch"
             aria-checked={simulateFailure}
             aria-label="Toggle network firewall drop failure mode"
             onClick={() => setSimulateFailure(!simulateFailure)}
-            className={`px-3 py-1.5 rounded-xl border font-bold flex items-center gap-1.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] ${
+            className={`px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5 transition-all border focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#121316] ${
               simulateFailure
-                ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-glow-rose'
-                : 'bg-white/5 text-zinc-400 border-white/10 hover:text-white'
+                ? 'bg-[#ef4444]/15 text-[#f87171] border-[#ef4444]/40'
+                : 'bg-[#14151a] text-[#8e95a5] border-[#2a2e39] hover:text-white'
             }`}
           >
-            <ShieldAlert className="w-3.5 h-3.5" />
-            {simulateFailure ? 'Failure Mode: ON (Firewall Block)' : 'Failure Mode: OFF'}
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+            <span>FIREWALL: {simulateFailure ? 'DROP [ACTIVE]' : 'PASS [OFF]'}</span>
           </button>
         </div>
 
         {/* Protocol Selector & Dispatch */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-2.5">
           <select
             aria-label="Select packet protocol"
             value={selectedProtocol}
             onChange={(e) => setSelectedProtocol(e.target.value as PacketProtocol)}
-            className="bg-[#121217] text-white border border-[#272732] rounded-xl px-3 py-1.5 text-xs font-mono font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff]"
+            className="bg-[#14151a] text-[#f4f5f7] border border-[#2a2e39] rounded-lg px-2.5 py-1 text-xs font-mono font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
           >
             {['TCP', 'DNS', 'ARP', 'ICMP', 'HTTP'].map((p) => (
-              <option key={p} value={p}>{p} Protocol</option>
+              <option key={p} value={p}>{p}</option>
             ))}
           </select>
 
-          <Button variant="cyan" size="sm" onClick={dispatchPacket} leftIcon={<Activity className="w-4 h-4" />}>
-            Dispatch Packet →
+          <Button
+            variant="cyan"
+            size="sm"
+            onClick={dispatchPacket}
+            leftIcon={<Activity className="w-3.5 h-3.5" />}
+            className="bg-[#2563eb] text-white hover:bg-[#3b82f6] text-xs font-bold rounded-lg px-3.5"
+          >
+            DISPATCH →
           </Button>
         </div>
       </div>
 
-      {/* Main Interactive Canvas */}
-      <div className="relative w-full h-[420px] sm:h-[460px] bg-[#09090b] rounded-3xl border border-[#272732] overflow-x-auto overflow-y-hidden p-4 sm:p-8 touch-pan-x bg-net-grid-pattern">
+      {/* Main Interactive Topology Instrument Canvas */}
+      <div className="relative w-full h-[420px] sm:h-[460px] bg-[#121316] rounded-xl border border-[#2a2e39] shadow-inner overflow-x-auto overflow-y-hidden p-4 sm:p-8 touch-pan-x bg-net-grid-pattern">
         <div
           className="min-w-[960px] h-full relative transition-transform duration-200"
           style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
