@@ -18,7 +18,7 @@ export default function ExamsPage() {
       questions: 30,
       duration: '45 mins',
       passingScore: '80%',
-      icon: <ShieldCheck className="w-8 h-8 text-[#00f0ff]" />,
+      icon: <ShieldCheck className="w-7 h-7 text-[#38bdf8]" />,
     },
     {
       title: 'NetVision Certified Subnetting & Routing Professional',
@@ -26,54 +26,59 @@ export default function ExamsPage() {
       questions: 40,
       duration: '60 mins',
       passingScore: '85%',
-      icon: <ShieldCheck className="w-8 h-8 text-purple-400" />,
+      icon: <ShieldCheck className="w-7 h-7 text-[#818cf8]" />,
     },
   ];
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+      <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col min-w-0">
           <AppTopbar />
 
-          <main className="p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
-            <div className="max-w-6xl mx-auto flex flex-col gap-8">
+          <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+            <div className="max-w-6xl mx-auto flex flex-col gap-6 sm:gap-8">
               <div>
-                <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
-                  Timed Certification Practice
+                <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold block mb-1">
+                  TIMED CERTIFICATION PRACTICE
                 </span>
-                <h1 className="text-3xl font-extrabold text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight">
                   Certification Exam Simulator
                 </h1>
+                <p className="text-xs sm:text-sm text-[#8e95a5] mt-1 max-w-xl leading-relaxed">
+                  Timed comprehensive evaluations testing end-to-end theoretical principles, topology configuration, and packet analysis.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 {exams.map((ex, idx) => (
-                  <Card key={idx} className="p-8 glass-panel-glow border-[#00f0ff]/30 flex flex-col justify-between">
+                  <Card key={idx} className="p-6 sm:p-8 surface-2 border border-[#2a2e39] rounded-xl flex flex-col justify-between shadow-instrument">
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <Badge variant="cyan">{ex.level}</Badge>
-                        <span className="text-xs font-mono text-zinc-400">Pass Score: {ex.passingScore}</span>
+                        <Badge variant="cyan" dot={true}>{ex.level}</Badge>
+                        <span className="text-xs font-mono text-[#8e95a5]">Passing Score: {ex.passingScore}</span>
                       </div>
 
-                      <div className="flex items-center gap-4 mb-4">
-                        {ex.icon}
-                        <h3 className="text-xl font-bold text-white">{ex.title}</h3>
+                      <div className="flex items-center gap-3.5 mb-4">
+                        <div className="w-11 h-11 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-center justify-center shrink-0">
+                          {ex.icon}
+                        </div>
+                        <h3 className="text-base sm:text-lg font-bold text-[#f4f5f7] leading-snug">{ex.title}</h3>
                       </div>
 
-                      <div className="flex items-center gap-6 text-xs text-zinc-400 font-mono mb-8">
+                      <div className="flex items-center gap-6 text-xs text-[#8e95a5] font-mono mb-6">
                         <span>{ex.questions} Questions</span>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4 text-[#00f0ff]" />
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-[#38bdf8]" />
                           <span>{ex.duration}</span>
                         </div>
                       </div>
                     </div>
 
                     <Link href="/courses">
-                      <Button variant="cyan" size="lg" className="w-full" rightIcon={<ArrowRight className="w-5 h-5" />}>
+                      <Button variant="primary" size="md" className="w-full justify-center font-bold text-xs shadow-sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
                         Start Exam Simulation
                       </Button>
                     </Link>

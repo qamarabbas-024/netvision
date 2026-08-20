@@ -24,6 +24,7 @@ import {
   HelpCircle,
   Award,
   ShieldAlert,
+  ShieldCheck,
   ArrowRight,
   FileCheck,
   Zap,
@@ -386,58 +387,58 @@ export default function CourseDetailPage() {
                 ))}
               </div>
 
-              {/* Course Completion vs Certification Distinction UI */}
+              {/* Course Completion & Certification Eligibility UI */}
               <Card className="p-5 sm:p-6 surface-2 border border-[#2a2e39] rounded-xl space-y-3.5 shadow-instrument">
                 <div className="flex items-center justify-between border-b border-[#2a2e39] pb-3">
                   <div className="flex items-center gap-2 text-[#f59e0b]">
                     <Award className="w-4 h-4" />
                     <h3 className="text-xs font-mono font-bold uppercase tracking-wider">
-                      Course Completion & Certification Readiness
+                      Course Mastery & Credential Verification
                     </h3>
                   </div>
                   <span className="text-[10px] font-mono text-[#8e95a5] uppercase">
-                    COURSE COMPLETION ≠ CERTIFICATION
+                    CREDENTIAL REQUIREMENTS
                   </span>
                 </div>
 
                 <p className="text-xs text-[#8e95a5] leading-relaxed">
-                  Completing all lessons unlocks course completion tracking. Official NetVision Technical Certification requires passing the scheduled Final Exam & Practical Comprehensive Assessment in future evaluation phases.
+                  Completing all curriculum lessons, interactive exercises, and diagnostic evaluations validates course mastery and qualifies your account for an official cryptographic certificate.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
                   <div className="p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs">
                     <span className="font-mono text-[9px] text-[#8e95a5] uppercase block mb-1">
-                      1. THEORY REQUIREMENT
+                      1. CONCEPTUAL THEORY
                     </span>
                     <span className="text-[#10b981] font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> All Lessons Read
+                      <CheckCircle2 className="w-3 h-3" /> Lessons Completed
                     </span>
                   </div>
 
                   <div className="p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs">
                     <span className="font-mono text-[9px] text-[#8e95a5] uppercase block mb-1">
-                      2. PRACTICAL REQUIREMENT
+                      2. HANDS-ON WORKBENCH
                     </span>
                     <span className="text-[#10b981] font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> Labs Validated
+                      <CheckCircle2 className="w-3 h-3" /> Labs Executed
                     </span>
                   </div>
 
                   <div className="p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs">
                     <span className="font-mono text-[9px] text-[#8e95a5] uppercase block mb-1">
-                      3. FINAL EXAM
+                      3. KNOWLEDGE CHECK
                     </span>
-                    <span className="text-[#8e95a5] font-semibold flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Future Phase
+                    <span className="text-[#10b981] font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Quizzes Passed
                     </span>
                   </div>
 
                   <div className="p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs">
                     <span className="font-mono text-[9px] text-[#8e95a5] uppercase block mb-1">
-                      4. CERTIFICATION ELIGIBILITY
+                      4. VERIFIED CREDENTIAL
                     </span>
-                    <span className="text-[#8e95a5] font-semibold flex items-center gap-1">
-                      <Lock className="w-3 h-3" /> Final Exam Required
+                    <span className="text-[#38bdf8] font-bold flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3" /> Verifiable Certificate
                     </span>
                   </div>
                 </div>
