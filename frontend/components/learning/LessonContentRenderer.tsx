@@ -365,7 +365,9 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
             Interactive Visual Model
           </h2>
         </div>
-        <VisualRegistry topicSlug={lesson.slug} />
+        <div className="w-full overflow-x-auto rounded-xl">
+          <VisualRegistry topicSlug={lesson.slug} />
+        </div>
       </div>
 
       {/* 5. CORE CONCEPTS BREAKDOWN */}

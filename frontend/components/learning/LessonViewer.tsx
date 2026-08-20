@@ -268,15 +268,15 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
           </div>
         </div>
 
-        {/* Instrument Mode Tabs */}
-        <div className="hidden lg:flex items-center gap-1 bg-[#14151a] p-1 rounded-lg border border-[#2a2e39]" role="tablist" aria-label="Lesson Stages">
+        {/* Instrument Mode Tabs (Responsive across all screens) */}
+        <div className="flex items-center gap-1 bg-[#14151a] p-1 rounded-lg border border-[#2a2e39] overflow-x-auto max-w-full shrink-0" role="tablist" aria-label="Lesson Stages">
           {stages.map((stg) => {
             const isDone = completedStages.has(stg);
             const isActive = activeStage === stg;
             const labels = {
-              learn: '01 THEORY & MODEL',
-              practice: '02 LAB WORKBENCH',
-              quiz: '03 DIAGNOSTICS',
+              learn: '01 THEORY',
+              practice: '02 LAB',
+              quiz: '03 QUIZ',
               mastery: '04 SUMMARY',
             };
 
@@ -287,7 +287,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActiveStage(stg)}
-                className={`px-3 py-1.5 rounded text-[11px] font-mono font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#121316] ${
+                className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded text-[10px] sm:text-[11px] font-mono font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5 shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#121316] ${
                   isActive
                     ? 'bg-[#2563eb] text-white font-bold shadow-sm'
                     : isDone
