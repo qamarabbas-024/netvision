@@ -19,6 +19,7 @@ import { NetworkAutomationVisual } from './NetworkAutomationVisual';
 import { BinaryConverterVisual } from './BinaryConverterVisual';
 import { MediaInspectorVisual } from './MediaInspectorVisual';
 import { PerformanceMetricsVisual } from './PerformanceMetricsVisual';
+import { WirelessSpectrumVisual } from './WirelessSpectrumVisual';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -92,6 +93,15 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
   }
   if (slug.includes('performance') || slug.includes('metrics') || slug.includes('latency')) {
     return <PerformanceMetricsVisual />;
+  }
+  if (
+    slug.includes('wireless') ||
+    slug.includes('wifi') ||
+    slug.includes('spectrum') ||
+    slug.includes('802.11') ||
+    slug.includes('rf')
+  ) {
+    return <WirelessSpectrumVisual />;
   }
 
   // Fallback to Packet Journey Visual for other networking topics

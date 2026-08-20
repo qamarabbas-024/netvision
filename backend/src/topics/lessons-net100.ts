@@ -998,122 +998,225 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'WIRELESS_SPECTRUM_ANALYZER',
     introduction:
       'Master the physics and engineering of wireless local area networks (WLANs / IEEE 802.11): Radio Frequency (RF) spectrum bands (2.4 GHz, 5 GHz, 6 GHz), Wi-Fi generations (Wi-Fi 4 through Wi-Fi 7), channel bonding, RF interference, and CSMA/CA collision avoidance mechanics.',
-    stepMetadata: {
-      step1_objective:
-        'Understand RF transmission, analyze 2.4 GHz, 5 GHz, and 6 GHz spectrum bands, compare Wi-Fi generations (802.11n/ac/ax/be), and master CSMA/CA channel contention.',
-      step2_prerequisites: ['level-0-what-is-a-computer-network'],
-      step3_whyItMatters:
-        'Configuring wrong channels or channel widths causes severe interference and dropped Wi-Fi connections.',
-      step4_coreConcept:
-        'WLANs transmit radio waves conforming to IEEE 802.11. Spectrum bands: 2.4 GHz (longer range, penetrates walls, only 3 non-overlapping channels: 1, 6, 11), 5 GHz (shorter range, 24+ non-overlapping channels, supports 40/80/160 MHz bonding), 6 GHz (Wi-Fi 6E/7 clean spectrum). Because wireless is half-duplex, 802.11 uses CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance) and positive ACKs.',
-      step5_technicalAnatomy: {
-        title: 'RF Frequency Spectrum Bands & Wi-Fi Generations',
-        description: 'Frequency characteristics and 802.11 standards.',
-        components: [
-          { name: '2.4 GHz Band', detail: 'Channels 1, 6, 11 are the ONLY non-overlapping 20 MHz channels.' },
-          { name: '5 GHz Band', detail: '24+ non-overlapping channels; supports 40/80/160 MHz channel bonding.' },
-          { name: '6 GHz Band', detail: '1,200 MHz of clean spectrum for Wi-Fi 6E and Wi-Fi 7 (up to 320 MHz channels).' },
-          { name: 'Wi-Fi Generations', detail: 'Wi-Fi 4 (802.11n), Wi-Fi 5 (802.11ac), Wi-Fi 6 (802.11ax), Wi-Fi 7 (802.11be).' },
-          { name: 'CSMA/CA', detail: 'Listen before talk; random backoff countdown; mandatory Layer 2 ACK.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Carrier Sense', action: 'Client checks if RF energy is above CCA threshold (-82 dBm).' },
-          { stepNumber: 2, title: 'Random Backoff', action: 'Client counts down random slot times before transmitting.' },
-          { stepNumber: 3, title: 'Positive ACK', action: 'Receiver returns 802.11 ACK frame confirming reception.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'IEEE 802.11 Wireless Frame & Channels',
-        fields: [
-          { fieldName: '2.4 GHz Non-Overlapping', bitLength: '20 MHz', hexSample: 'Channels 1, 6, 11', description: 'Only 3 non-overlapping channels.' },
-          { fieldName: 'CSMA/CA ACK', bitLength: '14 Bytes', hexSample: 'Control Frame', description: 'Positive ACK on half-duplex RF media.' },
-        ],
-      },
-      step8_visualExplanation: {
+    contentV2: {
+      objective:
+        'Understand the fundamentals of wireless networking (IEEE 802.11 / Wi-Fi), compare radio frequency spectrum bands (2.4 GHz, 5 GHz, 6 GHz), master 2.4 GHz non-overlapping channel planning (Channels 1, 6, 11), explore channel bonding across Wi-Fi generations (Wi-Fi 4 through Wi-Fi 7), and analyze CSMA/CA collision avoidance mechanics on half-duplex wireless media.',
+      prerequisites: [
+        'level-0-what-is-a-computer-network',
+        'Basic understanding of electromagnetic signals and physical network media',
+      ],
+      whyItMatters:
+        'Wireless networks are an unguided, shared, half-duplex radio medium prone to interference and signal attenuation. Selecting improper channels (such as using overlapping Channels 2, 3, or 4 on 2.4 GHz) or misconfiguring channel widths causes severe Adjacent Channel Interference (ACI), dropped frames, and network slowdowns. Understanding RF spectrum allocations and CSMA/CA arbitration enables engineers to build reliable, high-speed Wi-Fi infrastructures.',
+      explanation:
+        'Wireless Local Area Networks (WLANs) transmit digital data across radio frequency (RF) bands using the IEEE 802.11 family of standards (commonly known as Wi-Fi).\n\n### 1. RF Spectrum Bands: 2.4 GHz, 5 GHz & 6 GHz\n- **2.4 GHz Band**: Features longer radio wavelengths that travel further and penetrate solid walls effectively. However, it has very limited bandwidth and high background interference from Bluetooth, baby monitors, and microwave ovens.\n- **5 GHz Band**: Features shorter wavelengths with higher signal attenuation through walls, but offers much wider frequency spectrum, 24+ non-overlapping channels, and support for wide bonded channels (40 MHz, 80 MHz, 160 MHz) for high throughput.\n- **6 GHz Band (Wi-Fi 6E & Wi-Fi 7)**: Provides 1,200 MHz of pristine, contiguous spectrum free from legacy Wi-Fi contention, supporting ultra-wide channels up to 320 MHz.\n\n### 2. The 2.4 GHz Non-Overlapping Channel Architecture\nIn North America, the 2.4 GHz band provides 11 channels spaced 5 MHz apart (Channel 1 at 2412 MHz, Channel 2 at 2417 MHz, etc.). Because each standard Wi-Fi transmission occupies 20 MHz of bandwidth, adjacent channels overlap heavily.\n- **The Golden Rule**: The **ONLY** three channels that do not overlap in 2.4 GHz are **Channels 1, 6, and 11** (separated by 25 MHz center frequencies).\n- **Adjacent Channel Interference (ACI)**: Configuring access points on intermediate channels (e.g., Channel 2, 3, 4, 7, 8, 9) bleeds RF energy into neighboring channels without protocol synchronization, causing destructive packet corruption.\n\n### 3. Wi-Fi Generations & Evolution\n- **Wi-Fi 4 (802.11n)**: Introduced MIMO (Multiple-Input Multiple-Output) spatial streams and 40 MHz channel bonding on 2.4 GHz and 5 GHz (up to 600 Mbps).\n- **Wi-Fi 5 (802.11ac)**: 5 GHz only, introduced Multi-User MIMO (MU-MIMO downlink), 256-QAM modulation, and 80/160 MHz channel bonding (up to 6.9 Gbps).\n- **Wi-Fi 6 / 6E (802.11ax)**: Operates on 2.4 GHz, 5 GHz, and 6 GHz. Introduced OFDMA (Orthogonal Frequency Division Multiple Access) to divide channels into sub-carriers for high client density, 1024-QAM, and Target Wake Time (TWT).\n- **Wi-Fi 7 (802.11be)**: Extremely High Throughput (EHT), 320 MHz ultra-wide channels, 4096-QAM, and Multi-Link Operation (MLO) enabling simultaneous transmission across multiple frequency bands.\n\n### 4. Half-Duplex Media & CSMA/CA Collision Avoidance\nBecause wireless radios cannot transmit and receive simultaneously on the same frequency channel without blinding their own receiver, wireless communication is strictly **half-duplex**.\n- Wired Ethernet historically used **CSMA/CD** (Collision Detection), where devices detect collisions while transmitting.\n- Wireless cannot detect collisions during transmission; therefore, Wi-Fi mandates **CSMA/CA (Carrier Sense Multiple Access with Collision Avoidance)**:\n  1. **Carrier Sense / Clear Channel Assessment (CCA)**: The device checks if the radio channel is currently busy.\n  2. **DIFS & Random Backoff**: If busy, the client waits for a Distributed Inter-Frame Space (DIFS) plus a randomized slot countdown timer before transmitting.\n  3. **Mandatory Layer 2 Positive ACK**: The receiving station must immediately return an 802.11 ACK frame upon successful reception. If no ACK is received, the sender assumes a collision occurred and retransmits with an exponentially expanded backoff window.',
+      components: [
+        {
+          name: '1. 2.4 GHz RF Frequency Band',
+          detail: 'Longer wavelength with superior wall penetration; limited to 3 non-overlapping 20 MHz channels (1, 6, 11) with higher background noise.',
+        },
+        {
+          name: '2. 5 GHz & 6 GHz RF Bands',
+          detail: 'Shorter wavelength with higher attenuation; 24+ non-overlapping channels on 5 GHz and 1.2 GHz of clean spectrum on 6 GHz supporting wide channel bonding.',
+        },
+        {
+          name: '3. 2.4 GHz Non-Overlapping Channels (1, 6, 11)',
+          detail: 'Channels separated by 25 MHz center frequencies. The only valid combination to eliminate adjacent channel spectral overlap in 2.4 GHz deployments.',
+        },
+        {
+          name: '4. Channel Bonding (40 / 80 / 160 / 320 MHz)',
+          detail: 'Combines adjacent 20 MHz channels into wider channels to multiply throughput, primarily deployed on 5 GHz and 6 GHz spectrum.',
+        },
+        {
+          name: '5. Wi-Fi Generations (802.11n to 802.11be)',
+          detail: 'Standardized evolutions: Wi-Fi 4 (MIMO), Wi-Fi 5 (MU-MIMO), Wi-Fi 6 (OFDMA & 6 GHz), and Wi-Fi 7 (320 MHz channels & Multi-Link Operation).',
+        },
+        {
+          name: '6. CSMA/CA & Positive Layer 2 ACKs',
+          detail: 'Half-duplex channel arbitration mechanism: listen before talk (CCA), random backoff slot timers, and mandatory receiver ACK frames.',
+        },
+      ],
+      visualizer: {
         type: 'WIRELESS_SPECTRUM_ANALYZER',
-        title: 'RF Spectrum Analyzer & Channel Contention Engine',
-        description: 'Inspect 2.4 GHz, 5 GHz, and 6 GHz spectrum allocations and test CSMA/CA backoffs.',
+        title: 'Interactive Wi-Fi Spectrum Analyzer & CSMA/CA Contention Engine',
+        description: 'Explore 2.4 GHz, 5 GHz, and 6 GHz spectrum allocations, visualize channel overlap and bonding, and simulate CSMA/CA contention arbitration.',
       },
-      step9_workedExample: {
-        title: 'Non-Overlapping 2.4 GHz Channel Plan',
-        problemStatement: 'Assign 2.4 GHz channels to 3 APs covering an office floor.',
+      workedExample: {
+        title: 'Designing a 3-Access-Point Multi-Room Wi-Fi Channel Plan',
+        problemStatement: 'An enterprise office floor requires installing 3 Wi-Fi Access Points (AP-1, AP-2, AP-3) with overlapping coverage zones. Determine: (1) The optimal 2.4 GHz channel assignment, (2) Why Channel 3 must NOT be used, and (3) The recommended 5 GHz configuration.',
         stepByStepSolution: [
-          'Channels 1, 6, and 11 are separated by 25 MHz with zero spectral overlap.',
-          'Assign AP-1 -> Ch 1, AP-2 -> Ch 6, AP-3 -> Ch 11. Never use intermediate channels (2, 3, 4, etc.).',
+          '1. 2.4 GHz Channel Assignment: Assign the 3 non-overlapping channels: AP-1 -> Channel 1 (2412 MHz), AP-2 -> Channel 6 (2437 MHz), and AP-3 -> Channel 11 (2462 MHz) with standard 20 MHz channel widths.',
+          '2. Why Avoid Channel 3: Channel 3 center frequency (2422 MHz) overlaps directly with both Channel 1 (2412 MHz) and Channel 6 (2437 MHz). This causes severe Adjacent Channel Interference (ACI), corrupting preambles and dropping frames on all nearby APs.',
+          '3. 5 GHz Channel Configuration: Assign distinct non-overlapping UNII channels (such as Channels 36, 52, and 100) using 40 MHz or 80 MHz channel bonding to maximize throughput without co-channel interference.',
         ],
-        finalResult: 'Use Channels 1, 6, 11 exclusively.',
+        finalResult: '2.4 GHz: AP-1 -> Ch 1, AP-2 -> Ch 6, AP-3 -> Ch 11 (20 MHz). 5 GHz: Independent non-overlapping channels (Ch 36, 52, 100) with 40/80 MHz bonding.',
       },
-      step10_realWorldScenario: {
-        topology: 'Adjacent Channel Interference Slowdown',
-        scenarioText: 'Setting APs to Channels 1, 2, 3 causes severe adjacent channel interference; reconfiguring to 1, 6, 11 fixes issue.',
-        engineeringContext: 'Adjacent channel interference destroys packet preambles.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Sends 802.11 Probe Requests to scan SSIDs and signal strength (RSSI).',
-        nicBehavior: 'Executes CCA and CSMA/CA backoffs.',
-        switchOrRouterBehavior: 'WLC dynamically optimizes channel assignments and transmit power.',
-      },
-      step12_cliTooling: [
+      recap: [
+        '2.4 GHz offers long range and wall penetration but only 3 non-overlapping channels (1, 6, 11).',
+        '5 GHz and 6 GHz offer wide bandwidth, 24+ channels, and channel bonding (40/80/160/320 MHz).',
+        'Wi-Fi is half-duplex; radios cannot transmit and receive simultaneously on the same channel.',
+        'CSMA/CA prevents collisions using Clear Channel Assessment (CCA), random backoff, and mandatory Layer 2 ACKs.',
+      ],
+      practice: [
         {
-          command: 'netsh wlan show interfaces',
-          description: 'Displays Wi-Fi SSID, radio type, channel, and speed.',
-          expectedOutput: 'Radio type: 802.11ax\nBand: 5 GHz\nChannel: 36\nTransmit rate: 1201 Mbps',
-          proofExplanation: 'Confirms Wi-Fi 6 (802.11ax) on 5 GHz.',
+          id: 1,
+          prompt: 'In North America, which three 2.4 GHz Wi-Fi channels are the ONLY channels that do not overlap with one another?',
+          expected: 'Channels 1, 6, and 11.',
+          hints: 'Each channel is 20 MHz wide and spaced 5 MHz apart; 25 MHz spacing is needed to eliminate overlap.',
+        },
+        {
+          id: 2,
+          prompt: 'Why does Wi-Fi use CSMA/CA (Collision Avoidance) instead of Ethernet CSMA/CD (Collision Detection)?',
+          expected: 'Wireless radios operate in half-duplex and cannot transmit and detect incoming collisions simultaneously on the same frequency.',
+          hints: 'A transmitting radio transmitter overwhelms its own local receiver circuitry.',
+        },
+        {
+          id: 3,
+          prompt: 'What happens if an access point is configured to use 2.4 GHz Channel 3 in an area with active APs on Channels 1 and 6?',
+          expected: 'Severe Adjacent Channel Interference (ACI) occurs because Channel 3 overlaps with both Channel 1 and Channel 6.',
+          hints: 'Channel 3 (2422 MHz) bleeds directly into the frequency masks of Channels 1 and 6.',
+        },
+        {
+          id: 4,
+          prompt: 'Compare 2.4 GHz and 5 GHz radio frequencies in terms of physical wall penetration and available channel bandwidth.',
+          expected: '2.4 GHz penetrates walls better due to longer wavelength; 5 GHz offers much higher bandwidth and 24+ non-overlapping channels.',
+          hints: 'Lower frequencies travel further through barriers; higher frequencies support wider channel bonding.',
+        },
+        {
+          id: 5,
+          prompt: 'What mechanism in CSMA/CA confirms that a transmitted wireless frame was successfully received without collision?',
+          expected: 'A mandatory Layer 2 positive ACK (Acknowledgment) frame sent immediately by the receiving station.',
+          hints: 'If the sender does not receive this confirmation frame, it assumes collision and retransmits.',
+        },
+        {
+          id: 6,
+          prompt: 'Which modern Wi-Fi standard introduced OFDMA (Orthogonal Frequency Division Multiple Access) and expanded into the 6 GHz spectrum band (Wi-Fi 6E)?',
+          expected: 'Wi-Fi 6 / 6E (IEEE 802.11ax).',
+          hints: 'Think of 802.11ax which subdivides channels into resource units for dense client environments.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Wi-Fi slow and dropping on 2.4 GHz.',
-          possibleCauses: ['AP set to overlapping channel like 3 or 4'],
-          diagnosticSteps: ['Scan RF environment and check active channel.'],
-          remediation: 'Set channel to 1, 6, or 11 and steer clients to 5 GHz.',
-        },
-      ],
-      step14_commonMistakes: [
-        { misconception: 'Using Channel 2, 3, 4, 8, or 9 on 2.4 GHz.', correction: 'ONLY Channels 1, 6, and 11 are non-overlapping.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Rogue Access Points and Evil Twins.',
-        mitigationStrategy: 'Deploy WIPS and enforce WPA3 encryption.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['2.4 GHz non-overlapping: 1, 6, 11.', '5 GHz has 24+ non-overlapping channels.', 'CSMA/CA is used because RF is half-duplex.'],
-        frequentTraps: ['Selecting CSMA/CD for wireless (CSMA/CD is for wired).'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Wireless RF Spectrum Analysis & Channel Optimization',
-        scenario: 'Audit Wi-Fi connection parameters.',
-        tasks: ['Run netsh wlan show interfaces.'],
-        verificationMethod: 'Verify non-overlapping channel configuration.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['2.4 GHz has 3 non-overlapping channels (1, 6, 11); 5 GHz has 24+ channels with bonding.', 'CSMA/CA avoids collisions on half-duplex RF.'],
-        nextLessonBridge: 'Proceed to NET-103 for the 7-Layer OSI Model and TCP/IP Architecture.',
-      },
     },
     questions: [
       {
         text: 'In the 2.4 GHz wireless frequency band in North America, which three channels are the ONLY channels that do not overlap with one another?',
-        options: ['Channels 1, 6, and 11', 'Channels 1, 2, and 3', 'Channels 6, 7, and 8', 'Channels 2, 4, and 8'],
+        options: [
+          'Channels 1, 6, and 11',
+          'Channels 1, 2, and 3',
+          'Channels 6, 7, and 8',
+          'Channels 2, 4, and 8',
+        ],
         correctOption: 0,
-        explanation: 'In 2.4 GHz Wi-Fi, Channels 1, 6, and 11 are separated by 25 MHz and are the only non-overlapping channel combination.',
-        explanationsJson: { 1: 'Channels 1, 2, 3 overlap almost entirely.', 2: 'Overlap completely.', 3: 'Overlap with neighbors.' },
+        explanation: 'In 2.4 GHz Wi-Fi, each 20 MHz channel requires 25 MHz separation between center frequencies to eliminate spectral overlap. Channels 1 (2412 MHz), 6 (2437 MHz), and 11 (2462 MHz) are the only non-overlapping channel combination.',
+        explanationsJson: {
+          1: 'Channels 1, 2, and 3 are spaced only 5 MHz apart and overlap almost entirely.',
+          2: 'Channels 6, 7, and 8 suffer extreme adjacent channel overlap.',
+          3: 'Channels 2, 4, and 8 overlap with neighboring transmissions.',
+        },
         difficulty: CourseLevel.FOUNDATIONAL,
         cognitiveLevel: CognitiveLevel.RECALL,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: '2.4 GHz Non-Overlapping Channels',
       },
+      {
+        text: 'Why does Wi-Fi (IEEE 802.11) use CSMA/CA (Collision Avoidance) rather than CSMA/CD (Collision Detection)?',
+        options: [
+          'Wireless radios are half-duplex and cannot transmit and detect collisions simultaneously on the same frequency channel',
+          'CSMA/CD is legally restricted to fiber optic cables only',
+          'Wireless antennas do not support binary data transmission',
+          'Collision avoidance eliminates the need for radio frequency spectrum',
+        ],
+        correctOption: 0,
+        explanation: 'Because a wireless radio transceiver signal transmission overwhelms its own receiver circuitry on the same channel, it cannot detect collisions while transmitting. Therefore, 802.11 relies on CSMA/CA with Clear Channel Assessment (CCA), random backoffs, and positive Layer 2 ACKs.',
+        explanationsJson: {
+          1: 'CSMA/CD is a media access arbitration protocol for half-duplex coaxial/twisted-pair Ethernet, not fiber.',
+          2: 'Wireless antennas transmit binary data modulated onto radio waves.',
+          3: 'Collision avoidance governs media access timing across RF spectrum.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Half-Duplex Media & CSMA/CA Rationale',
+      },
+      {
+        text: 'How do 2.4 GHz and 5 GHz Wi-Fi frequency bands compare regarding wall penetration and available channel capacity?',
+        options: [
+          '2.4 GHz provides better wall penetration due to longer wavelengths, while 5 GHz provides greater channel capacity and support for wide channel bonding',
+          '2.4 GHz has 24 non-overlapping channels while 5 GHz has only 3',
+          '5 GHz penetrates solid concrete walls much better than 2.4 GHz',
+          '2.4 GHz and 5 GHz have identical attenuation and channel bonding capabilities',
+        ],
+        correctOption: 0,
+        explanation: '2.4 GHz radio waves have longer wavelengths that penetrate physical walls and obstacles with lower attenuation. 5 GHz waves attenuate more rapidly through barriers but offer 24+ non-overlapping channels and support 40/80/160 MHz channel bonding.',
+        explanationsJson: {
+          1: '2.4 GHz has only 3 non-overlapping channels (1, 6, 11), while 5 GHz has 24+ non-overlapping channels.',
+          2: 'Higher frequencies (5 GHz) attenuate more rapidly through solid concrete.',
+          3: 'They have fundamentally different propagation physics and channel allocations.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: '2.4 GHz vs 5 GHz Spectrum Characteristics',
+      },
+      {
+        text: 'What happens in a 2.4 GHz Wi-Fi deployment if an administrator configures Access Points to use Channels 1, 2, and 3?',
+        options: [
+          'Severe Adjacent Channel Interference (ACI) occurs, corrupting packet preambles and degrading wireless throughput',
+          'The access points automatically bond together into a single 60 MHz channel',
+          'All clients automatically upgrade to 6 GHz Wi-Fi 6E operation',
+          'Network throughput triples because channels are closely adjacent',
+        ],
+        correctOption: 0,
+        explanation: 'Channels 1, 2, and 3 are separated by only 5 MHz, causing massive spectral overlap. Transmissions on Channel 2 act as destructive RF noise to Channels 1 and 3, causing preamble corruption and heavy retransmissions.',
+        explanationsJson: {
+          1: 'Channel bonding on 2.4 GHz requires synchronized 802.11n/ax bonding, not arbitrary adjacent overlap.',
+          2: '6 GHz requires Wi-Fi 6E hardware and separate 6 GHz radio transceivers.',
+          3: 'Interference destroys signal-to-noise ratio and severely reduces throughput.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Adjacent Channel Interference Impact',
+      },
+      {
+        text: 'In 802.11 CSMA/CA protocol operation, how does a transmitting station determine that a unicast frame was successfully delivered?',
+        options: [
+          'It receives an explicit Layer 2 positive ACK frame from the destination receiver immediately following the transmission',
+          'It checks if the local Ethernet switch port link LED is blinking green',
+          'It queries the DNS root servers for an acknowledgment record',
+          'It assumes success automatically because half-duplex media cannot drop packets',
+        ],
+        correctOption: 0,
+        explanation: 'In 802.11 CSMA/CA, the receiving station immediately responds with a Layer 2 ACK frame upon receiving and validating a frame. If the sender does not receive an ACK, it assumes a collision or drop occurred and retransmits.',
+        explanationsJson: {
+          1: 'Switchport link LEDs do not reflect Layer 2 Wi-Fi frame acknowledgment.',
+          2: 'DNS is an application-layer name resolution protocol.',
+          3: 'Half-duplex wireless media frequently drops packets due to interference and collisions.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'CSMA/CA Positive ACK Mechanism',
+      },
+      {
+        text: 'Which Wi-Fi generation introduced OFDMA (Orthogonal Frequency Division Multiple Access) to divide wireless channels into sub-carriers for high client density?',
+        options: [
+          'Wi-Fi 6 / 6E (IEEE 802.11ax)',
+          'Wi-Fi 4 (IEEE 802.11n)',
+          'Wi-Fi 1 (IEEE 802.11b)',
+          'Original IEEE 802.3 Ethernet',
+        ],
+        correctOption: 0,
+        explanation: 'Wi-Fi 6 (802.11ax) introduced OFDMA, which divides a 20/40/80/160 MHz channel into smaller sub-carriers (Resource Units) allowing simultaneous multi-client communication in dense environments.',
+        explanationsJson: {
+          1: 'Wi-Fi 4 (802.11n) introduced MIMO and 40 MHz channel bonding.',
+          2: 'Wi-Fi 1 (802.11b) used DSSS modulation up to 11 Mbps.',
+          3: 'IEEE 802.3 is wired Ethernet, not Wi-Fi.',
+        },
+        difficulty: CourseLevel.FOUNDATIONAL,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Wi-Fi Generations & OFDMA',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Wireless RF Spectrum Analysis & Channel Optimization',
-      instructions: '1. Audit Wi-Fi with netsh wlan show interfaces.\n2. Verify channel configuration.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { ssid: 'Corporate-WiFi', band: '5 GHz', channel: 36 },
-      tasks: ['Run netsh wlan show interfaces.'],
-    },
   },
 
   // -------------------------------------------------------------------------

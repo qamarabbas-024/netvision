@@ -217,10 +217,30 @@ async function verifyCurriculumContentV2() {
   assert(!net102Perf!.contentV2!.cliTooling, 'NET-102 has no forced CLI bloat');
   assert(!net102Perf!.contentV2!.security, 'NET-102 has no generic security filler');
   assert(!net102Perf!.lab, 'NET-102 has no phantom CLI lab');
-  console.log('  ✓ NET-102 Network Performance verified with clean Content V2 structure, latency delay breakdown, throughput/goodput distinction, packet loss & jitter, 6 practice items, 6 quiz questions, and zero forced filler.');
+  // [TEST 12] Verify NET-102 Wireless Networking, RF Spectrum & Wi-Fi Standards (wireless-networking-overview)
+  console.log('\n[TEST 12] Verifying NET-102 Wireless Networking & RF Spectrum (wireless-networking-overview)...');
+  const net102Wifi = LESSONS_NET100.find((l) => l.slug === 'wireless-networking-overview');
+  assert(!!net102Wifi, 'NET-102 Wireless Networking (wireless-networking-overview) exists');
+  assert(!!net102Wifi!.contentV2, 'NET-102 Wireless Networking has Content V2 structure');
+  assert(net102Wifi!.courseCode === 'NET-102', 'NET-102 Wireless Networking has courseCode NET-102');
+  assert(typeof net102Wifi!.contentV2!.objective === 'string', 'NET-102 Wireless Networking has clear objective');
+  assert(net102Wifi!.contentV2!.explanation.includes('2.4 GHz'), 'NET-102 Wireless Networking explains 2.4 GHz');
+  assert(net102Wifi!.contentV2!.explanation.includes('5 GHz'), 'NET-102 Wireless Networking explains 5 GHz');
+  assert(net102Wifi!.contentV2!.explanation.includes('6 GHz'), 'NET-102 Wireless Networking explains 6 GHz');
+  assert(net102Wifi!.contentV2!.explanation.includes('Channels 1, 6, and 11'), 'NET-102 Wireless Networking explains non-overlapping channels 1, 6, 11');
+  assert(net102Wifi!.contentV2!.explanation.includes('CSMA/CA'), 'NET-102 Wireless Networking explains CSMA/CA');
+  assert(net102Wifi!.contentV2!.explanation.includes('half-duplex'), 'NET-102 Wireless Networking explains half-duplex');
+  assert(net102Wifi!.contentV2!.components.length >= 5, 'NET-102 Wireless Networking has at least 5 technical components');
+  assert(Array.isArray(net102Wifi!.contentV2!.practice) && net102Wifi!.contentV2!.practice.length >= 6, 'NET-102 Wireless Networking has 6 practice exercises');
+  assert(net102Wifi!.questions.length >= 6, 'NET-102 Wireless Networking has 6 aligned quiz questions');
+  assert(!net102Wifi!.contentV2!.packetHeaderView, 'NET-102 Wireless Networking has no fake packet header');
+  assert(!net102Wifi!.contentV2!.cliTooling, 'NET-102 Wireless Networking has no forced CLI bloat');
+  assert(!net102Wifi!.contentV2!.security, 'NET-102 Wireless Networking has no generic security filler');
+  assert(!net102Wifi!.lab, 'NET-102 Wireless Networking has no phantom CLI lab');
+  console.log('  ✓ NET-102 Wireless Networking verified with clean Content V2 structure, 2.4/5/6 GHz spectrum breakdown, channels 1/6/11 non-overlap, CSMA/CA half-duplex mechanics, 6 practice items, 6 quiz questions, and zero forced filler.');
 
   console.log('\n================================================================');
-  console.log('🎉 ALL 11 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 12 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 
