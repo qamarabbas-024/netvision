@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/Progress';
 import { RouterIcon, DNSIcon } from '@/components/ui/Icons';
 import { getUserProgressApi, getTopicsApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
+import { PulsePacketLoader } from '@/components/ui/Loading';
 import {
   Flame,
   Zap,
@@ -23,6 +24,8 @@ import {
   TrendingUp,
   Clock,
   ShieldCheck,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -30,22 +33,36 @@ export default function DashboardPage() {
   const [userProgress, setUserProgress] = useState<any>(null);
   const [topicsCatalog, setTopicsCatalog] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadDashboardData = async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const [progressData, catalogData] = await Promise.all([
+        getUserProgressApi().catch((err) => {
+          console.warn('Could not fetch user progress:', err);
+          return null;
+        }),
+        getTopicsApi().catch((err) => {
+          console.warn('Could not fetch topics catalog:', err);
+          return [];
+        }),
+      ]);
+      if (progressData) setUserProgress(progressData);
+      if (catalogData) setTopicsCatalog(catalogData);
+      if (!progressData && (!catalogData || catalogData.length === 0)) {
+        setLoadError('Unable to connect to learning server. Please check your connection.');
+      }
+    } catch (err: any) {
+      console.error('Error fetching dashboard data:', err);
+      setLoadError(err?.message || 'Failed to load dashboard data.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadDashboardData() {
-      try {
-        const [progressData, catalogData] = await Promise.all([
-          getUserProgressApi().catch(() => null),
-          getTopicsApi().catch(() => []),
-        ]);
-        if (progressData) setUserProgress(progressData);
-        if (catalogData) setTopicsCatalog(catalogData);
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
     loadDashboardData();
   }, []);
 
@@ -108,45 +125,62 @@ export default function DashboardPage() {
 
           {/* Dashboard Body */}
           <main className="p-4 sm:p-6 lg:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
-            <div className="max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8">
-              {/* 1. WHERE AM I? - Identity & Guest Notice */}
-              {!isAuthenticated && (
-                <div className="glass-panel p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 font-mono text-xs font-bold">
-                      GUEST
+            {isLoading ? (
+              <div className="py-24 flex justify-center items-center">
+                <PulsePacketLoader label="Loading Learner Dashboard & Progress..." />
+              </div>
+            ) : (
+              <div className="max-w-7xl mx-auto flex flex-col gap-6 sm:gap-8">
+                {loadError && (
+                  <div className="p-4 rounded-xl glass-panel border border-amber-500/30 bg-amber-500/5 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+                      <p className="text-xs text-amber-200">{loadError}</p>
                     </div>
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-bold text-white font-sans">Guest Session Active</h4>
-                      <p className="text-xs text-zinc-300 font-sans">
-                        Your learning progress is saved locally. Create an account to claim progress permanently and earn verifiable certificates.
-                      </p>
-                    </div>
+                    <Button variant="secondary" size="sm" onClick={loadDashboardData} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
+                      Retry
+                    </Button>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
-                    <Link href="/login" className="flex-1 sm:flex-initial">
-                      <Button variant="ghost" size="sm" className="w-full text-xs">Sign In</Button>
-                    </Link>
-                    <Link href="/register" className="flex-1 sm:flex-initial">
-                      <Button variant="cyan" size="sm" className="w-full text-xs">Create Account</Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
+                )}
 
-              {/* Header Profile Bar */}
-              <div className="glass-panel p-5 sm:p-6 rounded-xl border border-[#272732] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div>
-                  <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold uppercase tracking-wider bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/30 mb-2">
-                    {isAuthenticated ? 'Authenticated Learner' : 'Guest Learner'}
+                {/* 1. WHERE AM I? - Identity & Guest Notice */}
+                {!isAuthenticated && (
+                  <div className="glass-panel p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 font-mono text-xs font-bold">
+                        GUEST
+                      </div>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-white font-sans">Guest Session Active</h4>
+                        <p className="text-xs text-zinc-300 font-sans">
+                          Your learning progress is saved locally. Create an account to claim progress permanently and earn verifiable certificates.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
+                      <Link href="/login" className="flex-1 sm:flex-initial">
+                        <Button variant="ghost" size="sm" className="w-full text-xs">Sign In</Button>
+                      </Link>
+                      <Link href="/register" className="flex-1 sm:flex-initial">
+                        <Button variant="cyan" size="sm" className="w-full text-xs">Create Account</Button>
+                      </Link>
+                    </div>
                   </div>
-                  <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight font-sans">
-                    Welcome{isAuthenticated && (user?.fullName || user?.username) ? `, ${user.fullName || user.username}` : ''}
-                  </h1>
-                  <p className="text-xs sm:text-sm text-zinc-400 mt-1 font-sans">
-                    Track active course progress, resume technical lessons, and verify earned credentials.
-                  </p>
-                </div>
+                )}
+
+                {/* Header Profile Bar */}
+                <div className="glass-panel p-5 sm:p-6 rounded-xl border border-[#272732] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold uppercase tracking-wider bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/30 mb-2">
+                      {isAuthenticated ? 'Authenticated Learner' : 'Guest Learner'}
+                    </div>
+                    <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight font-sans">
+                      Welcome{isAuthenticated && (user?.fullName || user?.username) ? `, ${user.fullName || user.username}` : ''}
+                    </h1>
+                    <p className="text-xs sm:text-sm text-zinc-400 mt-1 font-sans">
+                      Track active course progress, resume technical lessons, and verify earned credentials.
+                    </p>
+                  </div>
 
                 {/* Compact XP & Streak Banner */}
                 <div className="flex items-center gap-3 w-full md:w-auto">
@@ -378,6 +412,7 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+            )}
           </main>
         </div>
       </div>

@@ -9,16 +9,32 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { useAuthStore } from '@/stores/authStore';
 import { getUserProgressApi, StudentDashboardMetrics } from '@/lib/api';
-import { Flame, Award, BookOpen, Clock, ShieldCheck, User as UserIcon } from 'lucide-react';
+import { Flame, Award, BookOpen, Clock, ShieldCheck, User as UserIcon, RefreshCw, AlertTriangle } from 'lucide-react';
+import { PulsePacketLoader } from '@/components/ui/Loading';
+import { Button } from '@/components/ui/Button';
 
 export default function ProfilePage() {
   const { user, isAuthenticated } = useAuthStore();
   const [metrics, setMetrics] = useState<StudentDashboardMetrics | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadProfileMetrics = async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const data = await getUserProgressApi();
+      if (data) setMetrics(data);
+    } catch (err: any) {
+      console.warn('Could not load profile metrics:', err);
+      setLoadError(err?.message || 'Failed to sync learner metrics.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    getUserProgressApi().then((data) => {
-      if (data) setMetrics(data);
-    });
+    loadProfileMetrics();
   }, []);
 
   const displayName = user?.fullName || user?.username || (isAuthenticated ? 'NetVision Learner' : 'Guest Learner');
@@ -34,7 +50,24 @@ export default function ProfilePage() {
           <AppTopbar />
 
           <main className="p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+            {isLoading ? (
+              <div className="py-24 flex justify-center items-center">
+                <PulsePacketLoader label="Loading Learner Profile & Metrics..." />
+              </div>
+            ) : (
             <div className="max-w-6xl mx-auto flex flex-col gap-8">
+              {loadError && (
+                <div className="p-4 rounded-xl glass-panel border border-amber-500/30 bg-amber-500/5 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+                    <p className="text-xs text-amber-200">{loadError}</p>
+                  </div>
+                  <Button variant="secondary" size="sm" onClick={loadProfileMetrics} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
+                    Retry
+                  </Button>
+                </div>
+              )}
+
               {/* Profile Banner */}
               <div className="glass-panel p-8 rounded-3xl border border-[#00f0ff]/30 shadow-glow-cyan flex flex-col sm:flex-row items-center gap-6">
                 <Avatar name={displayName} size="lg" status={isAuthenticated ? 'online' : 'offline'} className="w-20 h-20 text-2xl" />
@@ -77,6 +110,7 @@ export default function ProfilePage() {
                 </Card>
               </div>
             </div>
+            )}
           </main>
         </div>
       </div>

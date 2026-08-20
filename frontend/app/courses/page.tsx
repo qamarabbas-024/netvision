@@ -8,21 +8,29 @@ import { CurriculumSection } from '@/components/learning/CurriculumSection';
 import { PulsePacketLoader } from '@/components/ui/Loading';
 import { getTopicsApi } from '@/lib/api';
 
+import { Button } from '@/components/ui/Button';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
+
 export default function CourseCatalogPage() {
   const [topics, setTopics] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadTopics = async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const data = await getTopicsApi();
+      setTopics(data || []);
+    } catch (err: any) {
+      console.error('Failed to load curriculum topics:', err);
+      setLoadError(err?.message || 'Failed to connect to course curriculum service.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadTopics() {
-      try {
-        const data = await getTopicsApi();
-        setTopics(data);
-      } catch (err) {
-        console.error('Failed to load curriculum topics:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
     loadTopics();
   }, []);
 
@@ -39,6 +47,19 @@ export default function CourseCatalogPage() {
               {isLoading ? (
                 <div className="py-20 flex justify-center">
                   <PulsePacketLoader label="Loading Curriculum Topics..." />
+                </div>
+              ) : loadError ? (
+                <div className="p-12 glass-panel rounded-3xl border border-rose-500/30 text-center flex flex-col items-center gap-4 my-auto">
+                  <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                    <AlertTriangle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-1">Failed to Load Curriculum</h3>
+                    <p className="text-xs text-zinc-400 max-w-md">{loadError}</p>
+                  </div>
+                  <Button variant="cyan" size="sm" onClick={loadTopics} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
+                    Retry Connection
+                  </Button>
                 </div>
               ) : (
                 <CurriculumSection topics={topics} />

@@ -33,14 +33,27 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       const requestId = res.headers.get('x-request-id') || undefined;
-      const errorMsg = errorData.message || `API request failed with status ${res.status}`;
+      let errorMsg = 'An unexpected server error occurred.';
+      if (typeof errorData.message === 'string') {
+        errorMsg = errorData.message;
+      } else if (Array.isArray(errorData.message)) {
+        errorMsg = errorData.message.join('. ');
+      } else if (res.status === 404) {
+        errorMsg = 'The requested resource was not found.';
+      } else if (res.status === 401) {
+        errorMsg = 'Authentication session expired or invalid.';
+      } else if (res.status === 403) {
+        errorMsg = 'You do not have permission to access this resource.';
+      } else if (res.status >= 500) {
+        errorMsg = 'Server temporarily unavailable. Please try again.';
+      }
       telemetry.captureApiError(endpoint, res.status, errorMsg, requestId);
       throw new Error(errorMsg);
     }
 
     return await res.json();
   } catch (err: any) {
-    console.warn(`[NetVision API] Fetch failed for ${url}: ${err.message}.`);
+    console.warn(`[NetVision API] Fetch failed for ${url}: ${err?.message || 'Network error'}.`);
     throw err;
   }
 }

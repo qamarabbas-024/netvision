@@ -7,6 +7,10 @@ import { LessonViewer } from '@/components/learning/LessonViewer';
 import { PulsePacketLoader } from '@/components/ui/Loading';
 import { getLessonDetailApi, getTopicDetailApi } from '@/lib/api';
 
+import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
+import { ArrowLeft, RefreshCw, AlertTriangle } from 'lucide-react';
+
 export default function LessonPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -16,33 +20,38 @@ export default function LessonPage() {
 
   const [lesson, setLesson] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadLessonAndCourse = async () => {
+    if (!lessonSlug) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const lessonData = await getLessonDetailApi(lessonSlug || slug);
+      const courseSlug = lessonData?.course?.slug || slug;
+
+      // Fetch course detail for full sidebar modules if needed
+      if (courseSlug && (!lessonData?.course?.modules || lessonData.course.modules.length === 0)) {
+        try {
+          const courseDetail = await getTopicDetailApi(courseSlug);
+          if (courseDetail?.modules) {
+            lessonData.course.modules = courseDetail.modules;
+          }
+        } catch (e) {
+          console.warn('Could not fetch additional course modules for sidebar:', e);
+        }
+      }
+
+      setLesson(lessonData);
+    } catch (err: any) {
+      console.error('Error fetching lesson data:', err);
+      setError(err?.message || `Failed to load lesson "${lessonSlug}".`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function loadLessonAndCourse() {
-      if (!lessonSlug) return;
-      try {
-        const lessonData = await getLessonDetailApi(lessonSlug || slug);
-        const courseSlug = lessonData?.course?.slug || slug;
-
-        // Fetch course detail for full sidebar modules if needed
-        if (courseSlug && (!lessonData?.course?.modules || lessonData.course.modules.length === 0)) {
-          try {
-            const courseDetail = await getTopicDetailApi(courseSlug);
-            if (courseDetail?.modules) {
-              lessonData.course.modules = courseDetail.modules;
-            }
-          } catch (e) {
-            console.warn('Could not fetch additional course modules for sidebar:', e);
-          }
-        }
-
-        setLesson(lessonData);
-      } catch (err) {
-        console.error('Error fetching lesson data:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
     loadLessonAndCourse();
   }, [slug, lessonSlug]);
 
@@ -56,15 +65,33 @@ export default function LessonPage() {
     );
   }
 
-  if (!lesson) {
+  if (error || !lesson) {
+    const isNotFound = error?.toLowerCase().includes('not found') || !error;
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex items-center justify-center p-8 text-center">
-          <div>
-            <h2 className="text-2xl font-bold text-white mb-2">Lesson Not Found</h2>
-            <p className="text-sm text-zinc-400">
-              Could not retrieve lesson data for "{lessonSlug}".
-            </p>
+        <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto">
+          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4">
+            <AlertTriangle className="w-6 h-6" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {isNotFound ? 'Lesson Not Found' : 'Failed to Load Lesson'}
+          </h2>
+          <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+            {isNotFound
+              ? `Could not locate lesson "${lessonSlug}" in this course.`
+              : error || 'An unexpected connection error occurred.'}
+          </p>
+          <div className="flex items-center gap-3">
+            {!isNotFound && (
+              <Button variant="cyan" onClick={loadLessonAndCourse} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
+                Retry Loading
+              </Button>
+            )}
+            <Link href={`/courses/${slug || 'net-101-digital-foundations'}`}>
+              <Button variant={isNotFound ? 'cyan' : 'secondary'} leftIcon={<ArrowLeft className="w-4 h-4" />}>
+                Course Syllabus
+              </Button>
+            </Link>
           </div>
         </div>
       </ProtectedRoute>

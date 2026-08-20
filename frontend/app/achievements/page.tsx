@@ -6,9 +6,11 @@ import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Award, Flame, Trophy, User, ShieldCheck, CheckCircle2, Lock, Zap } from 'lucide-react';
+import { Award, Flame, Trophy, User, ShieldCheck, CheckCircle2, Lock, Zap, AlertTriangle, RefreshCw } from 'lucide-react';
 import { getMyAchievementsApi, getUserProgressApi, AchievementItem } from '@/lib/api';
-
+import { PulsePacketLoader } from '@/components/ui/Loading';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { useAuthStore } from '@/stores/authStore';
 
 export default function AchievementsPage() {
@@ -16,22 +18,32 @@ export default function AchievementsPage() {
   const [achievements, setAchievements] = useState<AchievementItem[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
-    Promise.all([
-      getMyAchievementsApi(),
-      getUserProgressApi(),
-    ]).then(([achData, progData]) => {
+  const loadAchievementsData = async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const [achData, progData] = await Promise.all([
+        getMyAchievementsApi(),
+        getUserProgressApi(),
+      ]);
       if (achData?.achievements) {
         setAchievements(achData.achievements);
       }
       if (progData) {
         setUserStats(progData);
       }
+    } catch (err: any) {
+      console.error('Failed to load achievements data:', err);
+      setLoadError(err?.message || 'Failed to load achievements and leaderboard metrics.');
+    } finally {
       setIsLoading(false);
-    }).catch(() => {
-      setIsLoading(false);
-    });
+    }
+  };
+
+  useEffect(() => {
+    loadAchievementsData();
   }, []);
 
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
@@ -51,6 +63,22 @@ export default function AchievementsPage() {
           <AppTopbar />
 
           <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+            {isLoading ? (
+              <div className="py-24 flex justify-center items-center">
+                <PulsePacketLoader label="Loading Achievement Badges & Learner Standing..." />
+              </div>
+            ) : loadError ? (
+              <div className="p-12 glass-panel rounded-3xl border border-rose-500/30 text-center flex flex-col items-center gap-4 max-w-md mx-auto my-auto">
+                <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-1">Failed to Load Achievements</h3>
+                <p className="text-xs text-zinc-400 mb-2">{loadError}</p>
+                <Button variant="cyan" size="sm" onClick={loadAchievementsData} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
+                  Retry Connection
+                </Button>
+              </div>
+            ) : (
             <div className="max-w-6xl mx-auto flex flex-col gap-8">
               <div>
                 <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
@@ -181,6 +209,7 @@ export default function AchievementsPage() {
                 </p>
               </Card>
             </div>
+            )}
           </main>
         </div>
       </div>

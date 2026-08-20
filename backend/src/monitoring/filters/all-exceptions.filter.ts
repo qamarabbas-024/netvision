@@ -18,12 +18,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const requestId = request.requestId || (request.headers['x-request-id'] as string) || 'unknown';
+    const requestId = (request as any).requestId || (request.headers['x-request-id'] as string) || 'unknown';
     const isProd = process.env.NODE_ENV === 'production';
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: string | object = 'Internal server error';
     let errorName = 'InternalServerError';
+
+    const isPrismaError =
+      exception instanceof Error &&
+      (exception.name.includes('Prisma') ||
+        typeof (exception as any).code === 'string' && (exception as any).code.startsWith('P') ||
+        exception.constructor?.name?.includes('Prisma'));
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
@@ -36,11 +42,31 @@ export class AllExceptionsFilter implements ExceptionFilter {
         message = res;
         errorName = exception.name;
       }
+    } else if (isPrismaError) {
+      const err = exception as any;
+      if (err.code === 'P2002') {
+        status = HttpStatus.CONFLICT;
+        errorName = 'Conflict';
+        message = 'A record with this unique field already exists.';
+      } else if (err.code === 'P2025') {
+        status = HttpStatus.NOT_FOUND;
+        errorName = 'NotFound';
+        message = 'The requested database record was not found.';
+      } else {
+        status = HttpStatus.INTERNAL_SERVER_ERROR;
+        errorName = 'DatabaseError';
+        message = 'A database operation error occurred. Please try again.';
+      }
     } else if (exception instanceof Error) {
       errorName = exception.name;
       if (!isProd) {
         message = exception.message;
       }
+    }
+
+    // Never leak raw Prisma class names in client response
+    if (errorName.includes('Prisma')) {
+      errorName = status >= 500 ? 'InternalServerError' : 'DatabaseError';
     }
 
     const safeMessage = redactSensitiveData(message);

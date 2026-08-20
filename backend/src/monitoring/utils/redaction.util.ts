@@ -25,7 +25,13 @@ const SENSITIVE_STRING_PATTERNS = [
   /postgres(ql)?:\/\/[^@\s]+:[^@\s]+@[^\s]+/gi,
   /redis:\/\/[^@\s]+:[^@\s]+@[^\s]+/gi,
   /mongodb(\+srv)?:\/\/[^@\s]+:[^@\s]+@[^\s]+/gi,
+  /mysql:\/\/[^@\s]+:[^@\s]+@[^\s]+/gi,
+  /sqlite:[^\s]+/gi,
   /re_[A-Za-z0-9_-]{20,}/gi, // Resend API keys
+  /ey[A-Za-z0-9-_=]+\.ey[A-Za-z0-9-_=]+\.[A-Za-z0-9-_.+/=]+/gi, // JWT tokens
+  /[A-Za-z]:\\[^"'\n\r<>]+/gi, // Windows absolute file paths
+  /\/(?:Users|home|var|tmp|etc|app|node_modules)\/[^"'\n\r<>]+/gi, // Unix file paths
+  /Invalid\s+`prisma\.[^`]+`\s+invocation/gi, // Prisma invocation leakage
 ];
 
 /**

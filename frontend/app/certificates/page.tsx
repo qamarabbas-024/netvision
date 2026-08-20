@@ -10,26 +10,37 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/authStore';
 import { getUserCertificatesApi } from '@/lib/api';
-import { Award, ArrowRight, ShieldCheck, Lock, BookOpen } from 'lucide-react';
+import { Award, ArrowRight, ShieldCheck, Lock, BookOpen, AlertTriangle, RefreshCw } from 'lucide-react';
+import { PulsePacketLoader } from '@/components/ui/Loading';
 
 export default function CertificatesCatalogPage() {
   const { isAuthenticated } = useAuthStore();
   const [certs, setCerts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      getUserCertificatesApi().then((data) => {
-        if (Array.isArray(data)) {
-          setCerts(data);
-        }
-        setIsLoading(false);
-      }).catch(() => {
-        setIsLoading(false);
-      });
-    } else {
+  const loadCertificates = async () => {
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const data = await getUserCertificatesApi();
+      if (Array.isArray(data)) {
+        setCerts(data);
+      }
+    } catch (err: any) {
+      console.error('Failed to load certificates:', err);
+      setLoadError(err?.message || 'Failed to retrieve earned certificates.');
+    } finally {
       setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    loadCertificates();
   }, [isAuthenticated]);
 
   return (
@@ -41,6 +52,22 @@ export default function CertificatesCatalogPage() {
           <AppTopbar />
 
           <main className="p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+            {isLoading ? (
+              <div className="py-24 flex justify-center items-center">
+                <PulsePacketLoader label="Retrieving Cryptographic Credentials..." />
+              </div>
+            ) : loadError ? (
+              <div className="p-12 glass-panel rounded-3xl border border-rose-500/30 text-center flex flex-col items-center gap-4 max-w-md mx-auto my-auto">
+                <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-1">Failed to Load Certificates</h3>
+                <p className="text-xs text-zinc-400 mb-2">{loadError}</p>
+                <Button variant="cyan" size="sm" onClick={loadCertificates} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
+                  Retry Connection
+                </Button>
+              </div>
+            ) : (
             <div className="max-w-6xl mx-auto flex flex-col gap-8">
               <div>
                 <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
@@ -134,6 +161,7 @@ export default function CertificatesCatalogPage() {
                 </div>
               )}
             </div>
+            )}
           </main>
         </div>
       </div>

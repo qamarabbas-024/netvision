@@ -36,20 +36,25 @@ export default function CourseDetailPage() {
 
   const [topic, setTopic] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showPrereqModal, setShowPrereqModal] = useState(false);
 
-  useEffect(() => {
-    async function loadTopicDetail() {
-      if (!slug) return;
-      try {
-        const data = await getTopicDetailApi(slug);
-        setTopic(data);
-      } catch (err) {
-        console.error('Error fetching course detail:', err);
-      } finally {
-        setIsLoading(false);
-      }
+  const loadTopicDetail = async () => {
+    if (!slug) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await getTopicDetailApi(slug);
+      setTopic(data);
+    } catch (err: any) {
+      console.error('Error fetching course detail:', err);
+      setError(err?.message || `Course "${slug}" could not be loaded.`);
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
     loadTopicDetail();
   }, [slug]);
 
@@ -69,21 +74,33 @@ export default function CourseDetailPage() {
     );
   }
 
-  if (!topic) {
+  if (error || !topic) {
+    const isNotFound = error?.toLowerCase().includes('not found') || !error;
     return (
       <ProtectedRoute>
         <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
           <AppSidebar />
           <div className="flex-1 flex flex-col min-w-0">
             <AppTopbar />
-            <main className="p-8 flex-1 flex flex-col justify-center items-center text-center">
-              <h2 className="text-2xl font-bold text-white mb-2">Course Not Found</h2>
-              <p className="text-sm text-zinc-400 mb-6">
-                The course slug "{slug}" could not be located in the curriculum catalog.
+            <main className="p-8 flex-1 flex flex-col justify-center items-center text-center max-w-md mx-auto my-auto">
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {isNotFound ? 'Course Not Found' : 'Failed to Load Course Syllabus'}
+              </h2>
+              <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+                {isNotFound
+                  ? `The course slug "${slug}" could not be located in the curriculum catalog.`
+                  : error || 'An unexpected connection error occurred while retrieving course details.'}
               </p>
-              <Link href="/courses">
-                <Button variant="cyan">Back to Course Catalog</Button>
-              </Link>
+              <div className="flex items-center gap-3">
+                {!isNotFound && (
+                  <Button variant="cyan" onClick={loadTopicDetail}>
+                    Retry Loading
+                  </Button>
+                )}
+                <Link href="/courses">
+                  <Button variant={isNotFound ? 'cyan' : 'secondary'}>Back to Course Catalog</Button>
+                </Link>
+              </div>
             </main>
           </div>
         </div>

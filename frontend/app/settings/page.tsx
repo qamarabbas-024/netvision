@@ -80,15 +80,15 @@ export default function SettingsPage() {
                     />
                     <Input
                       label="Username"
-                      defaultValue={user?.username || (isAuthenticated ? 'learner' : 'guest_user')}
-                      placeholder="your_username"
+                      defaultValue={user?.username || (isAuthenticated ? '' : 'guest_learner')}
+                      placeholder="Username not set"
                       disabled
                     />
                     <Input
                       label="Email Address"
-                      defaultValue={user?.email || (isAuthenticated ? 'learner@netvision.internal' : 'guest@local.session')}
+                      defaultValue={user?.email || ''}
                       type="email"
-                      placeholder="your.email@example.com"
+                      placeholder={isAuthenticated ? 'No email associated' : 'Guest session (unregistered)'}
                       disabled
                     />
                     <Input
