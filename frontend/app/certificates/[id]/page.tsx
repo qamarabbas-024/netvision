@@ -86,10 +86,11 @@ export default function CertificateDetailPage() {
 
   const candidateName = certData.recipientName || certData.candidateName;
   const certificationTitle = certData.certificationTitle || certData.courseTitle;
+  const skillsAssessed: string[] = Array.isArray(certData.skillsAssessed) ? certData.skillsAssessed : [];
   const isRevoked = certData.status === 'REVOKED';
   const isInactive = certData.status && certData.status !== 'ACTIVE';
 
-  if (!candidateName || !certificationTitle) {
+  if (!candidateName || !certificationTitle || skillsAssessed.length === 0) {
     return (
       <div className="min-h-screen surface-0 text-[#f4f5f7] flex flex-col justify-between p-4 sm:p-8 font-sans">
         <div className="max-w-4xl mx-auto w-full mb-6">
@@ -103,7 +104,7 @@ export default function CertificateDetailPage() {
           </div>
           <h1 className="text-xl sm:text-2xl font-bold text-[#f4f5f7]">Incomplete Credential Record</h1>
           <p className="text-xs sm:text-sm text-[#8e95a5] leading-relaxed">
-            The credential record for ID &quot;{certId}&quot; is missing authoritative recipient or certification metadata.
+            The credential record for ID &quot;{certId}&quot; is missing authoritative recipient, certification title, or assessed skills metadata.
           </p>
           <div className="pt-2 flex items-center gap-3">
             <Link href="/certificates">
@@ -123,13 +124,6 @@ export default function CertificateDetailPage() {
     : 'Recently Issued';
   const credentialId = certData.credentialId || certData.code || certId;
   const grade = certData.grade || (certData.score ? `${certData.score}% — Passed` : 'Passed');
-  const skillsAssessed: string[] = Array.isArray(certData.skillsAssessed) && certData.skillsAssessed.length > 0
-    ? certData.skillsAssessed
-    : [
-        'Computer Networking Curriculum Mastery',
-        'TCP/IP & Protocol Mechanics Evaluation',
-        'Network Addressing & Diagnostics Assessment',
-      ];
 
   const [copied, setCopied] = useState<boolean>(false);
 
@@ -143,13 +137,9 @@ export default function CertificateDetailPage() {
 
   const handleDownload = async () => {
     try {
-      const token = typeof window !== 'undefined'
-        ? (sessionStorage.getItem('netvision_token') || localStorage.getItem('netvision_token'))
-        : null;
       const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
       const res = await fetch(`${apiBase}/certificates/${credentialId}/download`, {
         credentials: 'include',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) {
         window.print();

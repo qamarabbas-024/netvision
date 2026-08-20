@@ -158,30 +158,49 @@ export class CertificationsService {
 
     const coursesComplete = totalLessonsCount > 0 && completedProgressCount >= totalLessonsCount;
 
-    // 2. Assessment Average Check
-    const quizAttempts = await this.prisma.quizAttempt.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
+    // 2. Assessment Average Check (Scoped strictly to required curriculum quizzes)
+    const requiredQuizzes = await this.prisma.quiz.findMany({
+      where: { lessonId: { in: allLessonIds } },
+      select: { id: true },
     });
+    const requiredQuizIds = requiredQuizzes.map((q) => q.id);
+
+    const quizAttempts = requiredQuizIds.length > 0
+      ? await this.prisma.quizAttempt.findMany({
+          where: {
+            userId,
+            quizId: { in: requiredQuizIds },
+          },
+          orderBy: { createdAt: 'desc' },
+        })
+      : [];
 
     const totalQuizScore = quizAttempts.reduce((acc, q) => acc + q.score, 0);
     const assessmentAvg = quizAttempts.length > 0 ? Math.round(totalQuizScore / quizAttempts.length) : 0;
     const assessmentsPassed = quizAttempts.length > 0 && assessmentAvg >= minAssessmentAvg;
 
-    // 3. Required Practical Labs Check
+    // 3. Required Practical Labs Check (Each distinct lab must be individually passed)
     const requiredLabs = await this.prisma.lessonLab.findMany({
       where: { lessonId: { in: allLessonIds } },
+      select: { id: true },
     });
+    const requiredLabIds = requiredLabs.map((l) => l.id);
 
-    const passedLabAttempts = await this.prisma.labAttempt.count({
-      where: {
-        userId,
-        labId: { in: requiredLabs.map((l) => l.id) },
-        passed: true,
-      },
-    });
-
-    const labsPassed = requiredLabs.length === 0 || passedLabAttempts >= requiredLabs.length;
+    let labsPassed = true;
+    let passedLabCount = 0;
+    if (requiredLabIds.length > 0) {
+      const distinctPassedLabs = await this.prisma.labAttempt.findMany({
+        where: {
+          userId,
+          labId: { in: requiredLabIds },
+          passed: true,
+        },
+        distinct: ['labId'],
+        select: { labId: true },
+      });
+      passedLabCount = distinctPassedLabs.length;
+      labsPassed = passedLabCount >= requiredLabIds.length;
+    }
 
     // 4. Theory Exam Status
     const theoryAttempts = await this.prisma.examAttempt.findMany({
@@ -218,7 +237,7 @@ export class CertificationsService {
       },
       {
         key: 'LABS',
-        title: `Required Practical Labs (${passedLabAttempts}/${requiredLabs.length})`,
+        title: `Required Practical Labs (${passedLabCount}/${requiredLabIds.length})`,
         status: labsPassed ? 'COMPLETE' : 'INCOMPLETE',
       },
       {
@@ -243,11 +262,17 @@ export class CertificationsService {
     };
   }
 
-  // Question Domain Blueprint Builder
+  // Question Domain Blueprint Builder (Real Approved Questions Only — Zero Synthetic Fallbacks)
   private async buildTheoryExamBlueprint(targetCount = 50) {
     const rawQuestions = await this.prisma.quizQuestion.findMany({
       take: 200,
     });
+
+    if (!rawQuestions || rawQuestions.length < targetCount) {
+      const msg = `Insufficient approved question pool for certification exam blueprint. Required: ${targetCount}, available: ${rawQuestions?.length || 0}`;
+      this.logger.error(`[Certification Integrity Error] ${msg}`);
+      throw new BadRequestException(msg);
+    }
 
     // Helper for classifying domain
     const classifyDomain = (q: any): 'CONCEPTUAL' | 'MECHANICS' | 'NUMERICAL' | 'PACKET_ANALYSIS' | 'TROUBLESHOOTING' => {
@@ -306,64 +331,53 @@ export class CertificationsService {
     };
 
     const selectedQuestions: any[] = [];
-    let synthId = 1;
+    const usedQuestionIds = new Set<string>();
 
     for (const [domain, target] of Object.entries(targets)) {
       const pool = categorized[domain] || [];
-      const shuffled = [...pool].sort(() => 0.5 - Math.random());
+      const availableFromPool = pool.filter((q) => !usedQuestionIds.has(q.id));
+      const shuffled = [...availableFromPool].sort(() => 0.5 - Math.random());
 
       const chosenFromPool = shuffled.slice(0, target);
-      selectedQuestions.push(...chosenFromPool);
-
-      // Fill remainder for this specific domain up to target
-      const needed = target - chosenFromPool.length;
-      for (let i = 0; i < needed; i++) {
-        const qId = `q-synth-${domain.toLowerCase()}-${synthId++}`;
-        let questionText = `[NV-NET ${domain} Exam Item #${synthId}] `;
-        let opts = ['Option A', 'Option B', 'Option C', 'Option D'];
-        let correctIdx = 0;
-        let explanation = `Correct answer for ${domain} theory item.`;
-
-        if (domain === 'NUMERICAL') {
-          questionText += `What is the usable host capacity of an IPv4 /27 subnet mask?`;
-          opts = ['30 usable hosts', '32 usable hosts', '62 usable hosts', '14 usable hosts'];
-          correctIdx = 0;
-          explanation = `A /27 subnet leaves 5 host bits (2^5 - 2 = 30 usable hosts).`;
-        } else if (domain === 'PACKET_ANALYSIS') {
-          questionText += `Which TCP flag combination indicates a connection setup request in a Wireshark capture?`;
-          opts = ['SYN=1, ACK=0', 'SYN=1, ACK=1', 'FIN=1, ACK=1', 'RST=1, ACK=0'];
-          correctIdx = 0;
-          explanation = `The first packet of the TCP 3-way handshake carries SYN=1, ACK=0.`;
-        } else if (domain === 'TROUBLESHOOTING') {
-          questionText += `Host 192.168.1.50/24 cannot ping default gateway 192.168.1.1. PING to localhost 127.0.0.1 succeeds. What is the probable root cause?`;
-          opts = ['Layer 2 Link failure or VLAN switch port misconfiguration', 'BGP autonomous system mismatch', 'DNS server port 53 timeout', 'HTTP GET request syntax error'];
-          correctIdx = 0;
-          explanation = `Inability to ping local default gateway indicates Layer 1/2 physical link or VLAN isolation issue.`;
-        } else if (domain === 'MECHANICS') {
-          questionText += `Which OSI layer manages data link framing, MAC addressing, and hardware error detection?`;
-          opts = ['Data Link Layer (Layer 2)', 'Network Layer (Layer 3)', 'Transport Layer (Layer 4)', 'Session Layer (Layer 5)'];
-          correctIdx = 0;
-          explanation = `Layer 2 Data Link handles Ethernet frames, MAC addresses, and CRC checksums.`;
-        } else {
-          questionText += `What is the primary architectural purpose of protocol encapsulation across OSI layers?`;
-          opts = ['To append layer-specific header control information as data traverses down the stack', 'To compress text payload bytes', 'To randomize physical cable voltages', 'To bypass firewall port filters'];
-          correctIdx = 0;
-          explanation = `Encapsulation wraps data in protocol headers (L4 segment -> L3 packet -> L2 frame).`;
-        }
-
-        selectedQuestions.push({
-          id: qId,
-          questionText,
-          optionsJson: opts,
-          correctOption: correctIdx,
-          explanation,
-          cognitiveLevel: domain === 'TROUBLESHOOTING' ? 'TROUBLESHOOTING' : 'UNDERSTANDING',
-          questionType: domain === 'TROUBLESHOOTING' ? 'TROUBLESHOOTING' : 'MULTIPLE_CHOICE',
-          points: 10,
-          concept: domain,
-          domain,
-        });
+      for (const q of chosenFromPool) {
+        selectedQuestions.push(q);
+        usedQuestionIds.add(q.id);
       }
+    }
+
+    // If any domain was short, backfill from remaining unused approved questions without synthesizing
+    if (selectedQuestions.length < targetCount) {
+      const remainingApproved = rawQuestions
+        .filter((q) => !usedQuestionIds.has(q.id))
+        .sort(() => 0.5 - Math.random());
+
+      const needed = targetCount - selectedQuestions.length;
+      const additional = remainingApproved.slice(0, needed).map((q) => {
+        const d = classifyDomain(q);
+        return {
+          id: q.id,
+          questionText: q.questionText,
+          optionsJson: q.optionsJson,
+          correctOption: q.correctOption,
+          explanation: q.explanation,
+          cognitiveLevel: q.cognitiveLevel,
+          questionType: q.questionType,
+          points: q.points,
+          concept: q.concept,
+          domain: d,
+        };
+      });
+
+      for (const q of additional) {
+        selectedQuestions.push(q);
+        usedQuestionIds.add(q.id);
+      }
+    }
+
+    if (selectedQuestions.length < targetCount) {
+      const msg = `Unable to fulfill exam blueprint with approved questions. Selected: ${selectedQuestions.length}, Required: ${targetCount}`;
+      this.logger.error(`[Certification Integrity Error] ${msg}`);
+      throw new BadRequestException(msg);
     }
 
     return selectedQuestions.slice(0, targetCount);
@@ -1914,23 +1928,6 @@ export class CertificationsService {
       throw new NotFoundException(`Certification definition "${code}" not found.`);
     }
 
-    // Verify candidate has a PASSED exam attempt for this certification
-    const passedAttempt = await this.prisma.examAttempt.findFirst({
-      where: {
-        userId,
-        certificationCode: code,
-        status: ExamAttemptStatus.PASSED,
-        passed: true,
-      },
-      orderBy: { submittedAt: 'desc' },
-    });
-
-    if (!passedAttempt) {
-      throw new BadRequestException(
-        `Certificate claim denied. You have not yet completed and passed the official examination for ${certDef.title} (${code}).`
-      );
-    }
-
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, username: true, fullName: true },
@@ -1940,7 +1937,7 @@ export class CertificationsService {
       throw new NotFoundException(`User "${userId}" not found.`);
     }
 
-    // Check if certificate already exists for user and certificationCode
+    // Check if certificate already exists for user and certificationCode (Idempotent claim)
     const existingCert = await this.prisma.certificate.findFirst({
       where: {
         userId,
@@ -1961,11 +1958,28 @@ export class CertificationsService {
         certificationTitle: existingCert.certificationTitle || certDef.title,
         certificationCode: existingCert.certificationCode || code,
         grade: meta.grade || 'Passed',
-        score: meta.overallScore || passedAttempt.score,
+        score: meta.overallScore || 80,
         componentScores: meta.componentScores,
         skillsAssessed: meta.skillsAssessed || [],
         isVerified: true,
       };
+    }
+
+    // Verify candidate has a PASSED exam attempt for this certification
+    const passedAttempt = await this.prisma.examAttempt.findFirst({
+      where: {
+        userId,
+        certificationCode: code,
+        status: ExamAttemptStatus.PASSED,
+        passed: true,
+      },
+      orderBy: { submittedAt: 'desc' },
+    });
+
+    if (!passedAttempt) {
+      throw new BadRequestException(
+        `Certificate claim denied. You have not yet completed and passed the official examination for ${certDef.title} (${code}).`
+      );
     }
 
     const attemptScore = passedAttempt.score || 80;

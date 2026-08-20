@@ -1788,7 +1788,7 @@ export class TopicsService {
         claimedAchievementCount,
       };
     },
-    { timeout: 15000, maxWait: 5000 });
+    { timeout: 30000, maxWait: 10000 });
   }
 
   async getCourseAssessment(identity: { userId?: string; anonymousId?: string }, courseIdOrSlug: string) {

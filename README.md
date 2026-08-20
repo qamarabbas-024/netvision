@@ -55,7 +55,7 @@ netvision/
 | Component | Technologies & Tools |
 |---|---|
 | **Frontend Client** | **Next.js 14** (App Router), **React 18**, **TypeScript 5**, **Tailwind CSS 3**, **Framer Motion**, **@xyflow/react**, **Zustand**, **@tanstack/react-query**, **Lucide React** |
-| **Backend API Gateway** | **NestJS 10**, **TypeScript 5**, **Prisma 5 ORM**, **Argon2**, **Passport JWT**, **Passport Google & GitHub**, **@nestjs/throttler**, **@nestjs/swagger**, **Helmet**, **Resend SDK** |
+| **Backend API Gateway** | **NestJS 11**, **TypeScript 5**, **Prisma 5 ORM**, **Argon2**, **Passport JWT**, **Passport Google & GitHub**, **@nestjs/throttler**, **@nestjs/swagger**, **Helmet**, **Resend SDK** |
 | **Database** | **PostgreSQL 16** (Neon Serverless in Staging; Docker Compose in Local Development) |
 | **Monorepo & Build Tools** | **pnpm v11 Workspaces**, **Turborepo** |
 
@@ -171,14 +171,23 @@ pnpm dev
 ## 🧪 Test Suites
 
 ```bash
-# Run public beta authentication & guest identity tests
-pnpm --filter netvision-backend test:beta:auth
+# Run P0 product correctness & canonical state suite
+pnpm --filter netvision-backend test:product:correctness
 
-# Run Resend email API & NestJS dependency injection tests
-pnpm --filter netvision-backend test:email:suite
+# Run anonymous claim security & session isolation tests
+pnpm --filter netvision-backend test:claim:security
 
-# Run full deployment readiness verification
-pnpm --filter netvision-backend test:deployment
+# Run security, OAuth cookies & OTP entropy hardening tests
+pnpm --filter netvision-backend test:security
+
+# Run Content V2 curriculum validation suite
+pnpm --filter netvision-backend test:curriculum:content-v2
+
+# Run error, empty state & resilience audit
+pnpm --filter netvision-backend test:audit:errors
+
+# Run network troubleshooting engine test suite
+pnpm --filter netvision-backend test:troubleshooting
 
 # Execute typecheck across all workspace packages
 pnpm typecheck

@@ -349,6 +349,362 @@ async function runProductCorrectnessTests() {
       passedTests++;
     }
 
+    // --------------------------------------------------------------------------
+    // P0 #9: CERTIFICATION QUIZ SCOPE CORRECTNESS
+    // --------------------------------------------------------------------------
+    console.log('\n[P0 #9] Certification Quiz Scope Correctness (Curriculum-Scoped Assessment)');
+    {
+      const userG = await prisma.user.create({
+        data: {
+          email: `learner-g-${Date.now()}@netvision.test`,
+          username: `learner_g_${Date.now()}`,
+          passwordHash: 'dummy_hash',
+          role: Role.STUDENT,
+          isVerified: true,
+        },
+      });
+
+      // Find required quiz in NET-201 (Core required course for NV-NET)
+      const course201 = await prisma.course.findFirst({
+        where: { code: 'NET-201' },
+        include: { modules: { include: { lessons: { include: { quizzes: true } } } } },
+      });
+      const requiredQuiz = course201?.modules[0]?.lessons[0]?.quizzes[0];
+
+      // Find unrelated quiz in NET-404
+      const course404 = await prisma.course.findFirst({
+        where: { code: 'NET-404' },
+        include: { modules: { include: { lessons: { include: { quizzes: true } } } } },
+      });
+      const unrelatedQuiz = course404?.modules[0]?.lessons[0]?.quizzes[0];
+
+      if (requiredQuiz && unrelatedQuiz) {
+        // Scenario A: Required quiz is 90% (Passing), Unrelated quiz is 20% (Failing)
+        await prisma.quizAttempt.create({
+          data: {
+            userId: userG.id,
+            quizId: requiredQuiz.id,
+            score: 90,
+            passed: true,
+            answersJson: {},
+          },
+        });
+        await prisma.quizAttempt.create({
+          data: {
+            userId: userG.id,
+            quizId: unrelatedQuiz.id,
+            score: 20,
+            passed: false,
+            answersJson: {},
+          },
+        });
+
+        const eligibility = await certificationsService.calculateEligibility(userG.id, 'NV-NET');
+        const assessmentReq = eligibility.requirements.find((r) => r.key === 'ASSESSMENTS');
+        assert(assessmentReq !== undefined, '9.1 Assessment requirement exists');
+        assert(assessmentReq!.score === 90, `9.2 Assessment score evaluates ONLY required quiz (expected: 90, got: ${assessmentReq!.score})`);
+        assert(assessmentReq!.status === 'COMPLETE', '9.3 Assessment requirement is COMPLETE despite failing unrelated quiz');
+
+        // Scenario B (Inverse): User with failing score on required quiz and 100% on unrelated quiz
+        const userG2 = await prisma.user.create({
+          data: {
+            email: `learner-g2-${Date.now()}@netvision.test`,
+            username: `learner_g2_${Date.now()}`,
+            passwordHash: 'dummy_hash',
+            role: Role.STUDENT,
+            isVerified: true,
+          },
+        });
+
+        await prisma.quizAttempt.create({
+          data: {
+            userId: userG2.id,
+            quizId: requiredQuiz.id,
+            score: 40,
+            passed: false,
+            answersJson: {},
+          },
+        });
+        await prisma.quizAttempt.create({
+          data: {
+            userId: userG2.id,
+            quizId: unrelatedQuiz.id,
+            score: 100,
+            passed: true,
+            answersJson: {},
+          },
+        });
+
+        const eligibility2 = await certificationsService.calculateEligibility(userG2.id, 'NV-NET');
+        const assessmentReq2 = eligibility2.requirements.find((r) => r.key === 'ASSESSMENTS');
+        assert(assessmentReq2!.score === 40, `9.4 Assessment score evaluates required quiz (expected: 40, got: ${assessmentReq2!.score})`);
+        assert(assessmentReq2!.status === 'INCOMPLETE', '9.5 Assessment requirement is INCOMPLETE despite high unrelated quiz score');
+      }
+
+      console.log('  ✓ P0 #9 Passed: Certification quiz evaluation is strictly scoped to required curriculum.');
+      passedTests++;
+    }
+
+    // --------------------------------------------------------------------------
+    // P0 #10: DISTINCT REQUIRED LAB COMPLETION
+    // --------------------------------------------------------------------------
+    console.log('\n[P0 #10] Distinct Required Lab Completion (No Repetitive Substitution)');
+    {
+      const userH = await prisma.user.create({
+        data: {
+          email: `learner-h-${Date.now()}@netvision.test`,
+          username: `learner_h_${Date.now()}`,
+          passwordHash: 'dummy_hash',
+          role: Role.STUDENT,
+          isVerified: true,
+        },
+      });
+
+      const labs = await prisma.lessonLab.findMany({
+        take: 3,
+      });
+
+      if (labs.length >= 2) {
+        // Repeated attempts on the same single lab
+        await prisma.labAttempt.create({
+          data: {
+            userId: userH.id,
+            labId: labs[0].id,
+            passed: true,
+            score: 100,
+            status: 'COMPLETED',
+          },
+        });
+        await prisma.labAttempt.create({
+          data: {
+            userId: userH.id,
+            labId: labs[0].id,
+            passed: true,
+            score: 100,
+            status: 'COMPLETED',
+          },
+        });
+        await prisma.labAttempt.create({
+          data: {
+            userId: userH.id,
+            labId: labs[0].id,
+            passed: true,
+            score: 100,
+            status: 'COMPLETED',
+          },
+        });
+
+        const eligibility = await certificationsService.calculateEligibility(userH.id, 'NV-NET');
+        const labsReq = eligibility.requirements.find((r) => r.key === 'LABS');
+        assert(labsReq !== undefined, '10.1 Labs requirement exists');
+        // Repeating lab 0 three times only counts as 1 distinct passed lab
+        assert(labsReq!.title.includes('(1/'), `10.2 Only 1 distinct lab counted despite 3 repeated attempts (got: ${labsReq!.title})`);
+      }
+
+      console.log('  ✓ P0 #10 Passed: Distinct lab completion enforced without allowing duplicate substitution.');
+      passedTests++;
+    }
+
+    // --------------------------------------------------------------------------
+    // P0 #11: CERTIFICATION BLUEPRINT & EXAM QUESTION INTEGRITY
+    // --------------------------------------------------------------------------
+    console.log('\n[P0 #11] Certification Exam Question Pool & Blueprint Integrity');
+    {
+      // Verify blueprint does not generate synthetic questions when raw pool is sufficient
+      const qCount = await prisma.quizQuestion.count();
+      assert(qCount >= 50, `11.1 Approved question pool has at least 50 questions (got: ${qCount})`);
+
+      const rawQuestions = await prisma.quizQuestion.findMany({ take: 50 });
+      for (const q of rawQuestions) {
+        assert(!q.id.startsWith('q-synth-'), '11.2 Question ID does not have synthetic marker');
+        assert(typeof q.questionText === 'string' && q.questionText.length > 5, '11.3 Question text is substantial');
+      }
+
+      console.log('  ✓ P0 #11 Passed: Question pool integrity verified with approved question content.');
+      passedTests++;
+    }
+
+    // --------------------------------------------------------------------------
+    // P0 #12: CERTIFICATE DATA INTEGRITY & ZERO FABRICATED SKILLS
+    // --------------------------------------------------------------------------
+    console.log('\n[P0 #12] Certificate Data Authority & No Fabricated Metadata');
+    {
+      const userI = await prisma.user.create({
+        data: {
+          email: `learner-i-${Date.now()}@netvision.test`,
+          username: `learner_i_${Date.now()}`,
+          fullName: 'Jordan Lee',
+          passwordHash: 'dummy_hash',
+          role: Role.STUDENT,
+          isVerified: true,
+        },
+      });
+
+      const cert = await prisma.certificate.create({
+        data: {
+          userId: userI.id,
+          credentialId: `NV-NET-JLEE-${Date.now()}`,
+          verificationCode: `NV-VERIFY-JLEE-${Date.now()}`,
+          certificationCode: 'NV-NET',
+          certificationTitle: 'NetVision Certified Network Administrator',
+          recipientName: 'Jordan Lee',
+          status: 'ACTIVE',
+          metadataJson: {
+            grade: 'Pass with High Distinction',
+            overallScore: 98,
+            skillsAssessed: [
+              'IPv4 CIDR Subnetting & Network Addressing',
+              'VLAN Segmentation & Switch Port Provisioning',
+            ],
+          },
+        },
+      });
+
+      const verification = await certificationsService.verifyCertificate(cert.credentialId!);
+      assert(verification.isVerified === true, '12.1 Active certificate isVerified is true');
+      assert(verification.recipientName === 'Jordan Lee', '12.2 Recipient name strictly matches database');
+      assert(verification.certificationTitle === 'NetVision Certified Network Administrator', '12.3 Title strictly matches database');
+      assert(Array.isArray(verification.skillsAssessed) && verification.skillsAssessed.length === 2, '12.4 Returns exact authoritative skills');
+      assert(verification.skillsAssessed[0] === 'IPv4 CIDR Subnetting & Network Addressing', '12.5 First skill matches authoritative metadata');
+
+      console.log('  ✓ P0 #12 Passed: Certificate data integrity and authoritative skill retrieval verified.');
+      passedTests++;
+    }
+
+    // --------------------------------------------------------------------------
+    // P0 #13: CERTIFICATE OWNERSHIP & UNAUTHORIZED DOWNLOAD DEFENSE
+    // --------------------------------------------------------------------------
+    console.log('\n[P0 #13] Certificate Ownership & Unauthorized Download Defense');
+    {
+      const owner = await prisma.user.create({
+        data: {
+          email: `owner-${Date.now()}@netvision.test`,
+          username: `owner_${Date.now()}`,
+          passwordHash: 'dummy_hash',
+          role: Role.STUDENT,
+          isVerified: true,
+        },
+      });
+
+      const attacker = await prisma.user.create({
+        data: {
+          email: `attacker-${Date.now()}@netvision.test`,
+          username: `attacker_${Date.now()}`,
+          passwordHash: 'dummy_hash',
+          role: Role.STUDENT,
+          isVerified: true,
+        },
+      });
+
+      const cert = await prisma.certificate.create({
+        data: {
+          userId: owner.id,
+          credentialId: `NV-NET-OWNER-${Date.now()}`,
+          verificationCode: `NV-VERIFY-OWNER-${Date.now()}`,
+          certificationCode: 'NV-NET',
+          certificationTitle: 'NetVision Certified Network Administrator',
+          recipientName: 'Cert Owner',
+          status: 'ACTIVE',
+        },
+      });
+
+      // Attacker attempts to download owner's certificate
+      let attackerForbidden = false;
+      try {
+        await certificationsService.generateCertificateDownload(attacker.id, cert.credentialId!);
+      } catch (err: any) {
+        if (err?.status === 403 || err?.message?.includes('Access denied') || err?.message?.includes('Forbidden')) {
+          attackerForbidden = true;
+        }
+      }
+      assert(attackerForbidden, '13.1 Non-owner receives Forbidden on certificate download');
+
+      // Owner downloads their own certificate
+      const downloadStream = await certificationsService.generateCertificateDownload(owner.id, cert.credentialId!);
+      assert(downloadStream !== undefined && downloadStream !== null, '13.2 Owner successfully generates download stream');
+
+      console.log('  ✓ P0 #13 Passed: Certificate download strictly verifies ownership and blocks unauthorized access.');
+      passedTests++;
+    }
+
+    // --------------------------------------------------------------------------
+    // P0 #14: CERTIFICATE PUBLIC VERIFICATION PRIVACY
+    // --------------------------------------------------------------------------
+    console.log('\n[P0 #14] Certificate Public Verification Privacy (Zero Private Data Leakage)');
+    {
+      const userJ = await prisma.user.create({
+        data: {
+          email: `private-learner-${Date.now()}@netvision.test`,
+          username: `private_learner_${Date.now()}`,
+          passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$super_private_hash',
+          role: Role.STUDENT,
+          isVerified: true,
+        },
+      });
+
+      const cert = await prisma.certificate.create({
+        data: {
+          userId: userJ.id,
+          credentialId: `NV-NET-PRIV-${Date.now()}`,
+          verificationCode: `NV-VERIFY-PRIV-${Date.now()}`,
+          certificationCode: 'NV-NET',
+          certificationTitle: 'NetVision Certified Network Administrator',
+          recipientName: 'Private Learner',
+          status: 'ACTIVE',
+        },
+      });
+
+      const verification: any = await certificationsService.verifyCertificate(cert.credentialId!);
+      assert(verification.email === undefined, '14.1 Public verification does not expose email');
+      assert(verification.passwordHash === undefined, '14.2 Public verification does not expose passwordHash');
+      assert(verification.userId === undefined, '14.3 Public verification does not expose internal userId');
+
+      console.log('  ✓ P0 #14 Passed: Public verification strictly sanitizes private user data.');
+      passedTests++;
+    }
+
+    // --------------------------------------------------------------------------
+    // P0 #15: DUPLICATE CERTIFICATE CLAIM PREVENTION
+    // --------------------------------------------------------------------------
+    console.log('\n[P0 #15] Duplicate Certificate Claim Prevention');
+    {
+      const userK = await prisma.user.create({
+        data: {
+          email: `learner-k-${Date.now()}@netvision.test`,
+          username: `learner_k_${Date.now()}`,
+          fullName: 'Casey Smith',
+          passwordHash: 'dummy_hash',
+          role: Role.STUDENT,
+          isVerified: true,
+        },
+      });
+
+      // Create existing certificate
+      const cert1 = await prisma.certificate.create({
+        data: {
+          userId: userK.id,
+          credentialId: `NV-NET-CASEY-${Date.now()}`,
+          verificationCode: `NV-VERIFY-CASEY-${Date.now()}`,
+          certificationCode: 'NV-NET',
+          certificationTitle: 'NetVision Certified Network Administrator',
+          recipientName: 'Casey Smith',
+          status: 'ACTIVE',
+        },
+      });
+
+      // Attempt to claim again via service
+      const cert2 = await certificationsService.claimCertificationCertificate(userK.id, 'NV-NET');
+      assert(cert2.credentialId === cert1.credentialId, '15.1 Duplicate claim returns existing certificate');
+
+      const allUserCerts = await prisma.certificate.findMany({
+        where: { userId: userK.id, certificationCode: 'NV-NET' },
+      });
+      assert(allUserCerts.length === 1, '15.2 Only 1 certificate record exists for user and certification code');
+
+      console.log('  ✓ P0 #15 Passed: Duplicate certificate claim prevention verified.');
+      passedTests++;
+    }
+
     console.log('\n================================================================');
     console.log(`🎉 ALL ${passedTests} P0 PRODUCT CORRECTNESS TESTS PASSED SUCCESSFULLY!`);
     console.log('================================================================\n');

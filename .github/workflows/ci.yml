@@ -104,8 +104,23 @@ jobs:
           pnpm --filter netvision-backend prisma:migrate:prod
           pnpm --filter netvision-backend prisma:seed
 
+      - name: Run P0 Product Correctness Test Suite
+        run: pnpm --filter netvision-backend test:product:correctness
+
+      - name: Run Anonymous Claim Security Test Suite
+        run: pnpm --filter netvision-backend test:claim:security
+
       - name: Run Security & OAuth/OTP Hardening Tests
         run: pnpm --filter netvision-backend test:security
+
+      - name: Run Content V2 Curriculum Validation Suite
+        run: pnpm --filter netvision-backend test:curriculum:content-v2
+
+      - name: Run Error & Empty States Audit Suite
+        run: pnpm --filter netvision-backend test:audit:errors
+
+      - name: Run Network Troubleshooting Engine Suite
+        run: pnpm --filter netvision-backend test:troubleshooting
 
       - name: Run Monitoring & Observability Test Suite
         run: pnpm --filter netvision-backend test:monitoring
@@ -115,9 +130,6 @@ jobs:
 
       - name: Run Deployment Readiness Verification
         run: pnpm --filter netvision-backend test:deployment
-
-      - name: Run Network Troubleshooting Engine Suite
-        run: pnpm --filter netvision-backend test:troubleshooting
 
       - name: Run Beta Auth Verification Suite
         run: pnpm --filter netvision-backend test:beta:auth
