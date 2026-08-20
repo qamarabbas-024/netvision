@@ -84,24 +84,52 @@ export default function CertificateDetailPage() {
     );
   }
 
-  const candidateName = certData.recipientName || 'Verified Candidate';
-  const certificationTitle =
-    certData.certificationTitle || certData.courseTitle || 'NetVision Certified Network Administrator';
+  const candidateName = certData.recipientName || certData.candidateName;
+  const certificationTitle = certData.certificationTitle || certData.courseTitle;
+  const isRevoked = certData.status === 'REVOKED';
+  const isInactive = certData.status && certData.status !== 'ACTIVE';
+
+  if (!candidateName || !certificationTitle) {
+    return (
+      <div className="min-h-screen surface-0 text-[#f4f5f7] flex flex-col justify-between p-4 sm:p-8 font-sans">
+        <div className="max-w-4xl mx-auto w-full mb-6">
+          <Link href="/certificates" className="inline-flex items-center gap-2 text-xs font-semibold text-[#8e95a5] hover:text-[#38bdf8] transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to Certificates
+          </Link>
+        </div>
+        <div className="max-w-lg mx-auto w-full surface-2 p-8 sm:p-10 rounded-xl border border-amber-500/30 text-center my-auto flex flex-col items-center gap-4 shadow-instrument">
+          <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#f4f5f7]">Incomplete Credential Record</h1>
+          <p className="text-xs sm:text-sm text-[#8e95a5] leading-relaxed">
+            The credential record for ID &quot;{certId}&quot; is missing authoritative recipient or certification metadata.
+          </p>
+          <div className="pt-2 flex items-center gap-3">
+            <Link href="/certificates">
+              <Button variant="secondary" size="sm">Browse Certifications</Button>
+            </Link>
+          </div>
+        </div>
+        <div className="text-center text-[11px] text-[#646c7d] pt-8">
+          <p>© 2026 NetVision. Verifiable learning credential.</p>
+        </div>
+      </div>
+    );
+  }
+
   const issueDateFormatted = certData.issuedAt
     ? new Date(certData.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : 'Recently Issued';
   const credentialId = certData.credentialId || certData.code || certId;
   const grade = certData.grade || (certData.score ? `${certData.score}% — Passed` : 'Passed');
-  const skillsAssessed: string[] = certData.skillsAssessed || [
-    'IPv4 CIDR Subnetting & Network Addressing',
-    'VLAN Segmentation & Switch Port Provisioning',
-    'Layer 3 Routing & Default Gateway Path Selection',
-    'Perimeter Firewall Access Control List (ACL) Policies',
-    'OSPF Link-State Adjacency & Routing Diagnostics',
-    'Spanning Tree Protocol (STP) Loop Prevention',
-    'Wireshark TCP/IP 3-Way Handshake & Packet Dissection',
-    'Core IP Infrastructure Protocols (ARP, DNS, DHCP, ICMP)',
-  ];
+  const skillsAssessed: string[] = Array.isArray(certData.skillsAssessed) && certData.skillsAssessed.length > 0
+    ? certData.skillsAssessed
+    : [
+        'Computer Networking Curriculum Mastery',
+        'TCP/IP & Protocol Mechanics Evaluation',
+        'Network Addressing & Diagnostics Assessment',
+      ];
 
   const [copied, setCopied] = useState<boolean>(false);
 
@@ -115,9 +143,12 @@ export default function CertificateDetailPage() {
 
   const handleDownload = async () => {
     try {
-      const token = sessionStorage.getItem('netvision_token') || localStorage.getItem('netvision_token');
+      const token = typeof window !== 'undefined'
+        ? (sessionStorage.getItem('netvision_token') || localStorage.getItem('netvision_token'))
+        : null;
       const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
       const res = await fetch(`${apiBase}/certificates/${credentialId}/download`, {
+        credentials: 'include',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (!res.ok) {
@@ -133,7 +164,7 @@ export default function CertificateDetailPage() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-    } catch (e) {
+    } catch {
       window.print();
     }
   };
@@ -148,11 +179,12 @@ export default function CertificateDetailPage() {
       name: 'NetVision',
       url: 'https://netvision-three.vercel.app',
     },
-    educationalLevel: 'Course Mastery',
-    validIn: {
-      '@type': 'Country',
-      name: 'Global',
+    recipient: {
+      '@type': 'Person',
+      name: candidateName,
     },
+    dateCreated: issueDateFormatted,
+    identifier: credentialId,
   };
 
   return (
@@ -174,7 +206,7 @@ export default function CertificateDetailPage() {
             leftIcon={<Share2 className="w-3.5 h-3.5" />}
             className="flex-1 sm:flex-initial text-xs font-semibold"
           >
-            {copied ? 'Link Copied! ✓' : 'Share Credential'}
+            {copied ? 'Link Copied! ✓' : 'Copy Credential Link'}
           </Button>
           <Button
             variant="primary"
@@ -195,44 +227,44 @@ export default function CertificateDetailPage() {
           <div className="w-10 h-10 rounded-lg bg-[#2563eb] flex items-center justify-center text-white shadow-sm">
             <Activity className="w-5 h-5 font-bold" />
           </div>
-          <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-[#f4f5f7]">
+          <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-[#f4f5f7] print:text-black">
             Net<span className="text-[#38bdf8]">Vision</span>
           </span>
         </div>
 
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#10b981]/10 border border-[#10b981]/30 text-[10px] font-mono text-[#10b981] uppercase tracking-wider font-bold mb-6">
-          <ShieldCheck className="w-3.5 h-3.5" /> VERIFIED LEARNING CREDENTIAL
+        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider font-bold mb-6 ${isRevoked || isInactive ? 'bg-rose-500/10 border border-rose-500/30 text-rose-400' : 'bg-[#10b981]/10 border border-[#10b981]/30 text-[#10b981]'}`}>
+          <ShieldCheck className="w-3.5 h-3.5" /> {isRevoked ? 'CREDENTIAL REVOKED' : isInactive ? 'CREDENTIAL INACTIVE' : 'CERTIFICATE OF MASTERY'}
         </div>
 
-        <p className="text-xs font-mono uppercase tracking-wider text-[#8e95a5] mb-3">This certifies that</p>
+        <p className="text-xs font-mono uppercase tracking-wider text-[#8e95a5] mb-3 print:text-zinc-600">This certifies that</p>
 
-        <h1 className="text-2xl sm:text-4xl font-extrabold text-[#f4f5f7] tracking-tight mb-4">
+        <h1 className="text-2xl sm:text-4xl font-extrabold text-[#f4f5f7] tracking-tight mb-4 print:text-black">
           {candidateName}
         </h1>
 
-        <p className="text-xs sm:text-sm text-[#8e95a5] max-w-xl mb-5 leading-relaxed">
+        <p className="text-xs sm:text-sm text-[#8e95a5] max-w-xl mb-5 leading-relaxed print:text-zinc-600">
           has successfully fulfilled all curriculum requirements, interactive simulations, and diagnostic mastery assessments for
         </p>
 
-        <h2 className="text-lg sm:text-xl font-bold text-[#38bdf8] mb-4 font-mono">
+        <h2 className="text-lg sm:text-xl font-bold text-[#38bdf8] mb-4 font-mono print:text-black">
           {certificationTitle}
         </h2>
 
         {/* Grade Badge */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#14151a] border border-[#2a2e39] text-[#10b981] font-mono text-xs font-bold mb-6">
-          <CheckCircle2 className="w-3.5 h-3.5" /> Evaluation Result: {grade}
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#14151a] border border-[#2a2e39] text-[#10b981] font-mono text-xs font-bold mb-6 print:border-zinc-300 print:bg-zinc-100 print:text-black">
+          <CheckCircle2 className="w-3.5 h-3.5" /> Assessment Evaluation: {grade}
         </div>
 
         {/* Skills Assessed Section */}
-        <div className="w-full text-left mb-6 pt-5 border-t border-[#2a2e39]">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-[#8e95a5] block mb-2.5 flex items-center gap-1.5 font-bold">
-            <Cpu className="w-3.5 h-3.5 text-[#38bdf8]" /> Competencies & Skills Verified:
+        <div className="w-full text-left mb-6 pt-5 border-t border-[#2a2e39] print:border-zinc-200">
+          <span className="text-[10px] font-mono uppercase tracking-wider text-[#8e95a5] block mb-2.5 flex items-center gap-1.5 font-bold print:text-zinc-700">
+            <Cpu className="w-3.5 h-3.5 text-[#38bdf8]" /> Competencies &amp; Skills Verified:
           </span>
           <div className="flex flex-wrap gap-2">
             {skillsAssessed.map((skill, idx) => (
               <span
                 key={idx}
-                className="px-2.5 py-1 rounded-md bg-[#14151a] border border-[#2a2e39] text-[11px] text-[#c4c9d4] font-mono"
+                className="px-2.5 py-1 rounded-md bg-[#14151a] border border-[#2a2e39] text-[11px] text-[#c4c9d4] font-mono print:border-zinc-300 print:bg-zinc-100 print:text-zinc-900"
               >
                 {skill}
               </span>
@@ -241,46 +273,22 @@ export default function CertificateDetailPage() {
         </div>
 
         {/* Bottom Verification Footer */}
-        <div className="flex flex-col sm:flex-row items-center justify-between w-full pt-5 border-t border-[#2a2e39] text-xs font-mono text-[#8e95a5] gap-3 sm:gap-0">
+        <div className="flex flex-col sm:flex-row items-center justify-between w-full pt-5 border-t border-[#2a2e39] text-xs font-mono text-[#8e95a5] gap-3 sm:gap-0 print:border-zinc-200 print:text-zinc-700">
           <div className="text-center sm:text-left">
-            <span className="block text-[#646c7d] text-[9px]">ISSUE DATE</span>
-            <span className="text-[#f4f5f7] font-bold">{issueDateFormatted}</span>
+            <span className="block text-[#646c7d] text-[9px] print:text-zinc-500">ISSUE DATE</span>
+            <span className="text-[#f4f5f7] font-bold print:text-black">{issueDateFormatted}</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[#10b981] font-bold px-2.5 py-0.5 rounded bg-[#10b981]/10 border border-[#10b981]/20 text-[11px]">
-            <ShieldCheck className="w-3.5 h-3.5" /> VERIFIED & ACTIVE
+          <div className={`flex items-center gap-1.5 font-bold px-2.5 py-0.5 rounded text-[11px] ${isRevoked || isInactive ? 'text-rose-400 bg-rose-500/10 border border-rose-500/20' : 'text-[#10b981] bg-[#10b981]/10 border border-[#10b981]/20'}`}>
+            <ShieldCheck className="w-3.5 h-3.5" /> {isRevoked ? 'REVOKED' : isInactive ? 'INACTIVE' : 'VERIFIED & ACTIVE'}
           </div>
 
           <div className="text-center sm:text-right">
-            <span className="block text-[#646c7d] text-[9px]">CREDENTIAL ID</span>
-            <span className="text-[#38bdf8] font-bold">{credentialId}</span>
+            <span className="block text-[#646c7d] text-[9px] print:text-zinc-500">CREDENTIAL ID</span>
+            <span className="text-[#38bdf8] font-bold print:text-black">{credentialId}</span>
           </div>
         </div>
       </div>
-
-      {/* Schema.org EducationalOccupationalCredential Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'EducationalOccupationalCredential',
-            name: certificationTitle,
-            credentialCategory: 'Certificate',
-            recognizedBy: {
-              '@type': 'Organization',
-              name: 'NetVision',
-              url: 'https://netvision-three.vercel.app',
-            },
-            recipient: {
-              '@type': 'Person',
-              name: candidateName,
-            },
-            dateCreated: issueDateFormatted,
-            identifier: credentialId,
-          }),
-        }}
-      />
 
       <div className="text-center text-[11px] text-[#646c7d] pt-8">
         <p>© 2026 NetVision. Verifiable learning credential.</p>

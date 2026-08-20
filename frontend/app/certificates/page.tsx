@@ -70,13 +70,13 @@ export default function CertificatesCatalogPage() {
             <div className="max-w-6xl mx-auto flex flex-col gap-6 sm:gap-8">
               <div>
                 <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold block mb-1">
-                  CRYPTOGRAPHIC CREDENTIALS
+                  ACADEMIC & PROFESSIONAL CREDENTIALS
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight">
-                  Earned Certificates
+                  Earned Certifications
                 </h1>
                 <p className="text-xs sm:text-sm text-[#8e95a5] mt-1 max-w-xl leading-relaxed">
-                  Official, verifiable certificates earned by achieving passing mastery across comprehensive networking courses.
+                  Official, verifiable certificates earned by demonstrating curriculum mastery and passing formal diagnostic assessments.
                 </p>
               </div>
 
@@ -86,9 +86,9 @@ export default function CertificatesCatalogPage() {
                     <Lock className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-bold text-[#f4f5f7] mb-1.5">Account Required for Verified Certificates</h3>
+                    <h3 className="text-base sm:text-lg font-bold text-[#f4f5f7] mb-1.5">Account Required to Claim Credentials</h3>
                     <p className="text-xs sm:text-sm text-[#8e95a5] max-w-md mx-auto leading-relaxed">
-                      Complete your course requirements and log in or create an account to claim your official verified course certificates.
+                      Complete your curriculum requirements and log in or create an account to claim and download your verified course credentials.
                     </p>
                   </div>
                   <div className="flex items-center gap-3 mt-2">
@@ -107,34 +107,45 @@ export default function CertificatesCatalogPage() {
                       ? new Date(c.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
                       : 'Recently Issued';
                     const targetId = c.credentialId || c.code || c.id;
+                    const certTitle = c.certificationTitle || c.title || 'Computer Networking Certification';
 
                     return (
-                      <Card key={c.id} className="p-6 surface-2 border border-[#2a2e39] flex flex-col justify-between shadow-instrument">
+                      <Card key={c.id} className="p-6 surface-2 border border-[#2a2e39] flex flex-col justify-between shadow-instrument hover:border-[#38bdf8]/40 transition-all">
                         <div>
                           <div className="flex items-center justify-between mb-4">
-                            <Badge variant="cyan" dot={true}>VERIFIED CREDENTIAL</Badge>
-                            <span className="text-xs font-mono text-[#10b981] flex items-center gap-1 font-bold">
-                              <ShieldCheck className="w-4 h-4" /> {c.status || 'Active'}
+                            <span className="text-[11px] font-mono text-[#38bdf8] font-semibold uppercase tracking-wider">VERIFIED CREDENTIAL</span>
+                            <span className={`text-xs font-mono flex items-center gap-1 font-bold ${c.status === 'ACTIVE' ? 'text-[#10b981]' : 'text-amber-400'}`}>
+                              <ShieldCheck className="w-3.5 h-3.5" /> {c.status === 'ACTIVE' ? 'Verified & Active' : (c.status || 'Active')}
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-3.5 mb-4">
-                            <div className="w-11 h-11 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-center justify-center text-[#38bdf8]">
-                              <Award className="w-6 h-6" />
+                          <div className="flex items-start gap-3.5 mb-4">
+                            <div className="w-10 h-10 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-center justify-center text-[#38bdf8] shrink-0 mt-0.5">
+                              <Award className="w-5 h-5" />
                             </div>
-                            <h3 className="text-base sm:text-lg font-bold text-[#f4f5f7] leading-snug">{c.title}</h3>
+                            <div>
+                              <h3 className="text-base sm:text-lg font-bold text-[#f4f5f7] leading-snug">{certTitle}</h3>
+                              {c.recipientName && (
+                                <p className="text-xs text-[#8e95a5] mt-0.5">Awarded to <span className="text-[#c4c9d4] font-semibold">{c.recipientName}</span></p>
+                              )}
+                            </div>
                           </div>
 
-                          <div className="p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] font-mono text-xs text-[#8e95a5] mb-5 space-y-1">
-                            <div>Recipient: <span className="text-[#f4f5f7] font-semibold">{c.recipientName || 'Candidate'}</span></div>
-                            <div>Issued: <span className="text-[#f4f5f7]">{issueDate}</span></div>
-                            <div>Credential ID: <span className="text-[#38bdf8] font-bold">{targetId}</span></div>
+                          <div className="p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] font-mono text-xs text-[#8e95a5] mb-5 space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <span>Issued:</span>
+                              <span className="text-[#f4f5f7] font-semibold">{issueDate}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span>Credential ID:</span>
+                              <span className="text-[#38bdf8] font-bold">{targetId}</span>
+                            </div>
                           </div>
                         </div>
 
                         <Link href={`/certificates/${targetId}`}>
-                          <Button variant="primary" className="w-full justify-center" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                            View & Download Certificate
+                          <Button variant="primary" className="w-full justify-center text-xs font-bold" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+                            View Credential Record
                           </Button>
                         </Link>
                       </Card>
@@ -145,9 +156,8 @@ export default function CertificatesCatalogPage() {
                 <EmptyState
                   title="No Certificates Earned Yet"
                   description="Complete 100% of required lessons and quizzes in a course with a passing grade of 80% or higher to earn and claim your official certificate."
-                  actionLabel="Browse Course Catalog →"
+                  actionLabel="Browse Courses"
                   onAction={() => { window.location.href = '/courses'; }}
-                  statusTag="STATUS: CREDENTIALS_EMPTY"
                   icon={<Award className="w-6 h-6" />}
                 />
               )}

@@ -2066,6 +2066,9 @@ export class CertificationsService {
     }
 
     const meta: any = cert.metadataJson || {};
+    const recipient = cert.recipientName || cert.user?.fullName || cert.user?.username || null;
+    const title = cert.certificationTitle || (cert.course ? cert.course.title : null);
+
     return {
       id: cert.id,
       code: cert.code,
@@ -2073,21 +2076,16 @@ export class CertificationsService {
       verificationCode: cert.verificationCode || cert.code,
       status: cert.status || 'ACTIVE',
       issuedAt: cert.issuedAt,
-      recipientName: cert.recipientName || cert.user?.fullName || cert.user?.username || 'Verified Candidate',
-      certificationTitle: cert.certificationTitle || (cert.course ? cert.course.title : 'NetVision Certified Network Administrator'),
+      recipientName: recipient,
+      certificationTitle: title,
       certificationCode: cert.certificationCode || cert.course?.code || 'NV-NET',
       courseTitle: cert.course?.title || null,
       courseSlug: cert.course?.slug || null,
       grade: meta.grade || 'Passed',
       score: meta.overallScore || null,
       componentScores: meta.componentScores || null,
-      skillsAssessed: meta.skillsAssessed || [
-        'Computer Networking Fundamentals',
-        'TCP/IP Protocol Suite & Handshakes',
-        'IP Subnetting & Routing',
-        'Network Diagnostics & Packet Analysis',
-      ],
-      isVerified: true,
+      skillsAssessed: meta.skillsAssessed || [],
+      isVerified: cert.status === 'ACTIVE',
     };
   }
 
