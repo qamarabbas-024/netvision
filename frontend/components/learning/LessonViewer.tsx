@@ -333,15 +333,16 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                 onProceedToQuiz={() => setActiveStage(hasPractice ? 'practice' : 'quiz')}
               />
 
-              <div className="flex items-center justify-between pt-4 border-t border-[#272732]">
-                <span className="text-xs text-zinc-400 font-mono">Stage 1 of 4: Theory & Visuals</span>
+              <div className="flex items-center justify-between pt-6 border-t border-[#2a2e39]">
+                <span className="text-xs text-[#8e95a5] font-mono">Stage 1 of 4: Conceptual Understanding</span>
                 <Button
-                  variant="cyan"
+                  variant="primary"
                   size="md"
                   onClick={() => setActiveStage(hasPractice ? 'practice' : 'quiz')}
                   rightIcon={<ArrowRight className="w-4 h-4" />}
+                  className="font-bold text-xs px-5 py-2.5 shadow-sm"
                 >
-                  {hasPractice ? 'Next: Practice & Skill Check →' : 'Next: Knowledge Check Quiz →'}
+                  {hasPractice ? 'Next: Practice Exercises →' : 'Next: Knowledge Check Quiz →'}
                 </Button>
               </div>
             </div>
@@ -350,14 +351,14 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
           {/* STAGE 2: PRACTICE */}
           {activeStage === 'practice' && (
             <div className="space-y-6">
-              <Card className="p-6 glass-panel border-[#272732] space-y-4">
+              <Card className="p-5 sm:p-6 surface-2 border border-[#2a2e39] rounded-xl space-y-3 shadow-instrument">
                 <div className="flex items-center justify-between">
-                  <Badge variant="cyan">STAGE 2: PRACTICE & SKILL CHECK</Badge>
-                  <span className="text-xs font-mono text-zinc-400">Interactive Evaluation</span>
+                  <Badge variant="cyan" dot={true}>STAGE 2: PRACTICE WORKBENCH</Badge>
+                  <span className="text-xs font-mono text-[#8e95a5]">Interactive Diagnostics</span>
                 </div>
-                <h2 className="text-xl font-bold text-white">Self-Paced Practice & Terminal Diagnostics</h2>
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  Review scenario problems, reveal target values, and test diagnostic execution.
+                <h2 className="text-lg sm:text-xl font-bold text-[#f4f5f7]">Self-Paced Practice & Terminal Diagnostics</h2>
+                <p className="text-xs sm:text-sm text-[#8e95a5] leading-relaxed">
+                  Apply your understanding by executing real diagnostic commands and inspecting protocol states.
                 </p>
               </Card>
 
@@ -369,19 +370,21 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                 }
               />
 
-              <div className="flex items-center justify-between pt-4 border-t border-[#272732]">
+              <div className="flex items-center justify-between pt-6 border-t border-[#2a2e39]">
                 <Button
                   variant="ghost"
                   onClick={() => setActiveStage('learn')}
                   leftIcon={<ArrowLeft className="w-4 h-4" />}
+                  className="text-xs text-[#8e95a5] hover:text-[#f4f5f7]"
                 >
-                  Back to Theory
+                  Back to Lesson Content
                 </Button>
                 <Button
-                  variant="cyan"
+                  variant="primary"
                   size="md"
                   onClick={() => setActiveStage('quiz')}
                   rightIcon={<ArrowRight className="w-4 h-4" />}
+                  className="font-bold text-xs px-5 py-2.5 shadow-sm"
                 >
                   Next: Knowledge Check Quiz →
                 </Button>
@@ -399,15 +402,15 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                   onContinueLesson={() => setActiveStage('mastery')}
                 />
               ) : (
-                <Card className="p-6 text-center space-y-3 glass-panel border-[#272732]">
-                  <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto" />
-                  <h3 className="text-lg font-bold text-white">
+                <Card className="p-6 text-center space-y-3 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
+                  <CheckCircle2 className="w-10 h-10 text-[#10b981] mx-auto" />
+                  <h3 className="text-base sm:text-lg font-bold text-[#f4f5f7]">
                     No Quiz Required for this Lesson
                   </h3>
-                  <p className="text-xs text-zinc-300 max-w-sm mx-auto">
+                  <p className="text-xs text-[#8e95a5] max-w-sm mx-auto">
                     You have reviewed all technical concepts and can proceed directly to mastery summary.
                   </p>
-                  <Button variant="cyan" onClick={() => setActiveStage('mastery')}>
+                  <Button variant="primary" onClick={() => setActiveStage('mastery')} className="font-bold text-xs">
                     Proceed to Mastery Summary
                   </Button>
                 </Card>
@@ -417,27 +420,27 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
 
           {/* STAGE 4: MASTERY & COMPLETION */}
           {activeStage === 'mastery' && (
-            <Card className="p-8 glass-panel border-[#00f0ff]/40 text-center flex flex-col items-center gap-6">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center">
+            <Card className="p-8 sm:p-10 surface-2 border border-[#2a2e39] rounded-xl text-center flex flex-col items-center gap-6 shadow-elevated">
+              <div className="w-16 h-16 rounded-full bg-[#10b981]/10 text-[#10b981] border border-[#10b981]/30 flex items-center justify-center">
                 <Award className="w-8 h-8" />
               </div>
 
               <div>
-                <Badge variant="emerald" className="mb-2 font-mono">
-                  LESSON MASTERY ACHIEVED
+                <Badge variant="emerald" dot={true} className="mb-2 font-mono">
+                  LESSON COMPLETE
                 </Badge>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
-                  Lesson Complete
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] mb-2">
+                  Lesson Completed
                 </h2>
-                <p className="text-xs sm:text-sm text-zinc-300 max-w-md mx-auto">
-                  You have completed the technical evaluation for{' '}
-                  <strong className="text-white">{lesson.title}</strong>.
+                <p className="text-xs sm:text-sm text-[#8e95a5] max-w-md mx-auto">
+                  You have successfully completed the technical evaluation for{' '}
+                  <strong className="text-[#f4f5f7]">{lesson.title}</strong>.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-3 pt-4 border-t border-[#272732] w-full justify-center">
+              <div className="flex flex-col sm:flex-row items-center gap-3 pt-6 border-t border-[#2a2e39] w-full justify-center">
                 <Link href={`/courses/${lesson.course.slug}`}>
-                  <Button variant="secondary" leftIcon={<BookOpen className="w-4 h-4" />}>
+                  <Button variant="secondary" leftIcon={<BookOpen className="w-4 h-4" />} className="text-xs font-semibold">
                     Course Syllabus
                   </Button>
                 </Link>
@@ -445,9 +448,10 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                 {resolvedNextLessonSlug ? (
                   <Link href={`/courses/${lesson.course.slug}/lessons/${resolvedNextLessonSlug}`}>
                     <Button
-                      variant="cyan"
+                      variant="primary"
                       size="md"
                       rightIcon={<ArrowRight className="w-4 h-4" />}
+                      className="font-bold text-xs px-6 py-2.5 shadow-sm"
                     >
                       Continue to Next Lesson →
                     </Button>
@@ -455,9 +459,10 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                 ) : (
                   <Link href={`/courses/${lesson.course.slug}`}>
                     <Button
-                      variant="cyan"
+                      variant="primary"
                       size="md"
                       rightIcon={<CheckCircle2 className="w-4 h-4" />}
+                      className="font-bold text-xs px-6 py-2.5 shadow-sm"
                     >
                       Module Complete ✓
                     </Button>

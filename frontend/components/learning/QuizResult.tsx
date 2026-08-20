@@ -45,129 +45,119 @@ export const QuizResult: React.FC<QuizResultProps> = ({
   onContinue,
 }) => {
   return (
-    <Card className="p-6 sm:p-8 glass-panel-glow border-[#00f0ff]/30 flex flex-col gap-8">
+    <Card className="p-6 sm:p-8 surface-2 border border-[#2a2e39] rounded-xl flex flex-col gap-6 shadow-instrument">
       {/* Header Result Banner */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6 rounded-3xl bg-white/5 border border-white/10">
-        <div className="flex items-center gap-5 text-center md:text-left">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-5 sm:p-6 rounded-xl bg-[#14151a] border border-[#2a2e39]">
+        <div className="flex items-center gap-4 text-center md:text-left">
           <div
-            className={`w-16 h-16 rounded-3xl flex items-center justify-center shrink-0 ${
+            className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${
               passed
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-glow-emerald'
-                : 'bg-rose-500/20 text-rose-400 border border-rose-500/30 shadow-glow-rose'
+                ? 'bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30'
+                : 'bg-[#ef4444]/15 text-[#ef4444] border border-[#ef4444]/30'
             }`}
           >
-            <Award className="w-8 h-8" />
+            <Award className="w-7 h-7" />
           </div>
 
           <div>
             <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-              <Badge variant={passed ? 'emerald' : 'rose'}>
-                {passed ? 'Mastery Achieved' : 'Concept Review Recommended'}
+              <Badge variant={passed ? 'emerald' : 'rose'} dot={true}>
+                {passed ? 'Mastery Achieved' : 'Review Recommended'}
               </Badge>
-              <span className="text-xs font-mono text-zinc-500">
+              <span className="text-xs font-mono text-[#8e95a5]">
                 Passing Threshold: {passingScore}%
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-extrabold text-white">{quizTitle} Evaluation</h2>
-            <p className="text-xs text-zinc-400 mt-1">
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#f4f5f7]">{quizTitle} Evaluation</h2>
+            <p className="text-xs text-[#8e95a5] mt-0.5">
               You answered {correctCount} out of {totalQuestions} questions correctly.
             </p>
           </div>
         </div>
 
         <div className="text-center md:text-right">
-          <span className="text-4xl font-extrabold text-white tracking-tight font-mono">
+          <span className="text-3xl sm:text-4xl font-extrabold text-[#f4f5f7] tracking-tight font-mono">
             {score}%
           </span>
-          <span className="text-xs text-zinc-400 block mt-1 font-mono">Mastery Score</span>
+          <span className="text-xs text-[#8e95a5] block mt-0.5 font-mono">Mastery Score</span>
         </div>
       </div>
 
       {/* Weak Concepts Diagnostic Review Box */}
       {weakConcepts.length > 0 && (
-        <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col gap-3">
-          <div className="flex items-center gap-2 text-amber-300 font-bold text-sm">
-            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
-            Identified Concepts Requiring Review:
+        <div className="p-4 rounded-xl bg-[#f59e0b]/5 border border-[#f59e0b]/20 flex flex-col gap-2.5">
+          <div className="flex items-center gap-2 text-[#f59e0b] font-bold text-xs font-mono">
+            <AlertTriangle className="w-4 h-4 text-[#f59e0b] shrink-0" />
+            Concepts Identified for Review:
           </div>
 
           <div className="flex flex-wrap gap-2">
             {weakConcepts.map((concept, idx) => (
-              <span key={idx} className="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-200 border border-amber-500/40 text-xs font-mono font-bold flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-amber-400" /> {concept}
+              <span key={idx} className="px-2.5 py-0.5 rounded-md bg-[#14151a] text-[#f59e0b] border border-[#f59e0b]/30 text-xs font-mono font-bold flex items-center gap-1.5">
+                <Target className="w-3 h-3 text-[#f59e0b]" /> {concept}
               </span>
             ))}
           </div>
-
-          {recommendations.length > 0 && (
-            <div className="mt-1 space-y-1">
-              {recommendations.map((rec, idx) => (
-                <p key={idx} className="text-xs text-amber-200 leading-relaxed flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-amber-400 shrink-0" /> {rec}
-                </p>
-              ))}
-            </div>
-          )}
         </div>
       )}
 
-      {/* Itemized Questions Breakdown */}
-      <div className="flex flex-col gap-4">
-        <h3 className="text-base font-bold text-white tracking-tight">Question Diagnostic Breakdown</h3>
-
-        {results.map((res, idx) => (
+      {/* Detailed Question Review List */}
+      <div className="flex flex-col gap-3">
+        <h3 className="text-sm font-bold text-[#f4f5f7] uppercase tracking-wider font-mono">Question Diagnostic Breakdown</h3>
+        {results?.map((res, idx) => (
           <div
             key={res.questionId || idx}
-            className={`p-5 rounded-2xl border flex flex-col gap-3 ${
+            className={`p-4 rounded-xl border flex flex-col gap-2.5 ${
               res.isCorrect
-                ? 'bg-emerald-500/5 border-emerald-500/20'
-                : 'bg-rose-500/5 border-rose-500/20'
+                ? 'bg-[#10b981]/5 border-[#10b981]/20'
+                : 'bg-[#ef4444]/5 border-[#ef4444]/20'
             }`}
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                {res.isCorrect ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                ) : (
-                  <XCircle className="w-5 h-5 text-rose-400 shrink-0" />
-                )}
-                <h4 className="text-sm font-semibold text-white">
-                  {idx + 1}. {res.questionText}
-                </h4>
-              </div>
-              <div className="flex items-center gap-2">
-                {res.concept && (
-                  <span className="text-[10px] font-mono text-zinc-400 px-2 py-0.5 rounded bg-white/5 border border-white/10">
-                    {res.concept}
-                  </span>
-                )}
-                <Badge variant={res.isCorrect ? 'emerald' : 'rose'}>
-                  {res.isCorrect ? 'Correct' : 'Incorrect'}
-                </Badge>
-              </div>
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-xs sm:text-sm font-semibold text-[#f4f5f7] leading-snug">
+                {idx + 1}. {res.questionText}
+              </span>
+              <span
+                className={`text-xs font-bold font-mono px-2 py-0.5 rounded shrink-0 ${
+                  res.isCorrect
+                    ? 'bg-[#10b981]/15 text-[#10b981]'
+                    : 'bg-[#ef4444]/15 text-[#ef4444]'
+                }`}
+              >
+                {res.isCorrect ? 'PASS' : 'FAIL'}
+              </span>
             </div>
 
             {res.explanation && (
-              <div className="p-3.5 rounded-xl bg-[#09090b] border border-white/10 text-xs text-zinc-300 space-y-1 ml-8">
-                <span className="font-bold text-[#00f0ff] uppercase tracking-wider block">
-                  Explanation & Rationales:
-                </span>
-                <p className="leading-relaxed">{res.explanation}</p>
-              </div>
+              <p className="text-xs text-[#8e95a5] leading-relaxed pt-2 border-t border-[#2a2e39]">
+                <strong className="text-[#c4c9d4]">Explanation: </strong> {res.explanation}
+              </p>
             )}
           </div>
         ))}
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[#272732]">
-        <Button variant="secondary" onClick={onRetry} leftIcon={<RotateCcw className="w-4 h-4" />}>
-          Retry Assessment
+      {/* Action Footer */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-[#2a2e39]">
+        <Button
+          variant="secondary"
+          size="md"
+          onClick={onRetry}
+          leftIcon={<RotateCcw className="w-4 h-4" />}
+          className="w-full sm:w-auto text-xs font-semibold"
+        >
+          Retry Diagnostic Quiz
         </Button>
 
         {onContinue && (
-          <Button variant="cyan" size="lg" onClick={onContinue} rightIcon={<ArrowRight className="w-4 h-4" />}>
-            Continue to Next Lesson
+          <Button
+            variant="primary"
+            size="md"
+            onClick={onContinue}
+            rightIcon={<ArrowRight className="w-4 h-4" />}
+            className="w-full sm:w-auto font-bold text-xs px-6 py-2.5 shadow-sm"
+          >
+            Continue Lesson →
           </Button>
         )}
       </div>

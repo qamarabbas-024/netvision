@@ -58,7 +58,7 @@ export default function LessonPage() {
   if (isLoading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex items-center justify-center">
+        <div className="min-h-screen surface-0 text-[#f4f5f7] flex items-center justify-center font-sans">
           <PulsePacketLoader label="Loading Technical Lesson Environment..." />
         </div>
       </ProtectedRoute>
@@ -69,26 +69,26 @@ export default function LessonPage() {
     const isNotFound = error?.toLowerCase().includes('not found') || !error;
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col items-center justify-center p-8 text-center max-w-md mx-auto">
-          <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4">
+        <div className="min-h-screen surface-0 text-[#f4f5f7] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto font-sans">
+          <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mb-4">
             <AlertTriangle className="w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-[#f4f5f7] mb-2">
             {isNotFound ? 'Lesson Not Found' : 'Failed to Load Lesson'}
           </h2>
-          <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#8e95a5] mb-6 leading-relaxed">
             {isNotFound
               ? `Could not locate lesson "${lessonSlug}" in this course.`
               : error || 'An unexpected connection error occurred.'}
           </p>
           <div className="flex items-center gap-3">
             {!isNotFound && (
-              <Button variant="cyan" onClick={loadLessonAndCourse} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
+              <Button variant="primary" onClick={loadLessonAndCourse} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
                 Retry Loading
               </Button>
             )}
             <Link href={`/courses/${slug || 'net-101-digital-foundations'}`}>
-              <Button variant={isNotFound ? 'cyan' : 'secondary'} leftIcon={<ArrowLeft className="w-4 h-4" />}>
+              <Button variant={isNotFound ? 'primary' : 'secondary'} leftIcon={<ArrowLeft className="w-4 h-4" />}>
                 Course Syllabus
               </Button>
             </Link>
@@ -100,10 +100,16 @@ export default function LessonPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] p-4 sm:p-6 bg-net-grid-pattern">
-        <div className="max-w-7xl mx-auto">
-          <LessonViewer lesson={lesson} initialStage={stageParam} />
-        </div>
+      <div className="min-h-screen surface-0 text-[#f4f5f7] font-sans">
+        <main className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+          <LessonViewer
+            lesson={lesson}
+            initialStage={stageParam}
+            onMarkComplete={() => {
+              // Local update callback if needed
+            }}
+          />
+        </main>
       </div>
     </ProtectedRoute>
   );

@@ -108,21 +108,22 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete, onContinueLesson }
   return (
     <div className="flex flex-col gap-6">
       {/* Progress Dots */}
-      <div className="flex items-center justify-between gap-4 p-4 glass-panel rounded-2xl border border-[#272732]">
-        <span className="text-xs font-bold text-white font-mono">{quiz.title}</span>
+      <div className="flex items-center justify-between gap-4 p-4 surface-2 rounded-xl border border-[#2a2e39] shadow-instrument">
+        <span className="text-xs font-bold text-[#f4f5f7] font-mono">{quiz.title}</span>
         <div className="flex items-center gap-1.5">
           {questions.map((q, idx) => (
             <button
               key={q.id || idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`w-3 h-3 rounded-full transition-all ${
+              className={`w-2.5 h-2.5 rounded-full transition-all ${
                 currentIndex === idx
-                  ? 'bg-[#00f0ff] ring-4 ring-[#00f0ff]/20'
+                  ? 'bg-[#38bdf8] ring-4 ring-[#38bdf8]/20'
                   : selectedAnswers[q.id] !== undefined
-                  ? 'bg-emerald-400'
-                  : 'bg-zinc-700'
+                  ? 'bg-[#10b981]'
+                  : 'bg-[#2a2e39]'
               }`}
               title={`Question ${idx + 1}`}
+              aria-label={`Jump to Question ${idx + 1}`}
             />
           ))}
         </div>
@@ -158,16 +159,18 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete, onContinueLesson }
           onClick={handlePrev}
           disabled={currentIndex === 0 || isSubmitting}
           leftIcon={<ArrowLeft className="w-4 h-4" />}
+          className="text-xs text-[#8e95a5] hover:text-[#f4f5f7]"
         >
           Previous
         </Button>
 
         {isLastQuestion ? (
           <Button
-            variant="cyan"
-            size="lg"
+            variant="primary"
+            size="md"
             onClick={handleSubmit}
             disabled={!allAnswered || isSubmitting}
+            className="font-bold text-xs px-6 py-2.5 shadow-sm"
             rightIcon={
               isSubmitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -180,10 +183,12 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete, onContinueLesson }
           </Button>
         ) : (
           <Button
-            variant="cyan"
+            variant="primary"
+            size="md"
             onClick={handleNext}
             disabled={currentSelection === null || isSubmitting}
             rightIcon={<ArrowRight className="w-4 h-4" />}
+            className="font-bold text-xs px-5 py-2.5 shadow-sm"
           >
             Next Question
           </Button>
