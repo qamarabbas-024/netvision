@@ -29,26 +29,27 @@ export const DevicePalette: React.FC<DevicePaletteProps> = ({ onAddDevice }) => 
   return (
     <div
       className={cn(
-        'glass-panel p-3.5 rounded-3xl border border-[#272732] flex flex-col gap-3 shrink-0 transition-all duration-300',
+        'surface-2 p-3.5 rounded-xl border border-[#2a2e39] flex flex-col gap-3 shrink-0 transition-all duration-300 shadow-instrument font-sans',
         isCollapsed ? 'w-full lg:w-16 items-center' : 'w-full lg:w-60'
       )}
     >
-      <div className="flex items-center justify-between w-full border-b border-[#272732] pb-2">
+      <div className="flex items-center justify-between w-full border-b border-[#2a2e39] pb-2">
         {!isCollapsed && (
-          <h3 className="text-xs font-mono font-bold uppercase text-zinc-400 tracking-wider">
-            Device Palette
+          <h3 className="text-xs font-mono font-bold uppercase text-[#8e95a5] tracking-wider">
+            DEVICE PALETTE
           </h3>
         )}
 
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={cn(
-            'p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors border border-white/10 shrink-0',
+            'p-1.5 rounded-lg bg-[#14151a] hover:bg-[#1b1e26] text-[#8e95a5] hover:text-[#f4f5f7] transition-colors border border-[#2a2e39] shrink-0',
             isCollapsed && 'mx-auto'
           )}
           title={isCollapsed ? 'Expand Palette' : 'Collapse Palette'}
+          aria-label={isCollapsed ? 'Expand Palette' : 'Collapse Palette'}
         >
-          {isCollapsed ? <ChevronRight className="w-4 h-4 text-[#00f0ff]" /> : <ChevronLeft className="w-4 h-4" />}
+          {isCollapsed ? <ChevronRight className="w-4 h-4 text-[#38bdf8]" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
       </div>
 
@@ -58,18 +59,21 @@ export const DevicePalette: React.FC<DevicePaletteProps> = ({ onAddDevice }) => 
             key={item.type}
             onClick={() => onAddDevice(item.type)}
             className={cn(
-              'flex items-center gap-2.5 p-2.5 rounded-2xl glass-panel border border-[#272732] hover:border-[#00f0ff]/50 hover:bg-[#00f0ff]/10 transition-all text-left group min-h-[44px]',
+              'p-2.5 rounded-lg bg-[#14151a] hover:bg-[#1f222c] border border-[#2a2e39] hover:border-[#38bdf8]/40 text-xs font-semibold text-[#f4f5f7] transition-all flex items-center justify-between group cursor-pointer shadow-subtle',
               isCollapsed && 'justify-center p-2'
             )}
-            title={item.label}
+            title={`Add ${item.label}`}
           >
-            <span className="shrink-0 group-hover:scale-110 transition-transform">{item.icon}</span>
-            {!isCollapsed && (
-              <span className="text-xs font-bold text-zinc-300 group-hover:text-white transition-colors truncate flex-1">
-                {item.label}
+            <div className="flex items-center gap-2.5">
+              <span className="text-[#38bdf8] group-hover:scale-110 transition-transform">
+                {item.icon}
               </span>
+              {!isCollapsed && <span className="truncate">{item.label}</span>}
+            </div>
+
+            {!isCollapsed && (
+              <Plus className="w-3.5 h-3.5 text-[#646c7d] group-hover:text-[#38bdf8] transition-colors shrink-0" />
             )}
-            {!isCollapsed && <Plus className="w-3.5 h-3.5 text-zinc-500 group-hover:text-[#00f0ff] shrink-0" />}
           </button>
         ))}
       </div>

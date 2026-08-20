@@ -86,17 +86,17 @@ export const LearningSidebar: React.FC<LearningSidebarProps> = ({
   return (
     <>
       {/* Mobile Sticky Top Strip with Drawer Trigger */}
-      <div className="lg:hidden flex items-center justify-between p-3 glass-panel border-b border-[#272732] rounded-2xl mb-4">
+      <div className="lg:hidden flex items-center justify-between p-3 surface-2 border border-[#2a2e39] rounded-xl mb-4 font-sans">
         <button
           onClick={() => setMobileDrawerOpen(true)}
-          className="flex items-center gap-2.5 text-xs font-bold text-white hover:text-[#00f0ff] transition-colors"
+          className="flex items-center gap-2 text-xs font-bold text-[#f4f5f7] hover:text-[#38bdf8] transition-colors"
         >
-          <Menu className="w-4 h-4 text-[#00f0ff]" />
+          <Menu className="w-4 h-4 text-[#38bdf8]" />
           <span>Course Menu</span>
         </button>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
-          <span className="text-[#00f0ff] font-bold">
+        <div className="flex items-center gap-2 text-xs font-mono text-[#8e95a5]">
+          <span className="text-[#38bdf8] font-bold">
             {course.completedLessons ?? 0}/{course.lessonsCount ?? 0}
           </span>
           <span>Lessons</span>
@@ -105,33 +105,34 @@ export const LearningSidebar: React.FC<LearningSidebarProps> = ({
 
       {/* Mobile Drawer Overlay */}
       {mobileDrawerOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
+        <div className="fixed inset-0 z-50 lg:hidden flex font-sans">
           <div
             className="fixed inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => setMobileDrawerOpen(false)}
           />
-          <div className="relative w-80 max-w-[85vw] h-full bg-[#121217] border-r border-[#272732] p-4 flex flex-col z-10 overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-[#272732] mb-4">
+          <div className="relative w-80 max-w-[85vw] h-full bg-[#16181f] border-r border-[#2a2e39] p-4 flex flex-col z-10 overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#2a2e39] mb-4">
               <div>
-                <span className="text-[10px] font-mono text-[#00f0ff] uppercase font-bold">
+                <span className="text-[10px] font-mono text-[#38bdf8] uppercase font-bold">
                   {course.code || 'COURSE SYLLABUS'}
                 </span>
-                <h3 className="text-sm font-bold text-white truncate max-w-[180px]">
+                <h3 className="text-sm font-bold text-[#f4f5f7] truncate max-w-[180px]">
                   {course.title}
                 </h3>
               </div>
               <button
                 onClick={() => setMobileDrawerOpen(false)}
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5"
+                className="p-1.5 rounded-lg text-[#8e95a5] hover:text-[#f4f5f7] bg-[#14151a] border border-[#2a2e39]"
+                aria-label="Close syllabus menu"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="flex flex-col gap-4 flex-1">
               {course.modules.map((mod) => (
                 <div key={mod.id} className="flex flex-col gap-1.5">
-                  <span className="text-[10px] font-mono font-bold uppercase text-zinc-500 tracking-wider px-2">
+                  <span className="text-[10px] font-mono font-bold uppercase text-[#646c7d] tracking-wider px-2">
                     {mod.title}
                   </span>
                   {mod.lessons.map((les) => {
@@ -145,26 +146,26 @@ export const LearningSidebar: React.FC<LearningSidebarProps> = ({
                         href={`/courses/${course.slug}/lessons/${les.slug}`}
                         onClick={() => setMobileDrawerOpen(false)}
                         className={cn(
-                          'p-2.5 rounded-xl border flex items-center justify-between text-xs font-semibold transition-all',
+                          'p-2.5 rounded-lg border flex items-center justify-between text-xs font-semibold transition-all',
                           isActive
-                            ? 'bg-[#00f0ff]/10 text-[#00f0ff] border-[#00f0ff]/40 shadow-glow-cyan'
+                            ? 'bg-[#14151a] text-[#38bdf8] border-[#38bdf8]/40 shadow-inner font-bold'
                             : les.completed
-                            ? 'bg-emerald-500/5 text-zinc-300 border-emerald-500/20 hover:text-white'
-                            : 'bg-white/5 text-zinc-400 border-white/5 hover:text-white hover:bg-white/10'
+                            ? 'bg-[#10b981]/5 text-[#c4c9d4] border-[#10b981]/20 hover:text-white'
+                            : 'bg-white/5 text-[#8e95a5] border-[#2a2e39] hover:text-white hover:bg-white/10'
                         )}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="font-mono text-[11px] text-zinc-500 shrink-0">
+                          <span className="font-mono text-[11px] text-[#646c7d] shrink-0">
                             {formattedNum}
                           </span>
                           <span className="truncate">{les.title}</span>
                         </div>
                         {les.completed ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 text-[#10b981] shrink-0" />
                         ) : isActive ? (
-                          <PlayCircle className="w-4 h-4 text-[#00f0ff] shrink-0 animate-pulse" />
+                          <PlayCircle className="w-4 h-4 text-[#38bdf8] shrink-0 animate-pulse" />
                         ) : les.locked ? (
-                          <Lock className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                          <Lock className="w-3.5 h-3.5 text-[#646c7d] shrink-0" />
                         ) : null}
                       </Link>
                     );
@@ -179,18 +180,18 @@ export const LearningSidebar: React.FC<LearningSidebarProps> = ({
       {/* Desktop IDE-Style Collapsible Sidebar */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col glass-panel border border-[#272732]/80 rounded-3xl transition-all duration-300 relative shrink-0 sticky top-20 max-h-[calc(100vh-6rem)] overflow-hidden',
+          'hidden lg:flex flex-col surface-2 border border-[#2a2e39] rounded-xl transition-all duration-300 relative shrink-0 sticky top-20 max-h-[calc(100vh-6rem)] overflow-hidden font-sans',
           isCollapsed ? 'w-16 p-2' : 'w-72 p-4'
         )}
       >
         {/* Sidebar Header & Collapse Toggle */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#272732]/80 mb-3 shrink-0">
+        <div className="flex items-center justify-between pb-3 border-b border-[#2a2e39] mb-3 shrink-0">
           {!isCollapsed && (
             <div className="min-w-0 pr-2">
-              <span className="text-[10px] font-mono text-[#00f0ff] uppercase font-bold block truncate">
+              <span className="text-[10px] font-mono text-[#38bdf8] uppercase font-bold block truncate">
                 {course.code || 'COURSE SYLLABUS'}
               </span>
-              <h3 className="text-xs font-bold text-white truncate" title={course.title}>
+              <h3 className="text-xs font-bold text-[#f4f5f7] truncate" title={course.title}>
                 {course.title}
               </h3>
             </div>
@@ -199,13 +200,14 @@ export const LearningSidebar: React.FC<LearningSidebarProps> = ({
           <button
             onClick={toggleCollapse}
             className={cn(
-              'p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors border border-white/10 shrink-0',
+              'p-1.5 rounded-lg bg-[#14151a] hover:bg-[#1b1e26] text-[#8e95a5] hover:text-[#f4f5f7] transition-colors border border-[#2a2e39] shrink-0',
               isCollapsed && 'mx-auto'
             )}
             title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
             {isCollapsed ? (
-              <ChevronRight className="w-4 h-4 text-[#00f0ff]" />
+              <ChevronRight className="w-4 h-4 text-[#38bdf8]" />
             ) : (
               <ChevronLeft className="w-4 h-4" />
             )}
@@ -214,16 +216,16 @@ export const LearningSidebar: React.FC<LearningSidebarProps> = ({
 
         {/* Course Progress Indicator (Expanded) */}
         {!isCollapsed && (course.progressPercent !== undefined || course.completedLessons !== undefined) && (
-          <div className="mb-4 p-2.5 rounded-2xl bg-[#121217] border border-[#272732] flex flex-col gap-1.5 shrink-0">
+          <div className="mb-4 p-2.5 rounded-lg bg-[#14151a] border border-[#2a2e39] flex flex-col gap-1.5 shrink-0">
             <div className="flex items-center justify-between text-[11px] font-mono">
-              <span className="text-zinc-400">Course Progress</span>
-              <span className="text-[#00f0ff] font-bold">
+              <span className="text-[#8e95a5]">Course Progress</span>
+              <span className="text-[#38bdf8] font-bold">
                 {course.completedLessons ?? 0}/{course.lessonsCount ?? 0} ({course.progressPercent ?? 0}%)
               </span>
             </div>
-            <div className="h-1.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[#121316] rounded-md overflow-hidden p-0.5 border border-[#2a2e39]">
               <div
-                className="h-full bg-gradient-to-r from-[#00f0ff] to-[#3b82f6] transition-all duration-300"
+                className="h-full bg-[#2563eb] rounded-sm transition-all duration-300"
                 style={{ width: `${course.progressPercent ?? 0}%` }}
               />
             </div>
@@ -231,13 +233,13 @@ export const LearningSidebar: React.FC<LearningSidebarProps> = ({
         )}
 
         {/* Modules & Lessons Scrollable Area */}
-        <div className="flex-1 overflow-y-auto space-y-4 pr-1 scrollbar-thin scrollbar-thumb-zinc-800">
+        <div className="flex-1 overflow-y-auto space-y-4 pr-1">
           {(() => {
             let desktopIndex = 0;
             return course.modules.map((mod) => (
               <div key={mod.id} className="flex flex-col gap-1">
                 {!isCollapsed && (
-                  <span className="text-[10px] font-mono font-bold uppercase text-zinc-500 tracking-wider px-2 block mb-1 truncate">
+                  <span className="text-[10px] font-mono font-bold uppercase text-[#646c7d] tracking-wider px-2 block mb-1 truncate">
                     {mod.title}
                   </span>
                 )}
@@ -253,30 +255,20 @@ export const LearningSidebar: React.FC<LearningSidebarProps> = ({
                         key={les.id}
                         href={`/courses/${course.slug}/lessons/${les.slug}`}
                         className={cn(
-                          'w-10 h-10 rounded-xl mx-auto flex items-center justify-center text-xs font-mono font-bold transition-all relative group',
+                          'w-9 h-9 rounded-lg mx-auto flex items-center justify-center text-xs font-mono font-bold transition-all relative group',
                           isActive
-                            ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
+                            ? 'bg-[#2563eb] text-white shadow-sm'
                             : les.completed
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : les.locked
-                            ? 'bg-white/5 text-zinc-600 border border-white/5'
-                            : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
+                            ? 'bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30'
+                            : 'text-[#8e95a5] hover:text-[#f4f5f7] hover:bg-[#14151a]'
                         )}
-                        title={`${formattedNum}. ${les.title}`}
+                        title={les.title}
                       >
-                        {les.completed && !isActive ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                        ) : les.locked ? (
-                          <Lock className="w-3.5 h-3.5 text-zinc-600" />
+                        {les.completed ? (
+                          <CheckCircle2 className="w-4 h-4 text-[#10b981]" />
                         ) : (
                           formattedNum
                         )}
-
-                        {/* Hover Tooltip */}
-                        <div className="absolute left-14 top-1/2 -translate-y-1/2 bg-[#181820] text-white text-xs font-semibold px-3 py-1.5 rounded-xl border border-[#272732] shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
-                          <span className="text-[#00f0ff] mr-1.5 font-mono">{formattedNum}</span>
-                          {les.title}
-                        </div>
                       </Link>
                     );
                   }
@@ -286,36 +278,27 @@ export const LearningSidebar: React.FC<LearningSidebarProps> = ({
                       key={les.id}
                       href={`/courses/${course.slug}/lessons/${les.slug}`}
                       className={cn(
-                        'p-2.5 rounded-xl border flex items-center justify-between text-xs font-semibold transition-all group',
+                        'p-2 rounded-lg border flex items-center justify-between text-xs font-semibold transition-all',
                         isActive
-                          ? 'bg-[#00f0ff]/10 text-[#00f0ff] border-[#00f0ff]/40 shadow-glow-cyan font-bold'
+                          ? 'bg-[#14151a] text-[#38bdf8] border-[#38bdf8]/40 shadow-inner font-bold'
                           : les.completed
-                          ? 'bg-emerald-500/5 text-zinc-300 border-emerald-500/20 hover:text-white hover:bg-emerald-500/10'
-                          : les.locked
-                          ? 'bg-white/5 text-zinc-500 border-white/5 cursor-not-allowed opacity-60'
-                          : 'bg-white/5 text-zinc-400 border-white/5 hover:text-white hover:bg-white/10'
+                          ? 'bg-[#10b981]/5 text-[#c4c9d4] border-[#10b981]/20 hover:text-white'
+                          : 'bg-transparent text-[#8e95a5] border-transparent hover:text-white hover:bg-[#14151a]'
                       )}
                     >
-                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                        <span className="font-mono text-[11px] text-zinc-500 group-hover:text-zinc-400 shrink-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-mono text-[11px] text-[#646c7d] shrink-0">
                           {formattedNum}
                         </span>
                         <span className="truncate">{les.title}</span>
                       </div>
-
-                      <div className="flex items-center gap-1 shrink-0">
-                        {les.completed ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                        ) : isActive ? (
-                          <PlayCircle className="w-4 h-4 text-[#00f0ff] animate-pulse" />
-                        ) : les.locked ? (
-                          <Lock className="w-3.5 h-3.5 text-zinc-600" />
-                        ) : (
-                          <span className="text-[10px] font-mono text-zinc-600">
-                            {les.durationMinutes}m
-                          </span>
-                        )}
-                      </div>
+                      {les.completed ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#10b981] shrink-0" />
+                      ) : isActive ? (
+                        <PlayCircle className="w-3.5 h-3.5 text-[#38bdf8] shrink-0 animate-pulse" />
+                      ) : les.locked ? (
+                        <Lock className="w-3.5 h-3.5 text-[#646c7d] shrink-0" />
+                      ) : null}
                     </Link>
                   );
                 })}

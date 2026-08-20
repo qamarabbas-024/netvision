@@ -54,20 +54,20 @@ export const AppSidebar: React.FC = () => {
   );
 
   return (
-    <aside className="hidden md:flex w-64 h-screen sticky top-0 glass-panel border-r border-[#272732]/60 p-4 flex-col justify-between shrink-0">
+    <aside className="hidden md:flex w-64 h-screen sticky top-0 bg-[#16181f] border-r border-[#2a2e39] p-4 flex-col justify-between shrink-0 font-sans">
       <div className="flex flex-col gap-6">
         {/* Brand */}
         <Link href="/dashboard" className="flex items-center gap-3 px-2 py-1">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#00f0ff] to-[#3b82f6] flex items-center justify-center shadow-glow-cyan">
-            <Cpu className="w-4 h-4 text-black font-bold" />
+          <div className="w-8 h-8 rounded-lg bg-[#2563eb] flex items-center justify-center shadow-sm">
+            <Cpu className="w-4 h-4 text-white font-bold" />
           </div>
-          <span className="font-extrabold text-lg text-white">NetVision</span>
+          <span className="font-extrabold text-base text-[#f4f5f7] tracking-tight">NetVision</span>
         </Link>
 
         {/* Navigation Section */}
         <div className="flex flex-col gap-1">
-          <span className="px-3 text-[10px] font-semibold uppercase text-zinc-500 tracking-wider mb-1">
-            Menu
+          <span className="px-3 text-[10px] font-mono font-semibold uppercase text-[#646c7d] tracking-wider mb-1">
+            NAVIGATION
           </span>
           {filteredItems.map((item) => {
             const isActive = !!pathname && (pathname === item.href || pathname.startsWith(item.href + '/'));
@@ -76,10 +76,10 @@ export const AppSidebar: React.FC = () => {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all',
+                  'flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold transition-all',
                   isActive
-                    ? 'bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/30 shadow-glow-cyan'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-[#14151a] text-[#38bdf8] border border-[#2a2e39] font-bold shadow-inner'
+                    : 'text-[#8e95a5] hover:text-[#f4f5f7] hover:bg-[#1b1e26] border border-transparent'
                 )}
               >
                 {item.icon}
@@ -93,7 +93,7 @@ export const AppSidebar: React.FC = () => {
       {/* Logout Action */}
       <button
         onClick={handleLogout}
-        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors w-full cursor-pointer"
+        className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-[#f87171] hover:bg-[#ef4444]/10 transition-colors w-full cursor-pointer"
       >
         <LogOut className="w-4 h-4" />
         <span>Log Out</span>
@@ -121,32 +121,37 @@ export const MobileSidebarDrawer: React.FC<{ isOpen: boolean; onClose: () => voi
   );
 
   return (
-    <div className="fixed inset-0 z-50 md:hidden flex">
+    <div className="fixed inset-0 z-50 flex md:hidden font-sans">
+      {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm"
         onClick={onClose}
       />
 
-      <div className="relative w-72 max-w-[85vw] h-full bg-[#121217] border-r border-[#272732] p-5 flex flex-col justify-between z-10 overflow-y-auto">
+      {/* Drawer */}
+      <div className="relative w-72 max-w-[85vw] h-full bg-[#16181f] border-r border-[#2a2e39] p-5 flex flex-col justify-between shadow-elevated z-10">
         <div className="flex flex-col gap-6">
+          {/* Header with Close */}
           <div className="flex items-center justify-between">
             <Link href="/dashboard" onClick={onClose} className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#00f0ff] to-[#3b82f6] flex items-center justify-center shadow-glow-cyan">
-                <Cpu className="w-4 h-4 text-black font-bold" />
+              <div className="w-8 h-8 rounded-lg bg-[#2563eb] flex items-center justify-center">
+                <Cpu className="w-4 h-4 text-white font-bold" />
               </div>
-              <span className="font-extrabold text-lg text-white">NetVision</span>
+              <span className="font-extrabold text-base text-[#f4f5f7]">NetVision</span>
             </Link>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-white/5"
+              className="p-1.5 rounded-lg bg-[#14151a] border border-[#2a2e39] text-[#8e95a5] hover:text-[#f4f5f7]"
+              aria-label="Close navigation menu"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex flex-col gap-1">
-            <span className="px-3 text-[10px] font-semibold uppercase text-zinc-500 tracking-wider mb-1">
-              Menu
+          {/* Navigation Links */}
+          <div className="flex flex-col gap-1 overflow-y-auto max-h-[calc(100vh-200px)]">
+            <span className="px-3 text-[10px] font-mono font-semibold uppercase text-[#646c7d] tracking-wider mb-1">
+              NAVIGATION
             </span>
             {filteredItems.map((item) => {
               const isActive = !!pathname && (pathname === item.href || pathname.startsWith(item.href + '/'));
@@ -156,10 +161,10 @@ export const MobileSidebarDrawer: React.FC<{ isOpen: boolean; onClose: () => voi
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    'flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all',
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all',
                     isActive
-                      ? 'bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/30 shadow-glow-cyan'
-                      : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                      ? 'bg-[#14151a] text-[#38bdf8] border border-[#2a2e39] font-bold'
+                      : 'text-[#8e95a5] hover:text-[#f4f5f7] hover:bg-[#1b1e26]'
                   )}
                 >
                   {item.icon}
@@ -170,9 +175,10 @@ export const MobileSidebarDrawer: React.FC<{ isOpen: boolean; onClose: () => voi
           </div>
         </div>
 
+        {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors w-full cursor-pointer mt-6"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-[#f87171] hover:bg-[#ef4444]/10 transition-colors w-full cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           <span>Log Out</span>

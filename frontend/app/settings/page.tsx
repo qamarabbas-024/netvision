@@ -38,7 +38,7 @@ export default function SettingsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+      <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col min-w-0">
@@ -47,26 +47,26 @@ export default function SettingsPage() {
           <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
             <div className="max-w-4xl mx-auto flex flex-col gap-6 sm:gap-8">
               <div>
-                <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
-                  Preferences & Security
+                <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold block mb-1">
+                  PREFERENCES & SECURITY
                 </span>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight">
                   Account & Session Settings
                 </h1>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+                <p className="text-xs sm:text-sm text-[#8e95a5] mt-1 leading-relaxed">
                   Manage active authenticated session identity, interface themes, and local storage cache.
                 </p>
               </div>
 
               {/* Profile Information */}
-              <Card className="p-5 sm:p-8 flex flex-col gap-6">
-                <div className="flex items-center justify-between border-b border-[#272732] pb-3">
+              <Card className="p-5 sm:p-6 flex flex-col gap-5 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
+                <div className="flex items-center justify-between border-b border-[#2a2e39] pb-3">
                   <div className="flex items-center gap-2.5">
-                    <User className="w-5 h-5 text-[#00f0ff]" />
-                    <h2 className="text-base sm:text-lg font-bold text-white">Learner Identity</h2>
+                    <User className="w-5 h-5 text-[#38bdf8]" />
+                    <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7]">Learner Identity</h2>
                   </div>
-                  <Badge variant={isAuthenticated ? 'cyan' : 'neutral'}>
-                    {isAuthenticated ? (user?.role === 'ADMIN' ? 'Administrator' : 'Verified Learner') : 'Guest Session'}
+                  <Badge variant={isAuthenticated ? 'cyan' : 'neutral'} dot={true}>
+                    {isAuthenticated ? (user?.role === 'ADMIN' ? 'ADMINISTRATOR' : 'VERIFIED LEARNER') : 'GUEST SESSION'}
                   </Badge>
                 </div>
 
@@ -99,13 +99,13 @@ export default function SettingsPage() {
                   </div>
 
                   {saveSuccess && (
-                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono flex items-center gap-2">
+                    <div className="p-3 rounded-lg bg-[#10b981]/10 border border-[#10b981]/30 text-[#10b981] text-xs font-mono flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4" /> Preferences updated successfully.
                     </div>
                   )}
 
                   <div className="flex justify-end">
-                    <Button variant="cyan" type="submit" className="w-full sm:w-auto">
+                    <Button variant="primary" type="submit" className="w-full sm:w-auto">
                       Save Profile
                     </Button>
                   </div>
@@ -113,49 +113,49 @@ export default function SettingsPage() {
               </Card>
 
               {/* Theme & Appearance */}
-              <Card className="p-5 sm:p-8 flex flex-col gap-6">
-                <h2 className="text-base sm:text-lg font-bold text-white border-b border-[#272732] pb-3">Theme & Appearance</h2>
+              <Card className="p-5 sm:p-6 flex flex-col gap-5 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
+                <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7] border-b border-[#2a2e39] pb-3">Theme & Appearance</h2>
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-sm font-bold text-white">Interface Theme Mode</h3>
-                    <p className="text-xs text-zinc-400">Toggle between Dark Technical Mode (Default) and Light Mode</p>
+                    <h3 className="text-sm font-bold text-[#f4f5f7]">Interface Theme Mode</h3>
+                    <p className="text-xs text-[#8e95a5]">Toggle between Dark Technical Mode (Default) and Light Mode</p>
                   </div>
                   <ThemeToggle />
                 </div>
               </Card>
 
               {/* Session Security & Authentication */}
-              <Card className="p-5 sm:p-8 flex flex-col gap-6">
-                <div className="flex items-center gap-2.5 border-b border-[#272732] pb-3">
-                  <ShieldCheck className="w-5 h-5 text-emerald-400" />
-                  <h2 className="text-base sm:text-lg font-bold text-white">Security & Active Session</h2>
+              <Card className="p-5 sm:p-6 flex flex-col gap-5 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
+                <div className="flex items-center gap-2.5 border-b border-[#2a2e39] pb-3">
+                  <ShieldCheck className="w-5 h-5 text-[#10b981]" />
+                  <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7]">Security & Active Session</h2>
                 </div>
 
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#121217] border border-[#272732]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-[#14151a] border border-[#2a2e39]">
                   <div>
-                    <div className="text-xs font-bold text-white">Current Session Status</div>
-                    <div className="text-xs text-zinc-400 font-mono mt-0.5">
+                    <div className="text-xs font-bold text-[#f4f5f7]">Current Session Status</div>
+                    <div className="text-xs text-[#8e95a5] font-mono mt-0.5">
                       {isAuthenticated ? `Authenticated as ${user?.email || user?.username}` : 'Local Anonymous Guest Session'}
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={handleLogout} leftIcon={<LogOut className="w-4 h-4" />} className="text-rose-400 hover:text-rose-300">
+                  <Button variant="ghost" size="sm" onClick={handleLogout} leftIcon={<LogOut className="w-4 h-4" />} className="text-[#f87171] hover:text-white hover:bg-[#ef4444]/10">
                     Sign Out
                   </Button>
                 </div>
               </Card>
 
               {/* Danger Zone */}
-              <Card className="p-5 sm:p-8 flex flex-col gap-6 border-rose-500/30 bg-rose-500/5">
-                <div className="flex items-center gap-2.5 border-b border-rose-500/20 pb-3">
-                  <AlertTriangle className="w-5 h-5 text-rose-400" />
-                  <h2 className="text-base sm:text-lg font-bold text-white">Danger Zone</h2>
+              <Card className="p-5 sm:p-6 flex flex-col gap-5 border-[#ef4444]/30 bg-[#ef4444]/5 rounded-xl">
+                <div className="flex items-center gap-2.5 border-b border-[#ef4444]/20 pb-3">
+                  <AlertTriangle className="w-5 h-5 text-[#ef4444]" />
+                  <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7]">Danger Zone</h2>
                 </div>
 
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h3 className="text-sm font-bold text-white">Clear Local Guest Storage</h3>
-                    <p className="text-xs text-zinc-400 max-w-md">
+                    <h3 className="text-sm font-bold text-[#f4f5f7]">Clear Local Guest Storage</h3>
+                    <p className="text-xs text-[#8e95a5] max-w-md">
                       Purges local device storage cache and rotates anonymous guest session tokens.
                     </p>
                   </div>

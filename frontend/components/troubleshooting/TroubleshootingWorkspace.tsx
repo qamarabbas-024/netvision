@@ -258,18 +258,18 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
           return (
             <div
               key={st}
-              className={`p-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1 ${
+              className={`p-3 rounded-lg border text-center transition-all flex flex-col items-center justify-center gap-1 font-mono ${
                 isCurrent
-                  ? 'bg-[#00f0ff]/10 border-[#00f0ff] text-[#00f0ff] shadow-glow-cyan'
+                  ? 'bg-[#14151a] border-[#38bdf8] text-[#38bdf8] font-bold shadow-inner'
                   : isDone
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                  : 'bg-[#121216] border-[#272732] text-zinc-500'
+                  ? 'bg-[#10b981]/10 border-[#10b981]/30 text-[#10b981]'
+                  : 'bg-[#14151a] border-[#2a2e39] text-[#646c7d]'
               }`}
             >
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider">
+              <span className="text-[10px] font-bold uppercase tracking-wider">
                 {stageLabels[st]}
               </span>
-              <span className="text-[11px] font-semibold">
+              <span className="text-[11px] font-semibold font-sans">
                 {isDone ? '✓ Completed' : isCurrent ? 'Active Stage' : 'Pending'}
               </span>
             </div>
@@ -282,40 +282,40 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
         {/* Left Column: Topology Context & Evidence Locker (5 cols) */}
         <div className="lg:col-span-5 flex flex-col gap-6">
           {/* Topology Preview Card */}
-          <Card className="p-5 flex flex-col gap-4 border-[#272732]">
+          <Card className="p-5 flex flex-col gap-4 border border-[#2a2e39] surface-2 rounded-xl shadow-instrument">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Layers className="w-4 h-4 text-[#00f0ff]" /> Network Topology Context
+              <h3 className="text-sm font-bold text-[#f4f5f7] flex items-center gap-2">
+                <Layers className="w-4 h-4 text-[#38bdf8]" /> Network Topology Context
               </h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#14151a] border border-[#2a2e39] text-[#8e95a5]">
                 {scenario.topology?.nodes?.length || 0} Nodes Active
               </span>
             </div>
 
-            <div className="p-4 rounded-2xl bg-[#09090b] border border-[#272732] flex flex-col gap-3">
+            <div className="p-3.5 rounded-lg bg-[#14151a] border border-[#2a2e39] flex flex-col gap-2.5">
               {scenario.topology?.nodes?.map((node: any) => (
                 <div
                   key={node.id}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800"
+                  className="flex items-center justify-between p-2 rounded-lg bg-[#1b1e26] border border-[#2a2e39]"
                 >
                   <div className="flex items-center gap-2.5">
                     <span
-                      className={`w-2.5 h-2.5 rounded-full ${
+                      className={`w-2 h-2 rounded-full shrink-0 ${
                         node.status === 'degraded'
-                          ? 'bg-rose-500 animate-pulse'
+                          ? 'bg-[#ef4444] animate-pulse'
                           : node.status === 'offline'
-                          ? 'bg-zinc-600'
-                          : 'bg-emerald-400'
+                          ? 'bg-[#646c7d]'
+                          : 'bg-[#10b981]'
                       }`}
                     />
                     <div>
-                      <span className="text-xs font-bold text-white block">{node.name}</span>
-                      <span className="text-[10px] font-mono text-zinc-400 uppercase">{node.type}</span>
+                      <span className="text-xs font-bold text-[#f4f5f7] block">{node.name}</span>
+                      <span className="text-[10px] font-mono text-[#8e95a5] uppercase">{node.type}</span>
                     </div>
                   </div>
 
                   {node.ipAddress && (
-                    <span className="text-[11px] font-mono text-[#00f0ff] bg-[#00f0ff]/10 px-2 py-0.5 rounded">
+                    <span className="text-[11px] font-mono text-[#38bdf8] bg-[#14151a] border border-[#2a2e39] px-2 py-0.5 rounded">
                       {node.ipAddress}
                     </span>
                   )}
@@ -325,16 +325,16 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
 
             {/* Reported Symptoms List */}
             <div>
-              <span className="text-[11px] font-mono text-rose-400 font-bold uppercase tracking-wider block mb-2">
+              <span className="text-[11px] font-mono text-[#f87171] font-bold uppercase tracking-wider block mb-2">
                 Reported Incident Symptoms:
               </span>
               <ul className="flex flex-col gap-1.5">
                 {scenario.initialSymptoms?.map((sym: string, idx: number) => (
                   <li
                     key={idx}
-                    className="text-xs text-zinc-300 flex items-start gap-2 bg-rose-500/5 p-2 rounded-xl border border-rose-500/10"
+                    className="text-xs text-[#c4c9d4] flex items-start gap-2 bg-[#ef4444]/5 p-2 rounded-lg border border-[#ef4444]/15"
                   >
-                    <AlertTriangle className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-3.5 h-3.5 text-[#ef4444] shrink-0 mt-0.5" />
                     <span>{sym}</span>
                   </li>
                 ))}
@@ -343,10 +343,10 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
           </Card>
 
           {/* Evidence Locker Card */}
-          <Card className="p-5 flex flex-col gap-4 border-[#272732]">
+          <Card className="p-5 flex flex-col gap-4 border border-[#2a2e39] surface-2 rounded-xl shadow-instrument">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <FileText className="w-4 h-4 text-purple-400" /> Evidence Locker
+              <h3 className="text-sm font-bold text-[#f4f5f7] flex items-center gap-2">
+                <FileText className="w-4 h-4 text-[#818cf8]" /> Evidence Locker
               </h3>
               <Badge variant="purple">
                 {unlockedEvidenceList.length} / {scenario.evidenceItems?.length || 0} Discovered
@@ -354,10 +354,10 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
             </div>
 
             {unlockedEvidenceList.length === 0 ? (
-              <div className="p-6 rounded-2xl border border-dashed border-zinc-800 text-center flex flex-col items-center gap-2 text-zinc-500">
-                <Search className="w-6 h-6" />
-                <span className="text-xs">No evidence discovered yet.</span>
-                <span className="text-[11px] text-zinc-600">
+              <div className="p-6 rounded-lg border border-dashed border-[#2a2e39] text-center flex flex-col items-center gap-2 text-[#646c7d]">
+                <Search className="w-5 h-5" />
+                <span className="text-xs text-[#8e95a5]">No evidence discovered yet.</span>
+                <span className="text-[11px] text-[#646c7d]">
                   Run diagnostic CLI commands on the terminal to uncover technical clues.
                 </span>
               </div>
@@ -366,16 +366,16 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
                 {unlockedEvidenceList.map((ev) => (
                   <div
                     key={ev.id}
-                    className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex flex-col gap-2 animate-fadeIn"
+                    className="p-3 rounded-lg bg-[#818cf8]/10 border border-[#818cf8]/20 flex flex-col gap-2"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">{ev.title}</span>
-                      <span className="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">
+                      <span className="text-xs font-bold text-[#f4f5f7]">{ev.title}</span>
+                      <span className="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded bg-[#818cf8]/20 text-[#a5b4fc]">
                         {ev.category}
                       </span>
                     </div>
-                    <p className="text-[11px] text-zinc-300">{ev.description}</p>
-                    <pre className="p-2 rounded-lg bg-black/60 font-mono text-[10px] text-[#00f0ff] overflow-x-auto whitespace-pre-wrap border border-purple-500/20">
+                    <p className="text-[11px] text-[#8e95a5]">{ev.description}</p>
+                    <pre className="p-2 rounded-md bg-[#14151a] font-mono text-[10px] text-[#38bdf8] overflow-x-auto whitespace-pre-wrap border border-[#2a2e39]">
                       {ev.data}
                     </pre>
                   </div>
@@ -388,28 +388,28 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
         {/* Right Column: Interactive Diagnostic Console & Stages (7 cols) */}
         <div className="lg:col-span-7 flex flex-col gap-6">
           {/* Diagnostic CLI Terminal */}
-          <Card className="p-5 flex flex-col gap-4 border-[#272732] bg-[#0c0c10]">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <Card className="p-5 flex flex-col gap-4 border border-[#2a2e39] surface-3 rounded-xl shadow-instrument">
+            <div className="flex items-center justify-between border-b border-[#242731] pb-3">
               <div className="flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-[#00f0ff]" />
-                <h3 className="text-sm font-bold text-white">Investigation CLI Terminal</h3>
+                <Terminal className="w-4 h-4 text-[#38bdf8]" />
+                <h3 className="text-sm font-bold text-[#f4f5f7]">Investigation CLI Terminal</h3>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                <span className="w-2 h-2 rounded-full bg-[#ef4444]" />
+                <span className="w-2 h-2 rounded-full bg-[#f59e0b]" />
+                <span className="w-2 h-2 rounded-full bg-[#10b981]" />
               </div>
             </div>
 
             {/* Quick Diagnostic Command Pills */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-mono text-zinc-500">Allowed Commands:</span>
+              <span className="text-[10px] font-mono text-[#646c7d]">Allowed Commands:</span>
               {scenario.allowedCommands?.map((cmdObj: any, idx: number) => (
                 <button
                   key={idx}
                   onClick={() => handleRunCommand(cmdObj.command)}
                   disabled={isExecutingCmd}
-                  className="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-[#00f0ff]/20 hover:text-[#00f0ff] text-zinc-300 border border-zinc-700 transition-all cursor-pointer"
+                  className="text-[10px] font-mono px-2.5 py-1 rounded-md bg-[#1b1e26] hover:bg-[#2563eb]/20 hover:text-[#38bdf8] text-[#8e95a5] border border-[#2a2e39] transition-all cursor-pointer"
                 >
                   $ {cmdObj.command}
                 </button>
@@ -417,8 +417,8 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
             </div>
 
             {/* Terminal Output Screen */}
-            <div className="h-64 rounded-2xl bg-black p-4 font-mono text-xs text-zinc-300 overflow-y-auto flex flex-col gap-3 border border-zinc-800">
-              <div className="text-zinc-500 text-[11px]">
+            <div className="h-64 rounded-lg bg-[#101115] p-4 font-mono text-xs text-[#e2e4e9] overflow-y-auto flex flex-col gap-3 border border-[#242731]">
+              <div className="text-[#646c7d] text-[11px]">
                 NetVision Incident Diagnostic Shell [Version 1.0.0]
                 <br />
                 Connected to virtual topology node. Type commands below to gather telemetry.
@@ -426,12 +426,12 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
 
               {commandHistory.map((entry, idx) => (
                 <div key={idx} className="flex flex-col gap-1">
-                  <div className="text-[#00f0ff] flex items-center gap-2">
+                  <div className="text-[#38bdf8] flex items-center gap-2">
                     <span>netvision@incident:~$</span>
                     <span className="text-white font-bold">{entry.command}</span>
-                    <span className="text-[9px] text-zinc-500 ml-auto">{entry.timestamp}</span>
+                    <span className="text-[9px] text-[#646c7d] ml-auto">{entry.timestamp}</span>
                   </div>
-                  <pre className="text-emerald-400 font-mono text-[11px] whitespace-pre-wrap pl-2 border-l border-zinc-800">
+                  <pre className="text-[#34d399] font-mono text-[11px] whitespace-pre-wrap pl-2 border-l border-[#242731]">
                     {entry.output}
                   </pre>
                 </div>
@@ -448,10 +448,10 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
                   if (e.key === 'Enter') handleRunCommand();
                 }}
                 placeholder="Type diagnostic command (e.g. ping, nslookup, ipconfig, show...)"
-                className="flex-1 bg-black/60 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-[#00f0ff]"
+                className="flex-1 bg-[#101115] border border-[#242731] rounded-lg px-3.5 py-2 text-xs font-mono text-[#f4f5f7] focus:outline-none focus:border-[#38bdf8]"
               />
               <Button
-                variant="cyan"
+                variant="primary"
                 size="sm"
                 onClick={() => handleRunCommand()}
                 disabled={isExecutingCmd || !cliInput.trim()}
