@@ -460,48 +460,103 @@ async function runProductCorrectnessTests() {
         },
       });
 
-      const labs = await prisma.lessonLab.findMany({
-        take: 3,
+      // Retrieve authoritative required labs for NV-NET certification
+      const certDef = await prisma.certificationDefinition.findUnique({
+        where: { code: 'NV-NET' },
+      });
+      assert(!!certDef, '10.0 Certification definition NV-NET exists');
+
+      const reqCourseCodes: string[] = (certDef!.requirementsJson as any)?.requiredCourseCodes || ['NET-201', 'NET-202', 'NET-203', 'NET-204'];
+      const requiredCourses = await prisma.course.findMany({
+        where: { code: { in: reqCourseCodes } },
+        include: { modules: { include: { lessons: { include: { labs: true } } } } },
       });
 
-      if (labs.length >= 2) {
-        // Repeated attempts on the same single lab
-        await prisma.labAttempt.create({
-          data: {
-            userId: userH.id,
-            labId: labs[0].id,
-            passed: true,
-            score: 100,
-            status: 'COMPLETED',
-          },
-        });
-        await prisma.labAttempt.create({
-          data: {
-            userId: userH.id,
-            labId: labs[0].id,
-            passed: true,
-            score: 100,
-            status: 'COMPLETED',
-          },
-        });
-        await prisma.labAttempt.create({
-          data: {
-            userId: userH.id,
-            labId: labs[0].id,
-            passed: true,
-            score: 100,
-            status: 'COMPLETED',
-          },
-        });
-
-        const eligibility = await certificationsService.calculateEligibility(userH.id, 'NV-NET');
-        const labsReq = eligibility.requirements.find((r) => r.key === 'LABS');
-        assert(labsReq !== undefined, '10.1 Labs requirement exists');
-        // Repeating lab 0 three times only counts as 1 distinct passed lab
-        assert(labsReq!.title.includes('(1/'), `10.2 Only 1 distinct lab counted despite 3 repeated attempts (got: ${labsReq!.title})`);
+      const requiredLabs: any[] = [];
+      for (const c of requiredCourses) {
+        for (const m of c.modules) {
+          for (const l of m.lessons) {
+            for (const lab of l.labs) {
+              requiredLabs.push(lab);
+            }
+          }
+        }
       }
 
-      console.log('  ✓ P0 #10 Passed: Distinct lab completion enforced without allowing duplicate substitution.');
+      // Find an unrelated lab from NET-404
+      const unrelatedCourse = await prisma.course.findFirst({
+        where: { code: 'NET-404' },
+        include: { modules: { include: { lessons: { include: { labs: true } } } } },
+      });
+      const unrelatedLab = unrelatedCourse?.modules[0]?.lessons.find((l) => l.labs.length > 0)?.labs[0];
+
+      assert(requiredLabs.length >= 2, `10.0 Found at least 2 required labs for NV-NET (found: ${requiredLabs.length})`);
+
+      const labA = requiredLabs[0];
+      const labB = requiredLabs[1];
+
+      // CASE 1: 3 successful attempts for SAME required lab (Lab A) -> exactly 1 distinct completed lab
+      await prisma.labAttempt.create({
+        data: { userId: userH.id, labId: labA.id, passed: true, score: 100, status: 'COMPLETED' },
+      });
+      await prisma.labAttempt.create({
+        data: { userId: userH.id, labId: labA.id, passed: true, score: 100, status: 'COMPLETED' },
+      });
+      await prisma.labAttempt.create({
+        data: { userId: userH.id, labId: labA.id, passed: true, score: 100, status: 'COMPLETED' },
+      });
+
+      let eligibility = await certificationsService.calculateEligibility(userH.id, 'NV-NET');
+      let labsReq = eligibility.requirements.find((r) => r.key === 'LABS');
+      assert(labsReq !== undefined, '10.1 Labs requirement exists');
+      assert(labsReq!.title.includes(`(1/${requiredLabs.length})`), `10.2 Case 1: 3 attempts on Lab A = exactly 1 completed required lab (got: ${labsReq!.title})`);
+      assert(labsReq!.status === 'INCOMPLETE', '10.3 Case 1 status is INCOMPLETE');
+
+      // CASE 2: same lab repeated + second required lab (Lab B) -> 2 distinct completed labs
+      await prisma.labAttempt.create({
+        data: { userId: userH.id, labId: labB.id, passed: true, score: 100, status: 'COMPLETED' },
+      });
+
+      eligibility = await certificationsService.calculateEligibility(userH.id, 'NV-NET');
+      labsReq = eligibility.requirements.find((r) => r.key === 'LABS');
+      assert(labsReq!.title.includes(`(2/${requiredLabs.length})`), `10.4 Case 2: Lab A + Lab B = exactly 2 completed required labs (got: ${labsReq!.title})`);
+
+      // CASE 3: successful attempt for non-required lab (Unrelated Lab from NET-404) -> does not affect requirement
+      if (unrelatedLab) {
+        await prisma.labAttempt.create({
+          data: { userId: userH.id, labId: unrelatedLab.id, passed: true, score: 100, status: 'COMPLETED' },
+        });
+
+        eligibility = await certificationsService.calculateEligibility(userH.id, 'NV-NET');
+        labsReq = eligibility.requirements.find((r) => r.key === 'LABS');
+        assert(labsReq!.title.includes(`(2/${requiredLabs.length})`), `10.5 Case 3: Non-required lab does not increase count (got: ${labsReq!.title})`);
+      }
+
+      // CASE 4: failed attempt on remaining required lab -> does not count
+      if (requiredLabs.length > 2) {
+        const labC = requiredLabs[2];
+        await prisma.labAttempt.create({
+          data: { userId: userH.id, labId: labC.id, passed: false, score: 40, status: 'FAILED' },
+        });
+
+        eligibility = await certificationsService.calculateEligibility(userH.id, 'NV-NET');
+        labsReq = eligibility.requirements.find((r) => r.key === 'LABS');
+        assert(labsReq!.title.includes(`(2/${requiredLabs.length})`), `10.6 Case 4: Failed attempt does not count (got: ${labsReq!.title})`);
+      }
+
+      // CASE 5: all required labs completed -> LABS status COMPLETE
+      for (let i = 2; i < requiredLabs.length; i++) {
+        await prisma.labAttempt.create({
+          data: { userId: userH.id, labId: requiredLabs[i].id, passed: true, score: 100, status: 'COMPLETED' },
+        });
+      }
+
+      eligibility = await certificationsService.calculateEligibility(userH.id, 'NV-NET');
+      labsReq = eligibility.requirements.find((r) => r.key === 'LABS');
+      assert(labsReq!.title.includes(`(${requiredLabs.length}/${requiredLabs.length})`), `10.7 Case 5: All required labs completed (got: ${labsReq!.title})`);
+      assert(labsReq!.status === 'COMPLETE', '10.8 Case 5 status is COMPLETE');
+
+      console.log('  ✓ P0 #10 Passed: Distinct lab completion enforced across Cases 1-5 without duplicate substitution.');
       passedTests++;
     }
 
