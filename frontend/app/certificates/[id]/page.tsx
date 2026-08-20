@@ -258,8 +258,32 @@ export default function CertificateDetailPage() {
         </div>
       </div>
 
+      {/* Schema.org EducationalOccupationalCredential Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'EducationalOccupationalCredential',
+            name: certificationTitle,
+            credentialCategory: 'Certificate',
+            recognizedBy: {
+              '@type': 'Organization',
+              name: 'NetVision',
+              url: 'https://netvision-three.vercel.app',
+            },
+            recipient: {
+              '@type': 'Person',
+              name: candidateName,
+            },
+            dateCreated: issueDateFormatted,
+            identifier: credentialId,
+          }),
+        }}
+      />
+
       <div className="text-center text-[11px] text-[#646c7d] pt-8">
-        <p>© 2026 NetVision. Verifiable, anti-tamper learning credential.</p>
+        <p>© 2026 NetVision. Verifiable learning credential.</p>
       </div>
     </div>
   );
