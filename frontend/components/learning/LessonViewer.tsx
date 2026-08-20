@@ -233,47 +233,51 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
 
   return (
     <div className="flex flex-col gap-6 font-sans">
-      {/* Lesson Header */}
-      <header className="glass-panel p-3.5 sm:p-4 rounded-xl border border-[#272732] flex items-center justify-between gap-4 sticky top-4 z-30 bg-[#09090b]/90">
+      {/* Network Studio Lesson Header */}
+      <header className="bg-[#15181e] p-3.5 sm:p-4 rounded-xl border border-[#232732] flex items-center justify-between gap-4 sticky top-4 z-30 shadow-subtle">
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href={`/courses/${lesson.course.slug}`}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b]"
+            className="p-2 rounded-lg bg-[#111317] border border-[#232732] hover:border-[#00c8f8]/40 text-zinc-400 hover:text-white transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00c8f8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1115]"
             aria-label="Back to Course Syllabus"
             title="Back to Course Syllabus"
           >
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] font-mono text-zinc-400 truncate">
+            <div className="flex items-center gap-2 flex-wrap text-xs font-mono">
+              <span className="text-[#94a3b8] truncate">
                 {lesson.course.title}
               </span>
               <span className="text-zinc-600">•</span>
-              <Badge variant="purple">{lesson.course.level}</Badge>
-              <span className="text-xs font-mono text-zinc-400">
-                {lesson.durationMinutes || 15} Min
+              <span className="px-1.5 py-0.5 rounded bg-[#111317] border border-[#232732] text-[10px] text-[#00c8f8] font-bold uppercase">
+                {lesson.course.level}
+              </span>
+              <span className="text-[#64748b]">
+                {lesson.durationMinutes || 15} MIN
               </span>
               {isInitiallyCompleted && (
-                <Badge variant="emerald">Lesson Complete ✓</Badge>
+                <span className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+                  COMPLETE ✓
+                </span>
               )}
             </div>
-            <h1 className="text-base sm:text-lg font-bold text-white tracking-tight truncate mt-0.5">
+            <h1 className="text-base sm:text-lg font-bold text-[#f3f4f6] tracking-tight truncate mt-0.5 font-sans">
               {lesson.title}
             </h1>
           </div>
         </div>
 
         {/* Streamlined Stepper Tabs */}
-        <div className="hidden lg:flex items-center gap-1 glass-panel p-1 rounded-lg border border-[#272732]" role="tablist" aria-label="Lesson Stages">
+        <div className="hidden lg:flex items-center gap-1 bg-[#111317] p-1 rounded-lg border border-[#232732]" role="tablist" aria-label="Lesson Stages">
           {stages.map((stg) => {
             const isDone = completedStages.has(stg);
             const isActive = activeStage === stg;
             const labels = {
-              learn: '1. Learn & See',
-              practice: '2. Practice',
-              quiz: '3. Quiz',
-              mastery: '4. Complete',
+              learn: '01 LEARN',
+              practice: '02 PRACTICE',
+              quiz: '03 QUIZ',
+              mastery: '04 SUMMARY',
             };
 
             return (
@@ -283,12 +287,12 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                 role="tab"
                 aria-selected={isActive}
                 onClick={() => setActiveStage(stg)}
-                className={`px-3 py-1 rounded text-xs font-mono font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] ${
+                className={`px-3 py-1.5 rounded text-[11px] font-mono font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00c8f8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1115] ${
                   isActive
-                    ? 'bg-[#00f0ff] text-black font-extrabold'
+                    ? 'bg-[#00c8f8] text-[#0f1115] font-extrabold shadow-sm'
                     : isDone
                     ? 'text-emerald-400 hover:text-white'
-                    : 'text-zinc-400 hover:text-white'
+                    : 'text-[#94a3b8] hover:text-white'
                 }`}
               >
                 {isDone && !isActive && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />}
@@ -302,12 +306,12 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
           type="button"
           onClick={handleToggleBookmark}
           aria-label={isBookmarked ? 'Remove bookmark from lesson' : 'Bookmark lesson for review'}
-          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-[#00f0ff] transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b]"
+          className="p-2 rounded-lg bg-[#111317] border border-[#232732] hover:border-[#00c8f8]/40 text-zinc-400 hover:text-[#00c8f8] transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00c8f8] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1115]"
           title="Bookmark Lesson"
         >
           <Bookmark
             className={`w-4 h-4 ${
-              isBookmarked ? 'text-[#00f0ff] fill-[#00f0ff]' : ''
+              isBookmarked ? 'text-[#00c8f8] fill-[#00c8f8]' : ''
             }`}
           />
         </button>

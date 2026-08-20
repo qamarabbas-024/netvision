@@ -145,151 +145,157 @@ export default function DashboardPage() {
 
                 {/* 1. WHERE AM I? - Identity & Guest Notice */}
                 {!isAuthenticated && (
-                  <div className="glass-panel p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="bg-[#15181e] p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 font-mono text-xs font-bold">
+                      <div className="w-8 h-8 rounded bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 font-mono text-[10px] font-bold">
                         GUEST
                       </div>
                       <div>
-                        <h4 className="text-xs sm:text-sm font-bold text-white font-sans">Guest Session Active</h4>
-                        <p className="text-xs text-zinc-300 font-sans">
+                        <h4 className="text-xs sm:text-sm font-bold text-[#f3f4f6] font-sans">Guest Session Active</h4>
+                        <p className="text-xs text-[#94a3b8] font-sans">
                           Your learning progress is saved locally. Create an account to claim progress permanently and earn verifiable certificates.
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto">
                       <Link href="/login" className="flex-1 sm:flex-initial">
-                        <Button variant="ghost" size="sm" className="w-full text-xs">Sign In</Button>
+                        <Button variant="ghost" size="sm" className="w-full text-xs text-zinc-300">Sign In</Button>
                       </Link>
                       <Link href="/register" className="flex-1 sm:flex-initial">
-                        <Button variant="cyan" size="sm" className="w-full text-xs">Create Account</Button>
+                        <Button variant="cyan" size="sm" className="w-full text-xs bg-[#00c8f8] text-[#0f1115] font-bold">Create Account</Button>
                       </Link>
                     </div>
                   </div>
                 )}
 
                 {/* Header Profile Bar */}
-                <div className="glass-panel p-5 sm:p-6 rounded-xl border border-[#272732] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                <div className="bg-[#15181e] p-5 sm:p-6 rounded-xl border border-[#232732] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded text-[11px] font-mono font-semibold uppercase tracking-wider bg-[#00f0ff]/10 text-[#00f0ff] border border-[#00f0ff]/30 mb-2">
-                      {isAuthenticated ? 'Authenticated Learner' : 'Guest Learner'}
+                    <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded text-[10px] font-mono font-semibold uppercase tracking-wider bg-[#111317] text-[#00c8f8] border border-[#232732] mb-2">
+                      {isAuthenticated ? 'LEARNER // ACTIVE' : 'LEARNER // GUEST_SESSION'}
                     </div>
-                    <h1 className="text-xl sm:text-3xl font-extrabold text-white tracking-tight font-sans">
+                    <h1 className="text-xl sm:text-3xl font-extrabold text-[#f3f4f6] tracking-tight font-sans">
                       Welcome{isAuthenticated && (user?.fullName || user?.username) ? `, ${user.fullName || user.username}` : ''}
                     </h1>
-                    <p className="text-xs sm:text-sm text-zinc-400 mt-1 font-sans">
+                    <p className="text-xs sm:text-sm text-[#94a3b8] mt-1 font-sans">
                       Track active course progress, resume technical lessons, and verify earned credentials.
                     </p>
                   </div>
 
-                {/* Compact XP & Streak Banner */}
-                <div className="flex items-center gap-3 w-full md:w-auto">
-                  <div className="p-3 rounded-lg bg-[#181820] border border-[#272732] flex items-center gap-3 flex-1 md:flex-initial">
-                    <div className="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
-                      <Flame className="w-5 h-5 fill-amber-400" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-zinc-400 block font-mono uppercase">Streak</span>
-                      <span className="text-sm font-bold text-white font-mono">{progress.studyStreak ?? 0} Days</span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-lg bg-[#181820] border border-[#272732] flex items-center gap-3 flex-1 md:flex-initial">
-                    <div className="w-9 h-9 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
-                      <TrendingUp className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-zinc-400 block font-mono uppercase">Earned XP</span>
-                      <span className="text-sm font-bold text-white font-mono">{progress.totalXp ?? 0} XP</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 2 & 3. WHAT AM I LEARNING? & WHAT SHOULD I DO NEXT? (HERO CONTINUE LEARNING CARD) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
-                {/* Hero Active Course Card */}
-                <Card className="lg:col-span-8 p-6 glass-panel border-[#00f0ff]/40 flex flex-col justify-between">
-                  <div>
-                    <div className="flex items-center justify-between mb-3 gap-2">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="cyan">CURRENT COURSE</Badge>
-                        <span className="text-xs font-mono text-[#00f0ff] font-semibold">{activeCode}</span>
+                  {/* Compact XP & Streak Banner */}
+                  <div className="flex items-center gap-3 w-full md:w-auto font-mono">
+                    <div className="p-3 rounded-lg bg-[#111317] border border-[#232732] flex items-center gap-3 flex-1 md:flex-initial">
+                      <div className="w-8 h-8 rounded bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0">
+                        <Flame className="w-4 h-4 fill-amber-400" />
                       </div>
-                      <span className="text-xs font-mono text-zinc-400">
-                        {activeCompleted} of {activeTotal} Lessons
-                      </span>
+                      <div>
+                        <span className="text-[10px] text-[#64748b] block uppercase">Streak</span>
+                        <span className="text-sm font-bold text-[#f3f4f6]">{progress.studyStreak ?? 0} Days</span>
+                      </div>
                     </div>
 
-                    <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 font-sans">
-                      {activeTitle}
-                    </h2>
-                    <p className="text-xs sm:text-sm text-zinc-300 mb-6 leading-relaxed font-sans">
-                      Resume where you left off. Interactive protocol animations, worked calculation problems, and CLI diagnostic labs.
-                    </p>
-
-                    {/* Course Progress Bar */}
-                    <Progress value={activePercent} label="Course Completion" className="mb-6" />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-[#272732]">
-                    <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono">
-                      <Clock className="w-4 h-4 text-[#00f0ff]" />
-                      <span>{activePercent}% Course Complete</span>
-                    </div>
-
-                    {/* HERO PRIMARY ACTION: CONTINUE LEARNING */}
-                    <Link href={`/courses/${activeSlug}/lessons/${activeNextLesson}`} className="w-full sm:w-auto">
-                      <Button variant="cyan" rightIcon={<PlayCircle className="w-4 h-4" />} className="w-full justify-center">
-                        Continue Learning →
-                      </Button>
-                    </Link>
-                  </div>
-                </Card>
-
-                {/* Compact Key Stats Overview */}
-                <div className="lg:col-span-4 grid grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl glass-panel border border-[#272732] flex flex-col justify-between">
-                    <BookOpen className="w-5 h-5 text-[#00f0ff] mb-3" />
-                    <div>
-                      <span className="text-xl font-bold text-white font-mono block">
-                        {progress.completedLessons ?? 0}
-                      </span>
-                      <span className="text-xs text-zinc-400 font-sans">Completed Lessons</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-xl glass-panel border border-[#272732] flex flex-col justify-between">
-                    <Zap className="w-5 h-5 text-purple-400 mb-3" />
-                    <div>
-                      <span className="text-xl font-bold text-white font-mono block">
-                        {progress.simulationsRun ?? 0}
-                      </span>
-                      <span className="text-xs text-zinc-400 font-sans">Simulations Run</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-xl glass-panel border border-[#272732] flex flex-col justify-between">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 mb-3" />
-                    <div>
-                      <span className="text-xl font-bold text-white font-mono block">
-                        {progress.quizAverageScore ?? 0}%
-                      </span>
-                      <span className="text-xs text-zinc-400 font-sans">Quiz Average</span>
-                    </div>
-                  </div>
-
-                  <div className="p-4 rounded-xl glass-panel border border-[#272732] flex flex-col justify-between">
-                    <Award className="w-5 h-5 text-amber-400 mb-3" />
-                    <div>
-                      <span className="text-xl font-bold text-white font-mono block">
-                        {progress.certificatesEarned ?? 0}
-                      </span>
-                      <span className="text-xs text-zinc-400 font-sans">Certificates Earned</span>
+                    <div className="p-3 rounded-lg bg-[#111317] border border-[#232732] flex items-center gap-3 flex-1 md:flex-initial">
+                      <div className="w-8 h-8 rounded bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                        <TrendingUp className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-[#64748b] block uppercase">Total XP</span>
+                        <span className="text-sm font-bold text-[#f3f4f6]">{progress.totalXp ?? 0} XP</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+
+                {/* 2 & 3. WHAT AM I LEARNING? & WHAT SHOULD I DO NEXT? (HERO CONTINUE LEARNING CARD) */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+                  {/* Hero Active Course Card */}
+                  <Card className="lg:col-span-8 p-6 bg-[#15181e] border border-[#232732] rounded-xl flex flex-col justify-between shadow-subtle">
+                    <div>
+                      <div className="flex items-center justify-between mb-3 gap-2">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded bg-[#111317] border border-[#232732] text-[10px] font-mono font-bold text-[#00c8f8]">
+                            CURRENT COURSE
+                          </span>
+                          <span className="text-xs font-mono text-[#00c8f8] font-semibold">{activeCode}</span>
+                        </div>
+                        <span className="text-xs font-mono text-[#64748b]">
+                          {activeCompleted} of {activeTotal} Lessons
+                        </span>
+                      </div>
+
+                      <h2 className="text-xl sm:text-2xl font-bold text-[#f3f4f6] mb-2 font-sans">
+                        {activeTitle}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-[#94a3b8] mb-6 leading-relaxed font-sans">
+                        Resume where you left off. Interactive protocol animations, worked calculation problems, and CLI diagnostic labs.
+                      </p>
+
+                      {/* Course Progress Bar */}
+                      <Progress value={activePercent} label="Course Completion" className="mb-6" />
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-[#232732]">
+                      <div className="flex items-center gap-2 text-xs text-[#94a3b8] font-mono">
+                        <Clock className="w-4 h-4 text-[#00c8f8]" />
+                        <span>{activePercent}% Course Complete</span>
+                      </div>
+
+                      {/* HERO PRIMARY ACTION: CONTINUE LEARNING */}
+                      <Link href={`/courses/${activeSlug}/lessons/${activeNextLesson}`} className="w-full sm:w-auto">
+                        <Button
+                          variant="cyan"
+                          rightIcon={<PlayCircle className="w-4 h-4" />}
+                          className="w-full justify-center bg-[#00c8f8] text-[#0f1115] hover:bg-[#38bdf8] font-bold rounded-lg px-5 text-xs"
+                        >
+                          Continue Learning →
+                        </Button>
+                      </Link>
+                    </div>
+                  </Card>
+
+                  {/* Compact Key Stats Overview */}
+                  <div className="lg:col-span-4 grid grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-[#15181e] border border-[#232732] flex flex-col justify-between">
+                      <BookOpen className="w-5 h-5 text-[#00c8f8] mb-3" />
+                      <div>
+                        <span className="text-xl font-bold text-[#f3f4f6] font-mono block">
+                          {progress.completedLessons ?? 0}
+                        </span>
+                        <span className="text-xs text-[#94a3b8] font-sans">Completed Lessons</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-[#15181e] border border-[#232732] flex flex-col justify-between">
+                      <Zap className="w-5 h-5 text-purple-400 mb-3" />
+                      <div>
+                        <span className="text-xl font-bold text-[#f3f4f6] font-mono block">
+                          {progress.simulationsRun ?? 0}
+                        </span>
+                        <span className="text-xs text-[#94a3b8] font-sans">Simulations Run</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-[#15181e] border border-[#232732] flex flex-col justify-between">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400 mb-3" />
+                      <div>
+                        <span className="text-xl font-bold text-[#f3f4f6] font-mono block">
+                          {progress.quizAverageScore ?? 0}%
+                        </span>
+                        <span className="text-xs text-[#94a3b8] font-sans">Quiz Average</span>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-[#15181e] border border-[#232732] flex flex-col justify-between">
+                      <Award className="w-5 h-5 text-amber-400 mb-3" />
+                      <div>
+                        <span className="text-xl font-bold text-[#f3f4f6] font-mono block">
+                          {progress.certificatesEarned ?? 0}
+                        </span>
+                        <span className="text-xs text-[#94a3b8] font-sans">Certificates Earned</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
               {/* 4. WHAT HAVE I ACHIEVED? - Activity Timeline & Earned Badges */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">

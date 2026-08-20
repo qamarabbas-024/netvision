@@ -3,12 +3,12 @@
 @import 'tailwindcss/utilities';
 
 :root {
-  --background: #09090b;
-  --foreground: #f4f4f5;
-  --net-card: #121217;
-  --net-surface: #181820;
-  --net-border: #272732;
-  --net-cyan: #00f0ff;
+  --background: #0f1115;
+  --foreground: #f3f4f6;
+  --net-card: #15181e;
+  --net-surface: #1b1f27;
+  --net-border: #232732;
+  --net-cyan: #00c8f8;
 }
 
 * {
@@ -28,40 +28,50 @@ body {
 
 /* Technical Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: #0f1115;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #272732;
-  border-radius: 3px;
+  background: #232732;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f50;
+  background: #333846;
 }
 
-/* Professional Dark Technical Panel Utility */
+/* Studio Technical Panel Utility */
 .glass-panel {
-  background-color: rgba(18, 18, 23, 0.9);
-  border: 1px solid #272732;
+  background-color: #15181e;
+  border: 1px solid #232732;
 }
 
 .glass-panel-glow {
-  background-color: rgba(18, 18, 23, 0.95);
-  border: 1px solid rgba(0, 240, 255, 0.3);
+  background-color: #15181e;
+  border: 1px solid #28303f;
 }
 
-/* Technical Grid Pattern */
+.studio-panel {
+  background-color: #15181e;
+  border: 1px solid #232732;
+}
+
+.studio-panel-subtle {
+  background-color: #111317;
+  border: 1px solid #1e222b;
+}
+
+/* Technical Architectural Grid Pattern */
 .bg-net-grid-pattern {
-  background-size: 32px 32px;
+  background-size: 40px 40px;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
 }
 
 /* Typography Utility Classes */
