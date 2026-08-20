@@ -103,7 +103,7 @@ export const BreakFixScenarioCard: React.FC<BreakFixScenarioCardProps> = ({
       </div>
 
       {/* Diagnosis Fix Action Selection */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3" role="radiogroup" aria-label="Diagnostic Fix Actions">
         <span className="text-xs font-mono font-bold text-zinc-300 flex items-center gap-1.5">
           <Wrench className="w-3.5 h-3.5 text-[#00f0ff]" /> Select Diagnostic Fix Action:
         </span>
@@ -121,10 +121,14 @@ export const BreakFixScenarioCard: React.FC<BreakFixScenarioCardProps> = ({
           return (
             <button
               key={opt.id}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              aria-label={opt.label}
               onClick={() => {
                 if (!resolved) setSelectedOptionId(opt.id);
               }}
-              className={`p-4 rounded-xl border text-left font-mono text-xs transition-all flex items-start gap-3 ${borderClass}`}
+              className={`p-4 rounded-xl border text-left font-mono text-xs transition-all flex items-start gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] ${borderClass}`}
             >
               <div className={`w-4 h-4 rounded-full border mt-0.5 shrink-0 flex items-center justify-center ${isSelected ? 'border-[#00f0ff] bg-[#00f0ff]' : 'border-zinc-600'}`}>
                 {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-black" />}

@@ -96,7 +96,7 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
       </h3>
 
       {/* Options List */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3" role="radiogroup" aria-label={`Question ${questionNumber}: ${question.questionText}`}>
         {question.options.map((optionText, idx) => {
           const isSelected = selectedOption === idx;
           let optionStyle =
@@ -119,9 +119,13 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
           return (
             <button
               key={idx}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              aria-label={`Option ${String.fromCharCode(65 + idx)}: ${optionText}`}
               disabled={!!resultFeedback || isSubmitting}
               onClick={() => onSelectOption(idx)}
-              className={`w-full p-3.5 sm:p-4 rounded-2xl border text-left transition-all flex items-start justify-between gap-3 ${optionStyle}`}
+              className={`w-full p-3.5 sm:p-4 rounded-2xl border text-left transition-all flex items-start justify-between gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] ${optionStyle}`}
             >
               <div className="flex items-start gap-3 min-w-0">
                 <span
@@ -137,10 +141,10 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
               </div>
 
               {resultFeedback && idx === resultFeedback.correctOption && (
-                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" aria-label="Correct answer" />
               )}
               {resultFeedback && isSelected && !resultFeedback.isCorrect && (
-                <XCircle className="w-5 h-5 text-rose-400 shrink-0" />
+                <XCircle className="w-5 h-5 text-rose-400 shrink-0" aria-label="Incorrect answer" />
               )}
             </button>
           );

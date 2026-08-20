@@ -9,14 +9,20 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = 'text', label, error, icon, ...props }, ref) => {
+  ({ className, type = 'text', label, error, icon, id, ...props }, ref) => {
+    const inputId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]+/g, '-') : undefined);
     return (
       <div className="w-full flex flex-col gap-1.5">
-        {label ? <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">{label}</label> : null}
+        {label ? (
+          <label htmlFor={inputId} className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+            {label}
+          </label>
+        ) : null}
         <div className="relative flex items-center">
-          {icon ? <div className="absolute left-3.5 text-zinc-400">{icon}</div> : null}
+          {icon ? <div className="absolute left-3.5 text-zinc-400 pointer-events-none">{icon}</div> : null}
           <input
             ref={ref}
+            id={inputId}
             type={type}
             className={cn(
               'w-full bg-[#121217] text-white border border-[#272732] rounded-xl px-4 py-2.5 text-sm transition-all focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff] placeholder:text-zinc-500',
@@ -42,12 +48,18 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
 }
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ className, label, error, options, ...props }, ref) => {
+  ({ className, label, error, options, id, ...props }, ref) => {
+    const selectId = id || (label ? label.toLowerCase().replace(/[^a-z0-9]+/g, '-') : undefined);
     return (
       <div className="w-full flex flex-col gap-1.5">
-        {label ? <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">{label}</label> : null}
+        {label ? (
+          <label htmlFor={selectId} className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+            {label}
+          </label>
+        ) : null}
         <select
           ref={ref}
+          id={selectId}
           className={cn(
             'w-full bg-[#121217] text-white border border-[#272732] rounded-xl px-4 py-2.5 text-sm transition-all focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff]',
             error && 'border-rose-500',
@@ -70,5 +82,10 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 Select.displayName = 'Select';
 
 export const SearchInput: React.FC<Omit<InputProps, 'icon'>> = (props) => (
-  <Input icon={<Search className="w-4 h-4 text-zinc-400" />} placeholder="Search courses, lessons, topics..." {...props} />
+  <Input
+    icon={<Search className="w-4 h-4 text-zinc-400" />}
+    placeholder="Search courses, lessons, topics..."
+    aria-label="Search curriculum courses and topics"
+    {...props}
+  />
 );

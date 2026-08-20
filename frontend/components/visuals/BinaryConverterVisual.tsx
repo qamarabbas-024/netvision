@@ -119,7 +119,7 @@ export const BinaryConverterVisual: React.FC = () => {
         </div>
 
         {/* The 8 Interactive Bit Buttons */}
-        <div className="grid grid-cols-8 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-8 gap-1.5 sm:gap-2" role="group" aria-label="8-Bit Binary Switch Register">
           {bits.map((bit, idx) => {
             const weight = BIT_WEIGHTS[idx];
             const isOn = bit === 1;
@@ -129,8 +129,11 @@ export const BinaryConverterVisual: React.FC = () => {
               <button
                 key={idx}
                 type="button"
+                role="switch"
+                aria-checked={isOn}
+                aria-label={`Bit position ${8 - idx} (weight ${weight}): currently ${isOn ? '1 (On)' : '0 (Off)'}. Click to toggle.`}
                 onClick={() => toggleBit(idx)}
-                className={`flex flex-col items-center justify-center p-2.5 sm:p-3.5 rounded-xl border transition-all cursor-pointer select-none relative ${
+                className={`flex flex-col items-center justify-center p-2.5 sm:p-3.5 rounded-xl border transition-all cursor-pointer select-none relative focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] ${
                   isOn
                     ? 'bg-gradient-to-b from-[#00f0ff]/20 to-[#00f0ff]/5 border-[#00f0ff] shadow-glow-cyan text-white'
                     : 'bg-[#121217] border-[#272732] text-zinc-500 hover:border-zinc-500'

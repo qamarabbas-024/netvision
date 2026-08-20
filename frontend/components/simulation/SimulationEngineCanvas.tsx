@@ -334,14 +334,17 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
         </div>
 
         {/* Speed Selector */}
-        <div className="flex items-center gap-2 text-xs font-mono">
+        <div className="flex items-center gap-2 text-xs font-mono" role="group" aria-label="Simulation Playback Speed">
           <span className="text-zinc-400">Speed:</span>
           <div className="flex items-center gap-1">
             {[0.5, 1, 2, 4].map((s) => (
               <button
                 key={s}
+                type="button"
+                aria-label={`Set simulation speed to ${s}x`}
+                aria-pressed={speedMultiplier === s}
                 onClick={() => setSpeedMultiplier(s)}
-                className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+                className={`px-2.5 py-1 rounded-lg font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] ${
                   speedMultiplier === s
                     ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
                     : 'bg-white/5 text-zinc-400 hover:text-white'
@@ -356,8 +359,12 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
         {/* Failure State Simulation Toggle */}
         <div className="flex items-center gap-2 text-xs font-mono">
           <button
+            type="button"
+            role="switch"
+            aria-checked={simulateFailure}
+            aria-label="Toggle network firewall drop failure mode"
             onClick={() => setSimulateFailure(!simulateFailure)}
-            className={`px-3 py-1.5 rounded-xl border font-bold flex items-center gap-1.5 transition-all ${
+            className={`px-3 py-1.5 rounded-xl border font-bold flex items-center gap-1.5 transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] ${
               simulateFailure
                 ? 'bg-rose-500/20 text-rose-300 border-rose-500/50 shadow-glow-rose'
                 : 'bg-white/5 text-zinc-400 border-white/10 hover:text-white'
@@ -371,9 +378,10 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
         {/* Protocol Selector & Dispatch */}
         <div className="flex items-center gap-2 sm:gap-3">
           <select
+            aria-label="Select packet protocol"
             value={selectedProtocol}
             onChange={(e) => setSelectedProtocol(e.target.value as PacketProtocol)}
-            className="bg-[#121217] text-white border border-[#272732] rounded-xl px-3 py-1.5 text-xs font-mono font-semibold"
+            className="bg-[#121217] text-white border border-[#272732] rounded-xl px-3 py-1.5 text-xs font-mono font-semibold focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff]"
           >
             {['TCP', 'DNS', 'ARP', 'ICMP', 'HTTP'].map((p) => (
               <option key={p} value={p}>{p} Protocol</option>

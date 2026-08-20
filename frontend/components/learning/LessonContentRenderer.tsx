@@ -137,8 +137,10 @@ const PracticeCard: React.FC<{
         {(expectedText || hintText) && (
           <button
             type="button"
+            aria-expanded={showAnswer}
+            aria-label={`${showAnswer ? 'Hide' : 'Reveal'} solution for practice exercise P${index + 1}`}
             onClick={() => setShowAnswer(!showAnswer)}
-            className="px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[#272732] text-zinc-400 hover:text-white hover:border-[#00f0ff]/40 transition-all shrink-0 flex items-center gap-1.5"
+            className="px-2.5 py-1 rounded-lg text-[11px] font-mono border border-[#272732] text-zinc-400 hover:text-white hover:border-[#00f0ff]/40 transition-all shrink-0 flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b]"
           >
             {showAnswer ? (
               <>

@@ -238,7 +238,8 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href={`/courses/${lesson.course.slug}`}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors shrink-0"
+            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b]"
+            aria-label="Back to Course Syllabus"
             title="Back to Course Syllabus"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -264,8 +265,8 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
         </div>
 
         {/* Streamlined Stepper Tabs */}
-        <div className="hidden lg:flex items-center gap-1 glass-panel p-1 rounded-lg border border-[#272732]">
-          {stages.map((stg, idx) => {
+        <div className="hidden lg:flex items-center gap-1 glass-panel p-1 rounded-lg border border-[#272732]" role="tablist" aria-label="Lesson Stages">
+          {stages.map((stg) => {
             const isDone = completedStages.has(stg);
             const isActive = activeStage === stg;
             const labels = {
@@ -278,8 +279,11 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
             return (
               <button
                 key={stg}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
                 onClick={() => setActiveStage(stg)}
-                className={`px-3 py-1 rounded text-xs font-mono font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5 ${
+                className={`px-3 py-1 rounded text-xs font-mono font-semibold uppercase tracking-wider transition-colors flex items-center gap-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b] ${
                   isActive
                     ? 'bg-[#00f0ff] text-black font-extrabold'
                     : isDone
@@ -287,7 +291,7 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                {isDone && !isActive && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+                {isDone && !isActive && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />}
                 {labels[stg]}
               </button>
             );
@@ -295,8 +299,10 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
         </div>
 
         <button
+          type="button"
           onClick={handleToggleBookmark}
-          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-[#00f0ff] transition-colors shrink-0"
+          aria-label={isBookmarked ? 'Remove bookmark from lesson' : 'Bookmark lesson for review'}
+          className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-[#00f0ff] transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#09090b]"
           title="Bookmark Lesson"
         >
           <Bookmark

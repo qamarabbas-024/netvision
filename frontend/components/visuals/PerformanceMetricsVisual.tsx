@@ -135,6 +135,7 @@ export const PerformanceMetricsVisual: React.FC = () => {
                 </div>
                 <input
                   type="range"
+                  aria-label="Distance in kilometers"
                   min="10"
                   max="36000"
                   step="50"
@@ -151,6 +152,7 @@ export const PerformanceMetricsVisual: React.FC = () => {
               <div className="flex flex-col gap-2">
                 <label className="text-xs text-zinc-300 font-semibold">Propagation Speed ($s$):</label>
                 <select
+                  aria-label="Propagation speed medium"
                   value={mediumSpeedKmS}
                   onChange={(e) => setMediumSpeedKmS(Number(e.target.value))}
                   className="w-full p-2.5 rounded-lg bg-[#09090b] border border-[#272732] text-xs font-mono text-white focus:outline-none focus:border-[#00f0ff]"
@@ -169,6 +171,7 @@ export const PerformanceMetricsVisual: React.FC = () => {
                 </div>
                 <input
                   type="range"
+                  aria-label="Packet size in bytes"
                   min="64"
                   max="1500"
                   step="32"
