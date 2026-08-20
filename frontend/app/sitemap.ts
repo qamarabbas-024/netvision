@@ -3,22 +3,22 @@ import { MetadataRoute } from 'next';
 const BASE_URL = 'https://netvision-three.vercel.app';
 
 const COURSE_SLUGS = [
-  'net-101-computer-digital-foundations',
-  'net-102-network-fundamentals-telecom',
-  'net-103-osi-tcpip-reference-models',
-  'net-201-layer2-ethernet-switching',
-  'net-202-ipv4-addressing-subnetting-mastery',
-  'net-203-core-ip-services-arp-dns-dhcp',
-  'net-204-transport-layer-tcp-udp',
-  'net-301-enterprise-switching-vlans',
-  'net-302-spanning-tree-protocol',
-  'net-303-ip-routing-static-administration',
+  'net-101-digital-foundations',
+  'net-102-network-fundamentals',
+  'net-103-reference-models',
+  'net-201-layer2-ethernet',
+  'net-202-ipv4-subnetting',
+  'net-203-core-ip-services',
+  'net-204-transport-protocols',
+  'net-301-switching-vlans',
+  'net-302-spanning-tree',
+  'net-303-static-routing',
   'net-304-dynamic-routing-ospf',
-  'net-305-network-security-acls-firewalls',
-  'net-401-nat-pat-edge-connectivity',
-  'net-402-vpn-technology-cryptography',
-  'net-403-bgp-enterprise-wan-architecture',
-  'net-404-packet-capture-wireshark-troubleshooting',
+  'net-305-acls-firewalls',
+  'net-401-nat-pat',
+  'net-402-vpn-crypto',
+  'net-403-network-automation',
+  'net-404-packet-analysis',
 ];
 
 const TROUBLESHOOTING_SLUGS = [

@@ -161,9 +161,38 @@ export default function CourseDetailPage() {
 
   let globalLessonIndex = 0;
 
+  // Schema.org Course Structured Data
+  const courseJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: topic.title,
+    description: topic.description || topic.tagline,
+    courseCode: topic.code,
+    educationalLevel: topic.level,
+    provider: {
+      '@type': 'EducationalOrganization',
+      name: 'NetVision',
+      url: 'https://netvision-three.vercel.app',
+    },
+    hasCourseInstance: {
+      '@type': 'CourseInstance',
+      courseMode: 'online',
+      courseWorkload: `PT${topic.estimatedHours || 4}H`,
+    },
+    syllabusSections: (topic.modules || []).map((m: any) => ({
+      '@type': 'Syllabus',
+      name: m.title,
+      description: m.description,
+    })),
+  };
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
+        />
         <AppSidebar />
 
         <div className="flex-1 flex flex-col min-w-0">
@@ -171,10 +200,10 @@ export default function CourseDetailPage() {
 
           <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
             <div className="max-w-6xl mx-auto flex flex-col gap-8">
-              {/* Back Link */}
+              {/* Back to Catalog Breadcrumb */}
               <Link
                 href="/courses"
-                className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-[#00f0ff] transition-colors w-fit"
+                className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-[#00f0ff] transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Course Catalog

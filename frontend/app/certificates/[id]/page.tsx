@@ -138,8 +138,29 @@ export default function CertificateDetailPage() {
     }
   };
 
+  const certJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'EducationalOccupationalCredential',
+    name: certificationTitle,
+    credentialCategory: 'Certificate',
+    recognizedBy: {
+      '@type': 'EducationalOrganization',
+      name: 'NetVision',
+      url: 'https://netvision-three.vercel.app',
+    },
+    educationalLevel: 'Professional Mastery',
+    validIn: {
+      '@type': 'Country',
+      name: 'Global',
+    },
+  };
+
   return (
     <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col justify-between p-4 sm:p-10 bg-net-grid-pattern print:p-0 print:bg-white print:text-black">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(certJsonLd) }}
+      />
       {/* Top Navigation */}
       <div className="max-w-5xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8 print:hidden">
         <Link href="/certificates" className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-[#00f0ff] transition-colors">
