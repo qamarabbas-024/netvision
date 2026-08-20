@@ -364,57 +364,62 @@ export const SandboxCanvas: React.FC = () => {
   return (
     <div className="w-full flex flex-col gap-5 font-sans">
       {/* Mode Navigation Bar */}
-      <div className="glass-panel p-2.5 rounded-xl border border-[#272732] flex items-center justify-between gap-3 overflow-x-auto">
+      <div className="surface-2 p-2 rounded-xl border border-[#2a2e39] flex items-center justify-between gap-3 overflow-x-auto shadow-instrument">
         <div className="flex items-center gap-1.5 shrink-0">
           <Button
-            variant={activeMode === 'build' ? 'cyan' : 'ghost'}
+            variant={activeMode === 'build' ? 'primary' : 'ghost'}
             size="sm"
             onClick={() => setActiveMode('build')}
             leftIcon={<Wrench className="w-3.5 h-3.5" />}
+            className="text-xs font-bold"
           >
             1. BUILD
           </Button>
 
           <Button
-            variant={activeMode === 'inspect' ? 'cyan' : 'ghost'}
+            variant={activeMode === 'inspect' ? 'primary' : 'ghost'}
             size="sm"
             onClick={() => setActiveMode('inspect')}
             leftIcon={<Eye className="w-3.5 h-3.5" />}
+            className="text-xs font-bold"
           >
             2. INSPECT
           </Button>
 
           <Button
-            variant={activeMode === 'packet' ? 'cyan' : 'ghost'}
+            variant={activeMode === 'packet' ? 'primary' : 'ghost'}
             size="sm"
             onClick={() => setActiveMode('packet')}
             leftIcon={<Activity className="w-3.5 h-3.5" />}
+            className="text-xs font-bold"
           >
             3. PACKET
           </Button>
 
           <Button
-            variant={activeMode === 'layer' ? 'cyan' : 'ghost'}
+            variant={activeMode === 'layer' ? 'primary' : 'ghost'}
             size="sm"
             onClick={() => setActiveMode('layer')}
             leftIcon={<Layers className="w-3.5 h-3.5" />}
+            className="text-xs font-bold"
           >
             4. LAYER (OSI)
           </Button>
 
           <Button
-            variant={activeMode === 'challenge' ? 'cyan' : 'ghost'}
+            variant={activeMode === 'challenge' ? 'primary' : 'ghost'}
             size="sm"
             onClick={() => setActiveMode('challenge')}
             leftIcon={<Award className="w-3.5 h-3.5" />}
+            className="text-xs font-bold"
           >
             5. CHALLENGE
           </Button>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Badge variant="cyan">{nodes.length} Nodes</Badge>
-          <Badge variant="purple">{links.length} Links</Badge>
+          <Badge variant="cyan" dot={true}>{nodes.length} Nodes</Badge>
+          <Badge variant="neutral">{links.length} Links</Badge>
         </div>
       </div>
 
@@ -426,24 +431,26 @@ export const SandboxCanvas: React.FC = () => {
         {/* Center Canvas Area */}
         <div className="flex-1 flex flex-col gap-4 min-w-0">
           {/* Action Toolbar */}
-          <div className="glass-panel p-3.5 rounded-xl border border-[#272732] flex flex-wrap items-center justify-between gap-3">
+          <div className="surface-2 p-3 rounded-xl border border-[#2a2e39] flex flex-wrap items-center justify-between gap-3 shadow-instrument">
             {/* Build Mode Controls */}
             {activeMode === 'build' && (
               <div className="flex flex-wrap items-center gap-2">
                 <Button
-                  variant={toolAction === 'select' ? 'cyan' : 'ghost'}
+                  variant={toolAction === 'select' ? 'primary' : 'ghost'}
                   size="sm"
                   onClick={() => { setToolAction('select'); setCableSourceNode(null); }}
                   leftIcon={<MousePointer className="w-3.5 h-3.5" />}
+                  className="text-xs font-semibold"
                 >
                   Select / Move
                 </Button>
 
                 <Button
-                  variant={toolAction === 'cable' ? 'cyan' : 'ghost'}
+                  variant={toolAction === 'cable' ? 'primary' : 'ghost'}
                   size="sm"
                   onClick={() => setToolAction('cable')}
                   leftIcon={<LinkIcon className="w-3.5 h-3.5" />}
+                  className="text-xs font-semibold"
                 >
                   {cableSourceNode ? `Click Target (${cableSourceNode.name})` : 'Connect Cable'}
                 </Button>
@@ -454,6 +461,7 @@ export const SandboxCanvas: React.FC = () => {
                   disabled={!selectedNodeId}
                   onClick={handleDeleteSelected}
                   leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                  className="text-xs font-semibold"
                 >
                   Delete Selected
                 </Button>
@@ -466,7 +474,8 @@ export const SandboxCanvas: React.FC = () => {
                 <select
                   value={sourceNodeId}
                   onChange={(e) => setSourceNodeId(e.target.value)}
-                  className="bg-[#121217] text-white border border-[#272732] rounded-lg px-2 py-1 text-xs font-mono"
+                  className="bg-[#14151a] text-[#f4f5f7] border border-[#2a2e39] rounded-lg px-2.5 py-1.5 text-xs font-mono"
+                  aria-label="Packet Source Node"
                 >
                   {nodes.map((n) => (
                     <option key={n.id} value={n.id}>Src: {n.name}</option>
@@ -476,7 +485,8 @@ export const SandboxCanvas: React.FC = () => {
                 <select
                   value={targetNodeId}
                   onChange={(e) => setTargetNodeId(e.target.value)}
-                  className="bg-[#121217] text-white border border-[#272732] rounded-lg px-2 py-1 text-xs font-mono"
+                  className="bg-[#14151a] text-[#f4f5f7] border border-[#2a2e39] rounded-lg px-2.5 py-1.5 text-xs font-mono"
+                  aria-label="Packet Destination Node"
                 >
                   {nodes.map((n) => (
                     <option key={n.id} value={n.id}>Dst: {n.name}</option>
@@ -486,7 +496,8 @@ export const SandboxCanvas: React.FC = () => {
                 <select
                   value={packetProtocol}
                   onChange={(e) => setPacketProtocol(e.target.value as any)}
-                  className="bg-[#121217] text-white border border-[#272732] rounded-lg px-2 py-1 text-xs font-mono"
+                  className="bg-[#14151a] text-[#f4f5f7] border border-[#2a2e39] rounded-lg px-2.5 py-1.5 text-xs font-mono"
+                  aria-label="Protocol Type"
                 >
                   <option value="ICMP">ICMP Ping</option>
                   <option value="HTTP">HTTP GET</option>
@@ -495,11 +506,12 @@ export const SandboxCanvas: React.FC = () => {
                 </select>
 
                 <Button
-                  variant="cyan"
+                  variant="primary"
                   size="sm"
                   onClick={handleDispatchPacket}
                   disabled={isPacketTransmitting}
                   leftIcon={<Play className="w-3.5 h-3.5" />}
+                  className="font-bold text-xs shadow-sm"
                 >
                   {isPacketTransmitting ? 'Transmitting...' : 'Dispatch Packet'}
                 </Button>
@@ -510,14 +522,15 @@ export const SandboxCanvas: React.FC = () => {
             {activeMode === 'challenge' && (
               <div className="flex flex-wrap items-center justify-between gap-2 w-full">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-white font-mono">Select Challenge:</span>
+                  <span className="text-xs font-bold text-[#f4f5f7] font-mono">Challenge:</span>
                   <select
                     value={activeChallengeIndex}
                     onChange={(e) => {
                       setActiveChallengeIndex(Number(e.target.value));
                       setChallengeResult(null);
                     }}
-                    className="bg-[#121217] text-white border border-[#272732] rounded-lg px-2.5 py-1 text-xs"
+                    className="bg-[#14151a] text-[#f4f5f7] border border-[#2a2e39] rounded-lg px-2.5 py-1.5 text-xs"
+                    aria-label="Select Challenge"
                   >
                     {BUILT_IN_CHALLENGES.map((ch, idx) => (
                       <option key={ch.id} value={idx}>{idx + 1}. {ch.title}</option>
@@ -525,7 +538,7 @@ export const SandboxCanvas: React.FC = () => {
                   </select>
                 </div>
 
-                <Button variant="cyan" size="sm" onClick={handleVerifyChallenge} leftIcon={<CheckCircle2 className="w-3.5 h-3.5" />}>
+                <Button variant="primary" size="sm" onClick={handleVerifyChallenge} leftIcon={<CheckCircle2 className="w-3.5 h-3.5" />} className="font-bold text-xs shadow-sm">
                   Verify Topology
                 </Button>
               </div>
@@ -533,7 +546,7 @@ export const SandboxCanvas: React.FC = () => {
 
             {/* Export / Scenarios Tools */}
             <div className="flex items-center gap-2 shrink-0">
-              <Button variant="ghost" size="sm" onClick={() => setShowScenariosModal(true)} leftIcon={<Wrench className="w-3.5 h-3.5" />}>
+              <Button variant="secondary" size="sm" onClick={() => setShowScenariosModal(true)} leftIcon={<Wrench className="w-3.5 h-3.5" />} className="text-xs font-semibold">
                 Preset Scenarios
               </Button>
             </div>
@@ -541,22 +554,22 @@ export const SandboxCanvas: React.FC = () => {
 
           {/* Status Message Display */}
           {packetStatusMessage && (
-            <div className="p-3 rounded-xl bg-[#121217] border border-[#272732] text-xs font-mono text-zinc-300 flex items-center gap-2">
-              <Activity className="w-4 h-4 text-[#00f0ff] shrink-0" />
+            <div className="p-3 rounded-lg surface-2 border border-[#2a2e39] text-xs font-mono text-[#c4c9d4] flex items-center gap-2 shadow-sm">
+              <Activity className="w-4 h-4 text-[#38bdf8] shrink-0" />
               <span>{packetStatusMessage}</span>
             </div>
           )}
 
           {/* Challenge Goal & Feedback Card */}
           {activeMode === 'challenge' && (
-            <Card className="p-4 glass-panel border-[#272732] space-y-2">
+            <Card className="p-4 surface-2 border border-[#2a2e39] rounded-xl space-y-2 shadow-instrument">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-mono font-bold text-[#00f0ff] uppercase">
+                <h4 className="text-xs font-mono font-bold text-[#38bdf8] uppercase">
                   {BUILT_IN_CHALLENGES[activeChallengeIndex].title}
                 </h4>
-                <Badge variant="cyan">Objective</Badge>
+                <Badge variant="cyan" dot={true}>Objective</Badge>
               </div>
-              <p className="text-xs text-zinc-300 leading-relaxed">
+              <p className="text-xs text-[#8e95a5] leading-relaxed">
                 {BUILT_IN_CHALLENGES[activeChallengeIndex].goal}
               </p>
 
@@ -564,23 +577,23 @@ export const SandboxCanvas: React.FC = () => {
                 <div
                   className={`mt-2 p-3 rounded-lg border text-xs flex items-start gap-2 ${
                     challengeResult.passed
-                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                      : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+                      ? 'bg-[#10b981]/10 border-[#10b981]/30 text-emerald-300'
+                      : 'bg-[#ef4444]/10 border-[#ef4444]/30 text-rose-300'
                   }`}
                 >
                   {challengeResult.passed ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#10b981] shrink-0 mt-0.5" />
                   ) : (
-                    <XCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                    <XCircle className="w-4 h-4 text-[#ef4444] shrink-0 mt-0.5" />
                   )}
-                  <span>{challengeResult.feedback}</span>
+                  <span className="font-sans leading-relaxed">{challengeResult.feedback}</span>
                 </div>
               )}
             </Card>
           )}
 
           {/* Canvas Box */}
-          <div className="relative w-full h-[500px] bg-[#09090b] rounded-2xl border border-[#272732] overflow-x-auto overflow-y-hidden p-4 bg-net-grid-pattern">
+          <div className="relative w-full h-[500px] bg-[#121316] rounded-xl border border-[#2a2e39] overflow-x-auto overflow-y-hidden p-4 bg-net-grid-pattern shadow-instrument">
             <div className="min-w-[980px] h-full relative">
               {/* SVG Cable Layer */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none">
@@ -596,10 +609,10 @@ export const SandboxCanvas: React.FC = () => {
                         y1={srcNode.position.y + 28}
                         x2={tgtNode.position.x + 28}
                         y2={tgtNode.position.y + 28}
-                        stroke="#00f0ff"
+                        stroke="#2563eb"
                         strokeWidth="2"
                         strokeDasharray="4 3"
-                        className="opacity-70"
+                        className="opacity-80"
                       />
                     </g>
                   );
@@ -631,14 +644,14 @@ export const SandboxCanvas: React.FC = () => {
                     className="absolute z-10 flex flex-col items-center gap-1.5 cursor-grab active:cursor-grabbing group"
                   >
                     <div
-                      className={`w-14 h-14 rounded-xl glass-panel border flex items-center justify-center transition-all relative ${
+                      className={`w-14 h-14 rounded-xl surface-2 border flex items-center justify-center transition-all relative shadow-instrument ${
                         isCurrentHop
-                          ? 'border-emerald-400 bg-emerald-500/20 ring-4 ring-emerald-500/30 animate-pulse'
+                          ? 'border-[#10b981] bg-[#10b981]/20 ring-4 ring-[#10b981]/30 animate-pulse'
                           : isCableSource
-                          ? 'border-[#00f0ff] bg-[#00f0ff]/20 animate-pulse'
+                          ? 'border-[#38bdf8] bg-[#38bdf8]/20 animate-pulse'
                           : isSelected
-                          ? 'border-[#00f0ff] bg-white/10'
-                          : 'border-[#272732] hover:border-zinc-500'
+                          ? 'border-[#38bdf8] ring-2 ring-[#38bdf8]/30 bg-[#1f222c]'
+                          : 'border-[#2a2e39] hover:border-[#38bdf8]/40'
                       }`}
                     >
                       {getNodeIcon(node.type)}
@@ -649,8 +662,9 @@ export const SandboxCanvas: React.FC = () => {
                           e.stopPropagation();
                           setConfigNode(node);
                         }}
-                        className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-1 -left-1 w-5 h-5 rounded-md bg-[#14151a] border border-[#2a2e39] text-[#8e95a5] hover:text-[#f4f5f7] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Configure Device"
+                        aria-label={`Configure ${node.name}`}
                       >
                         <Settings className="w-3 h-3" />
                       </button>
@@ -661,18 +675,19 @@ export const SandboxCanvas: React.FC = () => {
                           e.stopPropagation();
                           setCliNode(node);
                         }}
-                        className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 text-[#00f0ff] hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-1 -right-1 w-5 h-5 rounded-md bg-[#14151a] border border-[#2a2e39] text-[#38bdf8] hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Open CLI"
+                        aria-label={`Open CLI for ${node.name}`}
                       >
                         <Terminal className="w-3 h-3" />
                       </button>
                     </div>
 
                     <div className="text-center">
-                      <span className="text-[11px] font-bold text-white block truncate max-w-[100px]">
+                      <span className="text-[11px] font-bold text-[#f4f5f7] block truncate max-w-[100px]">
                         {node.name}
                       </span>
-                      <span className="text-[9px] font-mono text-zinc-400">{node.ipAddress}</span>
+                      <span className="text-[9px] font-mono text-[#8e95a5]">{node.ipAddress}</span>
                     </div>
                   </motion.div>
                 );
@@ -687,7 +702,7 @@ export const SandboxCanvas: React.FC = () => {
                   }}
                   className="absolute z-30 transition-all duration-500"
                 >
-                  <div className="px-2 py-0.5 rounded-md bg-[#00f0ff] text-black font-mono text-[10px] font-extrabold flex items-center gap-1 shadow-md">
+                  <div className="px-2 py-0.5 rounded-md bg-[#38bdf8] text-[#121316] font-mono text-[10px] font-extrabold flex items-center gap-1 shadow-md">
                     <Activity className="w-3 h-3 animate-spin" />
                     <span>{packetProtocol}</span>
                   </div>
@@ -699,52 +714,52 @@ export const SandboxCanvas: React.FC = () => {
 
         {/* Right: Inspector / Layer Panel */}
         {(activeMode === 'inspect' || activeMode === 'layer') && (
-          <Card className="w-full lg:w-72 p-4 glass-panel border-[#272732] flex flex-col gap-4 shrink-0">
+          <Card className="w-full lg:w-72 p-4 surface-2 border border-[#2a2e39] rounded-xl flex flex-col gap-4 shrink-0 shadow-instrument">
             {activeMode === 'inspect' && (
               <>
-                <div className="flex items-center justify-between border-b border-[#272732] pb-2">
-                  <h3 className="text-xs font-mono font-bold text-white uppercase">Device Inspector</h3>
-                  <Badge variant="cyan">{selectedNode?.type?.toUpperCase() || 'SELECT NODE'}</Badge>
+                <div className="flex items-center justify-between border-b border-[#2a2e39] pb-2">
+                  <h3 className="text-xs font-mono font-bold text-[#f4f5f7] uppercase">Device Inspector</h3>
+                  <Badge variant="cyan" dot={true}>{selectedNode?.type?.toUpperCase() || 'SELECT NODE'}</Badge>
                 </div>
 
                 {selectedNode ? (
                   <div className="space-y-3 text-xs">
                     <div>
-                      <span className="text-zinc-400 block font-mono text-[10px] uppercase">Device Name</span>
-                      <span className="font-bold text-white">{selectedNode.name}</span>
+                      <span className="text-[#8e95a5] block font-mono text-[10px] uppercase">Device Name</span>
+                      <span className="font-bold text-[#f4f5f7]">{selectedNode.name}</span>
                     </div>
 
                     <div>
-                      <span className="text-zinc-400 block font-mono text-[10px] uppercase">IPv4 Address</span>
-                      <span className="font-mono text-[#00f0ff]">{selectedNode.ipAddress}</span>
+                      <span className="text-[#8e95a5] block font-mono text-[10px] uppercase">IPv4 Address</span>
+                      <span className="font-mono text-[#38bdf8]">{selectedNode.ipAddress}</span>
                     </div>
 
                     <div>
-                      <span className="text-zinc-400 block font-mono text-[10px] uppercase">MAC Address</span>
-                      <span className="font-mono text-zinc-300">{selectedNode.macAddress}</span>
+                      <span className="text-[#8e95a5] block font-mono text-[10px] uppercase">MAC Address</span>
+                      <span className="font-mono text-[#c4c9d4]">{selectedNode.macAddress}</span>
                     </div>
 
                     <div>
-                      <span className="text-zinc-400 block font-mono text-[10px] uppercase">Subnet Mask</span>
-                      <span className="font-mono text-zinc-300">{selectedNode.subnetMask || '255.255.255.0'}</span>
+                      <span className="text-[#8e95a5] block font-mono text-[10px] uppercase">Subnet Mask</span>
+                      <span className="font-mono text-[#c4c9d4]">{selectedNode.subnetMask || '255.255.255.0'}</span>
                     </div>
 
                     <div>
-                      <span className="text-zinc-400 block font-mono text-[10px] uppercase">Gateway</span>
-                      <span className="font-mono text-zinc-300">{selectedNode.defaultGateway || 'None'}</span>
+                      <span className="text-[#8e95a5] block font-mono text-[10px] uppercase">Gateway</span>
+                      <span className="font-mono text-[#c4c9d4]">{selectedNode.defaultGateway || 'None'}</span>
                     </div>
 
                     <div>
-                      <span className="text-zinc-400 block font-mono text-[10px] uppercase">Status</span>
+                      <span className="text-[#8e95a5] block font-mono text-[10px] uppercase">Status</span>
                       <Badge variant="emerald">Online / Up</Badge>
                     </div>
 
-                    <Button variant="cyan" size="sm" className="w-full" onClick={() => setConfigNode(selectedNode)}>
+                    <Button variant="primary" size="sm" className="w-full font-bold text-xs shadow-sm" onClick={() => setConfigNode(selectedNode)}>
                       Configure Interface
                     </Button>
                   </div>
                 ) : (
-                  <div className="py-8 text-center text-zinc-500 text-xs">
+                  <div className="py-8 text-center text-[#646c7d] text-xs">
                     Click any device on the canvas to inspect its hardware interfaces and routing tables.
                   </div>
                 )}
@@ -753,35 +768,35 @@ export const SandboxCanvas: React.FC = () => {
 
             {activeMode === 'layer' && (
               <>
-                <div className="flex items-center justify-between border-b border-[#272732] pb-2">
-                  <h3 className="text-xs font-mono font-bold text-white uppercase">OSI Layer Stack</h3>
-                  <Badge variant="purple">{packetProtocol}</Badge>
+                <div className="flex items-center justify-between border-b border-[#2a2e39] pb-2">
+                  <h3 className="text-xs font-mono font-bold text-[#f4f5f7] uppercase">OSI Layer Stack</h3>
+                  <Badge variant="neutral">{packetProtocol}</Badge>
                 </div>
 
                 <div className="space-y-2 text-xs">
-                  <div className="p-2.5 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-[10px] font-mono text-[#00f0ff] font-bold block">L7 • APPLICATION</span>
-                    <span className="text-zinc-300 font-mono text-[11px]">{packetProtocol} Payload Data</span>
+                  <div className="p-2.5 rounded-lg bg-[#14151a] border border-[#2a2e39]">
+                    <span className="text-[10px] font-mono text-[#38bdf8] font-bold block">L7 • APPLICATION</span>
+                    <span className="text-[#c4c9d4] font-mono text-[11px]">{packetProtocol} Payload Data</span>
                   </div>
 
-                  <div className="p-2.5 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-[10px] font-mono text-purple-400 font-bold block">L4 • TRANSPORT</span>
-                    <span className="text-zinc-300 font-mono text-[11px]">Port 80 / 443 / ICMP Type 8</span>
+                  <div className="p-2.5 rounded-lg bg-[#14151a] border border-[#2a2e39]">
+                    <span className="text-[10px] font-mono text-[#818cf8] font-bold block">L4 • TRANSPORT</span>
+                    <span className="text-[#c4c9d4] font-mono text-[11px]">Port 80 / 443 / ICMP Type 8</span>
                   </div>
 
-                  <div className="p-2.5 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-[10px] font-mono text-emerald-400 font-bold block">L3 • NETWORK (IP)</span>
-                    <span className="text-zinc-300 font-mono text-[11px]">IPv4 Packet Headers (TTL: 64)</span>
+                  <div className="p-2.5 rounded-lg bg-[#14151a] border border-[#2a2e39]">
+                    <span className="text-[10px] font-mono text-[#10b981] font-bold block">L3 • NETWORK (IP)</span>
+                    <span className="text-[#c4c9d4] font-mono text-[11px]">IPv4 Packet Headers (TTL: 64)</span>
                   </div>
 
-                  <div className="p-2.5 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-[10px] font-mono text-amber-400 font-bold block">L2 • DATA LINK (MAC)</span>
-                    <span className="text-zinc-300 font-mono text-[11px]">Ethernet II Frame / FCS</span>
+                  <div className="p-2.5 rounded-lg bg-[#14151a] border border-[#2a2e39]">
+                    <span className="text-[10px] font-mono text-[#f59e0b] font-bold block">L2 • DATA LINK (MAC)</span>
+                    <span className="text-[#c4c9d4] font-mono text-[11px]">Ethernet II Frame / FCS</span>
                   </div>
 
-                  <div className="p-2.5 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-[10px] font-mono text-zinc-400 font-bold block">L1 • PHYSICAL</span>
-                    <span className="text-zinc-300 font-mono text-[11px]">1000BASE-T RJ45 / Port Up</span>
+                  <div className="p-2.5 rounded-lg bg-[#14151a] border border-[#2a2e39]">
+                    <span className="text-[10px] font-mono text-[#8e95a5] font-bold block">L1 • PHYSICAL</span>
+                    <span className="text-[#c4c9d4] font-mono text-[11px]">1000BASE-T RJ45 / Port Up</span>
                   </div>
                 </div>
               </>

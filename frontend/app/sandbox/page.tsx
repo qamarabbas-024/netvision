@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/Badge';
 export default function SandboxPage() {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+      <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col min-w-0">
@@ -21,18 +21,18 @@ export default function SandboxPage() {
               {/* Sandbox Header */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
-                    Visual Topology Builder
+                  <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold block mb-1">
+                    TOPOLOGY WORKBENCH
                   </span>
-                  <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                    Networking Sandbox Lab
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight">
+                    Interactive Network Sandbox
                   </h1>
-                  <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-                    Drag networking devices, connect Ethernet cables, configure IPs, dispatch test packet streams, and break or repair network topologies.
+                  <p className="text-xs sm:text-sm text-[#8e95a5] mt-1 max-w-2xl leading-relaxed">
+                    Build topologies, cable interfaces, configure IP subnets, dispatch test packet streams, and verify network connectivity.
                   </p>
                 </div>
 
-                <Badge variant="cyan" className="self-start md:self-auto">Drag & Drop Active</Badge>
+                <Badge variant="cyan" dot={true} className="self-start md:self-auto">Workbench Active</Badge>
               </div>
 
               {/* Sandbox Canvas Component */}
