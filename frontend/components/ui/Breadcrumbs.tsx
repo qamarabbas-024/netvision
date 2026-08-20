@@ -15,19 +15,19 @@ export interface BreadcrumbsProps {
 
 export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items, className }) => {
   return (
-    <nav className={cn('flex items-center gap-2 text-xs font-mono text-zinc-400', className)}>
+    <nav className={cn('flex items-center gap-1.5 text-xs font-mono text-[#8e95a5]', className)} aria-label="Breadcrumb">
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
           <React.Fragment key={index}>
             {item.href && !isLast ? (
-              <Link href={item.href} className="hover:text-[#00f0ff] transition-colors">
+              <Link href={item.href} className="hover:text-[#38bdf8] transition-colors">
                 {item.label}
               </Link>
             ) : (
-              <span className={cn(isLast && 'text-white font-bold')}>{item.label}</span>
+              <span className={cn(isLast ? 'text-[#f4f5f7] font-semibold' : 'text-[#8e95a5]')}>{item.label}</span>
             )}
-            {!isLast && <ChevronRight className="w-3.5 h-3.5 text-zinc-600 shrink-0" />}
+            {!isLast && <ChevronRight className="w-3.5 h-3.5 text-[#646c7d] shrink-0" aria-hidden="true" />}
           </React.Fragment>
         );
       })}

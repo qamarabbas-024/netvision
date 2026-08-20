@@ -5,10 +5,17 @@
 :root {
   --background: #121316;
   --foreground: #f4f5f7;
-  --net-card: #181a1f;
-  --net-surface: #20232b;
-  --net-border: #2a2e39;
-  --net-cyan: #38bdf8;
+  --surface-0: #121316;
+  --surface-1: #16181f;
+  --surface-2: #1b1e26;
+  --surface-3: #14151a;
+  --border-hairline: #2a2e39;
+  --border-subtle: #383f4e;
+  --accent-primary: #2563eb;
+  --accent-cyan: #38bdf8;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #ef4444;
 }
 
 * {
@@ -26,7 +33,7 @@ body {
   min-height: 100vh;
 }
 
-/* Technical Scrollbar */
+/* Technical Laboratory Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -45,21 +52,45 @@ body {
   background: #3b4150;
 }
 
-/* Network Instrument Panel Utilities */
+/* --- SURFACE HIERARCHY SYSTEM --- */
+/* Surface 0: Page Canvas */
+.surface-0 {
+  background-color: #121316;
+}
+
+/* Surface 1: Recessed Section Background */
+.surface-1 {
+  background-color: #16181f;
+}
+
+/* Surface 2: Emphasized Panel / Workbench / Card */
+.surface-2 {
+  background-color: #1b1e26;
+  border: 1px solid #2a2e39;
+}
+
+/* Surface 3: Interactive Tool Well / Terminal / Switchboard */
+.surface-3 {
+  background-color: #14151a;
+  border: 1px solid #242731;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* Legacy panel utility mappings for compatibility */
 .glass-panel {
-  background-color: #181a1f;
+  background-color: #1b1e26;
   border: 1px solid #2a2e39;
 }
 
 .glass-panel-glow {
-  background-color: #181a1f;
+  background-color: #1b1e26;
   border: 1px solid #363c4a;
 }
 
 .instrument-panel {
-  background-color: #181a1f;
+  background-color: #1b1e26;
   border: 1px solid #2a2e39;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .instrument-panel-subtle {
@@ -67,7 +98,7 @@ body {
   border: 1px solid #242731;
 }
 
-/* Technical Laboratory Calibration Grid */
+/* Technical Calibration Grid */
 .bg-net-grid-pattern {
   background-size: 36px 36px;
   background-image: 
@@ -75,29 +106,50 @@ body {
     linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
 }
 
-/* Typography Utility Classes */
+/* LED Indicator Utilities */
+.led-dot {
+  @apply w-2 h-2 rounded-full inline-block shrink-0;
+}
+.led-emerald {
+  @apply bg-[#10b981] shadow-[0_0_6px_rgba(16,185,129,0.6)];
+}
+.led-amber {
+  @apply bg-[#f59e0b] shadow-[0_0_6px_rgba(245,158,11,0.6)];
+}
+.led-rose {
+  @apply bg-[#ef4444] shadow-[0_0_6px_rgba(239,68,68,0.6)];
+}
+.led-cyan {
+  @apply bg-[#38bdf8] shadow-[0_0_6px_rgba(56,189,248,0.6)];
+}
+
+/* Typography Utility Hierarchy */
 .h1-text {
-  @apply text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans;
+  @apply text-2xl sm:text-3xl font-bold tracking-tight text-[#f4f5f7] font-sans;
 }
 
 .h2-text {
-  @apply text-lg sm:text-xl font-bold tracking-tight text-white font-sans;
+  @apply text-lg sm:text-xl font-bold tracking-tight text-[#f4f5f7] font-sans;
 }
 
 .h3-text {
-  @apply text-base font-semibold text-white font-sans;
+  @apply text-base sm:text-lg font-semibold tracking-tight text-[#f4f5f7] font-sans;
 }
 
 .body-text {
-  @apply text-sm text-zinc-300 leading-relaxed font-sans;
+  @apply text-sm text-[#949ba8] leading-relaxed font-sans;
 }
 
 .muted-text {
-  @apply text-xs text-zinc-400 font-sans;
+  @apply text-xs text-[#646c7d] font-sans;
+}
+
+.mono-metric {
+  @apply font-mono text-xs font-semibold text-[#38bdf8];
 }
 
 .tech-code {
-  @apply font-mono text-xs text-[#00f0ff] bg-[#121217] px-1.5 py-0.5 rounded border border-[#272732];
+  @apply font-mono text-xs text-[#38bdf8] bg-[#14151a] px-1.5 py-0.5 rounded border border-[#2a2e39];
 }
 
 /* Mobile Word Break & Code Block Utilities */

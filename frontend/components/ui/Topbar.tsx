@@ -78,35 +78,38 @@ export const AppTopbar: React.FC = () => {
 
   return (
     <>
-      <header className="w-full glass-panel border-b border-[#272732]/60 px-4 sm:px-6 py-3 flex items-center justify-between gap-3 relative z-30">
+      <header className="w-full bg-[#16181f] border-b border-[#2a2e39] px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 relative z-30 font-sans">
         {/* Mobile Menu Hamburger */}
         <button
+          type="button"
           onClick={() => setSidebarOpen(true)}
-          className="md:hidden p-2 rounded-xl bg-[#121217] border border-[#272732] text-zinc-400 hover:text-white shrink-0 cursor-pointer"
+          className="md:hidden p-2 rounded-lg bg-[#14151a] border border-[#2a2e39] text-[#8e95a5] hover:text-white shrink-0 cursor-pointer"
           aria-label="Open navigation menu"
         >
-          <Menu className="w-5 h-5" />
+          <Menu className="w-4 h-4" />
         </button>
 
         {/* Interactive Search Bar */}
         <div className="max-w-md w-full relative min-w-0" ref={searchRef}>
           <div className="relative flex items-center">
-            <Search className="absolute left-3 w-4 h-4 text-zinc-400" />
+            <Search className="absolute left-3 w-4 h-4 text-[#646c7d]" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onFocus={() => query.trim() && setIsOpen(true)}
               placeholder="Search curriculum..."
-              className="w-full bg-[#121217] text-white border border-[#272732] rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm transition-all focus:outline-none focus:border-[#00f0ff] focus:ring-1 focus:ring-[#00f0ff] placeholder:text-zinc-500"
+              className="w-full bg-[#14151a] text-[#f4f5f7] border border-[#2a2e39] rounded-lg pl-9 pr-8 py-1.5 text-xs sm:text-sm transition-all focus:outline-none focus:border-[#38bdf8] focus:ring-1 focus:ring-[#38bdf8] placeholder:text-[#646c7d]"
             />
             {query ? (
               <button
+                type="button"
                 onClick={() => {
                   setQuery('');
                   setIsOpen(false);
                 }}
-                className="absolute right-2.5 text-zinc-400 hover:text-white p-1"
+                className="absolute right-2.5 text-[#8e95a5] hover:text-white p-1"
+                aria-label="Clear search"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -115,15 +118,15 @@ export const AppTopbar: React.FC = () => {
 
           {/* Search Results Dropdown */}
           {isOpen && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-[#121217] border border-[#272732] rounded-2xl shadow-2xl overflow-hidden glass-panel p-3 flex flex-col gap-3 max-h-[380px] overflow-y-auto z-50">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-[#1b1e26] border border-[#2a2e39] rounded-xl shadow-elevated overflow-hidden p-3 flex flex-col gap-3 max-h-[380px] overflow-y-auto z-50">
               {isLoading ? (
-                <p className="text-xs text-zinc-400 p-2 text-center animate-pulse">Searching NetVision curriculum...</p>
+                <p className="text-xs text-[#8e95a5] p-2 text-center animate-pulse font-mono">Searching NetVision curriculum...</p>
               ) : hasResults ? (
                 <>
                   {/* Courses */}
                   {results.courses.length > 0 && (
                     <div>
-                      <span className="text-[10px] font-mono uppercase text-[#00f0ff] font-bold block mb-1.5 px-2">
+                      <span className="text-[10px] font-mono uppercase text-[#38bdf8] font-bold block mb-1.5 px-2">
                         Courses & Topics ({results.courses.length})
                       </span>
                       <div className="flex flex-col gap-1">
@@ -131,13 +134,13 @@ export const AppTopbar: React.FC = () => {
                           <div
                             key={c.id}
                             onClick={() => handleSelectResult(`/courses/${c.slug}`)}
-                            className="p-2 rounded-xl hover:bg-white/5 cursor-pointer flex items-center justify-between gap-2 transition-colors"
+                            className="p-2 rounded-lg hover:bg-[#14151a] cursor-pointer flex items-center justify-between gap-2 transition-colors border border-transparent hover:border-[#2a2e39]"
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
-                              <BookOpen className="w-4 h-4 text-[#00f0ff] shrink-0" />
+                              <BookOpen className="w-4 h-4 text-[#38bdf8] shrink-0" />
                               <div className="min-w-0">
-                                <div className="text-xs font-bold text-white truncate">{c.title}</div>
-                                <div className="text-[10px] text-zinc-400 truncate">{c.tagline}</div>
+                                <div className="text-xs font-bold text-[#f4f5f7] truncate">{c.title}</div>
+                                <div className="text-[10px] text-[#8e95a5] truncate">{c.tagline}</div>
                               </div>
                             </div>
                             <Badge variant="cyan" className="shrink-0">{c.level}</Badge>
@@ -150,7 +153,7 @@ export const AppTopbar: React.FC = () => {
                   {/* Lessons */}
                   {results.lessons.length > 0 && (
                     <div>
-                      <span className="text-[10px] font-mono uppercase text-purple-400 font-bold block mb-1.5 px-2">
+                      <span className="text-[10px] font-mono uppercase text-[#818cf8] font-bold block mb-1.5 px-2">
                         Interactive Lessons ({results.lessons.length})
                       </span>
                       <div className="flex flex-col gap-1">
@@ -162,13 +165,13 @@ export const AppTopbar: React.FC = () => {
                                 `/courses/${l.module?.course?.slug || 'networking-fundamentals'}/lessons/${l.slug}`
                               )
                             }
-                            className="p-2 rounded-xl hover:bg-white/5 cursor-pointer flex items-center justify-between gap-2 transition-colors"
+                            className="p-2 rounded-lg hover:bg-[#14151a] cursor-pointer flex items-center justify-between gap-2 transition-colors border border-transparent hover:border-[#2a2e39]"
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
-                              <Layers className="w-4 h-4 text-purple-400 shrink-0" />
+                              <Layers className="w-4 h-4 text-[#818cf8] shrink-0" />
                               <div className="min-w-0">
-                                <div className="text-xs font-bold text-white truncate">{l.title}</div>
-                                <div className="text-[10px] text-zinc-400 truncate">
+                                <div className="text-xs font-bold text-[#f4f5f7] truncate">{l.title}</div>
+                                <div className="text-[10px] text-[#8e95a5] truncate">
                                   {l.module?.course?.title} • {l.durationMinutes} mins
                                 </div>
                               </div>
@@ -182,7 +185,7 @@ export const AppTopbar: React.FC = () => {
                 </>
               ) : (
                 <div className="p-3 text-center">
-                  <p className="text-xs text-zinc-400">No lessons or topics found matching "{query}".</p>
+                  <p className="text-xs text-[#8e95a5]">No lessons or topics found matching "{query}".</p>
                 </div>
               )}
             </div>
@@ -191,24 +194,28 @@ export const AppTopbar: React.FC = () => {
 
         {/* User Progress Stats & Profile */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#14151a] border border-[#2a2e39] text-amber-400 text-xs font-mono font-bold">
             <Flame className="w-3.5 h-3.5 fill-amber-400" />
-            <span>{streak} {streak === 1 ? 'Day' : 'Days'}</span>
+            <span>{streak} {streak === 1 ? 'DAY' : 'DAYS'}</span>
           </div>
 
           <div className="hidden lg:block">
             <Badge variant={user?.role === 'ADMIN' ? 'rose' : 'cyan'}>
-              {user ? (user.role === 'ADMIN' ? 'Admin' : 'Learner') : 'Guest'}
+              {user ? (user.role === 'ADMIN' ? 'ADMIN' : 'LEARNER') : 'GUEST'}
             </Badge>
           </div>
 
-          <button className="w-8 h-8 rounded-xl bg-[#181820] border border-[#272732] hover:border-zinc-500 flex items-center justify-center text-zinc-400 hover:text-white transition-colors relative">
+          <button
+            type="button"
+            aria-label="Notifications"
+            className="w-8 h-8 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-zinc-500 flex items-center justify-center text-[#8e95a5] hover:text-[#f4f5f7] transition-colors relative"
+          >
             <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#00f0ff]" />
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#38bdf8]" />
           </button>
 
-          <Link href="/profile">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-white font-bold text-xs cursor-pointer shadow-glow-purple">
+          <Link href="/profile" aria-label="View user profile">
+            <div className="w-8 h-8 rounded-lg bg-[#2563eb] flex items-center justify-center text-white font-bold text-xs cursor-pointer shadow-sm hover:bg-[#3b82f6] transition-colors">
               <User className="w-4 h-4" />
             </div>
           </Link>

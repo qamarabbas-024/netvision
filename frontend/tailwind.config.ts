@@ -23,9 +23,15 @@ const config: Config = {
           600: '#0891b2',
           900: '#164e63',
         },
+        surface: {
+          0: '#121316', // Canvas Base
+          1: '#16181f', // Section / Recessed Group
+          2: '#1b1e26', // Panel / Card / Workbench
+          3: '#14151a', // Recessed Well / Tool / Terminal
+        },
         net: {
           bg: '#121316',
-          card: '#181a1f',
+          card: '#1b1e26',
           surface: '#20232b',
           border: '#2a2e39',
           cyan: '#38bdf8',
@@ -43,6 +49,7 @@ const config: Config = {
         'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.5)',
         'elevated': '0 4px 14px -2px rgba(0, 0, 0, 0.7), 0 2px 4px -1px rgba(0, 0, 0, 0.5)',
         'instrument': 'inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.6)',
+        'well': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.6)',
       },
       animation: {
         'packet-flow': 'packetFlow 2s linear infinite',
