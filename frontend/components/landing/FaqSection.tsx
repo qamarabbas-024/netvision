@@ -6,58 +6,59 @@ import { ChevronDown } from 'lucide-react';
 export const FaqSection: React.FC = () => {
   const faqs = [
     {
-      q: 'Is NetVision really 100% free?',
-      a: 'Yes! NetVision is dedicated to democratizing networking education worldwide. All core courses, interactive simulations, and sandbox labs are 100% free with zero paywalls.',
+      q: 'Do I need an account to start learning?',
+      a: 'No. NetVision provides 100% open guest access. You can jump directly into foundational lessons, launch visualizers, and execute labs immediately without any signup friction. Progress is automatically synced locally until you decide to create an account.',
     },
     {
       q: 'Do I need prior computer networking experience?',
-      a: 'Not at all. NetVision starts with absolute fundamentals (Ethernet cables, MAC addresses, IP basics) and progressively guides you up to advanced routing, switching, and firewall security.',
+      a: 'Not at all. NetVision begins at Tier 0 (bits, bytes, physical cables, and digital representation) and progressively builds up to advanced OSPF routing, VLAN segmentation, and firewall security policies.',
     },
     {
       q: 'How does NetVision compare to Cisco Packet Tracer?',
-      a: 'While Cisco Packet Tracer is a desktop software tool, NetVision is 100% web-native, instant-loading, and designed for intuitive learning with step-by-step visual packet animations and guided lessons.',
+      a: 'NetVision is 100% web-native, requires zero desktop installation, and is built around pedagogical packet inspection: you can step through protocol framing, observe live ARP and DNS handshakes, and run deterministic CLI diagnostics in real time.',
     },
     {
-      q: 'Can I earn verifiable certificates?',
-      a: 'Yes! Upon completing course pathways and passing end-of-module interactive quizzes, you receive a digital certificate complete with a cryptographic verification code for your resume and LinkedIn.',
+      q: 'Are certificates cryptographically verifiable?',
+      a: 'Yes. Upon completing course pathways and passing the final assessments, you receive a digital certificate containing a unique server-authoritative hash code that can be verified publicly by employers or academic institutions.',
     },
   ];
 
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   return (
-    <section className="py-20 bg-net-grid-pattern relative">
-      <div className="max-w-4xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold mb-2 block">
-            Got Questions?
+    <section className="py-16 sm:py-20 bg-net-grid-pattern relative surface-0 font-sans border-b border-[#2a2e39]">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="text-center mb-12">
+          <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold mb-2 block">
+            QUESTIONS & ARCHITECTURE
           </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight mb-3">
             Frequently Asked Questions
           </h2>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3.5">
           {faqs.map((faq, idx) => {
             const isOpen = openIdx === idx;
             return (
               <div
                 key={idx}
-                className="glass-panel rounded-2xl border border-[#272732] overflow-hidden transition-all"
+                className="surface-2 rounded-xl border border-[#2a2e39] overflow-hidden transition-all shadow-instrument"
               >
                 <button
                   onClick={() => setOpenIdx(isOpen ? null : idx)}
-                  className="w-full p-6 text-left flex items-center justify-between font-bold text-white text-base hover:text-[#00f0ff] transition-colors"
+                  aria-expanded={isOpen}
+                  className="w-full p-5 text-left flex items-center justify-between font-bold text-[#f4f5f7] text-sm sm:text-base hover:text-[#38bdf8] transition-colors cursor-pointer"
                 >
                   <span>{faq.q}</span>
                   <ChevronDown
-                    className={`w-5 h-5 text-zinc-400 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180 text-[#00f0ff]' : ''
+                    className={`w-4 h-4 text-[#8e95a5] transition-transform duration-200 shrink-0 ml-3 ${
+                      isOpen ? 'rotate-180 text-[#38bdf8]' : ''
                     }`}
                   />
                 </button>
                 {isOpen ? (
-                  <div className="px-6 pb-6 text-sm text-zinc-400 leading-relaxed border-t border-[#272732]/60 pt-4">
+                  <div className="px-5 pb-5 text-xs sm:text-sm text-[#8e95a5] leading-relaxed border-t border-[#2a2e39] pt-4">
                     {faq.a}
                   </div>
                 ) : null}

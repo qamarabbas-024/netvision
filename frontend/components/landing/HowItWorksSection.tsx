@@ -6,53 +6,53 @@ export const HowItWorksSection: React.FC = () => {
   const steps = [
     {
       step: '01',
-      title: 'Pick a Networking Topic',
-      desc: 'Select from TCP/IP, DNS, Subnetting, Routing, Firewalls, or Wireless networking modules.',
+      title: 'Conceptual Intuition',
+      desc: 'Understand the underlying protocol theory and architectural design through concise, highly focused technical explanations.',
     },
     {
       step: '02',
-      title: 'Observe Packet Animations',
-      desc: 'Watch real-time 60 FPS visual packet flows across routers, switches, and client devices.',
+      title: 'Interactive Manipulation',
+      desc: 'Manipulate live parameters, adjust frame flags, and observe deterministic 60 FPS packet flows across multi-hop topologies.',
     },
     {
       step: '03',
-      title: 'Experiment in the Sandbox',
-      desc: 'Build custom network topologies, change IP configurations, and test network packet delivery.',
+      title: 'Practical CLI Execution',
+      desc: 'Execute real diagnostic commands (ping, traceroute, nslookup, ipconfig) inside the browser-based simulation terminal.',
     },
     {
       step: '04',
-      title: 'Pass Labs & Earn Certificates',
-      desc: 'Complete interactive quizzes and troubleshoot broken scenarios to earn verified digital credentials.',
+      title: 'Mastery Verification',
+      desc: 'Solve scenario-based troubleshooting incidents and earn cryptographically verified credentials backed by server validation.',
     },
   ];
 
   return (
-    <section className="py-16 sm:py-20 relative bg-[#09090b]">
+    <section className="py-16 sm:py-20 relative surface-0 font-sans border-b border-[#2a2e39]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-          <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold mb-2 block">
-            4-Step Learning Pathway
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+          <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold mb-2 block">
+            PEDAGOGICAL BLUEPRINT
           </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-3 font-sans">
-            How NetVision Works
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight mb-3">
+            How NetVision Teaches
           </h2>
-          <p className="text-zinc-300 text-sm font-sans">
-            Progress from digital foundations to building, inspecting, and troubleshooting live networking topologies.
+          <p className="text-[#8e95a5] text-sm leading-relaxed">
+            Progress from physical bits to building, inspecting, and diagnosing live networked systems.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {steps.map((s, idx) => (
             <div
               key={idx}
-              className="glass-panel p-6 rounded-xl border border-[#272732] flex flex-col justify-between hover:border-zinc-700 transition-colors"
+              className="surface-2 p-5 rounded-xl border border-[#2a2e39] flex flex-col justify-between hover:border-[#38bdf8]/30 transition-all shadow-instrument"
             >
               <div>
-                <span className="text-3xl font-extrabold text-[#00f0ff] font-mono mb-3 block">
+                <span className="text-2xl font-extrabold text-[#38bdf8] font-mono mb-3 block">
                   {s.step}
                 </span>
-                <h3 className="text-base font-bold text-white mb-2 font-sans">{s.title}</h3>
-                <p className="text-xs text-zinc-300 leading-relaxed font-sans">{s.desc}</p>
+                <h3 className="text-sm font-bold text-[#f4f5f7] mb-2">{s.title}</h3>
+                <p className="text-xs text-[#8e95a5] leading-relaxed">{s.desc}</p>
               </div>
             </div>
           ))}

@@ -188,7 +188,7 @@ export default function CourseDetailPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+      <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
@@ -203,42 +203,42 @@ export default function CourseDetailPage() {
               {/* Back to Catalog Breadcrumb */}
               <Link
                 href="/courses"
-                className="inline-flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-[#00f0ff] transition-colors"
+                className="inline-flex items-center gap-2 text-xs font-mono text-[#8e95a5] hover:text-[#38bdf8] transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-3.5 h-3.5" />
                 Back to Course Catalog
               </Link>
 
               {/* Course Header Banner */}
-              <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-[#00f0ff]/30 shadow-glow-cyan flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
+              <div className="surface-2 p-6 sm:p-8 rounded-xl border border-[#2a2e39] shadow-instrument flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
                 <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                  <div className="flex flex-wrap items-center gap-2.5 mb-3">
                     {topic.code && (
-                      <span className="px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-xs font-mono font-bold text-zinc-300">
+                      <span className="px-2 py-0.5 rounded-md bg-[#14151a] border border-[#2a2e39] text-xs font-mono font-bold text-[#38bdf8]">
                         {topic.code}
                       </span>
                     )}
                     <DifficultyBadge level={topic.level} />
-                    <span className="text-xs font-mono text-zinc-400">
+                    <span className="text-xs font-mono text-[#8e95a5]">
                       {topic.estimatedHours || 4} Hours Total
                     </span>
-                    <span className="text-xs font-mono text-zinc-400">
+                    <span className="text-xs font-mono text-[#8e95a5]">
                       {totalCount} Lessons
                     </span>
                   </div>
 
-                  <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#f4f5f7] tracking-tight mb-2">
                     {topic.title}
                   </h1>
-                  <p className="text-sm text-zinc-300 max-w-2xl mb-6 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#8e95a5] max-w-2xl mb-6 leading-relaxed">
                     {topic.tagline || topic.description}
                   </p>
 
                   {/* Course-Scoped Progress Metric */}
-                  <div className="max-w-md space-y-1">
+                  <div className="max-w-md space-y-1.5">
                     <div className="flex justify-between text-xs font-mono">
-                      <span className="text-zinc-400">Course Completion</span>
-                      <span className="text-[#00f0ff] font-bold">
+                      <span className="text-[#8e95a5]">Course Completion</span>
+                      <span className="text-[#38bdf8] font-bold">
                         {completedCount} / {totalCount} lessons ({progressPercent}%)
                       </span>
                     </div>
@@ -249,16 +249,17 @@ export default function CourseDetailPage() {
                 {/* Primary CTA (Visually Dominant) */}
                 <div className="w-full lg:w-auto shrink-0 flex flex-col items-stretch lg:items-end gap-2">
                   <Button
-                    variant={isCompleted ? 'secondary' : isLocked ? 'ghost' : 'cyan'}
+                    variant={isCompleted ? 'secondary' : isLocked ? 'ghost' : 'primary'}
                     size="lg"
                     onClick={handlePrimaryCta}
+                    className="w-full sm:w-auto justify-center font-bold px-6 py-3 text-sm shadow-sm"
                     leftIcon={
                       isCompleted ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        <CheckCircle2 className="w-4 h-4 text-[#10b981]" />
                       ) : isLocked ? (
-                        <Lock className="w-5 h-5 text-zinc-500" />
+                        <Lock className="w-4 h-4 text-[#646c7d]" />
                       ) : (
-                        <PlayCircle className="w-5 h-5" />
+                        <PlayCircle className="w-4 h-4" />
                       )
                     }
                   >
@@ -275,21 +276,21 @@ export default function CourseDetailPage() {
 
               {/* Prerequisites Card if present */}
               {topic.prerequisites && topic.prerequisites.length > 0 && (
-                <Card className="p-6 glass-panel border-[#272732] flex items-center justify-between gap-4">
+                <Card className="p-5 surface-2 border border-[#2a2e39] rounded-xl flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400">
-                      <Lock className="w-5 h-5" />
+                    <div className="w-9 h-9 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-center justify-center text-[#8e95a5]">
+                      <Lock className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-mono font-bold text-zinc-400 uppercase">
+                      <h4 className="text-xs font-mono font-bold text-[#8e95a5] uppercase">
                         Course Prerequisites
                       </h4>
-                      <p className="text-xs text-zinc-300">
+                      <p className="text-xs text-[#c4c9d4]">
                         Required background: {topic.prerequisites.join(', ')}
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                  <span className="text-xs font-mono text-[#10b981] font-semibold bg-[#10b981]/10 px-2.5 py-0.5 rounded-md border border-[#10b981]/20">
                     Prerequisites Verified ✓
                   </span>
                 </Card>
@@ -298,25 +299,25 @@ export default function CourseDetailPage() {
               {/* Syllabus Roadmap */}
               <div className="flex flex-col gap-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                    <BookOpen className="w-5 h-5 text-[#00f0ff]" />
+                  <h2 className="text-lg sm:text-xl font-bold text-[#f4f5f7] tracking-tight flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-[#38bdf8]" />
                     Curriculum Syllabus & Roadmap
                   </h2>
-                  <span className="text-xs font-mono text-zinc-400">
+                  <span className="text-xs font-mono text-[#8e95a5]">
                     {topic.modules?.length || 1} Modules
                   </span>
                 </div>
 
                 {topic.modules?.map((mod: any) => (
-                  <Card key={mod.id} className="p-6 glass-panel border-[#272732] space-y-4">
-                    <div className="border-b border-[#272732] pb-3">
-                      <h3 className="text-base font-bold text-white mb-1">{mod.title}</h3>
+                  <Card key={mod.id} className="p-5 sm:p-6 surface-2 border border-[#2a2e39] rounded-xl space-y-4 shadow-instrument">
+                    <div className="border-b border-[#2a2e39] pb-3">
+                      <h3 className="text-sm sm:text-base font-bold text-[#f4f5f7] mb-1">{mod.title}</h3>
                       {mod.description && (
-                        <p className="text-xs text-zinc-400 leading-relaxed">{mod.description}</p>
+                        <p className="text-xs text-[#8e95a5] leading-relaxed">{mod.description}</p>
                       )}
                     </div>
 
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2.5">
                       {mod.lessons?.map((les: any) => {
                         globalLessonIndex++;
                         const formattedIndex = String(globalLessonIndex).padStart(2, '0');
@@ -325,32 +326,32 @@ export default function CourseDetailPage() {
                         return (
                           <div
                             key={les.id}
-                            className={`p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${
+                            className={`p-3.5 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 transition-all ${
                               les.completed
-                                ? 'bg-emerald-500/5 border-emerald-500/20'
+                                ? 'bg-[#10b981]/5 border-[#10b981]/20'
                                 : les.slug === nextActivity.lessonSlug
-                                ? 'bg-[#00f0ff]/10 border-[#00f0ff]/40 shadow-glow-cyan'
-                                : 'bg-[#181820]/60 border-[#272732] hover:border-zinc-700'
+                                ? 'bg-[#14151a] border-[#38bdf8] shadow-inner'
+                                : 'bg-[#14151a] border-[#2a2e39] hover:border-[#38bdf8]/30'
                             }`}
                           >
-                            <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                              <span className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-mono text-xs font-bold text-zinc-400 shrink-0">
+                            <div className="flex items-start sm:items-center gap-3 min-w-0">
+                              <span className="w-7 h-7 rounded-md bg-[#1b1e26] border border-[#2a2e39] flex items-center justify-center font-mono text-xs font-bold text-[#8e95a5] shrink-0">
                                 {formattedIndex}
                               </span>
 
                               <div className="min-w-0">
-                                <h4 className="text-sm font-bold text-white truncate">
+                                <h4 className="text-xs sm:text-sm font-bold text-[#f4f5f7] truncate">
                                   {les.title}
                                 </h4>
                                 <div className="flex flex-wrap items-center gap-2 mt-1">
                                   <Badge variant={isQuiz ? 'amber' : 'cyan'}>
                                     {les.type || 'LESSON'}
                                   </Badge>
-                                  <span className="text-[11px] font-mono text-zinc-500">
+                                  <span className="text-[10px] font-mono text-[#8e95a5]">
                                     {les.durationMinutes || 15} min
                                   </span>
                                   {les.score !== undefined && les.score !== null && (
-                                    <span className="text-[11px] font-mono text-emerald-400 font-semibold">
+                                    <span className="text-[10px] font-mono text-[#10b981] font-semibold">
                                       Score: {les.score}%
                                     </span>
                                   )}
@@ -364,10 +365,11 @@ export default function CourseDetailPage() {
                                   les.completed
                                     ? 'secondary'
                                     : les.slug === nextActivity.lessonSlug
-                                    ? 'cyan'
+                                    ? 'primary'
                                     : 'ghost'
                                 }
                                 size="sm"
+                                className="text-xs font-semibold"
                               >
                                 {les.completed
                                   ? 'Review Lesson'
@@ -385,57 +387,57 @@ export default function CourseDetailPage() {
               </div>
 
               {/* Course Completion vs Certification Distinction UI */}
-              <Card className="p-6 glass-panel border-[#272732] rounded-3xl space-y-4">
-                <div className="flex items-center justify-between border-b border-[#272732] pb-3">
-                  <div className="flex items-center gap-2 text-amber-400">
-                    <Award className="w-5 h-5" />
-                    <h3 className="text-sm font-mono font-bold uppercase tracking-wider">
+              <Card className="p-5 sm:p-6 surface-2 border border-[#2a2e39] rounded-xl space-y-3.5 shadow-instrument">
+                <div className="flex items-center justify-between border-b border-[#2a2e39] pb-3">
+                  <div className="flex items-center gap-2 text-[#f59e0b]">
+                    <Award className="w-4 h-4" />
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider">
                       Course Completion & Certification Readiness
                     </h3>
                   </div>
-                  <span className="text-[11px] font-mono text-zinc-500 uppercase">
+                  <span className="text-[10px] font-mono text-[#8e95a5] uppercase">
                     COURSE COMPLETION ≠ CERTIFICATION
                   </span>
                 </div>
 
-                <p className="text-xs text-zinc-400 leading-relaxed">
+                <p className="text-xs text-[#8e95a5] leading-relaxed">
                   Completing all lessons unlocks course completion tracking. Official NetVision Technical Certification requires passing the scheduled Final Exam & Practical Comprehensive Assessment in future evaluation phases.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
-                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs">
-                    <span className="font-mono text-[10px] text-zinc-500 uppercase block mb-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                  <div className="p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs">
+                    <span className="font-mono text-[9px] text-[#8e95a5] uppercase block mb-1">
                       1. THEORY REQUIREMENT
                     </span>
-                    <span className="text-emerald-400 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> All Lessons Read
+                    <span className="text-[#10b981] font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> All Lessons Read
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs">
-                    <span className="font-mono text-[10px] text-zinc-500 uppercase block mb-1">
+                  <div className="p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs">
+                    <span className="font-mono text-[9px] text-[#8e95a5] uppercase block mb-1">
                       2. PRACTICAL REQUIREMENT
                     </span>
-                    <span className="text-emerald-400 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Labs Validated
+                    <span className="text-[#10b981] font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Labs Validated
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs">
-                    <span className="font-mono text-[10px] text-zinc-500 uppercase block mb-1">
+                  <div className="p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs">
+                    <span className="font-mono text-[9px] text-[#8e95a5] uppercase block mb-1">
                       3. FINAL EXAM
                     </span>
-                    <span className="text-zinc-500 font-semibold flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> Future Phase
+                    <span className="text-[#8e95a5] font-semibold flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> Future Phase
                     </span>
                   </div>
 
-                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs">
-                    <span className="font-mono text-[10px] text-zinc-500 uppercase block mb-1">
+                  <div className="p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs">
+                    <span className="font-mono text-[9px] text-[#8e95a5] uppercase block mb-1">
                       4. CERTIFICATION ELIGIBILITY
                     </span>
-                    <span className="text-zinc-500 font-semibold flex items-center gap-1">
-                      <Lock className="w-3.5 h-3.5" /> Final Exam Required
+                    <span className="text-[#8e95a5] font-semibold flex items-center gap-1">
+                      <Lock className="w-3 h-3" /> Final Exam Required
                     </span>
                   </div>
                 </div>

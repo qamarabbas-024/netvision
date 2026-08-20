@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/Button';
 
 export const HeroSection: React.FC = () => {
   return (
-    <section className="relative pt-28 pb-24 overflow-hidden bg-net-grid-pattern border-b border-[#2a2e39]">
-      <div className="max-w-7xl mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+    <section className="relative pt-24 sm:pt-28 pb-20 sm:pb-24 overflow-hidden bg-net-grid-pattern border-b border-[#2a2e39] surface-0 font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
         {/* Left Column: Editorial Instrumentation Typography */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
@@ -18,22 +18,22 @@ export const HeroSection: React.FC = () => {
           className="lg:col-span-7 flex flex-col items-start text-left"
         >
           {/* Engineering Lab Instrument Badge */}
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#181a1f] border border-[#2a2e39] text-[11px] font-mono text-[#38bdf8] mb-6">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#16181f] border border-[#2a2e39] text-[11px] font-mono text-[#38bdf8] mb-6">
+            <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse" />
             <span className="tracking-widest uppercase font-bold">NETWORK INSTRUMENT // LAB_ENGINE_V1</span>
           </div>
 
           {/* Large Technical Display Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#f4f5f7] leading-[1.1] mb-6 font-sans">
-            Master Computer Networking <br />
-            <span className="text-[#38bdf8] font-normal tracking-tight">
-              Through Real-Time Instrumentation.
+            Learn networking by <br />
+            <span className="text-[#38bdf8] font-extrabold tracking-tight">
+              seeing how it works.
             </span>
           </h1>
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg text-[#8e95a5] font-normal leading-relaxed max-w-xl mb-8 font-sans">
-            Inspect real packet trajectories, measure latency components down to microseconds, configure live CLI diagnostic labs, and build rigorous technical intuition.
+            Interactive networking education with real packet visualizers, live CLI diagnostic labs, and structured technical progression from physical bits to advanced routing.
           </p>
 
           {/* Laboratory CTAs */}
@@ -41,9 +41,9 @@ export const HeroSection: React.FC = () => {
             <Link href="/courses" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                variant="cyan"
+                variant="primary"
                 rightIcon={<ArrowRight className="w-4 h-4" />}
-                className="w-full sm:w-auto justify-center bg-[#2563eb] text-white hover:bg-[#3b82f6] font-bold rounded-lg px-6 shadow-sm text-sm"
+                className="w-full sm:w-auto justify-center px-6 py-3 text-sm font-bold shadow-sm"
               >
                 Start Learning
               </Button>
@@ -53,9 +53,9 @@ export const HeroSection: React.FC = () => {
                 size="lg"
                 variant="secondary"
                 leftIcon={<PlayCircle className="w-4 h-4 text-[#38bdf8]" />}
-                className="w-full sm:w-auto justify-center bg-[#181a1f] border-[#2a2e39] hover:border-[#38bdf8]/40 text-[#e2e4e9] font-semibold rounded-lg px-6 text-sm"
+                className="w-full sm:w-auto justify-center px-6 py-3 text-sm font-semibold"
               >
-                Open Sandbox
+                Open Sandbox Lab
               </Button>
             </Link>
           </div>
@@ -63,16 +63,16 @@ export const HeroSection: React.FC = () => {
           {/* Instrument Telemetry Ticker */}
           <div className="flex flex-wrap items-center gap-6 pt-6 border-t border-[#2a2e39] text-xs font-mono text-[#8e95a5] w-full">
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-zinc-300">GUEST_SESSION: READY</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
+              <span className="text-[#c4c9d4]">GUEST_ACCESS: 100% OPEN</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#38bdf8]" />
-              <span className="text-zinc-300">16 COURSES INDEXED</span>
+              <span className="text-[#c4c9d4]">16 PROGRESSIVE COURSES</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span className="text-zinc-300">20+ DIAGNOSTIC LABS</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]" />
+              <span className="text-[#c4c9d4]">DETERMINISTIC SIMULATIONS</span>
             </div>
           </div>
         </motion.div>
@@ -84,12 +84,12 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.15 }}
           className="lg:col-span-5 w-full"
         >
-          <div className="bg-[#181a1f] rounded-xl border border-[#2a2e39] shadow-elevated overflow-hidden font-mono">
+          <div className="surface-2 rounded-xl border border-[#2a2e39] shadow-elevated overflow-hidden font-mono">
             {/* Instrument Bezel Top Bar */}
             <div className="flex items-center justify-between px-4 py-3 bg-[#14151a] border-b border-[#2a2e39]">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#38bdf8]" />
-                <span className="text-[11px] text-[#e2e4e9] uppercase tracking-wider font-bold">
+                <span className="text-[11px] text-[#f4f5f7] uppercase tracking-wider font-bold">
                   INSTRUMENT: LOGIC_ANALYZER // CH-01
                 </span>
               </div>
@@ -110,7 +110,7 @@ export const HeroSection: React.FC = () => {
 
               {/* Node 1: Host PC */}
               <div className="relative z-10 flex flex-col items-center gap-1">
-                <div className="w-11 h-11 rounded-lg bg-[#181a1f] border border-[#2a2e39] flex items-center justify-center text-emerald-400">
+                <div className="w-11 h-11 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-center justify-center text-[#10b981]">
                   <Monitor className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] text-[#f4f5f7] font-semibold mt-1">Host-A</span>
@@ -119,7 +119,7 @@ export const HeroSection: React.FC = () => {
 
               {/* Node 2: Gateway Router */}
               <div className="relative z-10 flex flex-col items-center gap-1">
-                <div className="w-12 h-12 rounded-lg bg-[#181a1f] border border-[#38bdf8]/50 flex items-center justify-center text-[#38bdf8]">
+                <div className="w-12 h-12 rounded-lg bg-[#14151a] border border-[#38bdf8]/50 flex items-center justify-center text-[#38bdf8]">
                   <Radio className="w-6 h-6" />
                 </div>
                 <span className="text-[10px] text-[#38bdf8] font-bold mt-1">Router-R1</span>
@@ -128,7 +128,7 @@ export const HeroSection: React.FC = () => {
 
               {/* Node 3: Cloud Web Server */}
               <div className="relative z-10 flex flex-col items-center gap-1">
-                <div className="w-11 h-11 rounded-lg bg-[#181a1f] border border-[#2a2e39] flex items-center justify-center text-purple-400">
+                <div className="w-11 h-11 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-center justify-center text-[#818cf8]">
                   <Server className="w-5 h-5" />
                 </div>
                 <span className="text-[10px] text-[#f4f5f7] font-semibold mt-1">Server-01</span>
@@ -138,12 +138,12 @@ export const HeroSection: React.FC = () => {
 
             {/* Telemetry Stream Output Bar */}
             <div className="p-3 bg-[#14151a] flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 text-[#e2e4e9]">
+              <div className="flex items-center gap-2 text-[#f4f5f7]">
                 <Activity className="w-3.5 h-3.5 text-[#38bdf8] shrink-0" />
                 <span className="text-[11px]">HEADER: <strong className="text-[#38bdf8]">IPv4 / TCP [SYN]</strong></span>
               </div>
               <div className="text-[10px] text-[#8e95a5]">
-                SEQ: <span className="text-emerald-400 font-bold">0x000003E8</span> • ACK: <span className="text-zinc-500">0x00000000</span>
+                SEQ: <span className="text-[#10b981] font-bold">0x000003E8</span> • ACK: <span className="text-[#646c7d]">0x00000000</span>
               </div>
             </div>
           </div>

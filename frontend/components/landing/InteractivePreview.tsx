@@ -51,25 +51,25 @@ export const InteractivePreview: React.FC = () => {
   };
 
   return (
-    <section id="demo" className="py-20 relative">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="demo" className="py-16 sm:py-20 relative surface-0 font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold mb-2 block">
-            Hands-On Experience
+        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+          <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold mb-2 block">
+            LIVE INTERACTIVE PREVIEW
           </span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
-            Interactive Packet Visualizer Demo
+          <h2 className="text-2xl sm:text-4xl font-extrabold text-[#f4f5f7] tracking-tight mb-3">
+            Interactive Packet Visualizer
           </h2>
-          <p className="text-zinc-400 text-base sm:text-lg">
+          <p className="text-[#8e95a5] text-sm sm:text-base leading-relaxed">
             Test the NetVision simulation engine right now. Select a protocol, click dispatch, and inspect live packet flags.
           </p>
         </div>
 
         {/* Demo Card */}
-        <Card className="max-w-4xl mx-auto p-4 sm:p-8 glass-panel-glow border-[#00f0ff]/30 shadow-2xl">
+        <Card className="max-w-4xl mx-auto p-5 sm:p-7 surface-2 border border-[#2a2e39] rounded-xl shadow-instrument">
           {/* Protocol Selector Tabs */}
-          <div className="flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8 border-b border-[#272732] pb-4 overflow-x-auto">
+          <div className="flex items-center gap-2 mb-6 border-b border-[#2a2e39] pb-4 overflow-x-auto">
             {(['TCP', 'DNS', 'ARP'] as const).map((proto) => (
               <button
                 key={proto}
@@ -77,64 +77,64 @@ export const InteractivePreview: React.FC = () => {
                   setActiveProtocol(proto);
                   handleReset();
                 }}
-                className={`px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs font-mono font-bold transition-all shrink-0 ${
+                className={`px-3.5 py-2 rounded-lg text-xs font-mono font-bold transition-all shrink-0 cursor-pointer ${
                   activeProtocol === proto
-                    ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
-                    : 'bg-[#181820] text-zinc-400 hover:text-white border border-[#272732]'
+                    ? 'bg-[#14151a] text-[#38bdf8] border border-[#38bdf8] shadow-inner'
+                    : 'bg-[#14151a] text-[#8e95a5] hover:text-[#f4f5f7] border border-[#2a2e39]'
                 }`}
               >
-                {proto} Protocol
+                {proto} PROTOCOL
               </button>
             ))}
           </div>
 
           {/* Topology Canvas Display */}
-          <div className="relative h-44 sm:h-48 bg-[#09090b] rounded-2xl border border-[#272732] flex items-center justify-between px-4 sm:px-12 mb-6 overflow-hidden">
+          <div className="relative h-44 sm:h-48 bg-[#121316] rounded-lg border border-[#2a2e39] flex items-center justify-between px-4 sm:px-12 mb-6 overflow-hidden">
             {/* Connecting Wire */}
-            <div className="absolute top-1/2 left-10 sm:left-20 right-10 sm:right-20 h-1 bg-[#272732] -translate-y-1/2" />
+            <div className="absolute top-1/2 left-10 sm:left-20 right-10 sm:right-20 h-0.5 bg-[#2a2e39] -translate-y-1/2" />
             <div
-              className="absolute top-1/2 left-10 sm:left-20 h-1 bg-[#00f0ff] shadow-glow-cyan -translate-y-1/2 transition-all duration-150"
+              className="absolute top-1/2 left-10 sm:left-20 h-0.5 bg-[#38bdf8] -translate-y-1/2 transition-all duration-150"
               style={{ width: `${(packetProgress / 100) * 75}%` }}
             />
 
             {/* Source Node */}
             <div className="relative z-10 flex flex-col items-center gap-1.5 sm:gap-2">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-center justify-center text-[#10b981]">
                 <Cpu className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <span className="text-[11px] sm:text-xs font-mono font-bold text-zinc-300">Client PC</span>
+              <span className="text-[11px] sm:text-xs font-mono font-bold text-[#f4f5f7]">Client Host</span>
             </div>
 
             {/* Moving Packet Marker */}
             {packetProgress > 0 && packetProgress < 100 ? (
               <motion.div
-                className="absolute z-20 top-1/2 -translate-y-1/2 px-2 sm:px-3 py-1 rounded-lg bg-[#00f0ff] text-black font-mono text-[9px] sm:text-[10px] font-bold shadow-glow-cyan whitespace-nowrap"
+                className="absolute z-20 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#2563eb] text-white font-mono text-[9px] sm:text-[10px] font-bold shadow-md whitespace-nowrap"
                 style={{ left: `calc(15% + ${(packetProgress / 100) * 65}%)` }}
               >
-                {activeProtocol} Packet
+                {activeProtocol} PDU
               </motion.div>
             ) : null}
 
             {/* Destination Node */}
             <div className="relative z-10 flex flex-col items-center gap-1.5 sm:gap-2">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-center justify-center text-[#818cf8]">
                 <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <span className="text-[11px] sm:text-xs font-mono font-bold text-zinc-300">Server Node</span>
+              <span className="text-[11px] sm:text-xs font-mono font-bold text-[#f4f5f7]">Server Node</span>
             </div>
           </div>
 
           {/* Packet Details & Inspector */}
-          <div className="p-3.5 sm:p-4 rounded-xl bg-[#121217] border border-[#272732] mb-6 font-mono text-xs text-zinc-300">
+          <div className="p-3.5 sm:p-4 rounded-lg bg-[#14151a] border border-[#2a2e39] mb-6 font-mono text-xs text-[#c4c9d4]">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2 mb-2">
-              <span className="text-white font-bold text-xs sm:text-sm">{protocolDetails[activeProtocol].title}</span>
-              <span className="text-emerald-400 flex items-center gap-1 text-[11px] shrink-0">
+              <span className="text-[#f4f5f7] font-bold text-xs sm:text-sm">{protocolDetails[activeProtocol].title}</span>
+              <span className="text-[#10b981] flex items-center gap-1 text-[11px] shrink-0 font-mono">
                 {packetProgress === 100 ? <CheckCircle2 className="w-3.5 h-3.5" /> : null}
-                {packetProgress === 100 ? 'Packet Delivered' : `Progress: ${packetProgress}%`}
+                {packetProgress === 100 ? 'STATUS: DELIVERED' : `PROGRESS: ${packetProgress}%`}
               </span>
             </div>
-            <p className="text-zinc-400 text-[11px] mb-2 leading-relaxed">{protocolDetails[activeProtocol].desc}</p>
-            <div className="p-2 rounded bg-black/60 border border-zinc-800 text-[#00f0ff] overflow-x-auto whitespace-nowrap text-[11px]">
+            <p className="text-[#8e95a5] text-[11px] mb-2 leading-relaxed font-sans">{protocolDetails[activeProtocol].desc}</p>
+            <div className="p-2 rounded bg-[#101115] border border-[#242731] text-[#38bdf8] overflow-x-auto whitespace-nowrap text-[11px]">
               Payload Header: {protocolDetails[activeProtocol].payload}
             </div>
           </div>
@@ -142,7 +142,7 @@ export const InteractivePreview: React.FC = () => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <Button
-              variant="cyan"
+              variant="primary"
               onClick={handleDispatch}
               isLoading={isSimulating}
               leftIcon={<Play className="w-4 h-4" />}
@@ -150,8 +150,8 @@ export const InteractivePreview: React.FC = () => {
             >
               Dispatch {activeProtocol} Packet
             </Button>
-            <Button variant="ghost" onClick={handleReset} leftIcon={<RotateCcw className="w-4 h-4" />} className="justify-center">
-              Reset Animation
+            <Button variant="ghost" onClick={handleReset} leftIcon={<RotateCcw className="w-4 h-4" />} className="justify-center text-[#8e95a5] hover:text-[#f4f5f7]">
+              Reset Telemetry
             </Button>
           </div>
         </Card>
