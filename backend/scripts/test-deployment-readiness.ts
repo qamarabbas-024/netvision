@@ -7,7 +7,7 @@ import { SimulatedSandboxProvider } from '../src/sandbox/providers/simulated-san
 import { AppController } from '../src/app.controller';
 import { PrismaService } from '../src/database/prisma.service';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaService();
 
 async function main() {
   console.log('🧪 Starting Comprehensive NetVision Deployment Readiness Test Suite...\n');
