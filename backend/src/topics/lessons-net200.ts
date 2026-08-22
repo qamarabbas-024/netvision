@@ -19,102 +19,127 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'MAC_BIT_PARSER',
     introduction:
       'Master Layer 2 physical hardware addressing: 48-bit (6-byte) MAC address architecture, Organizationally Unique Identifiers (OUI) vs Vendor-Assigned NIC bytes, hexadecimal representation, Unicast vs Multicast vs Broadcast destination types, and the Individual/Group (I/G) and Universal/Local (U/L) bit semantics.',
-    stepMetadata: {
-      step1_objective:
-        'Understand 48-bit MAC address architecture, differentiate between OUI (first 24 bits) and NIC identifiers (last 24 bits), analyze I/G and U/L bit logic, and classify Unicast, Multicast, and Broadcast MAC addresses.',
-      step2_prerequisites: ['net-101-bits-bytes-binary-hex', 'ethernet-mac-addresses-overview'],
-      step3_whyItMatters:
-        'Every Network Interface Card (NIC) manufactured on Earth has a globally unique burned-in MAC address. Layer 2 switches make all frame forwarding decisions based on destination MAC addresses.',
-      step4_coreConcept:
-        'A Media Access Control (MAC) address is a 48-bit (6-byte / 12-hex-digit) physical hardware identifier permanently assigned to a Network Interface Card (NIC). The first 24 bits (3 bytes) constitute the Organizationally Unique Identifier (OUI) assigned to hardware manufacturers (e.g. Cisco, Apple, Intel) by the IEEE. The remaining 24 bits (3 bytes) are the vendor-assigned Network Interface Controller (NIC) serial identifier. Bit 0 of octet 1 is the Individual/Group (I/G) bit: $0 = \\text{Unicast}$ (single NIC), $1 = \\text{Multicast}$ (e.g. `01:00:5e:...`). Bit 1 of octet 1 is the Universal/Local (U/L) bit: $0 = \\text{Universally Administered OUI}$, $1 = \\text{Locally Administered/Overridden}$. The broadcast address is `ff:ff:ff:ff:ff:ff` (all 48 bits set to 1).',
-      step5_technicalAnatomy: {
-        title: '48-Bit MAC Address Structure & Control Bit Architecture',
-        description: 'OUI vs NIC split, bit layout, and hexadecimal notation.',
-        components: [
-          { name: 'OUI (Organizationally Unique Identifier)', detail: 'First 24 bits (3 bytes / 6 hex digits). Assigned by IEEE to identify the hardware manufacturer (e.g. 00:1A:2B = Cisco).' },
-          { name: 'NIC Specific Extension Identifier', detail: 'Last 24 bits (3 bytes / 6 hex digits). Assigned uniquely by manufacturer to individual hardware interfaces.' },
-          { name: 'Individual / Group (I/G) Bit', detail: 'Least Significant Bit of first octet. 0 = Unicast (individual NIC destination); 1 = Multicast (group subscription).' },
-          { name: 'Universal / Local (U/L) Bit', detail: 'Second bit of first octet. 0 = Universally administered (IEEE OUI certified); 1 = Locally administered (custom/virtualized MAC).' },
-          { name: 'Broadcast MAC Address', detail: '`ff:ff:ff:ff:ff:ff` (all 48 bits set to 1). Delivered to all ports within the local broadcast domain.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'OUI IEEE Lookup', action: 'Inspect first 3 bytes of MAC (e.g. `00:50:56`) to identify the vendor (VMware).' },
-          { stepNumber: 2, title: 'Control Bit Inspection', action: 'Inspect first byte in binary to check I/G bit (bit 0) for unicast vs multicast.' },
-          { stepNumber: 3, title: 'Switch CAM Table Ingress', action: 'Switch records source MAC against incoming switchport in its CAM table.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: '48-Bit MAC Address Field Layout',
-        fields: [
-          { fieldName: 'OUI Vendor Prefix', bitLength: '24 bits (3 Bytes)', hexSample: '00:1A:2B', description: 'IEEE assigned manufacturer prefix.' },
-          { fieldName: 'NIC Serial Suffix', bitLength: '24 bits (3 Bytes)', hexSample: '3C:4D:5E', description: 'Manufacturer interface identifier.' },
-          { fieldName: 'Broadcast MAC', bitLength: '48 bits', hexSample: 'FF:FF:FF:FF:FF:FF', description: 'All-nodes Layer 2 broadcast.' },
-        ],
-      },
-      step8_visualExplanation: {
+    contentV2: {
+      objective:
+        'Understand 48-bit MAC address architecture, differentiate between the 24-bit OUI manufacturer prefix and 24-bit NIC extension identifier, analyze the I/G and U/L control bits in the first octet, and classify Unicast, Multicast, and Broadcast MAC destination types.',
+      prerequisites: [
+        'NET-101: Bits, Bytes, Binary & Hexadecimal Foundations',
+        'NET-103: The 7-Layer OSI Reference Model & Data Encapsulation',
+      ],
+      whyItMatters:
+        'Every Network Interface Card (NIC) manufactured on Earth has a globally unique burned-in MAC address. Ethernet switches make 100% of their local frame forwarding decisions by mapping destination MAC addresses to switchports in their Content-Addressable Memory (CAM) tables.',
+      explanation:
+        'A Media Access Control (MAC) address is a 48-bit (6-byte / 12-hexadecimal-digit) physical hardware identifier permanently burned into a Network Interface Card (NIC) by its manufacturer (also referred to as the Burned-In Address or BIA).\n\n### 1. 48-Bit Architecture & Partitioning\nA standard IEEE 802 MAC address is divided into two 24-bit (3-byte) halves:\n* **OUI (Organizationally Unique Identifier)**: The first 24 bits (3 bytes / 6 hex digits). Assigned by the IEEE Registration Authority to hardware vendors (e.g. `00:1A:2B` for Cisco, `00:50:56` for VMware, `3C:D9:2B` for Hewlett Packard).\n* **NIC Specific Identifier**: The last 24 bits (3 bytes / 6 hex digits). Assigned uniquely by the manufacturer to each individual physical interface, ensuring global uniqueness.\n\n### 2. First Octet Control Bits: I/G and U/L\nThe very first byte of a MAC address contains two critical standard framing bits:\n* **Bit 0 (Least Significant Bit): Individual / Group (I/G) Bit**:\n  - `0 = Unicast`: Frame is destined for a single, unique physical host NIC.\n  - `1 = Multicast`: Frame is destined for a group of subscribed endpoints (e.g. IPv4 Multicast prefix `01:00:5E:...`, IPv6 Multicast prefix `33:33:...`).\n* **Bit 1: Universal / Local (U/L) Bit**:\n  - `0 = Universally Administered`: Globally unique manufacturer address verified by the IEEE OUI registry.\n  - `1 = Locally Administered`: Overridden or assigned by local network software, virtualization hypervisors, or network administrators.\n\n### 3. Layer 2 Broadcast MAC\nThe broadcast destination MAC address is `FF:FF:FF:FF:FF:FF` (all 48 bits set to 1). When a switch receives a frame destined for `FF:FF:FF:FF:FF:FF`, it floods the frame out all active switchports belonging to the same VLAN except the ingress port.',
+      components: [
+        {
+          name: '48-Bit (6-Byte) Address Length',
+          detail: 'Composed of 12 hexadecimal characters formatted as XX:XX:XX:XX:XX:XX or XXXX.XXXX.XXXX (Cisco style).',
+        },
+        {
+          name: 'OUI (Organizationally Unique Identifier)',
+          detail: 'First 24 bits (3 bytes) assigned by the IEEE to identify the network hardware manufacturer.',
+        },
+        {
+          name: 'NIC Extension Identifier',
+          detail: 'Last 24 bits (3 bytes) assigned by the vendor as a serial number for the physical interface.',
+        },
+        {
+          name: 'Individual / Group (I/G) Bit',
+          detail: 'Bit 0 of octet 1: 0 = Unicast (single device), 1 = Multicast (group subscription).',
+        },
+        {
+          name: 'Universal / Local (U/L) Bit',
+          detail: 'Bit 1 of octet 1: 0 = Universally administered IEEE OUI, 1 = Locally administered/virtualized.',
+        },
+        {
+          name: 'Broadcast MAC (FF:FF:FF:FF:FF:FF)',
+          detail: 'All 48 bits set to binary 1; delivered to all endpoints within the local Layer 2 broadcast domain.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Burned-In ROM Initialization',
+          action: 'On host boot, the NIC loads its 48-bit MAC address from onboard EEPROM/ROM into hardware registers.',
+        },
+        {
+          stepNumber: 2,
+          title: 'Encapsulation & Source Stamping',
+          action: 'When transmitting a packet, the host NIC stamps its own physical MAC into the Source MAC field of the Ethernet II header.',
+        },
+        {
+          stepNumber: 3,
+          title: 'Switch CAM Table Ingress Learning',
+          action: 'The local switch reads the Source MAC and records a mapping of `[Source MAC -> Ingress Switchport -> VLAN]` in its CAM table.',
+        },
+        {
+          stepNumber: 4,
+          title: 'Destination NIC Filtering',
+          action: 'Receiving NICs inspect the Destination MAC: if it matches their burned-in MAC, multicast group, or broadcast (FF:FF:FF:FF:FF:FF), the NIC processes the frame; otherwise it discards it in hardware.',
+        },
+      ],
+      visualizer: {
         type: 'MAC_BIT_PARSER',
         title: 'Interactive 48-Bit MAC Address & OUI Bit Parser',
         description: 'Input any MAC address to parse OUI manufacturer vendor, toggle I/G and U/L bits, and observe Unicast/Multicast/Broadcast classification.',
       },
-      step9_workedExample: {
-        title: 'Parsing MAC Address 01:00:5E:00:00:01 for Multicast Classification',
-        problemStatement: 'Analyze MAC address `01:00:5E:00:00:01`. Determine: (1) Unicast vs Multicast, (2) Universal vs Local.',
+      workedExample: {
+        title: 'Analyzing MAC Address 01:00:5E:00:00:01 for Multicast Classification',
+        problemStatement:
+          'Analyze the physical address `01:00:5E:00:00:01`:\n1. What is the Organizationally Unique Identifier (OUI)?\n2. Is this MAC Unicast, Multicast, or Broadcast?\n3. Is this MAC Universally or Locally administered?',
         stepByStepSolution: [
-          'Step 1: Convert the first byte `0x01` to 8-bit binary: `00000001`.',
-          'Step 2: Inspect Least Significant Bit (Bit 0): The bit is `1` -> Multicast (I/G = 1).',
-          'Step 3: Inspect Second Bit (Bit 1): The bit is `0` -> Universally Administered (U/L = 0, assigned by IANA for IPv4 multicast).',
+          'Step 1 (OUI Extraction): The first 3 bytes (6 hex characters) are `01:00:5E`. This OUI is officially registered to IANA for IPv4 Multicast mapping.',
+          'Step 2 (I/G Bit Analysis): Convert first octet `0x01` to 8-bit binary: `00000001`. The Least Significant Bit (Bit 0) is `1`. Therefore, I/G = 1, which classifies this as a MULTICAST address.',
+          'Step 3 (U/L Bit Analysis): Inspect Bit 1 in `00000001`: Bit 1 is `0`. Therefore, U/L = 0, which classifies this as UNIVERSALLY ADMINISTERED by IEEE/IANA.',
         ],
-        finalResult: '`01:00:5E:00:00:01` is an IPv4 Multicast universally administered MAC address.',
+        finalResult:
+          'OUI: 01:00:5E (IANA). Classification: Multicast (I/G=1) and Universally Administered (U/L=0).',
       },
-      step10_realWorldScenario: {
-        topology: 'Virtual Machine MAC Address Duplication Incident',
-        scenarioText: 'A cloned VM boots with an identical locally administered MAC address as another host. The switch CAM table flaps rapidly between two ports, causing packet loss. Re-generating a unique MAC resolves the CAM flapping.',
-        engineeringContext: 'MAC address uniqueness on a Layer 2 LAN is mandatory for deterministic switch forwarding.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'NIC filters out all incoming unicast frames whose destination MAC does not match its own MAC.',
-        nicBehavior: 'Burned-in Address (BIA) loaded from EEPROM into hardware registers on boot.',
-        switchOrRouterBehavior: 'Switches build Source MAC to Port mappings in content-addressable memory (CAM).',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'getmac /v',
-          description: 'Displays active network adapter names, MAC physical addresses, and transport names on Windows.',
-          expectedOutput: 'Ethernet  00-1A-2B-3C-4D-5E  \\Device\\Tcpip_{...}',
-          proofExplanation: 'Proves 48-bit physical MAC address assigned to host NIC.',
+          id: 1,
+          prompt: 'What is the total bit length and byte count of a standard IEEE 802 MAC address?',
+          expected: '48 bits (6 bytes / 12 hexadecimal digits).',
+          hints: 'Each byte is 8 bits; 6 bytes * 8 = 48 bits.',
+        },
+        {
+          id: 2,
+          prompt: 'How is a 48-bit MAC address split between vendor prefix and interface serial?',
+          expected: 'First 24 bits (3 bytes) = OUI (manufacturer prefix); Last 24 bits (3 bytes) = NIC extension identifier (serial).',
+          hints: 'The IEEE assigns the first 24 bits; the hardware vendor assigns the last 24 bits.',
+        },
+        {
+          id: 3,
+          prompt: 'What does an Individual/Group (I/G) bit value of 0 vs 1 indicate in the first octet of a MAC address?',
+          expected: '0 = Unicast (individual NIC destination); 1 = Multicast (group destination).',
+          hints: 'Bit 0 (Least Significant Bit of first byte) controls Unicast vs Multicast.',
+        },
+        {
+          id: 4,
+          prompt: 'What is the universal Layer 2 broadcast MAC address in hexadecimal notation?',
+          expected: 'FF:FF:FF:FF:FF:FF (all 48 bits set to 1).',
+          hints: 'Every hex character is F.',
+        },
+        {
+          id: 5,
+          prompt: 'Why do switches record the Source MAC address of incoming frames in their CAM table?',
+          expected: 'To learn which physical switchport connects to that device so future frames destined to that MAC can be forwarded directly without flooding.',
+          hints: 'Switches learn dynamically from Source MACs and forward based on Destination MACs.',
+        },
+        {
+          id: 6,
+          prompt: 'If a virtual machine hypervisor generates a custom virtual MAC starting with 02:..., why is the second bit (U/L bit) set to 1?',
+          expected: 'Because the U/L bit set to 1 designates the MAC as Locally Administered rather than an IEEE-assigned global OUI.',
+          hints: '0x02 in binary is 00000010, setting bit 1 (U/L) to 1.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Switch logs `%SW_MATM-4-MACFLAP_NOTIF: Host 001a.2b3c.4d5e is flapping between port Gi0/1 and Gi0/2`.',
-          possibleCauses: ['Duplicate MAC address configured on two hosts or physical Layer 2 loop'],
-          diagnosticSteps: ['Check connected devices on ports Gi0/1 and Gi0/2.'],
-          remediation: 'Reconfigure duplicate host MAC or resolve switchport loop.',
-        },
+      recap: [
+        'A MAC address is a 48-bit (6-byte) Layer 2 hardware address permanent to a physical NIC.',
+        'First 24 bits are the IEEE-assigned OUI; last 24 bits are the vendor NIC serial identifier.',
+        'First octet bit 0 is the I/G bit (0=Unicast, 1=Multicast); bit 1 is the U/L bit (0=Universal, 1=Local).',
+        'Broadcast MAC is FF:FF:FF:FF:FF:FF, which is flooded to all ports in the local broadcast domain.',
+        'Switches build CAM tables dynamically by inspecting Source MAC addresses on ingress.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Thinking MAC addresses change when a laptop moves to a new Wi-Fi network.', correction: 'A burned-in MAC address is permanent to the hardware NIC; IP addresses change, MAC addresses remain static.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'MAC Address Spoofing',
-        mitigationStrategy: 'Enable Switchport Port Security (`switchport port-security mac-address sticky`) to lock ports to authorized MACs.',
-      },
-      step16_examPrep: {
-        keyExamPoints: ['48 bits (6 bytes / 12 hex chars).', 'First 24 bits = OUI; Last 24 bits = NIC identifier.', 'Broadcast = FF:FF:FF:FF:FF:FF.'],
-        frequentTraps: ['Confusing bit count (48 bits) with IPv4 bit count (32 bits).'],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: MAC Address Parsing & Hardware Identity Inspection',
-        scenario: 'Inspect physical MAC addresses with CLI and parse OUI prefixes.',
-        tasks: ['Run getmac /v and extract the 48-bit hardware address.'],
-        verificationMethod: 'Verify correct OUI and NIC split.',
-      },
-      step18_masterySummary: {
-        summaryPoints: ['MAC addresses provide 48-bit Layer 2 physical identity.', 'First 24 bits are OUI; last 24 bits are NIC serial.'],
-        nextLessonBridge: 'Proceed to NET-201 Lesson 2 to master Ethernet II Frame Structures.',
-      },
     },
     questions: [
       {
@@ -126,22 +151,124 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
           '64 bits (8 Bytes)',
         ],
         correctOption: 0,
-        explanation: 'A standard IEEE 802 MAC address is 48 bits (6 octets / 12 hex digits). The first 24 bits are the Organizationally Unique Identifier (OUI); the last 24 bits are the NIC identifier.',
-        explanationsJson: { 1: '32 bits is an IPv4 address.', 2: '128 bits is an IPv6 address.', 3: '64 bits is EUI-64.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'A standard IEEE 802 MAC address is 48 bits (6 octets / 12 hex digits). The first 24 bits are the Organizationally Unique Identifier (OUI); the last 24 bits are the NIC identifier.',
+        explanationsJson: {
+          1: '32 bits is an IPv4 address.',
+          2: '128 bits is an IPv6 address.',
+          3: '64 bits is EUI-64.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.RECALL,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'MAC Address Bit Length & Architecture',
       },
+      {
+        text: 'Which organization is responsible for assigning the first 24 bits (Organizationally Unique Identifier / OUI) of a MAC address to hardware manufacturers?',
+        options: [
+          'IEEE (Institute of Electrical and Electronics Engineers)',
+          'IETF (Internet Engineering Task Force)',
+          'W3C (World Wide Web Consortium)',
+          'ISO (International Organization for Standardization)',
+        ],
+        correctOption: 0,
+        explanation:
+          'The IEEE Registration Authority assigns 24-bit OUI prefixes to hardware manufacturers (such as Cisco, Intel, Apple) to guarantee global MAC uniqueness.',
+        explanationsJson: {
+          1: 'IETF publishes RFC protocols (e.g. TCP/IP), not hardware OUI assignments.',
+          2: 'W3C defines HTML and CSS web standards.',
+          3: 'ISO developed the OSI reference model.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'IEEE OUI Registration Authority',
+      },
+      {
+        text: 'In the first octet of a MAC address, what do the Individual/Group (I/G) bit and Universal/Local (U/L) bit signify when evaluated?',
+        options: [
+          'I/G bit (Bit 0): 0 = Unicast, 1 = Multicast | U/L bit (Bit 1): 0 = Universally Administered, 1 = Locally Administered',
+          'I/G bit: 0 = IPv4, 1 = IPv6 | U/L bit: 0 = Encrypted, 1 = Plaintext',
+          'I/G bit: 0 = 100 Mbps, 1 = 1 Gbps | U/L bit: 0 = Copper, 1 = Fiber',
+          'I/G bit: 0 = Private, 1 = Public | U/L bit: 0 = Dynamic, 1 = Static',
+        ],
+        correctOption: 0,
+        explanation:
+          'Bit 0 of octet 1 (Least Significant Bit) is the I/G bit: 0 indicates Unicast, 1 indicates Multicast. Bit 1 of octet 1 is the U/L bit: 0 indicates IEEE universally assigned, 1 indicates locally administered override.',
+        explanationsJson: {
+          1: 'IP versions and encryption are handled at Layers 3 and 6, not MAC control bits.',
+          2: 'Link speed and physical media are Physical Layer 1 attributes.',
+          3: 'Private/public addressing is an IP layer concept.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'I/G and U/L Control Bit Logic',
+      },
+      {
+        text: 'What is the standard Layer 2 destination MAC address used when a host must broadcast a frame to all devices on its local subnet?',
+        options: [
+          'FF:FF:FF:FF:FF:FF (all 48 bits set to 1)',
+          '00:00:00:00:00:00',
+          '01:00:5E:00:00:01',
+          '255.255.255.255',
+        ],
+        correctOption: 0,
+        explanation:
+          'The Layer 2 broadcast MAC address is `FF:FF:FF:FF:FF:FF`. When a switch receives this destination, it floods the frame out all ports on that VLAN except the ingress port.',
+        explanationsJson: {
+          1: '00:00:00:00:00:00 is an invalid destination MAC.',
+          2: '01:00:5E:00:00:01 is an IPv4 all-hosts multicast MAC, not a universal broadcast.',
+          3: '255.255.255.255 is an IPv3 Layer 3 broadcast address, not a Layer 2 MAC.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Layer 2 Broadcast MAC Destination',
+      },
+      {
+        text: 'A network engineer inspects a frame with destination MAC `01:00:5E:14:02:03`. How does a standard Layer 2 switch handle this frame?',
+        options: [
+          'It identifies the frame as Multicast (I/G bit = 1) and forwards it to all multicast group member ports (or floods if IGMP snooping is off)',
+          'It drops the frame immediately as corrupted',
+          'It routes the frame to the default gateway router over WAN',
+          'It changes the destination MAC to FF:FF:FF:FF:FF:FF',
+        ],
+        correctOption: 0,
+        explanation:
+          'MAC addresses starting with `01:00:5E` have the I/G bit set to 1 (`0x01` = `00000001`), identifying them as IPv4 Multicast. The switch delivers the frame to ports participating in the multicast group via IGMP snooping.',
+        explanationsJson: {
+          1: 'Valid multicast frames are forwarded, not dropped.',
+          2: 'Layer 2 switches do not route packets across WAN boundaries.',
+          3: 'Switches do not alter destination MAC addresses in transit.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Multicast MAC Forwarding Behavior',
+      },
+      {
+        text: 'A network engineer notices that two cloned virtual machines were deployed with the exact same MAC address `00:50:56:11:22:33` on the same VLAN. What symptom will occur on the network switch?',
+        options: [
+          'CAM table flapping (MAC address flapping) between the two switchports, causing intermittent packet loss and connection drops for both VMs',
+          'The entire switch will permanently lock up and overheat',
+          'The switch will automatically merge both VMs into a single server',
+          'Both VMs will receive double network bandwidth',
+        ],
+        correctOption: 0,
+        explanation:
+          'When two devices share a MAC address on the same broadcast domain, incoming frames from both hosts cause the switch CAM table to continuously overwrite the port association for that MAC, resulting in CAM flapping and packet loss.',
+        explanationsJson: {
+          1: 'CAM flapping causes packet drops, not physical hardware overheating.',
+          2: 'Switches cannot merge operating systems.',
+          3: 'Duplicate MACs cause packet collisions and drops, never increased bandwidth.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'Duplicate MAC Address & CAM Flapping Troubleshooting',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: MAC Address Parsing & Hardware Identity Inspection',
-      instructions: '1. Run getmac /v.\n2. Identify OUI and NIC fields.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { hostName: 'Workstation', mac: '00-1A-2B-3C-4D-5E' },
-      tasks: ['Run getmac /v.'],
-    },
   },
 
   // -------------------------------------------------------------------------
@@ -157,46 +284,81 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'ETHERNET_FRAME_INSPECTOR',
     introduction:
       'Master the standard data link encapsulation unit: The Ethernet II frame anatomy, Preamble & Start Frame Delimiter (SFD), Destination/Source MAC fields, EtherType field codes (IPv4 0x0800, IPv6 0x86DD, ARP 0x0806), Payload & MTU boundaries (46 to 1500 bytes), Frame Check Sequence (FCS / 32-bit CRC), minimum frame size (64 bytes), and runt/giant frame detection.',
-    stepMetadata: {
-      step1_objective:
-        'Understand complete Ethernet II frame anatomy, analyze EtherType multiplexing, calculate minimum/maximum frame boundaries (64 to 1518 bytes), and identify runt/giant frame anomalies.',
-      step2_prerequisites: ['level-0-mac-addresses-physical-identity'],
-      step3_whyItMatters:
-        'Ethernet II is the universal Layer 2 framing standard for wired networks. Understanding frame headers, EtherType codes, and CRC error checking is essential for packet capture analysis and troubleshooting.',
-      step4_coreConcept:
-        'An Ethernet II frame wraps Layer 3 packets for transmission over physical media: Preamble (7 bytes alternating 10101010 for clock sync) + SFD (1 byte `10101011` / `0xAB` signaling start of frame), Destination MAC (6 bytes), Source MAC (6 bytes), EtherType (2 bytes identifying upper protocol: `0x0800` IPv4, `0x86DD` IPv6, `0x0806` ARP), Payload Data (46 to 1500 bytes), and Frame Check Sequence (FCS, 4 bytes 32-bit CRC). Minimum frame size is 64 bytes ($6+6+2+46+4=64$). If payload is < 46 bytes, Padding bytes are added. Standard Maximum Transmission Unit (MTU) is 1500 bytes (yielding 1518-byte max untagged frame). Frames < 64 bytes are Runt frames (collisions); frames > 1518 bytes are Giant/Jumbo frames.',
-      step5_technicalAnatomy: {
-        title: 'Ethernet II Frame Structure & Byte Field Allocations',
-        description: 'Complete breakdown of all Ethernet II fields and size limits.',
-        components: [
-          { name: 'Preamble & SFD (8 Bytes)', detail: '7 bytes alternating 10101010 + 1 byte Start Frame Delimiter (10101011) to synchronize physical receiver clocks.' },
-          { name: 'Destination & Source MAC (12 Bytes)', detail: '6 bytes Destination MAC followed by 6 bytes Source MAC.' },
-          { name: 'EtherType (2 Bytes)', detail: 'Identifies upper layer: `0x0800` (IPv4), `0x86DD` (IPv6), `0x0806` (ARP), `0x8100` (802.1Q VLAN).' },
-          { name: 'Payload Data & Padding (46 to 1500 Bytes)', detail: 'Carries Layer 3 packet. Minimum 46 bytes (padded with zeros if smaller); standard maximum MTU = 1500 bytes.' },
-          { name: 'Frame Check Sequence / FCS (4 Bytes)', detail: '32-bit Cyclic Redundancy Check (CRC-32) computed across MAC, EtherType, and Payload to detect bit corruption.' },
-          { name: 'Minimum & Maximum Frame Size', detail: 'Minimum valid frame: 64 bytes. Standard maximum: 1518 bytes (1522 with 802.1Q tag; up to 9000 bytes for Jumbo frames).' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Frame Encapsulation', action: 'Layer 3 IP packet is placed into Ethernet payload; EtherType set to 0x0800.' },
-          { stepNumber: 2, title: 'CRC-32 Calculation', action: 'Transmitter calculates 32-bit CRC across frame bytes and appends 4-byte FCS trailer.' },
-          { stepNumber: 3, title: 'Physical Transmission', action: 'Transceiver precedes frame with 8-byte Preamble/SFD and clocks bits onto wire.' },
-          { stepNumber: 4, title: 'Receiver Verification', action: 'Receiver recalculates CRC; if matching, strips headers and passes packet to IP stack; if mismatch, frame is silently dropped.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'Ethernet II Frame Header & Trailer Fields',
+    contentV2: {
+      objective:
+        'Master Ethernet II frame anatomy, analyze EtherType multiplexing for upper layer protocols (IPv4 0x0800, IPv6 0x86DD, ARP 0x0806), calculate minimum frame padding requirements and maximum frame sizes (64 to 1518 bytes), understand 802.1Q VLAN tagging (1522 bytes), and troubleshoot runt/giant frame errors.',
+      prerequisites: [
+        'NET-101: Bits, Bytes, Binary & Hexadecimal Foundations',
+        'NET-201: MAC Addresses & Physical Hardware Identity',
+      ],
+      whyItMatters:
+        'Ethernet II (IEEE 802.3) is the universal Layer 2 framing standard for wired networking worldwide. Understanding header field offsets, EtherType codes, MTU payload limits, and CRC-32 integrity checking is indispensable for packet capture analysis, network engineering, and troubleshooting frame corruption.',
+      explanation:
+        'The Data Link Layer (Layer 2) encapsulates Layer 3 packets into structured units called **Ethernet Frames** for physical transmission across copper cables, fiber optic links, and wireless channels. The dominant standard on modern IP networks is the **Ethernet II frame** (also known as DIX Ethernet).\n\n### 1. Complete Frame Anatomy & Byte Field Allocations\nAn Ethernet II frame consists of a header, variable payload, and trailer:\n* **Preamble (7 Bytes)**: Seven bytes of alternating `10101010` bit patterns (`0x55`) that allow receiving physical transceivers to synchronize their clock signals.\n* **Start Frame Delimiter / SFD (1 Byte)**: The byte `10101011` (`0xD5`), which immediately signals to the receiver that the MAC header begins on the next bit.\n* **Destination MAC Address (6 Bytes)**: Identifies the target physical device or broadcast/multicast group.\n* **Source MAC Address (6 Bytes)**: Identifies the originating physical interface.\n* **EtherType (2 Bytes)**: Multiplexes upper-layer protocols. Key standard codes include:\n  - `0x0800`: IPv4 (Internet Protocol version 4)\n  - `0x86DD`: IPv6 (Internet Protocol version 6)\n  - `0x0806`: ARP (Address Resolution Protocol)\n  - `0x8100`: IEEE 802.1Q VLAN-Tagged Frame (inserts a 4-byte VLAN tag)\n* **Payload Data (46 to 1500 Bytes)**: Contains the encapsulated Layer 3 packet. The standard Maximum Transmission Unit (MTU) is 1500 bytes.\n* **Padding (0 to 38 Bytes)**: If the payload is smaller than 46 bytes (e.g. a 28-byte ARP packet), zero padding bytes are appended to ensure the frame reaches the mandatory 64-byte minimum size.\n* **Frame Check Sequence / FCS (4 Bytes)**: A 32-bit Cyclic Redundancy Check (CRC-32) computed across Destination MAC, Source MAC, EtherType, and Payload to detect physical transmission bit errors.\n\n### 2. Minimum & Maximum Frame Size Boundaries\n* **Minimum Frame Size**: **64 Bytes** ($6 \\text{ Dest} + 6 \\text{ Src} + 2 \\text{ EtherType} + 46 \\text{ Min Payload} + 4 \\text{ FCS} = 64 \\text{ Bytes}$, excluding the 8-byte Preamble/SFD). In early shared CSMA/CD networks, 64 bytes was mathematically required to ensure collision detection before transmission ended. Frames shorter than 64 bytes are **Runt frames** and are discarded as collision fragments.\n* **Standard Maximum Frame Size**: **1518 Bytes** ($14 \\text{ Header} + 1500 \\text{ Max MTU} + 4 \\text{ FCS} = 1518 \\text{ Bytes}$). When 802.1Q VLAN tagging is enabled, the maximum valid frame is extended to **1522 Bytes**.\n* **Giant & Jumbo Frames**: Frames larger than standard limits without proper MTU negotiation are flagged as **Giant frames**. **Jumbo Frames** (often configured up to 9000 bytes) are supported in data centers to reduce CPU overhead for large storage transfers (iSCSI/NFS).',
+      components: [
+        {
+          name: 'Preamble & SFD (8 Bytes)',
+          detail: '7 bytes of alternating 10101010 + 1 byte SFD (10101011 / 0xD5) for physical receiver clock synchronization.',
+        },
+        {
+          name: 'Destination & Source MAC (12 Bytes)',
+          detail: '6-byte target hardware address followed by 6-byte sender hardware address.',
+        },
+        {
+          name: 'EtherType Protocol Field (2 Bytes)',
+          detail: 'Multiplexes Layer 3 protocols: 0x0800 (IPv4), 0x86DD (IPv6), 0x0806 (ARP), 0x8100 (802.1Q).',
+        },
+        {
+          name: 'Payload & Padding (46 to 1500 Bytes)',
+          detail: 'Encapsulates Layer 3 packet. Standard MTU is 1500 bytes; zero padding added if payload < 46 bytes.',
+        },
+        {
+          name: 'Frame Check Sequence / FCS (4 Bytes)',
+          detail: '32-bit CRC-32 trailer computed across all frame fields to detect single-bit and multi-bit transmission errors.',
+        },
+        {
+          name: '802.1Q VLAN Tagging (4 Bytes)',
+          detail: 'Inserts TPID (0x8100) + 12-bit VLAN ID into header, expanding max standard frame size to 1522 bytes.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Layer 3 Packet Ingress',
+          action: 'The network stack delivers an IP packet or ARP message to the data link layer for transmission.',
+        },
+        {
+          stepNumber: 2,
+          title: 'Header Assembly & EtherType Tagging',
+          action: 'The NIC prepends Destination MAC, Source MAC, and sets EtherType to 0x0800 (IPv4), 0x86DD (IPv6), or 0x0806 (ARP).',
+        },
+        {
+          stepNumber: 3,
+          title: 'Padding Verification (64-Byte Floor)',
+          action: 'If payload is under 46 bytes, zero padding is appended so the frame reaches the required 64-byte minimum.',
+        },
+        {
+          stepNumber: 4,
+          title: 'CRC-32 Calculation & Wire Transmission',
+          action: 'The NIC hardware computes CRC-32 across the frame, appends the 4-byte FCS trailer, and clocks bits onto the wire preceded by Preamble/SFD.',
+        },
+        {
+          stepNumber: 5,
+          title: 'Receiver Frame Verification',
+          action: 'The receiving NIC recalculates CRC-32: if it matches FCS, headers are stripped and the packet is passed to Layer 3; if corrupted, the frame is silently dropped.',
+        },
+      ],
+      packetHeaderView: {
+        protocol: 'Ethernet II Frame (64 to 1518 Bytes)',
         fields: [
-          { fieldName: 'Preamble + SFD', bitLength: '8 Bytes', hexSample: '55 55 55 55 55 55 55 D5', description: 'Clock synchronization sequence.' },
-          { fieldName: 'Destination MAC', bitLength: '6 Bytes', hexSample: '00:1A:2B:3C:4D:5E', description: 'Target hardware address.' },
-          { fieldName: 'Source MAC', bitLength: '6 Bytes', hexSample: '00:11:22:33:44:55', description: 'Sender hardware address.' },
-          { fieldName: 'EtherType', bitLength: '2 Bytes', hexSample: '0x0800 (IPv4)', description: 'Multiplexes upper Layer 3 protocol.' },
-          { fieldName: 'Payload (MTU)', bitLength: '46 - 1500 Bytes', hexSample: 'IP Packet', description: 'Encapsulated Layer 3 data.' },
-          { fieldName: 'FCS (CRC-32)', bitLength: '4 Bytes', hexSample: '0x3F2A1B0C', description: '32-bit error detection checksum.' },
+          { fieldName: 'Preamble + SFD', bitLength: '64 bits (8 Bytes)', hexSample: '55 55 55 55 55 55 55 D5', description: 'Clock synchronization preamble and delimiter.' },
+          { fieldName: 'Destination MAC', bitLength: '48 bits (6 Bytes)', hexSample: '00:1A:2B:3C:4D:5E', description: 'Receiver hardware MAC address.' },
+          { fieldName: 'Source MAC', bitLength: '48 bits (6 Bytes)', hexSample: 'E8:6A:64:12:34:56', description: 'Sender hardware MAC address.' },
+          { fieldName: 'EtherType', bitLength: '16 bits (2 Bytes)', hexSample: '0x0800 (IPv4)', description: 'Multiplexed Layer 3 network protocol.' },
+          { fieldName: 'Payload & Padding', bitLength: '368 - 12000 bits (46 - 1500B)', hexSample: 'Layer 3 IP Packet', description: 'User data and padded zeros if payload < 46B.' },
+          { fieldName: 'FCS (CRC-32)', bitLength: '32 bits (4 Bytes)', hexSample: '0x3F2A1B0C', description: 'Cyclic redundancy check trailer.' },
         ],
-        headerDiagramAscii: `
-+-----------------------------------------------------------------------------------+
+        headerDiagramAscii: `+-----------------------------------------------------------------------------------+
 |                            ETHERNET II FRAME ANATOMY                              |
 +-------------+-------------+-------------+-----------+-----------------+-----------+
 | Preamble/SFD| Dest MAC    | Source MAC  | EtherType | Payload (Data)  | FCS (CRC) |
@@ -204,81 +366,70 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
 +-------------+-------------+-------------+-----------+-----------------+-----------+
 |<----------------- Standard Minimum Frame: 64 Bytes ------------------------------>|
 |<----------------- Standard Maximum Frame: 1518 Bytes ---------------------------->|
-`,
+|<----------------- With 802.1Q VLAN Tag: 1522 Bytes ------------------------------>|`,
       },
-      step8_visualExplanation: {
+      visualizer: {
         type: 'ETHERNET_FRAME_INSPECTOR',
         title: 'Interactive Ethernet II Frame Inspector & CRC Engine',
         description: 'Dissect live Ethernet frames byte-by-byte, inspect EtherType values (0x0800, 0x86DD, 0x0806), observe padding addition for small payloads, and calculate CRC-32 checksums.',
       },
-      step9_workedExample: {
-        title: 'Calculating Minimum Frame Padding and Size for a 20-Byte ARP Request',
-        problemStatement: 'An ARP request is 28 bytes long. When encapsulated into Ethernet II:\n1. How many bytes of padding are added?\n2. What is the total frame size transmitted on the wire (excluding preamble)?',
+      workedExample: {
+        title: 'Calculating Minimum Frame Padding for a 28-Byte ARP Request',
+        problemStatement:
+          'An ARP Request packet has a payload size of 28 bytes.\n1. How many bytes of padding must be appended to satisfy Ethernet II framing rules?\n2. What is the total frame size transmitted on the wire (excluding the 8-byte Preamble/SFD)?',
         stepByStepSolution: [
-          'Step 1 (Payload Minimum): Minimum payload requirement for Ethernet II is 46 bytes.',
-          'Step 2 (Padding Calculation): ARP request is 28 bytes. Padding required = 46 - 28 = 18 bytes of zero padding.',
-          'Step 3 (Total Frame Calculation): Dest MAC (6) + Src MAC (6) + EtherType (2) + Payload (28) + Padding (18) + FCS (4) = 64 bytes total.',
+          'Step 1 (Minimum Payload Rule): Ethernet II requires a minimum payload size of 46 bytes so that the frame reaches at least 64 bytes.',
+          'Step 2 (Padding Calculation): ARP payload = 28 bytes. Padding required = 46 bytes - 28 bytes = 18 bytes of zero padding.',
+          'Step 3 (Total Frame Calculation): Dest MAC (6B) + Src MAC (6B) + EtherType (2B) + Payload (28B) + Padding (18B) + FCS (4B) = 64 bytes total.',
         ],
-        finalResult: '18 bytes of padding added; total transmitted frame size is exactly 64 bytes.',
+        finalResult:
+          '18 bytes of padding added; total transmitted frame size is exactly 64 bytes.',
       },
-      step10_realWorldScenario: {
-        topology: 'Enterprise Switch Runt Frame Drops from Collisions',
-        scenarioText: 'A damaged Ethernet cable causes signal reflections that truncate frames to 48 bytes. The enterprise switch drops them immediately, logging thousands of "Runt" errors because they violate the 64-byte minimum frame rule. Replacing the damaged cable resolves the packet drops.',
-        engineeringContext: 'Switches automatically discard runt frames (< 64 bytes) as collision artifacts.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Adds zero padding if payload is smaller than 46 bytes.',
-        nicBehavior: 'Computes CRC-32 in hardware on transmit; verifies CRC on receive.',
-        switchOrRouterBehavior: 'Discards corrupted frames with invalid CRC silently without generating ICMP messages.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'show interfaces GigabitEthernet0/1',
-          description: 'Displays MTU, input/output packet counts, CRC error counters, and runt/giant frame counters on a switch port.',
-          expectedOutput: 'MTU 1500 bytes, BW 1000000 Kbit/sec\n     0 runts, 0 giants, 0 CRC, 0 frame',
-          proofExplanation: 'Confirms standard 1500-byte MTU and zero CRC/runt errors.',
+          id: 1,
+          prompt: 'What are the official EtherType hexadecimal codes for IPv4, IPv6, and ARP in Ethernet II frames?',
+          expected: 'IPv4 = 0x0800, IPv6 = 0x86DD, ARP = 0x0806.',
+          hints: '0x0800 is IPv4; 0x86DD is IPv6; 0x0806 is ARP.',
+        },
+        {
+          id: 2,
+          prompt: 'What are the minimum and maximum standard untagged Ethernet II frame sizes in bytes (excluding Preamble)?',
+          expected: 'Minimum = 64 bytes; Maximum = 1518 bytes.',
+          hints: 'Min frame has 46B payload; max frame has 1500B payload (MTU). Framing overhead is 18 bytes.',
+        },
+        {
+          id: 3,
+          prompt: 'If an application sends a 20-byte UDP DNS packet, how many bytes of padding will the Ethernet layer add?',
+          expected: '26 bytes of padding (46 - 20 = 26 bytes).',
+          hints: 'Minimum payload requirement is 46 bytes.',
+        },
+        {
+          id: 4,
+          prompt: 'What happens when a switch or host receives an Ethernet frame whose computed CRC-32 does not match the 4-byte FCS trailer?',
+          expected: 'The receiving NIC or switch immediately and silently drops the corrupted frame without generating an error response.',
+          hints: 'Ethernet provides error detection, not error recovery.',
+        },
+        {
+          id: 5,
+          prompt: 'What is a "Runt" frame on an Ethernet network, and what typically causes it?',
+          expected: 'A frame smaller than 64 bytes; typically caused by CSMA/CD collisions or physical cable faults.',
+          hints: 'Any frame < 64 bytes is illegal on 802.3 Ethernet.',
+        },
+        {
+          id: 6,
+          prompt: 'When an 802.1Q VLAN tag is inserted into an Ethernet header, how many bytes are added and what is the new maximum standard frame size?',
+          expected: '4 bytes are added (TPID 0x8100 + TCI), expanding maximum standard frame size to 1522 bytes.',
+          hints: '1518 + 4 = 1522 bytes.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Switch port reports escalating "CRC errors" and "Input errors".',
-          possibleCauses: ['Damaged copper patch cable, loose RJ-45 connector, or high electromagnetic interference'],
-          diagnosticSteps: ['Inspect cable integrity with cable tester and check interface counters.'],
-          remediation: 'Replace damaged patch cord with certified Cat6 cable.',
-        },
+      recap: [
+        'Ethernet II is the universal Layer 2 framing standard on modern IP networks.',
+        'Ethernet headers contain Dest MAC (6B), Src MAC (6B), EtherType (2B), Payload (46-1500B), and FCS (4B).',
+        'Standard EtherType codes: IPv4 = 0x0800, IPv6 = 0x86DD, ARP = 0x0806, 802.1Q = 0x8100.',
+        'Minimum frame size is 64 bytes (payloads < 46B are padded); standard maximum is 1518 bytes (1522 with 802.1Q).',
+        'FCS uses 32-bit CRC to detect physical layer bit corruption; damaged frames are dropped silently.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Believing Ethernet frames contain an IP Time-To-Live (TTL) field.', correction: 'Ethernet Layer 2 frames have NO TTL field; TTL exists strictly at Layer 3 inside the IP header.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'VLAN Tag Injection (Double Tagging 802.1Q)',
-        mitigationStrategy: 'Configure native VLANs to an unused ID and disable DTP trunk autonegotiation on access ports.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'Ethernet II fields: Dest MAC (6B), Src MAC (6B), EtherType (2B), Payload (46-1500B), FCS (4B).',
-          'EtherTypes: IPv4 = 0x0800, IPv6 = 0x86DD, ARP = 0x0806.',
-          'Minimum frame: 64 bytes; Standard Max: 1518 bytes; MTU = 1500 bytes.',
-        ],
-        frequentTraps: [
-          'Forgetting that the 64-byte minimum includes the 4-byte FCS but excludes the 8-byte Preamble/SFD.',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Ethernet II Frame Dissection & EtherType Decoding',
-        scenario: 'Analyze raw Ethernet frame byte offsets and decode EtherType protocol identifiers.',
-        tasks: ['Identify EtherType 0x0800 (IPv4) vs 0x0806 (ARP) in frame captures.'],
-        verificationMethod: 'Verify correct field boundaries and 64-byte minimum size.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'Ethernet II encapsulates packets into 64 to 1518 byte frames.',
-          'EtherType (0x0800 IPv4, 0x86DD IPv6, 0x0806 ARP) multiplexes Layer 3 protocols.',
-          'FCS uses 32-bit CRC to detect physical transmission bit corruption.',
-        ],
-        nextLessonBridge:
-          'With Layer 2 framing mastered in NET-201, proceed to NET-202 to master IPv4 Addressing, Subnetting, and CIDR.',
-      },
     },
     questions: [
       {
@@ -290,22 +441,124 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
           'IPv4 = 0x06, IPv6 = 0x11, ARP = 0x01',
         ],
         correctOption: 0,
-        explanation: 'Ethernet II standard EtherType fields: `0x0800` identifies IPv4, `0x86DD` identifies IPv6, and `0x0806` identifies ARP.',
-        explanationsJson: { 1: 'Invalid values.', 2: '0x8100 is 802.1Q VLAN; 0x8847 is MPLS; 0x88CC is LLDP.', 3: '0x06 and 0x11 are IP protocol numbers for TCP and UDP.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'Ethernet II standard EtherType fields: `0x0800` identifies IPv4, `0x86DD` identifies IPv6, and `0x0806` identifies ARP.',
+        explanationsJson: {
+          1: 'Invalid arbitrary numbers.',
+          2: '0x8100 is 802.1Q VLAN; 0x8847 is MPLS; 0x88CC is LLDP.',
+          3: '0x06 and 0x11 are IP protocol numbers for TCP and UDP, not Ethernet EtherTypes.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.RECALL,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'Ethernet II EtherType Values',
       },
+      {
+        text: 'What is the minimum valid Ethernet II frame size on the wire (excluding the 8-byte Preamble/SFD) and why was this minimum established?',
+        options: [
+          '64 bytes; to guarantee that in shared CSMA/CD half-duplex networks, collisions would be detected before transmission finished',
+          '32 bytes; to match the 32-bit IPv4 address space',
+          '128 bytes; to fit encrypted TLS cryptographic keys',
+          '1500 bytes; to equal the Maximum Transmission Unit (MTU)',
+        ],
+        correctOption: 0,
+        explanation:
+          'The 64-byte minimum frame size ($6+6+2+46+4=64$) ensured slot time exceeded maximum round-trip propagation delay in CSMA/CD segments, enabling reliable collision detection.',
+        explanationsJson: {
+          1: 'Frame length is independent of IP address bit length.',
+          2: 'TLS keys operate at Layer 6/7, not Layer 2 framing minimums.',
+          3: '1500 bytes is the maximum payload MTU, not the minimum frame floor.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Minimum Ethernet Frame Size Mechanics',
+      },
+      {
+        text: 'An ARP request containing 28 bytes of data is encapsulated in an Ethernet II frame. How many bytes of padding will the network interface card append?',
+        options: [
+          '18 bytes of zero padding (46 - 28 = 18 bytes)',
+          '0 bytes',
+          '36 bytes',
+          '46 bytes',
+        ],
+        correctOption: 0,
+        explanation:
+          'Because the minimum payload for Ethernet II is 46 bytes, an interface encapsulating a 28-byte ARP packet must add $46 - 28 = 18$ bytes of padding to reach the 64-byte minimum frame size.',
+        explanationsJson: {
+          1: 'Zero padding would result in a 46-byte runt frame which would be dropped.',
+          2: '36 bytes would exceed the minimum required padding.',
+          3: '46 bytes would double the payload unnecessarily.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Ethernet Payload Padding Calculation',
+      },
+      {
+        text: 'What algorithm does the 4-byte Frame Check Sequence (FCS) trailer use to verify data integrity in an Ethernet frame?',
+        options: [
+          'Cyclic Redundancy Check (CRC-32)',
+          'MD5 Cryptographic Hash',
+          'SHA-256 Checksum',
+          'Simple 8-bit Parity Bit',
+        ],
+        correctOption: 0,
+        explanation:
+          'Ethernet uses a 32-bit Cyclic Redundancy Check (CRC-32) in its FCS trailer. The receiver recalculates the CRC and compares it to FCS; if mismatching, the frame is dropped.',
+        explanationsJson: {
+          1: 'MD5 is a cryptographic hash, not used in Ethernet hardware trailers.',
+          2: 'SHA-256 is too computationally heavy for Layer 2 line-rate hardware CRC checking.',
+          3: 'Simple parity cannot detect multi-bit burst errors reliably.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Frame Check Sequence & CRC-32',
+      },
+      {
+        text: 'When IEEE 802.1Q VLAN encapsulation is active on an Ethernet trunk link, where is the 4-byte VLAN tag inserted and what is the new maximum standard frame size?',
+        options: [
+          'Inserted between Source MAC and EtherType; increases maximum standard frame size from 1518 to 1522 bytes',
+          'Appended to the end of the FCS trailer; maximum size remains 1500 bytes',
+          'Inserted at the beginning of the Preamble; increases size to 2000 bytes',
+          'Placed inside the IP header options field; size is unchanged',
+        ],
+        correctOption: 0,
+        explanation:
+          'The 802.1Q tag (4 bytes: TPID 0x8100 + TCI with Priority, DEI, and 12-bit VLAN ID) is inserted between the Source MAC and original EtherType, raising the standard maximum frame size to 1522 bytes.',
+        explanationsJson: {
+          1: 'FCS must always be the final trailer of the frame.',
+          2: 'Preamble is physical layer timing and cannot carry VLAN tags.',
+          3: '802.1Q is a Layer 2 Ethernet tag, not an IP Layer 3 header option.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: '802.1Q VLAN Tagging & Frame Expansion',
+      },
+      {
+        text: 'A network administrator notices thousands of "Runt frame" errors logged on switch interface GigabitEthernet0/1. What does this mean, and what is the most likely physical root cause?',
+        options: [
+          'Frames received are smaller than 64 bytes; typically caused by a faulty copper cable, bad connector, or duplex mismatch causing collisions',
+          'Frames received exceed 1500 bytes; caused by jumbo frames',
+          'The switch port is running out of memory',
+          'The DNS server is offline',
+        ],
+        correctOption: 0,
+        explanation:
+          'Runt frames are frames smaller than 64 bytes. In modern full-duplex switches, runts are almost always caused by physical cable damage, electrical noise truncating signals, or half/full duplex mismatch collision fragments.',
+        explanationsJson: {
+          1: 'Frames exceeding maximum size are Giant frames, not Runt frames.',
+          2: 'Runt errors reflect frame size violations on the wire, not switch memory exhaustion.',
+          3: 'DNS operates at Layer 7 and does not cause Layer 2 runt frames.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'Runt Frame Detection & Troubleshooting',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Ethernet II Frame Dissection & EtherType Decoding',
-      instructions: '1. Inspect Ethernet frame.\n2. Decode EtherType field.\n3. Verify 64-byte minimum size.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { frameType: 'Ethernet II', etherType: '0x0800', payloadSize: 46 },
-      tasks: ['Identify EtherType codes.'],
-    },
   },
 
   // =========================================================================

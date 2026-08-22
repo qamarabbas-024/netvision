@@ -309,8 +309,52 @@ async function verifyCurriculumContentV2() {
   assert(!net204Tcp!.lab, 'NET-204 TCP/UDP has no phantom CLI lab');
   console.log('  ✓ NET-204 TCP/UDP verified with clean Content V2 structure, 3-way handshake, 4-way teardown, sliding window flow control, 6 practice items, 6 quiz questions, and zero forced filler.');
 
+  // [TEST 16] Verify NET-201 MAC Addresses & Physical Hardware Identity (level-0-mac-addresses-physical-identity)
+  console.log('\n[TEST 16] Verifying NET-201 MAC Addresses & Physical Hardware Identity (level-0-mac-addresses-physical-identity)...');
+  const net201Mac = LESSONS_NET200.find((l) => l.slug === 'level-0-mac-addresses-physical-identity');
+  assert(!!net201Mac, 'NET-201 MAC lesson exists');
+  assert(!!net201Mac!.contentV2, 'NET-201 MAC has Content V2 structure');
+  assert(net201Mac!.courseCode === 'NET-201', 'NET-201 MAC has courseCode NET-201');
+  assert(typeof net201Mac!.contentV2!.objective === 'string', 'NET-201 MAC has clear objective');
+  assert(net201Mac!.contentV2!.explanation.includes('48-bit') || net201Mac!.contentV2!.explanation.includes('48-Bit'), 'NET-201 MAC explains 48-bit architecture');
+  assert(net201Mac!.contentV2!.explanation.includes('OUI'), 'NET-201 MAC explains OUI prefix');
+  assert(net201Mac!.contentV2!.explanation.includes('I/G') || net201Mac!.contentV2!.explanation.includes('Individual / Group'), 'NET-201 MAC explains I/G control bit');
+  assert(net201Mac!.contentV2!.explanation.includes('U/L') || net201Mac!.contentV2!.explanation.includes('Universal / Local'), 'NET-201 MAC explains U/L control bit');
+  assert(net201Mac!.contentV2!.explanation.includes('FF:FF:FF:FF:FF:FF'), 'NET-201 MAC explains broadcast address');
+  assert(net201Mac!.contentV2!.components.length >= 5, 'NET-201 MAC has at least 5 technical components');
+  assert(!!net201Mac!.contentV2!.visualizer, 'NET-201 MAC has visualizer defined');
+  assert(!!net201Mac!.contentV2!.workedExample, 'NET-201 MAC has worked example defined');
+  assert(Array.isArray(net201Mac!.contentV2!.practice) && net201Mac!.contentV2!.practice.length >= 6, 'NET-201 MAC has 6 practice exercises');
+  assert(net201Mac!.questions.length >= 6, 'NET-201 MAC has 6 aligned quiz questions');
+  assert(!net201Mac!.contentV2!.cliTooling, 'NET-201 MAC has no forced CLI bloat');
+  assert(!net201Mac!.contentV2!.security, 'NET-201 MAC has no generic security filler');
+  assert(!net201Mac!.lab, 'NET-201 MAC has no phantom CLI lab');
+  console.log('  ✓ NET-201 MAC verified with clean Content V2 structure, OUI/NIC split, I/G & U/L bit logic, 6 practice items, 6 quiz questions, and zero forced filler.');
+
+  // [TEST 17] Verify NET-201 Ethernet II Framing (ethernet-mac-addresses-overview)
+  console.log('\n[TEST 17] Verifying NET-201 Ethernet II Framing (ethernet-mac-addresses-overview)...');
+  const net201Ethernet = LESSONS_NET200.find((l) => l.slug === 'ethernet-mac-addresses-overview');
+  assert(!!net201Ethernet, 'NET-201 Ethernet framing lesson exists');
+  assert(!!net201Ethernet!.contentV2, 'NET-201 Ethernet framing has Content V2 structure');
+  assert(net201Ethernet!.courseCode === 'NET-201', 'NET-201 Ethernet framing has courseCode NET-201');
+  assert(typeof net201Ethernet!.contentV2!.objective === 'string', 'NET-201 Ethernet framing has clear objective');
+  assert(net201Ethernet!.contentV2!.explanation.includes('Preamble') && net201Ethernet!.contentV2!.explanation.includes('SFD'), 'NET-201 Ethernet framing explains Preamble and SFD');
+  assert(net201Ethernet!.contentV2!.explanation.includes('0x0800') && net201Ethernet!.contentV2!.explanation.includes('0x86DD'), 'NET-201 Ethernet framing explains IPv4/IPv6 EtherTypes');
+  assert(net201Ethernet!.contentV2!.explanation.includes('64') && net201Ethernet!.contentV2!.explanation.includes('1518'), 'NET-201 Ethernet framing explains 64B min and 1518B max frame boundaries');
+  assert(net201Ethernet!.contentV2!.explanation.includes('FCS') || net201Ethernet!.contentV2!.explanation.includes('CRC-32'), 'NET-201 Ethernet framing explains FCS and CRC-32');
+  assert(net201Ethernet!.contentV2!.components.length >= 5, 'NET-201 Ethernet framing has at least 5 technical components');
+  assert(!!net201Ethernet!.contentV2!.packetHeaderView, 'NET-201 Ethernet framing has packetHeaderView defined');
+  assert(!!net201Ethernet!.contentV2!.visualizer, 'NET-201 Ethernet framing has visualizer defined');
+  assert(!!net201Ethernet!.contentV2!.workedExample, 'NET-201 Ethernet framing has worked example defined');
+  assert(Array.isArray(net201Ethernet!.contentV2!.practice) && net201Ethernet!.contentV2!.practice.length >= 6, 'NET-201 Ethernet framing has 6 practice exercises');
+  assert(net201Ethernet!.questions.length >= 6, 'NET-201 Ethernet framing has 6 aligned quiz questions');
+  assert(!net201Ethernet!.contentV2!.cliTooling, 'NET-201 Ethernet framing has no forced CLI bloat');
+  assert(!net201Ethernet!.contentV2!.security, 'NET-201 Ethernet framing has no generic security filler');
+  assert(!net201Ethernet!.lab, 'NET-201 Ethernet framing has no phantom CLI lab');
+  console.log('  ✓ NET-201 Ethernet Framing verified with clean Content V2 structure, header fields, EtherTypes, 64-byte padding mechanics, 6 practice items, 6 quiz questions, and zero forced filler.');
+
   console.log('\n================================================================');
-  console.log('🎉 ALL 15 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 17 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 

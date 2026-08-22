@@ -20,6 +20,8 @@ import { BinaryConverterVisual } from './BinaryConverterVisual';
 import { MediaInspectorVisual } from './MediaInspectorVisual';
 import { PerformanceMetricsVisual } from './PerformanceMetricsVisual';
 import { WirelessSpectrumVisual } from './WirelessSpectrumVisual';
+import { MacBitParserVisual } from './MacBitParserVisual';
+import { EthernetFrameVisual } from './EthernetFrameVisual';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -47,6 +49,24 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
     slug.includes('fiber')
   ) {
     return <MediaInspectorVisual />;
+  }
+
+  if (
+    slug.includes('mac-address') ||
+    slug.includes('physical-identity') ||
+    slug.includes('mac_bit_parser') ||
+    slug.includes('level-0-mac-addresses')
+  ) {
+    return <MacBitParserVisual />;
+  }
+
+  if (
+    slug.includes('ethernet-mac-addresses') ||
+    slug.includes('ethernet-framing') ||
+    slug.includes('ethernet_frame') ||
+    slug.includes('802.3')
+  ) {
+    return <EthernetFrameVisual />;
   }
 
   if (slug.includes('automation') || slug.includes('programmability') || slug.includes('pipeline') || slug.includes('rest-api')) {

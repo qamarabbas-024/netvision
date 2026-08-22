@@ -506,94 +506,146 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-level-0-mac-addresses-physical-identity',
     lessonSlug: 'level-0-mac-addresses-physical-identity',
-    text: 'How is a 48-bit Ethernet MAC address structurally partitioned between vendor identification and device serializing?',
+    text: 'What is the total bit length and standard byte structure of an Ethernet MAC physical hardware address?',
     options: [
-      'The first 24 bits (3 bytes) represent the Organizationally Unique Identifier (OUI) assigned to the manufacturer, and the last 24 bits (3 bytes) represent the vendor-assigned Network Interface Controller serial number',
-      'The first 16 bits represent the IP subnet, and the remaining 32 bits represent the TCP port number',
-      'All 48 bits are completely random and change upon every computer restart',
-      'The first 8 bits indicate whether the computer is a desktop or laptop, and the remaining 40 bits represent the user national ID'
+      '48 bits (6 Bytes / 12 hexadecimal digits), split into a 24-bit OUI manufacturer prefix and a 24-bit vendor-assigned NIC identifier',
+      '32 bits (4 Bytes / 4 dotted-decimal octets)',
+      '128 bits (16 Bytes / 8 hexadecimal hextets)',
+      '64 bits (8 Bytes)',
     ],
     correctOption: 0,
-    explanation: 'IEEE assigns the first 24 bits (3 octets) as the OUI identifying the hardware vendor (e.g. Cisco, Intel, Apple). The manufacturer assigns the remaining 24 bits as a unique NIC serial identifier.',
+    explanation:
+      'A standard IEEE 802 MAC address is 48 bits (6 octets / 12 hex digits). The first 24 bits are the Organizationally Unique Identifier (OUI); the last 24 bits are the NIC identifier.',
     explanationsJson: {
-      1: 'MAC addresses contain no IP subnet or TCP port information; those exist at Layers 3 and 4.',
-      2: 'MAC addresses are burned-in hardware addresses (BIA) and do not randomize on standard reboots unless software MAC randomization is enabled.',
-      3: 'MAC addresses do not encode device form factors or human user IDs.'
+      1: '32 bits is an IPv4 address.',
+      2: '128 bits is an IPv6 address.',
+      3: '64 bits is EUI-64.',
     },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'MAC Address Architecture & OUI',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-mac-addresses-physical-identity',
-    lessonSlug: 'level-0-mac-addresses-physical-identity',
-    text: 'Which of the following represents the universal Layer 2 Broadcast MAC address used when sending a frame to all nodes on a local Ethernet segment?',
-    options: [
-      'FF:FF:FF:FF:FF:FF',
-      '00:00:00:00:00:00',
-      '255.255.255.255',
-      '01:00:5E:00:00:01'
-    ],
-    correctOption: 0,
-    explanation: 'FF:FF:FF:FF:FF:FF consists of 48 contiguous 1-bits in hexadecimal, denoting the Layer 2 Ethernet broadcast address that switches flood out all active ports in the VLAN.',
-    explanationsJson: {
-      1: '00:00:00:00:00:00 is an invalid/null unassigned hardware address.',
-      2: '255.255.255.255 is the Layer 3 IPv4 limited broadcast address, not a Layer 2 MAC address.',
-      3: '01:00:5E:xx:xx:xx is the IPv4 Multicast MAC address prefix range, not the broadcast address.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
+    difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Ethernet Broadcast MAC',
-    points: 10
+    concept: 'MAC Address Bit Length & Architecture',
+    points: 10,
   },
   {
     quizId: 'quiz-level-0-mac-addresses-physical-identity',
     lessonSlug: 'level-0-mac-addresses-physical-identity',
-    text: 'A network packet travels from Host A, through Router R1 and Router R2, to Server B. How do the Source/Destination IP and MAC addresses behave across each hop?',
+    text: 'Which organization is responsible for assigning the first 24 bits (Organizationally Unique Identifier / OUI) of a MAC address to hardware manufacturers?',
     options: [
-      'The Source and Destination IP addresses remain constant end-to-end, while the Source and Destination MAC addresses are rewritten at every router hop',
-      'The Source and Destination MAC addresses remain constant end-to-end, while the IP addresses change at every router hop',
-      'Both the IP addresses and MAC addresses remain completely unchanged across the entire path',
-      'Both the IP addresses and MAC addresses are scrambled randomly at each hop'
+      'IEEE (Institute of Electrical and Electronics Engineers)',
+      'IETF (Internet Engineering Task Force)',
+      'W3C (World Wide Web Consortium)',
+      'ISO (International Organization for Standardization)',
     ],
     correctOption: 0,
-    explanation: 'IP addresses provide end-to-end logical addressing and remain unchanged from source to destination (unless NAT is applied). MAC addresses provide hop-to-hop physical framing and are replaced at every Layer 3 router boundary.',
+    explanation:
+      'The IEEE Registration Authority assigns 24-bit OUI prefixes to hardware manufacturers (such as Cisco, Intel, Apple) to guarantee global MAC uniqueness.',
     explanationsJson: {
-      1: 'MAC addresses cannot cross Layer 3 router interfaces; routers strip the L2 header and create a new frame.',
-      2: 'If MAC addresses did not change, the frame could not be addressed to the next router physical interface.',
-      3: 'Addressing is deterministic and governed by standard encapsulation rules, not random scrambling.'
+      1: 'IETF publishes RFC protocols (e.g. TCP/IP), not hardware OUI assignments.',
+      2: 'W3C defines HTML and CSS web standards.',
+      3: 'ISO developed the OSI reference model.',
     },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.EXPERT_REASONING,
-    questionType: QuestionType.SCENARIO,
-    concept: 'L2 MAC Rewrite vs L3 IP Preservation',
-    points: 10
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'IEEE OUI Registration Authority',
+    points: 10,
   },
   {
     quizId: 'quiz-level-0-mac-addresses-physical-identity',
     lessonSlug: 'level-0-mac-addresses-physical-identity',
-    text: 'An administrator runs `ipconfig /all` on a Windows machine and reads: `Physical Address. . . . : 00-50-56-C0-00-08`. What does the first half (`00-50-56`) indicate to the engineer?',
+    text: 'In the first octet of a MAC address, what do the Individual/Group (I/G) bit and Universal/Local (U/L) bit signify when evaluated?',
     options: [
-      'The OUI identifying VMware as the manufacturer of the virtual network adapter',
-      'The internal IPv4 subnet mask converted to hexadecimal',
-      'The TCP socket port allocated to the DNS resolver daemon',
-      'The serial number of the motherboard chassis'
+      'I/G bit (Bit 0): 0 = Unicast, 1 = Multicast | U/L bit (Bit 1): 0 = Universally Administered, 1 = Locally Administered',
+      'I/G bit: 0 = IPv4, 1 = IPv6 | U/L bit: 0 = Encrypted, 1 = Plaintext',
+      'I/G bit: 0 = 100 Mbps, 1 = 1 Gbps | U/L bit: 0 = Copper, 1 = Fiber',
+      'I/G bit: 0 = Private, 1 = Public | U/L bit: 0 = Dynamic, 1 = Static',
     ],
     correctOption: 0,
-    explanation: 'The first 3 bytes (00-50-56) represent the IEEE registered OUI belonging to VMware, proving the network interface is a VMware virtual adapter.',
+    explanation:
+      'Bit 0 of octet 1 (Least Significant Bit) is the I/G bit: 0 indicates Unicast, 1 indicates Multicast. Bit 1 of octet 1 is the U/L bit: 0 indicates IEEE universally assigned, 1 indicates locally administered override.',
     explanationsJson: {
-      1: 'Subnet masks are 32-bit IPv4 structures (e.g. 255.255.255.0), not the first 24 bits of a MAC address.',
-      2: 'TCP socket ports are 16-bit transport layer numbers, unrelated to MAC OUIs.',
-      3: 'The OUI identifies the NIC manufacturer (VMware), not the physical motherboard serial number.'
+      1: 'IP versions and encryption are handled at Layers 3 and 6, not MAC control bits.',
+      2: 'Link speed and physical media are Physical Layer 1 attributes.',
+      3: 'Private/public addressing is an IP layer concept.',
     },
-    difficulty: CourseLevel.FOUNDATIONAL,
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'I/G and U/L Control Bit Logic',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-mac-addresses-physical-identity',
+    lessonSlug: 'level-0-mac-addresses-physical-identity',
+    text: 'What is the standard Layer 2 destination MAC address used when a host must broadcast a frame to all devices on its local subnet?',
+    options: [
+      'FF:FF:FF:FF:FF:FF (all 48 bits set to 1)',
+      '00:00:00:00:00:00',
+      '01:00:5E:00:00:01',
+      '255.255.255.255',
+    ],
+    correctOption: 0,
+    explanation:
+      'The Layer 2 broadcast MAC address is `FF:FF:FF:FF:FF:FF`. When a switch receives this destination, it floods the frame out all ports on that VLAN except the ingress port.',
+    explanationsJson: {
+      1: '00:00:00:00:00:00 is an invalid destination MAC.',
+      2: '01:00:5E:00:00:01 is an IPv4 all-hosts multicast MAC, not a universal broadcast.',
+      3: '255.255.255.255 is an IPv3 Layer 3 broadcast address, not a Layer 2 MAC.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Layer 2 Broadcast MAC Destination',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-mac-addresses-physical-identity',
+    lessonSlug: 'level-0-mac-addresses-physical-identity',
+    text: 'A network engineer inspects a frame with destination MAC `01:00:5E:14:02:03`. How does a standard Layer 2 switch handle this frame?',
+    options: [
+      'It identifies the frame as Multicast (I/G bit = 1) and forwards it to all multicast group member ports (or floods if IGMP snooping is off)',
+      'It drops the frame immediately as corrupted',
+      'It routes the frame to the default gateway router over WAN',
+      'It changes the destination MAC to FF:FF:FF:FF:FF:FF',
+    ],
+    correctOption: 0,
+    explanation:
+      'MAC addresses starting with `01:00:5E` have the I/G bit set to 1 (`0x01` = `00000001`), identifying them as IPv4 Multicast. The switch delivers the frame to ports participating in the multicast group via IGMP snooping.',
+    explanationsJson: {
+      1: 'Valid multicast frames are forwarded, not dropped.',
+      2: 'Layer 2 switches do not route packets across WAN boundaries.',
+      3: 'Switches do not alter destination MAC addresses in transit.',
+    },
+    difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
-    questionType: QuestionType.COMMAND_INTERPRETATION,
-    concept: 'MAC OUI Interpretation',
-    points: 10
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Multicast MAC Forwarding Behavior',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-mac-addresses-physical-identity',
+    lessonSlug: 'level-0-mac-addresses-physical-identity',
+    text: 'A network engineer notices that two cloned virtual machines were deployed with the exact same MAC address `00:50:56:11:22:33` on the same VLAN. What symptom will occur on the network switch?',
+    options: [
+      'CAM table flapping (MAC address flapping) between the two switchports, causing intermittent packet loss and connection drops for both VMs',
+      'The entire switch will permanently lock up and overheat',
+      'The switch will automatically merge both VMs into a single server',
+      'Both VMs will receive double network bandwidth',
+    ],
+    correctOption: 0,
+    explanation:
+      'When two devices share a MAC address on the same broadcast domain, incoming frames from both hosts cause the switch CAM table to continuously overwrite the port association for that MAC, resulting in CAM flapping and packet loss.',
+    explanationsJson: {
+      1: 'CAM flapping causes packet drops, not physical hardware overheating.',
+      2: 'Switches cannot merge operating systems.',
+      3: 'Duplicate MACs cause packet collisions and drops, never increased bandwidth.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+    questionType: QuestionType.TROUBLESHOOTING,
+    concept: 'Duplicate MAC Address & CAM Flapping Troubleshooting',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------
@@ -2326,94 +2378,146 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-ethernet-mac-addresses-overview',
     lessonSlug: 'ethernet-mac-addresses-overview',
-    text: 'What are the minimum and maximum standard frame sizes for an Ethernet II frame (including Header and FCS)?',
+    text: 'What are the official EtherType hexadecimal values for IPv4, IPv6, and Address Resolution Protocol (ARP) in an Ethernet II frame header?',
     options: [
-      'Minimum: 64 bytes (14B Header + 46B Min Payload + 4B FCS); Maximum: 1518 bytes (14B Header + 1500B Max Payload + 4B FCS)',
-      'Minimum: 20 bytes; Maximum: 65535 bytes',
-      'Minimum: 1 byte; Maximum: 100 bytes',
-      'Minimum: 128 bytes; Maximum: 9000 bytes'
+      'IPv4 = 0x0800, IPv6 = 0x86DD, ARP = 0x0806',
+      'IPv4 = 0x0001, IPv6 = 0x0002, ARP = 0x0003',
+      'IPv4 = 0x8100, IPv6 = 0x8847, ARP = 0x88CC',
+      'IPv4 = 0x06, IPv6 = 0x11, ARP = 0x01',
     ],
     correctOption: 0,
-    explanation: 'IEEE 802.3 / Ethernet II defines a minimum frame size of 64 bytes (preventing undetected collisions in CSMA/CD) and a maximum standard frame size of 1518 bytes (1522 bytes with 802.1Q tag).',
+    explanation:
+      'Ethernet II standard EtherType fields: `0x0800` identifies IPv4, `0x86DD` identifies IPv6, and `0x0806` identifies ARP.',
     explanationsJson: {
-      1: '20 bytes is the minimum IPv4 header length, not the Ethernet frame size.',
-      2: '1 to 100 bytes is far below valid Ethernet framing limits.',
-      3: '9000 bytes describes Jumbo Frames used in specialized storage/datacenter environments, not the base standard.'
+      1: 'Invalid arbitrary numbers.',
+      2: '0x8100 is 802.1Q VLAN; 0x8847 is MPLS; 0x88CC is LLDP.',
+      3: '0x06 and 0x11 are IP protocol numbers for TCP and UDP, not Ethernet EtherTypes.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Ethernet Frame Size Boundaries',
-    points: 10
+    concept: 'Ethernet II EtherType Values',
+    points: 10,
   },
   {
     quizId: 'quiz-ethernet-mac-addresses-overview',
     lessonSlug: 'ethernet-mac-addresses-overview',
-    text: 'What is the purpose of the 8-byte Preamble and Start Frame Delimiter (SFD) that precedes every Ethernet frame on the physical wire?',
+    text: 'What is the minimum valid Ethernet II frame size on the wire (excluding the 8-byte Preamble/SFD) and why was this minimum established?',
     options: [
-      'To provide bit synchronization for the receiver clock and signal the exact start of the MAC destination address bytes',
-      'To encrypt the payload data using 256-bit AES keys',
-      'To record the GPS coordinates of the transmitting computer',
-      'To store the source IP address in hexadecimal format'
+      '64 bytes; to guarantee that in shared CSMA/CD half-duplex networks, collisions would be detected before transmission finished',
+      '32 bytes; to match the 32-bit IPv4 address space',
+      '128 bytes; to fit encrypted TLS cryptographic keys',
+      '1500 bytes; to equal the Maximum Transmission Unit (MTU)',
     ],
     correctOption: 0,
-    explanation: 'The 7-byte Preamble (pattern `10101010`) synchronizes receiving NIC clock timing, and the 1-byte SFD (pattern `10101011`) signals that the very next byte is the first byte of the Destination MAC address.',
+    explanation:
+      'The 64-byte minimum frame size ($6+6+2+46+4=64$) ensured slot time exceeded maximum round-trip propagation delay in CSMA/CD segments, enabling reliable collision detection.',
     explanationsJson: {
-      1: 'Preambles are alternating bit timing signals, not cryptographic encryption keys.',
-      2: 'Ethernet Layer 2 framing contains no GPS location telemetry.',
-      3: 'IP addresses belong in the Layer 3 header, not the Layer 1/2 physical preamble.'
+      1: 'Frame length is independent of IP address bit length.',
+      2: 'TLS keys operate at Layer 6/7, not Layer 2 framing minimums.',
+      3: '1500 bytes is the maximum payload MTU, not the minimum frame floor.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Ethernet Preamble & SFD Synchronization',
-    points: 10
+    concept: 'Minimum Ethernet Frame Size Mechanics',
+    points: 10,
   },
   {
     quizId: 'quiz-ethernet-mac-addresses-overview',
     lessonSlug: 'ethernet-mac-addresses-overview',
-    text: 'How does an Ethernet NIC determine whether an incoming unicast frame should be processed or discarded at Layer 2?',
+    text: 'An ARP request containing 28 bytes of data is encapsulated in an Ethernet II frame. How many bytes of padding will the network interface card append?',
     options: [
-      'It compares the Destination MAC address in the frame header against its own burned-in MAC address; if they match (or if it is broadcast/multicast), it passes it up the stack; otherwise, it discards it in hardware',
-      'It reads the user password inside the payload to verify authorization',
-      'It forwards every single frame directly to the CPU regardless of MAC address',
-      'It checks if the frame was transmitted during working business hours'
+      '18 bytes of zero padding (46 - 28 = 18 bytes)',
+      '0 bytes',
+      '36 bytes',
+      '46 bytes',
     ],
     correctOption: 0,
-    explanation: 'NIC hardware filters incoming frames by comparing the Destination MAC to its own MAC address, the broadcast address (FF:FF:FF:FF:FF:FF), or registered multicast addresses, discarding non-matching frames with zero CPU overhead.',
+    explanation:
+      'Because the minimum payload for Ethernet II is 46 bytes, an interface encapsulating a 28-byte ARP packet must add $46 - 28 = 18$ bytes of padding to reach the 64-byte minimum frame size.',
     explanationsJson: {
-      1: 'Layer 2 NIC hardware does not parse application-layer user passwords.',
-      2: 'Passing all frames to the CPU occurs only in "promiscuous mode" (used by packet sniffers like Wireshark), not normal operation.',
-      3: 'Ethernet framing operates 24/7 independent of calendar hours.'
+      1: 'Zero padding would result in a 46-byte runt frame which would be dropped.',
+      2: '36 bytes would exceed the minimum required padding.',
+      3: '46 bytes would double the payload unnecessarily.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Ethernet Payload Padding Calculation',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-ethernet-mac-addresses-overview',
+    lessonSlug: 'ethernet-mac-addresses-overview',
+    text: 'What algorithm does the 4-byte Frame Check Sequence (FCS) trailer use to verify data integrity in an Ethernet frame?',
+    options: [
+      'Cyclic Redundancy Check (CRC-32)',
+      'MD5 Cryptographic Hash',
+      'SHA-256 Checksum',
+      'Simple 8-bit Parity Bit',
+    ],
+    correctOption: 0,
+    explanation:
+      'Ethernet uses a 32-bit Cyclic Redundancy Check (CRC-32) in its FCS trailer. The receiver recalculates the CRC and compares it to FCS; if mismatching, the frame is dropped.',
+    explanationsJson: {
+      1: 'MD5 is a cryptographic hash, not used in Ethernet hardware trailers.',
+      2: 'SHA-256 is too computationally heavy for Layer 2 line-rate hardware CRC checking.',
+      3: 'Simple parity cannot detect multi-bit burst errors reliably.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Frame Check Sequence & CRC-32',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-ethernet-mac-addresses-overview',
+    lessonSlug: 'ethernet-mac-addresses-overview',
+    text: 'When IEEE 802.1Q VLAN encapsulation is active on an Ethernet trunk link, where is the 4-byte VLAN tag inserted and what is the new maximum standard frame size?',
+    options: [
+      'Inserted between Source MAC and EtherType; increases maximum standard frame size from 1518 to 1522 bytes',
+      'Appended to the end of the FCS trailer; maximum size remains 1500 bytes',
+      'Inserted at the beginning of the Preamble; increases size to 2000 bytes',
+      'Placed inside the IP header options field; size is unchanged',
+    ],
+    correctOption: 0,
+    explanation:
+      'The 802.1Q tag (4 bytes: TPID 0x8100 + TCI with Priority, DEI, and 12-bit VLAN ID) is inserted between the Source MAC and original EtherType, raising the standard maximum frame size to 1522 bytes.',
+    explanationsJson: {
+      1: 'FCS must always be the final trailer of the frame.',
+      2: 'Preamble is physical layer timing and cannot carry VLAN tags.',
+      3: '802.1Q is a Layer 2 Ethernet tag, not an IP Layer 3 header option.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'NIC MAC Filtering Mechanics',
-    points: 10
+    concept: '802.1Q VLAN Tagging & Frame Expansion',
+    points: 10,
   },
   {
     quizId: 'quiz-ethernet-mac-addresses-overview',
     lessonSlug: 'ethernet-mac-addresses-overview',
-    text: 'A network sniffer reveals that an Ethernet frame has a total length of only 50 bytes. What will the transmitting NIC automatically do to ensure it meets the IEEE 802.3 minimum frame length?',
+    text: 'A network administrator notices thousands of "Runt frame" errors logged on switch interface GigabitEthernet0/1. What does this mean, and what is the most likely physical root cause?',
     options: [
-      'Append 14 bytes of padding (zeros) to the payload so the total frame length equals exactly 64 bytes',
-      'Drop the packet and report an operating system memory failure',
-      'Retransmit the frame 5 times in rapid succession',
-      'Convert the Ethernet frame into a wireless 802.11 beacon'
+      'Frames received are smaller than 64 bytes; typically caused by a faulty copper cable, bad connector, or duplex mismatch causing collisions',
+      'Frames received exceed 1500 bytes; caused by jumbo frames',
+      'The switch port is running out of memory',
+      'The DNS server is offline',
     ],
     correctOption: 0,
-    explanation: 'If an upper-layer payload is less than 46 bytes (making the total frame less than 64 bytes), the transmitting MAC layer automatically inserts Pad bytes (zeros) to reach the mandatory 64-byte minimum frame size.',
+    explanation:
+      'Runt frames are frames smaller than 64 bytes. In modern full-duplex switches, runts are almost always caused by physical cable damage, electrical noise truncating signals, or half/full duplex mismatch collision fragments.',
     explanationsJson: {
-      1: 'Small payloads are completely normal (e.g. small TCP ACKs) and padded automatically; no error is reported.',
-      2: 'Padding ensures single-frame compliance; rapid repetition does not fix short frames.',
-      3: 'Ethernet NICs do not convert wired frames to 802.11 wireless beacons.'
+      1: 'Frames exceeding maximum size are Giant frames, not Runt frames.',
+      2: 'Runt errors reflect frame size violations on the wire, not switch memory exhaustion.',
+      3: 'DNS operates at Layer 7 and does not cause Layer 2 runt frames.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
     questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'Ethernet Frame Padding (Pad Bytes)',
-    points: 10
+    concept: 'Runt Frame Detection & Troubleshooting',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------
