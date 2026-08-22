@@ -153,14 +153,145 @@ export default function CertificatesCatalogPage() {
                   })}
                 </div>
               ) : (
-                <EmptyState
-                  title="No Certificates Earned Yet"
-                  description="Complete 100% of required lessons and quizzes in a course with a passing grade of 80% or higher to earn and claim your official certificate."
-                  actionLabel="Browse Courses"
-                  onAction={() => { window.location.href = '/courses'; }}
-                  icon={<Award className="w-6 h-6" />}
-                />
+                <div className="p-6 rounded-2xl bg-[#121217] border border-[#272732] flex flex-col items-center text-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-[#00f0ff]/10 border border-[#00f0ff]/30 flex items-center justify-center text-[#00f0ff]">
+                    <Award className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">No Certificates Claimed Yet</h3>
+                  <p className="text-xs text-zinc-400 max-w-md">
+                    Complete 100% of required lessons and achieve $\ge 80\%$ on diagnostic benchmark quizzes in a credential track below to unlock your verifiable certificate.
+                  </p>
+                </div>
               )}
+
+              {/* Official NV-NET Certification Matrix */}
+              <div className="flex flex-col gap-5 pt-4">
+                <div>
+                  <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
+                    STANDARDIZED CERTIFICATION MATRIX
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                    NetVision Professional Credential Tracks
+                  </h2>
+                  <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-2xl leading-relaxed">
+                    Industry-recognized certifications benchmarking technical proficiency from physical signal mechanics through autonomous network automation pipelines.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {/* NV-NET 101 */}
+                  <div className="p-5 sm:p-6 rounded-2xl bg-[#0f0f14] border border-[#272732] flex flex-col justify-between hover:border-[#00f0ff]/40 transition-all gap-4">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-1 rounded-md bg-[#00f0ff]/10 border border-[#00f0ff]/30 text-[#00f0ff] font-mono text-[10px] font-bold uppercase">
+                          NV-NET 101 Track
+                        </span>
+                        <span className="text-xs font-mono text-zinc-400">Foundational Level</span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-white">Certified Network Foundations Specialist</h3>
+                      <p className="text-xs text-zinc-400 leading-relaxed">
+                        Validates mastery over binary/hex conversions, physical media & SFP transceivers, OSI 7-layer encapsulation, TCP/IP stack, and RF spectrum fundamentals.
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {['Binary Math', 'Physical Media', 'OSI 7 Layers', 'TCP/IP', 'Performance Metrics', '802.11 Wi-Fi'].map((s) => (
+                          <span key={s} className="px-2 py-0.5 rounded bg-[#181820] text-[10px] font-mono text-zinc-300 border border-zinc-800">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <Link href="/courses">
+                      <Button variant="secondary" className="w-full justify-center text-xs font-bold" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+                        Explore Course & Begin Track
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {/* NV-NET 202 */}
+                  <div className="p-5 sm:p-6 rounded-2xl bg-[#0f0f14] border border-[#272732] flex flex-col justify-between hover:border-sky-400/40 transition-all gap-4">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-1 rounded-md bg-sky-400/10 border border-sky-400/30 text-sky-400 font-mono text-[10px] font-bold uppercase">
+                          NV-NET 202 Track
+                        </span>
+                        <span className="text-xs font-mono text-zinc-400">Intermediate Level</span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-white">Certified IP Addressing & Subnetting Engineer</h3>
+                      <p className="text-xs text-zinc-400 leading-relaxed">
+                        Demonstrates expertise in VLSM hierarchical subnet allocation, CIDR prefix masks, RFC 1918 private ranges, ARP resolution, IPv6 SLAAC, and TCP/UDP socket boundaries.
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {['IPv4 CIDR', 'VLSM Design', 'RFC 1918', 'ARP Resolution', 'IPv6 SLAAC', 'TCP/UDP Sockets'].map((s) => (
+                          <span key={s} className="px-2 py-0.5 rounded bg-[#181820] text-[10px] font-mono text-zinc-300 border border-zinc-800">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <Link href="/courses">
+                      <Button variant="secondary" className="w-full justify-center text-xs font-bold" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+                        Explore Course & Begin Track
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {/* NV-NET 304 */}
+                  <div className="p-5 sm:p-6 rounded-2xl bg-[#0f0f14] border border-[#272732] flex flex-col justify-between hover:border-purple-400/40 transition-all gap-4">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-1 rounded-md bg-purple-400/10 border border-purple-400/30 text-purple-400 font-mono text-[10px] font-bold uppercase">
+                          NV-NET 304 Track
+                        </span>
+                        <span className="text-xs font-mono text-zinc-400">Advanced Level</span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-white">Certified Enterprise Routing & Switching Architect</h3>
+                      <p className="text-xs text-zinc-400 leading-relaxed">
+                        Validates enterprise switching loop prevention with STP / RSTP (802.1w), Dijkstra Shortest Path First (SPF) algorithm, single and multi-area OSPF routing, and route redistribution.
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {['STP / RSTP', 'Bridge ID & Ports', 'Dijkstra SPF', 'OSPF LSA Types', 'Multi-Area OSPF', 'Route Redistribution'].map((s) => (
+                          <span key={s} className="px-2 py-0.5 rounded bg-[#181820] text-[10px] font-mono text-zinc-300 border border-zinc-800">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <Link href="/courses">
+                      <Button variant="secondary" className="w-full justify-center text-xs font-bold" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+                        Explore Course & Begin Track
+                      </Button>
+                    </Link>
+                  </div>
+
+                  {/* NV-NET 404 */}
+                  <div className="p-5 sm:p-6 rounded-2xl bg-[#0f0f14] border border-[#272732] flex flex-col justify-between hover:border-emerald-400/40 transition-all gap-4">
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-2.5 py-1 rounded-md bg-emerald-400/10 border border-emerald-400/30 text-emerald-400 font-mono text-[10px] font-bold uppercase">
+                          NV-NET 404 Track
+                        </span>
+                        <span className="text-xs font-mono text-zinc-400">Expert Level</span>
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-white">Certified Packet Analysis & Network Automation Architect</h3>
+                      <p className="text-xs text-zinc-400 leading-relaxed">
+                        Advanced validation of promiscuous Wireshark PCAP byte dissection, BPF capture filters, RESTCONF/NETCONF programmability, Python automation scripts, and Scapy packet fabrication.
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {['Wireshark PCAP', 'BPF Syntax', 'RESTCONF / NETCONF', 'Python Automation', 'Scapy Crafting', 'CI/CD Pipelines'].map((s) => (
+                          <span key={s} className="px-2 py-0.5 rounded bg-[#181820] text-[10px] font-mono text-zinc-300 border border-zinc-800">
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <Link href="/courses">
+                      <Button variant="secondary" className="w-full justify-center text-xs font-bold" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+                        Explore Course & Begin Track
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
             )}
           </main>
