@@ -34,6 +34,7 @@ import { PacketInspectorModal } from './PacketInspectorModal';
 import { DeviceConfigModal } from './DeviceConfigModal';
 import { SimulationEventLog } from './SimulationEventLog';
 import { Interactive3DPacketJourney } from './Interactive3DPacketJourney';
+import { InteractiveNetworkTerminal } from './InteractiveNetworkTerminal';
 
 export interface SimulationEngineCanvasProps {
   initialNodes?: NetworkNode[];
@@ -46,7 +47,7 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
   initialLinks,
   onSimulationComplete,
 }) => {
-  const [viewMode, setViewMode] = useState<'2d' | '3d'>('3d');
+  const [viewMode, setViewMode] = useState<'2d' | '3d' | 'terminal'>('3d');
   const [nodes, setNodes] = useState<NetworkNode[]>(
     initialNodes || [
       { id: 'n-1', name: 'Client PC 1', type: 'pc', ipAddress: '192.168.1.10', macAddress: '00:1A:2B:3C:4D:5E', status: 'online', position: { x: 80, y: 140 } },
@@ -416,6 +417,17 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
             >
               2D Schematic
             </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('terminal')}
+              className={`px-2.5 py-1 rounded text-xs font-mono font-bold transition-all ${
+                viewMode === 'terminal'
+                  ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              CLI Terminal
+            </button>
           </div>
 
           <select
@@ -441,9 +453,11 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
         </div>
       </div>
 
-      {/* Main Interactive Topology Instrument Canvas (3D or 2D) */}
+      {/* Main Interactive Topology Instrument Canvas (3D, 2D, or Terminal) */}
       {viewMode === '3d' ? (
         <Interactive3DPacketJourney />
+      ) : viewMode === 'terminal' ? (
+        <InteractiveNetworkTerminal />
       ) : (
         <div className="relative w-full h-[420px] sm:h-[460px] bg-[#121316] rounded-xl border border-[#2a2e39] shadow-inner overflow-x-auto overflow-y-hidden p-4 sm:p-8 touch-pan-x bg-net-grid-pattern">
           <div
