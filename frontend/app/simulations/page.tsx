@@ -5,11 +5,19 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { SimulationEngineCanvas } from '@/components/simulation/SimulationEngineCanvas';
+import { MultimodalDiagramParser } from '@/components/simulation/MultimodalDiagramParser';
+import { UniversalChatHistoryImporter } from '@/components/learning/UniversalChatHistoryImporter';
+import { PdfReportStudio } from '@/components/ui/PdfReportStudio';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Cpu, ShieldCheck, Activity } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { Cpu, ShieldCheck, Activity, Image as ImageIcon, Bot, Printer } from 'lucide-react';
 
 export default function SimulationsPage() {
+  const [showDiagramParser, setShowDiagramParser] = React.useState<boolean>(false);
+  const [showChatImporter, setShowChatImporter] = React.useState<boolean>(false);
+  const [showPdfStudio, setShowPdfStudio] = React.useState<boolean>(false);
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans">
@@ -24,18 +32,69 @@ export default function SimulationsPage() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold block mb-1">
-                    PROTOCOL DISSECTION
+                    PROTOCOL DISSECTION & SIMULATION
                   </span>
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight">
                     Interactive Protocol Simulator
                   </h1>
                   <p className="text-xs sm:text-sm text-[#8e95a5] mt-1 max-w-2xl leading-relaxed">
-                    Dispatch packet streams, pause time to inspect OSI layer headers, and observe hardware forwarding state.
+                    Dispatch packet streams, pause time to inspect OSI layer headers, and observe hardware forwarding state in 3D.
                   </p>
                 </div>
 
-                <Badge variant="cyan" dot={true} className="self-start md:self-auto">Simulation Engine Ready</Badge>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowDiagramParser(true)}
+                    leftIcon={<ImageIcon className="w-3.5 h-3.5 text-[#00f0ff]" />}
+                    className="text-xs font-bold"
+                  >
+                    Import Diagram
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowChatImporter(true)}
+                    leftIcon={<Bot className="w-3.5 h-3.5 text-purple-400" />}
+                    className="text-xs font-bold"
+                  >
+                    Import AI Chat
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowPdfStudio(true)}
+                    leftIcon={<Printer className="w-3.5 h-3.5 text-emerald-400" />}
+                    className="text-xs font-bold"
+                  >
+                    PDF Export
+                  </Button>
+                </div>
               </div>
+
+              {/* Modals */}
+              {showDiagramParser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                  <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <MultimodalDiagramParser onClose={() => setShowDiagramParser(false)} />
+                  </div>
+                </div>
+              )}
+
+              {showChatImporter && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                  <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <UniversalChatHistoryImporter onClose={() => setShowChatImporter(false)} />
+                  </div>
+                </div>
+              )}
+
+              {showPdfStudio && (
+                <PdfReportStudio isOpen={showPdfStudio} onClose={() => setShowPdfStudio(false)} />
+              )}
 
               {/* Main Simulation Engine Canvas */}
               <SimulationEngineCanvas />

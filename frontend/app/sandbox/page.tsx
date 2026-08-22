@@ -5,9 +5,18 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { SandboxCanvas } from '@/components/sandbox/SandboxCanvas';
+import { MultimodalDiagramParser } from '@/components/simulation/MultimodalDiagramParser';
+import { UniversalChatHistoryImporter } from '@/components/learning/UniversalChatHistoryImporter';
+import { PdfReportStudio } from '@/components/ui/PdfReportStudio';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Image as ImageIcon, Bot, Printer } from 'lucide-react';
 
 export default function SandboxPage() {
+  const [showDiagramParser, setShowDiagramParser] = React.useState<boolean>(false);
+  const [showChatImporter, setShowChatImporter] = React.useState<boolean>(false);
+  const [showPdfStudio, setShowPdfStudio] = React.useState<boolean>(false);
+
   return (
     <ProtectedRoute>
       <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans">
@@ -28,12 +37,63 @@ export default function SandboxPage() {
                     Interactive Network Sandbox
                   </h1>
                   <p className="text-xs sm:text-sm text-[#8e95a5] mt-1 max-w-2xl leading-relaxed">
-                    Build topologies, cable interfaces, configure IP subnets, dispatch test packet streams, and verify network connectivity.
+                    Build topologies, cable interfaces, configure IP subnets, dispatch test packet streams, and import diagrams.
                   </p>
                 </div>
 
-                <Badge variant="cyan" dot={true} className="self-start md:self-auto">Workbench Active</Badge>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowDiagramParser(true)}
+                    leftIcon={<ImageIcon className="w-3.5 h-3.5 text-[#00f0ff]" />}
+                    className="text-xs font-bold"
+                  >
+                    Import Diagram Image
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowChatImporter(true)}
+                    leftIcon={<Bot className="w-3.5 h-3.5 text-purple-400" />}
+                    className="text-xs font-bold"
+                  >
+                    Import AI Chat
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowPdfStudio(true)}
+                    leftIcon={<Printer className="w-3.5 h-3.5 text-emerald-400" />}
+                    className="text-xs font-bold"
+                  >
+                    Export Vector PDF
+                  </Button>
+                </div>
               </div>
+
+              {/* Modals */}
+              {showDiagramParser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                  <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <MultimodalDiagramParser onClose={() => setShowDiagramParser(false)} />
+                  </div>
+                </div>
+              )}
+
+              {showChatImporter && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                  <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <UniversalChatHistoryImporter onClose={() => setShowChatImporter(false)} />
+                  </div>
+                </div>
+              )}
+
+              {showPdfStudio && (
+                <PdfReportStudio isOpen={showPdfStudio} onClose={() => setShowPdfStudio(false)} />
+              )}
 
               {/* Sandbox Canvas Component */}
               <SandboxCanvas />
