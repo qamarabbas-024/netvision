@@ -33,6 +33,7 @@ import {
 import { PacketInspectorModal } from './PacketInspectorModal';
 import { DeviceConfigModal } from './DeviceConfigModal';
 import { SimulationEventLog } from './SimulationEventLog';
+import { Interactive3DPacketJourney } from './Interactive3DPacketJourney';
 
 export interface SimulationEngineCanvasProps {
   initialNodes?: NetworkNode[];
@@ -45,6 +46,7 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
   initialLinks,
   onSimulationComplete,
 }) => {
+  const [viewMode, setViewMode] = useState<'2d' | '3d'>('3d');
   const [nodes, setNodes] = useState<NetworkNode[]>(
     initialNodes || [
       { id: 'n-1', name: 'Client PC 1', type: 'pc', ipAddress: '192.168.1.10', macAddress: '00:1A:2B:3C:4D:5E', status: 'online', position: { x: 80, y: 140 } },
@@ -390,6 +392,32 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
 
         {/* Protocol Selector & Dispatch */}
         <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* 2D vs 3D View Switcher */}
+          <div className="flex bg-[#14151a] p-0.5 rounded-lg border border-[#2a2e39]">
+            <button
+              type="button"
+              onClick={() => setViewMode('3d')}
+              className={`px-2.5 py-1 rounded text-xs font-mono font-bold transition-all ${
+                viewMode === '3d'
+                  ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              3D WebGL
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('2d')}
+              className={`px-2.5 py-1 rounded text-xs font-mono font-bold transition-all ${
+                viewMode === '2d'
+                  ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              2D Schematic
+            </button>
+          </div>
+
           <select
             aria-label="Select packet protocol"
             value={selectedProtocol}
@@ -413,12 +441,15 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
         </div>
       </div>
 
-      {/* Main Interactive Topology Instrument Canvas */}
-      <div className="relative w-full h-[420px] sm:h-[460px] bg-[#121316] rounded-xl border border-[#2a2e39] shadow-inner overflow-x-auto overflow-y-hidden p-4 sm:p-8 touch-pan-x bg-net-grid-pattern">
-        <div
-          className="min-w-[960px] h-full relative transition-transform duration-200"
-          style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
-        >
+      {/* Main Interactive Topology Instrument Canvas (3D or 2D) */}
+      {viewMode === '3d' ? (
+        <Interactive3DPacketJourney />
+      ) : (
+        <div className="relative w-full h-[420px] sm:h-[460px] bg-[#121316] rounded-xl border border-[#2a2e39] shadow-inner overflow-x-auto overflow-y-hidden p-4 sm:p-8 touch-pan-x bg-net-grid-pattern">
+          <div
+            className="min-w-[960px] h-full relative transition-transform duration-200"
+            style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
+          >
           {/* Cables Link Layer */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none">
             {links.map((link) => {
@@ -502,6 +533,7 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
           })}
         </div>
       </div>
+      )}
 
       {/* Live Educational Event Log Timeline */}
       <SimulationEventLog events={events} onClearEvents={() => setEvents([])} />
