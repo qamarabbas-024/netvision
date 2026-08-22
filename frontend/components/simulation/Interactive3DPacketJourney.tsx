@@ -19,6 +19,7 @@ import {
   Sliders,
   Maximize2,
 } from 'lucide-react';
+import { SoundFx } from '@/lib/soundFx';
 
 export interface Node3D {
   id: string;
@@ -129,6 +130,7 @@ export const Interactive3DPacketJourney: React.FC = () => {
     packetsRef.current.push(newPkt);
     setInspectedPacket(newPkt);
     setTelemetryMessage(`[HOST A] Generated ${proto} packet. Encapsulated in Layer 2 frame targeting Gateway MAC (00:1A:2B:GW:01:01).`);
+    SoundFx.playPacketDispatch();
   };
 
   // 3D Projection transformation helper
@@ -292,6 +294,7 @@ export const Interactive3DPacketJourney: React.FC = () => {
             pkt.currentHopIndex++;
 
             if (pkt.currentHopIndex < pkt.hops.length - 1) {
+              SoundFx.playHopForward();
               const hopNode = nodes.find((n) => n.id === pkt.hops[pkt.currentHopIndex]);
               if (hopNode?.role === 'router') {
                 pkt.ttl -= 1;
@@ -305,6 +308,7 @@ export const Interactive3DPacketJourney: React.FC = () => {
                 if (injectDrop) {
                   packetsRef.current.splice(idx, 1);
                   setTelemetryMessage(`[STATEFUL FIREWALL] Packet Dropped! Policy matched ACL Rule 10 (Deny Unsolicited Inbound Traffic).`);
+                  SoundFx.playPacketDrop();
                   return;
                 }
                 setTelemetryMessage(`[STATEFUL FIREWALL] Stateful inspection PASSED. Permitted outbound flow on Port 443.`);
@@ -312,6 +316,7 @@ export const Interactive3DPacketJourney: React.FC = () => {
             } else {
               // Delivered to Destination!
               setTelemetryMessage(`[WEB SERVER] 200 OK! Delivered packet to TCP port 443 socket. Processing complete.`);
+              SoundFx.playSuccessChime();
               packetsRef.current.splice(idx, 1);
             }
           }
