@@ -2427,20 +2427,21 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       'Resolving a known IPv4 address into its corresponding 48-bit physical MAC address on the local network link',
       'Resolving domain names like google.com into IP addresses',
       'Encrypting web traffic between clients and online banking servers',
-      'Assigning default gateway IP addresses to mobile smartphones'
+      'Assigning default gateway IP addresses to mobile smartphones',
     ],
     correctOption: 0,
-    explanation: 'When a host knows the target IPv4 address on the local subnet but lacks the destination MAC address to build the Layer 2 Ethernet frame, ARP broadcasts an ARP Request to discover the target MAC address.',
+    explanation:
+      'When a host knows the target IPv4 address on the local subnet but lacks the destination MAC address to build the Layer 2 Ethernet frame, ARP broadcasts an ARP Request to discover the target MAC address.',
     explanationsJson: {
       1: 'Resolving domain names into IP addresses is performed by DNS.',
       2: 'Encrypting web traffic is handled by TLS/SSL at Layer 6/7.',
-      3: 'Assigning IP settings dynamically is handled by DHCP.'
+      3: 'Assigning IP settings dynamically is handled by DHCP.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
     concept: 'ARP Purpose & Mechanics',
-    points: 10
+    points: 10,
   },
   {
     quizId: 'quiz-arp-protocol-overview',
@@ -2450,20 +2451,45 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       'Layer 2 Destination: Broadcast MAC (FF:FF:FF:FF:FF:FF) | Layer 3: Target Host IPv4 Address',
       'Layer 2 Destination: Unicast Router MAC | Layer 3: 127.0.0.1',
       'Layer 2 Destination: 00:00:00:00:00:00 | Layer 3: 255.255.255.255',
-      'Layer 2 Destination: Multicast 01:00:5E:00:00:01 | Layer 3: 0.0.0.0'
+      'Layer 2 Destination: Multicast 01:00:5E:00:00:01 | Layer 3: 0.0.0.0',
     ],
     correctOption: 0,
-    explanation: 'An ARP Request is encapsulated in a Layer 2 Broadcast frame (`FF:FF:FF:FF:FF:FF`) so all devices on the local segment receive it, while the ARP payload specifies the target IPv4 address being resolved.',
+    explanation:
+      'An ARP Request is encapsulated in a Layer 2 Broadcast frame (`FF:FF:FF:FF:FF:FF`) so all devices on the local segment receive it, while the ARP payload specifies the target IPv4 address being resolved.',
     explanationsJson: {
       1: 'The sender does not yet know the target MAC, so it cannot send a unicast frame.',
       2: '00:00:00:00:00:00 is an invalid destination MAC on Ethernet.',
-      3: 'Standard IPv4 ARP uses Layer 2 broadcast, not IPv4 multicast MAC addresses.'
+      3: 'Standard IPv4 ARP uses Layer 2 broadcast, not IPv4 multicast MAC addresses.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
     concept: 'ARP Request Frame Addressing',
-    points: 10
+    points: 10,
+  },
+  {
+    quizId: 'quiz-arp-protocol-overview',
+    lessonSlug: 'arp-protocol-overview',
+    text: 'When a host on subnet `192.168.1.0/24` needs to send an IP packet to remote public web server `93.184.216.34`, which device address does the host query in its ARP Request?',
+    options: [
+      'The IP address of its local Default Gateway (e.g. 192.168.1.1), because ARP broadcasts cannot cross a router boundary',
+      'The public IP address 93.184.216.34 across the global Internet',
+      'The MAC address of the root DNS server',
+      'The broadcast address 255.255.255.255',
+    ],
+    correctOption: 0,
+    explanation:
+      'Because 93.184.216.34 is on a remote subnet, the host knows it must route traffic through its Default Gateway. Since ARP broadcasts are confined to the local Layer 2 broadcast domain, the host ARPs for the Gateway\'s MAC address.',
+    explanationsJson: {
+      1: 'ARP broadcasts cannot cross routers.',
+      2: 'DNS servers do not handle Layer 2 framing.',
+      3: 'Broadcast IP is not an ARP target.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'ARP for Off-Subnet Destinations',
+    points: 10,
   },
   {
     quizId: 'quiz-arp-protocol-overview',
@@ -2473,43 +2499,69 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       'To avoid broadcasting an ARP Request for every individual IP packet sent to the same destination host, significantly reducing network broadcast overhead',
       'To permanently store credit card transactions on the network switch',
       'To speed up CPU clock speed during video rendering',
-      'To prevent the computer from needing an IP address'
+      'To prevent the computer from needing an IP address',
     ],
     correctOption: 0,
-    explanation: 'The ARP cache stores recent IP-to-MAC bindings for a few minutes. Subsequent packets to the same destination immediately use the cached MAC address, avoiding constant broadcast flooding across the LAN.',
+    explanation:
+      'The ARP cache stores recent IP-to-MAC bindings for a few minutes. Subsequent packets to the same destination immediately use the cached MAC address, avoiding constant broadcast flooding across the LAN.',
     explanationsJson: {
       1: 'ARP caches store network Layer 2/3 address bindings, not financial transactions.',
       2: 'ARP caching is a networking optimization, unrelated to CPU video rendering.',
-      3: 'Devices still require valid IP addresses to communicate on an IP network.'
+      3: 'Devices still require valid IP addresses to communicate on an IP network.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
     concept: 'ARP Cache Purpose & Aging',
-    points: 10
+    points: 10,
   },
   {
     quizId: 'quiz-arp-protocol-overview',
     lessonSlug: 'arp-protocol-overview',
-    text: 'An attacker transmits unsolicited ARP replies associating the Default Gateway IP address with the attacker own MAC address. What attack is taking place, and what is the standard switch mitigation?',
+    text: 'What happens when Host C (192.168.1.30) receives an ARP Request broadcast asking "Who has 192.168.1.50?"',
+    options: [
+      'Host C inspects the Target Protocol Address, sees 192.168.1.50 does not match its own IP, and silently discards the frame without replying',
+      'Host C forwards the ARP Request to the Default Gateway',
+      'Host C sends an ARP Error reply back to the sender',
+      'Host C crashes because it received broadcast traffic',
+    ],
+    correctOption: 0,
+    explanation:
+      'Non-target hosts on a broadcast segment process the incoming broadcast frame up to the ARP header, verify that the requested Target Protocol Address does not match their own IP, and discard the frame with zero reply.',
+    explanationsJson: {
+      1: 'Hosts do not route or forward ARP broadcast frames.',
+      2: 'ARP does not define an error reply message for non-matching hosts.',
+      3: 'Network stacks are designed to discard non-matching broadcasts routinely.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Non-Target ARP Frame Discarding',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-arp-protocol-overview',
+    lessonSlug: 'arp-protocol-overview',
+    text: 'An attacker transmits unsolicited ARP replies associating the Default Gateway IP address with the attacker\'s own MAC address. What attack is taking place, and what is the standard switch mitigation?',
     options: [
       'ARP Cache Poisoning / Spoofing (Man-in-the-Middle); mitigated on switches using Dynamic ARP Inspection (DAI) coupled with DHCP Snooping',
       'DNS Amplification DDoS; mitigated by blocking UDP port 53',
       'SYN Flood attack; mitigated by enabling TCP SYN Cookies',
-      'Buffer Overflow attack; mitigated by compiling with Address Space Layout Randomization (ASLR)'
+      'Buffer Overflow attack; mitigated by compiling with Address Space Layout Randomization (ASLR)',
     ],
     correctOption: 0,
-    explanation: 'ARP Spoofing tricks hosts into sending outbound traffic to the attacker MAC. Managed switches mitigate this using Dynamic ARP Inspection (DAI), which validates ARP packets against the trusted DHCP Snooping binding database.',
+    explanation:
+      'ARP Spoofing tricks hosts into sending outbound traffic to the attacker MAC. Managed switches mitigate this using Dynamic ARP Inspection (DAI), which validates ARP packets against the trusted DHCP Snooping binding database.',
     explanationsJson: {
       1: 'DNS amplification attacks public DNS resolvers via UDP reflection, not local LAN ARP tables.',
       2: 'SYN floods target TCP transport buffers, not Layer 2 ARP caches.',
-      3: 'ASLR protects OS application memory against code injection, not network ARP poisoning.'
+      3: 'ASLR protects OS application memory against code injection, not network ARP poisoning.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
     questionType: QuestionType.TROUBLESHOOTING,
     concept: 'ARP Poisoning & Dynamic ARP Inspection',
-    points: 10
+    points: 10,
   },
 
   // -------------------------------------------------------------------------

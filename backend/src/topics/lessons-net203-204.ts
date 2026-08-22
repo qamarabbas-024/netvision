@@ -362,139 +362,204 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
     order: 3,
     visualizationType: 'ARP_FLOW_INSPECTOR',
     introduction:
-      'Master the critical bridge between Layer 3 logical IP addressing and Layer 2 physical MAC addressing: ARP Request (Broadcast FF:FF:FF:FF:FF:FF, Opcode 1) vs ARP Reply (Unicast, Opcode 2), ARP Cache table mechanics, cache aging timeouts, Gratuitous ARP (GARP) for duplicate IP conflict detection, Proxy ARP, and why ARP broadcasts never cross a router boundary.',
-    stepMetadata: {
-      step1_objective:
-        'Understand how ARP dynamically maps 32-bit IPv4 addresses to 48-bit Ethernet MAC addresses on local subnets, analyze ARP Request (broadcast) vs Reply (unicast) mechanics, inspect the local ARP table, and understand Gratuitous and Proxy ARP.',
-      step2_prerequisites: ['net-201-level-0-mac-addresses-physical-identity', 'net-202-ipv4-addressing-cidr'],
-      step3_whyItMatters:
-        'Ethernet switches know nothing about IP addresses; they only forward frames based on destination MAC addresses. Without ARP, an IP host cannot construct an Ethernet frame to transmit data to local nodes or the default gateway.',
-      step4_coreConcept:
-        'The Address Resolution Protocol (ARP, RFC 826) resolves a known Layer 3 IPv4 address into a destination Layer 2 MAC address on the local subnet. When Host A needs to send data to Host B (`192.168.1.50`), Host A checks its local ARP Cache table. If no entry exists, Host A broadcasts an **ARP Request** (`ff:ff:ff:ff:ff:ff`, Opcode 1: "Who has IP 192.168.1.50? Tell 192.168.1.10"). All local hosts receive the frame, but only the host owning `192.168.1.50` responds with a unicast **ARP Reply** (Opcode 2: "I have 192.168.1.50, my MAC is 00:1A:2B:3C:4D:5E"). Host A stores this mapping in its ARP cache (with a 20–300s aging timer). **Gratuitous ARP (GARP)** is an unprompted ARP broadcast announcing own IP/MAC used for Duplicate Address Detection (DAD) and updating neighbor switch CAM tables. Routers NEVER forward ARP broadcasts across subnets.',
-      step5_technicalAnatomy: {
-        title: 'ARP Frame Structure, Opcodes & Cache Mechanics',
-        description: 'ARP packet format, broadcast/unicast semantics, and cache table management.',
-        components: [
-          { name: 'Hardware Type & Protocol Type', detail: 'Hardware = 0x0001 (Ethernet); Protocol = 0x0800 (IPv4).' },
-          { name: 'ARP Opcode (1 vs 2)', detail: 'Opcode 1 = ARP Request (Broadcast); Opcode 2 = ARP Reply (Unicast).' },
-          { name: 'Sender & Target Addresses', detail: 'Sender MAC (6B), Sender IP (4B), Target MAC (6B, 00:00:00:00:00:00 in Request), Target IP (4B).' },
-          { name: 'ARP Cache Table', detail: 'In-memory dynamic lookup table mapping IP -> MAC -> Interface with aging timer (20-300 seconds).' },
-          { name: 'Gratuitous ARP (GARP)', detail: 'Sender and Target IP are identical. Broadcast upon boot to detect duplicate IP conflicts and update neighbor caches.' },
-          { name: 'Proxy ARP (RFC 1027)', detail: 'Router replies with its own MAC on behalf of a remote target host when client is misconfigured.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'ARP Cache Lookup', action: 'Host checks local ARP cache for destination IP `192.168.1.50`.' },
-          { stepNumber: 2, title: 'ARP Request Broadcast', action: 'If missing, host encapsulates ARP Request in Ethernet frame with Destination MAC `ff:ff:ff:ff:ff:ff` and floods across local VLAN.' },
-          { stepNumber: 3, title: 'Unicast ARP Reply', action: 'Target host inspects Request, learns sender IP/MAC, and sends unicast ARP Reply directly to sender MAC.' },
-          { stepNumber: 4, title: 'Frame Encapsulation & Transmission', action: 'Sender caches target MAC and immediately transmits buffered IP payload frames.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'ARP Packet Format (Encapsulated in Ethernet EtherType 0x0806)',
+      'Master the critical bridge between Layer 3 logical IP addressing and Layer 2 physical MAC addressing: ARP Request (Broadcast FF:FF:FF:FF:FF:FF, Opcode 1) vs ARP Reply (Unicast, Opcode 2), ARP Cache table mechanics, cache aging timeouts, Gratuitous ARP (GARP) for duplicate IP conflict detection, and why ARP broadcasts never cross a router boundary.',
+    contentV2: {
+      objective:
+        'Understand how ARP dynamically maps 32-bit IPv4 addresses to 48-bit Ethernet MAC addresses on local subnets, analyze ARP Request (broadcast) vs Reply (unicast) mechanics, inspect the local ARP cache table and aging timers, understand Gratuitous ARP for duplicate IP detection, and explain why ARP broadcasts never cross router boundaries.',
+      prerequisites: [
+        'NET-101: Bits, Bytes, Binary & Hexadecimal Foundations',
+        'NET-201: MAC Addresses & Physical Hardware Identity',
+        'NET-202: IPv4 Addressing, Subnet Masks & CIDR Subnetting',
+      ],
+      whyItMatters:
+        'Ethernet switches operate at Layer 2 and forward frames exclusively based on destination MAC addresses. They know nothing about IP addresses. Without ARP, an IP host cannot construct an Ethernet frame to transmit data to local nodes or reach the default gateway to access the wider Internet.',
+      explanation:
+        'The Address Resolution Protocol (ARP, defined in RFC 826) provides the essential binding mechanism between Layer 3 logical IPv4 addresses and Layer 2 physical MAC addresses within a broadcast domain.\n\n### 1. The Core Problem ARP Solves\nWhen an application generates network traffic, the operating system creates an IP packet with a source IP (e.g. `192.168.1.10`) and destination IP (e.g. `192.168.1.50`). However, to physically transmit these bits across a local Ethernet link, the Network Interface Card (NIC) must encapsulate the packet inside an Ethernet II frame, which requires a **Destination MAC address**. If the sender does not have this mapping in memory, it cannot build the frame.\n\n### 2. ARP Resolution Workflow: Request vs Reply\n1. **ARP Cache Lookup**: Host A checks its local in-memory ARP Table. If an entry exists for `192.168.1.50`, Host A immediately constructs the frame.\n2. **ARP Request (Broadcast)**: If no entry exists, Host A broadcasts an ARP Request frame (`EtherType 0x0806`, Opcode 1). The frame destination MAC is set to `FF:FF:FF:FF:FF:FF` (Broadcast), prompting the switch to flood the frame to all active ports on the VLAN. The payload asks: *"Who has IP 192.168.1.50? Tell 192.168.1.10 (MAC AA:BB:CC:11:22:33)"*.\n3. **Frame Filtering & Unicast ARP Reply**: All hosts on the subnet receive the broadcast. Non-target nodes inspect the target IP (`192.168.1.50`), see it does not match their own IP, and quietly discard the frame without generating traffic. The host that owns `192.168.1.50` responds with a **unicast ARP Reply** (Opcode 2) sent directly to Host A\'s MAC: *"192.168.1.50 is at MAC 44:55:66:77:88:99"*\n4. **Cache & Transmit**: Host A adds the dynamic entry to its ARP cache with an aging timer (typically 20–300 seconds) and immediately transmits the buffered IP data frames.\n\n### 3. Local vs Remote Off-Subnet Destination Resolution\n* **Local Destinations**: If the destination IP resides on the same local subnet (evaluated using the subnet mask), Host A ARPs directly for the destination host\'s MAC.\n* **Remote (Internet) Destinations**: If the destination IP is on a remote network (e.g. `8.8.8.8`), Host A **CANNOT ARP for 8.8.8.8** because routers never forward Layer 2 broadcasts. Instead, Host A ARPs for the MAC address of its **Default Gateway** (`192.168.1.1`). The IP packet retains Destination IP `8.8.8.8`, but the Ethernet frame Destination MAC is set to the Gateway\'s MAC.\n\n### 4. Gratuitous ARP (GARP) & Duplicate Address Detection\nA Gratuitous ARP is an unprompted ARP broadcast where the Sender IP and Target IP are identical. It is transmitted upon interface boot to:\n1. Detect Duplicate IP conflicts (if another device replies, a conflict is flagged).\n2. Update neighbor switch CAM tables and neighbor ARP caches after NIC or gateway hardware failover.',
+      components: [
+        {
+          name: 'Hardware Type & Protocol Type',
+          detail: 'Hardware Type = 0x0001 (Ethernet); Protocol Type = 0x0800 (IPv4), indicating what Layer 2/3 protocols are being mapped.',
+        },
+        {
+          name: 'ARP Opcode (1 vs 2)',
+          detail: 'Opcode 1 = ARP Request (Broadcast); Opcode 2 = ARP Reply (Unicast direct response).',
+        },
+        {
+          name: 'Sender & Target Address Pairs',
+          detail: 'Sender MAC (6B), Sender IP (4B), Target MAC (6B, initialized to 00:00:00:00:00:00 in Requests), Target IP (4B).',
+        },
+        {
+          name: 'ARP Cache Table',
+          detail: 'In-memory dynamic lookup table mapping IP -> MAC -> Interface with aging timer (20-300s) to minimize broadcast traffic.',
+        },
+        {
+          name: 'Gratuitous ARP (GARP)',
+          detail: 'Sender and Target IP are identical. Broadcast upon boot for Duplicate Address Detection (DAD) and CAM table refresh.',
+        },
+        {
+          name: 'Broadcast Domain Boundary',
+          detail: 'Routers terminate Layer 2 broadcast domains and strictly drop ARP broadcast frames, preventing global broadcast storms.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'ARP Cache Lookup',
+          action: 'The sender checks its local ARP cache table for the target IPv4 address.',
+        },
+        {
+          stepNumber: 2,
+          title: 'ARP Request Broadcast',
+          action: 'Upon cache miss, sender encapsulates an ARP Request (Opcode 1) in an Ethernet frame with Destination MAC FF:FF:FF:FF:FF:FF.',
+        },
+        {
+          stepNumber: 3,
+          title: 'Switch Flooding & Target Reply',
+          action: 'The switch floods the broadcast to all VLAN ports; non-matching hosts drop it; the target host generates a unicast ARP Reply (Opcode 2).',
+        },
+        {
+          stepNumber: 4,
+          title: 'Cache Update & Data Transmission',
+          action: 'The sender records the target IP-to-MAC mapping in its ARP table and transmits the buffered payload packets.',
+        },
+      ],
+      packetHeaderView: {
+        protocol: 'ARP Packet Format (EtherType 0x0806)',
         fields: [
-          { fieldName: 'Hardware Type', bitLength: '16 bits', hexSample: '0x0001 (Ethernet)', description: 'Physical Layer 2 standard.' },
-          { fieldName: 'Protocol Type', bitLength: '16 bits', hexSample: '0x0800 (IPv4)', description: 'Logical Layer 3 protocol.' },
-          { fieldName: 'Opcode', bitLength: '16 bits', hexSample: '0x0001 (Req) / 0x0002 (Reply)', description: 'ARP message type.' },
-          { fieldName: 'Sender MAC / IP', bitLength: '48 bits / 32 bits', hexSample: '00:11:22:33:44:55 / 192.168.1.10', description: 'Originator addresses.' },
-          { fieldName: 'Target MAC / IP', bitLength: '48 bits / 32 bits', hexSample: '00:00:00:00:00:00 / 192.168.1.50', description: 'Target destination addresses.' },
+          { fieldName: 'Hardware Type (HTYPE)', bitLength: '16 bits', hexSample: '0x0001', description: 'Network link protocol (Ethernet = 1).' },
+          { fieldName: 'Protocol Type (PTYPE)', bitLength: '16 bits', hexSample: '0x0800', description: 'Network layer protocol (IPv4 = 0x0800).' },
+          { fieldName: 'Hardware / Protocol Length', bitLength: '8 bits / 8 bits', hexSample: '0x06 / 0x04', description: 'MAC length (6 bytes) / IPv4 length (4 bytes).' },
+          { fieldName: 'Opcode', bitLength: '16 bits', hexSample: '0x0001 / 0x0002', description: '1 for Request, 2 for Reply.' },
+          { fieldName: 'Sender Hardware Address (SHA)', bitLength: '48 bits', hexSample: 'AA:BB:CC:11:22:33', description: 'Originating host MAC address.' },
+          { fieldName: 'Sender Protocol Address (SPA)', bitLength: '32 bits', hexSample: '192.168.1.10', description: 'Originating host IPv4 address.' },
+          { fieldName: 'Target Hardware Address (THA)', bitLength: '48 bits', hexSample: '00:00:00:00:00:00 (Req)', description: 'Target MAC (0s in Request, filled in Reply).' },
+          { fieldName: 'Target Protocol Address (TPA)', bitLength: '32 bits', hexSample: '192.168.1.50', description: 'Destination IPv4 address being resolved.' },
         ],
-        headerDiagramAscii: `
+        headerDiagramAscii: `+-------------------------------------------------------------------------------+
+|                    ARP REQUEST & REPLY PROTOCOL SEQUENCE                      |
 +-------------------------------------------------------------------------------+
-|                    ARP REQUEST & REPLY TRANSACTION FLOW                       |
-+-------------------------------------------------------------------------------+
-|  [ HOST A ] (192.168.1.10)                       [ HOST B ] (192.168.1.50)    |
-|       |                                               |                       |
-|       | --- 1. ARP REQUEST (Broadcast: FF:FF:FF:FF:FF:FF) -----------------> |
-|       |     "Who has 192.168.1.50? Tell 192.168.1.10 (MAC: 00:11:22...)"       |
-|       |                                               |                       |
-|       | <--- 2. ARP REPLY (Unicast: to 00:11:22...) --+                       |
-|       |     "I am 192.168.1.50! My MAC is 00:1A:2B:3C:4D:5E"                  |
-|       |                                               |                       |
-|  [ Caches MAC in ARP Table ]                          |                       |
-|       | --- 3. Transmits standard IP payload frame to Target MAC -----------> |
-+-------------------------------------------------------------------------------+
-`,
+| [ Host A ] (192.168.1.10)                       [ Host B ] (192.168.1.50)     |
+|      |                                               |                        |
+|      | --- 1. ARP REQUEST (Dst: FF:FF:FF:FF:FF:FF) ->| (Flooded across VLAN)  |
+|      |     "Who has 192.168.1.50? Tell 192.168.1.10" |                        |
+|      |                                               |                        |
+|      | <--- 2. ARP REPLY (Dst: Host A MAC, Unicast) -+                        |
+|      |     "192.168.1.50 is at 44:55:66:77:88:99"    |                        |
+|      |                                               |                        |
+| [ Saved to ARP Cache Table ]                         |                        |
+|      | --- 3. Transmits IP Data Frame (Dst: Host B MAC) --------------------> |
++-------------------------------------------------------------------------------+`,
       },
-      step8_visualExplanation: {
+      visualizer: {
         type: 'ARP_FLOW_INSPECTOR',
         title: 'Interactive ARP Resolution & Cache Table Inspector',
-        description: 'Watch an ARP Request broadcast across a switched VLAN, see non-target nodes drop the frame, observe the target return a unicast ARP Reply, and inspect dynamic ARP table updates.',
+        description: 'Watch ARP Request broadcasts traverse a local switched network, observe non-matching nodes discard the frame, and trace dynamic ARP table caching.',
       },
-      step9_workedExample: {
-        title: 'Tracing ARP Resolution for Local Host vs Remote Off-Subnet Host',
-        problemStatement: 'Host A (`192.168.1.10/24`) wants to send packets to:\n1. Host B (`192.168.1.50/24` - Local LAN)\n2. Server C (`8.8.8.8` - Remote Internet)\nWhich IP address does Host A query in its ARP Request for each case?',
+      workedExample: {
+        title: 'Determining ARP Target for Local vs Remote Communication',
+        problemStatement:
+          'Host A has IP `192.168.1.10/24` and Default Gateway `192.168.1.1`. Host A needs to transmit data to:\n1. Server Alpha (`192.168.1.50`)\n2. Web Server Beta (`93.184.216.34`)\nWhich target IP address is placed in the ARP Request payload for each destination, and what destination MAC address is used on the outgoing Ethernet frame?',
         stepByStepSolution: [
-          'Case 1 (Local Host): Host A ANDs `192.168.1.50` with /24 mask. Network ID is `192.168.1.0` (Local). Host A sends an ARP Request querying the MAC of `192.168.1.50`.',
-          'Case 2 (Remote Host): Host A ANDs `8.8.8.8` with /24 mask. Network ID is `8.0.0.0` (Remote). Host A CANNOT ARP for 8.8.8.8 because ARP broadcasts do not cross routers.',
-          '  Instead, Host A sends an ARP Request querying the MAC of its **Default Gateway** (`192.168.1.1`).',
-          '  Host A encapsulates the packet to IP 8.8.8.8 inside an Ethernet frame with the **Gateway\'s Destination MAC**.',
+          'Step 1: For Server Alpha (192.168.1.50), Host A performs bitwise AND with subnet mask 255.255.255.0. Target network is 192.168.1.0 (Same local subnet).',
+          '  Host A sends an ARP Request with Target IP 192.168.1.50. Outgoing frame destination MAC is set to Server Alpha\'s MAC once resolved.',
+          'Step 2: For Web Server Beta (93.184.216.34), Host A performs bitwise AND with subnet mask. Target network is 93.184.216.0 (Remote subnet).',
+          '  Host A CANNOT ARP for 93.184.216.34 because ARP broadcasts do not cross routers.',
+          '  Host A instead sends an ARP Request with Target IP 192.168.1.1 (Default Gateway).',
+          'Step 3: When sending the IP packet to 93.184.216.34, the IP packet header retains Destination IP 93.184.216.34, but the Layer 2 Ethernet frame has Destination MAC equal to the Gateway\'s MAC.',
         ],
-        finalResult: 'Local: ARPs for target IP 192.168.1.50. Remote: ARPs for Default Gateway IP 192.168.1.1.',
+        finalResult:
+          'Local Server Alpha: ARP target is 192.168.1.50 (Frame Dst MAC is Server Alpha MAC). Remote Web Server: ARP target is 192.168.1.1 (Frame Dst MAC is Default Gateway MAC).',
       },
-      step10_realWorldScenario: {
-        topology: 'Duplicate IP Address Conflict Detection via Gratuitous ARP',
-        scenarioText: 'A static IP `192.168.1.50` is manually assigned to a server that already belongs to a workstation. Upon boot, the server transmits a Gratuitous ARP (GARP). The workstation responds, and the server OS immediately disables its network interface and displays an "IP Address Conflict" warning, preventing service outage.',
-        engineeringContext: 'Gratuitous ARP protects networks from catastrophic IP address duplication.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Stores learned mappings in ARP table; flushes dynamic entries after timeout.',
-        nicBehavior: 'Captures broadcast ARP frames and delivers to OS network stack.',
-        switchOrRouterBehavior: 'Switches flood ARP broadcast requests to all ports in VLAN; Routers drop ARP broadcasts and never forward them across subnets.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'arp -a',
-          description: 'Displays the current IPv4-to-MAC address mapping table (ARP cache) on Windows/Linux.',
-          expectedOutput:
-            'Interface: 192.168.1.10 --- 0x2\n  Internet Address      Physical Address      Type\n  192.168.1.1           00-11-22-33-44-55     dynamic\n  192.168.1.50          00-1a-2b-3c-4d-5e     dynamic\n  192.168.1.255         ff-ff-ff-ff-ff-ff     static',
-          proofExplanation: 'Shows active dynamic IP-to-MAC bindings stored in local host memory.',
+          id: 1,
+          prompt: 'What Layer 2 Ethernet destination MAC address is placed in the header of an ARP Request frame?',
+          expected: 'FF:FF:FF:FF:FF:FF (Broadcast MAC address)',
+          hints: 'ARP Requests must reach all hosts on the local broadcast domain so the unknown owner of the IP can hear the query.',
+        },
+        {
+          id: 2,
+          prompt: 'What ARP opcode value indicates an ARP Request vs an ARP Reply?',
+          expected: 'Opcode 1 = ARP Request, Opcode 2 = ARP Reply',
+          hints: 'Opcodes are defined in the 16-bit operation field of the ARP header.',
+        },
+        {
+          id: 3,
+          prompt: 'If Host A (10.0.0.5/24) wants to send a packet to 10.0.0.200/24, does Host A ARP for 10.0.0.200 or its Default Gateway?',
+          expected: 'Host A ARPs for 10.0.0.200 directly because both hosts share the 10.0.0.0/24 local subnet.',
+          hints: 'Evaluate the network ID: 10.0.0.5 and 10.0.0.200 both belong to the 10.0.0.0/24 subnet.',
+        },
+        {
+          id: 4,
+          prompt: 'If Host A (10.0.0.5/24) wants to send a packet to 1.1.1.1, what IP address does Host A place in the Target Protocol Address field of the ARP Request?',
+          expected: 'The IP address of its Default Gateway (e.g. 10.0.0.1).',
+          hints: 'ARP broadcasts cannot cross routers. To reach off-subnet destinations, traffic must be delivered to the Layer 2 MAC of the local gateway.',
+        },
+        {
+          id: 5,
+          prompt: 'What happens when a non-target host on the same switch receives an ARP Request for an IP address it does not own?',
+          expected: 'The non-target host silently discards the frame without generating any network response.',
+          hints: 'Only the host matching the Target Protocol Address generates an ARP Reply.',
+        },
+        {
+          id: 6,
+          prompt: 'What is the purpose of a Gratuitous ARP (GARP) transmission when an interface boots up?',
+          expected: 'To perform Duplicate Address Detection (DAD) and update neighboring switch CAM tables and host ARP caches.',
+          hints: 'In a Gratuitous ARP, the sender and target IP addresses are identical.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Host cannot communicate with local gateway after router hardware replacement.',
-          possibleCauses: ['Host ARP cache holds stale MAC address of the old router hardware'],
-          diagnosticSteps: ['Inspect ARP table with `arp -a`.'],
-          remediation: 'Clear local ARP cache using `arp -d *` or `netsh interface ip delete arpcache`.',
-        },
+      recap: [
+        'ARP dynamically maps 32-bit IPv4 addresses to 48-bit physical MAC addresses within a Layer 2 broadcast domain.',
+        'ARP Requests use Broadcast MAC FF:FF:FF:FF:FF:FF (Opcode 1); ARP Replies use Unicast MAC (Opcode 2).',
+        'Non-target hosts silently drop ARP broadcast requests; only the target owner replies.',
+        'Hosts maintain an in-memory ARP cache table with aging timers (20-300s) to avoid constant broadcast flooding.',
+        'For off-subnet destinations, hosts ARP for the Default Gateway MAC, NOT the remote destination IP.',
+        'Gratuitous ARP (GARP) broadcasts detect duplicate IP conflicts upon device initialization.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Thinking ARP sends an ARP Request to the public Internet to find `google.com`.', correction: 'ARP operates strictly within the local Layer 2 broadcast domain. For remote destinations, the host ARPs for its Default Gateway MAC.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'ARP Poisoning / ARP Spoofing Man-in-the-Middle (MitM)',
-        mitigationStrategy: 'Enable Dynamic ARP Inspection (DAI) on switches (`ip arp inspection vlan`) to validate ARP packets against the DHCP snooping binding database.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'ARP Request = Broadcast (FF:FF:FF:FF:FF:FF, Opcode 1).',
-          'ARP Reply = Unicast (Target MAC, Opcode 2).',
-          'EtherType for ARP = 0x0806.',
-          'For off-subnet traffic, host ARPs for the Default Gateway MAC, NOT the destination IP.',
-        ],
-        frequentTraps: [
-          'Believing ARP crosses routers (Routers terminate broadcast domains and never forward ARP requests).',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Local ARP Cache Inspection & Gateway Resolution',
-        scenario: 'Execute arp -a, ping local and remote destinations, and trace ARP table additions.',
-        tasks: ['Run arp -a before and after pinging default gateway.'],
-        verificationMethod: 'Verify dynamic entry added for default gateway IP in ARP table.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'ARP maps 32-bit IPv4 addresses to 48-bit MAC addresses on local subnets.',
-          'Request is broadcast (Opcode 1); Reply is unicast (Opcode 2).',
-          'Off-subnet traffic requires resolving the Default Gateway MAC.',
-        ],
-        nextLessonBridge:
-          'Proceed to NET-203 Lesson 4 to see how DHCP, DNS, ARP, and TCP orchestrate together in the Integrated Host Boot-Up Lifecycle.',
-      },
     },
     questions: [
+      {
+        text: 'What specific problem does the Address Resolution Protocol (ARP) solve on an IPv4 local Ethernet network?',
+        options: [
+          'Resolving a known IPv4 address into its corresponding 48-bit physical MAC address on the local network link',
+          'Resolving domain names like google.com into IP addresses',
+          'Encrypting web traffic between clients and online banking servers',
+          'Assigning default gateway IP addresses to mobile smartphones',
+        ],
+        correctOption: 0,
+        explanation:
+          'When a host knows the target IPv4 address on the local subnet but lacks the destination MAC address to build the Layer 2 Ethernet frame, ARP broadcasts an ARP Request to discover the target MAC address.',
+        explanationsJson: {
+          1: 'Resolving domain names into IP addresses is performed by DNS.',
+          2: 'Encrypting web traffic is handled by TLS/SSL at Layer 6/7.',
+          3: 'Assigning IP settings dynamically is handled by DHCP.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'ARP Purpose & Mechanics',
+      },
+      {
+        text: 'What are the Layer 2 and Layer 3 destination addresses used in an ARP Request message?',
+        options: [
+          'Layer 2 Destination: Broadcast MAC (FF:FF:FF:FF:FF:FF) | Layer 3: Target Host IPv4 Address',
+          'Layer 2 Destination: Unicast Router MAC | Layer 3: 127.0.0.1',
+          'Layer 2 Destination: 00:00:00:00:00:00 | Layer 3: 255.255.255.255',
+          'Layer 2 Destination: Multicast 01:00:5E:00:00:01 | Layer 3: 0.0.0.0',
+        ],
+        correctOption: 0,
+        explanation:
+          'An ARP Request is encapsulated in a Layer 2 Broadcast frame (`FF:FF:FF:FF:FF:FF`) so all devices on the local segment receive it, while the ARP payload specifies the target IPv4 address being resolved.',
+        explanationsJson: {
+          1: 'The sender does not yet know the target MAC, so it cannot send a unicast frame.',
+          2: '00:00:00:00:00:00 is an invalid destination MAC on Ethernet.',
+          3: 'Standard IPv4 ARP uses Layer 2 broadcast, not IPv4 multicast MAC addresses.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'ARP Request Frame Addressing',
+      },
       {
         text: 'When a host on subnet `192.168.1.0/24` needs to send an IP packet to remote public web server `93.184.216.34`, which device address does the host query in its ARP Request?',
         options: [
@@ -504,22 +569,82 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
           'The broadcast address 255.255.255.255',
         ],
         correctOption: 0,
-        explanation: 'Because 93.184.216.34 is on a remote subnet, the host knows it must route traffic through its Default Gateway. Since ARP broadcasts are confined to the local Layer 2 broadcast domain, the host ARPs for the Gateway\'s MAC address.',
-        explanationsJson: { 1: 'ARP broadcasts cannot cross routers.', 2: 'DNS servers do not handle Layer 2 framing.', 3: 'Broadcast IP is not an ARP target.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'Because 93.184.216.34 is on a remote subnet, the host knows it must route traffic through its Default Gateway. Since ARP broadcasts are confined to the local Layer 2 broadcast domain, the host ARPs for the Gateway\'s MAC address.',
+        explanationsJson: {
+          1: 'ARP broadcasts cannot cross routers.',
+          2: 'DNS servers do not handle Layer 2 framing.',
+          3: 'Broadcast IP is not an ARP target.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.APPLICATION,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'ARP for Off-Subnet Destinations',
       },
+      {
+        text: 'Why do operating systems maintain a temporary "ARP Cache" (ARP Table) in memory buffers?',
+        options: [
+          'To avoid broadcasting an ARP Request for every individual IP packet sent to the same destination host, significantly reducing network broadcast overhead',
+          'To permanently store credit card transactions on the network switch',
+          'To speed up CPU clock speed during video rendering',
+          'To prevent the computer from needing an IP address',
+        ],
+        correctOption: 0,
+        explanation:
+          'The ARP cache stores recent IP-to-MAC bindings for a few minutes. Subsequent packets to the same destination immediately use the cached MAC address, avoiding constant broadcast flooding across the LAN.',
+        explanationsJson: {
+          1: 'ARP caches store network Layer 2/3 address bindings, not financial transactions.',
+          2: 'ARP caching is a networking optimization, unrelated to CPU video rendering.',
+          3: 'Devices still require valid IP addresses to communicate on an IP network.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'ARP Cache Purpose & Aging',
+      },
+      {
+        text: 'What happens when Host C (192.168.1.30) receives an ARP Request broadcast asking "Who has 192.168.1.50?"',
+        options: [
+          'Host C inspects the Target Protocol Address, sees 192.168.1.50 does not match its own IP, and silently discards the frame without replying',
+          'Host C forwards the ARP Request to the Default Gateway',
+          'Host C sends an ARP Error reply back to the sender',
+          'Host C crashes because it received broadcast traffic',
+        ],
+        correctOption: 0,
+        explanation:
+          'Non-target hosts on a broadcast segment process the incoming broadcast frame up to the ARP header, verify that the requested Target Protocol Address does not match their own IP, and discard the frame with zero reply.',
+        explanationsJson: {
+          1: 'Hosts do not route or forward ARP broadcast frames.',
+          2: 'ARP does not define an error reply message for non-matching hosts.',
+          3: 'Network stacks are designed to discard non-matching broadcasts routinely.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Non-Target ARP Frame Discarding',
+      },
+      {
+        text: 'An attacker transmits unsolicited ARP replies associating the Default Gateway IP address with the attacker\'s own MAC address. What attack is taking place, and what is the standard switch mitigation?',
+        options: [
+          'ARP Cache Poisoning / Spoofing (Man-in-the-Middle); mitigated on switches using Dynamic ARP Inspection (DAI) coupled with DHCP Snooping',
+          'DNS Amplification DDoS; mitigated by blocking UDP port 53',
+          'SYN Flood attack; mitigated by enabling TCP SYN Cookies',
+          'Buffer Overflow attack; mitigated by compiling with Address Space Layout Randomization (ASLR)',
+        ],
+        correctOption: 0,
+        explanation:
+          'ARP Spoofing tricks hosts into sending outbound traffic to the attacker MAC. Managed switches mitigate this using Dynamic ARP Inspection (DAI), which validates ARP packets against the trusted DHCP Snooping binding database.',
+        explanationsJson: {
+          1: 'DNS amplification attacks public DNS resolvers via UDP reflection, not local LAN ARP tables.',
+          2: 'SYN floods target TCP transport buffers, not Layer 2 ARP caches.',
+          3: 'ASLR protects OS application memory against code injection, not network ARP poisoning.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'ARP Poisoning & Dynamic ARP Inspection',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Local ARP Cache Inspection & Gateway Resolution',
-      instructions: '1. Run arp -a.\n2. Ping gateway 192.168.1.1.\n3. Verify ARP table update.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { hostIp: '192.168.1.10', gatewayIp: '192.168.1.1' },
-      tasks: ['Run arp -a.'],
-    },
   },
 
   // -------------------------------------------------------------------------

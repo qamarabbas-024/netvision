@@ -265,8 +265,30 @@ async function verifyCurriculumContentV2() {
   assert(!net202!.lab, 'NET-202 has no phantom CLI lab');
   console.log('  ✓ NET-202 verified with clean Content V2 structure, 32-bit math, CIDR prefix shift, 192.168.10.37/26 worked example, 6 practice items, 6 quiz questions, and zero forced filler.');
 
+  // [TEST 14] Verify NET-203 Address Resolution Protocol (ARP) (arp-protocol-overview)
+  console.log('\n[TEST 14] Verifying NET-203 Address Resolution Protocol (ARP) (arp-protocol-overview)...');
+  const net203Arp = LESSONS_NET203_204.find((l) => l.slug === 'arp-protocol-overview');
+  assert(!!net203Arp, 'NET-203 ARP lesson exists');
+  assert(!!net203Arp!.contentV2, 'NET-203 ARP has Content V2 structure');
+  assert(net203Arp!.courseCode === 'NET-203', 'NET-203 ARP has courseCode NET-203');
+  assert(typeof net203Arp!.contentV2!.objective === 'string', 'NET-203 ARP has clear objective');
+  assert(net203Arp!.contentV2!.explanation.includes('RFC 826'), 'NET-203 ARP explains RFC 826');
+  assert(net203Arp!.contentV2!.explanation.includes('FF:FF:FF:FF:FF:FF'), 'NET-203 ARP explains broadcast MAC');
+  assert(net203Arp!.contentV2!.explanation.includes('Opcode 1') && net203Arp!.contentV2!.explanation.includes('Opcode 2'), 'NET-203 ARP explains Opcodes 1 and 2');
+  assert(net203Arp!.contentV2!.explanation.includes('Default Gateway'), 'NET-203 ARP explains Default Gateway resolution for remote destinations');
+  assert(net203Arp!.contentV2!.explanation.includes('Gratuitous ARP') || net203Arp!.contentV2!.explanation.includes('GARP'), 'NET-203 ARP explains Gratuitous ARP');
+  assert(net203Arp!.contentV2!.components.length >= 5, 'NET-203 ARP has at least 5 technical components');
+  assert(!!net203Arp!.contentV2!.visualizer, 'NET-203 ARP has visualizer defined');
+  assert(!!net203Arp!.contentV2!.workedExample, 'NET-203 ARP has worked example defined');
+  assert(Array.isArray(net203Arp!.contentV2!.practice) && net203Arp!.contentV2!.practice.length >= 6, 'NET-203 ARP has 6 practice exercises');
+  assert(net203Arp!.questions.length >= 6, 'NET-203 ARP has 6 aligned quiz questions');
+  assert(!net203Arp!.contentV2!.cliTooling, 'NET-203 ARP has no forced CLI bloat');
+  assert(!net203Arp!.contentV2!.security, 'NET-203 ARP has no generic security filler');
+  assert(!net203Arp!.lab, 'NET-203 ARP has no phantom CLI lab');
+  console.log('  ✓ NET-203 ARP verified with clean Content V2 structure, broadcast vs unicast flow, Default Gateway resolution, 6 practice items, 6 quiz questions, and zero forced filler.');
+
   console.log('\n================================================================');
-  console.log('🎉 ALL 13 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 14 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 
