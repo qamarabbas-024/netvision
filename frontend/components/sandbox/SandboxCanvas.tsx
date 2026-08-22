@@ -32,6 +32,7 @@ import {
   Shield,
   Database,
   Wifi,
+  Box,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
@@ -39,12 +40,13 @@ import { Card } from '@/components/ui/Card';
 import { NetworkNode, NetworkLink, NetworkPacket, NodeType } from '@/types';
 import { DeviceConfigModal } from '../simulation/DeviceConfigModal';
 import { PacketInspectorModal } from '../simulation/PacketInspectorModal';
+import { Interactive3DPacketJourney } from '../simulation/Interactive3DPacketJourney';
 import { DevicePalette } from './DevicePalette';
 import { PortSelectionModal } from './PortSelectionModal';
 import { DeviceCliModal } from './DeviceCliModal';
 import { TroubleshootingScenariosModal, TroubleshootingScenario } from './TroubleshootingScenariosModal';
 
-export type SimulatorMode = 'build' | 'inspect' | 'packet' | 'layer' | 'challenge';
+export type SimulatorMode = 'build' | 'inspect' | 'packet' | 'layer' | 'challenge' | '3d';
 
 interface ChallengeSpec {
   id: string;
@@ -415,6 +417,16 @@ export const SandboxCanvas: React.FC = () => {
           >
             5. CHALLENGE
           </Button>
+
+          <Button
+            variant={activeMode === '3d' ? 'primary' : 'ghost'}
+            size="sm"
+            onClick={() => setActiveMode('3d')}
+            leftIcon={<Box className="w-3.5 h-3.5 text-[#00f0ff]" />}
+            className="text-xs font-bold"
+          >
+            6. 3D WEBGL
+          </Button>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -592,9 +604,12 @@ export const SandboxCanvas: React.FC = () => {
             </Card>
           )}
 
-          {/* Canvas Box */}
-          <div className="relative w-full h-[500px] bg-[#121316] rounded-xl border border-[#2a2e39] overflow-x-auto overflow-y-hidden p-4 bg-net-grid-pattern shadow-instrument">
-            <div className="min-w-[980px] h-full relative">
+          {/* 3D WebGL Mode vs 2D Canvas Box */}
+          {activeMode === '3d' ? (
+            <Interactive3DPacketJourney />
+          ) : (
+            <div className="relative w-full h-[500px] bg-[#121316] rounded-xl border border-[#2a2e39] overflow-x-auto overflow-y-hidden p-4 bg-net-grid-pattern shadow-instrument">
+              <div className="min-w-[980px] h-full relative">
               {/* SVG Cable Layer */}
               <svg className="absolute inset-0 w-full h-full pointer-events-none">
                 {links.map((link) => {
@@ -727,6 +742,7 @@ export const SandboxCanvas: React.FC = () => {
               )}
             </div>
           </div>
+          )}
         </div>
 
         {/* Right: Inspector / Layer Panel */}
