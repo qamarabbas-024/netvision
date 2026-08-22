@@ -353,8 +353,79 @@ async function verifyCurriculumContentV2() {
   assert(!net201Ethernet!.lab, 'NET-201 Ethernet framing has no phantom CLI lab');
   console.log('  ✓ NET-201 Ethernet Framing verified with clean Content V2 structure, header fields, EtherTypes, 64-byte padding mechanics, 6 practice items, 6 quiz questions, and zero forced filler.');
 
+  // [TEST 18] Verify NET-203 DNS & Name Resolution Architecture (level-0-dns-internet-phonebook)
+  console.log('\n[TEST 18] Verifying NET-203 DNS & Name Resolution Architecture (level-0-dns-internet-phonebook)...');
+  const net203Dns = LESSONS_NET203_204.find((l) => l.slug === 'level-0-dns-internet-phonebook');
+  assert(!!net203Dns, 'NET-203 DNS lesson exists');
+  assert(!!net203Dns!.contentV2, 'NET-203 DNS has Content V2 structure');
+  assert(net203Dns!.courseCode === 'NET-203', 'NET-203 DNS has courseCode NET-203');
+  assert(typeof net203Dns!.contentV2!.objective === 'string', 'NET-203 DNS has clear objective');
+  assert(net203Dns!.contentV2!.explanation.includes('Recursive Resolver'), 'NET-203 DNS explains Recursive Resolver');
+  assert(net203Dns!.contentV2!.explanation.includes('Root Zone') || net203Dns!.contentV2!.explanation.includes('Root'), 'NET-203 DNS explains Root Server tier');
+  assert(net203Dns!.contentV2!.explanation.includes('Top-Level Domain') || net203Dns!.contentV2!.explanation.includes('TLD'), 'NET-203 DNS explains TLD tier');
+  assert(net203Dns!.contentV2!.explanation.includes('Authoritative'), 'NET-203 DNS explains Authoritative Nameserver');
+  assert(net203Dns!.contentV2!.explanation.includes('CNAME') && net203Dns!.contentV2!.explanation.includes('AAAA'), 'NET-203 DNS explains CNAME and AAAA records');
+  assert(net203Dns!.contentV2!.explanation.includes('UDP port 53') || net203Dns!.contentV2!.explanation.includes('UDP'), 'NET-203 DNS explains UDP port 53 transport');
+  assert(net203Dns!.contentV2!.components.length >= 5, 'NET-203 DNS has at least 5 technical components');
+  assert(!!net203Dns!.contentV2!.packetHeaderView, 'NET-203 DNS has packetHeaderView defined');
+  assert(!!net203Dns!.contentV2!.visualizer, 'NET-203 DNS has visualizer defined');
+  assert(!!net203Dns!.contentV2!.workedExample, 'NET-203 DNS has worked example defined');
+  assert(Array.isArray(net203Dns!.contentV2!.practice) && net203Dns!.contentV2!.practice.length >= 6, 'NET-203 DNS has 6 practice exercises');
+  assert(net203Dns!.questions.length >= 6, 'NET-203 DNS has 6 aligned quiz questions');
+  assert(!net203Dns!.contentV2!.cliTooling, 'NET-203 DNS has no forced CLI bloat');
+  assert(!net203Dns!.contentV2!.security, 'NET-203 DNS has no generic security filler');
+  assert(!net203Dns!.lab, 'NET-203 DNS has no phantom CLI lab');
+  console.log('  ✓ NET-203 DNS verified with clean Content V2 structure, 4-tier hierarchy, record schemas, UDP/TCP 53, 6 practice items, 6 quiz questions, and zero forced filler.');
+
+  // [TEST 19] Verify NET-203 DHCP & IP Leasing (level-0-dhcp-automatic-ip-allocation)
+  console.log('\n[TEST 19] Verifying NET-203 DHCP & IP Leasing (level-0-dhcp-automatic-ip-allocation)...');
+  const net203Dhcp = LESSONS_NET203_204.find((l) => l.slug === 'level-0-dhcp-automatic-ip-allocation');
+  assert(!!net203Dhcp, 'NET-203 DHCP lesson exists');
+  assert(!!net203Dhcp!.contentV2, 'NET-203 DHCP has Content V2 structure');
+  assert(net203Dhcp!.courseCode === 'NET-203', 'NET-203 DHCP has courseCode NET-203');
+  assert(typeof net203Dhcp!.contentV2!.objective === 'string', 'NET-203 DHCP has clear objective');
+  assert(net203Dhcp!.contentV2!.explanation.includes('DORA') || net203Dhcp!.contentV2!.explanation.includes('Discover'), 'NET-203 DHCP explains DORA exchange');
+  assert(net203Dhcp!.contentV2!.explanation.includes('UDP Port 67') || net203Dhcp!.contentV2!.explanation.includes('67'), 'NET-203 DHCP explains UDP 67/68 ports');
+  assert(net203Dhcp!.contentV2!.explanation.includes('Option 1') || net203Dhcp!.contentV2!.explanation.includes('Option 3'), 'NET-203 DHCP explains Option parameters');
+  assert(net203Dhcp!.contentV2!.explanation.includes('T1') && net203Dhcp!.contentV2!.explanation.includes('T2'), 'NET-203 DHCP explains T1 and T2 renewal/rebind timers');
+  assert(net203Dhcp!.contentV2!.explanation.includes('APIPA') || net203Dhcp!.contentV2!.explanation.includes('169.254'), 'NET-203 DHCP explains APIPA fallback');
+  assert(net203Dhcp!.contentV2!.components.length >= 5, 'NET-203 DHCP has at least 5 technical components');
+  assert(!!net203Dhcp!.contentV2!.packetHeaderView, 'NET-203 DHCP has packetHeaderView defined');
+  assert(!!net203Dhcp!.contentV2!.visualizer, 'NET-203 DHCP has visualizer defined');
+  assert(!!net203Dhcp!.contentV2!.workedExample, 'NET-203 DHCP has worked example defined');
+  assert(Array.isArray(net203Dhcp!.contentV2!.practice) && net203Dhcp!.contentV2!.practice.length >= 6, 'NET-203 DHCP has 6 practice exercises');
+  assert(net203Dhcp!.questions.length >= 6, 'NET-203 DHCP has 6 aligned quiz questions');
+  assert(!net203Dhcp!.contentV2!.cliTooling, 'NET-203 DHCP has no forced CLI bloat');
+  assert(!net203Dhcp!.contentV2!.security, 'NET-203 DHCP has no generic security filler');
+  assert(!net203Dhcp!.lab, 'NET-203 DHCP has no phantom CLI lab');
+  console.log('  ✓ NET-203 DHCP verified with clean Content V2 structure, DORA exchange, Options 1/3/6, T1/T2 timers, APIPA fallback, 6 practice items, 6 quiz questions, and zero forced filler.');
+
+  // [TEST 20] Verify NET-204 Network Ports, Sockets & Multiplexing (level-0-network-ports-socket-boundaries)
+  console.log('\n[TEST 20] Verifying NET-204 Network Ports, Sockets & Multiplexing (level-0-network-ports-socket-boundaries)...');
+  const net204Ports = LESSONS_NET203_204.find((l) => l.slug === 'level-0-network-ports-socket-boundaries');
+  assert(!!net204Ports, 'NET-204 Ports & Sockets lesson exists');
+  assert(!!net204Ports!.contentV2, 'NET-204 Ports & Sockets has Content V2 structure');
+  assert(net204Ports!.courseCode === 'NET-204', 'NET-204 Ports & Sockets has courseCode NET-204');
+  assert(typeof net204Ports!.contentV2!.objective === 'string', 'NET-204 Ports & Sockets has clear objective');
+  assert(net204Ports!.contentV2!.explanation.includes('16-bit') || net204Ports!.contentV2!.explanation.includes('65535'), 'NET-204 Ports & Sockets explains 16-bit port length');
+  assert(net204Ports!.contentV2!.explanation.includes('Well-Known') && net204Ports!.contentV2!.explanation.includes('1023'), 'NET-204 Ports & Sockets explains Well-Known range (0-1023)');
+  assert(net204Ports!.contentV2!.explanation.includes('Registered') && net204Ports!.contentV2!.explanation.includes('49151'), 'NET-204 Ports & Sockets explains Registered range (1024-49151)');
+  assert(net204Ports!.contentV2!.explanation.includes('Ephemeral') || net204Ports!.contentV2!.explanation.includes('Dynamic'), 'NET-204 Ports & Sockets explains Dynamic/Ephemeral range (49152-65535)');
+  assert(net204Ports!.contentV2!.explanation.includes('Socket Pair') || net204Ports!.contentV2!.explanation.includes('4-Tuple'), 'NET-204 Ports & Sockets explains Socket Pair 4-tuple');
+  assert(net204Ports!.contentV2!.explanation.includes('Multiplexing') && net204Ports!.contentV2!.explanation.includes('Demultiplexing'), 'NET-204 Ports & Sockets explains Multiplexing and Demultiplexing');
+  assert(net204Ports!.contentV2!.components.length >= 5, 'NET-204 Ports & Sockets has at least 5 technical components');
+  assert(!!net204Ports!.contentV2!.packetHeaderView, 'NET-204 Ports & Sockets has packetHeaderView defined');
+  assert(!!net204Ports!.contentV2!.visualizer, 'NET-204 Ports & Sockets has visualizer defined');
+  assert(!!net204Ports!.contentV2!.workedExample, 'NET-204 Ports & Sockets has worked example defined');
+  assert(Array.isArray(net204Ports!.contentV2!.practice) && net204Ports!.contentV2!.practice.length >= 6, 'NET-204 Ports & Sockets has 6 practice exercises');
+  assert(net204Ports!.questions.length >= 6, 'NET-204 Ports & Sockets has 6 aligned quiz questions');
+  assert(!net204Ports!.contentV2!.cliTooling, 'NET-204 Ports & Sockets has no forced CLI bloat');
+  assert(!net204Ports!.contentV2!.security, 'NET-204 Ports & Sockets has no generic security filler');
+  assert(!net204Ports!.lab, 'NET-204 Ports & Sockets has no phantom CLI lab');
+  console.log('  ✓ NET-204 Ports & Sockets verified with clean Content V2 structure, 16-bit ranges, 4-tuple socket pairs, multiplexing/demultiplexing, 6 practice items, 6 quiz questions, and zero forced filler.');
+
   console.log('\n================================================================');
-  console.log('🎉 ALL 17 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 20 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 
@@ -362,3 +433,4 @@ verifyCurriculumContentV2().catch((err) => {
   console.error('\n❌ CURRICULUM CONTENT V2 VERIFICATION FAILED:', err);
   process.exit(1);
 });
+

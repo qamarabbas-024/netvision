@@ -22,6 +22,7 @@ import { PerformanceMetricsVisual } from './PerformanceMetricsVisual';
 import { WirelessSpectrumVisual } from './WirelessSpectrumVisual';
 import { MacBitParserVisual } from './MacBitParserVisual';
 import { EthernetFrameVisual } from './EthernetFrameVisual';
+import { SocketMultiplexerVisual } from './SocketMultiplexerVisual';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -98,6 +99,9 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
   }
   if (slug.includes('dhcp')) {
     return <DHCPVisual />;
+  }
+  if (slug.includes('port') || slug.includes('socket') || slug.includes('multiplex')) {
+    return <SocketMultiplexerVisual />;
   }
   if (slug.includes('subnet')) {
     return <SubnetVisual />;

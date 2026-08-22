@@ -654,94 +654,146 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-level-0-network-ports-socket-boundaries',
     lessonSlug: 'level-0-network-ports-socket-boundaries',
-    text: 'In Transport Layer networking, what constitutes a network "Socket"?',
+    text: 'What are the three official IANA port number classifications and their correct numerical ranges?',
     options: [
-      'The unique combination of an IP address and a Port number (e.g. 192.168.1.10:443)',
-      'The physical plastic RJ-45 modular jack mounted on the office wall',
-      'The electrical copper connector inside a power strip',
-      'The memory cache slot on a motherboard holding a CPU chip'
+      'Well-Known Ports (0 – 1023), Registered Ports (1024 – 49151), and Dynamic/Ephemeral Ports (49152 – 65535)',
+      'Class A Ports (0 – 255), Class B Ports (256 – 1024), and Class C Ports (1025 – 65535)',
+      'Public Ports (0 – 1000) and Private Ports (1001 – 65535)',
+      'TCP Ports (0 – 32767) and UDP Ports (32768 – 65535)',
     ],
     correctOption: 0,
-    explanation: 'A network socket is defined in software as the endpoint of a bidirectional communication flow, uniquely identified by the combination of an IP address (host identity) and a Port number (application process identity).',
+    explanation:
+      'IANA officially designates 16-bit ports into Well-Known (0 to 1023 for system services), Registered (1024 to 49151 for applications), and Dynamic/Ephemeral (49152 to 65535 for client outbound connections).',
     explanationsJson: {
-      1: 'An RJ-45 wall jack is a physical Layer 1 connector, not a logical transport layer socket.',
-      2: 'A power outlet is electrical utility infrastructure.',
-      3: 'A CPU socket is a physical motherboard processor receptacle.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Socket Definition',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-network-ports-socket-boundaries',
-    lessonSlug: 'level-0-network-ports-socket-boundaries',
-    text: 'What port range is officially designated by IANA as the "Well-Known Ports" reserved for standardized system server daemons?',
-    options: [
-      'Ports 0 to 1023',
-      'Ports 1024 to 49151',
-      'Ports 49152 to 65535',
-      'Ports 65536 to 99999'
-    ],
-    correctOption: 0,
-    explanation: 'IANA reserves ports 0-1023 as Well-Known (System) Ports for standard services (HTTP 80, HTTPS 443, SSH 22, DNS 53). Ports 1024-49151 are Registered, and 49152-65535 are Dynamic/Ephemeral.',
-    explanationsJson: {
-      1: 'Ports 1024 to 49151 are Registered Ports for specific vendor applications.',
-      2: 'Ports 49152 to 65535 are Dynamic/Private/Ephemeral ports used as client source ports.',
-      3: '16-bit port numbers maximum value is 65535 (2^16 - 1); ports above 65535 do not exist in TCP/UDP.'
+      1: 'Port numbers do not use IP class letters.',
+      2: 'Invalid arbitrary ranges.',
+      3: 'Both TCP and UDP span the full 0-65535 range.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'IANA Port Number Ranges',
-    points: 10
+    concept: 'IANA Port Classification Ranges',
+    points: 10,
   },
   {
     quizId: 'quiz-level-0-network-ports-socket-boundaries',
     lessonSlug: 'level-0-network-ports-socket-boundaries',
-    text: 'How can a single web server with a single physical NIC and single IP address (`203.0.113.10`) concurrently host both a web server (HTTPS) and an SSH remote administration server without data collision?',
+    text: 'What constitutes a complete Transport Layer "Socket Pair" (4-tuple) that uniquely distinguishes a network conversation globally across the Internet?',
     options: [
-      'The Transport Layer multiplexes traffic using distinct port numbers (port 443 for HTTPS, port 22 for SSH) to direct incoming packets to the correct application process',
-      'The server alternates between HTTPS and SSH every 5 seconds by turning off the NIC',
-      'The server uses two different colors of Ethernet cables inside the same sheath',
-      'The server converts SSH traffic into physical audio vibrations'
+      'Source IP Address, Source Port Number, Destination IP Address, Destination Port Number',
+      'Source MAC Address, Destination MAC Address, VLAN ID, Subnet Mask',
+      'Domain Name, URL Path, Browser Cookie, HTTP Status Code',
+      'Serial Number, Transceiver Model, Fiber Core Diameter, Optical Wavelength',
     ],
     correctOption: 0,
-    explanation: 'Transport layer port numbers provide multiplexing/demultiplexing. The operating system kernel inspects the destination port in the TCP header and delivers port 443 packets to the web server process and port 22 packets to the SSH daemon process.',
+    explanation:
+      'A 4-tuple socket pair (Source IP, Source Port, Destination IP, Destination Port) along with the transport protocol uniquely identifies every end-to-end conversation across the global Internet.',
     explanationsJson: {
-      1: 'Servers handle multiple services simultaneously in parallel; they do not alternate by disabling the NIC.',
-      2: 'Cable coloring is cosmetic; multiple logical ports traverse the same physical medium concurrently.',
-      3: 'Audio vibrations are not used for transport layer demultiplexing.'
+      1: 'MAC addresses and VLANs are Layer 2 framing parameters.',
+      2: 'URL paths and cookies are Layer 7 application data.',
+      3: 'Hardware serials and wavelengths are Physical Layer 1 attributes.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
-    questionType: QuestionType.SCENARIO,
-    concept: 'Port Multiplexing',
-    points: 10
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'The 4-Tuple Socket Pair',
+    points: 10,
   },
   {
     quizId: 'quiz-level-0-network-ports-socket-boundaries',
     lessonSlug: 'level-0-network-ports-socket-boundaries',
-    text: 'An administrator runs `netstat -ano` on a server and notices a listening socket on `0.0.0.0:3389`. What does this socket state represent?',
+    text: 'Which of the following correctly pairs standard Well-Known port numbers with their respective protocol services?',
     options: [
-      'The Remote Desktop Protocol (RDP) service is listening for incoming connection requests on port 3389 across all available local IPv4 network interfaces',
-      'The server is currently sending an email to a remote host on port 3389',
-      'Port 3389 has been permanently blocked by an external hardware firewall',
-      'The network cable is disconnected and the NIC is in sleep mode'
+      'HTTP = 80, HTTPS = 443, SSH = 22, DNS = 53, DHCP Server = 67',
+      'HTTP = 443, HTTPS = 80, SSH = 53, DNS = 22, DHCP Server = 25',
+      'HTTP = 21, HTTPS = 23, SSH = 80, DNS = 443, DHCP Server = 110',
+      'HTTP = 8080, HTTPS = 8443, SSH = 2222, DNS = 5353, DHCP Server = 6767',
     ],
     correctOption: 0,
-    explanation: '`0.0.0.0` in a listening socket context represents `INADDR_ANY` (all local IPv4 interfaces). Port 3389 is the standard IANA port for Microsoft Remote Desktop Protocol (RDP).',
+    explanation:
+      'Official well-known ports: HTTP uses 80, HTTPS uses 443, SSH uses 22, DNS uses 53, and DHCP Server uses 67.',
     explanationsJson: {
-      1: 'Outbound email utilizes SMTP port 25 or submission port 587, not listening on RDP 3389.',
-      2: 'Netstat inspects local OS listening state; it does not indicate external firewall drops.',
-      3: 'A listening socket exists in the OS network stack regardless of physical link state.'
+      1: 'Swapped port assignments.',
+      2: '21 is FTP, 23 is Telnet, 110 is POP3.',
+      3: 'These are non-standard alternate ports.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Standard Well-Known Port Numbers',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-network-ports-socket-boundaries',
+    lessonSlug: 'level-0-network-ports-socket-boundaries',
+    text: 'A user opens three separate browser tabs to `https://www.google.com` (`142.250.190.46:443`). How does the user\'s operating system ensure returning web packets are delivered to the correct browser tab without cross-contamination?',
+    options: [
+      'The OS assigns a unique ephemeral source port (e.g. 51234, 51235, 51236) to each tab, allowing the kernel to demultiplex returning packets based on destination port',
+      'The OS assigns a different physical MAC address to each tab',
+      'The OS requests Google to create three separate physical IP addresses for the client',
+      'The OS shuts down the other two tabs while one tab is loading',
+    ],
+    correctOption: 0,
+    explanation:
+      'The OS allocates a distinct ephemeral source port to each browser tab. When Google replies, the Destination Port in the TCP header matches that specific ephemeral port, allowing the kernel to demultiplex the data stream directly to the correct tab.',
+    explanationsJson: {
+      1: 'A physical NIC has only one burned-in MAC address.',
+      2: 'The client host uses only its single assigned IP address.',
+      3: 'Modern multitasking operating systems run all sockets concurrently.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
-    questionType: QuestionType.COMMAND_INTERPRETATION,
-    concept: 'Netstat Socket State Interpretation',
-    points: 10
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Ephemeral Port Allocation & Socket Demultiplexing',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-network-ports-socket-boundaries',
+    lessonSlug: 'level-0-network-ports-socket-boundaries',
+    text: 'What is the operational difference between Transport Layer Multiplexing and Demultiplexing inside an operating system?',
+    options: [
+      'Multiplexing gathers data from multiple application sockets onto a single physical network interface; Demultiplexing delivers incoming packets from the interface to the correct application socket based on Destination Port',
+      'Multiplexing encrypts packets; Demultiplexing decrypts packets',
+      'Multiplexing converts IPv4 to IPv6; Demultiplexing converts IPv6 to IPv4',
+      'Multiplexing operates on copper cables; Demultiplexing operates on fiber optics',
+    ],
+    correctOption: 0,
+    explanation:
+      'Multiplexing combines outbound streams from diverse application sockets onto one physical link; Demultiplexing separates inbound packet streams and delivers them to their target application process using port headers.',
+    explanationsJson: {
+      1: 'Encryption/decryption is handled by TLS/Presentation Layer.',
+      2: 'Protocol translation is handled by NAT64/Dual-Stack.',
+      3: 'Physical media is handled by Layer 1 transceivers.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Multiplexing vs Demultiplexing Mechanics',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-network-ports-socket-boundaries',
+    lessonSlug: 'level-0-network-ports-socket-boundaries',
+    text: 'A software engineer runs a web server script and encounters the fatal error: `Error: listen EADDRINUSE: address already in use 0.0.0.0:8080`. What does this error signify, and what is the standard diagnostic action?',
+    options: [
+      'Another active process is already listening on port 8080; use `netstat -ano | findstr :8080` to locate and terminate the conflicting Process ID (PID) or reconfigure the application port',
+      'The router has run out of physical bandwidth',
+      'The computer has lost its IPv4 default gateway',
+      'The DNS root server is offline',
+    ],
+    correctOption: 0,
+    explanation:
+      'Only one process can bind to a specific IP address, transport protocol, and port number at any given time. `EADDRINUSE` indicates a port collision with an existing daemon.',
+    explanationsJson: {
+      1: 'Bandwidth issues cause latency/drops, not local socket binding collisions.',
+      2: 'Default gateway reachability does not prevent local socket binding.',
+      3: 'DNS root servers do not interfere with local localhost server binding.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+    questionType: QuestionType.TROUBLESHOOTING,
+    concept: 'Socket Binding & Port In-Use Troubleshooting',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------
@@ -942,94 +994,146 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-level-0-dns-internet-phonebook',
     lessonSlug: 'level-0-dns-internet-phonebook',
-    text: 'What fundamental service does the Domain Name System (DNS) provide on an IP network?',
+    text: 'What are the four primary DNS server roles involved in resolving an unknown domain name, in the correct chronological order of the resolution referral chain?',
     options: [
-      'Resolving human-friendly domain names (e.g. netvision.edu) into machine-routable IP addresses (e.g. 198.51.100.25)',
-      'Assigning dynamic physical MAC addresses to client network interface cards',
-      'Encrypting all hard drive storage partitions using AES-256 bit keys',
-      'Regulating the flow of alternating electrical current through wall power sockets'
+      'Recursive Resolver -> Root Nameserver -> TLD Nameserver -> Authoritative Nameserver',
+      'Authoritative Nameserver -> TLD Nameserver -> Root Nameserver -> Client',
+      'DHCP Server -> ARP Server -> Switch -> Router',
+      'Web Server -> Database Server -> Proxy Server -> Firewall',
     ],
     correctOption: 0,
-    explanation: 'DNS acts as the distributed directory service of the Internet, translating human-memorizable Fully Qualified Domain Names (FQDNs) into numerical IPv4/IPv6 addresses required by the network layer.',
+    explanation:
+      'When a client queries a Recursive Resolver, the resolver iteratively queries the Root Nameserver (`.`), which refers to the TLD Nameserver (`.com`), which refers to the Authoritative Nameserver (`ns1.example.com`), which returns the final A record.',
     explanationsJson: {
-      1: 'Assigning dynamic IP parameters is done by DHCP; MAC addresses are burned-in hardware addresses.',
-      2: 'Storage encryption is an OS/filesystem function (e.g. BitLocker/LUKS), not a DNS service.',
-      3: 'Power regulation is electrical engineering, unrelated to DNS name resolution.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'DNS Purpose & Resolution',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-dns-internet-phonebook',
-    lessonSlug: 'level-0-dns-internet-phonebook',
-    text: 'Which DNS Resource Record type is specifically used to map a domain hostname directly to an IPv4 address?',
-    options: [
-      'A Record',
-      'AAAA Record',
-      'MX Record',
-      'CNAME Record'
-    ],
-    correctOption: 0,
-    explanation: 'An "A" (Address) record maps an FQDN to a 32-bit IPv4 address. An "AAAA" record maps to a 128-bit IPv6 address, "MX" designates mail exchangers, and "CNAME" defines canonical domain aliases.',
-    explanationsJson: {
-      1: 'AAAA records map domain names to 128-bit IPv6 addresses.',
-      2: 'MX (Mail Exchange) records specify incoming email servers for a domain.',
-      3: 'CNAME (Canonical Name) records map an alias name to another canonical domain name, not directly to an IP.'
+      1: 'Reversed order.',
+      2: 'DHCP and ARP are distinct protocols.',
+      3: 'Application server roles.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'DNS Record Types',
-    points: 10
+    concept: 'DNS 4-Tier Server Hierarchy',
+    points: 10,
   },
   {
     quizId: 'quiz-level-0-dns-internet-phonebook',
     lessonSlug: 'level-0-dns-internet-phonebook',
-    text: 'What is the correct hierarchical order of DNS servers queried during a recursive resolution of `www.example.com` starting from a local resolver?',
+    text: 'Which DNS Resource Record type is used to map an alias hostname to another canonical domain name (e.g. mapping `www.example.com` to `example.com`)?',
     options: [
-      'Local Recursive Resolver → Root Name Server (.) → Top-Level Domain (TLD) Server (.com) → Authoritative Name Server (example.com)',
-      'Authoritative Name Server → Top-Level Domain Server → Root Name Server → Local Resolver',
-      'Root Name Server → Local DHCP Server → Client Web Browser → Default Gateway',
-      'Local Switch MAC Table → ARP Cache → Root Name Server → Host Operating System'
+      'CNAME (Canonical Name)',
+      'A Record',
+      'AAAA Record',
+      'MX Record',
     ],
     correctOption: 0,
-    explanation: 'When not cached, the recursive resolver queries: 1. Root servers (.) for the .com TLD server IP; 2. TLD server for example.com authoritative server IP; 3. Authoritative server for www.example.com A record.',
+    explanation:
+      'A CNAME (Canonical Name) record creates an alias pointing one domain name to another canonical hostname, allowing multiple subdomains to resolve to the same underlying record.',
     explanationsJson: {
-      1: 'This is the exact inverse of hierarchical DNS query order.',
-      2: 'DHCP servers assign network settings; they do not act as intermediate stages between root and browser.',
-      3: 'MAC tables and ARP are Layer 2 mechanisms, not hierarchical DNS name servers.'
+      1: 'A records map directly to 32-bit IPv4 addresses, not other domain names.',
+      2: 'AAAA records map directly to 128-bit IPv6 addresses.',
+      3: 'MX records specify mail exchange servers with routing priorities.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'DNS CNAME Resource Record',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-dns-internet-phonebook',
+    lessonSlug: 'level-0-dns-internet-phonebook',
+    text: 'Why does standard DNS primarily use UDP port 53 for queries rather than TCP port 53?',
+    options: [
+      'Because UDP avoids 3-way connection handshake overhead, enabling single round-trip lookups with minimal latency and reduced server state load',
+      'Because TCP cannot transmit ASCII text domain characters',
+      'Because UDP automatically encrypts domain names with AES-256',
+      'Because routers drop all TCP packets destined to port 53',
+    ],
+    correctOption: 0,
+    explanation:
+      'UDP is connectionless and fast: a client sends a single request packet and receives a single response packet, avoiding TCP 3-way handshake delay and conserving server memory for millions of concurrent queries.',
+    explanationsJson: {
+      1: 'TCP carries any binary or ASCII payload.',
+      2: 'Standard UDP DNS is plaintext; encryption requires DoT (port 853) or DoH (port 443).',
+      3: 'Routers routinely route TCP port 53 for DNS zone transfers and large payloads.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'DNS Hierarchical Resolution Hierarchy',
-    points: 10
+    concept: 'DNS Transport Protocol Selection (UDP vs TCP)',
+    points: 10,
   },
   {
     quizId: 'quiz-level-0-dns-internet-phonebook',
     lessonSlug: 'level-0-dns-internet-phonebook',
-    text: 'A user reports: "I can ping 8.8.8.8 successfully, but typing `https://www.google.com` into my browser returns `DNS_PROBE_FINISHED_NXDOMAIN`." What is the immediate diagnosis and troubleshooting step?',
+    text: 'A systems administrator updates the IPv4 address for `api.company.com` from `1.1.1.1` to `2.2.2.2`. However, remote users continue reaching `1.1.1.1` for the next hour. What DNS parameter is responsible for this delay?',
     options: [
-      'The client IP connectivity and default gateway routing are fully operational, but the configured DNS server IP is unreachable or misconfigured; check `ipconfig /all` and verify DNS server settings',
-      'The client physical network interface card has physically burned out',
-      'The Google web servers worldwide have been completely shut down',
-      'The local Ethernet switch has blocked all ICMP ping packets'
+      'Time-To-Live (TTL) caching timeout in upstream recursive resolvers',
+      'The 48-bit MAC address burned-in hardware serial',
+      'The router MTU packet size limit',
+      'The default gateway subnet mask',
     ],
     correctOption: 0,
-    explanation: 'Pinging 8.8.8.8 proves physical link, IP addressing, default gateway routing, and NAT are working perfectly. Failure to resolve google.com confirms the issue is isolated to DNS resolution (e.g. invalid DNS server IP or DNS server failure).',
+    explanation:
+      'Recursive resolvers and client operating systems cache DNS records according to the record\'s Time-To-Live (TTL). Upstream caches will not query authoritative servers for the new IP until the old TTL expires.',
     explanationsJson: {
-      1: 'If the NIC burned out, pinging 8.8.8.8 would fail immediately.',
-      2: 'Google web infrastructure is active; NXDOMAIN indicates a local DNS resolution failure.',
-      3: 'Pinging 8.8.8.8 succeeded, which proves ICMP was not blocked by the switch.'
+      1: 'MAC addresses operate at Layer 2 and have no effect on global DNS caching.',
+      2: 'MTU limits payload packet size, not domain record expiration.',
+      3: 'Subnet masks define local IP boundaries, not DNS cache timers.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'DNS TTL & Resolver Caching Mechanics',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-dns-internet-phonebook',
+    lessonSlug: 'level-0-dns-internet-phonebook',
+    text: 'Which DNS Resource Record type is queried when an email server needs to determine which mail gateway handles incoming emails for the domain `@example.com`?',
+    options: [
+      'MX (Mail Exchange) record',
+      'PTR (Pointer) record',
+      'TXT (Text) record',
+      'NS (Name Server) record',
+    ],
+    correctOption: 0,
+    explanation:
+      'MX (Mail Exchange) records specify the mail servers responsible for accepting incoming email for a domain, along with preference/priority values determining server precedence.',
+    explanationsJson: {
+      1: 'PTR records are used for reverse IP-to-hostname lookups.',
+      2: 'TXT records hold arbitrary text (often used for SPF/DKIM verification).',
+      3: 'NS records delegate zone authority to nameservers.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'DNS MX Mail Exchange Records',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-dns-internet-phonebook',
+    lessonSlug: 'level-0-dns-internet-phonebook',
+    text: 'A user reports that they can successfully ping public IP address `8.8.8.8` from their command prompt, but typing `https://www.google.com` into their web browser results in a "Server Not Found" error. What is the most likely root cause?',
+    options: [
+      'DNS server IP configuration is invalid or the configured DNS resolver is unreachable, preventing domain name translation',
+      'The physical Ethernet copper cable is unplugged',
+      'The default gateway router has crashed and dropped all IP routing',
+      'The user\'s network card MAC address has expired',
+    ],
+    correctOption: 0,
+    explanation:
+      'Because the host can ping 8.8.8.8, Layers 1, 2, and 3 (cable, MAC, IP, gateway routing) are fully functional. The failure to browse by domain name proves that Application Layer DNS name resolution is failing.',
+    explanationsJson: {
+      1: 'If the cable were unplugged, pinging 8.8.8.8 would fail immediately.',
+      2: 'If the default gateway had crashed, no traffic could reach public IP 8.8.8.8.',
+      3: 'MAC addresses are permanently burned-in and do not expire.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
     questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'DNS Failure vs IP Reachability Diagnosis',
-    points: 10
+    concept: 'DNS Resolution vs IP Routing Troubleshooting',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------
@@ -1038,94 +1142,146 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-level-0-dhcp-automatic-ip-allocation',
     lessonSlug: 'level-0-dhcp-automatic-ip-allocation',
-    text: 'What are the 4 sequential steps of the DHCP dynamic address allocation process (the DORA state machine)?',
+    text: 'What are the four sequential messages exchanged between a client and a DHCP server during initial IP address lease acquisition?',
     options: [
-      'Discover (Client broadcast) → Offer (Server unicast/broadcast) → Request (Client broadcast) → Acknowledge (Server unicast/broadcast)',
-      'Dial → Open → Read → Accept',
-      'Demand → Order → Reserve → Allocate',
-      'Detect → Overwrite → Reclaim → Authenticate'
+      'Discover -> Offer -> Request -> Acknowledge (DORA)',
+      'Request -> Reply -> Connect -> Finalize',
+      'SYN -> SYN-ACK -> ACK -> FIN',
+      'Query -> Lookup -> Resolve -> Bind',
     ],
     correctOption: 0,
-    explanation: 'DHCP operates via DORA: 1. DHCPDISCOVER (client broadcasts seeking a server); 2. DHCPOFFER (server reserves and offers an IP); 3. DHCPREQUEST (client broadcasts requesting the offered IP); 4. DHCPACK (server confirms lease).',
+    explanation:
+      'Initial DHCP lease acquisition follows the DORA sequence: DHCP Discover (Client broadcast), DHCP Offer (Server response), DHCP Request (Client commitment), and DHCP Acknowledge (Server finalization).',
     explanationsJson: {
-      1: 'Dial/Open/Read/Accept are generic software terms, not DHCP protocol messages.',
-      2: 'Demand/Order/Reserve/Allocate is not the RFC 2131 DHCP protocol sequence.',
-      3: 'Detect/Overwrite/Reclaim/Authenticate is not the RFC 2131 standard.'
+      1: 'Generic terms.',
+      2: 'That is the TCP handshake and teardown.',
+      3: 'Generic terms.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'DHCP DORA Sequence',
-    points: 10
+    concept: 'DHCP DORA Workflow',
+    points: 10,
   },
   {
     quizId: 'quiz-level-0-dhcp-automatic-ip-allocation',
     lessonSlug: 'level-0-dhcp-automatic-ip-allocation',
-    text: 'What critical network configuration parameters does a standard DHCP server provision to a client in addition to its assigned IPv4 address?',
+    text: 'Which UDP port numbers are officially designated for DHCP Server and DHCP Client communications?',
     options: [
-      'Subnet Mask (Option 1), Default Gateway Router IP (Option 3), and DNS Server IPs (Option 6)',
-      'The client administrator password and BIOS firmware update',
-      'The serial numbers of all hard drives installed in the office',
-      'The physical street address of the building landlord'
+      'DHCP Server = UDP Port 67, DHCP Client = UDP Port 68',
+      'DHCP Server = UDP Port 53, DHCP Client = UDP Port 53',
+      'DHCP Server = TCP Port 80, DHCP Client = TCP Port 443',
+      'DHCP Server = UDP Port 161, DHCP Client = UDP Port 162',
     ],
     correctOption: 0,
-    explanation: 'DHCP options dynamically configure the complete TCP/IP stack: Subnet Mask (Option 1), Default Gateway (Option 3), DNS Server IPs (Option 6), Lease Duration (Option 51), and Domain Name (Option 15).',
+    explanation:
+      'DHCP utilizes UDP port 67 for the server daemon (BOOTPS) and UDP port 68 for client endpoints (BOOTPC).',
     explanationsJson: {
-      1: 'DHCP provisions network parameters, not OS passwords or BIOS firmware.',
-      2: 'Storage hardware serial numbers are internal hardware attributes, not DHCP network options.',
-      3: 'Landlord physical address is not a networking configuration protocol field.'
+      1: 'Port 53 is DNS.',
+      2: 'Ports 80 and 443 are HTTP and HTTPS.',
+      3: 'Ports 161 and 162 are SNMP.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'DHCP UDP Port Numbers',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-dhcp-automatic-ip-allocation',
+    lessonSlug: 'level-0-dhcp-automatic-ip-allocation',
+    text: 'What are the standard DHCP Option numbers used to provide client endpoints with their Subnet Mask, Default Gateway Router IP, and DNS Server IPs?',
+    options: [
+      'Subnet Mask = Option 1, Default Gateway = Option 3, DNS Servers = Option 6',
+      'Subnet Mask = Option 10, Default Gateway = Option 20, DNS Servers = Option 30',
+      'Subnet Mask = Option 80, Default Gateway = Option 443, DNS Servers = Option 53',
+      'Subnet Mask = Option 255, Default Gateway = Option 1, DNS Servers = Option 8',
+    ],
+    correctOption: 0,
+    explanation:
+      'RFC 2132 defines standard DHCP Options: Option 1 specifies Subnet Mask, Option 3 specifies Router (Default Gateway), and Option 6 specifies Domain Name Servers (DNS).',
+    explanationsJson: {
+      1: 'Arbitrary numbers.',
+      2: 'These are well-known application port numbers, not DHCP option codes.',
+      3: 'Arbitrary numbers.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'DHCP Option Codes (1, 3, 6)',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-dhcp-automatic-ip-allocation',
+    lessonSlug: 'level-0-dhcp-automatic-ip-allocation',
+    text: 'An employee\'s laptop acquires an 8-hour DHCP lease at 09:00 AM. At what time will the client first attempt to renew its lease (T1 Renewal Timer), and how is the renewal packet transmitted?',
+    options: [
+      'At 01:00 PM (50% of lease duration) via a Unicast DHCP Request sent directly to the leasing server',
+      'At 04:00 PM (87.5% of lease duration) via a Broadcast DHCP Discover',
+      'At 05:00 PM (100% of lease duration) via an ARP Request',
+      'At 09:05 AM via a TCP SYN packet',
+    ],
+    correctOption: 0,
+    explanation:
+      'The T1 Renewal Timer triggers at 50% of the total lease duration ($0.50 \\times 8 \\text{ hours} = 4 \\text{ hours}$, which is 01:00 PM). The client transmits a unicast DHCP Request directly to the server that granted the lease.',
+    explanationsJson: {
+      1: '87.5% is the T2 Rebind Timer (04:00 PM), which is broadcast if T1 fails.',
+      2: '100% is lease expiration, not the first renewal attempt.',
+      3: 'Lease renewal does not trigger 5 minutes after connection.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'DHCP T1 Renewal Timer Calculation',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-dhcp-automatic-ip-allocation',
+    lessonSlug: 'level-0-dhcp-automatic-ip-allocation',
+    text: 'Why is the DHCP Relay Agent (`ip helper-address`) feature configured on enterprise router interfaces?',
+    options: [
+      'Because routers drop Layer 2/3 broadcast packets by default, requiring the router to convert client DHCP Discover broadcasts into unicast packets routed to a central DHCP server',
+      'To encrypt DHCP leases using WPA3 wireless security',
+      'To prevent computers from running web browsers',
+      'To convert IPv4 packets into IPv6 packets automatically',
+    ],
+    correctOption: 0,
+    explanation:
+      'Since routers terminate broadcast domains and do not forward `255.255.255.255` broadcasts, a DHCP Relay Agent (`ip helper-address`) intercepts client Discover broadcasts and forwards them as unicast packets to the central DHCP server.',
+    explanationsJson: {
+      1: 'DHCP Relay forwards address requests, not wireless encryption.',
+      2: 'DHCP Relay enables network connectivity, not application blocking.',
+      3: 'DHCP Relay is not an IPv4-to-IPv6 transition mechanism.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'DHCP Scope Options',
-    points: 10
+    concept: 'DHCP Relay Agent & ip helper-address',
+    points: 10,
   },
   {
     quizId: 'quiz-level-0-dhcp-automatic-ip-allocation',
     lessonSlug: 'level-0-dhcp-automatic-ip-allocation',
-    text: 'Which transport layer protocol and UDP port numbers are utilized by DHCP clients and servers during lease negotiation?',
+    text: 'A helpdesk technician notices that a user\'s computer shows an IPv4 address of `169.254.45.89` with a subnet mask of `255.255.0.0`. The user cannot access internal network shares or the Internet. What does this indicate?',
     options: [
-      'UDP Port 67 (DHCP Server listening) and UDP Port 68 (DHCP Client listening)',
-      'TCP Port 80 (HTTP) and TCP Port 443 (HTTPS)',
-      'TCP Port 22 (SSH) and UDP Port 53 (DNS)',
-      'ICMP Type 8 and ICMP Type 0'
+      'The client failed to communicate with a DHCP server and self-assigned an Automatic Private IP Addressing (APIPA) link-local address',
+      'The computer has been successfully assigned a public Internet IP address',
+      'The DHCP server assigned a static high-speed VIP address',
+      'The computer is connected to a Gigabit fiber connection',
     ],
     correctOption: 0,
-    explanation: 'DHCP uses UDP transport. The DHCP Server listens on UDP port 67 for incoming client broadcasts, and the DHCP Client listens on UDP port 68 for server offers and acknowledgments.',
+    explanation:
+      'The IPv4 block `169.254.0.0/16` is reserved for APIPA (Automatic Private IP Addressing). When a DHCP client receives no response to its Discovers, it self-assigns an address in this range, allowing communication only with other APIPA hosts on the immediate physical wire.',
     explanationsJson: {
-      1: 'TCP 80/443 are web traffic ports, not DHCP.',
-      2: 'TCP 22 is SSH and UDP 53 is DNS.',
-      3: 'ICMP Type 8/0 are echo request/reply ping messages, not UDP transport ports.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.RECALL,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'DHCP UDP Ports',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-dhcp-automatic-ip-allocation',
-    lessonSlug: 'level-0-dhcp-automatic-ip-allocation',
-    text: 'A Windows laptop is plugged into an Ethernet jack. The user cannot access any network resources. Running `ipconfig` reveals: `IPv4 Address: 169.254.45.120` with `Subnet Mask: 255.255.0.0`. What has occurred?',
-    options: [
-      'The client broadcasted DHCPDISCOVER messages but received no response from a DHCP server, causing Windows to assign an Automatic Private IP Addressing (APIPA) link-local address',
-      'The client successfully leased a valid public IP address from the ISP',
-      'The DNS server successfully resolved the client hostname into a class B private IP',
-      'The network interface card has been permanently locked due to a virus'
-    ],
-    correctOption: 0,
-    explanation: 'The `169.254.0.0/16` range is reserved for APIPA (Automatic Private IP Addressing). When a DHCP client fails to receive a DHCPOFFER after multiple retries, it assigns itself an APIPA address, allowing local link communication only.',
-    explanationsJson: {
-      1: '169.254.x.x is an APIPA link-local address, not a valid routable public ISP IP.',
-      2: 'APIPA is self-assigned by the client OS when DHCP fails, not allocated by DNS.',
-      3: 'An APIPA address indicates a DHCP reachability failure, not a hardware lock.'
+      1: '169.254.x.x is link-local and non-routable on the Internet.',
+      2: '169.254.x.x indicates DHCP failure, not a VIP assignment.',
+      3: 'APIPA address assignment is independent of physical media link speed.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
     questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'APIPA Address Diagnosis',
-    points: 10
+    concept: 'APIPA (169.254.x.x) Troubleshooting',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------

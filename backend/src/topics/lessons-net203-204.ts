@@ -7,6 +7,7 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
   // =========================================================================
 
   // -------------------------------------------------------------------------
+  // -------------------------------------------------------------------------
   // 1. NET-203: Domain Name System (DNS) & Name Resolution Architecture
   // -------------------------------------------------------------------------
   {
@@ -19,41 +20,76 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'DNS_RESOLUTION_TREE',
     introduction:
       'Master the distributed naming service of the Internet: The hierarchical DNS namespace (Root, TLD, Second-Level, Subdomain), the 4 DNS server roles in resolution (Recursive Resolver, Root Nameserver, TLD Nameserver, Authoritative Nameserver), core Resource Record types (A, AAAA, CNAME, MX, PTR, NS, SOA), and the iterative vs recursive query resolution flow.',
-    stepMetadata: {
-      step1_objective:
-        'Understand the hierarchical DNS namespace, differentiate between the 4 server roles in name resolution, analyze standard DNS Resource Record types (A, AAAA, CNAME, MX), and trace iterative and recursive resolution flows.',
-      step2_prerequisites: ['net-202-ipv4-addressing-cidr'],
-      step3_whyItMatters:
-        'Computers communicate using numeric IP addresses, but humans rely on readable domain names. DNS outages instantly disable web browsing, email delivery, and cloud application access worldwide.',
-      step4_coreConcept:
-        'The Domain Name System (DNS, RFC 1034/1035) is a globally distributed hierarchical database that translates human-readable domain names (e.g. `api.example.com`) into computer-routable IP addresses (e.g. `93.184.216.34` or `2606:2800:220:1:248:1893:25c8:1946`). The DNS hierarchy is structured top-down: (1) Root Zone (`.`, 13 named root clusters), (2) Top-Level Domains (TLDs: `.com`, `.org`, `.net`, ccTLDs `.uk`), (3) Second-Level Domains (`example.com`), (4) Subdomains (`api.example.com`). Resolution involves four server roles: (1) Recursive Resolver (acts on client behalf), (2) Root Server (points to TLD), (3) TLD Server (points to Authoritative), and (4) Authoritative Nameserver (holds definitive records). Standard records: `A` (IPv4), `AAAA` (IPv6), `CNAME` (canonical alias), `MX` (mail exchange), `PTR` (reverse IP lookup), `NS` (delegated nameserver), `SOA` (zone metadata).',
-      step5_technicalAnatomy: {
-        title: 'DNS Hierarchy, Server Roles & Resource Records',
-        description: 'Namespace levels, resolution roles, and standard record schemas.',
-        components: [
-          { name: 'Recursive Resolver (Stub Resolver Client Agent)', detail: 'Server (ISP or public 8.8.8.8/1.1.1.1) that receives client queries, traverses the hierarchy, and caches the result.' },
-          { name: 'Root Nameservers (13 Logical Clusters)', detail: 'Root of the DNS tree (`.`). Directs queries to the authoritative TLD nameservers (e.g. points `.com` queries to Verisign).' },
-          { name: 'TLD Nameservers', detail: 'Maintains registries for specific top-level domains (`.com`, `.org`, `.edu`) and points to authoritative nameservers.' },
-          { name: 'Authoritative Nameserver', detail: 'The definitive source of truth holding the actual DNS zone file records configured by the domain owner.' },
-          { name: 'Core Resource Records (A, AAAA, CNAME, MX)', detail: '`A` = IPv4 (32-bit), `AAAA` = IPv6 (128-bit), `CNAME` = Canonical Name (alias), `MX` = Mail server + priority, `PTR` = Reverse lookup.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Client Cache & Stub Query', action: 'Host checks local OS cache and hosts file; if missed, sends a recursive query to its configured DNS Resolver (UDP port 53).' },
-          { stepNumber: 2, title: 'Iterative Referral Chain', action: 'Resolver queries Root (`.`) -> receives TLD referral (`.com`) -> queries TLD -> receives Authoritative referral (`ns1.example.com`) -> queries Authoritative nameserver.' },
-          { stepNumber: 3, title: 'Authoritative Answer & Caching', action: 'Authoritative server returns the `A` record (`93.184.216.34`) with a Time-To-Live (TTL); resolver caches result and delivers answer to client.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'DNS Protocol Header & Query Format (UDP/TCP Port 53)',
+    contentV2: {
+      objective:
+        'Understand the hierarchical distributed DNS namespace, differentiate between the 4 server roles in name resolution (Recursive Resolver, Root, TLD, Authoritative), analyze core Resource Record types (A, AAAA, CNAME, MX, PTR, NS), trace iterative vs recursive query flows, and diagnose DNS resolution failures.',
+      prerequisites: [
+        'NET-103: The 7-Layer OSI Reference Model & Data Encapsulation',
+        'NET-202: IPv4 Addressing, Subnet Masks & CIDR Subnetting',
+      ],
+      whyItMatters:
+        'Computers and routing protocols communicate exclusively using binary/numerical IP addresses, but humans rely on readable domain names. DNS is the foundational distributed phonebook of the global Internet—if DNS fails, web browsing, email delivery, APIs, and cloud services immediately halt.',
+      explanation:
+        'The Domain Name System (DNS, defined in RFC 1034 & RFC 1035) is a globally distributed, hierarchical database that maps human-friendly domain names (e.g. `api.example.com`) to machine-routable IP addresses (e.g. IPv4 `93.184.216.34` or IPv6 `2606:2800:220:1:248:1893:25c8:1946`).\n\n### 1. The Hierarchical Namespace Tree\nThe DNS namespace is organized in an inverted tree structure with 4 primary tiers:\n1. **Root Zone (`.`)**: The top of the hierarchy, managed by ICANN and operated across 13 logical root server clusters (labeled A through M) distributed worldwide using Anycast routing.\n2. **Top-Level Domains (TLD)**: The rightmost label of a domain name. Managed by dedicated registry operators (e.g. Verisign for `.com`):\n   - **Generic TLDs (gTLD)**: `.com`, `.org`, `.net`, `.edu`, `.gov`.\n   - **Country-Code TLDs (ccTLD)**: `.uk`, `.de`, `.jp`, `.us`.\n3. **Second-Level Domain (SLD)**: The domain name registered by an individual or organization under a TLD (e.g. `example.com`, `google.com`).\n4. **Subdomain / Hostname**: Specific host identifiers or service partitions created by the domain owner (e.g. `api.example.com`, `mail.example.com`).\n\n### 2. The 4 DNS Server Roles in Resolution\nA complete DNS lookup traverses 4 distinct server roles:\n* **Recursive Resolver (Stub Resolver Client Agent)**: The DNS server configured on the client host (provided by ISP or public services like `8.8.8.8` or `1.1.1.1`). It receives recursive queries from the client, does all the heavy iterative work traversing the hierarchy, caches the answers, and returns the final IP to the client.\n* **Root Nameserver (`.`)**: Knows where the TLD nameservers reside. It does not know website IPs; it returns a referral pointer to the appropriate TLD server (e.g. "Ask the `.com` TLD servers").\n* **TLD Nameserver**: Knows where authoritative nameservers for registered domains reside. It returns a referral pointer to the domain\'s authoritative nameservers (e.g. "Ask `ns1.example.com`").\n* **Authoritative Nameserver**: The definitive source of truth holding the actual Zone File for that domain. It returns the final answer (e.g. `A 93.184.216.34`).\n\n### 3. Core DNS Resource Record Types\nZone files store DNS data in structured Resource Records (RRs):\n* **`A` (Address)**: Maps a hostname to a 32-bit IPv4 address (`example.com -> 93.184.216.34`).\n* **`AAAA` (IPv6 Address / Quad-A)**: Maps a hostname to a 128-bit IPv6 address (`example.com -> 2606:2800:220:...`).\n* **`CNAME` (Canonical Name)**: Maps an alias hostname to another canonical domain name (`www.example.com -> example.com`).\n* **`MX` (Mail Exchange)**: Identifies mail servers responsible for receiving email for the domain, with integer priority values (`10 mail.example.com`).\n* **`PTR` (Pointer)**: Maps an IP address back to a hostname (Reverse DNS lookups inside `in-addr.arpa`).\n* **`NS` (Name Server)**: Delegates a DNS zone to use authoritative nameservers (`ns1.example.com`).\n* **`SOA` (Start of Authority)**: Contains administrative zone metadata, primary nameserver, admin email, serial number, and zone refresh/retry/expire timers.\n\n### 4. Transport Mechanics & Caching\n* DNS queries typically use **UDP port 53** for fast, low-overhead single-round-trip lookups (standard 512-byte payload limit without EDNS0).\n* **TCP port 53** is used for DNS Zone Transfers (AXFR/IXFR) and responses that exceed UDP size limits.\n* Every DNS record contains a **Time-To-Live (TTL)** in seconds. Recursive resolvers and client operating systems cache responses for the duration of the TTL to eliminate redundant root-to-leaf lookups.',
+      components: [
+        {
+          name: 'Recursive Resolver (Stub Resolver Agent)',
+          detail: 'Client-facing DNS server (ISP, 8.8.8.8, 1.1.1.1) that traverses the hierarchy on behalf of the endpoint and caches responses.',
+        },
+        {
+          name: 'Root Nameservers (13 Anycast Clusters)',
+          detail: 'The top of the DNS hierarchy (`.`), directing resolvers to appropriate TLD servers (.com, .org).',
+        },
+        {
+          name: 'TLD Nameservers (.com, .org, .edu)',
+          detail: 'Maintains registries for specific top-level domain extensions and points to Authoritative nameservers.',
+        },
+        {
+          name: 'Authoritative Nameserver (Zone File)',
+          detail: 'The definitive source of truth holding official DNS records configured by the domain administrator.',
+        },
+        {
+          name: 'Core Resource Records (A, AAAA, CNAME, MX, PTR)',
+          detail: 'A (IPv4), AAAA (IPv6), CNAME (Alias), MX (Mail Priority), PTR (Reverse IP), NS (Delegation), SOA (Zone Metadata).',
+        },
+        {
+          name: 'UDP & TCP Port 53 Transport',
+          detail: 'UDP port 53 for standard fast lookups; TCP port 53 for zone transfers (AXFR) and large responses (>512 bytes).',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Local Client Cache & Recursive Query',
+          action: 'Host checks local OS resolver cache and hosts file; if not found, sends a recursive query to configured Resolver (e.g. 1.1.1.1:53 UDP).',
+        },
+        {
+          stepNumber: 2,
+          title: 'Root Server Referral',
+          action: 'Resolver sends iterative query to Root Server (`.`), receiving a referral to the `.com` TLD nameservers.',
+        },
+        {
+          stepNumber: 3,
+          title: 'TLD Server Referral',
+          action: 'Resolver queries `.com` TLD server, receiving a referral to `ns1.netvision.edu` (Authoritative nameserver).',
+        },
+        {
+          stepNumber: 4,
+          title: 'Authoritative Answer & Caching',
+          action: 'Resolver queries `ns1.netvision.edu`, receives target A record (104.21.48.12) with TTL, caches the result, and returns IP to client.',
+        },
+      ],
+      packetHeaderView: {
+        protocol: 'DNS Protocol Message (UDP/TCP Port 53)',
         fields: [
-          { fieldName: 'Transaction ID', bitLength: '16 bits (2 Bytes)', hexSample: '0x1A2B', description: 'Matches queries with responses.' },
-          { fieldName: 'Flags (QR, Opcode, AA, RD, RA)', bitLength: '16 bits', hexSample: '0x0100 (Standard Query)', description: 'Control flags indicating recursion desired/available.' },
-          { fieldName: 'Questions / Answers Count', bitLength: '16 bits each', hexSample: 'QDCOUNT=1, ANCOUNT=1', description: 'Number of query and response records.' },
+          { fieldName: 'Transaction ID', bitLength: '16 bits (2 Bytes)', hexSample: '0x1A2B', description: 'Unique identifier matching query to response.' },
+          { fieldName: 'Flags (QR, Opcode, AA, TC, RD, RA)', bitLength: '16 bits (2 Bytes)', hexSample: '0x0100 (Standard Query, RD=1)', description: 'Control flags indicating Query/Response, Recursion Desired/Available.' },
+          { fieldName: 'Question Count (QDCOUNT)', bitLength: '16 bits', hexSample: '0x0001', description: 'Number of entries in question section.' },
+          { fieldName: 'Answer Count (ANCOUNT)', bitLength: '16 bits', hexSample: '0x0001', description: 'Number of resource records in answer section.' },
+          { fieldName: 'Authority Count (NSCOUNT)', bitLength: '16 bits', hexSample: '0x0002', description: 'Number of name server records.' },
+          { fieldName: 'Additional Count (ARCOUNT)', bitLength: '16 bits', hexSample: '0x0002', description: 'Number of additional glue records.' },
         ],
-        headerDiagramAscii: `
-+-------------------------------------------------------------------------------+
+        headerDiagramAscii: `+-------------------------------------------------------------------------------+
 |                       THE 4-STEP DNS RESOLUTION HIERARCHY                     |
 +-------------------------------------------------------------------------------+
 |   [ CLIENT ] --- (1. Recursive Query: "api.example.com") ---> [ RESOLVER ]    |
@@ -69,87 +105,73 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
 |        +---> (4. What is api.example.com?) [ AUTHORITATIVE SERVER ]           |
 |        |<--- (A Record: 93.184.216.34) ----+                                  |
 |        |                                                                      |
-|   [ CLIENT ] <--- (5. Delivers IP & Caches) <----------------------+          |
-+-------------------------------------------------------------------------------+
-`,
+|   [ CLIENT ] <--- (5. Delivers IP & Caches with TTL) <-------------+          |
++-------------------------------------------------------------------------------+`,
       },
-      step8_visualExplanation: {
+      visualizer: {
         type: 'DNS_RESOLUTION_TREE',
         title: 'Interactive DNS Namespace Hierarchy & Recursive Resolver Engine',
         description: 'Trace a DNS lookup from client stub resolver through Root, TLD, and Authoritative servers, observing packet round-trips, record parsing, and TTL caching.',
       },
-      step9_workedExample: {
-        title: 'Tracing DNS Resolution Flow for `www.example.com`',
-        problemStatement: 'Trace the complete DNS resolution steps when a client queries `www.example.com` with an empty local cache.',
+      workedExample: {
+        title: 'Tracing DNS Resolution Steps for api.netvision.edu',
+        problemStatement:
+          'A client with an empty cache browses to `api.netvision.edu`. Trace the 4 sequential server queries executed by its recursive resolver `1.1.1.1` to resolve the hostname to an IP address.',
         stepByStepSolution: [
-          'Step 1: Client sends recursive query for `www.example.com` (Type A) to Resolver `8.8.8.8:53`.',
-          'Step 2: Resolver sends iterative query to Root Server (`.`), receiving referral to `.com` TLD servers.',
-          'Step 3: Resolver queries `.com` TLD server, receiving referral to `ns1.example.com` (Authoritative).',
-          'Step 4: Resolver queries `ns1.example.com` for `www.example.com`.',
-          'Step 5: `ns1.example.com` returns CNAME `example.com` and A record `93.184.216.34` with TTL 3600.',
-          'Step 6: Resolver caches the answer for 3600 seconds and returns `93.184.216.34` to client.',
+          'Step 1 (Client to Resolver): Client sends a Recursive DNS query for `api.netvision.edu` (Record Type A) to `1.1.1.1:53` (UDP).',
+          'Step 2 (Resolver to Root): Resolver queries Root Server (`.`), which returns referral NS records pointing to the `.edu` TLD nameservers.',
+          'Step 3 (Resolver to TLD): Resolver queries `.edu` TLD server, which returns referral NS records pointing to `ns1.netvision.edu` (Authoritative nameserver).',
+          'Step 4 (Resolver to Authoritative): Resolver queries `ns1.netvision.edu` for `api.netvision.edu`, receiving `A 104.21.48.12` with TTL 300 seconds.',
+          'Step 5 (Answer Delivery): Resolver caches `api.netvision.edu -> 104.21.48.12` for 300 seconds and returns IP `104.21.48.12` to the client browser.',
         ],
-        finalResult: 'Client receives IP 93.184.216.34 and initiates HTTP connection.',
+        finalResult:
+          'Browser receives IP 104.21.48.12 and immediately opens a TCP/HTTPS connection on port 443.',
       },
-      step10_realWorldScenario: {
-        topology: 'Enterprise Internal Split-Horizon DNS Deployment',
-        scenarioText: 'An enterprise configures Split-Horizon DNS: internal LAN clients resolving `portal.company.com` receive private IP `10.10.10.50`, while external Internet users receive public IP `198.51.100.25`, providing security and avoiding hairpin NAT.',
-        engineeringContext: 'Split-horizon DNS serves different IP answers based on the client source IP address.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Maintains local DNS resolver cache (viewable with `ipconfig /displaydns`).',
-        nicBehavior: 'Operates transparently at Layer 2.',
-        switchOrRouterBehavior: 'DNS queries traverse routers as standard UDP/TCP port 53 packets.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'nslookup api.github.com 8.8.8.8',
-          description: 'Queries a specific DNS resolver (8.8.8.8) to resolve a domain name and display record details.',
-          expectedOutput:
-            'Server:  dns.google\nAddress:  8.8.8.8\n\nNon-authoritative answer:\nName:    api.github.com\nAddresses:  140.82.121.6',
-          proofExplanation: 'Demonstrates DNS query and A record resolution output.',
+          id: 1,
+          prompt: 'What are the four primary DNS server roles involved in full hierarchical domain name resolution?',
+          expected: 'Recursive Resolver, Root Nameserver (.), TLD Nameserver (.com/.edu), and Authoritative Nameserver.',
+          hints: 'Client queries resolver; resolver traverses Root -> TLD -> Authoritative.',
+        },
+        {
+          id: 2,
+          prompt: 'What is the specific purpose of DNS Resource Record types A vs AAAA vs CNAME?',
+          expected: 'A = IPv4 address (32-bit); AAAA = IPv6 address (128-bit); CNAME = Canonical Name (alias hostname mapping).',
+          hints: 'A is IPv4; 4 As (AAAA) is 4 times bigger for IPv6; CNAME is an alias.',
+        },
+        {
+          id: 3,
+          prompt: 'What transport protocol and port number does standard DNS query traffic use?',
+          expected: 'UDP port 53 (with TCP port 53 used for zone transfers and large responses exceeding 512 bytes).',
+          hints: 'Standard queries use UDP 53 for speed.',
+        },
+        {
+          id: 4,
+          prompt: 'What does the Time-To-Live (TTL) value in a DNS resource record dictate to resolvers and client operating systems?',
+          expected: 'The number of seconds the resolver or client is permitted to cache the DNS record before querying authoritative servers again.',
+          hints: 'TTL defines cache expiration time.',
+        },
+        {
+          id: 5,
+          prompt: 'What DNS record type is used to identify mail servers and specify email routing priority for a domain?',
+          expected: 'MX (Mail Exchange) record.',
+          hints: 'MX stands for Mail Exchange.',
+        },
+        {
+          id: 6,
+          prompt: 'If a user can ping 8.8.8.8 successfully but cannot load google.com in a web browser, what is the most likely failure layer and protocol?',
+          expected: 'Application Layer DNS name resolution failure (misconfigured or unreachable DNS resolver server).',
+          hints: 'IP routing works because 8.8.8.8 responds; name translation is failing.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Users can ping IP `8.8.8.8` but cannot open websites by domain name.',
-          possibleCauses: ['DNS server IP misconfigured in client adapter or DNS server offline'],
-          diagnosticSteps: ['Test resolution with `nslookup google.com`.'],
-          remediation: 'Configure valid DNS server IPs (e.g. `8.8.8.8` / `1.1.1.1`) in client network adapter settings or DHCP scope.',
-        },
+      recap: [
+        'DNS is the hierarchical distributed database mapping domain names to IP addresses.',
+        '4-tier server hierarchy: Recursive Resolver -> Root Nameserver (.) -> TLD Server -> Authoritative Server.',
+        'Core record types: A (IPv4), AAAA (IPv6), CNAME (Alias), MX (Mail), PTR (Reverse lookup), NS (Delegation), SOA (Metadata).',
+        'Standard lookups use UDP port 53; Zone transfers and large payloads use TCP port 53.',
+        'TTL determines caching duration on recursive resolvers and client operating systems.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Thinking the Root Server holds the IP addresses for all websites on Earth.', correction: 'Root servers only know the locations of TLD servers; they never hold individual website A records.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'DNS Spoofing / Cache Poisoning',
-        mitigationStrategy: 'Enable DNSSEC (Domain Name System Security Extensions) and DNS over HTTPS (DoH) to cryptographically sign and encrypt DNS traffic.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          '4 DNS server roles: Recursive Resolver, Root, TLD, Authoritative.',
-          'Record types: A (IPv4), AAAA (IPv6), CNAME (Alias), MX (Mail), PTR (Reverse).',
-          'DNS operates primarily over UDP port 53 (uses TCP port 53 for zone transfers and large responses > 512 bytes).',
-        ],
-        frequentTraps: [
-          'Confusing Recursive queries (client to resolver) with Iterative queries (resolver to root/TLD/authoritative).',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: DNS Resolution Tracing & Resource Record Inspection',
-        scenario: 'Execute nslookup diagnostics, inspect A and CNAME records, and trace recursive resolution.',
-        tasks: ['Run nslookup to query A and MX records.', 'Flush local DNS cache with ipconfig /flushdns.'],
-        verificationMethod: 'Verify correct IP resolution in nslookup.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'DNS translates human-readable domain names into computer IP addresses.',
-          'Resolution traverses a 4-tier server hierarchy: Resolver -> Root -> TLD -> Authoritative.',
-          'Records: A (IPv4), AAAA (IPv6), CNAME (Alias), MX (Mail).',
-        ],
-        nextLessonBridge:
-          'Proceed to NET-203 Lesson 2 to master Dynamic Host Configuration Protocol (DHCP) & IP Leasing.',
-      },
     },
     questions: [
       {
@@ -161,22 +183,124 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
           'Web Server -> Database Server -> Proxy Server -> Firewall',
         ],
         correctOption: 0,
-        explanation: 'When a client queries a Recursive Resolver, the resolver iteratively queries the Root Nameserver (`.`), which refers to the TLD Nameserver (`.com`), which refers to the Authoritative Nameserver (`ns1.example.com`), which returns the final A record.',
-        explanationsJson: { 1: 'Reversed order.', 2: 'DHCP and ARP are distinct protocols.', 3: 'Application server roles.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'When a client queries a Recursive Resolver, the resolver iteratively queries the Root Nameserver (`.`), which refers to the TLD Nameserver (`.com`), which refers to the Authoritative Nameserver (`ns1.example.com`), which returns the final A record.',
+        explanationsJson: {
+          1: 'Reversed order.',
+          2: 'DHCP and ARP are distinct protocols.',
+          3: 'Application server roles.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.RECALL,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'DNS 4-Tier Server Hierarchy',
       },
+      {
+        text: 'Which DNS Resource Record type is used to map an alias hostname to another canonical domain name (e.g. mapping `www.example.com` to `example.com`)?',
+        options: [
+          'CNAME (Canonical Name)',
+          'A Record',
+          'AAAA Record',
+          'MX Record',
+        ],
+        correctOption: 0,
+        explanation:
+          'A CNAME (Canonical Name) record creates an alias pointing one domain name to another canonical hostname, allowing multiple subdomains to resolve to the same underlying record.',
+        explanationsJson: {
+          1: 'A records map directly to 32-bit IPv4 addresses, not other domain names.',
+          2: 'AAAA records map directly to 128-bit IPv6 addresses.',
+          3: 'MX records specify mail exchange servers with routing priorities.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'DNS CNAME Resource Record',
+      },
+      {
+        text: 'Why does standard DNS primarily use UDP port 53 for queries rather than TCP port 53?',
+        options: [
+          'Because UDP avoids 3-way connection handshake overhead, enabling single round-trip lookups with minimal latency and reduced server state load',
+          'Because TCP cannot transmit ASCII text domain characters',
+          'Because UDP automatically encrypts domain names with AES-256',
+          'Because routers drop all TCP packets destined to port 53',
+        ],
+        correctOption: 0,
+        explanation:
+          'UDP is connectionless and fast: a client sends a single request packet and receives a single response packet, avoiding TCP 3-way handshake delay and conserving server memory for millions of concurrent queries.',
+        explanationsJson: {
+          1: 'TCP carries any binary or ASCII payload.',
+          2: 'Standard UDP DNS is plaintext; encryption requires DoT (port 853) or DoH (port 443).',
+          3: 'Routers routinely route TCP port 53 for DNS zone transfers and large payloads.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'DNS Transport Protocol Selection (UDP vs TCP)',
+      },
+      {
+        text: 'A systems administrator updates the IPv4 address for `api.company.com` from `1.1.1.1` to `2.2.2.2`. However, remote users continue reaching `1.1.1.1` for the next hour. What DNS parameter is responsible for this delay?',
+        options: [
+          'Time-To-Live (TTL) caching timeout in upstream recursive resolvers',
+          'The 48-bit MAC address burned-in hardware serial',
+          'The router MTU packet size limit',
+          'The default gateway subnet mask',
+        ],
+        correctOption: 0,
+        explanation:
+          'Recursive resolvers and client operating systems cache DNS records according to the record\'s Time-To-Live (TTL). Upstream caches will not query authoritative servers for the new IP until the old TTL expires.',
+        explanationsJson: {
+          1: 'MAC addresses operate at Layer 2 and have no effect on global DNS caching.',
+          2: 'MTU limits payload packet size, not domain record expiration.',
+          3: 'Subnet masks define local IP boundaries, not DNS cache timers.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'DNS TTL & Resolver Caching Mechanics',
+      },
+      {
+        text: 'Which DNS Resource Record type is queried when an email server needs to determine which mail gateway handles incoming emails for the domain `@example.com`?',
+        options: [
+          'MX (Mail Exchange) record',
+          'PTR (Pointer) record',
+          'TXT (Text) record',
+          'NS (Name Server) record',
+        ],
+        correctOption: 0,
+        explanation:
+          'MX (Mail Exchange) records specify the mail servers responsible for accepting incoming email for a domain, along with preference/priority values determining server precedence.',
+        explanationsJson: {
+          1: 'PTR records are used for reverse IP-to-hostname lookups.',
+          2: 'TXT records hold arbitrary text (often used for SPF/DKIM verification).',
+          3: 'NS records delegate zone authority to nameservers.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'DNS MX Mail Exchange Records',
+      },
+      {
+        text: 'A user reports that they can successfully ping public IP address `8.8.8.8` from their command prompt, but typing `https://www.google.com` into their web browser results in a "Server Not Found" error. What is the most likely root cause?',
+        options: [
+          'DNS server IP configuration is invalid or the configured DNS resolver is unreachable, preventing domain name translation',
+          'The physical Ethernet copper cable is unplugged',
+          'The default gateway router has crashed and dropped all IP routing',
+          'The user\'s network card MAC address has expired',
+        ],
+        correctOption: 0,
+        explanation:
+          'Because the host can ping 8.8.8.8, Layers 1, 2, and 3 (cable, MAC, IP, gateway routing) are fully functional. The failure to browse by domain name proves that Application Layer DNS name resolution is failing.',
+        explanationsJson: {
+          1: 'If the cable were unplugged, pinging 8.8.8.8 would fail immediately.',
+          2: 'If the default gateway had crashed, no traffic could reach public IP 8.8.8.8.',
+          3: 'MAC addresses are permanently burned-in and do not expire.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'DNS Resolution vs IP Routing Troubleshooting',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: DNS Resolution Tracing & Resource Record Inspection',
-      instructions: '1. Run nslookup google.com 8.8.8.8.\n2. Flush cache with ipconfig /flushdns.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { resolver: '8.8.8.8', queryTarget: 'api.github.com' },
-      tasks: ['Execute nslookup query.'],
-    },
   },
 
   // -------------------------------------------------------------------------
@@ -192,135 +316,154 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'DHCP_DORA_ANIMATOR',
     introduction:
       'Master automated network configuration: The 4-step DHCP DORA message exchange (Discover, Offer, Request, Acknowledge), UDP port 67/68 architecture, lease duration timers (T1 at 50%, T2 at 87.5%, Expiration at 100%), delivery of core DHCP options (Subnet Mask, Default Gateway, DNS Servers), and APIPA fallback mechanics.',
-    stepMetadata: {
-      step1_objective:
-        'Master the 4-step DHCP DORA workflow, analyze UDP ports 67 and 68, understand lease lifecycle timers (T1, T2, Expiration), and identify core DHCP options delivered to clients.',
-      step2_prerequisites: ['net-202-ipv4-addressing-cidr'],
-      step3_whyItMatters:
-        'Manually configuring IP addresses on thousands of employee laptops and smartphones is impossible. DHCP automates IP configuration, prevents IP duplication, and dynamically delivers gateways and DNS servers.',
-      step4_coreConcept:
-        'The Dynamic Host Configuration Protocol (DHCP, RFC 2131) automatically leases IP configuration parameters to network endpoints. Communication operates over UDP: Server listens on Port 67, Client listens on Port 68. The initial lease acquisition uses the 4-step DORA workflow: (1) **Discover** (Client broadcasts UDP from `0.0.0.0:68` to `255.255.255.255:67`), (2) **Offer** (Server unicasts/broadcasts proposed IP and lease terms), (3) **Request** (Client broadcasts acceptance of the offer), (4) **Acknowledge** (Server commits lease). Core DHCP Options delivered: Option 1 (Subnet Mask), Option 3 (Default Gateway Router IP), Option 6 (DNS Server IPs), Option 15 (Domain Name). Leases have timers: T1 Renewal Timer (at 50% of lease, client sends unicast Request to leasing server), T2 Rebind Timer (at 87.5%, client broadcasts Request to any DHCP server), Expiration (at 100%, IP is released and client enters APIPA `169.254.x.x`).',
-      step5_technicalAnatomy: {
-        title: 'DHCP DORA Workflow, UDP Ports & Option Codes',
-        description: 'DORA messages, transport ports, lease timers, and option payload parameters.',
-        components: [
-          { name: 'Discover (D)', detail: 'Client broadcast (`255.255.255.255:67`) requesting an IP lease. Source IP is `0.0.0.0:68`.' },
-          { name: 'Offer (O)', detail: 'DHCP server proposes an unassigned IP address from its pool, along with Subnet Mask, Default Gateway, and DNS options.' },
-          { name: 'Request (R)', detail: 'Client broadcasts formal acceptance of the specific server offer, notifying all other DHCP servers to release their reserved offers.' },
-          { name: 'Acknowledge (A)', detail: 'Server finalizes the lease binding in its database and sends definitive ACK confirming configuration parameters.' },
-          { name: 'Core DHCP Options (1, 3, 6, 15)', detail: 'Option 1 = Subnet Mask; Option 3 = Default Gateway Router IP; Option 6 = DNS Servers; Option 15 = Domain Search Name.' },
-          { name: 'Lease Timers (T1, T2, Expiry)', detail: 'T1 = 50% (unicast renewal to server); T2 = 87.5% (broadcast rebind to any server); Expiration = 100% (lease terminates).' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Discover Broadcast', action: 'Unconfigured client boots, brings physical link up, and broadcasts DHCP Discover.' },
-          { stepNumber: 2, title: 'Offer Generation', action: 'DHCP server checks pool, reserves IP `192.168.1.50`, and sends DHCP Offer with Gateway and DNS options.' },
-          { stepNumber: 3, title: 'Request Commitment', action: 'Client broadcasts DHCP Request specifying Server Identifier and requested IP.' },
-          { stepNumber: 4, title: 'ACK & Local Configuration', action: 'Server sends DHCP ACK; client configures IP, subnet mask, default gateway, and DNS servers.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'DHCP Message Format (BOOTP / UDP 67 & 68)',
+    contentV2: {
+      objective:
+        'Master the 4-step DHCP DORA lease acquisition workflow, understand UDP port 67 (Server) and port 68 (Client) architecture, calculate lease lifecycle timers (T1 Renewal, T2 Rebind, Expiration), analyze core DHCP Option delivery (Subnet Mask, Gateway, DNS), and explain DHCP Relay (ip helper-address) mechanics.',
+      prerequisites: [
+        'NET-103: The 7-Layer OSI Reference Model & Data Encapsulation',
+        'NET-202: IPv4 Addressing, Subnet Masks & CIDR Subnetting',
+      ],
+      whyItMatters:
+        'Manually typing static IP addresses, subnet masks, gateways, and DNS servers on hundreds of enterprise laptops and mobile devices is impossible and error-prone. DHCP provides centralized, automated IP address management (IPAM), eliminates duplicate IP conflicts, and automatically reclaims addresses when devices disconnect.',
+      explanation:
+        'The Dynamic Host Configuration Protocol (DHCP, defined in RFC 2131) is a client-server network protocol that automatically assigns IP addresses and essential TCP/IP configuration parameters to client devices on a local area network.\n\n### 1. The 4-Step DORA Lease Exchange\nWhen a newly booted device connects to a network without an assigned IP address, it executes the **DORA** sequence:\n1. **DHCP Discover (D - Broadcast)**: The unconfigured client has no IP address, so it broadcasts a UDP packet from Source IP `0.0.0.0` (port 68) to Destination IP `255.255.255.255` (port 67) framed to Destination MAC `FF:FF:FF:FF:FF:FF`. It asks: *"Is there a DHCP server on this network? I need an IP address."*\n2. **DHCP Offer (O - Unicast/Broadcast)**: A listening DHCP server reserves an available IP address from its configured IP Pool and responds with an Offer containing the proposed IP (e.g. `192.168.1.50`), Subnet Mask, Gateway Router IP, DNS Server IPs, and Lease Duration.\n3. **DHCP Request (R - Broadcast)**: The client selects the offer and broadcasts a DHCP Request confirming its acceptance of that specific server\'s proposed IP. The broadcast informs all other DHCP servers that made offers to release their reserved IPs back to their available pools.\n4. **DHCP Acknowledge (A - Unicast/Broadcast)**: The chosen server commits the lease to its database and sends a definitive DHCP ACK. The client immediately configures its network interface and transitions to the BOUND state.\n\n### 2. Transport Architecture: UDP Ports 67 & 68\n* **DHCP Server Port**: Listens on **UDP Port 67** (BOOTPS).\n* **DHCP Client Port**: Listens on **UDP Port 68** (BOOTPC).\n\n### 3. Core DHCP Option Codes\nIn addition to the leased IP address, DHCP messages carry essential network parameters using standardized **DHCP Options**:\n* **Option 1**: Subnet Mask (e.g. `255.255.255.0`)\n* **Option 3**: Router / Default Gateway IP address (e.g. `192.168.1.1`)\n* **Option 6**: Domain Name System (DNS) Server IP addresses (e.g. `8.8.8.8`, `1.1.1.1`)\n* **Option 15**: Domain Search Suffix (e.g. `corp.internal`)\n* **Option 51**: Lease Duration Time (in seconds)\n* **Option 54**: DHCP Server Identifier (Server IP address)\n\n### 4. DHCP Lease Lifecycle & Timers\nA DHCP address is not permanently owned; it is leased for a specific duration (e.g. 8 hours or 24 hours). Two internal timers govern renewal:\n* **T1 Renewal Timer (50% of Lease Duration)**: The client sends a **unicast DHCP Request** directly to the leasing server to renew the lease. If the server ACKs, the lease timer resets to 100%.\n* **T2 Rebind Timer (87.5% / 7/8ths of Lease Duration)**: If the original server failed to respond at T1, the client broadcasts a DHCP Request to *any* active DHCP server on the subnet to rebind the lease.\n* **Lease Expiration (100%)**: If no renewal or rebind occurs, the lease expires. The client immediately releases the IP and falls back to **APIPA** (`169.254.x.x` via RFC 3927) while restarting the Discover process.\n\n### 5. DHCP Relay Agents (`ip helper-address`)\nBecause routers drop broadcast packets by default, a DHCP Discover broadcast cannot cross a router boundary. In enterprise networks with a centralized DHCP server in the datacenter, routers are configured with a **DHCP Relay Agent** (Cisco command: `ip helper-address 10.50.0.5`). The router intercepts client broadcast Discovers, converts them into unicast IP packets directed to the central DHCP server IP, and injects the client subnet Gateway IP (`giaddr`) so the server knows which subnet pool to allocate from.',
+      components: [
+        {
+          name: 'DHCP Discover (Broadcast)',
+          detail: 'Client broadcast (0.0.0.0:68 -> 255.255.255.255:67) asking for an IP lease on the local network.',
+        },
+        {
+          name: 'DHCP Offer (Server Proposal)',
+          detail: 'Server offers proposed IP address, subnet mask, default gateway, DNS servers, and lease duration.',
+        },
+        {
+          name: 'DHCP Request (Client Commitment)',
+          detail: 'Client broadcasts formal acceptance of proposed IP, notifying all other DHCP servers to release reservations.',
+        },
+        {
+          name: 'DHCP Acknowledge (Lease Finalized)',
+          detail: 'Server commits lease in database and returns ACK; client binds IP and activates interface.',
+        },
+        {
+          name: 'Core Options (Mask 1, Gateway 3, DNS 6)',
+          detail: 'Delivers complete network configuration beyond raw IP: Subnet Mask (1), Gateway (3), DNS Servers (6).',
+        },
+        {
+          name: 'Lease Timers (T1 @ 50%, T2 @ 87.5%, Expiry)',
+          detail: 'T1 unicast renewal at 50%; T2 broadcast rebind at 87.5%; Expiration releases IP and falls back to APIPA 169.254.x.x.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Discover Broadcast Ingress',
+          action: 'Unconfigured client brings network link up and broadcasts DHCP Discover (Src: 0.0.0.0:68, Dst: 255.255.255.255:67).',
+        },
+        {
+          stepNumber: 2,
+          title: 'Offer Reservation',
+          action: 'DHCP Server allocates unassigned IP 192.168.1.105 from pool and sends Offer with Gateway and DNS options.',
+        },
+        {
+          stepNumber: 3,
+          title: 'Request Commitment',
+          action: 'Client broadcasts DHCP Request accepting 192.168.1.105 from Server Identifier 192.168.1.1.',
+        },
+        {
+          stepNumber: 4,
+          title: 'ACK & BOUND State Activation',
+          action: 'Server sends DHCP ACK; client configures IP 192.168.1.105/24, Default Gateway 192.168.1.1, DNS 1.1.1.1, and arms T1 timer.',
+        },
+      ],
+      packetHeaderView: {
+        protocol: 'DHCP / BOOTP Message Format (UDP 67 & 68)',
         fields: [
-          { fieldName: 'Message Opcode', bitLength: '8 bits', hexSample: '0x01 (BootRequest) / 0x02 (BootReply)', description: 'Direction of DHCP message.' },
-          { fieldName: 'Transaction ID (xid)', bitLength: '32 bits', hexSample: '0x39A4E2B1', description: 'Random integer matching client with server.' },
-          { fieldName: 'Client IP (ciaddr)', bitLength: '32 bits', hexSample: '0.0.0.0 (in Discover)', description: 'Current client IP.' },
-          { fieldName: 'Your IP (yiaddr)', bitLength: '32 bits', hexSample: '192.168.1.50 (in Offer/ACK)', description: 'IP address assigned by server.' },
-          { fieldName: 'Magic Cookie', bitLength: '32 bits', hexSample: '0x63825363', description: 'Identifies DHCP option payload data.' },
+          { fieldName: 'Opcode (op)', bitLength: '8 bits (1 Byte)', hexSample: '0x01 (BOOTREQUEST) / 0x02 (BOOTREPLY)', description: 'Message direction (1 = Client to Server, 2 = Server to Client).' },
+          { fieldName: 'Hardware Type / Length', bitLength: '8 bits / 8 bits', hexSample: '0x01 (Ethernet) / 0x06 (6-byte MAC)', description: 'Physical link architecture.' },
+          { fieldName: 'Transaction ID (xid)', bitLength: '32 bits (4 Bytes)', hexSample: '0x39A4E2B1', description: 'Random integer matching client request with server reply.' },
+          { fieldName: 'Client IP (ciaddr)', bitLength: '32 bits', hexSample: '0.0.0.0 (in Discover)', description: 'Client existing IP (0.0.0.0 if unassigned).' },
+          { fieldName: 'Your IP (yiaddr)', bitLength: '32 bits', hexSample: '192.168.1.105', description: 'IP address assigned by DHCP server.' },
+          { fieldName: 'Server IP (siaddr)', bitLength: '32 bits', hexSample: '192.168.1.1', description: 'Next bootstrap server IP address.' },
+          { fieldName: 'Magic Cookie', bitLength: '32 bits', hexSample: '0x63825363', description: 'Standard vendor magic cookie identifying DHCP options.' },
         ],
-        headerDiagramAscii: `
-+-------------------------------------------------------------------------------+
+        headerDiagramAscii: `+-------------------------------------------------------------------------------+
 |                        THE 4-STEP DHCP DORA WORKFLOW                          |
 +-------------------------------------------------------------------------------+
 |  [ CLIENT ]                                                   [ DHCP SERVER ] |
 |      |                                                              |         |
-|      | --- 1. DHCP DISCOVER (Broadcast: 0.0.0.0 -> 255.255.255.255) ->         |
+|      | --- 1. DHCP DISCOVER (Broadcast: 0.0.0.0:68 -> 255.255.255.255:67) --> |
 |      |                                                              |         |
-|      | <-- 2. DHCP OFFER (Proposes: 192.168.1.50, Mask, Gateway, DNS) --      |
+|      | <-- 2. DHCP OFFER (Proposes: 192.168.1.105, Mask, Gateway, DNS) ---+  |
 |      |                                                              |         |
-|      | --- 3. DHCP REQUEST (Broadcast: "I accept 192.168.1.50") ---->         |
+|      | --- 3. DHCP REQUEST (Broadcast: "I accept 192.168.1.105") -->|         |
 |      |                                                              |         |
-|      | <-- 4. DHCP ACK (Commits lease & configures client) ----------+        |
-|      |                                                              |         |
+|      | <-- 4. DHCP ACK (Commits lease & configures client) ---------+         |
+|      |                                                                        |
 |  [ Timers: T1 Renewal @ 50% | T2 Rebind @ 87.5% | Lease Expiry @ 100% ]       |
-+-------------------------------------------------------------------------------+
-`,
++-------------------------------------------------------------------------------+`,
       },
-      step8_visualExplanation: {
+      visualizer: {
         type: 'DHCP_DORA_ANIMATOR',
         title: 'Interactive DHCP DORA Protocol Animator & Lease Timer Simulator',
         description: 'Watch the step-by-step DORA packet exchange across client and server, inspect Option fields (1, 3, 6), and simulate lease timer countdowns (T1, T2, Expiration).',
       },
-      step9_workedExample: {
-        title: 'Analyzing DHCP Lease Timers for an 8-Hour Enterprise Lease',
-        problemStatement: 'A DHCP server assigns a client an 8-hour lease (28,800 seconds) at 09:00 AM. Calculate: (1) T1 Renewal time, (2) T2 Rebind time, (3) Expiration time.',
+      workedExample: {
+        title: 'Calculating DHCP Lease Renewal and Rebind Timers for a 24-Hour Scope',
+        problemStatement:
+          'An enterprise DHCP server assigns a client an IPv4 address with a 24-hour lease duration (86,400 seconds) at 08:00 AM on Monday.\n1. At what time and percentage does the T1 Renewal Timer trigger, and what type of message is sent?\n2. At what time and percentage does the T2 Rebind Timer trigger?\n3. What happens if no DHCP server responds by 08:00 AM Tuesday (100% expiration)?',
         stepByStepSolution: [
-          'Step 1 (T1 Renewal Timer): T1 = 50% of lease duration = $0.50 \\times 8 \\text{ hours} = 4 \\text{ hours}$. T1 triggers at 01:00 PM (Unicast Request to server).',
-          'Step 2 (T2 Rebind Timer): T2 = 87.5% of lease duration = $0.875 \\times 8 \\text{ hours} = 7 \\text{ hours}$. T2 triggers at 04:00 PM (Broadcast Request to any server).',
-          'Step 3 (Lease Expiration): Expiration = 100% = 8 hours. Expiration occurs at 05:00 PM (IP released; client falls back to APIPA).',
+          'Step 1 (T1 Renewal Timer @ 50%): T1 is defined as 50% of the lease duration = $0.50 \\times 24 \\text{ hours} = 12 \\text{ hours}$. T1 triggers at 08:00 PM Monday. The client transmits a **Unicast DHCP Request** directly to the leasing server IP.',
+          'Step 2 (T2 Rebind Timer @ 87.5%): T2 is defined as 87.5% (7/8ths) of the lease duration = $0.875 \\times 24 \\text{ hours} = 21 \\text{ hours}$. T2 triggers at 05:00 AM Tuesday. The client broadcasts a **Broadcast DHCP Request** to any available DHCP server.',
+          'Step 3 (Lease Expiration @ 100%): At 08:00 AM Tuesday (24 hours elapsed), the lease expires. The client immediately stops using the IP address, flushes its network routing table, assigns an APIPA address (`169.254.x.x`), and begins transmitting DHCP Discovers.',
         ],
-        finalResult: 'T1: 1:00 PM (4h) | T2: 4:00 PM (7h) | Expiration: 5:00 PM (8h).',
+        finalResult:
+          'T1 triggers at 8:00 PM (12h, Unicast); T2 triggers at 5:00 AM (21h, Broadcast); Expiration triggers at 8:00 AM (24h, APIPA fallback).',
       },
-      step10_realWorldScenario: {
-        topology: 'Branch Office DHCP Relay Agent (ip helper-address)',
-        scenarioText: 'A branch office has client PCs on VLAN 10 but the central DHCP server is in the datacenter across a router. Because routers drop broadcast packets (DHCP Discover), the engineer configures `ip helper-address 10.50.0.5` on the router interface, which converts client broadcast Discovers into unicast packets routed directly to the datacenter DHCP server.',
-        engineeringContext: 'DHCP Relay (ip helper-address) allows one centralized DHCP server to serve multiple remote subnets.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Runs DHCP client daemon; initiates Discover on boot; renews at T1.',
-        nicBehavior: 'Captures broadcast frames sent to FF:FF:FF:FF:FF:FF.',
-        switchOrRouterBehavior: 'Routers do not forward DHCP broadcast frames unless configured with DHCP Relay / IP Helper.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'ipconfig /renew',
-          description: 'Forces the Windows DHCP client to send a DHCP Request and renew its IP lease parameters.',
-          expectedOutput: 'Windows IP Configuration\n\nEthernet adapter Ethernet:\n   IPv4 Address. . . . . : 192.168.1.50\n   Subnet Mask . . . . . : 255.255.255.0\n   Default Gateway . . . : 192.168.1.1',
-          proofExplanation: 'Confirms successful DHCP lease acquisition and interface configuration.',
+          id: 1,
+          prompt: 'What does the acronym DORA stand for in DHCP initial lease acquisition, and what is the sequence?',
+          expected: 'Discover (Broadcast) -> Offer (Server Proposal) -> Request (Client Commitment) -> Acknowledge (Lease Finalized).',
+          hints: 'D - O - R - A.',
+        },
+        {
+          id: 2,
+          prompt: 'What UDP port numbers do the DHCP Server and DHCP Client listen on?',
+          expected: 'DHCP Server listens on UDP Port 67; DHCP Client listens on UDP Port 68.',
+          hints: 'Server is 67, Client is 68.',
+        },
+        {
+          id: 3,
+          prompt: 'What are the official DHCP Option codes for Subnet Mask, Default Gateway Router, and DNS Servers?',
+          expected: 'Option 1 = Subnet Mask; Option 3 = Router / Default Gateway; Option 6 = DNS Servers.',
+          hints: 'Options 1, 3, and 6.',
+        },
+        {
+          id: 4,
+          prompt: 'At what percentage of total lease time does a DHCP client initiate its T1 renewal request, and is this request unicast or broadcast?',
+          expected: 'T1 triggers at 50% of the lease duration and is sent as a Unicast packet directly to the leasing server.',
+          hints: 'T1 = 50% unicast; T2 = 87.5% broadcast.',
+        },
+        {
+          id: 5,
+          prompt: 'Why does an unconfigured client use Source IP 0.0.0.0 and Destination IP 255.255.255.255 when sending a DHCP Discover?',
+          expected: 'Because the client has no assigned IP address yet (0.0.0.0) and does not know where the DHCP server is, requiring a local broadcast (255.255.255.255).',
+          hints: '0.0.0.0 indicates absence of address; 255.255.255.255 is limited broadcast.',
+        },
+        {
+          id: 6,
+          prompt: 'When a client computer displays an IP address starting with 169.254.x.x, what does this indicate has occurred?',
+          expected: 'Automatic Private IP Addressing (APIPA) fallback; the client failed to reach a DHCP server and self-assigned a link-local address.',
+          hints: '169.254.0.0/16 is APIPA.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Host displays APIPA address (169.254.x.x) after reboot.',
-          possibleCauses: ['DHCP server pool exhausted, DHCP service offline, or router missing ip helper-address'],
-          diagnosticSteps: ['Check DHCP server pool utilization and verify ip helper-address on router.'],
-          remediation: 'Expand DHCP pool or restore DHCP server service.',
-        },
+      recap: [
+        'DHCP automates IP configuration via the 4-step DORA exchange (Discover, Offer, Request, ACK).',
+        'Operates over UDP: Server listens on Port 67, Client on Port 68.',
+        'Delivers core options: Subnet Mask (Option 1), Default Gateway (Option 3), and DNS Servers (Option 6).',
+        'Lease lifecycle is governed by T1 (50% unicast renewal), T2 (87.5% broadcast rebind), and 100% Expiration.',
+        'DHCP Relay (ip helper-address) allows routers to forward client broadcast Discovers to centralized servers across subnets.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Assuming DHCP only assigns IP addresses.', correction: 'DHCP assigns complete network configurations: IP, Subnet Mask (Option 1), Default Gateway (Option 3), and DNS Servers (Option 6).' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Rogue DHCP Server & DHCP Starvation Attacks',
-        mitigationStrategy: 'Enable DHCP Snooping on switches (`ip dhcp snooping`) to trust only authorized switchports and drop rogue DHCP Offers.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'DORA: Discover (Broadcast), Offer (Unicast/Broadcast), Request (Broadcast), ACK (Unicast/Broadcast).',
-          'UDP Port 67 (Server), UDP Port 68 (Client).',
-          'DHCP Options: Option 1 (Mask), Option 3 (Gateway), Option 6 (DNS).',
-          'T1 = 50%, T2 = 87.5%, Expiration = 100%.',
-        ],
-        frequentTraps: [
-          'Confusing DHCP server port (67) with client port (68).',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: DHCP DORA Inspection & Lease Renewal Diagnostics',
-        scenario: 'Execute ipconfig /release and /renew, inspect DORA messages, and verify option parameters.',
-        tasks: ['Run ipconfig /release followed by ipconfig /renew.', 'Verify assigned IP, gateway, and DNS options.'],
-        verificationMethod: 'Confirm valid lease parameters received from DHCP server.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'DHCP automates IP configuration via the 4-step DORA exchange (UDP 67/68).',
-          'Delivers essential options: Subnet Mask (1), Gateway (3), and DNS (6).',
-          'Lease timers: T1 (50% renewal) and T2 (87.5% rebind).',
-        ],
-        nextLessonBridge:
-          'Proceed to NET-203 Lesson 3 to master Address Resolution Protocol (ARP) & Layer 2/3 Binding.',
-      },
     },
     questions: [
       {
@@ -332,22 +475,124 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
           'Query -> Lookup -> Resolve -> Bind',
         ],
         correctOption: 0,
-        explanation: 'Initial DHCP lease acquisition follows the DORA sequence: DHCP Discover (Client broadcast), DHCP Offer (Server response), DHCP Request (Client commitment), and DHCP Acknowledge (Server finalization).',
-        explanationsJson: { 1: 'Generic terms.', 2: 'That is the TCP handshake and teardown.', 3: 'Generic terms.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'Initial DHCP lease acquisition follows the DORA sequence: DHCP Discover (Client broadcast), DHCP Offer (Server response), DHCP Request (Client commitment), and DHCP Acknowledge (Server finalization).',
+        explanationsJson: {
+          1: 'Generic terms.',
+          2: 'That is the TCP handshake and teardown.',
+          3: 'Generic terms.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.RECALL,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'DHCP DORA Workflow',
       },
+      {
+        text: 'Which UDP port numbers are officially designated for DHCP Server and DHCP Client communications?',
+        options: [
+          'DHCP Server = UDP Port 67, DHCP Client = UDP Port 68',
+          'DHCP Server = UDP Port 53, DHCP Client = UDP Port 53',
+          'DHCP Server = TCP Port 80, DHCP Client = TCP Port 443',
+          'DHCP Server = UDP Port 161, DHCP Client = UDP Port 162',
+        ],
+        correctOption: 0,
+        explanation:
+          'DHCP utilizes UDP port 67 for the server daemon (BOOTPS) and UDP port 68 for client endpoints (BOOTPC).',
+        explanationsJson: {
+          1: 'Port 53 is DNS.',
+          2: 'Ports 80 and 443 are HTTP and HTTPS.',
+          3: 'Ports 161 and 162 are SNMP.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'DHCP UDP Port Numbers',
+      },
+      {
+        text: 'What are the standard DHCP Option numbers used to provide client endpoints with their Subnet Mask, Default Gateway Router IP, and DNS Server IPs?',
+        options: [
+          'Subnet Mask = Option 1, Default Gateway = Option 3, DNS Servers = Option 6',
+          'Subnet Mask = Option 10, Default Gateway = Option 20, DNS Servers = Option 30',
+          'Subnet Mask = Option 80, Default Gateway = Option 443, DNS Servers = Option 53',
+          'Subnet Mask = Option 255, Default Gateway = Option 1, DNS Servers = Option 8',
+        ],
+        correctOption: 0,
+        explanation:
+          'RFC 2132 defines standard DHCP Options: Option 1 specifies Subnet Mask, Option 3 specifies Router (Default Gateway), and Option 6 specifies Domain Name Servers (DNS).',
+        explanationsJson: {
+          1: 'Arbitrary numbers.',
+          2: 'These are well-known application port numbers, not DHCP option codes.',
+          3: 'Arbitrary numbers.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'DHCP Option Codes (1, 3, 6)',
+      },
+      {
+        text: 'An employee\'s laptop acquires an 8-hour DHCP lease at 09:00 AM. At what time will the client first attempt to renew its lease (T1 Renewal Timer), and how is the renewal packet transmitted?',
+        options: [
+          'At 01:00 PM (50% of lease duration) via a Unicast DHCP Request sent directly to the leasing server',
+          'At 04:00 PM (87.5% of lease duration) via a Broadcast DHCP Discover',
+          'At 05:00 PM (100% of lease duration) via an ARP Request',
+          'At 09:05 AM via a TCP SYN packet',
+        ],
+        correctOption: 0,
+        explanation:
+          'The T1 Renewal Timer triggers at 50% of the total lease duration ($0.50 \\times 8 \\text{ hours} = 4 \\text{ hours}$, which is 01:00 PM). The client transmits a unicast DHCP Request directly to the server that granted the lease.',
+        explanationsJson: {
+          1: '87.5% is the T2 Rebind Timer (04:00 PM), which is broadcast if T1 fails.',
+          2: '100% is lease expiration, not the first renewal attempt.',
+          3: 'Lease renewal does not trigger 5 minutes after connection.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'DHCP T1 Renewal Timer Calculation',
+      },
+      {
+        text: 'Why is the DHCP Relay Agent (`ip helper-address`) feature configured on enterprise router interfaces?',
+        options: [
+          'Because routers drop Layer 2/3 broadcast packets by default, requiring the router to convert client DHCP Discover broadcasts into unicast packets routed to a central DHCP server',
+          'To encrypt DHCP leases using WPA3 wireless security',
+          'To prevent computers from running web browsers',
+          'To convert IPv4 packets into IPv6 packets automatically',
+        ],
+        correctOption: 0,
+        explanation:
+          'Since routers terminate broadcast domains and do not forward `255.255.255.255` broadcasts, a DHCP Relay Agent (`ip helper-address`) intercepts client Discover broadcasts and forwards them as unicast packets to the central DHCP server.',
+        explanationsJson: {
+          1: 'DHCP Relay forwards address requests, not wireless encryption.',
+          2: 'DHCP Relay enables network connectivity, not application blocking.',
+          3: 'DHCP Relay is not an IPv4-to-IPv6 transition mechanism.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'DHCP Relay Agent & ip helper-address',
+      },
+      {
+        text: 'A helpdesk technician notices that a user\'s computer shows an IPv4 address of `169.254.45.89` with a subnet mask of `255.255.0.0`. The user cannot access internal network shares or the Internet. What does this indicate?',
+        options: [
+          'The client failed to communicate with a DHCP server and self-assigned an Automatic Private IP Addressing (APIPA) link-local address',
+          'The computer has been successfully assigned a public Internet IP address',
+          'The DHCP server assigned a static high-speed VIP address',
+          'The computer is connected to a Gigabit fiber connection',
+        ],
+        correctOption: 0,
+        explanation:
+          'The IPv4 block `169.254.0.0/16` is reserved for APIPA (Automatic Private IP Addressing). When a DHCP client receives no response to its Discovers, it self-assigns an address in this range, allowing communication only with other APIPA hosts on the immediate physical wire.',
+        explanationsJson: {
+          1: '169.254.x.x is link-local and non-routable on the Internet.',
+          2: '169.254.x.x indicates DHCP failure, not a VIP assignment.',
+          3: 'APIPA address assignment is independent of physical media link speed.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'APIPA (169.254.x.x) Troubleshooting',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: DHCP DORA Inspection & Lease Renewal Diagnostics',
-      instructions: '1. Run ipconfig /release.\n2. Run ipconfig /renew.\n3. Verify lease parameters.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { dhcpServer: '192.168.1.1', clientMac: '00:11:22:33:44:55' },
-      tasks: ['Run ipconfig /renew.'],
-    },
   },
 
   // -------------------------------------------------------------------------
@@ -1013,41 +1258,72 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'SOCKET_MULTIPLEXER',
     introduction:
       'Master Transport Layer process addressing: 16-bit port number architecture (0 to 65535), Port classification bands (Well-Known 0-1023, Registered 1024-49151, Ephemeral/Dynamic 49152-65535), Socket definition (IP Address + Port Number + Protocol), Socket Pairs, and Layer 4 Port Multiplexing / Demultiplexing mechanics.',
-    stepMetadata: {
-      step1_objective:
-        'Understand 16-bit transport port numbers, differentiate between Well-Known, Registered, and Dynamic/Ephemeral port ranges, define a Socket and Socket Pair, and analyze Layer 4 Multiplexing and Demultiplexing.',
-      step2_prerequisites: ['net-202-ipv4-addressing-cidr'],
-      step3_whyItMatters:
-        'A computer has only one physical network card and one IP address. Without transport ports, an operating system could not simultaneously run a web browser, Spotify, email client, and SSH session without data streams colliding.',
-      step4_coreConcept:
-        'Transport Layer Ports are 16-bit unsigned integers ($0 \\text{ to } 65535$) used to identify specific software application processes running on a host. Port numbers are classified into three official IANA ranges: (1) **Well-Known Ports** ($0 \\text{ to } 1023$): Reserved for standardized system services (HTTP 80, HTTPS 443, DNS 53, SSH 22, DHCP 67/68, NTP 123). (2) **Registered Ports** ($1024 \\text{ to } 49151$): Assigned by IANA for specific vendor applications (MySQL 3306, RDP 3389, PostgreSQL 5432). (3) **Dynamic / Ephemeral Ports** ($49152 \\text{ to } 65535$): Allocated temporarily by the client operating system for outgoing connections. A **Socket** is the combination of $\\text{IP Address} + \\text{Port Number} + \\text{Protocol}$ (e.g. `192.168.1.50:51234 TCP`). A **Socket Pair** (4-tuple: Source IP, Source Port, Destination IP, Destination Port) uniquely identifies every active end-to-end conversation across the Internet. **Port Multiplexing** allows hundreds of distinct application sockets to share a single physical NIC.',
-      step5_technicalAnatomy: {
-        title: 'Port Classification Ranges, Socket Definitions & Multiplexing',
-        description: 'IANA port ranges, socket data structures, and transport multiplexing mechanics.',
-        components: [
-          { name: 'Well-Known Ports (0 – 1023)', detail: 'Privileged system services: HTTP (80), HTTPS (443), DNS (53), SSH (22), Telnet (23), SMTP (25), DHCP (67/68), NTP (123).' },
-          { name: 'Registered Ports (1024 – 49151)', detail: 'User and application processes: MySQL (3306), RDP (3389), PostgreSQL (5432), SIP (5060).' },
-          { name: 'Dynamic / Ephemeral Ports (49152 – 65535)', detail: 'Client OS auto-allocated ports for transient outbound connections; recycled upon connection close.' },
-          { name: 'Socket & Socket Pair (4-Tuple)', detail: 'Socket = IP:Port:Proto. Socket Pair = $\\{\\text{Src IP:Port}, \\text{Dst IP:Port}\\}$ uniquely identifying the communication channel.' },
-          { name: 'Multiplexing & Demultiplexing', detail: 'Multiplexing gathers data from multiple sockets onto one NIC; Demultiplexing delivers incoming packets to the correct application socket based on destination port.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Server Binding', action: 'Web server binds socket to `0.0.0.0:443 TCP` and enters listening state.' },
-          { stepNumber: 2, title: 'Client Ephemeral Allocation', action: 'Browser opens connection, OS assigns ephemeral port `51234`, creating Socket `192.168.1.50:51234`.' },
-          { stepNumber: 3, title: 'Socket Pair Creation', action: 'Socket Pair `192.168.1.50:51234 <-> 93.184.216.34:443 TCP` established.' },
-          { stepNumber: 4, title: 'Demultiplexing on Ingress', action: 'When packet returns with destination port 51234, OS kernel demultiplexes payload directly to the browser process.' },
-        ],
-      },
-      step7_packetHeaderView: {
+    contentV2: {
+      objective:
+        'Understand 16-bit transport port numbers ($0 \\text{ to } 65535$), differentiate between Well-Known (0–1023), Registered (1024–49151), and Dynamic/Ephemeral (49152–65535) port ranges, define a Socket and 4-tuple Socket Pair, and analyze Layer 4 Multiplexing and Demultiplexing inside the operating system kernel.',
+      prerequisites: [
+        'NET-103: The 7-Layer OSI Reference Model & Data Encapsulation',
+        'NET-202: IPv4 Addressing, Subnet Masks & CIDR Subnetting',
+      ],
+      whyItMatters:
+        'A computer has only one physical network card and one IP address. Without transport ports and socket multiplexing, an operating system could not simultaneously run multiple browser tabs, streaming audio, an SSH terminal, and background updates without data streams colliding and corrupting one another.',
+      explanation:
+        'The Transport Layer (Layer 4) provides process-to-process communication between software applications running on network hosts. While IP addresses identify a specific physical or virtual machine on a network, **Port Numbers** identify the specific application software process running inside that machine\'s operating system.\n\n### 1. 16-Bit Port Architecture & Official IANA Ranges\nPort numbers are 16-bit unsigned integers, providing $2^{16} = 65,536$ unique numerical addresses ($0 \\text{ to } 65535$) for both TCP and UDP. The Internet Assigned Numbers Authority (IANA) divides these ports into three official ranges:\n1. **Well-Known Ports ($0 \\text{ to } 1023$)**: Reserved for standardized system protocols and core infrastructure daemons. On Unix/Linux systems, binding to a well-known port requires root/administrator privileges. Standard examples:\n   - HTTP: `80` | HTTPS: `443` | DNS: `53` | SSH: `22` | Telnet: `23` | SMTP: `25` | DHCP Server: `67` | DHCP Client: `68` | NTP: `123` | SNMP: `161`.\n2. **Registered Ports ($1024 \\text{ to } 49151$)**: Assigned by IANA upon request to vendor applications and database servers. Standard examples:\n   - MySQL: `3306` | Microsoft Remote Desktop (RDP): `3389` | PostgreSQL: `5432` | Redis: `6379` | SIP VoIP: `5060`.\n3. **Dynamic / Ephemeral Ports ($49152 \\text{ to } 65535$)**: Allocated dynamically by client operating systems for temporary outgoing client connections. When a browser initiates an HTTPS request, the OS kernel assigns a free ephemeral port (e.g. `51234`), which is recycled as soon as the connection terminates.\n\n### 2. Sockets & 4-Tuple Socket Pairs\n* **Socket**: The logical endpoint of a network communication channel, defined as the combination of: $\\text{IP Address} + \\text{Port Number} + \\text{Protocol}$ (e.g. `192.168.1.50:51234 TCP`).\n* **Socket Pair (4-Tuple)**: To uniquely distinguish every network connection globally, the operating system kernel tracks a 4-tuple:\n  $$\\text{Socket Pair} = \\{ \\text{Source IP}, \\text{Source Port}, \\text{Destination IP}, \\text{Destination Port} \\}$$\n  Even if a user opens 10 separate browser tabs to the exact same web server (`104.21.48.12:443`), each tab receives a unique ephemeral source port (`:51234`, `:51235`, `:51236`), making each 4-tuple mathematically unique.\n\n### 3. Layer 4 Multiplexing & Demultiplexing\n* **Multiplexing (Egress Transmission)**: The OS kernel gathers data chunks from dozens of separate application sockets, wraps them in TCP/UDP headers with their respective source ports, and funnels them through the single physical Network Interface Card (NIC).\n* **Demultiplexing (Ingress Delivery)**: When packets return from the physical wire, the NIC strips Layer 2 framing, the IP layer validates Layer 3 addresses, and the transport stack inspects the **Destination Port Number** to deliver the payload bytes directly into the correct application\'s memory buffer.',
+      components: [
+        {
+          name: '16-Bit Port Length (0 to 65535)',
+          detail: 'Provides 65,536 distinct numerical addresses for both TCP and UDP protocol stacks.',
+        },
+        {
+          name: 'Well-Known Ports (0 – 1023)',
+          detail: 'Privileged system services: HTTP (80), HTTPS (443), DNS (53), SSH (22), DHCP (67/68), NTP (123).',
+        },
+        {
+          name: 'Registered Ports (1024 – 49151)',
+          detail: 'Vendor and database applications: MySQL (3306), RDP (3389), PostgreSQL (5432), Redis (6379).',
+        },
+        {
+          name: 'Dynamic / Ephemeral Ports (49152 – 65535)',
+          detail: 'Client OS auto-allocated ports for transient outbound connections, recycled upon socket closure.',
+        },
+        {
+          name: 'Socket & 4-Tuple Socket Pair',
+          detail: 'Socket = IP:Port:Proto. 4-Tuple = {Src IP, Src Port, Dst IP, Dst Port} uniquely identifying active sessions.',
+        },
+        {
+          name: 'Port Multiplexing & Demultiplexing',
+          detail: 'Multiplexing shares one physical NIC across processes; Demultiplexing directs incoming data by Destination Port.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Server Socket Binding',
+          action: 'Web server process binds socket to `0.0.0.0:443 TCP` and enters LISTENING state in OS kernel.',
+        },
+        {
+          stepNumber: 2,
+          title: 'Client Ephemeral Port Allocation',
+          action: 'Browser opens connection; OS kernel allocates ephemeral source port `51234`, creating Socket `192.168.1.50:51234`.',
+        },
+        {
+          stepNumber: 3,
+          title: 'Socket Pair Establishment',
+          action: 'Kernel records 4-tuple `192.168.1.50:51234 <-> 104.21.48.12:443 TCP` in active socket table.',
+        },
+        {
+          stepNumber: 4,
+          title: 'Kernel Demultiplexing on Ingress',
+          action: 'When return packet arrives with Destination Port 51234, OS kernel demultiplexes payload directly to the browser process buffer.',
+        },
+      ],
+      packetHeaderView: {
         protocol: 'Transport Layer Port Fields (TCP & UDP)',
         fields: [
-          { fieldName: 'Source Port', bitLength: '16 bits (2 Bytes)', hexSample: '0xC822 (51234)', description: 'Client ephemeral port.' },
-          { fieldName: 'Destination Port', bitLength: '16 bits (2 Bytes)', hexSample: '0x01BB (443)', description: 'Server well-known service port.' },
+          { fieldName: 'Source Port', bitLength: '16 bits (2 Bytes)', hexSample: '0xC822 (51234)', description: 'Client ephemeral port or server response port.' },
+          { fieldName: 'Destination Port', bitLength: '16 bits (2 Bytes)', hexSample: '0x01BB (443)', description: 'Target application service daemon port.' },
         ],
-        headerDiagramAscii: `
-+-------------------------------------------------------------------------------+
+        headerDiagramAscii: `+-------------------------------------------------------------------------------+
 |                      LAYER 4 PORT MULTIPLEXING & DEMULTIPLEXING               |
 +-------------------------------------------------------------------------------+
 |   [ Browser Tab 1 ]       [ Spotify App ]         [ SSH Client ]              |
@@ -1062,84 +1338,70 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
 |   [ SINGLE PHYSICAL NIC & SINGLE IP ADDRESS: 192.168.1.50 ]                   |
 |                             |                                                 |
 |   (Incoming packets demultiplexed to correct application by Destination Port) |
-+-------------------------------------------------------------------------------+
-`,
++-------------------------------------------------------------------------------+`,
       },
-      step8_visualExplanation: {
+      visualizer: {
         type: 'SOCKET_MULTIPLEXER',
         title: 'Interactive Socket Multiplexer & Port Inspection Engine',
         description: 'Observe multiple client browser tabs and background applications multiplexing across a single IP address, and watch the OS kernel demultiplex returning packets to their exact socket.',
       },
-      step9_workedExample: {
-        title: 'Differentiating Multiple Browser Tabs to the Same Web Server',
-        problemStatement: 'A user opens two separate tabs in Chrome to `https://example.com` (`93.184.216.34:443`). How does the client OS differentiate returning web traffic for Tab 1 vs Tab 2?',
+      workedExample: {
+        title: 'Differentiating Concurrent Connections to the Same Web Server',
+        problemStatement:
+          'A user opens two separate tabs in Chrome to `https://netvision.edu` (`104.21.48.12:443`) from workstation `192.168.1.50`.\n1. What are the complete 4-tuple socket pairs for Tab 1 and Tab 2?\n2. How does the client operating system ensure web responses for Tab 1 do not appear in Tab 2?',
         stepByStepSolution: [
-          'Tab 1 Socket Pair: `192.168.1.50:51234 <-> 93.184.216.34:443 TCP`.',
-          'Tab 2 Socket Pair: `192.168.1.50:51235 <-> 93.184.216.34:443 TCP`.',
-          'Even though the Destination IP (`93.184.216.34`), Destination Port (`443`), and Source IP (`192.168.1.50`) are identical, the client OS allocated unique ephemeral source ports (`51234` vs `51235`).',
-          'Returning packets for Tab 1 have Destination Port `51234`; returning packets for Tab 2 have Destination Port `51235`.',
+          'Step 1 (Tab 1 4-Tuple): When Tab 1 opens, the OS assigns ephemeral port `51234`. 4-tuple: `{ 192.168.1.50:51234 <-> 104.21.48.12:443 TCP }`.',
+          'Step 2 (Tab 2 4-Tuple): When Tab 2 opens, the OS assigns a new distinct ephemeral port `51235`. 4-tuple: `{ 192.168.1.50:51235 <-> 104.21.48.12:443 TCP }`.',
+          'Step 3 (Demultiplexing on Return): When the web server replies to Tab 1, it transmits packets with Destination Port `51234`. When it replies to Tab 2, it transmits packets with Destination Port `51235`. The OS kernel inspects the destination port on ingress and routes bytes exclusively to the matching process thread.',
         ],
-        finalResult: 'Unique ephemeral source ports make each socket pair globally distinct.',
+        finalResult:
+          'Unique ephemeral source ports ensure each concurrent socket pair is mathematically distinct.',
       },
-      step10_realWorldScenario: {
-        topology: 'NAT Router Port Address Translation (PAT) / NAPT',
-        scenarioText: 'An office of 500 workers shares a single public IPv4 address. The enterprise firewall uses Port Address Translation (PAT) to map thousands of internal host private sockets (e.g. `192.168.1.10:51234`) to unique public port numbers on its single public IP, enabling simultaneous Internet access for all 500 users.',
-        engineeringContext: 'PAT relies entirely on 16-bit port multiplexing to conserve IPv4 space.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Allocates ephemeral ports from pool; maintains socket table in kernel memory.',
-        nicBehavior: 'Delivers entire frame payload to OS kernel transport stack.',
-        switchOrRouterBehavior: 'Stateful firewalls inspect Layer 4 port numbers to enforce access rules (e.g. permit port 443, block port 23).',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'netstat -ano -p tcp',
-          description: 'Lists all active TCP socket connections, listening ports, and owning Process IDs (PID).',
-          expectedOutput:
-            'Proto  Local Address          Foreign Address        State        PID\nTCP    0.0.0.0:443            0.0.0.0:0              LISTENING    1204\nTCP    192.168.1.50:51234     93.184.216.34:443      ESTABLISHED  4512',
-          proofExplanation: 'Shows web server listening on 443 and client socket established to remote server.',
+          id: 1,
+          prompt: 'What is the total bit length and numerical range of Layer 4 TCP and UDP port numbers?',
+          expected: '16 bits (range: 0 to 65535).',
+          hints: '2^16 = 65536 total port values.',
+        },
+        {
+          id: 2,
+          prompt: 'What are the three official IANA port classifications and their respective numerical boundaries?',
+          expected: 'Well-Known Ports (0 – 1023), Registered Ports (1024 – 49151), and Dynamic/Ephemeral Ports (49152 – 65535).',
+          hints: '0-1023 system; 1024-49151 vendor apps; 49152-65535 client ephemeral.',
+        },
+        {
+          id: 3,
+          prompt: 'What four addressing parameters constitute a complete network "Socket Pair" (4-tuple)?',
+          expected: 'Source IP Address, Source Port Number, Destination IP Address, and Destination Port Number (along with Transport Protocol).',
+          hints: 'Src IP, Src Port, Dst IP, Dst Port.',
+        },
+        {
+          id: 4,
+          prompt: 'What standard well-known port numbers are assigned to HTTP, HTTPS, SSH, DNS, and DHCP Server?',
+          expected: 'HTTP = 80, HTTPS = 443, SSH = 22, DNS = 53, DHCP Server = 67.',
+          hints: '80, 443, 22, 53, 67.',
+        },
+        {
+          id: 5,
+          prompt: 'What is the difference between Layer 4 Multiplexing and Demultiplexing in the OS kernel?',
+          expected: 'Multiplexing combines data from multiple application sockets onto a single physical NIC; Demultiplexing delivers incoming packets to the correct application socket based on Destination Port.',
+          hints: 'Multiplexing is egress gathering; demultiplexing is ingress routing by port.',
+        },
+        {
+          id: 6,
+          prompt: 'When a web developer launches a server and receives the error "Address already in use: bind", what does this mean?',
+          expected: 'Another running process or daemon on the machine is already bound to and listening on that specific IP and port number combination.',
+          hints: 'Only one process can listen on a specific port per IP and protocol at a time.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Application fails to start with error: "Address already in use: bind".',
-          possibleCauses: ['Another process is already running and bound to the requested port'],
-          diagnosticSteps: ['Run `netstat -ano | findstr :<port>` to identify the blocking PID.'],
-          remediation: 'Terminate the conflicting process via Task Manager / `kill` or reconfigure port.',
-        },
+      recap: [
+        'Ports are 16-bit integers ($0 \\text{ to } 65535$) identifying application processes on a host.',
+        'IANA port bands: Well-Known (0-1023), Registered (1024-49151), and Ephemeral (49152-65535).',
+        'A Socket is IP:Port:Protocol; a Socket Pair (4-tuple) uniquely distinguishes active network sessions.',
+        'Multiplexing allows multiple application sockets to share a single physical NIC.',
+        'Demultiplexing directs incoming packets to the correct process based on Destination Port.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Thinking a port number is a physical jack on the back of a computer.', correction: 'A network port is a logical 16-bit software memory address inside the OS kernel; physical connectors are RJ-45 jacks.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Port Scanning & Unauthorized Service Discovery',
-        mitigationStrategy: 'Close unused listening ports and deploy stateful firewalls to block unauthorized incoming port connections.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'Port bit length: 16 bits ($0 \\text{ to } 65535$).',
-          'Ranges: Well-Known (0-1023), Registered (1024-49151), Ephemeral (49152-65535).',
-          'Socket = IP:Port:Protocol. Socket Pair = 4-Tuple.',
-        ],
-        frequentTraps: [
-          'Confusing Well-Known range limit (ends at 1023, not 1024).',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Active Socket Inspection & Ephemeral Port Tracking',
-        scenario: 'Use netstat to audit listening ports and map active application socket pairs.',
-        tasks: ['Run netstat -ano and identify listening ports vs established client sockets.'],
-        verificationMethod: 'Verify socket pair mapping in terminal output.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          '16-bit ports identify application processes ($0 \\text{ to } 65535$).',
-          'Well-known ports (0-1023) identify standard server daemons.',
-          'Socket pairs enable Layer 4 multiplexing across a single IP address.',
-        ],
-        nextLessonBridge:
-          'Proceed to NET-204 Lesson 2 to master Transport Layer Segmentation, MSS, MTU, and Path MTU Discovery.',
-      },
     },
     questions: [
       {
@@ -1151,22 +1413,124 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
           'TCP Ports (0 – 32767) and UDP Ports (32768 – 65535)',
         ],
         correctOption: 0,
-        explanation: 'IANA officially designates 16-bit ports into Well-Known (0 to 1023 for system services), Registered (1024 to 49151 for applications), and Dynamic/Ephemeral (49152 to 65535 for client outbound connections).',
-        explanationsJson: { 1: 'Port numbers do not use IP class letters.', 2: 'Invalid ranges.', 3: 'Both TCP and UDP span the full 0-65535 range.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'IANA officially designates 16-bit ports into Well-Known (0 to 1023 for system services), Registered (1024 to 49151 for applications), and Dynamic/Ephemeral (49152 to 65535 for client outbound connections).',
+        explanationsJson: {
+          1: 'Port numbers do not use IP class letters.',
+          2: 'Invalid arbitrary ranges.',
+          3: 'Both TCP and UDP span the full 0-65535 range.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.RECALL,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'IANA Port Classification Ranges',
       },
+      {
+        text: 'What constitutes a complete Transport Layer "Socket Pair" (4-tuple) that uniquely distinguishes a network conversation globally across the Internet?',
+        options: [
+          'Source IP Address, Source Port Number, Destination IP Address, Destination Port Number',
+          'Source MAC Address, Destination MAC Address, VLAN ID, Subnet Mask',
+          'Domain Name, URL Path, Browser Cookie, HTTP Status Code',
+          'Serial Number, Transceiver Model, Fiber Core Diameter, Optical Wavelength',
+        ],
+        correctOption: 0,
+        explanation:
+          'A 4-tuple socket pair (Source IP, Source Port, Destination IP, Destination Port) along with the transport protocol uniquely identifies every end-to-end conversation across the global Internet.',
+        explanationsJson: {
+          1: 'MAC addresses and VLANs are Layer 2 framing parameters.',
+          2: 'URL paths and cookies are Layer 7 application data.',
+          3: 'Hardware serials and wavelengths are Physical Layer 1 attributes.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'The 4-Tuple Socket Pair',
+      },
+      {
+        text: 'Which of the following correctly pairs standard Well-Known port numbers with their respective protocol services?',
+        options: [
+          'HTTP = 80, HTTPS = 443, SSH = 22, DNS = 53, DHCP Server = 67',
+          'HTTP = 443, HTTPS = 80, SSH = 53, DNS = 22, DHCP Server = 25',
+          'HTTP = 21, HTTPS = 23, SSH = 80, DNS = 443, DHCP Server = 110',
+          'HTTP = 8080, HTTPS = 8443, SSH = 2222, DNS = 5353, DHCP Server = 6767',
+        ],
+        correctOption: 0,
+        explanation:
+          'Official well-known ports: HTTP uses 80, HTTPS uses 443, SSH uses 22, DNS uses 53, and DHCP Server uses 67.',
+        explanationsJson: {
+          1: 'Swapped port assignments.',
+          2: '21 is FTP, 23 is Telnet, 110 is POP3.',
+          3: 'These are non-standard alternate ports.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Standard Well-Known Port Numbers',
+      },
+      {
+        text: 'A user opens three separate browser tabs to `https://www.google.com` (`142.250.190.46:443`). How does the user\'s operating system ensure returning web packets are delivered to the correct browser tab without cross-contamination?',
+        options: [
+          'The OS assigns a unique ephemeral source port (e.g. 51234, 51235, 51236) to each tab, allowing the kernel to demultiplex returning packets based on destination port',
+          'The OS assigns a different physical MAC address to each tab',
+          'The OS requests Google to create three separate physical IP addresses for the client',
+          'The OS shuts down the other two tabs while one tab is loading',
+        ],
+        correctOption: 0,
+        explanation:
+          'The OS allocates a distinct ephemeral source port to each browser tab. When Google replies, the Destination Port in the TCP header matches that specific ephemeral port, allowing the kernel to demultiplex the data stream directly to the correct tab.',
+        explanationsJson: {
+          1: 'A physical NIC has only one burned-in MAC address.',
+          2: 'The client host uses only its single assigned IP address.',
+          3: 'Modern multitasking operating systems run all sockets concurrently.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Ephemeral Port Allocation & Socket Demultiplexing',
+      },
+      {
+        text: 'What is the operational difference between Transport Layer Multiplexing and Demultiplexing inside an operating system?',
+        options: [
+          'Multiplexing gathers data from multiple application sockets onto a single physical network interface; Demultiplexing delivers incoming packets from the interface to the correct application socket based on Destination Port',
+          'Multiplexing encrypts packets; Demultiplexing decrypts packets',
+          'Multiplexing converts IPv4 to IPv6; Demultiplexing converts IPv6 to IPv4',
+          'Multiplexing operates on copper cables; Demultiplexing operates on fiber optics',
+        ],
+        correctOption: 0,
+        explanation:
+          'Multiplexing combines outbound streams from diverse application sockets onto one physical link; Demultiplexing separates inbound packet streams and delivers them to their target application process using port headers.',
+        explanationsJson: {
+          1: 'Encryption/decryption is handled by TLS/Presentation Layer.',
+          2: 'Protocol translation is handled by NAT64/Dual-Stack.',
+          3: 'Physical media is handled by Layer 1 transceivers.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Multiplexing vs Demultiplexing Mechanics',
+      },
+      {
+        text: 'A software engineer runs a web server script and encounters the fatal error: `Error: listen EADDRINUSE: address already in use 0.0.0.0:8080`. What does this error signify, and what is the standard diagnostic action?',
+        options: [
+          'Another active process is already listening on port 8080; use `netstat -ano | findstr :8080` to locate and terminate the conflicting Process ID (PID) or reconfigure the application port',
+          'The router has run out of physical bandwidth',
+          'The computer has lost its IPv4 default gateway',
+          'The DNS root server is offline',
+        ],
+        correctOption: 0,
+        explanation:
+          'Only one process can bind to a specific IP address, transport protocol, and port number at any given time. `EADDRINUSE` indicates a port collision with an existing daemon.',
+        explanationsJson: {
+          1: 'Bandwidth issues cause latency/drops, not local socket binding collisions.',
+          2: 'Default gateway reachability does not prevent local socket binding.',
+          3: 'DNS root servers do not interfere with local localhost server binding.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'Socket Binding & Port In-Use Troubleshooting',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Active Socket Inspection & Ephemeral Port Tracking',
-      instructions: '1. Run netstat -ano -p tcp.\n2. Identify listening port 443 and ephemeral client ports.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { clientIp: '192.168.1.50', ephemeralPort: 51234, targetPort: 443 },
-      tasks: ['Run netstat -ano.'],
-    },
   },
 
   // -------------------------------------------------------------------------
