@@ -2,20 +2,110 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-:root {
-  --background: #121316;
+/* =========================================================================
+   NETVISION MULTI-THEME TOKEN ENGINE (5 CURATED PALETTES)
+   ========================================================================= */
+
+:root,
+[data-theme='obsidian'] {
+  --background: #09090b;
   --foreground: #f4f5f7;
-  --surface-0: #121316;
-  --surface-1: #16181f;
-  --surface-2: #1b1e26;
-  --surface-3: #14151a;
-  --border-hairline: #2a2e39;
-  --border-subtle: #383f4e;
-  --accent-primary: #2563eb;
-  --accent-cyan: #38bdf8;
+  --surface-0: #09090b;
+  --surface-1: #121217;
+  --surface-2: #181820;
+  --surface-3: #0e0e12;
+  --border-hairline: #22222d;
+  --border-subtle: #2d2d3d;
+  --accent-cyan: #00f0ff;
+  --accent-primary: #00f0ff;
+  --accent-purple: #a855f7;
   --accent-emerald: #10b981;
   --accent-amber: #f59e0b;
   --accent-rose: #ef4444;
+  --text-muted: #8e95a5;
+  --glow-accent: rgba(0, 240, 255, 0.25);
+  color-scheme: dark;
+}
+
+[data-theme='midnight-slate'] {
+  --background: #0b0f19;
+  --foreground: #f1f5f9;
+  --surface-0: #0b0f19;
+  --surface-1: #111827;
+  --surface-2: #1a2234;
+  --surface-3: #0e1422;
+  --border-hairline: #1e293b;
+  --border-subtle: #334155;
+  --accent-cyan: #38bdf8;
+  --accent-primary: #2563eb;
+  --accent-purple: #818cf8;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+  --text-muted: #94a3b8;
+  --glow-accent: rgba(56, 189, 248, 0.25);
+  color-scheme: dark;
+}
+
+[data-theme='oled-deepspace'] {
+  --background: #000000;
+  --foreground: #ffffff;
+  --surface-0: #000000;
+  --surface-1: #0a0a0d;
+  --surface-2: #131318;
+  --surface-3: #060608;
+  --border-hairline: #1f1f27;
+  --border-subtle: #31313d;
+  --accent-cyan: #22d3ee;
+  --accent-primary: #6366f1;
+  --accent-purple: #c084fc;
+  --accent-emerald: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
+  --text-muted: #a1a1aa;
+  --glow-accent: rgba(99, 102, 241, 0.25);
+  color-scheme: dark;
+}
+
+[data-theme='matrix-terminal'] {
+  --background: #0d1117;
+  --foreground: #e6edf3;
+  --surface-0: #0d1117;
+  --surface-1: #161b22;
+  --surface-2: #1f262e;
+  --surface-3: #090d12;
+  --border-hairline: #27303a;
+  --border-subtle: #3e4854;
+  --accent-cyan: #3fb950;
+  --accent-primary: #2ea043;
+  --accent-purple: #a371f7;
+  --accent-emerald: #3fb950;
+  --accent-amber: #d29922;
+  --accent-rose: #f85149;
+  --text-muted: #8b949e;
+  --glow-accent: rgba(63, 185, 80, 0.25);
+  color-scheme: dark;
+}
+
+[data-theme='solar-cream'],
+[data-theme='light'] {
+  --background: #fbf9f4;
+  --foreground: #1e293b;
+  --surface-0: #fbf9f4;
+  --surface-1: #f2ece0;
+  --surface-2: #ffffff;
+  --surface-3: #e8dfce;
+  --border-hairline: #ded5c2;
+  --border-subtle: #cbd5e1;
+  --accent-cyan: #0284c7;
+  --accent-primary: #0284c7;
+  --accent-purple: #7c3aed;
+  --accent-emerald: #16a34a;
+  --accent-amber: #d97706;
+  --accent-rose: #dc2626;
+  --text-muted: #64748b;
+  --glow-accent: rgba(2, 132, 199, 0.2);
+  color-scheme: light;
 }
 
 * {
@@ -31,6 +121,7 @@ body {
   font-family: var(--font-sans), Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Technical Laboratory Scrollbar */
@@ -40,62 +131,59 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #121316;
+  background: var(--surface-0);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2a2e39;
+  background: var(--border-hairline);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b4150;
+  background: var(--border-subtle);
 }
 
 /* --- SURFACE HIERARCHY SYSTEM --- */
-/* Surface 0: Page Canvas */
 .surface-0 {
-  background-color: #121316;
+  background-color: var(--surface-0);
 }
 
-/* Surface 1: Recessed Section Background */
 .surface-1 {
-  background-color: #16181f;
+  background-color: var(--surface-1);
 }
 
-/* Surface 2: Emphasized Panel / Workbench / Card */
 .surface-2 {
-  background-color: #1b1e26;
-  border: 1px solid #2a2e39;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border-hairline);
 }
 
-/* Surface 3: Interactive Tool Well / Terminal / Switchboard */
 .surface-3 {
-  background-color: #14151a;
-  border: 1px solid #242731;
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.6);
+  background-color: var(--surface-3);
+  border: 1px solid var(--border-hairline);
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4);
 }
 
-/* Legacy panel utility mappings for compatibility */
+/* Legacy panel utility mappings for full compatibility */
 .glass-panel {
-  background-color: #1b1e26;
-  border: 1px solid #2a2e39;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border-hairline);
 }
 
 .glass-panel-glow {
-  background-color: #1b1e26;
-  border: 1px solid #363c4a;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 0 15px -3px var(--glow-accent);
 }
 
 .instrument-panel {
-  background-color: #1b1e26;
-  border: 1px solid #2a2e39;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 3px rgba(0, 0, 0, 0.5);
+  background-color: var(--surface-2);
+  border: 1px solid var(--border-hairline);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 .instrument-panel-subtle {
-  background-color: #14151a;
-  border: 1px solid #242731;
+  background-color: var(--surface-3);
+  border: 1px solid var(--border-hairline);
 }
 
 /* Technical Calibration Grid */
@@ -125,31 +213,37 @@ body {
 
 /* Typography Utility Hierarchy */
 .h1-text {
-  @apply text-2xl sm:text-3xl font-bold tracking-tight text-[#f4f5f7] font-sans;
+  @apply text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans;
 }
 
 .h2-text {
-  @apply text-lg sm:text-xl font-bold tracking-tight text-[#f4f5f7] font-sans;
+  @apply text-lg sm:text-xl font-bold tracking-tight text-white font-sans;
 }
 
 .h3-text {
-  @apply text-base sm:text-lg font-semibold tracking-tight text-[#f4f5f7] font-sans;
+  @apply text-base sm:text-lg font-semibold tracking-tight text-white font-sans;
 }
 
 .body-text {
-  @apply text-sm text-[#949ba8] leading-relaxed font-sans;
+  @apply text-sm leading-relaxed font-sans;
+  color: var(--text-muted);
 }
 
 .muted-text {
-  @apply text-xs text-[#646c7d] font-sans;
+  @apply text-xs font-sans;
+  color: var(--text-muted);
 }
 
 .mono-metric {
-  @apply font-mono text-xs font-semibold text-[#38bdf8];
+  @apply font-mono text-xs font-semibold;
+  color: var(--accent-cyan);
 }
 
 .tech-code {
-  @apply font-mono text-xs text-[#38bdf8] bg-[#14151a] px-1.5 py-0.5 rounded border border-[#2a2e39];
+  @apply font-mono text-xs px-1.5 py-0.5 rounded;
+  color: var(--accent-cyan);
+  background-color: var(--surface-3);
+  border: 1px solid var(--border-hairline);
 }
 
 /* Mobile Word Break & Code Block Utilities */
