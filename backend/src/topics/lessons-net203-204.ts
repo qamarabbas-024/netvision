@@ -1346,44 +1346,80 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'TCP_STATE_MACHINE',
     introduction:
       'Master the two fundamental transport protocols of the Internet: Transmission Control Protocol (TCP) vs User Datagram Protocol (UDP), TCP 3-Way Handshake (SYN -> SYN-ACK -> ACK), 4-Way Connection Teardown (FIN -> ACK -> FIN -> ACK), Sequence Numbers & Cumulative Acknowledgments, Sliding Window Flow Control, Retransmission Timers (RTO), and UDP lightweight 8-byte header mechanics.',
-    stepMetadata: {
-      step1_objective:
-        'Compare TCP (connection-oriented, reliable) vs UDP (connectionless, lightweight), master the TCP 3-way handshake and 4-way teardown, analyze sequence numbers and cumulative ACKs, and understand sliding window flow control.',
-      step2_prerequisites: ['level-0-network-ports-socket-boundaries', 'level-0-network-packets-data-framing'],
-      step3_whyItMatters:
-        'Every application developer and network engineer must choose between TCP (guaranteed delivery for web/files) and UDP (low-latency streaming for voice/gaming). Misunderstanding transport states leads to connection leaks and buffer bloat.',
-      step4_coreConcept:
-        'The Transport Layer provides process-to-process communication using two contrasting protocols: (1) **TCP (Transmission Control Protocol, RFC 793)**: Connection-Oriented, Reliable, Byte-Stream service. It establishes connections via a **3-Way Handshake** (`SYN` -> `SYN-ACK` -> `ACK`), numbers every byte with **Sequence Numbers**, guarantees delivery via **Cumulative Acknowledgments (ACK)**, manages congestion with **Sliding Window Flow Control** (Receive Window `win`), and terminates connections via a **4-Way Teardown** (`FIN` -> `ACK` -> `FIN` -> `ACK`). (2) **UDP (User Datagram Protocol, RFC 768)**: Connectionless, Unreliable Best-Effort, Low-Latency service. It has no handshake, no acknowledgments, and a minimal **8-Byte Header** (Source Port 2B, Destination Port 2B, Length 2B, Checksum 2B). UDP is preferred for real-time latency-sensitive traffic (DNS, VoIP, video streaming, gaming) where retransmissions cause intolerable lag.',
-      step5_technicalAnatomy: {
-        title: 'TCP vs UDP Feature Matrix & Header Architecture',
-        description: 'Comparison of connection states, header sizes, and reliability mechanisms.',
-        components: [
-          { name: 'TCP (Transmission Control Protocol)', detail: '20-byte base header. Features: 3-way handshake, sequence numbers, ACKs, retransmissions, flow control (windowing), ordered delivery. Used by HTTP/HTTPS, SSH, FTP.' },
-          { name: 'UDP (User Datagram Protocol)', detail: '8-byte fixed header. Features: No connection state, no ACKs, no retransmissions, minimal latency overhead. Used by DNS, DHCP, VoIP, gaming.' },
-          { name: 'TCP 3-Way Handshake', detail: 'Step 1: Client sends `SYN` (Seq=x). Step 2: Server returns `SYN-ACK` (Seq=y, Ack=x+1). Step 3: Client sends `ACK` (Seq=x+1, Ack=y+1).' },
-          { name: 'TCP 4-Way Connection Teardown', detail: 'Step 1: Client sends `FIN`. Step 2: Server sends `ACK`. Step 3: Server sends `FIN`. Step 4: Client sends `ACK` and waits `TIME_WAIT`.' },
-          { name: 'Sliding Window Flow Control', detail: 'Receiver advertises available buffer space in the `Window Size` field; sender transmits up to window limit before pausing for an ACK.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'TCP Handshake SYN', action: 'Client sends TCP SYN to server port 443 with random Initial Sequence Number (ISN).' },
-          { stepNumber: 2, title: 'TCP SYN-ACK Reply', action: 'Server allocates buffer, generates own ISN, and returns SYN-ACK acknowledging client ISN.' },
-          { stepNumber: 3, title: 'TCP ACK & Established State', action: 'Client returns ACK; connection enters ESTABLISHED state for bidirectional data flow.' },
-          { stepNumber: 4, title: 'UDP Datagram Transmission', action: 'In UDP, sender transmits datagrams directly without prior handshake; receiver processes without sending ACKs.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'TCP 20-Byte Header vs UDP 8-Byte Header',
+    contentV2: {
+      objective:
+        'Compare TCP (connection-oriented, reliable, byte-stream) vs UDP (connectionless, lightweight, best-effort), master the TCP 3-way handshake and 4-way teardown state machines, calculate sequence numbers and cumulative ACKs during data transfer, understand sliding window flow control, and evaluate transport trade-offs for real-world applications.',
+      prerequisites: [
+        'NET-101: Bits, Bytes, Binary & Hexadecimal Foundations',
+        'NET-103: The TCP/IP 4-Layer Architecture & Model Mapping',
+        'NET-202: IPv4 Addressing, Subnet Masks & CIDR Subnetting',
+      ],
+      whyItMatters:
+        'Every web browser, mobile app, and network server relies on the Transport Layer to manage data integrity and delivery speed. Choosing between TCP (guaranteed delivery for web, databases, and file transfers) and UDP (low-latency streaming for VoIP, video, and gaming) is the foundational architectural decision in network engineering.',
+      explanation:
+        'The Transport Layer (Layer 4) provides logical end-to-end communication between application processes running on different hosts. It achieves this using two distinct protocols designed for contrasting engineering trade-offs: TCP and UDP.\n\n### 1. TCP (Transmission Control Protocol, RFC 793)\nTCP is a **Connection-Oriented, Reliable, Full-Duplex Byte-Stream** protocol. It ensures that every byte sent arrives at the destination in exact sequential order, intact, and without duplicates.\n* **20-Byte Base Header**: Includes Source/Destination Ports, 32-bit Sequence Number, 32-bit Acknowledgment Number, 4-bit Data Offset, 9 control flags (URG, ACK, PSH, RST, SYN, FIN, ECE, CWR, NS), 16-bit Window Size, and Checksum.\n* **3-Way Handshake**: Establishes synchronization before any data is sent:\n  1. `Client -> Server`: **SYN** (Synchronize) with client Initial Sequence Number (ISN = $x$).\n  2. `Server -> Client`: **SYN-ACK** (Synchronize-Acknowledgment) acknowledging client ISN ($Ack = x + 1$) and advertising server ISN ($Seq = y$).\n  3. `Client -> Server`: **ACK** (Acknowledgment) acknowledging server ISN ($Ack = y + 1$). Connection enters `ESTABLISHED` state.\n* **Cumulative Acknowledgments**: ACKs are forward-looking. If a receiver gets bytes 1000 through 1499, it replies with `ACK = 1500` ("I have received all bytes up to 1499; I am waiting for byte 1500").\n* **Sliding Window Flow Control**: The receiver advertises its available buffer capacity in the `Window Size` field. The sender cannot transmit more unacknowledged bytes than the advertised window, preventing buffer overflow.\n* **4-Way Connection Teardown**: Gracefully closes connections:\n  1. `Host A -> Host B`: **FIN** (Finished).\n  2. `Host B -> Host A`: **ACK** (Acknowledged).\n  3. `Host B -> Host A`: **FIN** (Host B finishes sending remaining data).\n  4. `Host A -> Host B`: **ACK** (Host A enters `TIME_WAIT` to ensure final ACK delivery).\n\n### 2. UDP (User Datagram Protocol, RFC 768)\nUDP is a **Connectionless, Unreliable Best-Effort, Low-Latency** protocol. It provides direct packet multiplexing without connection establishment, acknowledgments, retransmissions, or flow control.\n* **8-Byte Minimal Header**: Fixed 4-field structure: Source Port (2B), Destination Port (2B), Length (2B), and Checksum (2B).\n* **Zero Handshake Delay**: UDP transmits immediately without waiting for a 1-RTT handshake.\n* **No Retransmission Stutter**: If a UDP datagram is dropped, the protocol does not retransmit it. For real-time applications (VoIP, live video streaming, DNS lookups, online multiplayer gaming), a late packet is useless, making low latency and jitter predictability vastly more important than 100% reliability.',
+      components: [
+        {
+          name: 'TCP Header (20 Bytes)',
+          detail: 'Stateful header containing Source/Dest Ports (16b each), Seq Number (32b), Ack Number (32b), Flags (SYN/ACK/FIN/RST), Window Size (16b), and Checksum.',
+        },
+        {
+          name: 'UDP Header (8 Bytes)',
+          detail: 'Minimal fixed header containing Source Port (2B), Destination Port (2B), Length (2B), and Checksum (2B) for ultra-low overhead.',
+        },
+        {
+          name: 'TCP 3-Way Handshake State Machine',
+          detail: 'Three-step handshake (SYN -> SYN-ACK -> ACK) synchronizing initial sequence numbers before data exchange.',
+        },
+        {
+          name: 'Cumulative Acknowledgments & Seq Numbers',
+          detail: 'Byte-stream tracking where Seq indicates the first byte in the segment and Ack specifies the next expected byte.',
+        },
+        {
+          name: 'Sliding Window Flow Control',
+          detail: 'Dynamic flow regulation where receiver advertises available buffer capacity, preventing sender buffer overrun.',
+        },
+        {
+          name: 'TCP 4-Way Teardown (FIN/ACK)',
+          detail: 'Bidirectional half-close handshake (FIN -> ACK -> FIN -> ACK) followed by TIME_WAIT safety timeout.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'TCP Connection Handshake (SYN -> SYN-ACK -> ACK)',
+          action: 'Client sends SYN (ISN=x); Server responds with SYN-ACK (Seq=y, Ack=x+1); Client returns ACK (Seq=x+1, Ack=y+1) to reach ESTABLISHED state.',
+        },
+        {
+          stepNumber: 2,
+          title: 'Data Stream Segmentation & Byte Sequencing',
+          action: 'Application data is segmented into MSS chunks; each byte is assigned a sequential number tracked by the sender and receiver.',
+        },
+        {
+          stepNumber: 3,
+          title: 'Sliding Window Flow Regulation',
+          action: 'Receiver processes data and returns ACK with updated Receive Window (win) size; sender throttles output if window shrinks.',
+        },
+        {
+          stepNumber: 4,
+          title: 'Connection Termination & TIME_WAIT',
+          action: 'Either endpoint initiates teardown via FIN; both sides acknowledge, and the initiator enters TIME_WAIT (2MSL) before closing.',
+        },
+      ],
+      packetHeaderView: {
+        protocol: 'TCP (20 Bytes) vs UDP (8 Bytes) Headers',
         fields: [
-          { fieldName: 'TCP Header (20 Bytes)', bitLength: '160 bits', hexSample: 'Ports + Seq + Ack + Flags (SYN/ACK/FIN) + Window', description: 'Reliable stateful transport.' },
-          { fieldName: 'UDP Header (8 Bytes)', bitLength: '64 bits', hexSample: 'Src Port (2B) + Dst Port (2B) + Length (2B) + Checksum (2B)', description: 'Lightweight stateless datagram.' },
+          { fieldName: 'Source Port / Dest Port', bitLength: '16 bits / 16 bits', hexSample: '52114 / 443', description: 'Originating and receiving application socket ports.' },
+          { fieldName: 'Sequence Number (TCP)', bitLength: '32 bits', hexSample: '0x000003E8 (1000)', description: 'Byte offset of the first data byte in this segment.' },
+          { fieldName: 'Acknowledgment Number (TCP)', bitLength: '32 bits', hexSample: '0x00001389 (5001)', description: 'Next expected byte from the remote endpoint.' },
+          { fieldName: 'Control Flags (TCP)', bitLength: '9 bits', hexSample: 'SYN, ACK, FIN, RST, PSH, URG', description: 'Session lifecycle and transmission state controls.' },
+          { fieldName: 'Window Size (TCP)', bitLength: '16 bits', hexSample: '65535 bytes', description: 'Advertised receiver buffer capacity for flow control.' },
+          { fieldName: 'UDP Length / Checksum', bitLength: '16 bits / 16 bits', hexSample: '0x0028 / 0xA4F2', description: 'Total UDP datagram length and error detection checksum.' },
         ],
-        headerDiagramAscii: `
-+-------------------------------------------------------------------------------+
+        headerDiagramAscii: `+-------------------------------------------------------------------------------+
 |                       TCP vs UDP HEADER COMPARISON                            |
 +-------------------------------------------------------------------------------+
-| TCP 20-BYTE HEADER (Stateful & Reliable):                                     |
+| TCP 20-BYTE HEADER:                                                           |
 | +-------------------------------+-------------------------------+             |
 | | Source Port (16 bits)         | Destination Port (16 bits)    |             |
 | +-------------------------------+-------------------------------+             |
@@ -1396,113 +1432,206 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
 | | Checksum (16 bits)            | Urgent Pointer (16 bits)      |             |
 | +-------------------------------+-------------------------------+             |
 +-------------------------------------------------------------------------------+
-| UDP 8-BYTE HEADER (Lightweight & Low-Latency):                                |
+| UDP 8-BYTE HEADER:                                                            |
 | +-------------------------------+-------------------------------+             |
 | | Source Port (16 bits)         | Destination Port (16 bits)    |             |
 | +-------------------------------+-------------------------------+             |
 | | Length (16 bits)              | Checksum (16 bits)            |             |
 | +-------------------------------+-------------------------------+             |
-+-------------------------------------------------------------------------------+
-`,
++-------------------------------------------------------------------------------+`,
       },
-      step8_visualExplanation: {
+      visualizer: {
         type: 'TCP_STATE_MACHINE',
         title: 'Interactive TCP 3-Way Handshake & Sliding Window Engine',
-        description: 'Simulate TCP 3-Way Handshakes (SYN, SYN-ACK, ACK), test sliding window buffer scaling, inject packet loss to observe retransmissions, and compare against lightweight UDP.',
+        description: 'Step through TCP 3-Way Handshake flag transitions, test Sliding Window buffer scaling, simulate packet drops with retransmission timers, and contrast with lightweight UDP.',
       },
-      step9_workedExample: {
-        title: 'Tracing TCP Sequence and Acknowledgment Numbers in Data Transfer',
-        problemStatement: 'Client establishes TCP session with ISN=1000; Server has ISN=5000. Client sends 500 bytes of data. What are the Sequence and ACK numbers in the server reply?',
+      workedExample: {
+        title: 'Calculating TCP Sequence and Acknowledgment Numbers in Flight',
+        problemStatement:
+          'Client initiates a TCP session with ISN = 1000. Server responds with ISN = 5000. The 3-way handshake completes.\nNext, Client transmits a segment containing 400 bytes of data.\nWhat are the Sequence Number, ACK Number, and Flags in the Client data segment, and what are the Sequence and ACK numbers in the Server acknowledgment?',
         stepByStepSolution: [
-          'Step 1 (Handshake): Client sends SYN (Seq=1000). Server returns SYN-ACK (Seq=5000, Ack=1001). Client sends ACK (Seq=1001, Ack=5001).',
-          'Step 2 (Data Transfer): Client sends 500 bytes of data starting at Seq=1001 (bytes 1001 to 1500).',
-          'Step 3 (Server Acknowledgment): Server acknowledges receipt by sending ACK = 1501 ("I received all bytes up to 1500; I expect byte 1501 next").',
+          'Step 1 (Handshake Sync): Client SYN has Seq=1000. Server SYN-ACK has Seq=5000, Ack=1001. Client ACK has Seq=1001, Ack=5001.',
+          'Step 2 (Client Data Segment): The client begins transmitting data at Seq = 1001. Since it contains 400 bytes, this segment occupies byte offsets 1001 through 1400. Segment has Seq=1001, Ack=5001, Flags=[ACK, PSH].',
+          'Step 3 (Server Acknowledgment): The server has received all bytes up to 1400. It acknowledges receipt by asking for the next expected byte: Ack = 1001 + 400 = 1401. Server returns Seq=5001, Ack=1401, Flags=[ACK].',
         ],
-        finalResult: 'Server ACK number is 1501.',
+        finalResult:
+          'Client Segment: Seq=1001, Ack=5001 (Payload: 400 bytes). Server ACK: Seq=5001, Ack=1401.',
       },
-      step10_realWorldScenario: {
-        topology: 'VoIP vs File Transfer Protocol Selection',
-        scenarioText: 'Zoom and Microsoft Teams use UDP for live audio and video calls because dropped frames are discarded instantly without delay. In contrast, banking transactions and file downloads use TCP because 100% data integrity and zero bit loss are mandatory.',
-        engineeringContext: 'Real-time media favors low-latency UDP; transactional data demands reliable TCP.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Maintains TCP transmission control blocks (TCB) in kernel memory.',
-        nicBehavior: 'Computes TCP/UDP checksums in hardware offload engines.',
-        switchOrRouterBehavior: 'Stateful firewalls track TCP flags (SYN, ACK, FIN, RST) in connection state tables.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'powershell -Command "Test-NetConnection -ComputerName google.com -Port 443 -InformationLevel Detailed"',
-          description: 'Tests TCP 3-way handshake connectivity to port 443 and displays Round-Trip Time (RTT).',
-          expectedOutput: 'TcpTestSucceeded : True\nRemoteAddress    : 142.250.190.46\nRemotePort       : 443\nRoundTripTime    : 14 ms',
-          proofExplanation: 'Confirms successful completion of TCP 3-way handshake.',
+          id: 1,
+          prompt: 'What are the three control flags exchanged in order during a TCP connection handshake?',
+          expected: 'SYN -> SYN-ACK -> ACK',
+          hints: 'Synchronize, Synchronize-Acknowledgment, Acknowledgment.',
+        },
+        {
+          id: 2,
+          prompt: 'What are the header sizes of a standard base TCP header vs a UDP header?',
+          expected: 'TCP = 20 bytes (base without options), UDP = 8 bytes (fixed).',
+          hints: 'TCP contains sequence numbers, ACKs, flags, and window size; UDP only contains ports, length, and checksum.',
+        },
+        {
+          id: 3,
+          prompt: 'If Host A sends a TCP segment with Seq=2000 containing 300 bytes of data, what ACK number will Host B return upon successful receipt?',
+          expected: 'Ack = 2300 (Ack = Seq + Length = 2000 + 300).',
+          hints: 'TCP ACKs are cumulative and forward-looking, requesting the next byte offset.',
+        },
+        {
+          id: 4,
+          prompt: 'How does TCP Sliding Window Flow Control prevent a fast sender from overwhelming a slow receiver?',
+          expected: 'The receiver advertises its available buffer capacity in the Window Size header field; the sender pauses if unacknowledged data reaches the window limit.',
+          hints: 'If the receiver buffer fills up, it sends Window Size = 0 (Zero Window) to pause transmission.',
+        },
+        {
+          id: 5,
+          prompt: 'Why is UDP preferred over TCP for live audio/video calls (VoIP, Zoom) and online multiplayer gaming?',
+          expected: 'UDP eliminates 3-way handshake delays and avoid retransmission lag, prioritizing low latency and predictable timing over re-sending late packets.',
+          hints: 'In real-time voice, an audio packet that arrives 300ms late due to retransmission is useless and causes stutter.',
+        },
+        {
+          id: 6,
+          prompt: 'What is the purpose of the TIME_WAIT state entered by a client after sending the final ACK during a 4-way TCP teardown?',
+          expected: 'To ensure the final ACK was received by the server and to prevent old duplicate segments from interfering with a future new connection.',
+          hints: 'TIME_WAIT lasts for 2 * Maximum Segment Lifetime (2MSL).',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'TCP connections hang in `SYN_SENT` state.',
-          possibleCauses: ['Destination server offline or firewall silently dropping TCP SYN packets'],
-          diagnosticSteps: ['Check firewall rules and verify destination server listening status.'],
-          remediation: 'Permit traffic on destination port in intermediate firewalls.',
-        },
+      recap: [
+        'TCP is connection-oriented, reliable, and provides ordered byte-stream delivery via a 20-byte base header.',
+        'TCP establishes sessions using a 3-Way Handshake (SYN -> SYN-ACK -> ACK) and terminates via a 4-Way Teardown (FIN/ACK).',
+        'TCP Sequence Numbers track byte offsets; Cumulative ACKs specify the next expected byte (Ack = Seq + Length).',
+        'Sliding Window Flow Control regulates transmission speed based on advertised receiver buffer capacity.',
+        'UDP is connectionless and lightweight (8-byte header), avoiding handshake delay and retransmission lag.',
+        'Real-time, latency-critical applications (VoIP, DNS, gaming) favor UDP; transactional integrity (HTTPS, SSH, SQL) demands TCP.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Assuming UDP is "bad" or "broken" because it is unreliable.', correction: 'UDP is deliberately lightweight; it avoids handshake delays and retransmission lag, making it optimal for real-time voice, video, and DNS.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'TCP SYN Flood Denial of Service (DoS)',
-        mitigationStrategy: 'Enable SYN Cookies on servers and firewalls to prevent half-open TCP connection table exhaustion.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'TCP: 20-byte header, 3-way handshake (SYN, SYN-ACK, ACK), reliable, flow control.',
-          'UDP: 8-byte header, connectionless, no handshake, lightweight.',
-          'TCP Teardown: 4-way exchange (FIN, ACK, FIN, ACK).',
-        ],
-        frequentTraps: [
-          'Forgetting that the UDP header is only 8 bytes (TCP is 20 bytes).',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: TCP Handshake State Machine & UDP Streaming Comparison',
-        scenario: 'Verify TCP 3-way handshake flags and compare against UDP socket transmission.',
-        tasks: ['Test TCP connection to port 443 using Test-NetConnection.'],
-        verificationMethod: 'Confirm TcpTestSucceeded : True.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'TCP provides reliable byte-stream delivery via 3-way handshakes and sliding window flow control.',
-          'UDP provides lightweight 8-byte datagram delivery for real-time latency-critical applications.',
-        ],
-        nextLessonBridge:
-          'With Layer 4 Transport mastered in NET-204, proceed to Tier 3 (NET-301 & NET-302) to master Enterprise Switching and Spanning Tree Protocol.',
-      },
     },
     questions: [
       {
-        text: 'What are the three flags exchanged in order during the establishment of a standard TCP connection (the 3-Way Handshake)?',
+        text: 'What are the exact control flags and sequence of the TCP 3-Way Handshake used to establish a reliable connection?',
         options: [
-          'SYN -> SYN-ACK -> ACK',
-          'ACK -> SYN -> FIN',
-          'HELLO -> READY -> CONNECT',
-          'DISCOVER -> OFFER -> REQUEST',
+          '1. Client sends SYN (Synchronize) → 2. Server responds with SYN-ACK (Synchronize-Acknowledgment) → 3. Client sends ACK (Acknowledgment)',
+          '1. Client sends ACK → 2. Server sends SYN → 3. Client sends FIN',
+          '1. Client sends PSH → 2. Server sends URG → 3. Client sends RST',
+          '1. Client sends HELLO → 2. Server sends WELCOME → 3. Client sends READY',
         ],
         correctOption: 0,
-        explanation: 'The TCP 3-Way Handshake consists of: (1) Client sends SYN, (2) Server responds with SYN-ACK, and (3) Client returns ACK.',
-        explanationsJson: { 1: 'Invalid sequence.', 2: 'Generic terms.', 3: 'That is the DHCP sequence.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'TCP connection establishment uses the 3-way handshake: 1. Host A sends SYN with Initial Sequence Number (ISN); 2. Host B responds with SYN-ACK (acknowledging A\'s ISN and sending its own ISN); 3. Host A replies with ACK. The connection is now ESTABLISHED.',
+        explanationsJson: {
+          1: 'A connection cannot begin with ACK before sequence numbers are synchronized with SYN.',
+          2: 'PSH and URG are data-handling flags, not connection establishment flags.',
+          3: 'HELLO/WELCOME/READY are informal terms, not TCP header control flags.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.RECALL,
         questionType: QuestionType.MULTIPLE_CHOICE,
-        concept: 'TCP 3-Way Handshake Flags',
+        concept: 'TCP 3-Way Handshake Mechanics',
+      },
+      {
+        text: 'How does TCP implement Flow Control to prevent a high-speed transmitting host from overwhelming a slower receiving host memory buffer?',
+        options: [
+          'Using a dynamic Sliding Window mechanism where the receiver advertises its available buffer capacity in the TCP "Window Size" header field',
+          'By dropping 50% of all packets at the default gateway router',
+          'By forcing the transmitting computer to shut down for 10 seconds after every 1 megabyte sent',
+          'By converting all TCP packets into UDP datagrams',
+        ],
+        correctOption: 0,
+        explanation:
+          'TCP flow control uses the 16-bit Window Size field (and window scaling). The receiver continuously advertises how many bytes of data it can currently accept in its buffer. If the buffer fills, it sends Window Size = 0 (Zero Window), pausing sender transmission.',
+        explanationsJson: {
+          1: 'Dropping 50% of packets causes severe retransmission churn, not controlled flow regulation.',
+          2: 'TCP regulates packet flow smoothly in millisecond sliding window intervals without OS shutdown.',
+          3: 'TCP and UDP are distinct protocols; TCP does not convert itself into UDP.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'TCP Sliding Window Flow Control',
+      },
+      {
+        text: 'Why do real-time applications such as Voice over IP (VoIP), live video streaming, and online multiplayer gaming prefer UDP over TCP?',
+        options: [
+          'UDP has minimal header overhead (8 bytes vs 20+ bytes) and no retransmission delays, prioritizing low latency and timing over retransmitting lost stale packets',
+          'UDP provides 100% guaranteed delivery of every single audio byte',
+          'UDP automatically encrypts audio using military-grade encryption',
+          'UDP does not require IP addresses to traverse the Internet',
+        ],
+        correctOption: 0,
+        explanation:
+          'UDP is connectionless and lightweight (8-byte header). In real-time audio/video, a retransmitted audio packet arriving 300ms late is useless and causes stuttering. Low latency and predictable jitter take precedence over perfect reliability.',
+        explanationsJson: {
+          1: 'UDP provides no delivery guarantees; TCP provides guaranteed delivery.',
+          2: 'UDP provides no built-in encryption; security must be provided by application layers (e.g. SRTP/DTLS).',
+          3: 'UDP datagrams are encapsulated inside standard Layer 3 IP packets requiring source and destination IP addresses.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'UDP vs TCP Real-Time Tradeoffs',
+      },
+      {
+        text: 'Host A sends a TCP segment with `Seq = 1000` containing `500 bytes` of data to Host B. What Acknowledgment number (`Ack`) will Host B return if the segment is received successfully?',
+        options: [
+          '`Ack = 1500` (acknowledging receipt of bytes 1000 through 1499 and expecting byte 1500 next)',
+          '`Ack = 1000`',
+          '`Ack = 500`',
+          '`Ack = 1001`',
+        ],
+        correctOption: 0,
+        explanation:
+          'TCP Acknowledgments are "forward-looking" and cumulative: `Ack = Seq + Payload Length`. The segment covers byte offsets 1000 to 1499. Host B acknowledges this by requesting the next expected byte: `Ack = 1000 + 500 = 1500`.',
+        explanationsJson: {
+          1: 'Ack = 1000 would indicate no bytes were received and request byte 1000 again.',
+          2: 'Ack = 500 is backward-referencing an invalid offset.',
+          3: 'Ack = 1001 only acknowledges 1 single byte of data (as in a SYN-ACK), not 500 payload bytes.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'TCP Sequence & Acknowledgment Calculation',
+      },
+      {
+        text: 'What are the correct sequence of messages exchanged during a standard graceful TCP 4-Way connection teardown?',
+        options: [
+          'FIN -> ACK from remote -> FIN from remote -> final ACK from initiator',
+          'RST -> RST-ACK -> FIN -> CLOSE',
+          'DISCONNECT -> OK -> GOODBYE -> DONE',
+          'SYN -> FIN -> ACK -> RST',
+        ],
+        correctOption: 0,
+        explanation:
+          'A graceful TCP teardown closes each unidirectional data stream separately: 1. Initiator sends FIN, 2. Remote sends ACK, 3. Remote sends its own FIN when finished transmitting data, 4. Initiator sends final ACK and enters TIME_WAIT.',
+        explanationsJson: {
+          1: 'RST immediately aborts a connection abruptly rather than performing a graceful 4-way teardown.',
+          2: 'Generic informal terms are not TCP control flags.',
+          3: 'SYN is used for connection establishment, not teardown.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'TCP 4-Way Connection Teardown',
+      },
+      {
+        text: 'A web server receives a massive flood of TCP SYN packets with forged source IP addresses, causing its half-open connection table to fill and reject legitimate users. What attack is this, and what is the primary server mitigation?',
+        options: [
+          'TCP SYN Flood Denial of Service; mitigated by enabling SYN Cookies which encode connection state into the Initial Sequence Number without allocating memory until the handshake completes',
+          'ARP Poisoning; mitigated by installing fiber optic cables',
+          'DNS Amplification; mitigated by changing browser cookies',
+          'BGP Hijacking; mitigated by upgrading RAM on client workstations',
+        ],
+        correctOption: 0,
+        explanation:
+          'A SYN Flood exhausts the server\'s half-open TCP connection table (backlog queue). Enabling SYN Cookies defers server memory allocation by encoding state cryptographically into the server\'s Initial Sequence Number (ISN) in the SYN-ACK.',
+        explanationsJson: {
+          1: 'ARP operates at Layer 2 within a broadcast domain, not over TCP handshakes.',
+          2: 'DNS amplification attacks UDP port 53, not TCP SYN buffers.',
+          3: 'BGP hijacking affects inter-domain routing tables, not transport layer SYN state tables.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'TCP SYN Flood & SYN Cookies Mitigation',
       },
     ],
-    lab: {
-      title: 'Guided Practice: TCP Handshake State Machine & UDP Streaming Comparison',
-      instructions: '1. Run Test-NetConnection google.com -Port 443.\n2. Verify TCP handshake.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { host: 'Client', target: 'google.com', port: 443 },
-      tasks: ['Test TCP connection.'],
-    },
   },
 ];
+

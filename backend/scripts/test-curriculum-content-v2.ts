@@ -287,8 +287,30 @@ async function verifyCurriculumContentV2() {
   assert(!net203Arp!.lab, 'NET-203 ARP has no phantom CLI lab');
   console.log('  ✓ NET-203 ARP verified with clean Content V2 structure, broadcast vs unicast flow, Default Gateway resolution, 6 practice items, 6 quiz questions, and zero forced filler.');
 
+  // [TEST 15] Verify NET-204 TCP & UDP Transport Protocols (tcp-udp-transport-overview)
+  console.log('\n[TEST 15] Verifying NET-204 TCP & UDP Transport Protocols (tcp-udp-transport-overview)...');
+  const net204Tcp = LESSONS_NET203_204.find((l) => l.slug === 'tcp-udp-transport-overview');
+  assert(!!net204Tcp, 'NET-204 TCP/UDP lesson exists');
+  assert(!!net204Tcp!.contentV2, 'NET-204 TCP/UDP has Content V2 structure');
+  assert(net204Tcp!.courseCode === 'NET-204', 'NET-204 TCP/UDP has courseCode NET-204');
+  assert(typeof net204Tcp!.contentV2!.objective === 'string', 'NET-204 TCP/UDP has clear objective');
+  assert(net204Tcp!.contentV2!.explanation.includes('3-Way Handshake'), 'NET-204 TCP/UDP explains 3-way handshake');
+  assert(net204Tcp!.contentV2!.explanation.includes('SYN') && net204Tcp!.contentV2!.explanation.includes('SYN-ACK'), 'NET-204 TCP/UDP explains SYN/SYN-ACK flags');
+  assert(net204Tcp!.contentV2!.explanation.includes('Sliding Window') || net204Tcp!.contentV2!.explanation.includes('Flow Control'), 'NET-204 TCP/UDP explains Sliding Window Flow Control');
+  assert(net204Tcp!.contentV2!.explanation.includes('4-Way Connection Teardown') || net204Tcp!.contentV2!.explanation.includes('4-Way'), 'NET-204 TCP/UDP explains 4-way teardown');
+  assert(net204Tcp!.contentV2!.explanation.includes('8-Byte Minimal Header') || net204Tcp!.contentV2!.explanation.includes('8-Byte'), 'NET-204 TCP/UDP explains UDP 8-byte header');
+  assert(net204Tcp!.contentV2!.components.length >= 5, 'NET-204 TCP/UDP has at least 5 technical components');
+  assert(!!net204Tcp!.contentV2!.visualizer, 'NET-204 TCP/UDP has visualizer defined');
+  assert(!!net204Tcp!.contentV2!.workedExample, 'NET-204 TCP/UDP has worked example defined');
+  assert(Array.isArray(net204Tcp!.contentV2!.practice) && net204Tcp!.contentV2!.practice.length >= 6, 'NET-204 TCP/UDP has 6 practice exercises');
+  assert(net204Tcp!.questions.length >= 6, 'NET-204 TCP/UDP has 6 aligned quiz questions');
+  assert(!net204Tcp!.contentV2!.cliTooling, 'NET-204 TCP/UDP has no forced CLI bloat');
+  assert(!net204Tcp!.contentV2!.security, 'NET-204 TCP/UDP has no generic security filler');
+  assert(!net204Tcp!.lab, 'NET-204 TCP/UDP has no phantom CLI lab');
+  console.log('  ✓ NET-204 TCP/UDP verified with clean Content V2 structure, 3-way handshake, 4-way teardown, sliding window flow control, 6 practice items, 6 quiz questions, and zero forced filler.');
+
   console.log('\n================================================================');
-  console.log('🎉 ALL 14 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 15 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 

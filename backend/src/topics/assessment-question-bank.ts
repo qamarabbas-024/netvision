@@ -2663,6 +2663,8 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   // -------------------------------------------------------------------------
   // Topic 12: TCP & UDP Transport Overview
   // -------------------------------------------------------------------------
+  // Topic 12: TCP & UDP Transport Protocols
+  // -------------------------------------------------------------------------
   {
     quizId: 'quiz-tcp-udp-transport-overview',
     lessonSlug: 'tcp-udp-transport-overview',
@@ -2671,20 +2673,21 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       '1. Client sends SYN (Synchronize) → 2. Server responds with SYN-ACK (Synchronize-Acknowledgment) → 3. Client sends ACK (Acknowledgment)',
       '1. Client sends ACK → 2. Server sends SYN → 3. Client sends FIN',
       '1. Client sends PSH → 2. Server sends URG → 3. Client sends RST',
-      '1. Client sends HELLO → 2. Server sends WELCOME → 3. Client sends READY'
+      '1. Client sends HELLO → 2. Server sends WELCOME → 3. Client sends READY',
     ],
     correctOption: 0,
-    explanation: 'TCP connection establishment uses the 3-way handshake: 1. Host A sends SYN with Initial Sequence Number (ISN); 2. Host B responds with SYN-ACK (acknowledging A ISN and sending its own ISN); 3. Host A replies with ACK. The connection is now ESTABLISHED.',
+    explanation:
+      'TCP connection establishment uses the 3-way handshake: 1. Host A sends SYN with Initial Sequence Number (ISN); 2. Host B responds with SYN-ACK (acknowledging A\'s ISN and sending its own ISN); 3. Host A replies with ACK. The connection is now ESTABLISHED.',
     explanationsJson: {
       1: 'A connection cannot begin with ACK before sequence numbers are synchronized with SYN.',
       2: 'PSH and URG are data-handling flags, not connection establishment flags.',
-      3: 'HELLO/WELCOME/READY are informal terms, not TCP header control flags.'
+      3: 'HELLO/WELCOME/READY are informal terms, not TCP header control flags.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
     concept: 'TCP 3-Way Handshake Mechanics',
-    points: 10
+    points: 10,
   },
   {
     quizId: 'quiz-tcp-udp-transport-overview',
@@ -2694,20 +2697,21 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       'Using a dynamic Sliding Window mechanism where the receiver advertises its available buffer capacity in the TCP "Window Size" header field',
       'By dropping 50% of all packets at the default gateway router',
       'By forcing the transmitting computer to shut down for 10 seconds after every 1 megabyte sent',
-      'By converting all TCP packets into UDP datagrams'
+      'By converting all TCP packets into UDP datagrams',
     ],
     correctOption: 0,
-    explanation: 'TCP flow control uses the 16-bit Window Size field (and window scaling). The receiver continuously advertises how many bytes of data it can currently accept in its buffer. If the buffer fills, it sends Window Size = 0 (Zero Window), pausing sender transmission.',
+    explanation:
+      'TCP flow control uses the 16-bit Window Size field (and window scaling). The receiver continuously advertises how many bytes of data it can currently accept in its buffer. If the buffer fills, it sends Window Size = 0 (Zero Window), pausing sender transmission.',
     explanationsJson: {
       1: 'Dropping 50% of packets causes severe retransmission churn, not controlled flow regulation.',
       2: 'TCP regulates packet flow smoothly in millisecond sliding window intervals without OS shutdown.',
-      3: 'TCP and UDP are distinct protocols; TCP does not convert itself into UDP.'
+      3: 'TCP and UDP are distinct protocols; TCP does not convert itself into UDP.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
     concept: 'TCP Sliding Window Flow Control',
-    points: 10
+    points: 10,
   },
   {
     quizId: 'quiz-tcp-udp-transport-overview',
@@ -2717,20 +2721,21 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       'UDP has minimal header overhead (8 bytes vs 20+ bytes) and no retransmission delays, prioritizing low latency and timing over retransmitting lost stale packets',
       'UDP provides 100% guaranteed delivery of every single audio byte',
       'UDP automatically encrypts audio using military-grade encryption',
-      'UDP does not require IP addresses to traverse the Internet'
+      'UDP does not require IP addresses to traverse the Internet',
     ],
     correctOption: 0,
-    explanation: 'UDP is connectionless and lightweight (8-byte header). In real-time audio/video, a retransmitted audio packet arriving 300ms late is useless and causes stuttering. Low latency and predictable jitter take precedence over perfect reliability.',
+    explanation:
+      'UDP is connectionless and lightweight (8-byte header). In real-time audio/video, a retransmitted audio packet arriving 300ms late is useless and causes stuttering. Low latency and predictable jitter take precedence over perfect reliability.',
     explanationsJson: {
       1: 'UDP provides no delivery guarantees; TCP provides guaranteed delivery.',
       2: 'UDP provides no built-in encryption; security must be provided by application layers (e.g. SRTP/DTLS).',
-      3: 'UDP datagrams are encapsulated inside standard Layer 3 IP packets requiring source and destination IP addresses.'
+      3: 'UDP datagrams are encapsulated inside standard Layer 3 IP packets requiring source and destination IP addresses.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
     concept: 'UDP vs TCP Real-Time Tradeoffs',
-    points: 10
+    points: 10,
   },
   {
     quizId: 'quiz-tcp-udp-transport-overview',
@@ -2740,20 +2745,69 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       '`Ack = 1500` (acknowledging receipt of bytes 1000 through 1499 and expecting byte 1500 next)',
       '`Ack = 1000`',
       '`Ack = 500`',
-      '`Ack = 1001`'
+      '`Ack = 1001`',
     ],
     correctOption: 0,
-    explanation: 'TCP Acknowledgments are "forward-looking" and cumulative: `Ack = Seq + Payload Length`. The segment covers byte offsets 1000 to 1499. Host B acknowledges this by requesting the next expected byte: `Ack = 1000 + 500 = 1500`.',
+    explanation:
+      'TCP Acknowledgments are "forward-looking" and cumulative: `Ack = Seq + Payload Length`. The segment covers byte offsets 1000 to 1499. Host B acknowledges this by requesting the next expected byte: `Ack = 1000 + 500 = 1500`.',
     explanationsJson: {
       1: 'Ack = 1000 would indicate no bytes were received and request byte 1000 again.',
       2: 'Ack = 500 is backward-referencing an invalid offset.',
-      3: 'Ack = 1001 only acknowledges 1 single byte of data (as in a SYN-ACK), not 500 payload bytes.'
+      3: 'Ack = 1001 only acknowledges 1 single byte of data (as in a SYN-ACK), not 500 payload bytes.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
     concept: 'TCP Sequence & Acknowledgment Calculation',
-    points: 10
+    points: 10,
+  },
+  {
+    quizId: 'quiz-tcp-udp-transport-overview',
+    lessonSlug: 'tcp-udp-transport-overview',
+    text: 'What are the correct sequence of messages exchanged during a standard graceful TCP 4-Way connection teardown?',
+    options: [
+      'FIN -> ACK from remote -> FIN from remote -> final ACK from initiator',
+      'RST -> RST-ACK -> FIN -> CLOSE',
+      'DISCONNECT -> OK -> GOODBYE -> DONE',
+      'SYN -> FIN -> ACK -> RST',
+    ],
+    correctOption: 0,
+    explanation:
+      'A graceful TCP teardown closes each unidirectional data stream separately: 1. Initiator sends FIN, 2. Remote sends ACK, 3. Remote sends its own FIN when finished transmitting data, 4. Initiator sends final ACK and enters TIME_WAIT.',
+    explanationsJson: {
+      1: 'RST immediately aborts a connection abruptly rather than performing a graceful 4-way teardown.',
+      2: 'Generic informal terms are not TCP control flags.',
+      3: 'SYN is used for connection establishment, not teardown.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'TCP 4-Way Connection Teardown',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-tcp-udp-transport-overview',
+    lessonSlug: 'tcp-udp-transport-overview',
+    text: 'A web server receives a massive flood of TCP SYN packets with forged source IP addresses, causing its half-open connection table to fill and reject legitimate users. What attack is this, and what is the primary server mitigation?',
+    options: [
+      'TCP SYN Flood Denial of Service; mitigated by enabling SYN Cookies which encode connection state into the Initial Sequence Number without allocating memory until the handshake completes',
+      'ARP Poisoning; mitigated by installing fiber optic cables',
+      'DNS Amplification; mitigated by changing browser cookies',
+      'BGP Hijacking; mitigated by upgrading RAM on client workstations',
+    ],
+    correctOption: 0,
+    explanation:
+      'A SYN Flood exhausts the server\'s half-open TCP connection table (backlog queue). Enabling SYN Cookies defers server memory allocation by encoding state cryptographically into the server\'s Initial Sequence Number (ISN) in the SYN-ACK.',
+    explanationsJson: {
+      1: 'ARP operates at Layer 2 within a broadcast domain, not over TCP handshakes.',
+      2: 'DNS amplification attacks UDP port 53, not TCP SYN buffers.',
+      3: 'BGP hijacking affects inter-domain routing tables, not transport layer SYN state tables.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+    questionType: QuestionType.TROUBLESHOOTING,
+    concept: 'TCP SYN Flood & SYN Cookies Mitigation',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------
