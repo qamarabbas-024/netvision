@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Laptop, Server, Radio, ArrowRight, ArrowLeft, RefreshCw, ShieldCheck, CheckCircle, AlertTriangle, Database } from 'lucide-react';
+import { Laptop, Server, Radio, ArrowRight, ArrowLeft, RefreshCw, ShieldCheck, CheckCircle, Database } from 'lucide-react';
 
 type ARPScenario = 'local' | 'remote' | 'garp';
 type ARPStep = 'idle' | 'broadcast_req' | 'unicast_rep' | 'cached';

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Wrench, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Cpu, Server, Network } from 'lucide-react';
+import { Wrench, AlertTriangle, CheckCircle2, XCircle, RefreshCw, Network } from 'lucide-react';
 
 export interface BreakFixScenarioCardProps {
   topicSlug: string;

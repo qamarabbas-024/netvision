@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cpu, Server, Monitor, Shield, Cloud, Globe, Radio, Database, Activity } from 'lucide-react';
+import { Cpu, Server, Monitor, Shield, Cloud, Radio, Database, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface NetworkIconProps {

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Laptop, Router, Server, ArrowRight, Play, RotateCcw, Box, Layers, CheckCircle2 } from 'lucide-react';
+import { Laptop, Router, Server, ArrowRight, Play, RotateCcw, Box, Layers } from 'lucide-react';
 import { Interactive3DPacketJourney } from '../simulation/Interactive3DPacketJourney';
 
 export const PacketJourneyVisual: React.FC = () => {

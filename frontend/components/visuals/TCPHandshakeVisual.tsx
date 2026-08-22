@@ -7,10 +7,10 @@ type TransportScenario = 'tcp-handshake' | 'tcp-data' | 'tcp-teardown' | 'udp-st
 
 export const TCPHandshakeVisual: React.FC = () => {
   const [scenario, setScenario] = useState<TransportScenario>('tcp-handshake');
-  const [clientIsn, setClientIsn] = useState<number>(1000);
-  const [serverIsn, setServerIsn] = useState<number>(5000);
-  const [payloadBytes, setPayloadBytes] = useState<number>(500);
-  const [windowSize, setWindowSize] = useState<number>(65535);
+  const clientIsn = 1000;
+  const serverIsn = 5000;
+  const payloadBytes = 500;
+  const windowSize = 65535;
 
   const nodes: VisualNode[] = [
     {

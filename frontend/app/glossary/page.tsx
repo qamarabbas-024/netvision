@@ -7,7 +7,6 @@ import { AppTopbar } from '@/components/ui/Topbar';
 import { SearchInput } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
-import { BookOpen } from 'lucide-react';
 
 export default function GlossaryPage() {
   const [search, setSearch] = useState('');

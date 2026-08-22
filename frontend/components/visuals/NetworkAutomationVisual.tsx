@@ -10,14 +10,9 @@ import {
   Play,
   CheckCircle2,
   AlertTriangle,
-  ArrowRight,
   Database,
   ShieldCheck,
-  Activity,
-  Layers,
   HelpCircle,
-  RotateCcw,
-  Cpu,
   FileCode,
 } from 'lucide-react';
 

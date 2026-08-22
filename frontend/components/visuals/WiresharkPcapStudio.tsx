@@ -206,7 +206,7 @@ export const WiresharkPcapStudio: React.FC = () => {
           <select
             value={selectedCapturePreset}
             onChange={(e) => {
-              setSelectedCapturePreset(e.target.value as any);
+              setSelectedCapturePreset(e.target.value as 'handshake' | 'dns' | 'ospf' | 'tls');
               setSelectedPacketNo(1);
             }}
             className="px-2.5 py-1.5 rounded-lg bg-[#1a1a24] border border-[#272732] text-xs font-mono text-white focus:outline-none focus:border-sky-500"

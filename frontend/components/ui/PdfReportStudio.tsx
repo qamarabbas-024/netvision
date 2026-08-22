@@ -5,14 +5,7 @@ import {
   Printer,
   FileText,
   Award,
-  CheckCircle2,
   Download,
-  Eye,
-  Sliders,
-  Sparkles,
-  ShieldCheck,
-  Activity,
-  Layers,
 } from 'lucide-react';
 import { Button } from './Button';
 import { VectorPdfGenerator, CertificatePdfData, LabReportPdfData } from '@/lib/pdfGenerator';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Radio, Wifi, Zap, Activity, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { Radio, Wifi, Zap, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
 
 export const WirelessSpectrumVisual: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'bands' | 'channels' | 'bonding' | 'csmaca'>('bands');
