@@ -23,6 +23,7 @@ import { WirelessSpectrumVisual } from './WirelessSpectrumVisual';
 import { MacBitParserVisual } from './MacBitParserVisual';
 import { EthernetFrameVisual } from './EthernetFrameVisual';
 import { SocketMultiplexerVisual } from './SocketMultiplexerVisual';
+import { WiresharkPcapStudio } from './WiresharkPcapStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -68,6 +69,16 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
     slug.includes('802.3')
   ) {
     return <EthernetFrameVisual />;
+  }
+
+  if (
+    slug.includes('wireshark') ||
+    slug.includes('pcap') ||
+    slug.includes('packet-capture') ||
+    slug.includes('packet_capture') ||
+    slug.includes('forensics')
+  ) {
+    return <WiresharkPcapStudio />;
   }
 
   if (slug.includes('automation') || slug.includes('programmability') || slug.includes('pipeline') || slug.includes('rest-api')) {
