@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { ShieldCheck, Activity, CheckCircle2, Cpu, ArrowLeft, Share2, Download } from 'lucide-react';
 import { getCertificateByIdApi } from '@/lib/api';
+import { VectorPdfGenerator } from '@/lib/pdfGenerator';
 
 export default function CertificateDetailPage() {
   const params = useParams();
@@ -136,27 +137,21 @@ export default function CertificateDetailPage() {
   };
 
   const handleDownload = async () => {
-    try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
-      const res = await fetch(`${apiBase}/certificates/${credentialId}/download`, {
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        window.print();
-        return;
-      }
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `NetVision-Certificate-${credentialId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch {
-      window.print();
-    }
+    VectorPdfGenerator.printCertificate({
+      candidateName,
+      certificationTitle,
+      credentialId,
+      issueDate: issueDateFormatted,
+      grade,
+      skillsAssessed: skillsAssessed.length > 0 ? skillsAssessed : [
+        'Ethernet Layer 2 Framing',
+        'IPv4 & IPv6 Subnetting',
+        'TCP/UDP Transport Protocols',
+        'Core Infrastructure DNS & DHCP',
+        'OSPF & STP Loop Prevention',
+      ],
+      verificationUrl: typeof window !== 'undefined' ? window.location.href : '',
+    });
   };
 
   const certJsonLd = {
