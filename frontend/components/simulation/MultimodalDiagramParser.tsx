@@ -3,24 +3,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   UploadCloud,
-  FileImage,
   Sparkles,
   CheckCircle2,
-  AlertCircle,
   Cpu,
   Router,
   Server,
   Shield,
   Monitor,
   Network,
-  ArrowRight,
   RefreshCw,
-  Eye,
-  Sliders,
-  Download,
   Box,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import { NetworkNode, NetworkLink } from '@/types';
 
 export interface ExtractedTopology {

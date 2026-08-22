@@ -2,24 +2,11 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  FileText,
-  Search,
-  Sliders,
   Filter,
-  Download,
-  Upload,
-  Play,
-  RotateCcw,
-  CheckCircle2,
-  AlertTriangle,
   ChevronRight,
   ChevronDown,
   Layers,
-  Sparkles,
-  ArrowRight,
-  Binary,
 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 
 export interface PacketEntry {
   no: number;

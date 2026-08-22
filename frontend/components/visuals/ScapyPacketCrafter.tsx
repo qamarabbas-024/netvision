@@ -4,18 +4,10 @@ import React, { useState } from 'react';
 import {
   Code,
   Terminal,
-  Play,
   Copy,
   Check,
-  Sparkles,
   Layers,
   Send,
-  RotateCcw,
-  CheckCircle2,
-  Cpu,
-  Shield,
-  Activity,
-  ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { SoundFx } from '@/lib/soundFx';
