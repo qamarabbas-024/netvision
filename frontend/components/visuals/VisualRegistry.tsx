@@ -24,6 +24,7 @@ import { MacBitParserVisual } from './MacBitParserVisual';
 import { EthernetFrameVisual } from './EthernetFrameVisual';
 import { SocketMultiplexerVisual } from './SocketMultiplexerVisual';
 import { WiresharkPcapStudio } from './WiresharkPcapStudio';
+import { ScapyPacketCrafter } from './ScapyPacketCrafter';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -79,6 +80,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
     slug.includes('forensics')
   ) {
     return <WiresharkPcapStudio />;
+  }
+
+  if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
+    return <ScapyPacketCrafter />;
   }
 
   if (slug.includes('automation') || slug.includes('programmability') || slug.includes('pipeline') || slug.includes('rest-api')) {
