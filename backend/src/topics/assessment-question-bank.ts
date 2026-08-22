@@ -3695,132 +3695,147 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-net-202-ipv4-addressing-cidr',
     lessonSlug: 'net-202-ipv4-addressing-cidr',
-    text: 'How many USABLE host IP addresses are available in a CIDR `/26` subnet?',
-    options: ['62', '64', '126', '30'],
+    text: 'An IPv4 address is composed of how many total bits, and how are these bits partitioned?',
+    options: [
+      '32 bits, divided into a Network portion (identifying the subnet) and a Host portion (identifying the specific device)',
+      '48 bits, divided into an Organizationally Unique Identifier (OUI) and a Device serial',
+      '128 bits, divided into eight 16-bit hexadecimal blocks',
+      '64 bits, divided into four 16-bit binary words',
+    ],
     correctOption: 0,
-    explanation: 'A /26 prefix leaves 32 - 26 = 6 host bits. Total IPs = 2^6 = 64. Usable hosts = 64 - 2 = 62.',
+    explanation:
+      'An IPv4 address is a 32-bit binary number represented as four 8-bit octets. A subnet mask divides these 32 bits into a Network portion (identifying the subnet) and a Host portion (identifying the specific device on that subnet).',
     explanationsJson: {
-      1: '64 is the TOTAL IP addresses including Network and Broadcast IDs.',
-      2: '126 usable hosts belong to a /25 subnet (2^7 - 2).',
-      3: '30 usable hosts belong to a /27 subnet (2^5 - 2).'
+      1: '48 bits describes an Ethernet MAC address.',
+      2: '128 bits describes an IPv6 address.',
+      3: '64 bits is not a standard IP addressing architecture.',
     },
     difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
+    cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Usable Hosts Formula',
-    points: 10
+    concept: '32-Bit IPv4 Architecture',
+    points: 10,
   },
   {
     quizId: 'quiz-net-202-ipv4-addressing-cidr',
     lessonSlug: 'net-202-ipv4-addressing-cidr',
-    text: 'Given IP `192.168.1.100` with subnet mask `255.255.255.192 (/26)`, what is the Network ID and Broadcast Address?',
+    text: 'What is the primary architectural purpose of a subnet mask in IPv4 addressing?',
     options: [
-      'Network ID: 192.168.1.64 | Broadcast: 192.168.1.127',
-      'Network ID: 192.168.1.0 | Broadcast: 192.168.1.63',
-      'Network ID: 192.168.1.96 | Broadcast: 192.168.1.127',
-      'Network ID: 192.168.1.64 | Broadcast: 192.168.1.255'
+      'To define the exact boundary between Network bits (binary 1s) and Host bits (binary 0s)',
+      'To encrypt IP packets before transmission across physical network media',
+      'To uniquely identify the physical MAC address of the network interface card',
+      'To determine the domain name associated with a logical IP endpoint',
     ],
     correctOption: 0,
-    explanation: 'Block size for /26 is 256 - 192 = 64. Subnet blocks: .0, .64, .128, .192. IP 100 falls in block .64 to .127. Network ID = 192.168.1.64; Broadcast = 192.168.1.127.',
+    explanation:
+      'A subnet mask is a 32-bit sequence of contiguous 1s followed by contiguous 0s. The 1s indicate the network bits, and the 0s indicate the host bits. In CIDR notation, the prefix length /N represents the count of network 1s.',
     explanationsJson: {
-      1: '192.168.1.0/26 only covers IPs .0 to .63; IP .100 is outside this range.',
-      2: '.96 is not a valid block boundary for block size 64.',
-      3: '.255 is the broadcast of the 4th subnet (192.168.1.192/26), not the 2nd subnet.'
+      1: 'Subnet masks do not perform cryptographic encryption.',
+      2: 'MAC addresses are physical Layer 2 identifiers, not subnet masks.',
+      3: 'Domain name resolution is handled by DNS, not subnet masks.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Subnet Mask Role',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-net-202-ipv4-addressing-cidr',
+    lessonSlug: 'net-202-ipv4-addressing-cidr',
+    text: 'In a standard `/26` subnet, what are the total number of IP addresses and the number of assignable (usable) host addresses?',
+    options: [
+      '64 total addresses, and 62 usable host addresses',
+      '32 total addresses, and 30 usable host addresses',
+      '64 total addresses, and 64 usable host addresses',
+      '128 total addresses, and 126 usable host addresses',
+    ],
+    correctOption: 0,
+    explanation:
+      'A /26 prefix leaves 32 - 26 = 6 host bits. Total addresses = 2^6 = 64. In standard subnets, subtracting the Network Address (all 0s) and Broadcast Address (all 1s) leaves 64 - 2 = 62 usable host addresses.',
+    explanationsJson: {
+      1: '32 total / 30 usable corresponds to a /27 prefix (5 host bits).',
+      2: '64 usable is incorrect because the Network and Broadcast addresses cannot be assigned to hosts.',
+      3: '128 total / 126 usable corresponds to a /25 prefix (7 host bits).',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Host Capacity Formula',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-net-202-ipv4-addressing-cidr',
+    lessonSlug: 'net-202-ipv4-addressing-cidr',
+    text: 'Given the host IP address `192.168.10.75/26`, what are the Network Address and Broadcast Address for this subnet?',
+    options: [
+      'Network Address: 192.168.10.64 | Broadcast Address: 192.168.10.127',
+      'Network Address: 192.168.10.0 | Broadcast Address: 192.168.10.63',
+      'Network Address: 192.168.10.64 | Broadcast Address: 192.168.10.255',
+      'Network Address: 192.168.10.75 | Broadcast Address: 192.168.10.128',
+    ],
+    correctOption: 0,
+    explanation:
+      'A /26 prefix has a block size of 2^6 = 64 in the 4th octet (blocks start at .0, .64, .128, .192). IP 192.168.10.75 falls in the second block (.64 to .127). The Network Address is 192.168.10.64 and the Broadcast Address is 192.168.10.127.',
+    explanationsJson: {
+      1: '192.168.10.0/26 covers IPs .0 to .63; IP .75 is outside this range.',
+      2: '.255 is the broadcast of the fourth block (192.168.10.192/26), not the second block.',
+      3: '192.168.10.75 is a host IP, not a valid network boundary.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
     concept: 'Subnet Boundary Calculation',
-    points: 10
+    points: 10,
   },
   {
     quizId: 'quiz-net-202-ipv4-addressing-cidr',
     lessonSlug: 'net-202-ipv4-addressing-cidr',
-    text: 'An organization needs to create subnets for 4 departments, each requiring up to 25 usable hosts. Which CIDR prefix is the most efficient choice?',
-    options: ['/27 (30 usable hosts)', '/28 (14 usable hosts)', '/26 (62 usable hosts)', '/25 (126 usable hosts)'],
-    correctOption: 0,
-    explanation: '25 hosts requires 2^H - 2 >= 25 -> 2^5 - 2 = 30 usable hosts (H = 5 bits). Prefix length = 32 - 5 = /27.',
-    explanationsJson: {
-      1: '/28 provides only 14 usable hosts, which is insufficient for 25 hosts.',
-      2: '/26 provides 62 hosts, wasting 37 IP addresses per subnet.',
-      3: '/25 provides 126 hosts, which is far too large and inefficient.'
-    },
-    difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
-    questionType: QuestionType.SCENARIO,
-    concept: 'VLSM Subnet Sizing',
-    points: 10
-  },
-  {
-    quizId: 'quiz-net-202-ipv4-addressing-cidr',
-    lessonSlug: 'net-202-ipv4-addressing-cidr',
-    text: 'A workstation configured with IP `10.0.1.50/24` cannot ping `10.0.2.50/24`. Both devices are connected to the same Layer 2 switch with no router. What is the cause?',
+    text: 'If a network administrator changes a subnet prefix from `/24` to `/26`, what happens to the number of network bits and host capacity per subnet?',
     options: [
-      'The hosts belong to different logical IP subnets (10.0.1.0/24 vs 10.0.2.0/24) and cannot communicate at Layer 3 without a router',
-      'The Ethernet cables are connected with wrong polarity',
-      'Both hosts are using reserved broadcast IP addresses',
-      'The switch MAC address table is full'
+      'Network bits increase by 2, dividing the address space into 4 smaller subnets with 62 usable hosts each instead of 254',
+      'Host bits increase by 2, doubling the available host capacity per subnet',
+      'Network bits decrease by 2, merging smaller subnets into one larger broadcast domain',
+      'The total number of available host addresses per subnet increases from 254 to 510',
     ],
     correctOption: 0,
-    explanation: 'Because both hosts have /24 masks, 10.0.1.50 is on network 10.0.1.0/24 and 10.0.2.50 is on network 10.0.2.0/24. Cross-subnet communication requires a Layer 3 router.',
+    explanation:
+      'Moving from /24 (24 network bits, 8 host bits, 254 hosts) to /26 (26 network bits, 6 host bits) borrows 2 bits from the host portion. This creates 2^2 = 4 subnets, with each subnet accommodating 2^6 - 2 = 62 usable hosts.',
     explanationsJson: {
-      1: 'Modern twisted-pair Ethernet uses Auto-MDIX and standard polarity; cable polarity does not segment subnets.',
-      2: '.50 is a valid host address in both subnets, not a broadcast address (.255).',
-      3: 'The switch will flood unicasts if the CAM table is full, which does not prevent communication.'
-    },
-    difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
-    questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'Subnet Reachability Diagnostics',
-    points: 10
-  },
-  {
-    quizId: 'quiz-net-202-ipv4-addressing-cidr',
-    lessonSlug: 'net-202-ipv4-addressing-cidr',
-    text: 'What is the valid usable host range for subnet `172.16.32.0/20`?',
-    options: [
-      '172.16.32.1 to 172.16.47.254',
-      '172.16.32.1 to 172.16.32.254',
-      '172.16.32.1 to 172.16.63.254',
-      '172.16.32.0 to 172.16.47.255'
-    ],
-    correctOption: 0,
-    explanation: 'A /20 prefix has mask 255.255.240.0. Block size in the 3rd octet is 256 - 240 = 16. Subnet spans 172.16.32.0 to 172.16.47.255. Usable host range is 172.16.32.1 through 172.16.47.254 (4,094 usable hosts).',
-    explanationsJson: {
-      1: '172.16.32.1 to 172.16.32.254 describes a /24 subnet, not /20.',
-      2: '172.16.32.1 to 172.16.63.254 describes a block size of 32 (/19 prefix).',
-      3: '172.16.32.0 and 172.16.47.255 are the Network ID and Broadcast ID, not usable hosts.'
+      1: 'Host bits decrease from 8 to 6, reducing host capacity per subnet.',
+      2: 'Network bits increased from 24 to 26; they did not decrease.',
+      3: 'Host capacity decreases when prefix length increases.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Usable Host Range Derivation (/20)',
-    points: 10
+    concept: 'Prefix Shift Dynamics',
+    points: 10,
   },
   {
     quizId: 'quiz-net-202-ipv4-addressing-cidr',
     lessonSlug: 'net-202-ipv4-addressing-cidr',
-    text: 'An enterprise network architect must assign a single IPv4 subnet block to support 500 employee laptops in a new headquarters building while minimizing wasted addresses. Which subnet mask should be assigned?',
+    text: 'Why does a standard `/30` prefix provide exactly 2 usable host IP addresses, and how do point-to-point links treat host bit reservations?',
     options: [
-      '`255.255.254.0` (/23 providing 510 usable hosts)',
-      '`255.255.255.0` (/24 providing 254 usable hosts)',
-      '`255.255.252.0` (/22 providing 1022 usable hosts)',
-      '`255.255.240.0` (/20 providing 4094 usable hosts)'
+      'A /30 has 2 host bits (2^2 = 4 total addresses), reserving 1 for the Network Address and 1 for the Broadcast Address, leaving 2 usable addresses',
+      'A /30 has 30 host bits, providing over 1 billion usable host addresses',
+      'A /30 reserves all 4 addresses for routing protocol discovery',
+      'A /30 has only 1 host bit (2^1 = 2 total addresses), allowing zero usable host endpoints',
     ],
     correctOption: 0,
-    explanation: '500 hosts requires $2^H - 2 \\ge 500 \\rightarrow 2^9 - 2 = 512 - 2 = 510$ usable hosts ($H = 9$). Prefix length = $32 - 9 = /23$ (Subnet mask `255.255.254.0`), perfectly accommodating 500 hosts with only 10 spare IPs.',
+    explanation:
+      'With a /30 prefix, there are 32 - 30 = 2 host bits (2^2 = 4 total addresses). In standard IPv4 subnetting, subtracting the Network Address (all 0s) and Broadcast Address (all 1s) leaves 4 - 2 = 2 usable host addresses, making /30 ideal for point-to-point router links (note: RFC 3021 defines /31 for point-to-point links without broadcast, utilizing both addresses).',
     explanationsJson: {
-      1: '/24 only provides 254 usable hosts, which is insufficient for 500 laptops.',
-      2: '/22 provides 1022 hosts, which wastes over 500 addresses.',
-      3: '/20 provides 4094 hosts, which is excessively oversized.'
+      1: 'A /30 has 30 network bits and only 2 host bits.',
+      2: 'Addresses in a /30 are not reserved for routing protocols; 2 are usable for host endpoints.',
+      3: 'A /30 has 2 host bits (4 total addresses), not 1 host bit.',
     },
     difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
-    questionType: QuestionType.SCENARIO,
-    concept: 'Optimal Subnet Mask Selection for Capacity',
-    points: 10
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Point-to-Point & Edge Subnetting',
+    points: 10,
   },
-
   // -------------------------------------------------------------------------
   // Benchmark 3: NET-302 (Spanning Tree Protocol)
   // -------------------------------------------------------------------------

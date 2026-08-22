@@ -237,10 +237,36 @@ async function verifyCurriculumContentV2() {
   assert(!net102Wifi!.contentV2!.cliTooling, 'NET-102 Wireless Networking has no forced CLI bloat');
   assert(!net102Wifi!.contentV2!.security, 'NET-102 Wireless Networking has no generic security filler');
   assert(!net102Wifi!.lab, 'NET-102 Wireless Networking has no phantom CLI lab');
-  console.log('  ✓ NET-102 Wireless Networking verified with clean Content V2 structure, 2.4/5/6 GHz spectrum breakdown, channels 1/6/11 non-overlap, CSMA/CA half-duplex mechanics, 6 practice items, 6 quiz questions, and zero forced filler.');
+  // [TEST 13] Verify NET-202 IPv4 Addressing & CIDR Subnetting (net-202-ipv4-addressing-cidr)
+  console.log('\n[TEST 13] Verifying NET-202 IPv4 Addressing & CIDR Subnetting (net-202-ipv4-addressing-cidr)...');
+  const net202 = LESSONS_NET200.find((l) => l.slug === 'net-202-ipv4-addressing-cidr');
+  assert(!!net202, 'NET-202 IPv4 lesson exists');
+  assert(!!net202!.contentV2, 'NET-202 has Content V2 structure');
+  assert(net202!.courseCode === 'NET-202', 'NET-202 has courseCode NET-202');
+  assert(typeof net202!.contentV2!.objective === 'string', 'NET-202 has clear objective');
+  assert(net202!.contentV2!.explanation.includes('32-bit'), 'NET-202 explains 32-bit architecture');
+  assert(net202!.contentV2!.explanation.includes('Network Portion'), 'NET-202 explains Network Portion');
+  assert(net202!.contentV2!.explanation.includes('Host Portion'), 'NET-202 explains Host Portion');
+  assert(net202!.contentV2!.explanation.includes('Subnet Mask'), 'NET-202 explains Subnet Mask');
+  assert(net202!.contentV2!.explanation.includes('CIDR'), 'NET-202 explains CIDR prefix length');
+  assert(net202!.contentV2!.explanation.includes('Network Address'), 'NET-202 explains Network Address');
+  assert(net202!.contentV2!.explanation.includes('Broadcast Address'), 'NET-202 explains Broadcast Address');
+  assert(net202!.contentV2!.explanation.includes('Usable Host Range'), 'NET-202 explains Usable Host Range');
+  assert(net202!.contentV2!.explanation.includes('2^H - 2') || net202!.contentV2!.explanation.includes('2^H-2'), 'NET-202 explains host capacity formula');
+  assert(net202!.contentV2!.components.length >= 6, 'NET-202 has at least 6 technical components');
+  assert(!!net202!.contentV2!.visualizer, 'NET-202 has visualizer defined');
+  assert(!!net202!.contentV2!.workedExample, 'NET-202 has worked example defined');
+  assert(net202!.contentV2!.workedExample!.problemStatement.includes('192.168.10.37/26'), 'NET-202 has worked example for 192.168.10.37/26');
+  assert(Array.isArray(net202!.contentV2!.practice) && net202!.contentV2!.practice.length >= 6, 'NET-202 has 6 practice exercises');
+  assert(net202!.questions.length >= 6, 'NET-202 has 6 aligned quiz questions');
+  assert(!net202!.contentV2!.packetHeaderView, 'NET-202 has no fake packet header');
+  assert(!net202!.contentV2!.cliTooling, 'NET-202 has no forced CLI bloat');
+  assert(!net202!.contentV2!.security, 'NET-202 has no generic security filler');
+  assert(!net202!.lab, 'NET-202 has no phantom CLI lab');
+  console.log('  ✓ NET-202 verified with clean Content V2 structure, 32-bit math, CIDR prefix shift, 192.168.10.37/26 worked example, 6 practice items, 6 quiz questions, and zero forced filler.');
 
   console.log('\n================================================================');
-  console.log('🎉 ALL 12 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 13 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 

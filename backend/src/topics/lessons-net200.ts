@@ -320,150 +320,317 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
     slug: 'net-202-ipv4-addressing-cidr',
     title: 'IPv4 Addressing, Subnet Masks & CIDR Subnetting',
     type: LessonType.THEORY,
-    durationMinutes: 30,
+    durationMinutes: 25,
     order: 1,
     visualizationType: 'SUBNET_CALCULATOR_ENGINE',
     introduction:
-      'Master the mathematical foundations of Layer-3 IPv4 addressing: 32-bit address architecture, dotted-decimal notation, subnet masks, bitwise AND operations, Classless Inter-Domain Routing (CIDR /N prefix notation), and rapid powers-of-two subnet calculations.',
-    stepMetadata: {
-      step1_objective:
-        'Understand 32-bit IPv4 structure, perform bitwise AND operations to determine Network and Broadcast IDs, calculate usable host ranges ($2^H - 2$), and master rapid CIDR prefix calculations (/24 through /30).',
-      step2_prerequisites: ['net-101-bits-bytes-binary-hex'],
-      step3_whyItMatters:
-        'IP addressing is the logical routing foundation of the Internet. Every packet routed across enterprise switches, firewalls, and ISP backbones depends on correct subnet masking and CIDR boundaries.',
-      step4_coreConcept:
-        'An IPv4 address is a 32-bit unsigned binary integer formatted as 4 dotted-decimal octets (0.0.0.0 to 255.255.255.255). A Subnet Mask separates the address into a Network Portion (identifies the subnet) and a Host Portion (identifies the specific endpoint). The bitwise AND operation (Address AND Mask) yields the Network ID. CIDR prefix notation (`/N`) specifies the exact number of contiguous leading 1s in the mask. Usable host count equals $2^H - 2$, subtracting the Network ID (all host bits 0) and Broadcast ID (all host bits 1).',
-      step5_technicalAnatomy: {
-        title: '32-Bit Dotted-Decimal Layout & Subnet Mask Mechanics',
-        description: 'Network bits, host bits, block size calculations, and usable addresses.',
-        components: [
-          { name: '32-Bit Binary Layout', detail: '4 octets of 8 bits each ($4 \\times 8 = 32$ bits total), representing $2^{32} = 4,294,967,296$ possible addresses.' },
-          { name: 'Subnet Mask & CIDR Prefix (/N)', detail: 'Contiguous string of binary 1s representing network bits, followed by contiguous 0s representing host bits (e.g. `/26` = 26 ones = `255.255.255.192`).' },
-          { name: 'Network ID', detail: 'The very first address in the subnet (all host bits 0). Represents the subnet route; cannot be assigned to an endpoint.' },
-          { name: 'Directed Broadcast ID', detail: 'The very last address in the subnet (all host bits 1). Used to send to all nodes on the subnet; cannot be assigned to a host.' },
-          { name: 'Magic Number / Block Size Formula', detail: 'Block Size = $256 - \\text{Interesting Octet Mask Value}$ (or $2^H$ where $H$ is host bits in that octet).' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Bitwise ANDing', action: 'Host performs bitwise AND between IP and Subnet Mask to determine its local Network ID.' },
-          { stepNumber: 2, title: 'Block Size Calculation', action: 'Determine the block size using $256 - \\text{Mask Octet}$ (e.g. for /27 with mask .224: $256 - 224 = 32$).' },
-          { stepNumber: 3, title: 'Subnet Boundary Mapping', action: 'Count by multiples of the block size (0, 32, 64, 96...) to find which subnet range contains the IP.' },
-          { stepNumber: 4, title: 'Usable Range & Broadcast Identification', action: 'Network ID is the multiple; Broadcast ID is next multiple minus 1; usable hosts are all addresses in between.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'IPv4 Addressing & Mask Representation',
-        fields: [
-          { fieldName: 'IPv4 Address', bitLength: '32 bits (4 Bytes)', hexSample: '192.168.10.75 (C0.A8.0A.4B)', description: '32-bit logical endpoint address.' },
-          { fieldName: 'Subnet Mask /27', bitLength: '32 bits', hexSample: '255.255.255.224 (FF.FF.FF.E0)', description: '27 network bits, 5 host bits.' },
-          { fieldName: 'Usable Hosts', bitLength: '2^5 - 2 = 30 Hosts', hexSample: '192.168.10.65 - .94', description: 'Assignables on subnet.' },
-        ],
-      },
-      step8_visualExplanation: {
+      'Master the fundamental structure of IPv4 addressing: 32-bit binary architecture, 4-octet dotted-decimal representation, network bits versus host bits, subnet masks, CIDR prefix notation (/N), and step-by-step subnet calculation without memorizing fragile formulas.',
+    contentV2: {
+      objective:
+        'Understand how an IPv4 address functions as a 32-bit logical identifier, how a subnet mask divides bits into network and host portions, how CIDR prefix notation (/N) represents subnet boundaries, and how to determine the network address, broadcast address, usable host range, and host capacity for any given IPv4 prefix.',
+      prerequisites: [
+        'Understanding of binary bits and 8-bit octets (NET-101)',
+        'Positional place values: 128, 64, 32, 16, 8, 4, 2, 1 (NET-101)',
+        'Basic concept of digital communication across networks (NET-102)',
+      ],
+      whyItMatters:
+        'Every packet sent across the global Internet or local area network relies on IPv4 addresses to deliver data from a source endpoint to a destination host. Subnetting enables network administrators to logically divide large networks into organized, secure, and broadcast-isolated subnets. Understanding CIDR allows you to allocate addresses efficiently, size subnets accurately for host requirements, and diagnose address configuration mismatches.',
+      explanation:
+        'An IPv4 (Internet Protocol Version 4) address is a 32-bit logical numerical label assigned to each network interface card (NIC) participating in an IP network. To make 32 binary bits human-readable, IPv4 uses dotted-decimal notation: the 32 bits are divided into four 8-bit groups called octets, separated by periods (e.g., 192.168.10.37). Each octet represents a decimal value from 0 (00000000) to 255 (11111111), providing a total theoretical address space of 2^32 (4,294,967,296 addresses).\n\nEvery IPv4 address contains two distinct logical components: a Network Portion and a Host Portion. The Network portion acts like a street name—identifying the specific network segment or broadcast domain. The Host portion acts like a house number—uniquely identifying the individual computer, server, or printer on that network segment. All devices on the same local physical or logical network must share the exact same Network portion to communicate directly.\n\nTo specify where the Network portion ends and the Host portion begins, devices use a Subnet Mask. A subnet mask is a 32-bit filter composed of contiguous binary 1s followed by contiguous binary 0s. The 1s lock the network bits, while the 0s identify the host bits. For example, the subnet mask 255.255.255.0 consists of 24 contiguous 1s followed by 8 zeros.\n\nIn modern networking, Classless Inter-Domain Routing (CIDR, RFC 1519) expresses subnet masks using prefix length notation: a forward slash followed by the count of network 1s (/N). Instead of writing "Subnet Mask: 255.255.255.0", CIDR writes "/24". When the prefix length increases (e.g., from /24 to /26), bits are borrowed from the host portion and added to the network portion. This divides the network into smaller subnets (2^borrowed_bits), with fewer host addresses per subnet (2^remaining_host_bits).\n\nWithin any standard IPv4 subnet, two addresses are reserved and cannot be assigned to individual endpoints:\n1. Network Address: Formed when all host bits are set to binary 0. This address identifies the entire subnet itself.\n2. Broadcast Address: Formed when all host bits are set to binary 1. Packets addressed to this IP are received and processed by every host on the subnet.\n\nThe assignable Usable Host Range consists of all IP addresses strictly between the Network Address and Broadcast Address. The usable host capacity is calculated as 2^H - 2 (where H is the number of host bits, 32 - prefix).\n\nSpecial prefix cases: /30 provides 2 usable host endpoints (traditionally used for router point-to-point links); /31 (RFC 3021) permits point-to-point links using both addresses without a separate broadcast; and /32 represents a single host route (such as a loopback interface) with zero host bits.',
+      components: [
+        {
+          name: '32-Bit Binary Structure',
+          detail:
+            'Four 8-bit octets (4 × 8 = 32 bits) represented in dotted-decimal format (0.0.0.0 to 255.255.255.255), representing 4,294,967,296 total addresses.',
+        },
+        {
+          name: 'Network Portion',
+          detail:
+            'The leading bits of the IPv4 address that identify the specific network segment or broadcast domain. Shared identically by all hosts on the same subnet.',
+        },
+        {
+          name: 'Host Portion',
+          detail:
+            'The trailing bits of the IPv4 address that uniquely identify an individual endpoint interface within that specific subnet.',
+        },
+        {
+          name: 'Subnet Mask',
+          detail:
+            'A 32-bit sequence of contiguous 1s followed by 0s that defines the boundary between network bits and host bits (e.g., 255.255.255.0).',
+        },
+        {
+          name: 'CIDR Prefix (/N)',
+          detail:
+            'Shorthand notation indicating the exact count of contiguous network 1-bits (e.g., /24 = 255.255.255.0, /26 = 255.255.255.192).',
+        },
+        {
+          name: 'Network Address',
+          detail:
+            'The first address of a subnet, formed by setting all host bits to binary 0. Identifies the subnet itself and cannot be assigned to a host.',
+        },
+        {
+          name: 'Broadcast Address',
+          detail:
+            'The last address of a subnet, formed by setting all host bits to binary 1. Transmits packets to all devices on the subnet and cannot be assigned to a single host.',
+        },
+        {
+          name: 'Usable Host Range',
+          detail:
+            'The sequential block of assignable addresses from Network Address + 1 up to Broadcast Address - 1 (usable capacity = 2^H - 2).',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Determine Network & Host Bit Allocation',
+          action:
+            'Identify the prefix length (N). The number of host bits is calculated as H = 32 - N (for example, /26 yields 32 - 26 = 6 host bits).',
+        },
+        {
+          stepNumber: 2,
+          title: 'Derive the Dotted-Decimal Subnet Mask',
+          action:
+            'Construct 32 bits with N contiguous 1s followed by H zeros. Convert each 8-bit group into decimal (e.g., 26 ones = 255.255.255.192).',
+        },
+        {
+          stepNumber: 3,
+          title: 'Calculate Subnet Block Size (Increment)',
+          action:
+            'In the octet where the bit split occurs, calculate block size as 2^(host bits in that octet) or 256 - mask_value (for /26: 256 - 192 = 64). Subnets start at multiples: 0, 64, 128, 192.',
+        },
+        {
+          stepNumber: 4,
+          title: 'Locate the Network & Broadcast Boundaries',
+          action:
+            'Find which block multiple contains the host IP. Setting host bits to 0 yields the Network Address; setting host bits to 1 yields the Broadcast Address.',
+        },
+        {
+          stepNumber: 5,
+          title: 'Identify Usable Host Range and Capacity',
+          action:
+            'The first usable IP is Network Address + 1; the last usable IP is Broadcast Address - 1. Total usable hosts = 2^H - 2.',
+        },
+      ],
+      visualizer: {
         type: 'SUBNET_CALCULATOR_ENGINE',
-        title: 'Interactive IPv4 Subnet Calculator & Bit Boundary Slider',
-        description: 'Drag the CIDR prefix slider (/1 to /30) to see bit boundaries shift, block sizes change, and network/broadcast addresses calculate automatically.',
+        title: 'Interactive IPv4 & CIDR Prefix Explorer',
+        description:
+          'Adjust the CIDR prefix slider to visualize the shift between network bits and host bits in real time. Observe how subnet masks, block sizes, network IDs, broadcast addresses, and usable host capacities adjust dynamically.',
       },
-      step9_workedExample: {
-        title: 'Complete Subnet Calculation for 192.168.10.75/27',
-        problemStatement: 'Given IP `192.168.10.75/27`, calculate: (1) Subnet Mask in dotted-decimal, (2) Network ID, (3) Broadcast ID, (4) First and Last Usable IP, (5) Total Usable Hosts.',
+      workedExample: {
+        title: 'Step-by-Step CIDR Subnet Analysis for 192.168.10.37/26',
+        problemStatement:
+          'Given the host IPv4 address 192.168.10.37/26, determine: (1) Subnet Mask in dotted decimal, (2) Network Address, (3) Broadcast Address, (4) Usable Host IP Range, and (5) Total Usable Host Capacity.',
         stepByStepSolution: [
-          'Step 1 (Subnet Mask): /27 means 27 network bits. 24 bits = 255.255.255.0. Octet 4 has 3 network bits (11100000 = 128+64+32 = 224) -> Mask is `255.255.255.224`.',
-          'Step 2 (Block Size): $256 - 224 = 32$ (or $2^5 = 32$ using 5 host bits).',
-          'Step 3 (Subnet Multiples): 0, 32, 64, 96, 128, 160... The IP .75 falls between 64 and 96.',
-          'Step 4 (Network ID & Broadcast ID): Network ID = `192.168.10.64`. Next subnet starts at .96, so Broadcast ID = `192.168.10.95`.',
-          'Step 5 (Usable Hosts): First usable = `192.168.10.65`; Last usable = `192.168.10.94`. Total usable = $2^5 - 2 = 30$ hosts.',
+          'Step 1 (Bit Allocation): Prefix /26 indicates 26 network bits and 32 - 26 = 6 host bits.',
+          'Step 2 (Subnet Mask): 26 network bits = 11111111.11111111.11111111.11000000. The first 3 octets are 255.255.255. The 4th octet has 2 bits: 128 + 64 = 192. Subnet Mask = 255.255.255.192.',
+          'Step 3 (Block Size): With 6 host bits, block size = 2^6 = 64 (or 256 - 192 = 64). Subnet boundaries in octet 4 occur at multiples of 64: .0, .64, .128, .192.',
+          'Step 4 (Network Address): The 4th octet of our IP is 37, which falls between 0 and 63. The subnet begins at 0. Network Address = 192.168.10.0.',
+          'Step 5 (Broadcast Address): The highest address in this block (before next subnet .64) is 0 + 64 - 1 = 63. Broadcast Address = 192.168.10.63.',
+          'Step 6 (Usable Range & Capacity): First usable = 192.168.10.1; Last usable = 192.168.10.62. Usable capacity = 64 - 2 = 62 assignable hosts.',
         ],
-        finalResult: 'Network: 192.168.10.64/27 | Usable: 192.168.10.65 - 192.168.10.94 | Broadcast: 192.168.10.95 | Hosts: 30.',
+        finalResult:
+          'Network: 192.168.10.0/26 | Usable Range: 192.168.10.1 – 192.168.10.62 | Broadcast: 192.168.10.63 | Usable Hosts: 62',
       },
-      step10_realWorldScenario: {
-        topology: 'Point-to-Point WAN Link Subnet Optimization',
-        scenarioText: 'A junior admin assigns a `/24` (254 usable IPs) to a point-to-point router link connecting two buildings. The senior architect reconfigures the link as a `/30` (`255.255.255.252`, 2 usable hosts), reclaiming 252 wasted IP addresses for enterprise servers.',
-        engineeringContext: 'Subnet sizing discipline prevents IPv4 address exhaustion.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Performs bitwise AND with destination IP; if Network IDs match, delivers locally via ARP; if different, routes to default gateway.',
-        nicBehavior: 'Operates transparently at Layer 2.',
-        switchOrRouterBehavior: 'Routers perform Longest Prefix Match (LPM) on routing table CIDR prefixes to forward packets.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'ipconfig /all',
-          description: 'Displays active IPv4 address, subnet mask, default gateway, and DHCP lease data on Windows.',
-          expectedOutput: 'IPv4 Address. . . . . : 192.168.10.75\nSubnet Mask . . . . . : 255.255.255.224\nDefault Gateway . . . : 192.168.10.65',
-          proofExplanation: 'Proves host IPv4 address and /27 subnet mask assignment.',
+          id: 1,
+          prompt: 'Given the subnet mask 255.255.255.0, identify the equivalent CIDR prefix length (e.g., /24).',
+          expected: '/24',
+          hints: 'Count the contiguous network 1-bits: 8 + 8 + 8 + 0 = 24 bits, written as /24.',
+        },
+        {
+          id: 2,
+          prompt: 'What is the dotted-decimal subnet mask corresponding to CIDR prefix /26?',
+          expected: '255.255.255.192',
+          hints:
+            'A /26 prefix has 24 network bits in the first 3 octets (255.255.255) plus 2 network bits in the 4th octet (128 + 64 = 192).',
+        },
+        {
+          id: 3,
+          prompt: 'For CIDR prefix /28, how many host bits remain in the 32-bit IPv4 address?',
+          expected: '4',
+          hints: 'Subtract the prefix length from 32 total bits: 32 - 28 = 4 host bits.',
+        },
+        {
+          id: 4,
+          prompt: 'For host IP 192.168.1.130/25 (block size 128), what is the Network Address?',
+          expected: '192.168.1.128',
+          hints:
+            'A /25 prefix creates blocks of 128 (.0 and .128). IP .130 falls into the second block starting at 192.168.1.128.',
+        },
+        {
+          id: 5,
+          prompt: 'For the subnet 10.0.0.0/28 (block size 16), what is the Broadcast Address?',
+          expected: '10.0.0.15',
+          hints:
+            'The block spans 10.0.0.0 through 10.0.0.15. The broadcast address has all host bits set to 1, which is the last address: 10.0.0.15.',
+        },
+        {
+          id: 6,
+          prompt:
+            'How many assignable (usable) host IP addresses are available in a standard /27 subnet?',
+          expected: '30',
+          hints:
+            'A /27 prefix leaves 32 - 27 = 5 host bits. Total addresses = 2^5 = 32. Subtract 2 for Network and Broadcast IDs = 30 usable hosts.',
         },
       ],
-      step13_troubleshooting: [
+      commonMistakes: [
         {
-          symptom: 'Host cannot communicate with server on same physical switch; ping reports "Destination Host Unreachable".',
-          possibleCauses: ['Mismatched subnet mask assigned to host (e.g. /24 vs /27) putting hosts in different logical subnets'],
-          diagnosticSteps: ['Verify IP and mask on both hosts with ipconfig.'],
-          remediation: 'Correct the subnet mask so both hosts share the same Network ID.',
+          misconception: 'Assuming subnet boundaries can start on any arbitrary number.',
+          correction:
+            'Subnet blocks must always align to mathematical multiples of the block size (powers of 2: 0, 64, 128, 192, etc.).',
+        },
+        {
+          misconception:
+            'Assigning the Network Address or Broadcast Address to a host computer or server interface.',
+          correction:
+            'The Network Address (all host bits 0) and Broadcast Address (all host bits 1) are reserved by the IP architecture and cannot be assigned to any individual endpoint.',
+        },
+        {
+          misconception: 'Believing that larger CIDR prefix numbers mean more host addresses.',
+          correction:
+            'The CIDR prefix counts network bits. A larger prefix number means more network bits and fewer remaining host bits (e.g., /28 has only 14 usable hosts, while /24 has 254).',
         },
       ],
-      step14_commonMistakes: [
-        { misconception: 'Assigning the Network ID or Broadcast ID to a computer NIC.', correction: 'The Network ID and Broadcast ID are reserved and cannot be assigned to any endpoint.' },
+      recap: [
+        'An IPv4 address is a 32-bit binary number represented in dotted-decimal notation as 4 octets (0–255).',
+        'A Subnet Mask divides the 32 bits into a Network portion (identifying the subnet) and a Host portion (identifying the device).',
+        'CIDR prefix notation (/N) specifies the exact count of leading network 1-bits (e.g., /24 = 255.255.255.0).',
+        'Total addresses per subnet equal 2^(host bits). In standard subnets (H >= 2), subtracting the Network ID and Broadcast ID leaves 2^H - 2 usable host addresses.',
+        'Changing prefix length shifts the boundary: increasing prefix length creates more subnets with fewer hosts each, while decreasing prefix length creates larger broadcast domains.',
+        'Special prefix cases include /30 (2 usable hosts for point-to-point links), /31 (RFC 3021 2-endpoint links), and /32 (1 single host route).',
       ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Directed Broadcast Smurf DDoS Amplification',
-        mitigationStrategy: 'Disable `ip directed-broadcast` on all router interfaces to prevent ICMP echo amplification attacks.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'CIDR Prefixes: /24 (254 hosts), /25 (126 hosts), /26 (62 hosts), /27 (30 hosts), /28 (14 hosts), /29 (6 hosts), /30 (2 hosts).',
-          'Usable hosts formula: $2^H - 2$.',
-          'Block Size = $256 - \\text{Mask Octet}$.',
-        ],
-        frequentTraps: [
-          'Forgetting to subtract 2 for Network ID and Broadcast ID.',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Enterprise IPv4 CIDR Subnetting & Host Allocation',
-        scenario: 'Calculate subnet masks, network IDs, broadcast IDs, and usable host ranges.',
-        tasks: ['Calculate Network ID and Broadcast ID for 192.168.10.75/27.'],
-        verificationMethod: 'Verify matching network ID 192.168.10.64 and broadcast 192.168.10.95.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'IPv4 is 32 bits divided into Network and Host portions by a Subnet Mask.',
-          'CIDR /N notation specifies network bit count.',
-          'Usable hosts = $2^H - 2$; Block Size = $256 - \\text{Mask Value}$.',
-        ],
-        nextLessonBridge:
-          'Proceed to NET-202 Lesson 2 to explore Special-Use IPv4 Ranges (RFC 1918, Loopback, APIPA, CGNAT).',
-      },
     },
     questions: [
       {
-        text: 'Given the IPv4 host address `192.168.10.75/27`, what is the correct Network ID and Broadcast ID for this subnet?',
+        text: 'An IPv4 address is composed of how many total bits, and how are these bits partitioned?',
         options: [
-          'Network ID: 192.168.10.64 | Broadcast ID: 192.168.10.95',
-          'Network ID: 192.168.10.0 | Broadcast ID: 192.168.10.255',
-          'Network ID: 192.168.10.32 | Broadcast ID: 192.168.10.63',
-          'Network ID: 192.168.10.70 | Broadcast ID: 192.168.10.80',
+          '32 bits, divided into a Network portion (identifying the subnet) and a Host portion (identifying the specific device)',
+          '48 bits, divided into an Organizationally Unique Identifier (OUI) and a Device serial',
+          '128 bits, divided into eight 16-bit hexadecimal blocks',
+          '64 bits, divided into four 16-bit binary words',
         ],
         correctOption: 0,
-        explanation: 'A /27 mask has 5 host bits ($2^5 = 32$ block size). Multiples are 0, 32, 64, 96. The IP .75 falls in the 64 block. Network ID is 192.168.10.64 and Broadcast ID is 192.168.10.95.',
-        explanationsJson: { 1: 'That is for a /24 subnet.', 2: 'That is the previous subnet (32-63).', 3: 'Invalid boundaries.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'An IPv4 address is a 32-bit binary number represented as four 8-bit octets. A subnet mask divides these 32 bits into a Network portion (identifying the subnet) and a Host portion (identifying the specific device on that subnet).',
+        explanationsJson: {
+          1: '48 bits describes an Ethernet MAC address.',
+          2: '128 bits describes an IPv6 address.',
+          3: '64 bits is not a standard IP addressing architecture.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: '32-Bit IPv4 Architecture',
+      },
+      {
+        text: 'What is the primary architectural purpose of a subnet mask in IPv4 addressing?',
+        options: [
+          'To define the exact boundary between Network bits (binary 1s) and Host bits (binary 0s)',
+          'To encrypt IP packets before transmission across physical network media',
+          'To uniquely identify the physical MAC address of the network interface card',
+          'To determine the domain name associated with a logical IP endpoint',
+        ],
+        correctOption: 0,
+        explanation:
+          'A subnet mask is a 32-bit sequence of contiguous 1s followed by contiguous 0s. The 1s indicate the network bits, and the 0s indicate the host bits. In CIDR notation, the prefix length /N represents the count of network 1s.',
+        explanationsJson: {
+          1: 'Subnet masks do not perform cryptographic encryption.',
+          2: 'MAC addresses are physical Layer 2 identifiers, not subnet masks.',
+          3: 'Domain name resolution is handled by DNS, not subnet masks.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Subnet Mask Role',
+      },
+      {
+        text: 'In a standard `/26` subnet, what are the total number of IP addresses and the number of assignable (usable) host addresses?',
+        options: [
+          '64 total addresses, and 62 usable host addresses',
+          '32 total addresses, and 30 usable host addresses',
+          '64 total addresses, and 64 usable host addresses',
+          '128 total addresses, and 126 usable host addresses',
+        ],
+        correctOption: 0,
+        explanation:
+          'A /26 prefix leaves 32 - 26 = 6 host bits. Total addresses = 2^6 = 64. In standard subnets, subtracting the Network Address (all 0s) and Broadcast Address (all 1s) leaves 64 - 2 = 62 usable host addresses.',
+        explanationsJson: {
+          1: '32 total / 30 usable corresponds to a /27 prefix (5 host bits).',
+          2: '64 usable is incorrect because the Network and Broadcast addresses cannot be assigned to hosts.',
+          3: '128 total / 126 usable corresponds to a /25 prefix (7 host bits).',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.APPLICATION,
         questionType: QuestionType.MULTIPLE_CHOICE,
-        concept: 'CIDR Subnet Calculation',
+        concept: 'Host Capacity Formula',
+      },
+      {
+        text: 'Given the host IP address `192.168.10.75/26`, what are the Network Address and Broadcast Address for this subnet?',
+        options: [
+          'Network Address: 192.168.10.64 | Broadcast Address: 192.168.10.127',
+          'Network Address: 192.168.10.0 | Broadcast Address: 192.168.10.63',
+          'Network Address: 192.168.10.64 | Broadcast Address: 192.168.10.255',
+          'Network Address: 192.168.10.75 | Broadcast Address: 192.168.10.128',
+        ],
+        correctOption: 0,
+        explanation:
+          'A /26 prefix has a block size of 2^6 = 64 in the 4th octet (blocks start at .0, .64, .128, .192). IP 192.168.10.75 falls in the second block (.64 to .127). The Network Address is 192.168.10.64 and the Broadcast Address is 192.168.10.127.',
+        explanationsJson: {
+          1: '192.168.10.0/26 covers IPs .0 to .63; IP .75 is outside this range.',
+          2: '.255 is the broadcast of the fourth block (192.168.10.192/26), not the second block.',
+          3: '192.168.10.75 is a host IP, not a valid network boundary.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Subnet Boundary Calculation',
+      },
+      {
+        text: 'If a network administrator changes a subnet prefix from `/24` to `/26`, what happens to the number of network bits and host capacity per subnet?',
+        options: [
+          'Network bits increase by 2, dividing the address space into 4 smaller subnets with 62 usable hosts each instead of 254',
+          'Host bits increase by 2, doubling the available host capacity per subnet',
+          'Network bits decrease by 2, merging smaller subnets into one larger broadcast domain',
+          'The total number of available host addresses per subnet increases from 254 to 510',
+        ],
+        correctOption: 0,
+        explanation:
+          'Moving from /24 (24 network bits, 8 host bits, 254 hosts) to /26 (26 network bits, 6 host bits) borrows 2 bits from the host portion. This creates 2^2 = 4 subnets, with each subnet accommodating 2^6 - 2 = 62 usable hosts.',
+        explanationsJson: {
+          1: 'Host bits decrease from 8 to 6, reducing host capacity per subnet.',
+          2: 'Network bits increased from 24 to 26; they did not decrease.',
+          3: 'Host capacity decreases when prefix length increases.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Prefix Shift Dynamics',
+      },
+      {
+        text: 'Why does a standard `/30` prefix provide exactly 2 usable host IP addresses, and how do point-to-point links treat host bit reservations?',
+        options: [
+          'A /30 has 2 host bits (2^2 = 4 total addresses), reserving 1 for the Network Address and 1 for the Broadcast Address, leaving 2 usable addresses',
+          'A /30 has 30 host bits, providing over 1 billion usable host addresses',
+          'A /30 reserves all 4 addresses for routing protocol discovery',
+          'A /30 has only 1 host bit (2^1 = 2 total addresses), allowing zero usable host endpoints',
+        ],
+        correctOption: 0,
+        explanation:
+          'With a /30 prefix, there are 32 - 30 = 2 host bits (2^2 = 4 total addresses). In standard IPv4 subnetting, subtracting the Network Address (all 0s) and Broadcast Address (all 1s) leaves 4 - 2 = 2 usable host addresses, making /30 ideal for point-to-point router links (note: RFC 3021 defines /31 for point-to-point links without broadcast, utilizing both addresses).',
+        explanationsJson: {
+          1: 'A /30 has 30 network bits and only 2 host bits.',
+          2: 'Addresses in a /30 are not reserved for routing protocols; 2 are usable for host endpoints.',
+          3: 'A /30 has 2 host bits (4 total addresses), not 1 host bit.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Point-to-Point & Edge Subnetting',
       },
     ],
-    lab: {
-      title: 'Guided Practice: Enterprise IPv4 CIDR Subnetting & Host Allocation',
-      instructions: '1. Calculate subnet boundaries for 192.168.10.75/27.\n2. Verify with ipconfig.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 20,
-      initialTopologyJson: { ip: '192.168.10.75', cidr: '/27' },
-      tasks: ['Calculate Network ID and Broadcast ID.'],
-    },
   },
-
   // -------------------------------------------------------------------------
   // 4. NET-202: Special-Use IPv4 Ranges & Enterprise Allocation
   // -------------------------------------------------------------------------
