@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { getTroubleshootingScenariosApi } from '@/lib/api';
+import { CollaborativeWarRoom } from '@/components/simulation/CollaborativeWarRoom';
 import {
   ShieldAlert,
   Terminal,
@@ -19,9 +20,12 @@ import {
   Wrench,
   Activity,
   AlertTriangle,
+  Flame,
+  Users,
 } from 'lucide-react';
 
 export default function TroubleshootingCatalogPage() {
+  const [activeTab, setActiveTab] = useState<'catalog' | 'war_room'>('catalog');
   const [scenarios, setScenarios] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -122,8 +126,41 @@ export default function TroubleshootingCatalogPage() {
                 </div>
               </div>
 
-              {/* Filters & Search Controls */}
-              <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
+              {/* View Switcher Tabs */}
+              <div className="flex bg-[#121217] p-1 rounded-2xl border border-[#272732] gap-1 self-start">
+                <button
+                  onClick={() => setActiveTab('catalog')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 ${
+                    activeTab === 'catalog'
+                      ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Wrench className="w-3.5 h-3.5" />
+                  <span>Diagnostic Scenarios ({scenarios.length})</span>
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('war_room')}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 ${
+                    activeTab === 'war_room'
+                      ? 'bg-rose-500 text-white shadow-glow-rose'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Flame className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Multiplayer Incident War-Room</span>
+                  <span className="px-1.5 py-0.2 rounded bg-rose-950 text-[10px] font-bold text-rose-300">LIVE</span>
+                </button>
+              </div>
+
+              {/* Tab 1: War Room Mode */}
+              {activeTab === 'war_room' ? (
+                <CollaborativeWarRoom />
+              ) : (
+                <>
+                  {/* Filters & Search Controls */}
+                  <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between">
                 {/* Search input */}
                 <div className="relative flex-1 max-w-md">
                   <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -262,8 +299,10 @@ export default function TroubleshootingCatalogPage() {
                   ))}
                 </div>
               )}
-            </div>
-          </main>
+            </>
+          )}
+        </div>
+      </main>
         </div>
       </div>
     </ProtectedRoute>
