@@ -897,47 +897,63 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'SPECIAL_IP_INSPECTOR',
     introduction:
       'Master the dedicated, non-globally routable IPv4 address blocks: RFC 1918 Private Ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16), Loopback (127.0.0.0/8), Automatic Private IP Addressing (APIPA 169.254.0.0/16), and Carrier-Grade NAT (CGNAT 100.64.0.0/10).',
-    stepMetadata: {
-      step1_objective:
+    contentV2: {
+      objective:
         'Identify all RFC-defined special-use IPv4 address blocks, understand why private addresses cannot be routed across the public Internet without NAT, and diagnose APIPA configuration failures.',
-      step2_prerequisites: ['net-202-ipv4-addressing-cidr'],
-      step3_whyItMatters:
+      prerequisites: ['net-202-ipv4-addressing-cidr'],
+      whyItMatters:
         'Accidentally routing private IPs across the Internet causes packet drops at ISP edge filters, while encountering an APIPA address immediately indicates DHCP service failure.',
-      step4_coreConcept:
-        'The IANA and IETF reserved specific IPv4 address blocks for specialized functions: (1) RFC 1918 Private Addresses (`10.0.0.0/8`, `172.16.0.0/12` [172.16.0.0–172.31.255.255], `192.168.0.0/16`) for private enterprise LANs, dropped by public Internet routers; (2) Loopback (`127.0.0.0/8`, e.g. `127.0.0.1`) for internal host inter-process communication without generating wire traffic; (3) APIPA (`169.254.0.0/16`, RFC 3927) self-assigned by OS when DHCP fails; (4) CGNAT (`100.64.0.0/10`, RFC 6598) used by ISPs for shared WAN NAT; and (5) Multicast (`224.0.0.0/4`).',
-      step5_technicalAnatomy: {
-        title: 'Special-Use IPv4 Blocks & Allocation Rules',
-        description: 'RFC definitions, prefix lengths, and operational scope.',
-        components: [
-          { name: 'RFC 1918 Class A Private Block', detail: '`10.0.0.0/8` (10.0.0.0 – 10.255.255.255, 16,777,216 addresses). Used for large enterprise LANs.' },
-          { name: 'RFC 1918 Class B Private Block', detail: '`172.16.0.0/12` (172.16.0.0 – 172.31.255.255, 1,048,576 addresses spanning 16 contiguous /16 blocks).' },
-          { name: 'RFC 1918 Class C Private Block', detail: '`192.168.0.0/16` (192.168.0.0 – 192.255.255.255, 65,536 addresses spanning 256 /24 blocks).' },
-          { name: 'Loopback Block (RFC 1122)', detail: '`127.0.0.0/8` (127.0.0.1). Processed entirely within the local OS TCP/IP stack without hitting physical media.' },
-          { name: 'APIPA Link-Local (RFC 3927)', detail: '`169.254.0.0/16` (169.254.0.1 – 169.254.255.254). Self-assigned when DHCP fails.' },
-          { name: 'Carrier-Grade NAT / CGNAT (RFC 6598)', detail: '`100.64.0.0/10` (100.64.0.0 – 100.127.255.255). ISP WAN aggregation space.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Private vs Public Routing', action: 'Internal hosts communicate using RFC 1918 IPs; edge router performs NAT before sending onto public Internet.' },
-          { stepNumber: 2, title: 'Loopback Testing', action: 'Pinging `127.0.0.1` tests internal host TCP/IP protocol stack functionality.' },
-          { stepNumber: 3, title: 'APIPA Fallback Trigger', action: 'If DHCP Discover times out after 4 attempts, OS generates a pseudo-random `169.254.x.x` address.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'Special IPv4 Prefixes & Allocation Scopes',
-        fields: [
-          { fieldName: 'RFC 1918 Private', bitLength: '10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16', hexSample: 'Non-Routable on Internet', description: 'Internal LAN addressing.' },
-          { fieldName: 'Loopback Address', bitLength: '127.0.0.1/8', hexSample: 'Internal Stack Only', description: 'Local inter-process communication.' },
-          { fieldName: 'APIPA Address', bitLength: '169.254.0.0/16', hexSample: 'DHCP Failure Indicator', description: 'Link-local unconfigured state.' },
-        ],
-      },
-      step8_visualExplanation: {
+      explanation:
+        'The IANA and IETF reserved specific IPv4 address blocks for specialized functions:\n\n### 1. RFC 1918 Private Address Blocks\n* **Class A Private**: `10.0.0.0/8` (`10.0.0.0` to `10.255.255.255`, 16,777,216 addresses). Used for large enterprise LANs and datacenters.\n* **Class B Private**: `172.16.0.0/12` (`172.16.0.0` to `172.31.255.255`, 1,048,576 addresses spanning 16 contiguous /16 blocks).\n* **Class C Private**: `192.168.0.0/16` (`192.168.0.0` to `192.168.255.255`, 65,536 addresses spanning 256 /24 blocks). Standard for home and small business routers.\n\n### 2. Specialized Host & Infrastructure Blocks\n* **Loopback Block (RFC 1122)**: `127.0.0.0/8` (typically `127.0.0.1`). Packets destined to 127.x.x.x never leave the host OS kernel and test TCP/IP stack integrity.\n* **APIPA Link-Local (RFC 3927)**: `169.254.0.0/16` (`169.254.0.1` to `169.254.255.254`). Automatically self-assigned by Windows/macOS when a DHCP server fails to respond.\n* **Carrier-Grade NAT / CGNAT (RFC 6598)**: `100.64.0.0/10` (`100.64.0.0` to `100.127.255.255`). Used internally by ISPs to multiplex public IPv4 addresses across thousands of broadband subscribers.',
+      components: [
+        {
+          name: 'RFC 1918 Class A (10.0.0.0/8)',
+          detail: '10.0.0.0 – 10.255.255.255 (16.7M addresses). Enterprise campus networks.',
+        },
+        {
+          name: 'RFC 1918 Class B (172.16.0.0/12)',
+          detail: '172.16.0.0 – 172.31.255.255 (1M addresses across 16 contiguous /16s).',
+        },
+        {
+          name: 'RFC 1918 Class C (192.168.0.0/16)',
+          detail: '192.168.0.0 – 192.168.255.255 (65k addresses across 256 /24s).',
+        },
+        {
+          name: 'Loopback (127.0.0.0/8)',
+          detail: '127.0.0.1. Node-local software testing; never transmitted onto physical wire.',
+        },
+        {
+          name: 'APIPA Link-Local (169.254.0.0/16)',
+          detail: 'Auto-assigned upon DHCP discovery failure; isolated to local broadcast domain.',
+        },
+        {
+          name: 'Carrier-Grade NAT (100.64.0.0/10)',
+          detail: 'RFC 6598 ISP shared address space for subscriber WAN aggregation.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Private vs Public Routing',
+          action: 'Internal hosts communicate using RFC 1918 IPs; edge router performs NAT before sending onto public Internet.',
+        },
+        {
+          stepNumber: 2,
+          title: 'Loopback Testing',
+          action: 'Pinging `127.0.0.1` tests internal host TCP/IP protocol stack functionality.',
+        },
+        {
+          stepNumber: 3,
+          title: 'APIPA Fallback Trigger',
+          action: 'If DHCP Discover times out after 4 attempts, OS generates a pseudo-random `169.254.x.x` address.',
+        },
+      ],
+      visualizer: {
         type: 'SPECIAL_IP_INSPECTOR',
         title: 'Special-Use IPv4 Range Classifier & Address Inspector',
         description: 'Input any IPv4 address to determine its special RFC classification, routability status, and intended enterprise use case.',
       },
-      step9_workedExample: {
+      workedExample: {
         title: 'Classifying Addresses & Diagnosing an APIPA Host Failure',
         problemStatement: 'Classify: (1) `172.25.10.5`, (2) `169.254.120.45`, (3) `100.70.1.1`, (4) `127.0.0.1`.',
         stepByStepSolution: [
@@ -948,64 +964,51 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
         ],
         finalResult: '1: RFC 1918 Private; 2: APIPA (DHCP failed); 3: CGNAT; 4: Loopback.',
       },
-      step10_realWorldScenario: {
-        topology: 'Office Helpdesk Troubleshooting APIPA Address',
-        scenarioText: 'User cannot access internal servers or internet. Running `ipconfig` reveals IP `169.254.88.12`. The technician immediately recognizes APIPA, traces the patch cable to a disconnected switchport, plugs it in, and the user receives a valid `192.168.1.50` DHCP lease.',
-        engineeringContext: 'An APIPA address (169.254.x.x) is the universal indicator of DHCP failure.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Assigns 169.254.x.x if DHCP fails; never sends 127.x.x.x onto physical wire.',
-        nicBehavior: 'Operates in unconfigured link-local state during APIPA.',
-        switchOrRouterBehavior: 'ISP border routers drop RFC 1918 and APIPA packets at edge interfaces.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'ping 127.0.0.1',
-          description: 'Pings the local host loopback address to verify TCP/IP protocol stack integrity.',
-          expectedOutput: 'Reply from 127.0.0.1: bytes=32 time<1ms TTL=128\nPackets: Sent = 4, Received = 4, Lost = 0 (0% loss)',
-          proofExplanation: 'Proves local host TCP/IP stack software is operating properly.',
+          id: 1,
+          prompt: 'What are the three official RFC 1918 Private IPv4 address blocks and their CIDR prefixes?',
+          expected: '10.0.0.0/8, 172.16.0.0/12 (172.16 to 172.31), and 192.168.0.0/16 (192.168.0 to 192.168.255).',
+          hints: '10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16.',
+        },
+        {
+          id: 2,
+          prompt: 'What is the designated purpose and address block for IPv4 Loopback?',
+          expected: '127.0.0.0/8 (e.g. 127.0.0.1), used for local host TCP/IP stack self-testing and inter-process communication.',
+          hints: '127.0.0.1 tests local protocol stack.',
+        },
+        {
+          id: 3,
+          prompt: 'What does an IP address in the 169.254.0.0/16 range indicate when observed on an endpoint interface?',
+          expected: 'Automatic Private IP Addressing (APIPA) fallback caused by a failure to contact a DHCP server.',
+          hints: '169.254.x.x indicates DHCP failure.',
+        },
+        {
+          id: 4,
+          prompt: 'Is 172.32.10.1 a private RFC 1918 address or a public routable address?',
+          expected: 'Public routable address; RFC 1918 Class B space stops at 172.31.255.255.',
+          hints: '172.16.0.0/12 ends at 172.31.255.255.',
+        },
+        {
+          id: 5,
+          prompt: 'What is the purpose of the 100.64.0.0/10 address block defined in RFC 6598?',
+          expected: 'Carrier-Grade NAT (CGNAT) space used internally by ISPs between subscriber routers and core NAT gateways.',
+          hints: 'CGNAT space for ISPs.',
+        },
+        {
+          id: 6,
+          prompt: 'Why do Internet backbone routers drop packets with destination addresses in RFC 1918 ranges?',
+          expected: 'Because RFC 1918 private addresses are non-globally routable and intended solely for internal isolated networks.',
+          hints: 'Private IPs cannot be routed globally without NAT.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Host displays "No Internet Access" and ipconfig reports 169.254.x.x.',
-          possibleCauses: ['DHCP server offline, VLAN misconfiguration, or DHCP scope exhausted'],
-          diagnosticSteps: ['Check physical link light and DHCP server availability.'],
-          remediation: 'Restore DHCP server service or expand DHCP address pool scope.',
-        },
+      recap: [
+        'RFC 1918 defines 3 private ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16) for internal enterprise networks.',
+        'Loopback (127.0.0.0/8) enables local host self-testing without network transmission.',
+        'APIPA (169.254.0.0/16) self-configures upon DHCP failure for local link communication.',
+        'CGNAT (100.64.0.0/10) enables ISP-level address sharing and WAN aggregation.',
+        'Private addresses require Network Address Translation (NAT) to access public Internet destinations.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Thinking 172.32.0.1 is a private IP address.', correction: 'RFC 1918 Class B stops at 172.31.255.255. 172.32.0.0/16 is a public routable address.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'RFC 1918 IP Leaks across Internet Routers',
-        mitigationStrategy: 'Apply BCP 38 ingress/egress filtering on edge firewalls to block all RFC 1918/APIPA packets.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'RFC 1918 Private: 10.0.0.0/8, 172.16.0.0/12 (172.16-172.31), 192.168.0.0/16.',
-          'Loopback = 127.0.0.0/8 (127.0.0.1).',
-          'APIPA = 169.254.0.0/16.',
-          'CGNAT = 100.64.0.0/10.',
-        ],
-        frequentTraps: [
-          'Assuming 172.35.0.1 is private (it is public; private ends at 172.31.255.255).',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Special IPv4 Range Classification & Loopback Verification',
-        scenario: 'Verify loopback operation and identify RFC 1918 vs APIPA ranges.',
-        tasks: ['Ping 127.0.0.1 and verify TCP/IP stack health.', 'Classify sample enterprise IP addresses.'],
-        verificationMethod: 'Confirm successful ping reply from 127.0.0.1.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'RFC 1918 defines 3 private ranges (10/8, 172.16/12, 192.168/16) for non-routable internal LANs.',
-          'Loopback (127/8) tests internal OS stack; APIPA (169.254/16) indicates DHCP failure.',
-        ],
-        nextLessonBridge:
-          'Proceed to NET-202 Lesson 3 for the History of Classful IPv4 Addressing and the Transition to CIDR.',
-      },
     },
     questions: [
       {
@@ -1017,27 +1020,125 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
           '192.168.0.0/24, 192.168.1.0/24, and 192.168.2.0/24 only',
         ],
         correctOption: 0,
-        explanation: 'RFC 1918 specifies three private address blocks: 10.0.0.0/8 (Class A), 172.16.0.0/12 (Class B, spanning 172.16 to 172.31), and 192.168.0.0/16 (Class C, spanning 192.168.0 to 192.168.255).',
-        explanationsJson: { 1: 'Those are Loopback, APIPA, and Multicast.', 2: 'Those are public routable blocks.', 3: '192.168.0.0/16 encompasses all 256 /24 subnets.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'RFC 1918 specifies three private address blocks: 10.0.0.0/8 (Class A), 172.16.0.0/12 (Class B, spanning 172.16 to 172.31), and 192.168.0.0/16 (Class C, spanning 192.168.0 to 192.168.255).',
+        explanationsJson: {
+          1: 'Those are Loopback, APIPA, and Multicast.',
+          2: 'Those are public routable blocks.',
+          3: '192.168.0.0/16 encompasses all 256 /24 subnets.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.RECALL,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'RFC 1918 Private Address Ranges',
       },
+      {
+        text: 'What is the operational behavior of packets transmitted to IP address `127.0.0.1` on a host operating system?',
+        options: [
+          'The packets are processed entirely within the local host TCP/IP stack in kernel memory and are never transmitted onto the physical network wire',
+          'The packets are broadcast to all devices on the local Ethernet switch',
+          'The packets are routed to the nearest ISP default gateway',
+          'The packets are discarded as malformed runt frames',
+        ],
+        correctOption: 0,
+        explanation:
+          'The `127.0.0.0/8` block is reserved for loopback. Traffic sent to 127.0.0.1 loops back internally inside the host OS network stack, verifying software protocol stack integrity without hitting network hardware.',
+        explanationsJson: {
+          1: 'Loopback traffic is never broadcast onto physical links.',
+          2: 'Loopback traffic does not leave the local computer.',
+          3: 'Loopback packets are fully valid transport messages processed internally.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'IPv4 Loopback Architecture (127.0.0.1)',
+      },
+      {
+        text: 'A systems administrator discovers that an internal server has been assigned IP `172.32.1.100`. Why is this address configuration problematic for an internal private network?',
+        options: [
+          '172.32.1.100 is a globally routable public IP owned by an external organization (RFC 1918 Class B space stops at 172.31.255.255), creating IP conflicts when accessing legitimate Internet services on that range',
+          '172.32.1.100 is a reserved multicast address',
+          '172.32.1.100 cannot be represented in binary notation',
+          '172.32.1.100 forces all network switches into half-duplex mode',
+        ],
+        correctOption: 0,
+        explanation:
+          'RFC 1918 Class B private address space spans strictly from `172.16.0.0` to `172.31.255.255` (/12). `172.32.0.0` and above are public routable addresses.',
+        explanationsJson: {
+          1: 'Multicast uses 224.0.0.0/4 (Class D).',
+          2: 'All 32-bit IPv4 addresses have standard binary representations.',
+          3: 'Duplex mode is a Layer 1/2 physical link setting, unrelated to IP addressing.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'RFC 1918 Class B Boundaries',
+      },
+      {
+        text: 'What does an IPv4 address of `169.254.100.50` with subnet mask `255.255.0.0` signify when observed on a newly booted client workstation?',
+        options: [
+          'Automatic Private IP Addressing (APIPA) self-assignment occurred because the client failed to receive a response from a local DHCP server',
+          'The workstation successfully leased a high-priority enterprise IP address',
+          'The default gateway router assigned a dynamic cloud route',
+          'The workstation has been infected by a boot-sector rootkit',
+        ],
+        correctOption: 0,
+        explanation:
+          'The `169.254.0.0/16` prefix is reserved by RFC 3927 for APIPA link-local addressing. When DHCP Discover broadcasts go unanswered, the client self-assigns an address in this block.',
+        explanationsJson: {
+          1: 'APIPA is not an enterprise server lease; it indicates DHCP failure.',
+          2: 'Routers do not assign APIPA addresses.',
+          3: 'APIPA is a standard operating system network recovery mechanism, not malware.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'APIPA Link-Local Diagnosis',
+      },
+      {
+        text: 'Which RFC 6598 address block is specifically reserved for Carrier-Grade NAT (CGNAT) deployed by ISPs?',
+        options: [
+          '100.64.0.0/10 (100.64.0.0 – 100.127.255.255)',
+          '192.168.0.0/16',
+          '10.0.0.0/8',
+          '240.0.0.0/4',
+        ],
+        correctOption: 0,
+        explanation:
+          'RFC 6598 defines `100.64.0.0/10` for Carrier-Grade NAT (CGNAT), providing service providers with a shared address space between subscriber premises equipment and edge NAT routers.',
+        explanationsJson: {
+          1: '192.168.0.0/16 is RFC 1918 private customer space.',
+          2: '10.0.0.0/8 is RFC 1918 private enterprise space.',
+          3: '240.0.0.0/4 is Class E experimental space.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Carrier-Grade NAT (RFC 6598)',
+      },
+      {
+        text: 'A network administrator notices that packets originating from `192.168.1.50` reach the local default gateway router, but cannot reach external web servers on the Internet. What router service is missing?',
+        options: [
+          'Network Address Translation (NAT) / Port Address Translation (PAT) to translate private RFC 1918 IPs into a routable public IP',
+          'A DNS cache flush command',
+          'An ARP broadcast disable command',
+          'A fiber optic cable transponder',
+        ],
+        correctOption: 0,
+        explanation:
+          'Because RFC 1918 private addresses cannot be routed across the public Internet, the boundary router must perform NAT/PAT to translate the internal private source IP into a registered public IP address.',
+        explanationsJson: {
+          1: 'Flushing DNS does not resolve Layer 3 routing for non-routable private addresses.',
+          2: 'Disabling ARP breaks local Layer 2 resolution.',
+          3: 'Physical transponders do not handle Layer 3 address translation.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'NAT/PAT Requirement for RFC 1918 Addresses',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Special IPv4 Range Classification & Loopback Verification',
-      instructions: '1. Run ping 127.0.0.1.\n2. Classify IP ranges.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { loopback: '127.0.0.1', apipa: '169.254.10.20' },
-      tasks: ['Run ping 127.0.0.1.'],
-    },
   },
-
-  // -------------------------------------------------------------------------
-  // 5. NET-202: Classful IPv4 History & The Architectural Necessity of CIDR
-  // -------------------------------------------------------------------------
   {
     courseCode: 'NET-202',
     slug: 'ip-addressing-ipv4-overview',
@@ -1048,46 +1149,64 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'CLASSFUL_CIDR_TIMELINE',
     introduction:
       'Explore the architectural evolution of the Internet: The 1981 Classful IPv4 system (Classes A, B, C, D, E), leading-bit rules, how rigid boundaries caused massive address waste (e.g. 65,534 hosts for Class B), the 1993 global routing table crisis, and the introduction of Classless Inter-Domain Routing (CIDR, RFC 1519).',
-    stepMetadata: {
-      step1_objective:
+    contentV2: {
+      objective:
         'Understand historical RFC 791 Classful Addressing (Classes A, B, C, D, E), analyze why classful boundaries led to severe address exhaustion, and understand how CIDR (RFC 1519) decoupled network prefixes from fixed byte boundaries.',
-      step2_prerequisites: ['net-202-ipv4-addressing-cidr', 'level-0-ip-addresses-logical-location'],
-      step3_whyItMatters:
+      prerequisites: ['net-202-ipv4-addressing-cidr', 'level-0-ip-addresses-logical-location'],
+      whyItMatters:
         'CIDR saved the Internet from complete address exhaustion and routing table collapse in the mid-1990s. Understanding this transition explains why prefix notation (/N) is universal today.',
-      step4_coreConcept:
-        'Under RFC 791 (1981), IPv4 was divided into 5 rigid classes determined by leading bits: Class A (Leading bit `0`, `1.0.0.0`–`126.255.255.255`, default `/8`, 16.7M hosts), Class B (Leading bits `10`, `128.0.0.0`–`191.255.255.255`, default `/16`, 65,534 hosts), Class C (Leading bits `110`, `192.0.0.0`–`223.255.255.255`, default `/24`, 254 hosts), Class D (Leading bits `1110`, `224.0.0.0`–`239.255.255.255`, Multicast), Class E (Leading bits `1111`, `240.0.0.0`–`255.255.255.255`, Experimental). An enterprise needing 350 IPs was forced to take a full Class B (/16 = 65,534 IPs), wasting 65,184 addresses (99.5% waste!). In 1993, IETF introduced CIDR (RFC 1519), abolishing fixed classes and allowing arbitrary prefix lengths (/N) and route aggregation (Supernetting).',
-      step5_technicalAnatomy: {
-        title: 'Classful Address Architecture & CIDR Decoupling',
-        description: 'Leading bits, default masks, host capacities, and CIDR supernetting.',
-        components: [
-          { name: 'Class A (1-126, Leading bit 0)', detail: 'Default mask `255.0.0.0` (/8). 126 networks with 16,777,214 hosts each. Massive address waste.' },
-          { name: 'Class B (128-191, Leading bits 10)', detail: 'Default mask `255.255.0.0` (/16). 16,384 networks with 65,534 hosts each. Exhausted rapidly in the early 1990s.' },
-          { name: 'Class C (192-223, Leading bits 110)', detail: 'Default mask `255.255.255.0` (/24). 2,097,152 networks with 254 hosts each. Often too small for medium enterprises.' },
-          { name: 'Class D (224-239) & Class E (240-255)', detail: 'Class D: Multicast groups (no subnet masks). Class E: Reserved experimental space.' },
-          { name: 'CIDR (RFC 1519 Decoupling)', detail: 'Decoupled network size from leading bits. Enables arbitrary prefixes (/20, /23, /27) and route summarization.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Classful Address Assessment', action: 'In 1990, an organization with 400 computers requested IP space; IANA had to grant an entire /16 Class B (65,534 IPs).' },
-          { stepNumber: 2, title: 'Address Waste Impact', action: '65,184 IPs sat completely unused and locked, accelerating global IPv4 depletion.' },
-          { stepNumber: 3, title: 'CIDR Prefix Allocation', action: 'Under CIDR (1993), IANA assigns a `/23` prefix (510 usable hosts), perfectly matching the 400-host requirement with 98% efficiency.' },
-          { stepNumber: 4, title: 'Route Aggregation (Supernetting)', action: 'ISPs aggregate multiple contiguous `/24` subnets into a single advertised `/20` prefix, shrinking global routing tables.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'Classful Boundaries vs CIDR Arbitrary Prefixes',
-        fields: [
-          { fieldName: 'Class B Default Mask', bitLength: '16 bits (/16)', hexSample: '255.255.0.0', description: 'Rigid byte boundary (65,534 hosts).' },
-          { fieldName: 'CIDR /23 Prefix', bitLength: '23 bits (/23)', hexSample: '255.255.254.0', description: 'Tailored boundary (510 hosts, 0 waste).' },
-        ],
-      },
-      step8_visualExplanation: {
+      explanation:
+        'Under RFC 791 (1981), IPv4 was divided into 5 rigid classes determined by leading bits:\n\n### 1. The 5 Historical Address Classes\n* **Class A (Leading bit `0`)**: `1.0.0.0` to `126.255.255.255`. Default `/8` mask (`255.0.0.0`). 126 total networks, each supporting **16,777,214 usable hosts**.\n* **Class B (Leading bits `10`)**: `128.0.0.0` to `191.255.255.255`. Default `/16` mask (`255.255.0.0`). 16,384 total networks, each supporting **65,534 usable hosts**.\n* **Class C (Leading bits `110`)**: `192.0.0.0` to `223.255.255.255`. Default `/24` mask (`255.255.255.0`). 2,097,152 total networks, each supporting **254 usable hosts**.\n* **Class D (Leading bits `1110`)**: `224.0.0.0` to `239.255.255.255`. Reserved for **Multicast** groups (no subnet masks or host fields).\n* **Class E (Leading bits `1111`)**: `240.0.0.0` to `255.255.255.255`. Reserved for **Experimental** and research use.\n\n### 2. The Classful Exhaustion Crisis\nAn enterprise needing 350 IP addresses found Class C (/24 = 254 hosts) too small. They were forced to request a Class B (/16 = 65,534 hosts), wasting 65,184 addresses (99.5% waste!). By 1992, Class B addresses were nearly exhausted and global routing tables were exploding with millions of unaggregated routes.\n\n### 3. CIDR Decoupling & Supernetting (RFC 1519)\nIn 1993, the IETF introduced **Classless Inter-Domain Routing (CIDR)**:\n1. **Abolished Fixed Classes**: Subnet prefix length `/N` is explicit and can be set to any arbitrary bit length (e.g. `/23` for 510 hosts, perfectly fitting 350 hosts with minimal waste).\n2. **Route Aggregation (Supernetting)**: ISPs aggregate dozens of contiguous smaller subnets into a single advertised route prefix (e.g. 16 contiguous `/24`s merged into one `/20`), reducing global BGP routing table size.',
+      components: [
+        {
+          name: 'Class A (1–126, Leading Bit 0)',
+          detail: 'Default /8 (255.0.0.0). 126 networks with 16.7M hosts each.',
+        },
+        {
+          name: 'Class B (128–191, Leading Bits 10)',
+          detail: 'Default /16 (255.255.0.0). 16,384 networks with 65,534 hosts each.',
+        },
+        {
+          name: 'Class C (192–223, Leading Bits 110)',
+          detail: 'Default /24 (255.255.255.0). 2.09M networks with 254 hosts each.',
+        },
+        {
+          name: 'Class D (224–239) & Class E (240–255)',
+          detail: 'Class D is Multicast; Class E is Experimental.',
+        },
+        {
+          name: 'CIDR Decoupling (RFC 1519)',
+          detail: 'Abolished rigid classes; enabled arbitrary /N prefix lengths and route aggregation.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Classful Address Assessment',
+          action: 'In 1990, an organization with 400 computers requested IP space; IANA had to grant an entire /16 Class B (65,534 IPs).',
+        },
+        {
+          stepNumber: 2,
+          title: 'Address Waste Impact',
+          action: '65,184 IPs sat completely unused and locked, accelerating global IPv4 depletion.',
+        },
+        {
+          stepNumber: 3,
+          title: 'CIDR Prefix Allocation',
+          action: 'Under CIDR (1993), IANA assigns a `/23` prefix (510 usable hosts), matching the 400-host requirement with 98% efficiency.',
+        },
+        {
+          stepNumber: 4,
+          title: 'Route Aggregation (Supernetting)',
+          action: 'ISPs aggregate multiple contiguous `/24` subnets into a single advertised `/20` prefix, shrinking global routing tables.',
+        },
+      ],
+      visualizer: {
         type: 'CLASSFUL_CIDR_TIMELINE',
         title: 'Interactive Classful IPv4 to CIDR Evolution Timeline',
         description: 'Inspect Class A, B, C leading bit allocations, observe address waste calculations, and trace how CIDR supernetting compressed the global routing table.',
       },
-      step9_workedExample: {
+      workedExample: {
         title: 'Calculating Address Waste: Classful Class B vs CIDR /23 for 350 Hosts',
         problemStatement: 'An enterprise needs 350 IP addresses. Calculate address waste under:\n1. 1981 Classful allocation rules.\n2. 1993 CIDR allocation rules.',
         stepByStepSolution: [
@@ -1098,62 +1217,51 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
         ],
         finalResult: 'Classful rules waste 65,184 addresses; CIDR reduces excess allocation to 160 addresses.',
       },
-      step10_realWorldScenario: {
-        topology: 'Global ISP Route Summarization via CIDR',
-        scenarioText: 'A regional ISP owns 16 contiguous /24 networks (198.51.100.0/24 through 198.51.115.0/24). Instead of advertising 16 separate routing table entries to the global Internet, the ISP advertises a single aggregated `/20` prefix (198.51.96.0/20), conserving global router memory.',
-        engineeringContext: 'CIDR supernetting prevents global BGP routing table explosion.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Modern operating systems are 100% classless; they require an explicit subnet mask for every IP configuration.',
-        nicBehavior: 'Operates transparently at Layer 2.',
-        switchOrRouterBehavior: 'Core BGP routers execute Longest Prefix Match (LPM) on classless prefixes.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'powershell -Command "Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress, PrefixLength"',
-          description: 'Displays active IPv4 addresses and their CIDR prefix lengths (/N) on Windows.',
-          expectedOutput: 'IPAddress     PrefixLength\n---------     ------------\n192.168.1.50            24',
-          proofExplanation: 'Demonstrates modern classless CIDR prefix length representation.',
+          id: 1,
+          prompt: 'What are the first octet numerical boundaries and default subnet masks for historical Classes A, B, and C?',
+          expected: 'Class A: 1–126 (/8); Class B: 128–191 (/16); Class C: 192–223 (/24).',
+          hints: 'Class A 1-126 (/8), Class B 128-191 (/16), Class C 192-223 (/24).',
+        },
+        {
+          id: 2,
+          prompt: 'Why is 127.0.0.0 excluded from Class A addressing?',
+          expected: '127.0.0.0/8 is reserved for host loopback testing (RFC 1122).',
+          hints: '127 is reserved for loopback.',
+        },
+        {
+          id: 3,
+          prompt: 'Why did Classful IPv4 allocation lead to massive address waste in the early 1990s?',
+          expected: 'Because fixed byte boundaries forced organizations needing more than 254 hosts to take a Class B (65,534 hosts), wasting thousands of addresses.',
+          hints: 'Organizations between 255 and 65,534 hosts had to take a full /16.',
+        },
+        {
+          id: 4,
+          prompt: 'What two major networking problems did CIDR (RFC 1519) solve in 1993?',
+          expected: 'Address exhaustion (by allowing custom /N prefix sizes) and global routing table explosion (via supernetting / route aggregation).',
+          hints: 'Custom prefix lengths and route aggregation.',
+        },
+        {
+          id: 5,
+          prompt: 'What are Class D and Class E address blocks reserved for?',
+          expected: 'Class D (224–239) is reserved for Multicast; Class E (240–255) is reserved for Experimental use.',
+          hints: 'D = Multicast, E = Experimental.',
+        },
+        {
+          id: 6,
+          prompt: 'What is Route Aggregation (Supernetting)?',
+          expected: 'Combining multiple contiguous smaller subnet routes into a single larger advertised prefix to reduce routing table size.',
+          hints: 'Merging multiple subnets into one routing entry.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Legacy routing protocol (RIPv1) summarizes subnets incorrectly at class boundaries.',
-          possibleCauses: ['Classful routing protocol in use that does not carry subnet masks in route updates'],
-          diagnosticSteps: ['Check routing protocol configuration.'],
-          remediation: 'Upgrade to classless routing protocols (OSPF, EIGRP, BGP) that support variable-length subnet masks.',
-        },
+      recap: [
+        'Classful addressing used rigid byte boundaries (Class A /8, Class B /16, Class C /24) leading to 99% address waste.',
+        'CIDR (RFC 1519, 1993) decoupled prefix masks from address values, enabling custom /N sizing.',
+        'Class D (224–239) is Multicast; Class E (240–255) is Experimental.',
+        'Supernetting aggregates multiple contiguous subnets into single BGP route advertisements.',
+        'Modern networking is entirely classless; every IP configuration requires an explicit prefix length.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Assuming 192.168.1.0 must always have a /24 subnet mask because it is "Class C".', correction: 'Under CIDR, any IP address can use any prefix length (e.g. 192.168.1.0/28 or 10.0.0.0/24). Fixed classes are obsolete.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'BGP Route Hijacking via More-Specific CIDR Prefixes',
-        mitigationStrategy: 'Deploy RPKI (Resource Public Key Infrastructure) Route Origin Authorization (ROA) to validate advertised CIDR prefixes.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'Class ranges: A (1-126, /8), B (128-191, /16), C (192-223, /24), D (224-239 Multicast), E (240-255 Experimental).',
-          'CIDR (RFC 1519, 1993) introduced arbitrary /N prefixes and route aggregation (Supernetting).',
-        ],
-        frequentTraps: [
-          'Calling 127.0.0.0 Class A (127 is reserved for loopback).',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Classful Address Waste Analysis & CIDR Supernetting',
-        scenario: 'Analyze address waste under classful rules vs CIDR prefix allocation.',
-        tasks: ['Calculate address waste for 350 hosts under Class B vs /23.'],
-        verificationMethod: 'Verify mathematical difference of 65,024 reclaimed addresses.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'Classful addressing used rigid byte boundaries (/8, /16, /24) leading to 99% address waste.',
-          'CIDR (RFC 1519) decoupled masks from address values, enabling custom /N sizing and supernetting.',
-        ],
-        nextLessonBridge:
-          'Proceed to NET-202 Lesson 4 to master Variable Length Subnet Masking (VLSM) Enterprise Design.',
-      },
     },
     questions: [
       {
@@ -1165,27 +1273,125 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
           'To enforce mandatory encryption on all web packets',
         ],
         correctOption: 0,
-        explanation: 'Classful addressing caused massive address waste (e.g. an enterprise needing 300 hosts had to take a full Class B with 65,534 addresses). CIDR enabled tailored prefix sizes (like /23 for 510 hosts) and route summarization.',
-        explanationsJson: { 1: '128-bit addresses were introduced by IPv6, not CIDR.', 2: 'Routers remain essential for forwarding CIDR prefixes.', 3: 'Encryption is handled by TLS/IPsec.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'Classful addressing caused massive address waste (e.g. an enterprise needing 300 hosts had to take a full Class B with 65,534 addresses). CIDR enabled tailored prefix sizes (like /23 for 510 hosts) and route summarization.',
+        explanationsJson: {
+          1: '128-bit addresses were introduced by IPv6, not CIDR.',
+          2: 'Routers remain essential for forwarding CIDR prefixes.',
+          3: 'Encryption is handled by TLS/IPsec.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.UNDERSTANDING,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'CIDR Architectural Purpose',
       },
+      {
+        text: 'What are the first octet numerical ranges and default classful subnet masks for historical Classes A, B, and C?',
+        options: [
+          'Class A = 1–126 (/8), Class B = 128–191 (/16), Class C = 192–223 (/24)',
+          'Class A = 1–100 (/8), Class B = 101–200 (/16), Class C = 201–255 (/24)',
+          'Class A = 0–127 (/16), Class B = 128–192 (/24), Class C = 193–255 (/32)',
+          'Class A = 10.0.0.0 (/8), Class B = 172.16.0.0 (/12), Class C = 192.168.0.0 (/16)',
+        ],
+        correctOption: 0,
+        explanation:
+          'Classful boundaries: Class A spans 1 to 126 (mask 255.0.0.0 /8), Class B spans 128 to 191 (mask 255.255.0.0 /16), and Class C spans 192 to 223 (mask 255.255.255.0 /24). 127 is reserved for loopback.',
+        explanationsJson: {
+          1: 'Arbitrary numbers.',
+          2: 'Incorrect ranges and masks.',
+          3: 'These are RFC 1918 private ranges, not the general classful architecture.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Classful First Octet Ranges & Default Masks',
+      },
+      {
+        text: 'An enterprise in 1991 required 300 IPv4 addresses for its campus. Under historical classful rules, why did this allocation cause 99.5% address waste?',
+        options: [
+          'Because Class C (/24) provided only 254 hosts, forcing the organization to receive a full Class B (/16 = 65,534 hosts), leaving 65,234 addresses unused',
+          'Because Class A provided only 126 addresses',
+          'Because routers were unable to process more than 10 packets per second',
+          'Because the enterprise was required to discard all odd-numbered IP addresses',
+        ],
+        correctOption: 0,
+        explanation:
+          'With Class C capped at 254 usable hosts, any requirement between 255 and 65,534 hosts forced the allocation of a full Class B (/16), locking 65,000+ unused addresses away from the global pool.',
+        explanationsJson: {
+          1: 'Class A provides 16.7 million hosts.',
+          2: 'Router forwarding speed is independent of classful allocation sizes.',
+          3: 'All usable IP addresses in a subnet are valid.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Classful Address Allocation Inefficiency',
+      },
+      {
+        text: 'What is the architectural purpose of Class D and Class E IPv4 address blocks?',
+        options: [
+          'Class D (224.0.0.0 – 239.255.255.255) is reserved for Multicast; Class E (240.0.0.0 – 255.255.255.255) is reserved for Experimental use',
+          'Class D is for public web servers; Class E is for private home routers',
+          'Class D is for fiber optic networks; Class E is for wireless networks',
+          'Class D is for IPv6 translation; Class E is for DNS root servers',
+        ],
+        correctOption: 0,
+        explanation:
+          'Class D (224.0.0.0/4) is designated for multicast group addressing. Class E (240.0.0.0/4) was set aside by the IETF for experimental and research use.',
+        explanationsJson: {
+          1: 'Public web servers use unicast Class A/B/C addresses.',
+          2: 'Physical media types are Layer 1/2 concerns.',
+          3: 'Class D and E are not protocol translation mechanisms.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Class D Multicast & Class E Experimental Spaces',
+      },
+      {
+        text: 'How does CIDR Route Aggregation (Supernetting) prevent global Internet routing table exhaustion?',
+        options: [
+          'It combines multiple contiguous smaller subnet routes into a single summarized prefix advertisement (e.g. 16 /24 routes advertised as one /20), dramatically reducing routing table entries',
+          'It forces all internet traffic through a single physical router in California',
+          'It converts all IPv4 packets into uncompressed text files',
+          'It shuts down dormant websites automatically',
+        ],
+        correctOption: 0,
+        explanation:
+          'Route aggregation (Supernetting) allows service providers to summarize multiple contiguous network blocks into a single routing table entry, reducing the memory and processing load on global BGP core routers.',
+        explanationsJson: {
+          1: 'The Internet is a distributed global mesh, not a single centralized router.',
+          2: 'Packets retain standard binary headers.',
+          3: 'Route aggregation manages routing announcements, not website lifecycles.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'CIDR Route Aggregation / Supernetting',
+      },
+      {
+        text: 'A network technician encounters a legacy configuration using `192.168.1.0/28`. A colleague claims this is invalid because "192.168.x.x is Class C and must use /24". How should the technician explain the colleague\'s misconception?',
+        options: [
+          'Under modern Classless Inter-Domain Routing (CIDR), fixed classes are obsolete; any IP address can use any valid subnet prefix length (/28 provides 14 usable hosts)',
+          'The colleague is correct; subnets other than /24 will damage the network interface card',
+          'A /28 mask only works on token ring networks',
+          'The IP address must be converted to hexadecimal before applying a /28 mask',
+        ],
+        correctOption: 0,
+        explanation:
+          'CIDR decoupled IP addresses from fixed classful byte boundaries. Any IPv4 address can be subnetted using any prefix length from /1 to /32.',
+        explanationsJson: {
+          1: 'Subnet masks are mathematical bit filters and do not damage hardware.',
+          2: 'CIDR works uniformly across all modern Ethernet and IP media.',
+          3: 'Binary bitmasking is performed automatically by the OS kernel.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'Classless CIDR vs Classful Misconceptions',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Classful Address Waste Analysis & CIDR Supernetting',
-      instructions: '1. Calculate Class B vs /23 address waste.\n2. Inspect CIDR prefixes with Get-NetIPAddress.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { classfulWaste: 65184, cidrCapacity: 510 },
-      tasks: ['Analyze address waste difference.'],
-    },
   },
-
-  // -------------------------------------------------------------------------
-  // 6. NET-202: VLSM Design & Multi-Department Address Allocation
-  // -------------------------------------------------------------------------
   {
     courseCode: 'NET-202',
     slug: 'subnetting-cidr-overview',
@@ -1196,65 +1402,64 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'VLSM_DESIGNER_ENGINE',
     introduction:
       'Master enterprise-grade Variable Length Subnet Masking (VLSM): Designing multi-department address allocation schemes, enforcing the "Largest to Smallest" allocation rule, partitioning a single base network across varied department sizes, and guaranteeing zero address overlap.',
-    stepMetadata: {
-      step1_objective:
+    contentV2: {
+      objective:
         'Master Variable Length Subnet Masking (VLSM) design principles, apply the Golden Rule of VLSM (Largest to Smallest allocation order), partition a base IPv4 block across multiple department requirements, and verify zero-overlap integrity.',
-      step2_prerequisites: ['net-202-ipv4-addressing-cidr', 'ip-addressing-ipv4-overview'],
-      step3_whyItMatters:
+      prerequisites: ['net-202-ipv4-addressing-cidr', 'ip-addressing-ipv4-overview'],
+      whyItMatters:
         'In real-world enterprise networks, departments have vastly different host requirements (e.g. 60 hosts vs 10 hosts vs 2-host WAN links). Traditional Fixed-Length Subnet Masking (FLSM) wastes hundreds of addresses, whereas VLSM optimizes address efficiency to near 100%.',
-      step4_coreConcept:
-        'Variable Length Subnet Masking (VLSM) allows an engineer to divide a single IP network into subnets of different sizes with different CIDR prefix masks. The Golden Rule of VLSM is: Always allocate subnets starting with the largest host requirement and proceed in descending order down to the smallest (WAN links last). Failing to allocate from largest to smallest causes address overlap conflicts or fragments address blocks, making larger subnets impossible to fit.',
-      step5_technicalAnatomy: {
-        title: 'VLSM Hierarchy & Descending Allocation Mechanics',
-        description: 'Prefix sizing table, allocation sequence, and boundary alignment rules.',
-        components: [
-          { name: 'Descending Allocation Rule (Largest to Smallest)', detail: 'Sort all requirements in descending order before assigning any addresses: e.g. 60 hosts (/26) -> 25 hosts (/27) -> 10 hosts (/28) -> WAN links (/30).' },
-          { name: 'Subnet Boundary Alignment', detail: 'Every subnet Network ID must be an exact mathematical multiple of its block size ($2^H$). E.g. a /26 (block size 64) can only begin at .0, .64, .128, or .192.' },
-          { name: 'Point-to-Point WAN Subnets (/30)', detail: 'Requires exactly 2 usable hosts ($2^2 - 2 = 2$). Uses mask `255.255.255.252` with block size 4, allocated at the end of the address block.' },
-          { name: 'Zero-Overlap Verification', detail: 'Each subnet range (from Network ID to Broadcast ID) must be strictly non-overlapping with all other allocated subnets.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Requirement Sizing & Sorting', action: 'Determine host requirements for all departments and sort in descending order: Engineering (60), Sales (25), Admin (10), WAN-1 (2), WAN-2 (2).' },
-          { stepNumber: 2, title: 'Prefix Mask Selection', action: 'Map each host requirement to the smallest sufficient $2^H - 2$ capacity: 60 -> /26 (62 hosts), 25 -> /27 (30 hosts), 10 -> /28 (14 hosts), 2 -> /30 (2 hosts).' },
-          { stepNumber: 3, title: 'Sequential Allocation from Base Block', action: 'Allocate from base `192.168.1.0/24`: Subnet 1 takes `192.168.1.0/26` (.0 to .63); Subnet 2 takes `192.168.1.64/27` (.64 to .95); Subnet 3 takes `192.168.1.96/28` (.96 to .111); WAN-1 takes `192.168.1.112/30` (.112 to .115); WAN-2 takes `192.168.1.116/30` (.116 to .119).' },
-          { stepNumber: 4, title: 'Remaining Capacity Reservation', action: 'Addresses `192.168.1.120` through `.255` remain pristine and unfragmented for future enterprise expansion.' },
-        ],
-      },
-      step7_packetHeaderView: {
-        protocol: 'VLSM Hierarchical Address Plan',
-        fields: [
-          { fieldName: 'Subnet 1 (Engineering 60)', bitLength: '/26 (62 Hosts)', hexSample: '192.168.1.0 - .63', description: 'Mask: 255.255.255.192.' },
-          { fieldName: 'Subnet 2 (Sales 25)', bitLength: '/27 (30 Hosts)', hexSample: '192.168.1.64 - .95', description: 'Mask: 255.255.255.224.' },
-          { fieldName: 'Subnet 3 (Admin 10)', bitLength: '/28 (14 Hosts)', hexSample: '192.168.1.96 - .111', description: 'Mask: 255.255.255.240.' },
-          { fieldName: 'WAN Links (2 each)', bitLength: '/30 (2 Hosts)', hexSample: '192.168.1.112 & .116', description: 'Mask: 255.255.255.252.' },
-        ],
-        headerDiagramAscii: `
-+-------------------------------------------------------------------------------+
-|                    VLSM ENTERPRISE ADDRESS ALLOCATION MAP                     |
-+-------------------------------------------------------------------------------+
-| Base Network: 192.168.1.0/24 (Total: 256 Addresses)                          |
-+-----------------------------------+-------------------------------------------+
-| [0 . . . . . . . . . . . . . 63]  | Engineering Dept: 192.168.1.0/26 (60 Hosts)|
-+-----------------+-----------------+-------------------------------------------+
-| [64 . . . . 95] | Sales Dept: 192.168.1.64/27 (25 Hosts)                      |
-+--------+--------+-------------------------------------------------------------+
-| [96.111] Admin Dept: 192.168.1.96/28 (10 Hosts)                               |
-+----+---+----------------------------------------------------------------------+
-|WAN1|WAN2| WAN-1: .112/30 (2 Hosts) | WAN-2: .116/30 (2 Hosts)                 |
-+----+---+----------------------------------------------------------------------+
-| [120 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 255] |
-| UNALLOCATED RESERVE SPACE (136 Addresses Available for Future Growth)         |
-+-------------------------------------------------------------------------------+
-`,
-      },
-      step8_visualExplanation: {
+      explanation:
+        'Variable Length Subnet Masking (VLSM) allows network engineers to subnet an already subnetted network, assigning different CIDR prefix lengths to different subnets based on their exact host requirements.\n\n### 1. The Golden Rule of VLSM: Largest to Smallest\nWhen partitioning an address block across multiple departmental subnets, **always allocate starting with the largest host requirement first, proceeding in strict descending order down to the smallest (WAN point-to-point links last)**.\n* **Why?** Subnet network IDs must always begin on a numerical boundary that is a multiple of their block size ($2^H$). If you allocate small subnets (e.g. a /30 block size of 4) at the start of a range, the remaining unallocated address space will no longer align with the large block boundary required by a /26 (block size 64) or /27 (block size 32), causing address fragmentation and overlapping subnet errors.\n\n### 2. Sizing Point-to-Point WAN Links (/30)\nPoint-to-point router links require exactly 2 usable IP addresses (one for each router interface). Using a `/24` or `/28` on a WAN link wastes dozens of addresses. A **`/30` prefix** ($255.255.255.252$) provides $2^2 = 4$ total addresses ($2^2 - 2 = 2$ usable host IPs), maximizing address conservation.\n\n### 3. Step-by-Step VLSM Design Workflow\n1. **List and Sort**: Write down all subnet host requirements and sort in descending order (e.g. 60 hosts -> 25 hosts -> 10 hosts -> 2 hosts -> 2 hosts).\n2. **Determine Host Bits & Mask**: For each department, find the smallest exponent $H$ satisfying $2^H - 2 \\ge \\text{Required Hosts}$. CIDR prefix $= 32 - H$.\n3. **Sequential Non-Overlapping Allocation**: Start at base network address `.0`. For each subnet, set the next Network ID equal to the previous subnet\'s Broadcast ID $+ 1$.\n4. **Verify Boundaries**: Ensure each Network ID is evenly divisible by its block size $2^H$.',
+      components: [
+        {
+          name: 'Descending Allocation Order',
+          detail: 'Sort requirements from largest to smallest before allocating to prevent fragmentation.',
+        },
+        {
+          name: 'Block Size Alignment (2^H)',
+          detail: 'Subnet Network IDs must align to exact multiples of their mathematical block size.',
+        },
+        {
+          name: 'Point-to-Point WAN Subnets (/30)',
+          detail: 'Mask 255.255.255.252 provides exactly 2 usable IPs for serial/router links.',
+        },
+        {
+          name: 'Zero-Overlap Verification',
+          detail: 'Validate that no subnet IP range (Network to Broadcast) overlaps any other assigned block.',
+        },
+        {
+          name: 'Unallocated Reserve Space',
+          detail: 'Leaves contiguous pristine blocks at the end of the address space for future expansion.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Requirement Sizing & Sorting',
+          action: 'Determine host requirements for all departments and sort in descending order: Engineering (60), Sales (25), Admin (10), WAN-1 (2), WAN-2 (2).',
+        },
+        {
+          stepNumber: 2,
+          title: 'Prefix Mask Selection',
+          action: 'Map each host requirement to smallest sufficient 2^H - 2 capacity: 60 -> /26 (62 hosts), 25 -> /27 (30 hosts), 10 -> /28 (14 hosts), 2 -> /30 (2 hosts).',
+        },
+        {
+          stepNumber: 3,
+          title: 'Sequential Allocation from Base Block',
+          action: 'Allocate from base 192.168.1.0/24: Subnet 1 takes 192.168.1.0/26 (.0 to .63); Subnet 2 takes 192.168.1.64/27 (.64 to .95); Subnet 3 takes 192.168.1.96/28 (.96 to .111); WAN-1 takes 192.168.1.112/30 (.112 to .115); WAN-2 takes 192.168.1.116/30 (.116 to .119).',
+        },
+        {
+          stepNumber: 4,
+          title: 'Remaining Capacity Reservation',
+          action: 'Addresses 192.168.1.120 through .255 remain pristine and unfragmented for future enterprise expansion.',
+        },
+      ],
+      visualizer: {
         type: 'VLSM_DESIGNER_ENGINE',
         title: 'Interactive VLSM Multi-Department Address Planner',
         description: 'Input custom department host counts to automatically calculate descending VLSM allocations, visual block partitioning, and zero-overlap validation.',
       },
-      step9_workedExample: {
+      workedExample: {
         title: 'Designing VLSM Allocation for Enterprise Branch from 192.168.1.0/24',
         problemStatement: 'Design a VLSM address plan from `192.168.1.0/24` for: Engineering (60 hosts), Sales (25 hosts), Admin (10 hosts), and 2 WAN links (2 hosts each).',
         stepByStepSolution: [
@@ -1273,66 +1478,51 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
         ],
         finalResult: 'All 5 subnets allocated with zero overlap; .120–.255 remains available for expansion.',
       },
-      step10_realWorldScenario: {
-        topology: 'Enterprise Network Migration from FLSM to VLSM',
-        scenarioText: 'An enterprise runs out of IP space under a rigid FLSM `/26` scheme that gave every department 64 IPs regardless of size. The network engineer implements VLSM, resizing small branch offices to `/28` and WAN links to `/30`, recovering over 120 IP addresses and avoiding purchasing expensive public IPv4 blocks.',
-        engineeringContext: 'VLSM enables maximum utilization of private and public IP allocations.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Endpoints configure their specific department subnet mask without awareness of other department mask sizes.',
-        nicBehavior: 'Operates transparently at Layer 2.',
-        switchOrRouterBehavior: 'Enterprise routers maintain variable-length prefix entries in the routing table (e.g. /26, /27, /28, /30) and route between VLANs.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'show ip route',
-          description: 'Displays the active routing table showing variable-length subnet prefixes (VLSM) and next hops.',
-          expectedOutput:
-            'Gateway of last resort is not set\n     192.168.1.0/24 is variably subnetted, 5 subnets, 4 masks\nC       192.168.1.0/26 is directly connected, GigabitEthernet0/0.10\nC       192.168.1.64/27 is directly connected, GigabitEthernet0/0.20\nC       192.168.1.96/28 is directly connected, GigabitEthernet0/0.30\nC       192.168.1.112/30 is directly connected, Serial0/0/0\nC       192.168.1.116/30 is directly connected, Serial0/0/1',
-          proofExplanation:
-            'Shows 5 subnets using 4 different CIDR masks (/26, /27, /28, /30) on a single router.',
+          id: 1,
+          prompt: 'What is the Golden Rule of VLSM subnet allocation order?',
+          expected: 'Always sort host requirements and allocate subnets in descending order from largest to smallest.',
+          hints: 'Largest to smallest.',
+        },
+        {
+          id: 2,
+          prompt: 'What CIDR prefix mask and block size is standard for a 2-host point-to-point WAN router link?',
+          expected: '/30 (mask 255.255.255.252) with block size 4 (2 usable hosts).',
+          hints: '/30 provides 2 usable hosts.',
+        },
+        {
+          id: 3,
+          prompt: 'Why must a /26 subnet (block size 64) only start at .0, .64, .128, or .192?',
+          expected: 'Because a subnet Network ID must always align on an exact mathematical multiple of its block size ($2^H$).',
+          hints: 'Multiples of block size 64.',
+        },
+        {
+          id: 4,
+          prompt: 'What CIDR prefix is required to support a department with 28 host computers?',
+          expected: '/27 (provides 2^5 - 2 = 30 usable host addresses).',
+          hints: '2^5 - 2 = 30 hosts.',
+        },
+        {
+          id: 5,
+          prompt: 'If Subnet 1 is 192.168.1.0/26, what is the next available Network ID for Subnet 2?',
+          expected: '192.168.1.64 (since Subnet 1 broadcast ID is .63).',
+          hints: '.63 + 1 = .64.',
+        },
+        {
+          id: 6,
+          prompt: 'What error occurs if a network administrator attempts to configure overlapping subnets on router interfaces?',
+          expected: 'The router operating system rejects the configuration with an "overlapping subnet" error.',
+          hints: 'Routers reject overlapping IP subnets.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Hosts in Sales cannot communicate with Engineering; router reports overlapping subnet error when configuring interface.',
-          possibleCauses: ['Subnet allocated out of order causing address range overlap'],
-          diagnosticSteps: ['List Network ID and Broadcast ID for all configured subnets in a chart.'],
-          remediation: 'Reallocate subnets in strict descending order (largest to smallest) starting from base .0.',
-        },
+      recap: [
+        'VLSM allows subnets of different sizes to be carved out of the same major network block.',
+        'Golden Rule: Always allocate from largest host requirement to smallest.',
+        'Subnet boundaries must always align with mathematical multiples of their block size ($2^H$).',
+        '/30 prefix (mask 255.255.255.252) is standard for point-to-point router WAN links.',
+        'Unallocated address space remains pristine and contiguous at the end of the address block.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Allocating small subnets or WAN links first before allocating large subnets.', correction: 'Always allocate from Largest to Smallest. Starting with small subnets fragments the address space and makes large boundary blocks impossible to align.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Cross-VLAN Host Lateral Movement',
-        mitigationStrategy: 'Isolate each VLSM subnet onto its own dedicated VLAN and apply Inter-VLAN Access Control Lists (ACLs) on the router/firewall.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'Golden Rule: Always allocate from LARGEST host requirement to SMALLEST.',
-          '/30 provides exactly 2 usable hosts ($2^2 - 2 = 2$) for point-to-point links.',
-          'Subnet boundaries must always align with multiples of their block size.',
-        ],
-        frequentTraps: [
-          'Allocating a /26 starting at .32 (a /26 has block size 64 and can only start at .0, .64, .128, .192).',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Enterprise Multi-Department VLSM Address Design',
-        scenario: 'Design a complete VLSM address allocation plan from 192.168.1.0/24 and verify zero overlap.',
-        tasks: ['Sort departments: 60, 25, 10, 2, 2.', 'Assign contiguous non-overlapping subnet blocks.'],
-        verificationMethod: 'Verify show ip route displays 5 variably subnetted networks.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'VLSM allows different subnet mask lengths within the same major network.',
-          'Always allocate in descending order (largest to smallest) to prevent fragmentation and overlaps.',
-          '/30 is standard for 2-host point-to-point links.',
-        ],
-        nextLessonBridge:
-          'With IPv4 Addressing, Subnetting, and VLSM mastered in NET-202, proceed to NET-203 to master Core IP Services (ARP, DHCP, DNS, and IPv6).',
-      },
     },
     questions: [
       {
@@ -1344,21 +1534,123 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
           'Always use the exact same /24 subnet mask for all departments regardless of host count',
         ],
         correctOption: 0,
-        explanation: 'The fundamental rule of VLSM is to allocate from Largest to Smallest. Subnets can only start on boundaries that are multiples of their block size. Allocating small subnets first fragments the address space and makes it impossible to align larger blocks.',
-        explanationsJson: { 1: 'Allocating small subnets first causes address fragmentation and overlap errors.', 2: 'Department function does not dictate mathematical parity.', 3: 'Using the same mask for all departments is FLSM, not VLSM.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'The fundamental rule of VLSM is to allocate from Largest to Smallest. Subnets can only start on boundaries that are multiples of their block size. Allocating small subnets first fragments the address space and makes it impossible to align larger blocks.',
+        explanationsJson: {
+          1: 'Allocating small subnets first causes address fragmentation and overlap errors.',
+          2: 'Department function does not dictate mathematical parity.',
+          3: 'Using the same mask for all departments is FLSM, not VLSM.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.UNDERSTANDING,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'VLSM Largest-to-Smallest Allocation Rule',
       },
+      {
+        text: 'Which CIDR prefix length and subnet mask is standard for a 2-host point-to-point WAN router serial link?',
+        options: [
+          '/30 (Subnet Mask: 255.255.255.252, Block size: 4, Usable hosts: 2)',
+          '/28 (Subnet Mask: 255.255.255.240, Block size: 16, Usable hosts: 14)',
+          '/24 (Subnet Mask: 255.255.255.0, Block size: 256, Usable hosts: 254)',
+          '/31 (Subnet Mask: 255.255.255.254, Block size: 2, Usable hosts: 0)',
+        ],
+        correctOption: 0,
+        explanation:
+          'A `/30` prefix uses 2 host bits ($2^2 = 4$ addresses), providing exactly $4 - 2 = 2$ usable host IPs (one for each router interface) with zero address waste.',
+        explanationsJson: {
+          1: '/28 wastes 12 host IPs on a 2-router link.',
+          2: '/24 wastes 252 host IPs on a 2-router link.',
+          3: 'Traditional /31 leaves no standard network/broadcast IDs (unless RFC 3021 is explicitly supported).',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: '/30 Point-to-Point WAN Subnets',
+      },
+      {
+        text: 'A network designer allocates `192.168.1.0/26` to Department A. What is the valid Network ID, Usable Host Range, and Broadcast ID for this subnet?',
+        options: [
+          'Network ID: 192.168.1.0, Usable: 192.168.1.1 – 192.168.1.62, Broadcast: 192.168.1.63',
+          'Network ID: 192.168.1.0, Usable: 192.168.1.0 – 192.168.1.63, Broadcast: 192.168.1.64',
+          'Network ID: 192.168.1.1, Usable: 192.168.1.2 – 192.168.1.62, Broadcast: 192.168.1.63',
+          'Network ID: 192.168.1.0, Usable: 192.168.1.1 – 192.168.1.254, Broadcast: 192.168.1.255',
+        ],
+        correctOption: 0,
+        explanation:
+          'A `/26` subnet has a block size of 64 ($2^6$). Range: Network ID is `.0`, first usable is `.1`, last usable is `.62`, and broadcast ID is `.63`.',
+        explanationsJson: {
+          1: '.0 is the Network ID and cannot be assigned to a host.',
+          2: 'Network ID must be .0, not .1.',
+          3: 'That is a /24 subnet range, not a /26.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: '/26 Subnet Boundary Math',
+      },
+      {
+        text: 'Following the allocation of `192.168.1.0/26` (.0 to .63), Department B requires 25 host addresses. What is the appropriate CIDR prefix and resulting subnet range for Department B?',
+        options: [
+          '`192.168.1.64/27` (Network: .64, Usable: .65 – .94, Broadcast: .95)',
+          '`192.168.1.64/26` (Network: .64, Usable: .65 – .126, Broadcast: .127)',
+          '`192.168.1.32/27` (Network: .32, Usable: .33 – .62, Broadcast: .63)',
+          '`192.168.1.64/28` (Network: .64, Usable: .65 – .78, Broadcast: .79)',
+        ],
+        correctOption: 0,
+        explanation:
+          '25 hosts requires a `/27` ($2^5 - 2 = 30$ hosts, block size 32). Starting at the next boundary (`.64`), the subnet spans `.64` to `.95` (usable `.65` to `.94`).',
+        explanationsJson: {
+          1: '/26 provides 62 hosts, which is unnecessarily large for 25 hosts.',
+          2: '.32 overlaps with Department A (.0 to .63).',
+          3: '/28 provides only 14 usable hosts, insufficient for 25 hosts.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Sequential VLSM Sizing & Block Assignment',
+      },
+      {
+        text: 'Why does attempting to allocate a `/26` subnet starting at IP address `192.168.1.32` result in a configuration error on an enterprise router?',
+        options: [
+          'Because a /26 has a block size of 64 and can only legally begin on boundaries that are exact multiples of 64 (.0, .64, .128, .192)',
+          'Because .32 is a reserved loopback address',
+          'Because routers only support even-numbered host bits',
+          'Because /26 masks can only be applied to fiber optic switchports',
+        ],
+        correctOption: 0,
+        explanation:
+          'Subnet Network IDs must align on mathematical multiples of the block size. A `/26` has block size 64, meaning valid Network IDs are exclusively `.0`, `.64`, `.128`, and `.192`. Starting at `.32` violates boundary alignment.',
+        explanationsJson: {
+          1: '127.0.0.0/8 is loopback, not 192.168.1.32.',
+          2: 'Routers support all host bit counts from 0 to 32.',
+          3: 'Subnet masks apply to all network interface types.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Subnet Block Size Boundary Alignment Rules',
+      },
+      {
+        text: 'A network administrator attempts to assign `192.168.1.64/26` to Router Interface GigabitEthernet0/1 while `192.168.1.32/27` is already assigned to GigabitEthernet0/0. The router rejects the command. What is the root cause?',
+        options: [
+          'Overlapping Subnet Error: The range of the /26 (.0 to .63 is taken, so .64 to .127) overlaps with the /27 (.32 to .63), causing routing ambiguity',
+          'The router interface speed is set to 10 Mbps',
+          'The subnet mask length exceeds 32 bits',
+          'The router memory is completely full',
+        ],
+        correctOption: 0,
+        explanation:
+          'Because the subnets overlap, the router cannot determine which interface to forward traffic to for overlapping addresses, triggering an overlapping subnet rejection error.',
+        explanationsJson: {
+          1: 'Interface link speed does not trigger IP subnet overlap errors.',
+          2: 'Both /26 and /27 are standard sub-32-bit masks.',
+          3: 'This is a logical routing topology error, not an out-of-memory condition.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'Overlapping Subnet Troubleshooting',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Enterprise Multi-Department VLSM Address Design',
-      instructions: '1. Sort departments descending.\n2. Allocate subnets from 192.168.1.0/24.\n3. Verify with show ip route.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 20,
-      initialTopologyJson: { baseNetwork: '192.168.1.0/24', departments: [{ name: 'Eng', hosts: 60 }, { name: 'Sales', hosts: 25 }] },
-      tasks: ['Design zero-overlap VLSM plan.'],
-    },
   },
 ];

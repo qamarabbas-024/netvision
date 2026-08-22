@@ -405,99 +405,151 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   },
 
   // -------------------------------------------------------------------------
-  // Lesson 5: Special-Use IPv4 Ranges & Enterprise Address Allocation
+  // Lesson 5: Special-Use IPv4 Ranges & Enterprise Allocation
   // -------------------------------------------------------------------------
   {
     quizId: 'quiz-level-0-ip-addresses-logical-location',
     lessonSlug: 'level-0-ip-addresses-logical-location',
-    text: 'Which of the following IPv4 address blocks is an official RFC 1918 Private address range that is non-routable on the public Internet?',
+    text: 'Which three IPv4 address blocks are officially designated as Private Non-Routable address spaces under RFC 1918?',
     options: [
-      '172.20.0.0/16',
-      '172.35.0.0/16',
-      '192.170.0.0/16',
-      '11.0.0.0/8'
+      '10.0.0.0/8 (10.0.0.0 - 10.255.255.255), 172.16.0.0/12 (172.16.0.0 - 172.31.255.255), and 192.168.0.0/16 (192.168.0.0 - 192.168.255.255)',
+      '127.0.0.0/8, 169.254.0.0/16, and 224.0.0.0/4',
+      '1.0.0.0/8, 2.0.0.0/8, and 3.0.0.0/8',
+      '192.168.0.0/24, 192.168.1.0/24, and 192.168.2.0/24 only',
     ],
     correctOption: 0,
-    explanation: 'RFC 1918 Class B private space covers `172.16.0.0` through `172.31.255.255` (/12). `172.20.0.0/16` falls directly within this private range.',
+    explanation:
+      'RFC 1918 specifies three private address blocks: 10.0.0.0/8 (Class A), 172.16.0.0/12 (Class B, spanning 172.16 to 172.31), and 192.168.0.0/16 (Class C, spanning 192.168.0 to 192.168.255).',
     explanationsJson: {
-      1: '172.35.0.0/16 is outside the private 172.16-172.31 range and is a publicly routable IP.',
-      2: '192.170.0.0/16 is outside the private 192.168.0.0/16 range and is public.',
-      3: '11.0.0.0/8 is public (only 10.0.0.0/8 is private in the 10.x space).'
+      1: 'Those are Loopback, APIPA, and Multicast.',
+      2: 'Those are public routable blocks.',
+      3: '192.168.0.0/16 encompasses all 256 /24 subnets.',
     },
-    difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'RFC 1918 Private Address Ranges',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-ip-addresses-logical-location',
-    lessonSlug: 'level-0-ip-addresses-logical-location',
-    text: 'A network technician runs `ipconfig` on a workstation that cannot access the Internet and sees IPv4 address `169.254.88.19` with subnet mask `255.255.0.0`. What does this address indicate?',
-    options: [
-      'The workstation failed to contact a DHCP server and self-assigned an APIPA Link-Local address',
-      'The workstation successfully obtained a private corporate IP lease from the domain controller',
-      'The workstation has been assigned a public Carrier-Grade NAT address by the ISP',
-      'The workstation network interface card is defective and must be physically replaced'
-    ],
-    correctOption: 0,
-    explanation: 'Addresses in `169.254.0.0/16` are Automatic Private IP Addressing (APIPA) link-local addresses, assigned by the operating system when DHCP Discover broadcasts receive no reply.',
-    explanationsJson: {
-      1: 'Corporate DHCP leases use RFC 1918 private spaces (10.x, 172.16-31.x, 192.168.x), not APIPA.',
-      2: 'Carrier-Grade NAT uses 100.64.0.0/10, not 169.254.x.x.',
-      3: 'APIPA indicates a DHCP server/network connectivity failure, not necessarily hardware failure.'
-    },
-    difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
-    questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'APIPA / Link-Local Troubleshooting',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-ip-addresses-logical-location',
-    lessonSlug: 'level-0-ip-addresses-logical-location',
-    text: 'What is the primary purpose of the `100.64.0.0/10` IPv4 address block defined in RFC 6598?',
-    options: [
-      'Carrier-Grade NAT (CGNAT) Shared Address Space used by ISPs to connect customers without colliding with RFC 1918 subnets',
-      'Multicast streaming for public Internet radio broadcasts',
-      'Internal loopback testing for multi-core CPUs',
-      'Direct satellite uplink routing for military defense networks'
-    ],
-    correctOption: 0,
-    explanation: 'RFC 6598 designates `100.64.0.0/10` as Shared Address Space for Carrier-Grade NAT (CGNAT), allowing service providers to NAT subscriber traffic without conflicting with internal customer 10.x or 192.168.x subnets.',
-    explanationsJson: {
-      1: 'Multicast uses Class D 224.0.0.0/4 (224.0.0.0 to 239.255.255.255).',
-      2: 'Loopback uses 127.0.0.0/8.',
-      3: 'Military defense historically received legacy Class A blocks (e.g. 6.0.0.0/8, 11.0.0.0/8).'
-    },
-    difficulty: CourseLevel.BEGINNER,
+    difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Carrier-Grade NAT (RFC 6598 Shared Space)',
-    points: 10
+    concept: 'RFC 1918 Private Address Ranges',
+    points: 10,
   },
   {
     quizId: 'quiz-level-0-ip-addresses-logical-location',
     lessonSlug: 'level-0-ip-addresses-logical-location',
-    text: 'When an engineer executes `ping 127.0.0.1` in a command terminal, where do the generated ICMP packets physically travel?',
+    text: 'What is the operational behavior of packets transmitted to IP address `127.0.0.1` on a host operating system?',
     options: [
-      'They are processed entirely within the local host operating system TCP/IP software stack in RAM and never reach the network card or wire',
-      'They travel out the physical Ethernet port to the local default gateway and return',
-      'They are broadcast to all devices on the local Layer 2 switch',
-      'They query the nearest public DNS root server'
+      'The packets are processed entirely within the local host TCP/IP stack in kernel memory and are never transmitted onto the physical network wire',
+      'The packets are broadcast to all devices on the local Ethernet switch',
+      'The packets are routed to the nearest ISP default gateway',
+      'The packets are discarded as malformed runt frames',
     ],
     correctOption: 0,
-    explanation: 'The entire `127.0.0.0/8` range is reserved for node-local loopback. Traffic sent to 127.0.0.1 is routed internally within the kernel network driver to verify protocol stack integrity without hitting physical transceivers.',
+    explanation:
+      'The `127.0.0.0/8` block is reserved for loopback. Traffic sent to 127.0.0.1 loops back internally inside the host OS network stack, verifying software protocol stack integrity without hitting network hardware.',
     explanationsJson: {
-      1: 'Loopback packets never egress the physical NIC interface.',
-      2: 'Loopback traffic is strictly node-local and is never flooded as a switch broadcast.',
-      3: 'Loopback has no interaction with external DNS servers.'
+      1: 'Loopback traffic is never broadcast onto physical links.',
+      2: 'Loopback traffic does not leave the local computer.',
+      3: 'Loopback packets are fully valid transport messages processed internally.',
     },
-    difficulty: CourseLevel.BEGINNER,
+    difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Loopback Interface Mechanics (127.0.0.1)',
-    points: 10
+    concept: 'IPv4 Loopback Architecture (127.0.0.1)',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-ip-addresses-logical-location',
+    lessonSlug: 'level-0-ip-addresses-logical-location',
+    text: 'A systems administrator discovers that an internal server has been assigned IP `172.32.1.100`. Why is this address configuration problematic for an internal private network?',
+    options: [
+      '172.32.1.100 is a globally routable public IP owned by an external organization (RFC 1918 Class B space stops at 172.31.255.255), creating IP conflicts when accessing legitimate Internet services on that range',
+      '172.32.1.100 is a reserved multicast address',
+      '172.32.1.100 cannot be represented in binary notation',
+      '172.32.1.100 forces all network switches into half-duplex mode',
+    ],
+    correctOption: 0,
+    explanation:
+      'RFC 1918 Class B private address space spans strictly from `172.16.0.0` to `172.31.255.255` (/12). `172.32.0.0` and above are public routable addresses.',
+    explanationsJson: {
+      1: 'Multicast uses 224.0.0.0/4 (Class D).',
+      2: 'All 32-bit IPv4 addresses have standard binary representations.',
+      3: 'Duplex mode is a Layer 1/2 physical link setting, unrelated to IP addressing.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'RFC 1918 Class B Boundaries',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-ip-addresses-logical-location',
+    lessonSlug: 'level-0-ip-addresses-logical-location',
+    text: 'What does an IPv4 address of `169.254.100.50` with subnet mask `255.255.0.0` signify when observed on a newly booted client workstation?',
+    options: [
+      'Automatic Private IP Addressing (APIPA) self-assignment occurred because the client failed to receive a response from a local DHCP server',
+      'The workstation successfully leased a high-priority enterprise IP address',
+      'The default gateway router assigned a dynamic cloud route',
+      'The workstation has been infected by a boot-sector rootkit',
+    ],
+    correctOption: 0,
+    explanation:
+      'The `169.254.0.0/16` prefix is reserved by RFC 3927 for APIPA link-local addressing. When DHCP Discover broadcasts go unanswered, the client self-assigns an address in this block.',
+    explanationsJson: {
+      1: 'APIPA is not an enterprise server lease; it indicates DHCP failure.',
+      2: 'Routers do not assign APIPA addresses.',
+      3: 'APIPA is a standard operating system network recovery mechanism, not malware.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+    questionType: QuestionType.TROUBLESHOOTING,
+    concept: 'APIPA Link-Local Diagnosis',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-ip-addresses-logical-location',
+    lessonSlug: 'level-0-ip-addresses-logical-location',
+    text: 'Which RFC 6598 address block is specifically reserved for Carrier-Grade NAT (CGNAT) deployed by ISPs?',
+    options: [
+      '100.64.0.0/10 (100.64.0.0 – 100.127.255.255)',
+      '192.168.0.0/16',
+      '10.0.0.0/8',
+      '240.0.0.0/4',
+    ],
+    correctOption: 0,
+    explanation:
+      'RFC 6598 defines `100.64.0.0/10` for Carrier-Grade NAT (CGNAT), providing service providers with a shared address space between subscriber premises equipment and edge NAT routers.',
+    explanationsJson: {
+      1: '192.168.0.0/16 is RFC 1918 private customer space.',
+      2: '10.0.0.0/8 is RFC 1918 private enterprise space.',
+      3: '240.0.0.0/4 is Class E experimental space.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Carrier-Grade NAT (RFC 6598)',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-ip-addresses-logical-location',
+    lessonSlug: 'level-0-ip-addresses-logical-location',
+    text: 'A network administrator notices that packets originating from `192.168.1.50` reach the local default gateway router, but cannot reach external web servers on the Internet. What router service is missing?',
+    options: [
+      'Network Address Translation (NAT) / Port Address Translation (PAT) to translate private RFC 1918 IPs into a routable public IP',
+      'A DNS cache flush command',
+      'An ARP broadcast disable command',
+      'A fiber optic cable transponder',
+    ],
+    correctOption: 0,
+    explanation:
+      'Because RFC 1918 private addresses cannot be routed across the public Internet, the boundary router must perform NAT/PAT to translate the internal private source IP into a registered public IP address.',
+    explanationsJson: {
+      1: 'Flushing DNS does not resolve Layer 3 routing for non-routable private addresses.',
+      2: 'Disabling ARP breaks local Layer 2 resolution.',
+      3: 'Physical transponders do not handle Layer 3 address translation.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+    questionType: QuestionType.TROUBLESHOOTING,
+    concept: 'NAT/PAT Requirement for RFC 1918 Addresses',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------
@@ -802,94 +854,146 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-level-0-network-packets-data-framing',
     lessonSlug: 'level-0-network-packets-data-framing',
-    text: 'Why must large application data streams (such as a 50 MegaByte video file) be divided into smaller Transport Segments rather than being transmitted as a single monolithic block across the network?',
-    options: [
-      'To prevent a single transmission error from requiring the retransmission of the entire 50 MB file, prevent network link monopoly, and conform to the physical link Maximum Transmission Unit (MTU)',
-      'Because physical copper cables physically melt if a single packet contains more than 1 Kilobyte of data',
-      'Because the Internet only supports ASCII text characters and cannot transmit binary video files',
-      'Because routers require every byte of data to be assigned its own individual MAC address'
-    ],
-    correctOption: 0,
-    explanation: 'Segmenting data streams into manageable chunks (MSS) ensures fair queue sharing among competing flows, bounds serialization latency, complies with physical link MTU limits (typically 1500 bytes), and ensures that if a bit error occurs in transit, only that single 1460-byte segment needs retransmission.',
-    explanationsJson: {
-      1: 'Packet size has no effect on copper cable thermal temperature.',
-      2: 'The Internet routes arbitrary binary payloads across all telecommunication layers.',
-      3: 'MAC addresses identify hardware network interfaces, not individual data payload bytes.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Transport Layer Segmentation Purpose',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-network-packets-data-framing',
-    lessonSlug: 'level-0-network-packets-data-framing',
-    text: 'On a standard Ethernet link with an MTU of 1500 bytes, what is the maximum TCP payload capacity (Maximum Segment Size - MSS) for standard IPv4 traffic, and what mathematical formula defines it?',
+    text: 'On a standard Ethernet network with an MTU of 1500 bytes, what is the standard Maximum Segment Size (MSS) for IPv4 TCP traffic, and what formula defines it?',
     options: [
       'MSS = 1460 Bytes (Formula: MSS = MTU (1500) - IPv4 Header (20) - TCP Header (20))',
       'MSS = 1500 Bytes (Formula: MSS = MTU)',
       'MSS = 1480 Bytes (Formula: MSS = MTU - IPv4 Header (20))',
-      'MSS = 64 Bytes (Formula: Minimum Frame Size)'
+      'MSS = 64 Bytes (Formula: Minimum Frame Size)',
     ],
     correctOption: 0,
-    explanation: 'Maximum Segment Size (MSS) is the largest pure application data payload TCP can put into a single segment. Under standard IPv4 (20-byte IP header + 20-byte TCP header = 40 bytes overhead): MSS = 1500 - 40 = 1460 bytes.',
+    explanation:
+      'Maximum Segment Size (MSS) represents the maximum TCP payload data. Formula: $\\text{MSS} = \\text{MTU} - (\\text{IP Header} + \\text{TCP Header}) = 1500 - 20 - 20 = 1460 \\text{ bytes}$.',
     explanationsJson: {
-      1: '1500 bytes is the total Layer 3 MTU, including the 20-byte IP and 20-byte TCP headers.',
-      2: '1480 bytes subtracts only the IP header, neglecting the 20-byte Layer 4 TCP header.',
-      3: '64 bytes is the minimum Layer 2 Ethernet frame size.'
+      1: '1500 is total MTU including headers.',
+      2: '1480 forgets to subtract the 20-byte TCP header.',
+      3: '64 bytes is minimum Ethernet frame size.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
     concept: 'MSS vs MTU Calculation',
-    points: 10
+    points: 10,
   },
   {
     quizId: 'quiz-level-0-network-packets-data-framing',
     lessonSlug: 'level-0-network-packets-data-framing',
-    text: 'How does the receiving host TCP transport stack reconstruct an original continuous file from hundreds of individual segments that arrive out-of-order over an IP network?',
+    text: 'An enterprise deploys an IPsec VPN tunnel with an interface MTU of 1420 bytes. What is the maximum IPv4 TCP MSS that should be negotiated across this tunnel to prevent fragmentation?',
     options: [
-      'The receiver buffers incoming segments and reassembles them in exact sequence using the 32-bit TCP Sequence Numbers in each segment header',
-      'The receiver discards all out-of-order packets and requests the user to reboot the operating system',
-      'The receiver changes its IP address to match the packet arrival order',
-      'The receiver sends an email to the Internet Service Provider to rearrange the packets'
+      '1380 Bytes (1420 MTU - 20B IPv4 Header - 20B TCP Header)',
+      '1420 Bytes',
+      '1400 Bytes',
+      '1460 Bytes',
     ],
     correctOption: 0,
-    explanation: 'TCP tracks every single byte transmitted using a 32-bit Sequence Number. The receiving host stores incoming segments in a reassembly buffer, arranges them by their sequence numbers, and passes the reconstructed stream to the application.',
+    explanation:
+      'Applying the formula $\\text{MSS} = \\text{MTU} - 40$ gives $1420 - 40 = 1380 \\text{ bytes}$.',
     explanationsJson: {
-      1: 'TCP does not require rebooting; it buffers out-of-order segments and uses selective/cumulative ACKs.',
-      2: 'IP addresses are logical host endpoints and do not change based on packet arrival sequence.',
-      3: 'Packet reassembly is performed in real-time by the host OS kernel network stack.'
-    },
-    difficulty: CourseLevel.FOUNDATIONAL,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Transport Stream Reassembly & Sequence Numbers',
-    points: 10
-  },
-  {
-    quizId: 'quiz-level-0-network-packets-data-framing',
-    lessonSlug: 'level-0-network-packets-data-framing',
-    text: 'How does Path MTU Discovery (PMTUD, RFC 1191) enable a sending host to automatically adapt to an intermediate link with a smaller MTU (such as a 1400-byte VPN tunnel) without causing IP fragmentation?',
-    options: [
-      'The sender sets the Don’t Fragment (DF = 1) bit; when a packet exceeds the tunnel MTU, the router drops it and returns an ICMP "Fragmentation Needed" message with the next-hop MTU, prompting the sender to lower its MSS',
-      'The sender sends a probe packet that physically expands the router interface buffers',
-      'The sender automatically converts all TCP packets into UDP datagrams',
-      'The sender encrypts the packet twice so the router cannot measure its size'
-    ],
-    correctOption: 0,
-    explanation: 'PMTUD sets the IPv4 DF bit (Don\'t Fragment). When an intermediate router cannot forward the 1500-byte packet across a 1400-byte link, it drops the packet and transmits an ICMP Type 3 Code 4 message containing the next-hop MTU (1400). The sender receives this and lowers its TCP MSS to 1360 bytes.',
-    explanationsJson: {
-      1: 'Software probe packets cannot physically alter hardware router interfaces.',
-      2: 'PMTUD adjusts TCP segment sizing; it does not switch transport protocols to UDP.',
-      3: 'Encryption increases header overhead and does not bypass MTU limits.'
+      1: '1420 is the MTU, not MSS.',
+      2: '1400 only subtracts the 20-byte IP header.',
+      3: '1460 exceeds the 1420-byte tunnel MTU and would cause fragmentation.',
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Path MTU Discovery (PMTUD) Mechanics',
-    points: 10
+    concept: 'VPN Tunnel MSS Clamping Calculation',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-network-packets-data-framing',
+    lessonSlug: 'level-0-network-packets-data-framing',
+    text: 'How does Path MTU Discovery (PMTUD, RFC 1191) dynamically detect the lowest MTU across an end-to-end network path without performing Layer 3 fragmentation?',
+    options: [
+      'The sender sets the Don\'t Fragment (DF = 1) bit in the IPv4 header; intermediate routers that cannot forward the oversized packet drop it and return an ICMP Type 3 Code 4 message containing their MTU',
+      'The sender queries the local DNS server for the path MTU record',
+      'The router converts all packets into jumbo frames automatically',
+      'The sender floods broadcast frames to all intermediate switches',
+    ],
+    correctOption: 0,
+    explanation:
+      'PMTUD relies on setting DF=1. If an intermediate link MTU is exceeded, the router drops the packet and responds with an ICMP Type 3 Code 4 ("Fragmentation Needed and DF set") specifying its MTU size, allowing the sender to adjust MSS.',
+    explanationsJson: {
+      1: 'DNS does not track hop-by-hop interface MTUs.',
+      2: 'Routers cannot force jumbo frames across non-jumbo links.',
+      3: 'PMTUD uses unicast ICMP feedback, not broadcast flooding.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'PMTUD Protocol Mechanics',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-network-packets-data-framing',
+    lessonSlug: 'level-0-network-packets-data-framing',
+    text: 'What is the primary architectural penalty when an IP packet is subjected to Layer 3 fragmentation across a low-MTU WAN link?',
+    options: [
+      'If any single fragment is dropped in transit, the entire original packet is lost and must be retransmitted, while intermediate routers suffer CPU overhead buffering fragments',
+      'The packet payload is permanently encrypted',
+      'The destination MAC address is deleted',
+      'The Ethernet cable speed is reduced from 1 Gbps to 10 Mbps',
+    ],
+    correctOption: 0,
+    explanation:
+      'IP fragmentation lacks per-fragment retransmission. If 1 of 5 fragments is dropped, the destination host discards all 4 received fragments, multiplying effective packet loss and wasting network bandwidth.',
+    explanationsJson: {
+      1: 'Fragmentation splits packets into smaller IP slices; it does not encrypt data.',
+      2: 'MAC headers are re-encapsulated normally per fragment.',
+      3: 'Physical link negotiation speed is independent of packet fragmentation.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'IP Fragmentation Performance Penalties',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-network-packets-data-framing',
+    lessonSlug: 'level-0-network-packets-data-framing',
+    text: 'A network engineer notices that users connecting through a VPN tunnel can send small ping packets and connect via SSH, but large file transfers and web pages freeze indefinitely. What is the root cause of this "PMTUD Black Hole"?',
+    options: [
+      'An intermediate firewall is dropping all ICMP messages, preventing the ICMP Type 3 Code 4 "Packet Too Big" notifications from reaching the sender when large packets with DF=1 are dropped',
+      'The web server has disabled HTTPS port 443',
+      'The client computer has run out of private IPv4 addresses',
+      'The Ethernet switch has disabled spanning tree protocol',
+    ],
+    correctOption: 0,
+    explanation:
+      'When firewalls indiscriminately block ICMP, the sender never receives the PMTUD "Packet Too Big" alert. The sender keeps retransmitting oversized packets with DF=1, which the router silently drops, creating a black hole.',
+    explanationsJson: {
+      1: 'If port 443 were disabled, initial connection would fail rather than freezing on large data.',
+      2: 'The client already has an active IP address.',
+      3: 'STP loops cause broadcast storms, not selective MTU black holes.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+    questionType: QuestionType.TROUBLESHOOTING,
+    concept: 'PMTUD Black Hole Diagnosis',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-level-0-network-packets-data-framing',
+    lessonSlug: 'level-0-network-packets-data-framing',
+    text: 'Which Cisco IOS command is applied on a router interface to automatically intercept TCP SYN packets and rewrite the advertised Maximum Segment Size to 1360 bytes for VPN traffic?',
+    options: [
+      'ip tcp adjust-mss 1360',
+      'mtu 1360',
+      'ip fragmentation disable',
+      'tcp window-size 1360',
+    ],
+    correctOption: 0,
+    explanation:
+      '`ip tcp adjust-mss <bytes>` enables TCP MSS clamping, modifying the MSS option inside TCP SYN packets passing through the router to ensure endpoints never exceed the tunnel MTU.',
+    explanationsJson: {
+      1: '`mtu` configures the physical interface Layer 3 MTU, not TCP MSS rewriting.',
+      2: 'Invalid command.',
+      3: '`tcp window-size` configures buffer windows, not MSS clamping.',
+    },
+    difficulty: CourseLevel.FOUNDATIONAL,
+    cognitiveLevel: CognitiveLevel.APPLICATION,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'TCP MSS Clamping Configuration',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------
@@ -2246,94 +2350,146 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-ip-addressing-ipv4-overview',
     lessonSlug: 'ip-addressing-ipv4-overview',
-    text: 'In legacy classful IPv4 addressing (RFC 791), what default subnet mask and host capacity were assigned to all Class B network blocks (first octet 128 to 191)?',
+    text: 'Why was Classless Inter-Domain Routing (CIDR, RFC 1519) introduced in 1993 to replace the original 1981 Classful IPv4 architecture?',
     options: [
-      'Default Mask: 255.255.0.0 (/16) supporting 65,534 usable host IPs',
-      'Default Mask: 255.0.0.0 (/8) supporting 16,777,214 usable host IPs',
-      'Default Mask: 255.255.255.0 (/24) supporting 254 usable host IPs',
-      'Default Mask: 255.255.255.240 (/28) supporting 14 usable host IPs'
+      'To decouple subnet masks from rigid class boundaries (allowing arbitrary /N prefix lengths) and enable route aggregation (supernetting), preventing IPv4 address exhaustion and routing table collapse',
+      'To increase IPv4 address length from 32 bits to 128 bits',
+      'To eliminate the need for routers on the Internet',
+      'To enforce mandatory encryption on all web packets',
     ],
     correctOption: 0,
-    explanation: 'Class B addresses (128.0.0.0 to 191.255.255.255) had a default 16-bit network prefix (/16, 255.255.0.0) leaving 16 host bits ($2^{16} - 2 = 65,534$ usable host addresses).',
+    explanation:
+      'Classful addressing caused massive address waste (e.g. an enterprise needing 300 hosts had to take a full Class B with 65,534 addresses). CIDR enabled tailored prefix sizes (like /23 for 510 hosts) and route summarization.',
     explanationsJson: {
-      1: '255.0.0.0 (/8) is the default mask for Class A networks.',
-      2: '255.255.255.0 (/24) is the default mask for Class C networks.',
-      3: '/28 is a modern classless CIDR subnet mask, not a legacy classful default.'
+      1: '128-bit addresses were introduced by IPv6, not CIDR.',
+      2: 'Routers remain essential for forwarding CIDR prefixes.',
+      3: 'Encryption is handled by TLS/IPsec.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'CIDR Architectural Purpose',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-ip-addressing-ipv4-overview',
+    lessonSlug: 'ip-addressing-ipv4-overview',
+    text: 'What are the first octet numerical ranges and default classful subnet masks for historical Classes A, B, and C?',
+    options: [
+      'Class A = 1–126 (/8), Class B = 128–191 (/16), Class C = 192–223 (/24)',
+      'Class A = 1–100 (/8), Class B = 101–200 (/16), Class C = 201–255 (/24)',
+      'Class A = 0–127 (/16), Class B = 128–192 (/24), Class C = 193–255 (/32)',
+      'Class A = 10.0.0.0 (/8), Class B = 172.16.0.0 (/12), Class C = 192.168.0.0 (/16)',
+    ],
+    correctOption: 0,
+    explanation:
+      'Classful boundaries: Class A spans 1 to 126 (mask 255.0.0.0 /8), Class B spans 128 to 191 (mask 255.255.0.0 /16), and Class C spans 192 to 223 (mask 255.255.255.0 /24). 127 is reserved for loopback.',
+    explanationsJson: {
+      1: 'Arbitrary numbers.',
+      2: 'Incorrect ranges and masks.',
+      3: 'These are RFC 1918 private ranges, not the general classful architecture.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.RECALL,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Classful IPv4 Class B Architecture',
-    points: 10
+    concept: 'Classful First Octet Ranges & Default Masks',
+    points: 10,
   },
   {
     quizId: 'quiz-ip-addressing-ipv4-overview',
     lessonSlug: 'ip-addressing-ipv4-overview',
-    text: 'What was the primary architectural crisis in the early 1990s that forced the IETF to replace Classful addressing with Classless Inter-Domain Routing (CIDR, RFC 1519)?',
+    text: 'An enterprise in 1991 required 300 IPv4 addresses for its campus. Under historical classful rules, why did this allocation cause 99.5% address waste?',
     options: [
-      'Rapid exhaustion of Class B address blocks and exponential explosion of the global Internet routing table due to rigid /8, /16, /24 allocation boundaries',
-      'Ethernet switches were invented and could not process 32-bit IP addresses',
-      'Classful addressing only worked on fiber optic cables and failed on copper wires',
-      'The United States government mandated that all IP addresses must contain exactly 128 bits'
+      'Because Class C (/24) provided only 254 hosts, forcing the organization to receive a full Class B (/16 = 65,534 hosts), leaving 65,234 addresses unused',
+      'Because Class A provided only 126 addresses',
+      'Because routers were unable to process more than 10 packets per second',
+      'Because the enterprise was required to discard all odd-numbered IP addresses',
     ],
     correctOption: 0,
-    explanation: 'Because Class C (/24, 254 hosts) was too small for most organizations, companies were allocated full Class B (/16, 65K hosts) blocks, wasting over 90% of allocated space and rapidly exhausting IPv4 space while bloating global routing tables.',
+    explanation:
+      'With Class C capped at 254 usable hosts, any requirement between 255 and 65,534 hosts forced the allocation of a full Class B (/16), locking 65,000+ unused addresses away from the global pool.',
     explanationsJson: {
-      1: 'Ethernet switches operate at Layer 2 (MAC addresses) and are agnostic to IP class structure.',
-      2: 'Layer 3 IP operates independently of Layer 1 physical media.',
-      3: '128-bit addresses describe IPv6, which was developed later (RFC 2460).'
-    },
-    difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
-    questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'The Historical Necessity of CIDR',
-    points: 10
-  },
-  {
-    quizId: 'quiz-ip-addressing-ipv4-overview',
-    lessonSlug: 'ip-addressing-ipv4-overview',
-    text: 'An organization in 1992 required 350 usable IP addresses. Under Classful rules, it was assigned an entire Class B block. How many IP addresses were wasted in this single allocation?',
-    options: [
-      '65,184 addresses (65,534 usable - 350 needed)',
-      '254 addresses',
-      '16,777,214 addresses',
-      'Zero addresses were wasted'
-    ],
-    correctOption: 0,
-    explanation: 'A Class B network contains 65,534 usable host addresses. Needing only 350 addresses means $65,534 - 350 = 65,184$ addresses were wasted (99.47% waste).',
-    explanationsJson: {
-      1: '254 is the capacity of one Class C network.',
-      2: '16.7 million is the capacity of a Class A network.',
-      3: 'Massive waste occurred because fractional Class B allocations were impossible under classful rules.'
+      1: 'Class A provides 16.7 million hosts.',
+      2: 'Router forwarding speed is independent of classful allocation sizes.',
+      3: 'All usable IP addresses in a subnet are valid.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Classful Address Allocation Waste Calculation',
-    points: 10
+    concept: 'Classful Address Allocation Inefficiency',
+    points: 10,
   },
   {
     quizId: 'quiz-ip-addressing-ipv4-overview',
     lessonSlug: 'ip-addressing-ipv4-overview',
-    text: 'How does modern Classless Inter-Domain Routing (CIDR) eliminate the address waste of the legacy Classful system?',
+    text: 'What is the architectural purpose of Class D and Class E IPv4 address blocks?',
     options: [
-      'CIDR decouples network boundaries from 8-bit octet boundaries, allowing arbitrary prefix lengths (/1 to /32) tailored to exact host requirements',
-      'CIDR converts all IPv4 addresses into 48-bit MAC addresses',
-      'CIDR forces all computers on the Internet to share a single public IP address',
-      'CIDR eliminates the need for routers by using satellite broadcasts'
+      'Class D (224.0.0.0 – 239.255.255.255) is reserved for Multicast; Class E (240.0.0.0 – 255.255.255.255) is reserved for Experimental use',
+      'Class D is for public web servers; Class E is for private home routers',
+      'Class D is for fiber optic networks; Class E is for wireless networks',
+      'Class D is for IPv6 translation; Class E is for DNS root servers',
     ],
     correctOption: 0,
-    explanation: 'CIDR allows network masks of any bit length (/22, /23, /27, /30), enabling network engineers to allocate exact subnet sizes (e.g. /23 for 500 hosts) and aggregate multiple routes into compact supernets.',
+    explanation:
+      'Class D (224.0.0.0/4) is designated for multicast group addressing. Class E (240.0.0.0/4) was set aside by the IETF for experimental and research use.',
     explanationsJson: {
-      1: 'CIDR is an IPv4 Layer 3 prefix scheme, not a Layer 2 MAC conversion.',
-      2: 'Sharing a single public IP is NAT/PAT, not CIDR prefix notation.',
-      3: 'Routers remain the core forwarding devices of CIDR internetworks.'
+      1: 'Public web servers use unicast Class A/B/C addresses.',
+      2: 'Physical media types are Layer 1/2 concerns.',
+      3: 'Class D and E are not protocol translation mechanisms.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Class D Multicast & Class E Experimental Spaces',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-ip-addressing-ipv4-overview',
+    lessonSlug: 'ip-addressing-ipv4-overview',
+    text: 'How does CIDR Route Aggregation (Supernetting) prevent global Internet routing table exhaustion?',
+    options: [
+      'It combines multiple contiguous smaller subnet routes into a single summarized prefix advertisement (e.g. 16 /24 routes advertised as one /20), dramatically reducing routing table entries',
+      'It forces all internet traffic through a single physical router in California',
+      'It converts all IPv4 packets into uncompressed text files',
+      'It shuts down dormant websites automatically',
+    ],
+    correctOption: 0,
+    explanation:
+      'Route aggregation (Supernetting) allows service providers to summarize multiple contiguous network blocks into a single routing table entry, reducing the memory and processing load on global BGP core routers.',
+    explanationsJson: {
+      1: 'The Internet is a distributed global mesh, not a single centralized router.',
+      2: 'Packets retain standard binary headers.',
+      3: 'Route aggregation manages routing announcements, not website lifecycles.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'CIDR Prefix Decoupling Principle',
-    points: 10
+    concept: 'CIDR Route Aggregation / Supernetting',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-ip-addressing-ipv4-overview',
+    lessonSlug: 'ip-addressing-ipv4-overview',
+    text: 'A network technician encounters a legacy configuration using `192.168.1.0/28`. A colleague claims this is invalid because "192.168.x.x is Class C and must use /24". How should the technician explain the colleague\'s misconception?',
+    options: [
+      'Under modern Classless Inter-Domain Routing (CIDR), fixed classes are obsolete; any IP address can use any valid subnet prefix length (/28 provides 14 usable hosts)',
+      'The colleague is correct; subnets other than /24 will damage the network interface card',
+      'A /28 mask only works on token ring networks',
+      'The IP address must be converted to hexadecimal before applying a /28 mask',
+    ],
+    correctOption: 0,
+    explanation:
+      'CIDR decoupled IP addresses from fixed classful byte boundaries. Any IPv4 address can be subnetted using any prefix length from /1 to /32.',
+    explanationsJson: {
+      1: 'Subnet masks are mathematical bit filters and do not damage hardware.',
+      2: 'CIDR works uniformly across all modern Ethernet and IP media.',
+      3: 'Binary bitmasking is performed automatically by the OS kernel.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+    questionType: QuestionType.TROUBLESHOOTING,
+    concept: 'Classless CIDR vs Classful Misconceptions',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------
@@ -2342,94 +2498,146 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   {
     quizId: 'quiz-subnetting-cidr-overview',
     lessonSlug: 'subnetting-cidr-overview',
-    text: 'What is the Cardinal Rule that must be followed when designing a Variable Length Subnet Masking (VLSM) address plan to prevent address fragmentation and overlapping subnets?',
+    text: 'When designing a Variable Length Subnet Masking (VLSM) address plan for multiple departments of different sizes, what is the fundamental "Golden Rule" of allocation order?',
     options: [
-      'Always sort all departmental host requirements from LARGEST to SMALLEST before assigning subnet address blocks',
-      'Always allocate small point-to-point /30 links first at the beginning of the address block',
-      'Assign identical /24 subnet masks to every department regardless of host count',
-      'Allocate addresses alphabetically based on department name'
+      'Always sort requirements and allocate subnets starting with the LARGEST host requirement first, proceeding in descending order down to the smallest',
+      'Always allocate the smallest /30 WAN links first to lock in the beginning of the address space',
+      'Always assign odd-numbered subnets to sales and even-numbered subnets to engineering',
+      'Always use the exact same /24 subnet mask for all departments regardless of host count',
     ],
     correctOption: 0,
-    explanation: 'The fundamental rule of VLSM design is to allocate from largest host requirement to smallest. Larger subnets (e.g. /26) must align with larger power-of-2 boundaries (0, 64, 128, 192), which is only possible if smaller subnets do not fragment the space first.',
+    explanation:
+      'The fundamental rule of VLSM is to allocate from Largest to Smallest. Subnets can only start on boundaries that are multiples of their block size. Allocating small subnets first fragments the address space and makes it impossible to align larger blocks.',
     explanationsJson: {
-      1: 'Allocating small /30 links first fragments the space and prevents placing larger /26 or /27 subnets cleanly.',
-      2: 'Assigning identical masks is FLSM (Fixed Length Subnet Masking), not VLSM.',
-      3: 'Department names have no mathematical relation to binary block boundaries.'
+      1: 'Allocating small subnets first causes address fragmentation and overlap errors.',
+      2: 'Department function does not dictate mathematical parity.',
+      3: 'Using the same mask for all departments is FLSM, not VLSM.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'The Cardinal Rule of VLSM Allocation',
-    points: 10
+    concept: 'VLSM Largest-to-Smallest Allocation Rule',
+    points: 10,
   },
   {
     quizId: 'quiz-subnetting-cidr-overview',
     lessonSlug: 'subnetting-cidr-overview',
-    text: 'Given base network `192.168.10.0/24`, the Engineering department is assigned the first subnet `192.168.10.0/26` (62 usable hosts). What is the exact starting Network ID and Subnet Mask for the next department (Sales) which requires 25 usable hosts?',
+    text: 'Which CIDR prefix length and subnet mask is standard for a 2-host point-to-point WAN router serial link?',
     options: [
-      'Network ID: 192.168.10.64 with Subnet Mask 255.255.255.224 (/27)',
-      'Network ID: 192.168.10.63 with Subnet Mask 255.255.255.192 (/26)',
-      'Network ID: 192.168.10.128 with Subnet Mask 255.255.255.240 (/28)',
-      'Network ID: 192.168.10.32 with Subnet Mask 255.255.255.224 (/27)'
+      '/30 (Subnet Mask: 255.255.255.252, Block size: 4, Usable hosts: 2)',
+      '/28 (Subnet Mask: 255.255.255.240, Block size: 16, Usable hosts: 14)',
+      '/24 (Subnet Mask: 255.255.255.0, Block size: 256, Usable hosts: 254)',
+      '/31 (Subnet Mask: 255.255.255.254, Block size: 2, Usable hosts: 0)',
     ],
     correctOption: 0,
-    explanation: 'Subnet 1 (`192.168.10.0/26`) has block size 64 and spans `.0` to `.63`. The next available address is `192.168.10.64`. For 25 hosts, we need block size 32 ($2^5 = 32$), which is prefix `/27` (mask 255.255.255.224). Range is `192.168.10.64/27` (.64 to .95).',
+    explanation:
+      'A `/30` prefix uses 2 host bits ($2^2 = 4$ addresses), providing exactly $4 - 2 = 2$ usable host IPs (one for each router interface) with zero address waste.',
     explanationsJson: {
-      1: '.63 is the broadcast address of the first subnet and cannot be a Network ID.',
-      2: '.128 skips unallocated address space and /28 only supports 14 hosts (Sales needs 25).',
-      3: '.32 falls inside the first /26 subnet (.0 to .63), creating a catastrophic address overlap.'
+      1: '/28 wastes 12 host IPs on a 2-router link.',
+      2: '/24 wastes 252 host IPs on a 2-router link.',
+      3: 'Traditional /31 leaves no standard network/broadcast IDs (unless RFC 3021 is explicitly supported).',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: '/30 Point-to-Point WAN Subnets',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-subnetting-cidr-overview',
+    lessonSlug: 'subnetting-cidr-overview',
+    text: 'A network designer allocates `192.168.1.0/26` to Department A. What is the valid Network ID, Usable Host Range, and Broadcast ID for this subnet?',
+    options: [
+      'Network ID: 192.168.1.0, Usable: 192.168.1.1 – 192.168.1.62, Broadcast: 192.168.1.63',
+      'Network ID: 192.168.1.0, Usable: 192.168.1.0 – 192.168.1.63, Broadcast: 192.168.1.64',
+      'Network ID: 192.168.1.1, Usable: 192.168.1.2 – 192.168.1.62, Broadcast: 192.168.1.63',
+      'Network ID: 192.168.1.0, Usable: 192.168.1.1 – 192.168.1.254, Broadcast: 192.168.1.255',
+    ],
+    correctOption: 0,
+    explanation:
+      'A `/26` subnet has a block size of 64 ($2^6$). Range: Network ID is `.0`, first usable is `.1`, last usable is `.62`, and broadcast ID is `.63`.',
+    explanationsJson: {
+      1: '.0 is the Network ID and cannot be assigned to a host.',
+      2: 'Network ID must be .0, not .1.',
+      3: 'That is a /24 subnet range, not a /26.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'VLSM Subnet Block Progression',
-    points: 10
+    concept: '/26 Subnet Boundary Math',
+    points: 10,
   },
   {
     quizId: 'quiz-subnetting-cidr-overview',
     lessonSlug: 'subnetting-cidr-overview',
-    text: 'An enterprise network requires two point-to-point router WAN links requiring exactly 2 usable host IP addresses each. Which two non-overlapping subnets immediately follow `192.168.10.96/28` (.96 to .111)?',
+    text: 'Following the allocation of `192.168.1.0/26` (.0 to .63), Department B requires 25 host addresses. What is the appropriate CIDR prefix and resulting subnet range for Department B?',
     options: [
-      'WAN Link 1: 192.168.10.112/30 and WAN Link 2: 192.168.10.116/30',
-      'WAN Link 1: 192.168.10.111/30 and WAN Link 2: 192.168.10.115/30',
-      'WAN Link 1: 192.168.10.128/30 and WAN Link 2: 192.168.10.132/30',
-      'WAN Link 1: 192.168.10.112/29 and WAN Link 2: 192.168.10.120/29'
+      '`192.168.1.64/27` (Network: .64, Usable: .65 – .94, Broadcast: .95)',
+      '`192.168.1.64/26` (Network: .64, Usable: .65 – .126, Broadcast: .127)',
+      '`192.168.1.32/27` (Network: .32, Usable: .33 – .62, Broadcast: .63)',
+      '`192.168.1.64/28` (Network: .64, Usable: .65 – .78, Broadcast: .79)',
     ],
     correctOption: 0,
-    explanation: 'The prior `/28` subnet ends at `.111`. The next available IP is `.112`. A /30 has block size 4: WAN 1 is `192.168.10.112/30` (.112-.115). WAN 2 begins at `.116`: `192.168.10.116/30` (.116-.119). Both are perfectly contiguous with zero overlap.',
+    explanation:
+      '25 hosts requires a `/27` ($2^5 - 2 = 30$ hosts, block size 32). Starting at the next boundary (`.64`), the subnet spans `.64` to `.95` (usable `.65` to `.94`).',
     explanationsJson: {
-      1: '.111 is the broadcast address of the prior subnet and cannot be used.',
-      2: '.128 unnecessarily skips valid address space (.112 to .127).',
-      3: '/29 subnets have block size 8 (6 usable hosts), wasting 4 addresses per link when /30 is optimal.'
+      1: '/26 provides 62 hosts, which is unnecessarily large for 25 hosts.',
+      2: '.32 overlaps with Department A (.0 to .63).',
+      3: '/28 provides only 14 usable hosts, insufficient for 25 hosts.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Point-to-Point /30 VLSM Allocation',
-    points: 10
+    concept: 'Sequential VLSM Sizing & Block Assignment',
+    points: 10,
   },
   {
     quizId: 'quiz-subnetting-cidr-overview',
     lessonSlug: 'subnetting-cidr-overview',
-    text: 'A network administrator configures a host with IP `192.168.10.95/27` on the Sales subnet. The host is unable to communicate with any other workstation. What is the root cause of this failure?',
+    text: 'Why does attempting to allocate a `/26` subnet starting at IP address `192.168.1.32` result in a configuration error on an enterprise router?',
     options: [
-      '`192.168.10.95` is the reserved Broadcast Address of the `192.168.10.64/27` subnet (block size 32, range .64 to .95) and cannot be assigned to an individual host',
-      'A /27 subnet mask is invalid on Ethernet networks',
-      'The host requires an optical transceiver to use IP addresses ending in 95',
-      'The IP address belongs to the public Internet space'
+      'Because a /26 has a block size of 64 and can only legally begin on boundaries that are exact multiples of 64 (.0, .64, .128, .192)',
+      'Because .32 is a reserved loopback address',
+      'Because routers only support even-numbered host bits',
+      'Because /26 masks can only be applied to fiber optic switchports',
     ],
     correctOption: 0,
-    explanation: 'Subnet `192.168.10.64/27` has block size 32. The range is 192.168.10.64 (Network ID) through 192.168.10.95 (Broadcast ID). Usable host IPs are strictly .65 through .94. Assigning .95 assigns the broadcast address, which operating systems reject.',
+    explanation:
+      'Subnet Network IDs must align on mathematical multiples of the block size. A `/26` has block size 64, meaning valid Network IDs are exclusively `.0`, `.64`, `.128`, and `.192`. Starting at `.32` violates boundary alignment.',
     explanationsJson: {
-      1: '/27 is a standard, valid subnet mask.',
-      2: 'Physical transceivers have no relation to IP octet values.',
-      3: '192.168.x.x is private RFC 1918 space, not public Internet.'
+      1: '127.0.0.0/8 is loopback, not 192.168.1.32.',
+      2: 'Routers support all host bit counts from 0 to 32.',
+      3: 'Subnet masks apply to all network interface types.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Subnet Block Size Boundary Alignment Rules',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-subnetting-cidr-overview',
+    lessonSlug: 'subnetting-cidr-overview',
+    text: 'A network administrator attempts to assign `192.168.1.64/26` to Router Interface GigabitEthernet0/1 while `192.168.1.32/27` is already assigned to GigabitEthernet0/0. The router rejects the command. What is the root cause?',
+    options: [
+      'Overlapping Subnet Error: The range of the /26 (.0 to .63 is taken, so .64 to .127) overlaps with the /27 (.32 to .63), causing routing ambiguity',
+      'The router interface speed is set to 10 Mbps',
+      'The subnet mask length exceeds 32 bits',
+      'The router memory is completely full',
+    ],
+    correctOption: 0,
+    explanation:
+      'Because the subnets overlap, the router cannot determine which interface to forward traffic to for overlapping addresses, triggering an overlapping subnet rejection error.',
+    explanationsJson: {
+      1: 'Interface link speed does not trigger IP subnet overlap errors.',
+      2: 'Both /26 and /27 are standard sub-32-bit masks.',
+      3: 'This is a logical routing topology error, not an out-of-memory condition.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
     questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'Broadcast Address Assignment Error in VLSM',
-    points: 10
+    concept: 'Overlapping Subnet Troubleshooting',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------
@@ -2825,7 +3033,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
   },
 
   // -------------------------------------------------------------------------
-  // Topic 11: The Integrated Host Boot-Up Lifecycle
+  // Lesson 11: Host Boot-Up Lifecycle (dhcp-dns-overview)
   // -------------------------------------------------------------------------
   {
     quizId: 'quiz-dhcp-dns-overview',
@@ -2835,89 +3043,141 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       'Physical Link Up -> DHCP Lease Acquisition -> Gratuitous ARP (DAD) -> Default Gateway ARP Resolution -> DNS Name Resolution -> Outbound TCP 3-Way Handshake & HTTPS GET',
       'HTTPS GET -> DNS Resolution -> TCP Handshake -> DHCP Lease -> Physical Link Up',
       'DNS Resolution -> Default Gateway ARP -> DHCP Lease -> Physical Link Up -> TCP Handshake',
-      'Default Gateway ARP -> DNS Resolution -> Physical Link Up -> DHCP Lease -> HTTPS GET'
+      'Default Gateway ARP -> DNS Resolution -> Physical Link Up -> DHCP Lease -> HTTPS GET',
     ],
     correctOption: 0,
-    explanation: 'A host must first establish Physical Link Up (PHY negotiation), acquire its IP configuration via DHCP (DORA), verify IP uniqueness via Gratuitous ARP, resolve the Default Gateway MAC via ARP, resolve the target domain name via DNS, and finally initiate the TCP 3-way handshake and HTTPS GET request.',
+    explanation:
+      'A host must first establish Physical Link Up, acquire its IP/gateway/DNS configuration via DHCP, verify IP uniqueness via Gratuitous ARP, resolve the Gateway MAC via ARP, resolve the domain name via DNS, and finally initiate the TCP handshake and HTTPS GET request.',
     explanationsJson: {
-      1: 'Reversed sequence; application requests cannot occur before physical link and IP configuration.',
-      2: 'DNS requires an IP address and default gateway route before it can query a DNS server.',
-      3: 'A host cannot ARP for its gateway before learning its gateway IP address via DHCP.'
+      1: 'Reversed order.',
+      2: 'DNS requires an IP address first.',
+      3: 'Physical link must precede all packets.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
     concept: 'Integrated Host Boot-Up Sequence',
-    points: 10
+    points: 10,
   },
   {
     quizId: 'quiz-dhcp-dns-overview',
     lessonSlug: 'dhcp-dns-overview',
-    text: 'During the host boot-up lifecycle, why must the client resolve the MAC address of its Default Gateway via ARP before it can send a DNS query to public DNS resolver 8.8.8.8?',
+    text: 'When a host at `192.168.1.50` transmits an HTTPS request to web server `93.184.216.34` via Default Gateway `192.168.1.1`, what addresses are placed in the Layer 2 Ethernet frame and Layer 3 IP packet headers?',
     options: [
-      'Because 8.8.8.8 is on a remote subnet; the client must encapsulate the DNS IP packet inside an Ethernet frame addressed to the local Default Gateway router MAC',
-      'Because DNS root servers require the gateway MAC address to look up domain names',
-      'Because ARP assigns the client its IPv4 address before DNS can run',
-      'Because DHCP servers only accept DNS queries that are signed by the gateway'
+      'Layer 3: Src IP = 192.168.1.50, Dst IP = 93.184.216.34 | Layer 2: Src MAC = Host MAC, Dst MAC = Default Gateway Router MAC',
+      'Layer 3: Src IP = 192.168.1.50, Dst IP = 192.168.1.1 | Layer 2: Src MAC = Host MAC, Dst MAC = Web Server MAC',
+      'Layer 3: Src IP = 192.168.1.1, Dst IP = 93.184.216.34 | Layer 2: Src MAC = Default Gateway MAC, Dst MAC = Broadcast',
+      'Layer 3: Src IP = 93.184.216.34, Dst IP = 192.168.1.50 | Layer 2: Src MAC = Host MAC, Dst MAC = Host MAC',
     ],
     correctOption: 0,
-    explanation: 'When a host determines that the destination IP (8.8.8.8) is off-subnet, it knows it must forward the packet through its local Default Gateway. The host sends an ARP Request for the Gateway IP to obtain the Gateway MAC needed for the Layer 2 Ethernet frame.',
+    explanation:
+      'In remote internetwork routing, Layer 3 IP addresses represent the end-to-end source and ultimate destination (Src IP = Host, Dst IP = Web Server), while Layer 2 MAC addresses change hop-by-hop (Src MAC = Host, Dst MAC = Default Gateway router).',
     explanationsJson: {
-      1: 'DNS root servers process DNS query payloads; they do not inspect client Layer 2 gateway MAC headers.',
-      2: 'DHCP leases IP addresses, not ARP.',
-      3: 'DHCP and DNS are distinct protocols operating on UDP ports 67/68 and 53.'
+      1: 'The destination IP is the remote server, not the gateway IP.',
+      2: 'The source IP is the originating client host, not the gateway.',
+      3: 'Source and destination IP are reversed.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Gateway ARP Resolution for Off-Subnet DNS',
-    points: 10
+    concept: 'Layer 2 vs Layer 3 Addressing in Remote Forwarding',
+    points: 10,
   },
   {
     quizId: 'quiz-dhcp-dns-overview',
     lessonSlug: 'dhcp-dns-overview',
-    text: 'When a client host (192.168.1.50, MAC 00:AA) transmits an outbound HTTPS request to web server 93.184.216.34 via default gateway 192.168.1.1 (MAC 00:BB), what are the Layer 2 and Layer 3 destination addresses in the transmitted frame?',
+    text: 'What is the primary function of transmitting a Gratuitous ARP (GARP) broadcast immediately following DHCP lease acquisition (Phase 3)?',
     options: [
-      'Layer 3 Destination IP: 93.184.216.34 | Layer 2 Destination MAC: 00:BB (Default Gateway MAC)',
-      'Layer 3 Destination IP: 192.168.1.1 | Layer 2 Destination MAC: 00:AA',
-      'Layer 3 Destination IP: 93.184.216.34 | Layer 2 Destination MAC: FF:FF:FF:FF:FF:FF (Broadcast)',
-      'Layer 3 Destination IP: 255.255.255.255 | Layer 2 Destination MAC: 00:BB'
+      'Duplicate Address Detection (DAD): To verify that no other active host on the local broadcast domain is already using the newly leased IP address',
+      'To download the host\'s operating system updates from the gateway',
+      'To encrypt the client\'s wireless credentials',
+      'To synchronize the computer\'s real-time clock with NTP',
     ],
     correctOption: 0,
-    explanation: 'The Layer 3 Destination IP always identifies the ultimate end-to-end destination server (93.184.216.34) and does not change. The Layer 2 Destination MAC identifies the next-hop physical interface (the Default Gateway router MAC 00:BB) on the local broadcast domain.',
+    explanation:
+      'Gratuitous ARP broadcasts an ARP Request for the host\'s own new IP. If another host replies, an IP conflict is detected, allowing the client to reject the lease and request a new IP.',
     explanationsJson: {
-      1: '192.168.1.1 is the gateway router IP, not the web server target IP.',
-      2: 'Unicast web traffic is never broadcast to FF:FF:FF:FF:FF:FF.',
-      3: '255.255.255.255 is a Layer 3 broadcast, invalid for unicast HTTPS.'
+      1: 'OS updates use HTTPS/TCP, not GARP.',
+      2: 'Wireless encryption is negotiated via 802.11 4-way handshakes.',
+      3: 'Clock synchronization is performed by NTP (UDP 123).',
     },
     difficulty: CourseLevel.BEGINNER,
-    cognitiveLevel: CognitiveLevel.APPLICATION,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
     questionType: QuestionType.MULTIPLE_CHOICE,
-    concept: 'Destination IP vs Destination MAC in Outbound Traffic',
-    points: 10
+    concept: 'Gratuitous ARP Duplicate Address Detection',
+    points: 10,
   },
   {
     quizId: 'quiz-dhcp-dns-overview',
     lessonSlug: 'dhcp-dns-overview',
-    text: 'A user boots their computer and cannot load websites. An engineer diagnoses the sequential lifecycle: (1) Link LED is solid green, (2) `ipconfig` shows IP 192.168.1.50 and Gateway 192.168.1.1, (3) `ping 192.168.1.1` succeeds, (4) `ping 8.8.8.8` succeeds, (5) `nslookup google.com` times out. At which stage of the boot lifecycle did the failure occur?',
+    text: 'A technician observes that a client computer can successfully ping external IP address `8.8.8.8`, but entering `https://www.example.com` into a web browser results in a timeout error. Which lifecycle phase has failed?',
     options: [
-      'Phase 5: DNS Name Resolution failed, because IP routing and gateway reachability are fully operational but domain name lookup is timing out',
-      'Phase 1: Physical Link Up failed',
-      'Phase 2: DHCP Lease Acquisition failed',
-      'Phase 4: Default Gateway ARP Resolution failed'
+      'Phase 5: DNS Name Resolution failed to translate `www.example.com` into an IP address',
+      'Phase 1: Physical Link is disconnected',
+      'Phase 2: DHCP server failed to allocate an IP address',
+      'Phase 4: Default Gateway ARP resolution failed',
     ],
     correctOption: 0,
-    explanation: 'Because link up (Phase 1), DHCP IP assignment (Phase 2), Gateway ARP (Phase 4), and IP routing to public 8.8.8.8 all succeeded, the failure is isolated specifically to Phase 5 (DNS Name Resolution), pointing to an uncontactable or misconfigured DNS server.',
+    explanation:
+      'Because pinging `8.8.8.8` succeeds, Physical Link (Phase 1), IP leasing (Phase 2), Gateway ARP (Phase 4), and Layer 3 routing are all fully operational. Failure to load domain names isolates the problem directly to DNS resolution (Phase 5).',
     explanationsJson: {
-      1: 'Solid green link LED and successful local pings prove Physical Link Up succeeded.',
-      2: 'A valid 192.168.1.50 IP proves DHCP leasing succeeded.',
-      3: 'Successful ping to the gateway proves Gateway ARP and Layer 2 forwarding succeeded.'
+      1: 'If the physical link were disconnected, pinging 8.8.8.8 would fail.',
+      2: 'If DHCP had failed, the host would have no IP to ping 8.8.8.8.',
+      3: 'If Gateway ARP had failed, packets could not leave the local LAN to reach 8.8.8.8.',
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
     questionType: QuestionType.TROUBLESHOOTING,
-    concept: 'Host Boot Lifecycle Fault Isolation',
-    points: 10
+    concept: 'Lifecycle Sequential Troubleshooting & DNS Isolation',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-dhcp-dns-overview',
+    lessonSlug: 'dhcp-dns-overview',
+    text: 'Why does an operating system execute an ARP request for the Default Gateway IP address before it can transmit a DNS query to recursive resolver `8.8.8.8`?',
+    options: [
+      'Because 8.8.8.8 is on a remote subnet, the host must encapsulate the IP packet in a Layer 2 Ethernet frame addressed to the local Default Gateway router\'s MAC address',
+      'Because DNS queries must be converted into broadcast frames',
+      'Because the DNS server MAC address is always identical to the client MAC address',
+      'Because the router disables DNS until ARP is executed',
+    ],
+    correctOption: 0,
+    explanation:
+      'When the destination IP (`8.8.8.8`) is outside the local subnet, the host knows it cannot reach it directly at Layer 2. It must forward the packet to its Default Gateway, requiring the Gateway\'s MAC address in the frame header.',
+    explanationsJson: {
+      1: 'DNS queries are unicast UDP packets, not broadcasts.',
+      2: 'MAC addresses are unique physical hardware identifiers.',
+      3: 'ARP is triggered naturally by the host TCP/IP stack whenever an IP route requires Layer 2 framing.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'Default Gateway ARP Resolution Mechanics',
+    points: 10,
+  },
+  {
+    quizId: 'quiz-dhcp-dns-overview',
+    lessonSlug: 'dhcp-dns-overview',
+    text: 'During Phase 6 (Transport Handshake), which TCP flags are exchanged between client and server to establish a reliable connection before transmitting HTTP GET data?',
+    options: [
+      'SYN (Client -> Server) -> SYN-ACK (Server -> Client) -> ACK (Client -> Server)',
+      'FIN -> FIN-ACK -> RST',
+      'PING -> PONG -> ACK',
+      'DISCOVER -> OFFER -> REQUEST',
+    ],
+    correctOption: 0,
+    explanation:
+      'TCP connection establishment uses the 3-Way Handshake: SYN from client, SYN-ACK from server, and ACK from client, establishing initial sequence numbers and socket state.',
+    explanationsJson: {
+      1: 'FIN is used for connection teardown, not establishment.',
+      2: 'PING/PONG are ICMP echo messages, not TCP flags.',
+      3: 'DISCOVER/OFFER/REQUEST is the DHCP DORA process.',
+    },
+    difficulty: CourseLevel.BEGINNER,
+    cognitiveLevel: CognitiveLevel.RECALL,
+    questionType: QuestionType.MULTIPLE_CHOICE,
+    concept: 'TCP 3-Way Handshake Flags',
+    points: 10,
   },
 
   // -------------------------------------------------------------------------

@@ -905,42 +905,78 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'BOOTUP_LIFECYCLE_TIMELINE',
     introduction:
       'Master the complete end-to-end orchestration of all core networking protocols in chronological sequence: Physical Link Up -> DHCP Lease Acquisition (DORA) -> Gratuitous ARP (Duplicate Address Detection) -> Default Gateway ARP Resolution -> DNS Name Resolution -> Outbound TCP Handshake & HTTPS GET Request.',
-    stepMetadata: {
-      step1_objective:
+    contentV2: {
+      objective:
         'Understand the complete chronological sequence of network protocols executed when a host boots up, connects to a network, resolves names, and transmits its first application-layer packet.',
-      step2_prerequisites: [
+      prerequisites: [
         'level-0-dns-internet-phonebook',
         'level-0-dhcp-automatic-ip-allocation',
         'arp-protocol-overview',
         'ethernet-mac-addresses-overview',
       ],
-      step3_whyItMatters:
+      whyItMatters:
         'Network troubleshooting requires understanding how protocols interact sequentially. If a user cannot browse the web, knowing whether the failure occurred during DHCP leasing, ARP gateway resolution, DNS name translation, or TCP transport connection isolates the exact failure point.',
-      step4_coreConcept:
-        'When an unconfigured computer plugs an Ethernet cable into a switch and requests `https://api.example.com`, six distinct protocol phases execute in strict chronological orchestration: (1) **Physical Link Up**: PHY autonegotiation establishes 1 Gbps Full-Duplex Layer 1/2 connectivity. (2) **DHCP Lease (DORA)**: Client broadcasts Discover -> receives Offer -> sends Request -> receives ACK with IP `192.168.1.50`, Mask `/24`, Gateway `192.168.1.1`, DNS `8.8.8.8`. (3) **Duplicate Address Detection (GARP)**: Client broadcasts Gratuitous ARP for `192.168.1.50`; zero replies verify IP uniqueness. (4) **Default Gateway ARP Resolution**: Client evaluates `8.8.8.8` (Remote); sends ARP Request for Gateway `192.168.1.1` -> receives Gateway MAC `00:11:22:33:44:55`. (5) **DNS Name Resolution**: Client sends DNS UDP query for `api.example.com` to `8.8.8.8:53` via Gateway MAC -> receives DNS Answer `93.184.216.34`. (6) **Transport Handshake & HTTP Request**: Client sends TCP SYN to `93.184.216.34:443` via Gateway MAC -> completes 3-way handshake -> sends TLS/HTTPS GET request.',
-      step5_technicalAnatomy: {
-        title: 'The 6-Phase Protocol Orchestration Architecture',
-        description: 'Chronological timeline, protocols involved, and packet header transitions.',
-        components: [
-          { name: 'Phase 1: Physical Link Up & Carrier Detect', detail: 'PHY transceiver electrical autonegotiation establishes link pulse synchronization and full-duplex operation.' },
-          { name: 'Phase 2: DHCP DORA Lease Acquisition', detail: 'Client acquires IP parameters (IP, Subnet Mask, Default Gateway, DNS Servers) via UDP ports 67/68.' },
-          { name: 'Phase 3: Gratuitous ARP / Duplicate Address Detection', detail: 'Client broadcasts ARP Probe for its newly leased IP to ensure zero address conflict with other LAN nodes.' },
-          { name: 'Phase 4: Default Gateway ARP Resolution', detail: 'Client sends ARP Request for Default Gateway IP `192.168.1.1` to obtain Gateway MAC `00:11:22:33:44:55`.' },
-          { name: 'Phase 5: DNS Recursive Name Resolution', detail: 'Client sends UDP query on port 53 to DNS server `8.8.8.8` (framed to Gateway MAC) to resolve `api.example.com` to `93.184.216.34`.' },
-          { name: 'Phase 6: TCP Handshake & HTTPS Application Session', detail: 'Client initiates TCP 3-Way Handshake (SYN -> SYN-ACK -> ACK) to `93.184.216.34:443` and begins HTTPS session.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'Phase 1 (Link Up)', action: 'Cable plugged in; switch port transitions to Up/Up; MAC learned in CAM table.' },
-          { stepNumber: 2, title: 'Phase 2 (DHCP DORA)', action: 'Client broadcasts Discover from 0.0.0.0; server returns ACK with IP 192.168.1.50, Mask /24, Gateway 192.168.1.1, DNS 8.8.8.8.' },
-          { stepNumber: 3, title: 'Phase 3 (GARP DAD)', action: 'Client broadcasts Gratuitous ARP for 192.168.1.50 to verify no other host claims the address.' },
-          { stepNumber: 4, title: 'Phase 4 (Gateway ARP)', action: 'Client sends ARP Request for Gateway 192.168.1.1; Gateway returns unicast ARP Reply with its MAC.' },
-          { stepNumber: 5, title: 'Phase 5 (DNS Query)', action: 'Client encapsulates DNS query for `api.example.com` into UDP packet to 8.8.8.8, framed to Gateway MAC.' },
-          { stepNumber: 6, title: 'Phase 6 (TCP SYN & HTTP)', action: 'Client receives IP 93.184.216.34 and transmits TCP SYN packet framed to Gateway MAC.' },
-        ],
-      },
-      step7_packetHeaderView: {
+      explanation:
+        'When an unconfigured computer plugs an Ethernet cable into a switch and requests `https://api.example.com`, six distinct protocol phases execute in strict chronological orchestration:\n\n### 1. Phase 1: Physical Link Up & Carrier Detect\nPHY transceiver electrical autonegotiation establishes link pulse synchronization and full-duplex operation at Layer 1 and Layer 2.\n\n### 2. Phase 2: DHCP Lease (DORA)\nClient broadcasts Discover (`0.0.0.0:68` -> `255.255.255.255:67`) -> receives Offer -> sends Request -> receives ACK containing its IP (`192.168.1.50`), Subnet Mask (`/24`), Default Gateway (`192.168.1.1`), and DNS Servers (`8.8.8.8`).\n\n### 3. Phase 3: Duplicate Address Detection (GARP)\nClient broadcasts Gratuitous ARP (GARP) for `192.168.1.50` to verify that no other host on the broadcast domain is using the leased address.\n\n### 4. Phase 4: Default Gateway ARP Resolution\nClient evaluates `8.8.8.8` against its local subnet mask (`/24`), determines DNS is remote, and sends an ARP Request broadcast asking "Who has `192.168.1.1`?" to learn the Gateway MAC (`00:11:22:33:44:55`).\n\n### 5. Phase 5: DNS Recursive Name Resolution\nClient sends a DNS UDP query for `api.example.com` to `8.8.8.8:53` (framed to Gateway MAC `00:11:22:33:44:55`) -> receives DNS Answer IP `93.184.216.34`.\n\n### 6. Phase 6: Transport Handshake & HTTPS Request\nClient sends a TCP SYN packet to `93.184.216.34:443` (framed to Gateway MAC) -> completes the 3-Way Handshake -> initiates TLS key negotiation and sends HTTP GET request.',
+      components: [
+        {
+          name: 'Phase 1: Physical Link Up',
+          detail: 'PHY autonegotiation establishes link pulse synchronization and full-duplex connection.',
+        },
+        {
+          name: 'Phase 2: DHCP DORA Lease',
+          detail: 'Client acquires IP parameters (IP, Subnet Mask, Gateway, DNS) via UDP 67/68.',
+        },
+        {
+          name: 'Phase 3: Gratuitous ARP (DAD)',
+          detail: 'Broadcasts ARP Probe for leased IP to ensure zero address conflict on LAN.',
+        },
+        {
+          name: 'Phase 4: Gateway ARP Resolution',
+          detail: 'Broadcasts ARP Request to resolve local Default Gateway IP to Layer 2 MAC address.',
+        },
+        {
+          name: 'Phase 5: DNS Name Resolution',
+          detail: 'Transmits UDP 53 query via Gateway to resolve domain name into target IP.',
+        },
+        {
+          name: 'Phase 6: TCP Handshake & HTTPS',
+          detail: 'Executes SYN/SYN-ACK/ACK to target IP:443 and initiates encrypted web exchange.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'Phase 1 (Link Up)',
+          action: 'Cable plugged in; switch port transitions to Up/Up; MAC learned in CAM table.',
+        },
+        {
+          stepNumber: 2,
+          title: 'Phase 2 (DHCP DORA)',
+          action: 'Client broadcasts Discover from 0.0.0.0; server returns ACK with IP 192.168.1.50, Mask /24, Gateway 192.168.1.1, DNS 8.8.8.8.',
+        },
+        {
+          stepNumber: 3,
+          title: 'Phase 3 (GARP DAD)',
+          action: 'Client broadcasts Gratuitous ARP for 192.168.1.50 to verify no other host claims the address.',
+        },
+        {
+          stepNumber: 4,
+          title: 'Phase 4 (Gateway ARP)',
+          action: 'Client sends ARP Request for Gateway 192.168.1.1; Gateway returns unicast ARP Reply with its MAC.',
+        },
+        {
+          stepNumber: 5,
+          title: 'Phase 5 (DNS Query)',
+          action: 'Client encapsulates DNS query for api.example.com into UDP packet to 8.8.8.8, framed to Gateway MAC.',
+        },
+        {
+          stepNumber: 6,
+          title: 'Phase 6 (TCP SYN & HTTP)',
+          action: 'Client receives IP 93.184.216.34 and transmits TCP SYN packet framed to Gateway MAC.',
+        },
+      ],
+      packetHeaderView: {
         protocol: 'Lifecycle Protocol Headers in Sequence',
         fields: [
           { fieldName: '1. DHCP Discover', bitLength: 'UDP 67/68', hexSample: 'Src: 0.0.0.0 Dst: 255.255.255.255', description: 'Acquires network configuration.' },
@@ -966,84 +1002,65 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
 +-------------------------------------------------------------------------------+
 `,
       },
-      step8_visualExplanation: {
+      visualizer: {
         type: 'BOOTUP_LIFECYCLE_TIMELINE',
         title: 'Interactive Host Boot-Up Lifecycle & Protocol Sequence Engine',
         description: 'Step through the 6 chronological phases from cold cable plug-in to web browser HTTP GET request, inspecting packet headers, MAC/IP mappings, and socket states.',
       },
-      step9_workedExample: {
+      workedExample: {
         title: 'Analyzing Frame Headers During an Outbound HTTPS Request',
         problemStatement: 'When a host (`192.168.1.50`, MAC `00:AA`) sends an HTTPS packet to `93.184.216.34` via Gateway `192.168.1.1` (MAC `00:BB`):\n1. What is the Source IP and Destination IP in the Layer 3 header?\n2. What is the Source MAC and Destination MAC in the Layer 2 header?',
         stepByStepSolution: [
           'Step 1 (Layer 3 IP Header): Source IP is the originating client (`192.168.1.50`). Destination IP is the ultimate web server (`93.184.216.34`). IP addresses DO NOT change across router hops.',
-          'Step 2 (Layer 2 Ethernet Header): Source MAC is the client NIC (`00:AA`). Destination MAC is the local **Default Gateway router interface** (`00:BB`). MAC addresses change at every router hop.',
+          'Step 2 (Layer 2 Ethernet Header): Source MAC is the client NIC (`00:AA`). Destination MAC is the local Default Gateway router interface (`00:BB`). MAC addresses change at every router hop.',
         ],
         finalResult: 'L3: 192.168.1.50 -> 93.184.216.34 | L2: 00:AA -> 00:BB (Gateway MAC).',
       },
-      step10_realWorldScenario: {
-        topology: 'Enterprise Network Outage Root-Cause Lifecycle Isolation',
-        scenarioText: 'A user cannot open web portals. The engineer traces the lifecycle: (1) Link is Up (L1 OK), (2) DHCP leased IP `192.168.1.50` (DHCP OK), (3) Gateway ARP resolved MAC (L2 OK), (4) DNS query to `8.8.8.8` timed out (DNS Failure!). The engineer updates the DHCP server DNS option to `1.1.1.1`, resolving the issue immediately.',
-        engineeringContext: 'Lifecycle isolation identifies exactly which protocol layer failed.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Executes protocol finite state machine in chronological sequence.',
-        nicBehavior: 'Captures and filters physical wire frames.',
-        switchOrRouterBehavior: 'Switches forward Layer 2 frames; Routers receive frames destined to their MAC, strip L2 header, decrement TTL, and re-encapsulate for next hop.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'powershell -Command "ipconfig /all; arp -a; Resolve-DnsName google.com; Test-NetConnection google.com -Port 443"',
-          description: 'Executes comprehensive full-stack lifecycle diagnostic sequence from IP lease to DNS and TCP port 443 verification.',
-          expectedOutput:
-            'IPv4 Address . . . : 192.168.1.50\nDefault Gateway. . : 192.168.1.1\nIPAddress : 142.250.190.46\nTcpTestSucceeded : True',
-          proofExplanation: 'Proves complete operational health across all 6 lifecycle stages.',
+          id: 1,
+          prompt: 'What are the six phases of the host boot-up lifecycle in exact chronological order?',
+          expected: 'Physical Link Up -> DHCP Lease (DORA) -> Gratuitous ARP (DAD) -> Default Gateway ARP Resolution -> DNS Name Resolution -> Outbound TCP Handshake & HTTPS GET.',
+          hints: 'Link -> DHCP -> GARP -> Gateway ARP -> DNS -> TCP/HTTP.',
+        },
+        {
+          id: 2,
+          prompt: 'During Phase 3 (Gratuitous ARP), what indicates that the host\'s newly leased IP address is unique?',
+          expected: 'Receiving zero ARP replies to the GARP broadcast within the timeout window.',
+          hints: 'Zero replies indicates no IP conflict.',
+        },
+        {
+          id: 3,
+          prompt: 'When sending a packet to an external server on the Internet, what is placed in the Destination MAC field of the Ethernet frame?',
+          expected: 'The MAC address of the local Default Gateway router interface.',
+          hints: 'Destination MAC is always the Default Gateway for remote IPs.',
+        },
+        {
+          id: 4,
+          prompt: 'Why cannot a client perform DNS name resolution before completing DHCP lease acquisition?',
+          expected: 'Because without DHCP, the client lacks a valid source IP address, a default gateway route, and the IP address of a recursive DNS server.',
+          hints: 'A host cannot send IP packets without an IP address and DNS server setting.',
+        },
+        {
+          id: 5,
+          prompt: 'Which protocol and port numbers are used during Phase 2 (DHCP) vs Phase 5 (DNS)?',
+          expected: 'DHCP uses UDP ports 67 (server) and 68 (client); DNS query uses UDP port 53.',
+          hints: 'DHCP = UDP 67/68; DNS = UDP 53.',
+        },
+        {
+          id: 6,
+          prompt: 'If pinging 8.8.8.8 succeeds but opening https://google.com fails, which lifecycle phase has failed?',
+          expected: 'Phase 5 (DNS Name Resolution), since Layer 3 routing to 8.8.8.8 is functional but domain names cannot be resolved.',
+          hints: 'IP works but domain name fails = DNS failure.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'User cannot connect to internal web application after boot.',
-          possibleCauses: ['Failure at any of the 6 lifecycle stages (Link, DHCP, ARP, DNS, TCP)'],
-          diagnosticSteps: [
-            '1. Check link LED.',
-            '2. Run `ipconfig` (check for APIPA).',
-            '3. Ping default gateway (tests ARP/L2).',
-            '4. Ping public IP (tests L3 routing).',
-            '5. Resolve domain name (tests DNS).',
-            '6. Test port 443 (tests TCP).',
-          ],
-          remediation: 'Remediate the specific stage that failed the sequential diagnostic.',
-        },
+      recap: [
+        'The host boot-up lifecycle coordinates 6 distinct protocols in strict chronological order.',
+        'DHCP provides IP, mask, default gateway, and DNS server addresses.',
+        'Gratuitous ARP validates address uniqueness on the local broadcast domain.',
+        'For remote destinations, Destination IP is the ultimate server; Destination MAC is the local Default Gateway.',
+        'DNS name resolution translates hostnames to IPs prior to initiating the TCP 3-way handshake.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Believing the Destination MAC address of an outbound web packet is the MAC address of Google\'s server.', correction: 'MAC addresses are hop-to-hop local. The Destination MAC is ALWAYS the local Default Gateway router interface.' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'Lifecycle Multi-Stage Hijacking Attacks',
-        mitigationStrategy: 'Deploy 802.1X (Phase 1), DHCP Snooping (Phase 2), Dynamic ARP Inspection (Phase 3/4), DNSSEC (Phase 5), and TLS 1.3 (Phase 6).',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'Know the 6 phases in exact order: Link -> DHCP -> GARP -> Gateway ARP -> DNS -> TCP/HTTP.',
-          'In off-subnet packets: Destination IP is remote server; Destination MAC is Default Gateway router.',
-        ],
-        frequentTraps: [
-          'Thinking DNS resolution occurs before DHCP lease acquisition (a host cannot perform DNS without an IP address!).',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: Full-Stack Host Boot-Up Lifecycle Trace & Packet Forensics',
-        scenario: 'Trace the end-to-end packet sequence from cold boot to HTTPS GET request.',
-        tasks: ['Execute full lifecycle diagnostic script.', 'Verify MAC vs IP destination headers.'],
-        verificationMethod: 'Confirm TCP test succeeds to port 443.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'Network boot-up orchestrates 6 protocols in strict sequence.',
-          'Destination IP identifies ultimate target; Destination MAC identifies next-hop gateway.',
-        ],
-        nextLessonBridge:
-          'Proceed to NET-203 Lesson 5 to master IPv6 Addressing Foundations & SLAAC.',
-      },
     },
     questions: [
       {
@@ -1055,22 +1072,124 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
           'Default Gateway ARP -> DNS Resolution -> Physical Link Up -> DHCP Lease -> HTTPS GET',
         ],
         correctOption: 0,
-        explanation: 'A host must first establish Physical Link Up, acquire its IP/gateway/DNS configuration via DHCP, verify IP uniqueness via Gratuitous ARP, resolve the Gateway MAC via ARP, resolve the domain name via DNS, and finally initiate the TCP handshake and HTTPS GET request.',
-        explanationsJson: { 1: 'Reversed order.', 2: 'DNS requires an IP address first.', 3: 'Physical link must precede all packets.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'A host must first establish Physical Link Up, acquire its IP/gateway/DNS configuration via DHCP, verify IP uniqueness via Gratuitous ARP, resolve the Gateway MAC via ARP, resolve the domain name via DNS, and finally initiate the TCP handshake and HTTPS GET request.',
+        explanationsJson: {
+          1: 'Reversed order.',
+          2: 'DNS requires an IP address first.',
+          3: 'Physical link must precede all packets.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.UNDERSTANDING,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'Integrated Host Boot-Up Sequence',
       },
+      {
+        text: 'When a host at `192.168.1.50` transmits an HTTPS request to web server `93.184.216.34` via Default Gateway `192.168.1.1`, what addresses are placed in the Layer 2 Ethernet frame and Layer 3 IP packet headers?',
+        options: [
+          'Layer 3: Src IP = 192.168.1.50, Dst IP = 93.184.216.34 | Layer 2: Src MAC = Host MAC, Dst MAC = Default Gateway Router MAC',
+          'Layer 3: Src IP = 192.168.1.50, Dst IP = 192.168.1.1 | Layer 2: Src MAC = Host MAC, Dst MAC = Web Server MAC',
+          'Layer 3: Src IP = 192.168.1.1, Dst IP = 93.184.216.34 | Layer 2: Src MAC = Default Gateway MAC, Dst MAC = Broadcast',
+          'Layer 3: Src IP = 93.184.216.34, Dst IP = 192.168.1.50 | Layer 2: Src MAC = Host MAC, Dst MAC = Host MAC',
+        ],
+        correctOption: 0,
+        explanation:
+          'In remote internetwork routing, Layer 3 IP addresses represent the end-to-end source and ultimate destination (Src IP = Host, Dst IP = Web Server), while Layer 2 MAC addresses change hop-by-hop (Src MAC = Host, Dst MAC = Default Gateway router).',
+        explanationsJson: {
+          1: 'The destination IP is the remote server, not the gateway IP.',
+          2: 'The source IP is the originating client host, not the gateway.',
+          3: 'Source and destination IP are reversed.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Layer 2 vs Layer 3 Addressing in Remote Forwarding',
+      },
+      {
+        text: 'What is the primary function of transmitting a Gratuitous ARP (GARP) broadcast immediately following DHCP lease acquisition (Phase 3)?',
+        options: [
+          'Duplicate Address Detection (DAD): To verify that no other active host on the local broadcast domain is already using the newly leased IP address',
+          'To download the host\'s operating system updates from the gateway',
+          'To encrypt the client\'s wireless credentials',
+          'To synchronize the computer\'s real-time clock with NTP',
+        ],
+        correctOption: 0,
+        explanation:
+          'Gratuitous ARP broadcasts an ARP Request for the host\'s own new IP. If another host replies, an IP conflict is detected, allowing the client to reject the lease and request a new IP.',
+        explanationsJson: {
+          1: 'OS updates use HTTPS/TCP, not GARP.',
+          2: 'Wireless encryption is negotiated via 802.11 4-way handshakes.',
+          3: 'Clock synchronization is performed by NTP (UDP 123).',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Gratuitous ARP Duplicate Address Detection',
+      },
+      {
+        text: 'A technician observes that a client computer can successfully ping external IP address `8.8.8.8`, but entering `https://www.example.com` into a web browser results in a timeout error. Which lifecycle phase has failed?',
+        options: [
+          'Phase 5: DNS Name Resolution failed to translate `www.example.com` into an IP address',
+          'Phase 1: Physical Link is disconnected',
+          'Phase 2: DHCP server failed to allocate an IP address',
+          'Phase 4: Default Gateway ARP resolution failed',
+        ],
+        correctOption: 0,
+        explanation:
+          'Because pinging `8.8.8.8` succeeds, Physical Link (Phase 1), IP leasing (Phase 2), Gateway ARP (Phase 4), and Layer 3 routing are all fully operational. Failure to load domain names isolates the problem directly to DNS resolution (Phase 5).',
+        explanationsJson: {
+          1: 'If the physical link were disconnected, pinging 8.8.8.8 would fail.',
+          2: 'If DHCP had failed, the host would have no IP to ping 8.8.8.8.',
+          3: 'If Gateway ARP had failed, packets could not leave the local LAN to reach 8.8.8.8.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'Lifecycle Sequential Troubleshooting & DNS Isolation',
+      },
+      {
+        text: 'Why does an operating system execute an ARP request for the Default Gateway IP address before it can transmit a DNS query to recursive resolver `8.8.8.8`?',
+        options: [
+          'Because 8.8.8.8 is on a remote subnet, the host must encapsulate the IP packet in a Layer 2 Ethernet frame addressed to the local Default Gateway router\'s MAC address',
+          'Because DNS queries must be converted into broadcast frames',
+          'Because the DNS server MAC address is always identical to the client MAC address',
+          'Because the router disables DNS until ARP is executed',
+        ],
+        correctOption: 0,
+        explanation:
+          'When the destination IP (`8.8.8.8`) is outside the local subnet, the host knows it cannot reach it directly at Layer 2. It must forward the packet to its Default Gateway, requiring the Gateway\'s MAC address in the frame header.',
+        explanationsJson: {
+          1: 'DNS queries are unicast UDP packets, not broadcasts.',
+          2: 'MAC addresses are unique physical hardware identifiers.',
+          3: 'ARP is triggered naturally by the host TCP/IP stack whenever an IP route requires Layer 2 framing.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'Default Gateway ARP Resolution Mechanics',
+      },
+      {
+        text: 'During Phase 6 (Transport Handshake), which TCP flags are exchanged between client and server to establish a reliable connection before transmitting HTTP GET data?',
+        options: [
+          'SYN (Client -> Server) -> SYN-ACK (Server -> Client) -> ACK (Client -> Server)',
+          'FIN -> FIN-ACK -> RST',
+          'PING -> PONG -> ACK',
+          'DISCOVER -> OFFER -> REQUEST',
+        ],
+        correctOption: 0,
+        explanation:
+          'TCP connection establishment uses the 3-Way Handshake: SYN from client, SYN-ACK from server, and ACK from client, establishing initial sequence numbers and socket state.',
+        explanationsJson: {
+          1: 'FIN is used for connection teardown, not establishment.',
+          2: 'PING/PONG are ICMP echo messages, not TCP flags.',
+          3: 'DISCOVER/OFFER/REQUEST is the DHCP DORA process.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.RECALL,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'TCP 3-Way Handshake Flags',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: Full-Stack Host Boot-Up Lifecycle Trace & Packet Forensics',
-      instructions: '1. Trace 6 boot phases.\n2. Verify TCP test to port 443.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 20,
-      initialTopologyJson: { hostIp: '192.168.1.50', gatewayIp: '192.168.1.1', dnsServer: '8.8.8.8', webTarget: '93.184.216.34' },
-      tasks: ['Execute full lifecycle diagnostics.'],
-    },
   },
 
   // -------------------------------------------------------------------------
@@ -1546,34 +1665,59 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
     visualizationType: 'SEGMENTATION_PMTUD_ENGINE',
     introduction:
       'Master the mechanics of dividing large application data streams into transport segments: Why segmentation is necessary, Maximum Segment Size (MSS = 1460 bytes) vs Maximum Transmission Unit (MTU = 1500 bytes), the relationship $MSS = MTU - (IP\\_Header + TCP\\_Header)$, transport stream reassembly, the hazards of IP fragmentation, and Path MTU Discovery (PMTUD, RFC 1191).',
-    stepMetadata: {
-      step1_objective:
+    contentV2: {
+      objective:
         'Understand why large application data must be segmented, calculate MSS from MTU headers ($MSS = MTU - 40$), analyze the problems caused by Layer 3 IP fragmentation, and master Path MTU Discovery (PMTUD) using the DF bit and ICMP.',
-      step2_prerequisites: ['level-0-network-ports-socket-boundaries', 'ethernet-mac-addresses-overview'],
-      step3_whyItMatters:
+      prerequisites: ['level-0-network-ports-socket-boundaries', 'ethernet-mac-addresses-overview'],
+      whyItMatters:
         'Transmitting a 50 MB file as a single packet is impossible because link MTU limits frames to 1500 bytes. Mismatched MTU sizes on VPN tunnels cause silent packet drops ("black holes") unless PMTUD is working correctly.',
-      step4_coreConcept:
-        'Applications generate data streams of arbitrary size (e.g. 50 MB video). The Transport Layer (TCP) divides this stream into smaller chunks called **Segments** that fit within the physical link capacity. The **Maximum Transmission Unit (MTU)** is the largest Layer 3 packet that a Layer 2 frame can carry (standard Ethernet MTU = 1500 bytes). The **Maximum Segment Size (MSS)** is the maximum TCP payload data in a single segment. Under standard IPv4: $\\text{MSS} = \\text{MTU} (1500) - \\text{IP Header} (20) - \\text{TCP Header} (20) = 1460 \\text{ bytes}$. If a packet exceeds an intermediate link MTU (e.g. 1400-byte VPN tunnel), routers must either perform **IP Fragmentation** (high CPU overhead, lost fragment multiplier) or drop the packet. **Path MTU Discovery (PMTUD, RFC 1191)** sets the IPv4 Don\'t Fragment (DF = 1) bit; if a router cannot forward the packet, it drops it and returns an ICMP Type 3 Code 4 ("Fragmentation Needed and DF set") containing the next-hop MTU, allowing the sender to adjust MSS automatically.',
-      step5_technicalAnatomy: {
-        title: 'Segmentation Formulas, Header Overhead & PMTUD Mechanics',
-        description: 'Mathematical relationship between MSS, MTU, IP headers, and ICMP discovery.',
-        components: [
-          { name: 'MTU (Maximum Transmission Unit)', detail: 'Standard Ethernet MTU = 1500 bytes. Represents maximum IP packet size (IP Header + Payload).' },
-          { name: 'MSS (Maximum Segment Size)', detail: 'Formula: $\\text{MSS} = \\text{MTU} - (\\text{IP Header} + \\text{TCP Header}) = 1500 - 40 = 1460 \\text{ bytes}$ (1440 bytes for IPv6).' },
-          { name: 'Transport Stream Reassembly', detail: 'Receiver buffers incoming segments and reassembles them in correct order using TCP Sequence Numbers.' },
-          { name: 'The Problem of IP Fragmentation', detail: 'If 1 fragment is lost, the entire original packet is lost. Routers suffer CPU penalties reassembling fragments.' },
-          { name: 'Path MTU Discovery (PMTUD / RFC 1191)', detail: 'Sender sets DF = 1; intermediate routers return ICMP Type 3 Code 4 with next-hop MTU if packet is too large.' },
-        ],
-      },
-      step6_howItWorks: {
-        steps: [
-          { stepNumber: 1, title: 'MSS Negotiation in TCP Handshake', action: 'During TCP SYN exchange, both endpoints advertise their local MSS (e.g. MSS=1460).' },
-          { stepNumber: 2, title: 'Transport Stream Chunking', action: 'TCP slices application byte stream into 1460-byte segments, adding sequence numbers.' },
-          { stepNumber: 3, title: 'Intermediate MTU Bottleneck', action: 'Packet hits 1400-byte VPN tunnel; router cannot fragment because DF=1.' },
-          { stepNumber: 4, title: 'PMTUD ICMP Convergence', action: 'Router returns ICMP "Packet Too Big (MTU 1400)"; sender shrinks MSS to 1360 bytes without fragmentation.' },
-        ],
-      },
-      step7_packetHeaderView: {
+      explanation:
+        'Applications generate byte streams of arbitrary size (e.g. 50 MB video). The Transport Layer (TCP) divides this stream into smaller chunks called **Segments** that fit within physical link capacity.\n\n### 1. MTU vs MSS Mathematical Formulation\n* **Maximum Transmission Unit (MTU)**: The largest Layer 3 packet that a Layer 2 frame can carry without fragmentation (standard Ethernet MTU = **1500 bytes**).\n* **Maximum Segment Size (MSS)**: The maximum TCP payload data in a single segment.\n$$\\text{MSS} = \\text{MTU} - \\text{IPv4 Header (20 B)} - \\text{TCP Header (20 B)} = 1500 - 40 = 1460 \\text{ bytes}$$\n*(For standard IPv6 with 40-byte IP header: $\\text{MSS} = 1500 - 40 - 20 = 1440 \\text{ bytes}$)*.\n\n### 2. The Dangers of Layer 3 IP Fragmentation\nWhen an IP packet exceeds an intermediate link MTU (e.g. 1420-byte IPsec tunnel), routers without PMTUD must fragment the packet into multiple smaller IP packets. Fragmentation degrades performance:\n1. If a single fragment is dropped in transit, the **entire original packet is discarded**.\n2. Routers incur significant CPU and memory overhead buffering and reassembling fragments.\n\n### 3. Path MTU Discovery (PMTUD, RFC 1191)\nTo eliminate fragmentation, senders set the **Don\'t Fragment (DF = 1)** flag in the IPv4 header:\n1. When a packet encounters a router link whose MTU is smaller than the packet size, the router drops the packet.\n2. The router returns an **ICMP Type 3 Code 4** message ("Destination Unreachable: Fragmentation Needed and DF Set") containing the **Next-Hop MTU**.\n3. The sending host reduces its TCP MSS to match the bottleneck MTU and retransmits.',
+      components: [
+        {
+          name: 'MTU (Maximum Transmission Unit)',
+          detail: 'Standard Ethernet MTU = 1500 bytes. Represents maximum IP packet size (IP Header + Payload).',
+        },
+        {
+          name: 'MSS (Maximum Segment Size)',
+          detail: 'MSS = MTU - (IP Header + TCP Header) = 1500 - 40 = 1460 bytes for standard IPv4.',
+        },
+        {
+          name: 'Transport Stream Reassembly',
+          detail: 'Receiver buffers segments and reorders them using TCP Sequence Numbers.',
+        },
+        {
+          name: 'IP Fragmentation Penalty',
+          detail: 'Packet loss multiplier and router CPU buffering bottlenecks during fragment reassembly.',
+        },
+        {
+          name: 'Path MTU Discovery (PMTUD)',
+          detail: 'Uses DF=1 bit and ICMP Type 3 Code 4 feedback to dynamically adjust sender MSS.',
+        },
+      ],
+      howItWorks: [
+        {
+          stepNumber: 1,
+          title: 'MSS Negotiation in TCP Handshake',
+          action: 'During TCP SYN exchange, both endpoints advertise their local MSS (e.g. MSS=1460).',
+        },
+        {
+          stepNumber: 2,
+          title: 'Transport Stream Chunking',
+          action: 'TCP slices application byte stream into 1460-byte segments, adding sequence numbers.',
+        },
+        {
+          stepNumber: 3,
+          title: 'Intermediate MTU Bottleneck',
+          action: 'Packet hits 1400-byte VPN tunnel; router cannot fragment because DF=1.',
+        },
+        {
+          stepNumber: 4,
+          title: 'PMTUD ICMP Convergence',
+          action: 'Router returns ICMP "Packet Too Big (MTU 1400)"; sender shrinks MSS to 1360 bytes without fragmentation.',
+        },
+      ],
+      packetHeaderView: {
         protocol: 'MSS vs MTU Byte Allocation & PMTUD Flags',
         fields: [
           { fieldName: 'Ethernet Frame MTU', bitLength: '1500 Bytes', hexSample: 'Standard MTU', description: 'Max IP packet payload in frame.' },
@@ -1595,12 +1739,12 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
 +-------------------------------------------------------------------------------+
 `,
       },
-      step8_visualExplanation: {
+      visualizer: {
         type: 'SEGMENTATION_PMTUD_ENGINE',
         title: 'Interactive Transport Segmentation & PMTUD Bottleneck Engine',
         description: 'Slice large application files into 1460-byte TCP segments, inject an MTU bottleneck link (e.g. 1400B VPN), and observe ICMP PMTUD feedback adjust the sender MSS dynamically.',
       },
-      step9_workedExample: {
+      workedExample: {
         title: 'Calculating MSS for an IPsec VPN Tunnel with 1420-Byte MTU',
         problemStatement: 'An enterprise IPsec VPN tunnel has an MTU of 1420 bytes. Calculate the maximum usable TCP MSS for standard IPv4 traffic.',
         stepByStepSolution: [
@@ -1610,64 +1754,51 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
         ],
         finalResult: 'Maximum TCP MSS for the VPN tunnel is exactly 1380 bytes.',
       },
-      step10_realWorldScenario: {
-        topology: 'VPN Tunnel "Black Hole" Outage caused by Blocked ICMP PMTUD',
-        scenarioText: 'Remote workers connect via VPN. Small packets (SSH, ping) work, but web pages freeze during load. The engineer discovers the firewall was dropping all ICMP traffic, preventing PMTUD "Packet Too Big" messages from reaching the client. Permitting ICMP Type 3 Code 4 (or configuring `ip tcp adjust-mss 1360` on the router) immediately resolves the webpage freeze.',
-        engineeringContext: 'Blocking ICMP breaks PMTUD, creating MTU black holes on VPN tunnels.',
-      },
-      step11_deviceBehavior: {
-        hostBehavior: 'Sets DF=1 on all outgoing TCP packets; adjusts MSS upon receiving ICMP Type 3 Code 4.',
-        nicBehavior: 'Supports TCP Segmentation Offload (TSO) to offload segmentation from CPU to NIC ASIC.',
-        switchOrRouterBehavior: 'Inspects packet size against egress interface MTU.',
-      },
-      step12_cliTooling: [
+      practice: [
         {
-          command: 'ping 8.8.8.8 -f -l 1472',
-          description: 'Pings with Don\'t Fragment (-f) set and buffer size (-l 1472 bytes + 28B ICMP/IP headers = 1500B total).',
-          expectedOutput: 'Reply from 8.8.8.8: bytes=1472 time=14ms TTL=118',
-          proofExplanation: 'Proves standard 1500-byte path MTU is intact without fragmentation.',
+          id: 1,
+          prompt: 'What is the mathematical formula relating TCP Maximum Segment Size (MSS) to link MTU for IPv4 traffic?',
+          expected: 'MSS = MTU - IPv4_Header (20 bytes) - TCP_Header (20 bytes) = MTU - 40 bytes.',
+          hints: 'MSS = MTU - 40.',
+        },
+        {
+          id: 2,
+          prompt: 'On a standard 1500-byte Ethernet network, what is the maximum TCP MSS value for IPv4?',
+          expected: '1460 bytes (1500 - 20 - 20 = 1460).',
+          hints: '1500 - 40 = 1460.',
+        },
+        {
+          id: 3,
+          prompt: 'What happens if a single fragment of a fragmented IP packet is dropped in transit?',
+          expected: 'The destination host cannot reassemble the packet and discards all received fragments, forcing the entire original packet to be retransmitted.',
+          hints: 'Loss of 1 fragment causes loss of the entire packet.',
+        },
+        {
+          id: 4,
+          prompt: 'How does Path MTU Discovery (PMTUD) detect intermediate link MTU bottlenecks without fragmenting packets?',
+          expected: 'The sender sets the Don\'t Fragment (DF=1) bit; intermediate routers drop oversized packets and return an ICMP Type 3 Code 4 message with their MTU.',
+          hints: 'DF=1 and ICMP Type 3 Code 4.',
+        },
+        {
+          id: 5,
+          prompt: 'If a VPN tunnel has an MTU of 1400 bytes, what should the router\'s TCP MSS clamping value be set to for IPv4?',
+          expected: '1360 bytes (1400 MTU - 40 bytes headers = 1360 bytes MSS).',
+          hints: '1400 - 40 = 1360.',
+        },
+        {
+          id: 6,
+          prompt: 'What causes a PMTUD "Black Hole" on a wide area network connection?',
+          expected: 'An intermediate firewall blocking all ICMP traffic, preventing "Packet Too Big" ICMP notifications from reaching the sender.',
+          hints: 'Firewall blocking ICMP prevents PMTUD feedback.',
         },
       ],
-      step13_troubleshooting: [
-        {
-          symptom: 'Ping works with small size but fails when size is 1500 bytes (`Packet needs to be fragmented but DF set`).',
-          possibleCauses: ['Intermediate link has MTU smaller than 1500 bytes (e.g. PPPoE or GRE/IPsec tunnel)'],
-          diagnosticSteps: ['Reduce ping buffer size with `ping -f -l <size>` until replies succeed.'],
-          remediation: 'Configure `ip tcp adjust-mss` on router or lower interface MTU.',
-        },
+      recap: [
+        'Transport segmentation divides application byte streams into MTU-compatible chunks.',
+        'Standard Ethernet: MTU = 1500 bytes; IPv4 TCP MSS = 1460 bytes (MSS = MTU - 40).',
+        'IP fragmentation creates severe performance penalties and vulnerability to packet loss.',
+        'PMTUD (RFC 1191) uses the DF=1 bit and ICMP Type 3 Code 4 feedback to avoid fragmentation.',
+        'TCP MSS clamping on routers prevents VPN tunnel MTU black holes when ICMP is blocked.',
       ],
-      step14_commonMistakes: [
-        { misconception: 'Confusing MSS with MTU.', correction: 'MTU is the maximum IP packet size (1500B); MSS is the maximum TCP payload data inside the packet (1460B).' },
-      ],
-      step15_securityPerspective: {
-        threatOrVulnerability: 'IP Fragmentation Overlap Exploits (Teardrop Attacks)',
-        mitigationStrategy: 'Firewalls reassemble and inspect all fragmented packets before forwarding to prevent offset overlap attacks.',
-      },
-      step16_examPrep: {
-        keyExamPoints: [
-          'Formula: $\\text{MSS} = \\text{MTU} - 40$ (for standard IPv4 TCP).',
-          'Standard Ethernet: MTU = 1500B, MSS = 1460B.',
-          'PMTUD uses DF=1 and ICMP Type 3 Code 4 (Fragmentation Needed).',
-        ],
-        frequentTraps: [
-          'Forgetting to subtract both IP (20B) and TCP (20B) headers when calculating MSS from MTU.',
-        ],
-      },
-      step17_practicalLabRef: {
-        title: 'Guided Practice: MTU Discovery & MSS Calculation for Encrypted Tunnels',
-        scenario: 'Use ping with DF flag to discover path MTU and calculate maximum TCP MSS.',
-        tasks: ['Test path MTU using ping -f -l 1472.', 'Calculate MSS for 1400-byte tunnel.'],
-        verificationMethod: 'Confirm 1360-byte MSS calculation for 1400-byte MTU.',
-      },
-      step18_masterySummary: {
-        summaryPoints: [
-          'Transport segmentation slices application streams into MTU-compatible segments.',
-          'Standard Ethernet: MTU = 1500 bytes; MSS = 1460 bytes.',
-          'PMTUD dynamically discovers path MTU using DF=1 and ICMP feedback.',
-        ],
-        nextLessonBridge:
-          'Proceed to NET-204 Lesson 3 to master TCP vs UDP Connection Management, Handshakes, and Flow Control.',
-      },
     },
     questions: [
       {
@@ -1679,22 +1810,124 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
           'MSS = 64 Bytes (Formula: Minimum Frame Size)',
         ],
         correctOption: 0,
-        explanation: 'Maximum Segment Size (MSS) represents the maximum TCP payload data. Formula: $\\text{MSS} = \\text{MTU} - (\\text{IP Header} + \\text{TCP Header}) = 1500 - 20 - 20 = 1460 \\text{ bytes}$.',
-        explanationsJson: { 1: '1500 is total MTU including headers.', 2: '1480 forgets to subtract the 20-byte TCP header.', 3: '64 bytes is minimum Ethernet frame size.' },
-        difficulty: CourseLevel.FOUNDATIONAL,
+        explanation:
+          'Maximum Segment Size (MSS) represents the maximum TCP payload data. Formula: $\\text{MSS} = \\text{MTU} - (\\text{IP Header} + \\text{TCP Header}) = 1500 - 20 - 20 = 1460 \\text{ bytes}$.',
+        explanationsJson: {
+          1: '1500 is total MTU including headers.',
+          2: '1480 forgets to subtract the 20-byte TCP header.',
+          3: '64 bytes is minimum Ethernet frame size.',
+        },
+        difficulty: CourseLevel.BEGINNER,
         cognitiveLevel: CognitiveLevel.APPLICATION,
         questionType: QuestionType.MULTIPLE_CHOICE,
         concept: 'MSS vs MTU Calculation',
       },
+      {
+        text: 'An enterprise deploys an IPsec VPN tunnel with an interface MTU of 1420 bytes. What is the maximum IPv4 TCP MSS that should be negotiated across this tunnel to prevent fragmentation?',
+        options: [
+          '1380 Bytes (1420 MTU - 20B IPv4 Header - 20B TCP Header)',
+          '1420 Bytes',
+          '1400 Bytes',
+          '1460 Bytes',
+        ],
+        correctOption: 0,
+        explanation:
+          'Applying the formula $\\text{MSS} = \\text{MTU} - 40$ gives $1420 - 40 = 1380 \\text{ bytes}$.',
+        explanationsJson: {
+          1: '1420 is the MTU, not MSS.',
+          2: '1400 only subtracts the 20-byte IP header.',
+          3: '1460 exceeds the 1420-byte tunnel MTU and would cause fragmentation.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'VPN Tunnel MSS Clamping Calculation',
+      },
+      {
+        text: 'How does Path MTU Discovery (PMTUD, RFC 1191) dynamically detect the lowest MTU across an end-to-end network path without performing Layer 3 fragmentation?',
+        options: [
+          'The sender sets the Don\'t Fragment (DF = 1) bit in the IPv4 header; intermediate routers that cannot forward the oversized packet drop it and return an ICMP Type 3 Code 4 message containing their MTU',
+          'The sender queries the local DNS server for the path MTU record',
+          'The router converts all packets into jumbo frames automatically',
+          'The sender floods broadcast frames to all intermediate switches',
+        ],
+        correctOption: 0,
+        explanation:
+          'PMTUD relies on setting DF=1. If an intermediate link MTU is exceeded, the router drops the packet and responds with an ICMP Type 3 Code 4 ("Fragmentation Needed and DF set") specifying its MTU size, allowing the sender to adjust MSS.',
+        explanationsJson: {
+          1: 'DNS does not track hop-by-hop interface MTUs.',
+          2: 'Routers cannot force jumbo frames across non-jumbo links.',
+          3: 'PMTUD uses unicast ICMP feedback, not broadcast flooding.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'PMTUD Protocol Mechanics',
+      },
+      {
+        text: 'What is the primary architectural penalty when an IP packet is subjected to Layer 3 fragmentation across a low-MTU WAN link?',
+        options: [
+          'If any single fragment is dropped in transit, the entire original packet is lost and must be retransmitted, while intermediate routers suffer CPU overhead buffering fragments',
+          'The packet payload is permanently encrypted',
+          'The destination MAC address is deleted',
+          'The Ethernet cable speed is reduced from 1 Gbps to 10 Mbps',
+        ],
+        correctOption: 0,
+        explanation:
+          'IP fragmentation lacks per-fragment retransmission. If 1 of 5 fragments is dropped, the destination host discards all 4 received fragments, multiplying effective packet loss and wasting network bandwidth.',
+        explanationsJson: {
+          1: 'Fragmentation splits packets into smaller IP slices; it does not encrypt data.',
+          2: 'MAC headers are re-encapsulated normally per fragment.',
+          3: 'Physical link negotiation speed is independent of packet fragmentation.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.UNDERSTANDING,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'IP Fragmentation Performance Penalties',
+      },
+      {
+        text: 'A network engineer notices that users connecting through a VPN tunnel can send small ping packets and connect via SSH, but large file transfers and web pages freeze indefinitely. What is the root cause of this "PMTUD Black Hole"?',
+        options: [
+          'An intermediate firewall is dropping all ICMP messages, preventing the ICMP Type 3 Code 4 "Packet Too Big" notifications from reaching the sender when large packets with DF=1 are dropped',
+          'The web server has disabled HTTPS port 443',
+          'The client computer has run out of private IPv4 addresses',
+          'The Ethernet switch has disabled spanning tree protocol',
+        ],
+        correctOption: 0,
+        explanation:
+          'When firewalls indiscriminately block ICMP, the sender never receives the PMTUD "Packet Too Big" alert. The sender keeps retransmitting oversized packets with DF=1, which the router silently drops, creating a black hole.',
+        explanationsJson: {
+          1: 'If port 443 were disabled, initial connection would fail rather than freezing on large data.',
+          2: 'The client already has an active IP address.',
+          3: 'STP loops cause broadcast storms, not selective MTU black holes.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
+        questionType: QuestionType.TROUBLESHOOTING,
+        concept: 'PMTUD Black Hole Diagnosis',
+      },
+      {
+        text: 'Which Cisco IOS command is applied on a router interface to automatically intercept TCP SYN packets and rewrite the advertised Maximum Segment Size to 1360 bytes for VPN traffic?',
+        options: [
+          'ip tcp adjust-mss 1360',
+          'mtu 1360',
+          'ip fragmentation disable',
+          'tcp window-size 1360',
+        ],
+        correctOption: 0,
+        explanation:
+          '`ip tcp adjust-mss <bytes>` enables TCP MSS clamping, modifying the MSS option inside TCP SYN packets passing through the router to ensure endpoints never exceed the tunnel MTU.',
+        explanationsJson: {
+          1: '`mtu` configures the physical interface Layer 3 MTU, not TCP MSS rewriting.',
+          2: 'Invalid command.',
+          3: '`tcp window-size` configures buffer windows, not MSS clamping.',
+        },
+        difficulty: CourseLevel.BEGINNER,
+        cognitiveLevel: CognitiveLevel.APPLICATION,
+        questionType: QuestionType.MULTIPLE_CHOICE,
+        concept: 'TCP MSS Clamping Configuration',
+      },
     ],
-    lab: {
-      title: 'Guided Practice: MTU Discovery & MSS Calculation for Encrypted Tunnels',
-      instructions: '1. Run ping 8.8.8.8 -f -l 1472.\n2. Calculate MSS for 1420-byte MTU.',
-      difficulty: CourseLevel.FOUNDATIONAL,
-      estimatedMinutes: 15,
-      initialTopologyJson: { interfaceMtu: 1500, targetIp: '8.8.8.8' },
-      tasks: ['Test path MTU.'],
-    },
   },
 
   // -------------------------------------------------------------------------

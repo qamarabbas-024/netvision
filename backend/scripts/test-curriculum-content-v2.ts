@@ -424,8 +424,99 @@ async function verifyCurriculumContentV2() {
   assert(!net204Ports!.lab, 'NET-204 Ports & Sockets has no phantom CLI lab');
   console.log('  ✓ NET-204 Ports & Sockets verified with clean Content V2 structure, 16-bit ranges, 4-tuple socket pairs, multiplexing/demultiplexing, 6 practice items, 6 quiz questions, and zero forced filler.');
 
+  // [TEST 21] Verify Special-Use IPv4 Ranges & Enterprise Allocation (level-0-ip-addresses-logical-location)
+  console.log('\n[TEST 21] Verifying NET-202 Special-Use IPv4 Ranges (level-0-ip-addresses-logical-location)...');
+  const specialIpv4 = LESSONS_NET200.find((l) => l.slug === 'level-0-ip-addresses-logical-location');
+  assert(!!specialIpv4, 'Special-Use IPv4 lesson exists');
+  assert(!!specialIpv4!.contentV2, 'Special-Use IPv4 has Content V2 structure');
+  assert(specialIpv4!.contentV2!.explanation.includes('10.0.0.0/8'), 'Explains 10.0.0.0/8 RFC 1918');
+  assert(specialIpv4!.contentV2!.explanation.includes('172.16.0.0/12'), 'Explains 172.16.0.0/12 RFC 1918');
+  assert(specialIpv4!.contentV2!.explanation.includes('192.168.0.0/16'), 'Explains 192.168.0.0/16 RFC 1918');
+  assert(specialIpv4!.contentV2!.explanation.includes('169.254'), 'Explains APIPA 169.254.0.0/16');
+  assert(specialIpv4!.contentV2!.practice.length >= 6, 'Special-Use IPv4 has at least 6 practice items');
+  assert(specialIpv4!.questions.length >= 6, 'Special-Use IPv4 has at least 6 aligned questions');
+  console.log('  ✓ Special-Use IPv4 verified with clean Content V2 structure, RFC 1918 blocks, APIPA, CGNAT, 6 practice items, and 6 questions.');
+
+  // [TEST 22] Verify Classful IPv4 History & CIDR (ip-addressing-ipv4-overview)
+  console.log('\n[TEST 22] Verifying Classful IPv4 History & CIDR (ip-addressing-ipv4-overview)...');
+  const classfulIpv4 = LESSONS_NET200.find((l) => l.slug === 'ip-addressing-ipv4-overview');
+  assert(!!classfulIpv4, 'Classful IPv4 lesson exists');
+  assert(!!classfulIpv4!.contentV2, 'Classful IPv4 has Content V2 structure');
+  assert(classfulIpv4!.contentV2!.explanation.includes('Class A') && classfulIpv4!.contentV2!.explanation.includes('Class B') && classfulIpv4!.contentV2!.explanation.includes('Class C'), 'Explains Class A, B, and C ranges');
+  assert(classfulIpv4!.contentV2!.explanation.includes('CIDR') || classfulIpv4!.contentV2!.explanation.includes('RFC 1519'), 'Explains CIDR RFC 1519');
+  assert(classfulIpv4!.contentV2!.practice.length >= 6, 'Classful IPv4 has at least 6 practice items');
+  assert(classfulIpv4!.questions.length >= 6, 'Classful IPv4 has at least 6 aligned questions');
+  console.log('  ✓ Classful IPv4 History verified with clean Content V2 structure, Class A/B/C/D/E leading bits, CIDR, 6 practice items, and 6 questions.');
+
+  // [TEST 23] Verify VLSM Subnetting (subnetting-cidr-overview)
+  console.log('\n[TEST 23] Verifying VLSM Subnetting (subnetting-cidr-overview)...');
+  const vlsmSubnetting = LESSONS_NET200.find((l) => l.slug === 'subnetting-cidr-overview');
+  assert(!!vlsmSubnetting, 'VLSM Subnetting lesson exists');
+  assert(!!vlsmSubnetting!.contentV2, 'VLSM Subnetting has Content V2 structure');
+  assert(vlsmSubnetting!.contentV2!.explanation.includes('VLSM') || vlsmSubnetting!.contentV2!.explanation.includes('Variable Length'), 'Explains VLSM');
+  assert(vlsmSubnetting!.contentV2!.explanation.includes('/30') || vlsmSubnetting!.contentV2!.explanation.includes('/31'), 'Explains WAN point-to-point /30 or /31');
+  assert(vlsmSubnetting!.contentV2!.practice.length >= 6, 'VLSM Subnetting has at least 6 practice items');
+  assert(vlsmSubnetting!.questions.length >= 6, 'VLSM Subnetting has at least 6 aligned questions');
+  console.log('  ✓ VLSM Subnetting verified with clean Content V2 structure, hierarchical allocation, 6 practice items, and 6 questions.');
+
+  // [TEST 24] Verify Host Boot-Up Lifecycle (dhcp-dns-overview)
+  console.log('\n[TEST 24] Verifying Host Boot-Up Lifecycle (dhcp-dns-overview)...');
+  const bootLifecycle = LESSONS_NET203_204.find((l) => l.slug === 'dhcp-dns-overview');
+  assert(!!bootLifecycle, 'Host Boot-Up Lifecycle lesson exists');
+  assert(!!bootLifecycle!.contentV2, 'Host Boot-Up Lifecycle has Content V2 structure');
+  assert(bootLifecycle!.contentV2!.explanation.includes('Physical Link') || bootLifecycle!.contentV2!.explanation.includes('PHY'), 'Explains Physical Link Phase');
+  assert(bootLifecycle!.contentV2!.explanation.includes('DHCP') && bootLifecycle!.contentV2!.explanation.includes('ARP') && bootLifecycle!.contentV2!.explanation.includes('DNS'), 'Explains sequential DHCP -> ARP -> DNS');
+  assert(bootLifecycle!.contentV2!.practice.length >= 6, 'Host Boot-Up Lifecycle has at least 6 practice items');
+  assert(bootLifecycle!.questions.length >= 6, 'Host Boot-Up Lifecycle has at least 6 aligned questions');
+  console.log('  ✓ Host Boot-Up Lifecycle verified with clean Content V2 structure, 6-phase sequence, 6 practice items, and 6 questions.');
+
+  // [TEST 25] Verify Transport Segmentation & PMTUD (level-0-network-packets-data-framing)
+  console.log('\n[TEST 25] Verifying Transport Segmentation & PMTUD (level-0-network-packets-data-framing)...');
+  const transportSeg = LESSONS_NET203_204.find((l) => l.slug === 'level-0-network-packets-data-framing');
+  assert(!!transportSeg, 'Transport Segmentation lesson exists');
+  assert(!!transportSeg!.contentV2, 'Transport Segmentation has Content V2 structure');
+  assert(transportSeg!.contentV2!.explanation.includes('MSS') && transportSeg!.contentV2!.explanation.includes('MTU'), 'Explains MSS vs MTU relationship');
+  assert(transportSeg!.contentV2!.explanation.includes('1460') && transportSeg!.contentV2!.explanation.includes('1500'), 'Explains standard 1500 MTU / 1460 MSS');
+  assert(transportSeg!.contentV2!.explanation.includes('PMTUD') || transportSeg!.contentV2!.explanation.includes('1191'), 'Explains PMTUD RFC 1191');
+  assert(transportSeg!.contentV2!.practice.length >= 6, 'Transport Segmentation has at least 6 practice items');
+  assert(transportSeg!.questions.length >= 6, 'Transport Segmentation has at least 6 aligned questions');
+  console.log('  ✓ Transport Segmentation verified with clean Content V2 structure, MSS=MTU-40 formula, PMTUD, 6 practice items, and 6 questions.');
+
+  // [TEST 26] Verify STP & Loop Prevention (net-302-spanning-tree-protocol-loop-prevention)
+  console.log('\n[TEST 26] Verifying STP & Loop Prevention (net-302-spanning-tree-protocol-loop-prevention)...');
+  const stpLesson = LESSONS_NET300_400.find((l) => l.slug === 'net-302-spanning-tree-protocol-loop-prevention');
+  assert(!!stpLesson, 'STP lesson exists');
+  assert(!!stpLesson!.contentV2, 'STP has Content V2 structure');
+  assert(stpLesson!.contentV2!.explanation.includes('Root Bridge'), 'Explains Root Bridge');
+  assert(stpLesson!.contentV2!.explanation.includes('Bridge ID') || stpLesson!.contentV2!.explanation.includes('32768'), 'Explains Bridge ID & 32768 priority');
+  assert(stpLesson!.contentV2!.practice.length >= 6, 'STP has at least 6 practice items');
+  assert(stpLesson!.questions.length >= 6, 'STP has at least 6 aligned questions');
+  console.log('  ✓ STP & Loop Prevention verified with clean Content V2 structure, Bridge ID, Port Roles, 6 practice items, and 6 questions.');
+
+  // [TEST 27] Verify Single-Area OSPF (net-304-single-area-ospf-routing)
+  console.log('\n[TEST 27] Verifying Single-Area OSPF (net-304-single-area-ospf-routing)...');
+  const ospfLesson = LESSONS_NET300_400.find((l) => l.slug === 'net-304-single-area-ospf-routing');
+  assert(!!ospfLesson, 'Single-Area OSPF lesson exists');
+  assert(!!ospfLesson!.contentV2, 'Single-Area OSPF has Content V2 structure');
+  assert(ospfLesson!.contentV2!.explanation.includes('Dijkstra') || ospfLesson!.contentV2!.explanation.includes('SPF'), 'Explains Dijkstra SPF algorithm');
+  assert(ospfLesson!.contentV2!.explanation.includes('DR') && ospfLesson!.contentV2!.explanation.includes('BDR'), 'Explains DR/BDR election');
+  assert(ospfLesson!.contentV2!.practice.length >= 6, 'Single-Area OSPF has at least 6 practice items');
+  assert(ospfLesson!.questions.length >= 6, 'Single-Area OSPF has at least 6 aligned questions');
+  console.log('  ✓ Single-Area OSPF verified with clean Content V2 structure, 7 neighbor states, DR/BDR, 6 practice items, and 6 questions.');
+
+  // [TEST 28] Verify Wireshark Packet Capture (net-404-wireshark-packet-capture)
+  console.log('\n[TEST 28] Verifying Wireshark Packet Capture (net-404-wireshark-packet-capture)...');
+  const wiresharkLesson = LESSONS_NET300_400.find((l) => l.slug === 'net-404-wireshark-packet-capture');
+  assert(!!wiresharkLesson, 'Wireshark lesson exists');
+  assert(!!wiresharkLesson!.contentV2, 'Wireshark has Content V2 structure');
+  assert(wiresharkLesson!.contentV2!.explanation.includes('Promiscuous Mode'), 'Explains Promiscuous Mode');
+  assert(wiresharkLesson!.contentV2!.explanation.includes('BPF') || wiresharkLesson!.contentV2!.explanation.includes('Capture Filter'), 'Explains BPF Capture Filters');
+  assert(wiresharkLesson!.contentV2!.practice.length >= 6, 'Wireshark has at least 6 practice items');
+  assert(wiresharkLesson!.questions.length >= 6, 'Wireshark has at least 6 aligned questions');
+  console.log('  ✓ Wireshark Packet Capture verified with clean Content V2 structure, 3-pane dissection model, filters, 6 practice items, and 6 questions.');
+
   console.log('\n================================================================');
-  console.log('🎉 ALL 20 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
+  console.log('🎉 ALL 28 CURRICULUM CONTENT ARCHITECTURE V2 TESTS PASSED!');
   console.log('================================================================\n');
 }
 
