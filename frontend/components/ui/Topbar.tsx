@@ -3,11 +3,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Search, Bell, Flame, User, BookOpen, Layers, X, Menu } from 'lucide-react';
+import { Search, Bell, Flame, User, BookOpen, Layers, X, Menu, Palette } from 'lucide-react';
 import { Badge } from './Badge';
 import { searchApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { MobileSidebarDrawer } from './Sidebar';
+import { HyperThemeStudio } from './HyperThemeStudio';
 
 export const AppTopbar: React.FC = () => {
   const router = useRouter();
@@ -18,6 +19,7 @@ export const AppTopbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showThemeStudio, setShowThemeStudio] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -207,6 +209,16 @@ export const AppTopbar: React.FC = () => {
 
           <button
             type="button"
+            aria-label="Theme Studio"
+            onClick={() => setShowThemeStudio(true)}
+            className="w-8 h-8 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-[#00f0ff] flex items-center justify-center text-[#8e95a5] hover:text-[#00f0ff] transition-colors"
+            title="Open Hyper-Theme Studio (Version 4.3)"
+          >
+            <Palette className="w-4 h-4" />
+          </button>
+
+          <button
+            type="button"
             aria-label="Notifications"
             className="w-8 h-8 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-zinc-500 flex items-center justify-center text-[#8e95a5] hover:text-[#f4f5f7] transition-colors relative"
           >
@@ -221,6 +233,15 @@ export const AppTopbar: React.FC = () => {
           </Link>
         </div>
       </header>
+
+      {/* Theme Studio Modal */}
+      {showThemeStudio && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <HyperThemeStudio onClose={() => setShowThemeStudio(false)} />
+          </div>
+        </div>
+      )}
 
       {/* Mobile Drawer Overlay */}
       <MobileSidebarDrawer isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
