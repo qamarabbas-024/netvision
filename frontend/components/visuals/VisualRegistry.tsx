@@ -39,6 +39,7 @@ import { Wifi7RfPhysicsStudio } from '../simulation/Wifi7RfPhysicsStudio';
 import { PenetrationTestingStudio } from '../simulation/PenetrationTestingStudio';
 import { ZeroTrustPolicyStudio } from '../simulation/ZeroTrustPolicyStudio';
 import { EbpfStudio } from '../simulation/EbpfStudio';
+import { QuantumCryptoStudio } from '../simulation/QuantumCryptoStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -150,6 +151,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('ebpf') || slug.includes('xdp') || slug.includes('bpf') || slug.includes('kernel') || slug.includes('tc') || slug.includes('kprobe') || slug.includes('observability')) {
     return <EbpfStudio />;
+  }
+
+  if (slug.includes('quantum') || slug.includes('pqc') || slug.includes('kyber') || slug.includes('dilithium') || slug.includes('post-quantum') || slug.includes('encryption') || slug.includes('hybrid-tls') || slug.includes('cryptography')) {
+    return <QuantumCryptoStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
