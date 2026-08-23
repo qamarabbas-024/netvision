@@ -42,6 +42,7 @@ import { EbpfStudio } from '../simulation/EbpfStudio';
 import { QuantumCryptoStudio } from '../simulation/QuantumCryptoStudio';
 import { SatelliteMeshStudio } from '../simulation/SatelliteMeshStudio';
 import { AutonomousAiOpsStudio } from '../simulation/AutonomousAiOpsStudio';
+import { GlobalNocCommandStudio } from '../simulation/GlobalNocCommandStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -165,6 +166,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('aiops') || slug.includes('self-healing') || slug.includes('gnmi') || slug.includes('openconfig') || slug.includes('telemetry') || slug.includes('closed-loop') || slug.includes('rca') || slug.includes('autonomous-network')) {
     return <AutonomousAiOpsStudio />;
+  }
+
+  if (slug.includes('noc') || slug.includes('command-center') || slug.includes('video-wall') || slug.includes('enterprise') || slug.includes('multi-tenant') || slug.includes('lms') || slug.includes('soc2') || slug.includes('v6')) {
+    return <GlobalNocCommandStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
