@@ -37,6 +37,7 @@ import { CloudTransitVpcStudio } from '../simulation/CloudTransitVpcStudio';
 import { SdwanTrafficStudio } from '../simulation/SdwanTrafficStudio';
 import { Wifi7RfPhysicsStudio } from '../simulation/Wifi7RfPhysicsStudio';
 import { PenetrationTestingStudio } from '../simulation/PenetrationTestingStudio';
+import { ZeroTrustPolicyStudio } from '../simulation/ZeroTrustPolicyStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -140,6 +141,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('pentest') || slug.includes('nmap') || slug.includes('scanner') || slug.includes('xmas') || slug.includes('smbghost') || slug.includes('cve') || slug.includes('exploit') || slug.includes('port-scan')) {
     return <PenetrationTestingStudio />;
+  }
+
+  if (slug.includes('zerotrust') || slug.includes('zero-trust') || slug.includes('ztna') || slug.includes('microsegmentation') || slug.includes('spiffe') || slug.includes('beyondcorp') || slug.includes('mtls') || slug.includes('device-posture')) {
+    return <ZeroTrustPolicyStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
