@@ -35,6 +35,7 @@ import { ProctoredExamStudio } from '../certification/ProctoredExamStudio';
 import { GlobalInternetDigitalTwinStudio } from '../simulation/GlobalInternetDigitalTwinStudio';
 import { CloudTransitVpcStudio } from '../simulation/CloudTransitVpcStudio';
 import { SdwanTrafficStudio } from '../simulation/SdwanTrafficStudio';
+import { Wifi7RfPhysicsStudio } from '../simulation/Wifi7RfPhysicsStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -130,6 +131,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('sdwan') || slug.includes('sd-wan') || slug.includes('fec') || slug.includes('sla') || slug.includes('path-selection') || slug.includes('mpls') || slug.includes('broadband')) {
     return <SdwanTrafficStudio />;
+  }
+
+  if (slug.includes('wifi7') || slug.includes('wifi') || slug.includes('wireless-rf') || slug.includes('802.11be') || slug.includes('mlo') || slug.includes('4096-qam') || slug.includes('beamforming') || slug.includes('cellular-5g')) {
+    return <Wifi7RfPhysicsStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
