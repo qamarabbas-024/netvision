@@ -27,6 +27,7 @@ import { WiresharkPcapStudio } from './WiresharkPcapStudio';
 import { ScapyPacketCrafter } from './ScapyPacketCrafter';
 import { NetworkBufferPhysicsVisualizer } from '../simulation/NetworkBufferPhysicsVisualizer';
 import { BgpEvpnFabricVisualizer } from '../simulation/BgpEvpnFabricVisualizer';
+import { IacAutomationStudio } from '../simulation/IacAutomationStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -90,6 +91,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('bgp') || slug.includes('evpn') || slug.includes('vxlan') || slug.includes('spine-leaf') || slug.includes('datacenter') || slug.includes('cloud-fabric')) {
     return <BgpEvpnFabricVisualizer />;
+  }
+
+  if (slug.includes('iac') || slug.includes('terraform') || slug.includes('ansible') || slug.includes('netdevops') || slug.includes('netmiko') || slug.includes('playbook') || slug.includes('infrastructure-as-code')) {
+    return <IacAutomationStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
