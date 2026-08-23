@@ -9,15 +9,17 @@ import { MultimodalDiagramParser } from '@/components/simulation/MultimodalDiagr
 import { UniversalChatHistoryImporter } from '@/components/learning/UniversalChatHistoryImporter';
 import { PdfReportStudio } from '@/components/ui/PdfReportStudio';
 import { NetworkBufferPhysicsVisualizer } from '@/components/simulation/NetworkBufferPhysicsVisualizer';
+import { AiDiagnosticCopilot } from '@/components/learning/AiDiagnosticCopilot';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Image as ImageIcon, Bot, Printer, Zap, Network } from 'lucide-react';
+import { Image as ImageIcon, Bot, Printer, Zap, Network, Sparkles } from 'lucide-react';
 
 export default function SandboxPage() {
   const [viewTab, setViewTab] = React.useState<'sandbox' | 'physics'>('sandbox');
   const [showDiagramParser, setShowDiagramParser] = React.useState<boolean>(false);
   const [showChatImporter, setShowChatImporter] = React.useState<boolean>(false);
   const [showPdfStudio, setShowPdfStudio] = React.useState<boolean>(false);
+  const [showCopilot, setShowCopilot] = React.useState<boolean>(false);
 
   return (
     <ProtectedRoute>
@@ -67,6 +69,16 @@ export default function SandboxPage() {
                   <Button
                     variant="secondary"
                     size="sm"
+                    onClick={() => setShowCopilot(true)}
+                    leftIcon={<Sparkles className="w-3.5 h-3.5 text-purple-400" />}
+                    className="text-xs font-bold"
+                  >
+                    AI Copilot Tutor (V4.2)
+                  </Button>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     onClick={() => setShowPdfStudio(true)}
                     leftIcon={<Printer className="w-3.5 h-3.5 text-emerald-400" />}
                     className="text-xs font-bold"
@@ -77,6 +89,14 @@ export default function SandboxPage() {
               </div>
 
               {/* Modals */}
+              {showCopilot && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                  <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <AiDiagnosticCopilot onClose={() => setShowCopilot(false)} />
+                  </div>
+                </div>
+              )}
+
               {showDiagramParser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
                   <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
