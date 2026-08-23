@@ -43,6 +43,7 @@ import { QuantumCryptoStudio } from '../simulation/QuantumCryptoStudio';
 import { SatelliteMeshStudio } from '../simulation/SatelliteMeshStudio';
 import { AutonomousAiOpsStudio } from '../simulation/AutonomousAiOpsStudio';
 import { GlobalNocCommandStudio } from '../simulation/GlobalNocCommandStudio';
+import { MultimodalImportStudio } from '../tools/MultimodalImportStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -170,6 +171,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('noc') || slug.includes('command-center') || slug.includes('video-wall') || slug.includes('enterprise') || slug.includes('multi-tenant') || slug.includes('lms') || slug.includes('soc2') || slug.includes('v6')) {
     return <GlobalNocCommandStudio />;
+  }
+
+  if (slug.includes('import') || slug.includes('ocr') || slug.includes('multimodal') || slug.includes('chat-import') || slug.includes('pdf-export') || slug.includes('diploma')) {
+    return <MultimodalImportStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
