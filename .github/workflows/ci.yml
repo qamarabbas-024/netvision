@@ -11,6 +11,25 @@ jobs:
     name: Build, Typecheck, Lint & Test Suite
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: netvision
+          POSTGRES_PASSWORD: netvision_secure_password
+          POSTGRES_DB: netvision_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: "postgresql://netvision:netvision_secure_password@localhost:5432/netvision_db?schema=public"
+      JWT_SECRET: "netvision_ci_test_secret"
+
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -26,7 +45,13 @@ jobs:
           version: 9
 
       - name: Install Monorepo Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Generate Prisma Client & Migrate DB
+        run: |
+          cd backend
+          npx prisma db push --accept-data-loss
+          npx ts-node prisma/seed.ts
 
       - name: Run TypeScript Typecheck (5 Projects)
         run: pnpm typecheck
