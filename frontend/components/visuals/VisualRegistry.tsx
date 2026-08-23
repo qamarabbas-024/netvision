@@ -36,6 +36,7 @@ import { GlobalInternetDigitalTwinStudio } from '../simulation/GlobalInternetDig
 import { CloudTransitVpcStudio } from '../simulation/CloudTransitVpcStudio';
 import { SdwanTrafficStudio } from '../simulation/SdwanTrafficStudio';
 import { Wifi7RfPhysicsStudio } from '../simulation/Wifi7RfPhysicsStudio';
+import { PenetrationTestingStudio } from '../simulation/PenetrationTestingStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -135,6 +136,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('wifi7') || slug.includes('wifi') || slug.includes('wireless-rf') || slug.includes('802.11be') || slug.includes('mlo') || slug.includes('4096-qam') || slug.includes('beamforming') || slug.includes('cellular-5g')) {
     return <Wifi7RfPhysicsStudio />;
+  }
+
+  if (slug.includes('pentest') || slug.includes('nmap') || slug.includes('scanner') || slug.includes('xmas') || slug.includes('smbghost') || slug.includes('cve') || slug.includes('exploit') || slug.includes('port-scan')) {
+    return <PenetrationTestingStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
