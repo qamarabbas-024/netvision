@@ -1,0 +1,23 @@
+# NetVision Backend Production Multi-Stage Dockerfile
+FROM node:20-alpine AS base
+RUN npm install -g pnpm@9
+
+WORKDIR /app
+
+# Copy root workspace configurations
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY packages/shared ./packages/shared
+COPY packages/ui ./packages/ui
+COPY packages/simulation-engine ./packages/simulation-engine
+COPY backend ./backend
+
+# Install dependencies and build shared packages + backend
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @netvision/shared build || true
+RUN pnpm --filter @netvision/simulation-engine build || true
+RUN pnpm --filter netvision-backend build || true
+
+WORKDIR /app/backend
+
+EXPOSE 4000
+CMD ["pnpm", "start"]

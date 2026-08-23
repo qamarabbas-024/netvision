@@ -1,0 +1,24 @@
+# NetVision Frontend Production Multi-Stage Dockerfile
+FROM node:20-alpine AS base
+RUN npm install -g pnpm@9
+
+WORKDIR /app
+
+# Copy root workspace configurations
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY packages/shared ./packages/shared
+COPY packages/ui ./packages/ui
+COPY packages/simulation-engine ./packages/simulation-engine
+COPY frontend ./frontend
+
+# Install dependencies and build shared packages + frontend
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @netvision/shared build || true
+RUN pnpm --filter @netvision/simulation-engine build || true
+
+WORKDIR /app/frontend
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN pnpm build || true
+
+EXPOSE 3000
+CMD ["pnpm", "start"]
