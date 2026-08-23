@@ -29,6 +29,7 @@ import { NetworkBufferPhysicsVisualizer } from '../simulation/NetworkBufferPhysi
 import { BgpEvpnFabricVisualizer } from '../simulation/BgpEvpnFabricVisualizer';
 import { IacAutomationStudio } from '../simulation/IacAutomationStudio';
 import { HardwareBridgeStudio } from '../simulation/HardwareBridgeStudio';
+import { CyberDefenseStudio } from '../simulation/CyberDefenseStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -100,6 +101,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('containerlab') || slug.includes('eve-ng') || slug.includes('gns3') || slug.includes('clab') || slug.includes('hardware-bridge') || slug.includes('physical-lab')) {
     return <HardwareBridgeStudio />;
+  }
+
+  if (slug.includes('cyber') || slug.includes('security') || slug.includes('ddos') || slug.includes('mitm') || slug.includes('arp-spoofing') || slug.includes('syn-flood') || slug.includes('dnssec') || slug.includes('firewall') || slug.includes('ids') || slug.includes('red-blue')) {
+    return <CyberDefenseStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
