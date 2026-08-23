@@ -34,6 +34,7 @@ import { ChaosEngineeringStudio } from '../simulation/ChaosEngineeringStudio';
 import { ProctoredExamStudio } from '../certification/ProctoredExamStudio';
 import { GlobalInternetDigitalTwinStudio } from '../simulation/GlobalInternetDigitalTwinStudio';
 import { CloudTransitVpcStudio } from '../simulation/CloudTransitVpcStudio';
+import { SdwanTrafficStudio } from '../simulation/SdwanTrafficStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -125,6 +126,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('vpc') || slug.includes('tgw') || slug.includes('transit-gateway') || slug.includes('cloud-network') || slug.includes('aws') || slug.includes('azure') || slug.includes('cross-cloud')) {
     return <CloudTransitVpcStudio />;
+  }
+
+  if (slug.includes('sdwan') || slug.includes('sd-wan') || slug.includes('fec') || slug.includes('sla') || slug.includes('path-selection') || slug.includes('mpls') || slug.includes('broadband')) {
+    return <SdwanTrafficStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
