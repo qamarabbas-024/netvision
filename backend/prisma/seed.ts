@@ -486,7 +486,7 @@ async function main() {
       level: CourseLevel.BEGINNER,
       isActive: true,
       requirementsJson: {
-        requiredCourseCodes: ['NET-201', 'NET-202', 'NET-203', 'NET-204'],
+        requiredCourseCodes: ['NET-201', 'NET-202', 'NET-203', 'NET-204', 'NET-302'],
         minAssessmentAvg: 80,
         requireAllLabs: true,
       },
@@ -525,7 +525,7 @@ async function main() {
       level: CourseLevel.BEGINNER,
       isActive: true,
       requirementsJson: {
-        requiredCourseCodes: ['NET-201', 'NET-202', 'NET-203', 'NET-204'],
+        requiredCourseCodes: ['NET-201', 'NET-202', 'NET-203', 'NET-204', 'NET-302'],
         minAssessmentAvg: 80,
         requireAllLabs: true,
       },

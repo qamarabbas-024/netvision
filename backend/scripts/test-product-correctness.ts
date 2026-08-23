@@ -466,7 +466,7 @@ async function runProductCorrectnessTests() {
       });
       assert(!!certDef, '10.0 Certification definition NV-NET exists');
 
-      const reqCourseCodes: string[] = (certDef!.requirementsJson as any)?.requiredCourseCodes || ['NET-201', 'NET-202', 'NET-203', 'NET-204'];
+      const reqCourseCodes: string[] = (certDef!.requirementsJson as any)?.requiredCourseCodes || ['NET-201', 'NET-202', 'NET-203', 'NET-204', 'NET-302'];
       const requiredCourses = await prisma.course.findMany({
         where: { code: { in: reqCourseCodes } },
         include: { modules: { include: { lessons: { include: { labs: true } } } } },
