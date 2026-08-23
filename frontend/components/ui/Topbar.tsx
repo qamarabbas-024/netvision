@@ -207,6 +207,15 @@ export const AppTopbar: React.FC = () => {
             </Badge>
           </div>
 
+          <Link href="/workbench" aria-label="Simulation Workbench">
+            <div
+              className="w-8 h-8 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-[#00f0ff] flex items-center justify-center text-[#8e95a5] hover:text-[#00f0ff] transition-colors cursor-pointer"
+              title="Open Master Simulation Workbench"
+            >
+              <Layers className="w-4 h-4" />
+            </div>
+          </Link>
+
           <button
             type="button"
             aria-label="Theme Studio"
