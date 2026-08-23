@@ -31,6 +31,7 @@ import { IacAutomationStudio } from '../simulation/IacAutomationStudio';
 import { HardwareBridgeStudio } from '../simulation/HardwareBridgeStudio';
 import { CyberDefenseStudio } from '../simulation/CyberDefenseStudio';
 import { ChaosEngineeringStudio } from '../simulation/ChaosEngineeringStudio';
+import { ProctoredExamStudio } from '../certification/ProctoredExamStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -110,6 +111,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('chaos') || slug.includes('outage') || slug.includes('flapping') || slug.includes('jitter') || slug.includes('blackhole') || slug.includes('split-brain') || slug.includes('resilience') || slug.includes('chaos-monkey')) {
     return <ChaosEngineeringStudio />;
+  }
+
+  if (slug.includes('proctor') || slug.includes('proctoring') || slug.includes('exam') || slug.includes('high-stakes') || slug.includes('anti-cheat') || slug.includes('tamper') || slug.includes('credential-mint')) {
+    return <ProctoredExamStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
