@@ -40,6 +40,7 @@ import { PenetrationTestingStudio } from '../simulation/PenetrationTestingStudio
 import { ZeroTrustPolicyStudio } from '../simulation/ZeroTrustPolicyStudio';
 import { EbpfStudio } from '../simulation/EbpfStudio';
 import { QuantumCryptoStudio } from '../simulation/QuantumCryptoStudio';
+import { SatelliteMeshStudio } from '../simulation/SatelliteMeshStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -155,6 +156,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('quantum') || slug.includes('pqc') || slug.includes('kyber') || slug.includes('dilithium') || slug.includes('post-quantum') || slug.includes('encryption') || slug.includes('hybrid-tls') || slug.includes('cryptography')) {
     return <QuantumCryptoStudio />;
+  }
+
+  if (slug.includes('satellite') || slug.includes('starlink') || slug.includes('leo') || slug.includes('isl') || slug.includes('space') || slug.includes('dtn') || slug.includes('laser-link') || slug.includes('orbital')) {
+    return <SatelliteMeshStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
