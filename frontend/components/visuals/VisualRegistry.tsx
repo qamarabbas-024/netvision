@@ -26,6 +26,7 @@ import { SocketMultiplexerVisual } from './SocketMultiplexerVisual';
 import { WiresharkPcapStudio } from './WiresharkPcapStudio';
 import { ScapyPacketCrafter } from './ScapyPacketCrafter';
 import { NetworkBufferPhysicsVisualizer } from '../simulation/NetworkBufferPhysicsVisualizer';
+import { BgpEvpnFabricVisualizer } from '../simulation/BgpEvpnFabricVisualizer';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -85,6 +86,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('physics') || slug.includes('buffer') || slug.includes('queue') || slug.includes('tail-drop') || slug.includes('red') || slug.includes('congestion') || slug.includes('qos')) {
     return <NetworkBufferPhysicsVisualizer />;
+  }
+
+  if (slug.includes('bgp') || slug.includes('evpn') || slug.includes('vxlan') || slug.includes('spine-leaf') || slug.includes('datacenter') || slug.includes('cloud-fabric')) {
+    return <BgpEvpnFabricVisualizer />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
