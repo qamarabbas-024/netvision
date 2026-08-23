@@ -269,6 +269,26 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
         concept: 'Duplicate MAC Address & CAM Flapping Troubleshooting',
       },
     ],
+    lab: {
+      title: 'Guided Practice: MAC Address Inspection & CAM Table Port Mapping',
+      instructions:
+        '1. Inspect physical NIC burned-in MAC address (BIA) on Host-A (00:1A:2B:11:22:33).\n2. Transmit an initial Unicast frame destined for default gateway MAC (00:1A:2B:GW:01:01).\n3. Observe switch CAM table learning on Ingress port FastEthernet0/1.\n4. Trigger an ARP broadcast to FF:FF:FF:FF:FF:FF and verify all-port flooding.\n5. Verify that unicast reply results in a static entry and eliminates switch flooding.',
+      difficulty: CourseLevel.BEGINNER,
+      estimatedMinutes: 15,
+      initialTopologyJson: {
+        hostMac: '00:1A:2B:11:22:33',
+        gatewayMac: '00:1A:2B:GW:01:01',
+        broadcastMac: 'FF:FF:FF:FF:FF:FF',
+        switchPorts: ['Fa0/1', 'Fa0/2', 'Fa0/3', 'Gi0/1'],
+        vlan: 1,
+      },
+      tasks: [
+        'Inspect Host-A Layer 2 MAC address and Organizationally Unique Identifier (OUI).',
+        'Send Unicast frame and record MAC learning in switch CAM table on Fa0/1.',
+        'Send Broadcast frame to FF:FF:FF:FF:FF:FF and observe frame flooding across Fa0/2 and Fa0/3.',
+        'Confirm bidirectional CAM table convergence with zero unknown unicast flooding.',
+      ],
+    },
   },
 
   // -------------------------------------------------------------------------
@@ -1652,5 +1672,26 @@ export const LESSONS_NET200: BenchmarkLessonFullDefinition[] = [
         concept: 'Overlapping Subnet Troubleshooting',
       },
     ],
+    lab: {
+      title: 'Guided Practice: IPv4 VLSM Subnet Calculation & Gateway Allocation',
+      instructions:
+        '1. Given the master network block 192.168.10.0/24, allocate subnets using Variable Length Subnet Masking (VLSM).\n2. Design Subnet A for 60 host endpoints (/26 prefix, 255.255.255.192).\n3. Design Subnet B for 25 host endpoints (/27 prefix, 255.255.255.224).\n4. Design Point-to-Point WAN link for 2 router endpoints (/30 prefix, 255.255.255.252).\n5. Assign first usable IP to router gateway interfaces and verify non-overlapping routing tables.',
+      difficulty: CourseLevel.BEGINNER,
+      estimatedMinutes: 20,
+      initialTopologyJson: {
+        baseNetwork: '192.168.10.0/24',
+        subnets: [
+          { name: 'Engineering', hostsRequired: 60, allocatedCidr: '192.168.10.0/26', gatewayIp: '192.168.10.1' },
+          { name: 'Sales', hostsRequired: 25, allocatedCidr: '192.168.10.64/27', gatewayIp: '192.168.10.65' },
+          { name: 'WAN Link', hostsRequired: 2, allocatedCidr: '192.168.10.96/30', gatewayIp: '192.168.10.97' },
+        ],
+      },
+      tasks: [
+        'Calculate prefix length and subnet mask for 60 hosts (/26, mask 255.255.255.192).',
+        'Calculate prefix length and subnet mask for 25 hosts (/27, mask 255.255.255.224).',
+        'Calculate Point-to-Point WAN link subnet (/30, mask 255.255.255.252).',
+        'Assign gateway addresses and verify zero subnet overlap errors across routing tables.',
+      ],
+    },
   },
 ];

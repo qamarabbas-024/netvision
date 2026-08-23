@@ -57,36 +57,45 @@ async function main() {
   const targetModuleMap = new Map<string, string>(); // course.id -> first module.id
 
   for (const cDef of TARGET_16_COURSES) {
-    const course = await prisma.course.upsert({
-      where: { slug: cDef.slug },
-      update: {
-        code: cDef.code,
-        order: cDef.order,
-        title: cDef.title,
-        tagline: cDef.tagline,
-        category: cDef.category,
-        description: cDef.description,
-        level: cDef.level,
-        icon: cDef.icon,
-        estimatedHours: cDef.estimatedHours,
-        published: true,
-        prerequisitesJson: cDef.prerequisitesJson,
-      },
-      create: {
-        code: cDef.code,
-        order: cDef.order,
-        slug: cDef.slug,
-        title: cDef.title,
-        tagline: cDef.tagline,
-        category: cDef.category,
-        description: cDef.description,
-        level: cDef.level,
-        icon: cDef.icon,
-        estimatedHours: cDef.estimatedHours,
-        published: true,
-        prerequisitesJson: cDef.prerequisitesJson,
-      },
+    let course = await prisma.course.findFirst({
+      where: { OR: [{ code: cDef.code }, { slug: cDef.slug }] },
     });
+    if (course) {
+      course = await prisma.course.update({
+        where: { id: course.id },
+        data: {
+          code: cDef.code,
+          slug: cDef.slug,
+          order: cDef.order,
+          title: cDef.title,
+          tagline: cDef.tagline,
+          category: cDef.category,
+          description: cDef.description,
+          level: cDef.level,
+          icon: cDef.icon,
+          estimatedHours: cDef.estimatedHours,
+          published: true,
+          prerequisitesJson: cDef.prerequisitesJson,
+        },
+      });
+    } else {
+      course = await prisma.course.create({
+        data: {
+          code: cDef.code,
+          order: cDef.order,
+          slug: cDef.slug,
+          title: cDef.title,
+          tagline: cDef.tagline,
+          category: cDef.category,
+          description: cDef.description,
+          level: cDef.level,
+          icon: cDef.icon,
+          estimatedHours: cDef.estimatedHours,
+          published: true,
+          prerequisitesJson: cDef.prerequisitesJson,
+        },
+      });
+    }
 
     courseMap.set(cDef.code, course.id);
 
@@ -157,7 +166,19 @@ async function main() {
         where: { lessonId: bLesson.id },
       });
 
-      if (!existingLab) {
+      if (existingLab) {
+        await prisma.lessonLab.update({
+          where: { id: existingLab.id },
+          data: {
+            title: bDef.lab.title,
+            instructions: bDef.lab.instructions,
+            difficulty: bDef.lab.difficulty,
+            estimatedMinutes: bDef.lab.estimatedMinutes,
+            initialTopologyJson: bDef.lab.initialTopologyJson,
+            objectivesJson: bDef.lab.tasks,
+          },
+        });
+      } else {
         await prisma.lessonLab.create({
           data: {
             lessonId: bLesson.id,

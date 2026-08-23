@@ -2229,6 +2229,28 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
         concept: 'TCP SYN Flood & SYN Cookies Mitigation',
       },
     ],
+    lab: {
+      title: 'Guided Practice: TCP 3-Way Handshake & Port Multiplexing Analysis',
+      instructions:
+        '1. Initiate TCP connection from Client (192.168.1.50:52114) to Web Server (93.184.216.34:443).\n2. Trace TCP SYN generation with Client Initial Sequence Number (ISN).\n3. Inspect Server response with SYN-ACK, Server ISN, and ACK (Client ISN + 1).\n4. Complete 3-way handshake with Client ACK (Server ISN + 1).\n5. Transmit HTTP application payload and observe Sliding Window acknowledgment progression.',
+      difficulty: CourseLevel.BEGINNER,
+      estimatedMinutes: 20,
+      initialTopologyJson: {
+        clientIp: '192.168.1.50',
+        clientEphemeralPort: 52114,
+        serverIp: '93.184.216.34',
+        serverPort: 443,
+        clientIsn: 1000,
+        serverIsn: 5000,
+        windowSize: 64240,
+      },
+      tasks: [
+        'Inspect TCP SYN segment and record Client Initial Sequence Number (ISN=1000).',
+        'Inspect TCP SYN-ACK segment and verify relative ACK number (1001).',
+        'Verify Client final ACK completing connection establishment (ESTABLISHED state).',
+        'Observe graceful TCP 4-way FIN/ACK connection teardown sequence.',
+      ],
+    },
   },
 ];
 
