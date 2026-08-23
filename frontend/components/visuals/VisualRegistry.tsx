@@ -28,6 +28,7 @@ import { ScapyPacketCrafter } from './ScapyPacketCrafter';
 import { NetworkBufferPhysicsVisualizer } from '../simulation/NetworkBufferPhysicsVisualizer';
 import { BgpEvpnFabricVisualizer } from '../simulation/BgpEvpnFabricVisualizer';
 import { IacAutomationStudio } from '../simulation/IacAutomationStudio';
+import { HardwareBridgeStudio } from '../simulation/HardwareBridgeStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -95,6 +96,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('iac') || slug.includes('terraform') || slug.includes('ansible') || slug.includes('netdevops') || slug.includes('netmiko') || slug.includes('playbook') || slug.includes('infrastructure-as-code')) {
     return <IacAutomationStudio />;
+  }
+
+  if (slug.includes('containerlab') || slug.includes('eve-ng') || slug.includes('gns3') || slug.includes('clab') || slug.includes('hardware-bridge') || slug.includes('physical-lab')) {
+    return <HardwareBridgeStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
