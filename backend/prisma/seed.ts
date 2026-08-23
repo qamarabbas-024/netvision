@@ -559,6 +559,150 @@ async function main() {
     },
   });
 
+  await prisma.certificationDefinition.upsert({
+    where: { code: 'NV-SEC' },
+    update: {
+      title: 'NetVision Certified Cyber-Defense & Zero-Trust Specialist',
+      level: CourseLevel.ADVANCED,
+      isActive: true,
+    },
+    create: {
+      code: 'NV-SEC',
+      title: 'NetVision Certified Cyber-Defense & Zero-Trust Specialist',
+      description: 'Demonstrates elite mastery in Red/Blue cyber-defense, eBPF XDP firewall mitigation, NIST SP 800-207 Zero-Trust posture enforcement, and Post-Quantum Kyber-1024 encryption.',
+      level: CourseLevel.ADVANCED,
+      isActive: true,
+      requirementsJson: {
+        requiredCourseCodes: ['NET-404', 'NET-304'],
+        minAssessmentAvg: 85,
+        requireAllLabs: true,
+      },
+      policyJson: {
+        maxAttempts: 3,
+        cooldownAfterFirstFailure: 86400,
+        cooldownAfterSubsequentFailure: 259200,
+        rollingWindowDays: 30,
+      },
+      theoryConfigJson: {
+        questionCount: 60,
+        durationSeconds: 4500,
+        passingScore: 85,
+        troubleshootingMinimum: 75,
+      },
+      practicalConfigJson: {
+        durationSeconds: 5400,
+        passingScore: 85,
+        maximumHints: 1,
+        hintPenalty: 5,
+        scenarioCode: 'NV-SEC-PRACTICAL-SCENARIO-1',
+        scoringWeights: {
+          theoryWeight: 20,
+          practicalWeight: 40,
+          troubleshootingWeight: 25,
+          packetAnalysisWeight: 15,
+          componentMinimum: 70,
+          passingScore: 85,
+        },
+      },
+    },
+  });
+
+  await prisma.certificationDefinition.upsert({
+    where: { code: 'NV-CLOUD' },
+    update: {
+      title: 'NetVision Certified Multi-Cloud Network Architect',
+      level: CourseLevel.ADVANCED,
+      isActive: true,
+    },
+    create: {
+      code: 'NV-CLOUD',
+      title: 'NetVision Certified Multi-Cloud Network Architect',
+      description: 'Demonstrates expert competence in AWS Transit Gateway hub-and-spoke topologies, BGP EVPN/VXLAN data center fabrics, SD-WAN dynamic path steering, and Multi-Cloud interconnection.',
+      level: CourseLevel.ADVANCED,
+      isActive: true,
+      requirementsJson: {
+        requiredCourseCodes: ['NET-304', 'NET-401'],
+        minAssessmentAvg: 85,
+        requireAllLabs: true,
+      },
+      policyJson: {
+        maxAttempts: 3,
+        cooldownAfterFirstFailure: 86400,
+        cooldownAfterSubsequentFailure: 259200,
+        rollingWindowDays: 30,
+      },
+      theoryConfigJson: {
+        questionCount: 60,
+        durationSeconds: 4500,
+        passingScore: 85,
+        troubleshootingMinimum: 75,
+      },
+      practicalConfigJson: {
+        durationSeconds: 5400,
+        passingScore: 85,
+        maximumHints: 1,
+        hintPenalty: 5,
+        scenarioCode: 'NV-CLOUD-PRACTICAL-SCENARIO-1',
+        scoringWeights: {
+          theoryWeight: 20,
+          practicalWeight: 40,
+          troubleshootingWeight: 25,
+          packetAnalysisWeight: 15,
+          componentMinimum: 70,
+          passingScore: 85,
+        },
+      },
+    },
+  });
+
+  await prisma.certificationDefinition.upsert({
+    where: { code: 'NV-AIOPS' },
+    update: {
+      title: 'NetVision Certified Autonomous Network & NetDevOps Engineer',
+      level: CourseLevel.ADVANCED,
+      isActive: true,
+    },
+    create: {
+      code: 'NV-AIOPS',
+      title: 'NetVision Certified Autonomous Network & NetDevOps Engineer',
+      description: 'Demonstrates deep mastery in Infrastructure-as-Code (Terraform/Ansible/Netmiko), gNMI OpenConfig streaming telemetry, and autonomous closed-loop AI self-healing pipelines.',
+      level: CourseLevel.ADVANCED,
+      isActive: true,
+      requirementsJson: {
+        requiredCourseCodes: ['NET-403', 'NET-404'],
+        minAssessmentAvg: 85,
+        requireAllLabs: true,
+      },
+      policyJson: {
+        maxAttempts: 3,
+        cooldownAfterFirstFailure: 86400,
+        cooldownAfterSubsequentFailure: 259200,
+        rollingWindowDays: 30,
+      },
+      theoryConfigJson: {
+        questionCount: 60,
+        durationSeconds: 4500,
+        passingScore: 85,
+        troubleshootingMinimum: 75,
+      },
+      practicalConfigJson: {
+        durationSeconds: 5400,
+        passingScore: 85,
+        maximumHints: 1,
+        hintPenalty: 5,
+        scenarioCode: 'NV-AIOPS-PRACTICAL-SCENARIO-1',
+        scoringWeights: {
+          theoryWeight: 20,
+          practicalWeight: 40,
+          troubleshootingWeight: 25,
+          packetAnalysisWeight: 15,
+          componentMinimum: 70,
+          passingScore: 85,
+        },
+      },
+    },
+  });
+
   console.log('✅ Phase 12C Curriculum Migration & Seed Completed Successfully!');
 }
 
