@@ -8,11 +8,13 @@ import { SandboxCanvas } from '@/components/sandbox/SandboxCanvas';
 import { MultimodalDiagramParser } from '@/components/simulation/MultimodalDiagramParser';
 import { UniversalChatHistoryImporter } from '@/components/learning/UniversalChatHistoryImporter';
 import { PdfReportStudio } from '@/components/ui/PdfReportStudio';
+import { NetworkBufferPhysicsVisualizer } from '@/components/simulation/NetworkBufferPhysicsVisualizer';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Image as ImageIcon, Bot, Printer } from 'lucide-react';
+import { Image as ImageIcon, Bot, Printer, Zap, Network } from 'lucide-react';
 
 export default function SandboxPage() {
+  const [viewTab, setViewTab] = React.useState<'sandbox' | 'physics'>('sandbox');
   const [showDiagramParser, setShowDiagramParser] = React.useState<boolean>(false);
   const [showChatImporter, setShowChatImporter] = React.useState<boolean>(false);
   const [showPdfStudio, setShowPdfStudio] = React.useState<boolean>(false);
@@ -95,8 +97,35 @@ export default function SandboxPage() {
                 <PdfReportStudio isOpen={showPdfStudio} onClose={() => setShowPdfStudio(false)} />
               )}
 
-              {/* Sandbox Canvas Component */}
-              <SandboxCanvas />
+              {/* View Switcher Tabs */}
+              <div className="flex items-center gap-2 p-1 rounded-2xl bg-[#121217] border border-[#272732] w-fit">
+                <button
+                  onClick={() => setViewTab('sandbox')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
+                    viewTab === 'sandbox'
+                      ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Network className="w-4 h-4" />
+                  Topology Sandbox (2D/3D)
+                </button>
+
+                <button
+                  onClick={() => setViewTab('physics')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
+                    viewTab === 'physics'
+                      ? 'bg-[#00f0ff] text-black shadow-glow-cyan'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Zap className="w-4 h-4" />
+                  Buffer & Queue Physics Engine (V4.1)
+                </button>
+              </div>
+
+              {/* Main Content View */}
+              {viewTab === 'sandbox' ? <SandboxCanvas /> : <NetworkBufferPhysicsVisualizer />}
             </div>
           </main>
         </div>
