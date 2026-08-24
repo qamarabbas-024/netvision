@@ -74,6 +74,7 @@ import { BgpAutoRemediationStudio } from '../simulation/BgpAutoRemediationStudio
 import { IndustrialSlicingStudio } from '../simulation/IndustrialSlicingStudio';
 import { ZkpNetworkStudio } from '../simulation/ZkpNetworkStudio';
 import { InterplanetaryBundleStudio } from '../simulation/InterplanetaryBundleStudio';
+import { PostQuantumTlsStudio } from '../simulation/PostQuantumTlsStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -187,11 +188,19 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
     return <EbpfStudio />;
   }
 
-  if (slug.includes('quantum') || slug.includes('pqc') || slug.includes('kyber') || slug.includes('dilithium') || slug.includes('post-quantum') || slug.includes('encryption') || slug.includes('hybrid-tls') || slug.includes('cryptography')) {
+  if (slug.includes('pqc') || slug.includes('post-quantum-tls') || slug.includes('ml-kem') || slug.includes('fips203') || slug.includes('v9.1')) {
+    return <PostQuantumTlsStudio />;
+  }
+
+  if (slug.includes('quantum') || slug.includes('kyber') || slug.includes('dilithium') || slug.includes('post-quantum') || slug.includes('encryption') || slug.includes('cryptography')) {
     return <QuantumCryptoStudio />;
   }
 
-  if (slug.includes('satellite') || slug.includes('starlink') || slug.includes('leo') || slug.includes('isl') || slug.includes('space') || slug.includes('dtn') || slug.includes('laser-link') || slug.includes('orbital')) {
+  if (slug.includes('interplanetary') || slug.includes('dtn') || slug.includes('bundle-protocol') || slug.includes('rfc5050') || slug.includes('mars-relay') || slug.includes('v9.0') || slug.includes('v9')) {
+    return <InterplanetaryBundleStudio />;
+  }
+
+  if (slug.includes('satellite') || slug.includes('starlink') || slug.includes('leo') || slug.includes('isl') || slug.includes('space') || slug.includes('laser-link') || slug.includes('orbital')) {
     return <SatelliteMeshStudio />;
   }
 
@@ -321,10 +330,6 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('zkp') || slug.includes('zk-snark') || slug.includes('groth16') || slug.includes('zero-knowledge') || slug.includes('compliance-proof') || slug.includes('v8.9')) {
     return <ZkpNetworkStudio />;
-  }
-
-  if (slug.includes('interplanetary') || slug.includes('dtn') || slug.includes('bundle-protocol') || slug.includes('rfc5050') || slug.includes('mars-relay') || slug.includes('deep-space') || slug.includes('v9.0') || slug.includes('v9')) {
-    return <InterplanetaryBundleStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {

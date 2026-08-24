@@ -34,32 +34,56 @@ interface EngineCatalogItem {
 }
 
 const ENGINES: EngineCatalogItem[] = [
+  // Physics & Hardware
   { slug: 'physics', name: 'Buffer Queue Physics', category: 'PHYSICS', versionTag: 'V4.1', description: 'Newtonian force-directed graph & FIFO/RED queue drops', icon: <Activity className="w-4 h-4 text-cyan-400" /> },
   { slug: 'wifi7', name: 'Wi-Fi 7 & 5G RF Physics', category: 'PHYSICS', versionTag: 'V5.3', description: '802.11be MLO tri-band & 4096-QAM attenuation', icon: <Wifi className="w-4 h-4 text-cyan-400" /> },
   { slug: 'satellite', name: 'Satellite Laser Mesh', category: 'PHYSICS', versionTag: 'V5.8', description: '550km LEO orbital constellation & vacuum lasers', icon: <Radio className="w-4 h-4 text-cyan-400" /> },
   { slug: 'tsn', name: 'TSN Time-Sensitive Net', category: 'PHYSICS', versionTag: 'V6.3', description: 'IEEE 802.1Qbv cyclic gate scheduling & 0-jitter queues', icon: <Activity className="w-4 h-4 text-amber-400" /> },
   { slug: 'dwdm', name: '800G DWDM & Photonics', category: 'PHYSICS', versionTag: 'V6.6', description: 'C-Band optical ROADM wavelengths & EDFA amplification', icon: <Sparkles className="w-4 h-4 text-cyan-400" /> },
+  { slug: 'subsea', name: 'Subsea Acoustic DAS', category: 'PHYSICS', versionTag: 'V8.3', description: 'Transatlantic fiber Rayleigh backscattering acoustic sensing', icon: <Activity className="w-4 h-4 text-cyan-400" /> },
+  { slug: 'hollow-core', name: 'Hollow-Core NANF Fiber', category: 'PHYSICS', versionTag: 'V8.5', description: '0.997c air-core photon propagation & ultra-low latency', icon: <Zap className="w-4 h-4 text-cyan-400" /> },
+  { slug: 'optical-mems', name: 'Optical MEMS 3D Switch', category: 'PHYSICS', versionTag: 'V8.6', description: 'Sub-microsecond all-optical silicon photonic mirror matrix', icon: <Sparkles className="w-4 h-4 text-cyan-400" /> },
+  { slug: 'interplanetary', name: 'Interplanetary DTN Bundle', category: 'PHYSICS', versionTag: 'V9.0', description: 'RFC 5050 Deep-Space Bundle Protocol & Mars relay telemetry', icon: <Radio className="w-4 h-4 text-cyan-400" /> },
 
+  // Cloud & Advanced Fabrics
   { slug: 'bgp', name: 'BGP EVPN Spine-Leaf', category: 'CLOUD', versionTag: 'V4.4', description: 'Data center Clos underlay & VXLAN UDP 4789 overlay', icon: <Server className="w-4 h-4 text-indigo-400" /> },
   { slug: 'vpc', name: 'Cloud Transit Gateway', category: 'CLOUD', versionTag: 'V5.1', description: 'Multi-VPC AWS Transit Gateway hub-and-spoke', icon: <Cloud className="w-4 h-4 text-indigo-400" /> },
   { slug: 'sdwan', name: 'Enterprise SD-WAN & FEC', category: 'CLOUD', versionTag: 'V5.2', description: 'Dynamic SLA path steering & brownout failover', icon: <Layers className="w-4 h-4 text-indigo-400" /> },
   { slug: 'digital-twin', name: 'Global Internet Twin', category: 'CLOUD', versionTag: 'V5.0', description: 'Tier-1 BGP backbone & undersea cable cuts', icon: <Sparkles className="w-4 h-4 text-indigo-400" /> },
   { slug: 'srv6', name: 'SRv6 Segment Routing', category: 'CLOUD', versionTag: 'V6.2', description: 'IPv6 SRH header execution & Traffic Engineering SLAs', icon: <Server className="w-4 h-4 text-indigo-400" /> },
   { slug: 'mptcp', name: 'MP-TCP & QUIC 0-RTT', category: 'CLOUD', versionTag: 'V6.9', description: 'Dual-path subflow aggregation & dynamic CID migration', icon: <Zap className="w-4 h-4 text-indigo-400" /> },
+  { slug: 'roce', name: 'RoCEv2 Lossless AI Fabric', category: 'CLOUD', versionTag: 'V7.1', description: 'PFC pause frames, DCQCN ECN congestion notification for GPUs', icon: <Cpu className="w-4 h-4 text-indigo-400" /> },
+  { slug: 'uec', name: 'Ultra Ethernet AI Fabric', category: 'CLOUD', versionTag: 'V7.2', description: 'UEC packet spraying, In-Network Collective Reduction', icon: <Zap className="w-4 h-4 text-indigo-400" /> },
+  { slug: 'multi-cloud', name: 'Multi-Cloud WAN Mesh', category: 'CLOUD', versionTag: 'V7.6', description: 'AWS Cloud WAN, Azure vWAN & GCP Network Connectivity Center', icon: <Cloud className="w-4 h-4 text-indigo-400" /> },
+  { slug: 'bgp-leak', name: 'BGP RFC 9234 Auto-Fix', category: 'CLOUD', versionTag: 'V8.7', description: 'Autonomous route leak mitigation & RPKI ROA enforcement', icon: <Server className="w-4 h-4 text-indigo-400" /> },
+  { slug: 'slicing', name: '5G Industrial URLLC', category: 'CLOUD', versionTag: 'V8.8', description: '3GPP 5G Network Slicing & deterministic millisecond SLA', icon: <Radio className="w-4 h-4 text-indigo-400" /> },
+  { slug: 'sagin', name: 'Space-Air-Ground SAGIN', category: 'CLOUD', versionTag: 'V8.1', description: 'Integrated multi-tier NTN mesh bridging LEO, HAPS & Terrestrial', icon: <Radio className="w-4 h-4 text-indigo-400" /> },
 
+  // Security & Cryptography
   { slug: 'cyber', name: 'Red/Blue Cyber Defense', category: 'SECURITY', versionTag: 'V4.7', description: 'Volumetric SYN flood & DAI/DNSSEC mitigations', icon: <ShieldAlert className="w-4 h-4 text-rose-400" /> },
   { slug: 'pentest', name: 'Pen-Testing & CVEs', category: 'SECURITY', versionTag: 'V5.4', description: 'Nmap stealth SYN scan & Log4Shell / SMBGhost CVEs', icon: <Terminal className="w-4 h-4 text-rose-400" /> },
   { slug: 'zerotrust', name: 'Zero Trust (ZTNA)', category: 'SECURITY', versionTag: 'V5.5', description: 'NIST SP 800-207 posture check & WireGuard tunnels', icon: <Shield className="w-4 h-4 text-rose-400" /> },
   { slug: 'quantum', name: 'Post-Quantum Kyber-1024', category: 'SECURITY', versionTag: 'V5.7', description: 'NIST PQC lattice cryptography vs Shor’s attack', icon: <Zap className="w-4 h-4 text-rose-400" /> },
+  { slug: 'pqc', name: 'Post-Quantum TLS 1.3', category: 'SECURITY', versionTag: 'V9.1', description: 'NIST FIPS 203 ML-KEM-768 hybrid key encapsulation', icon: <Zap className="w-4 h-4 text-rose-400" /> },
   { slug: 'threat-intel', name: 'Threat Intel & MITRE', category: 'SECURITY', versionTag: 'V6.4', description: 'STIX 2.1 TAXII feeds & automated BGP Flowspec filters', icon: <ShieldAlert className="w-4 h-4 text-rose-400" /> },
   { slug: 'doh', name: 'Encrypted DNS & ECH', category: 'SECURITY', versionTag: 'V6.5', description: 'DoH, DoT & Encrypted Client Hello wiretap defense', icon: <Shield className="w-4 h-4 text-rose-400" /> },
+  { slug: 'qkd', name: 'Quantum QKD Routing', category: 'SECURITY', versionTag: 'V7.3', description: 'BB84 & Entanglement-swapped trusted quantum repeaters', icon: <Sparkles className="w-4 h-4 text-rose-400" /> },
+  { slug: 'confidential', name: 'Confidential Cloud Net', category: 'SECURITY', versionTag: 'V7.7', description: 'AMD SEV-SNP & Intel TDX hardware memory encryption enclave', icon: <Shield className="w-4 h-4 text-rose-400" /> },
+  { slug: 'anycast', name: 'Anycast DDoS Scrubbing', category: 'SECURITY', versionTag: 'V7.8', description: 'Multi-Tbps BGP Anycast scrubbing & eBPF edge filtering', icon: <ShieldAlert className="w-4 h-4 text-rose-400" /> },
+  { slug: 'zkp', name: 'ZKP Network Verifier', category: 'SECURITY', versionTag: 'V8.9', description: 'Zero-Knowledge zk-SNARK Groth16 cryptographic policy audit', icon: <Shield className="w-4 h-4 text-rose-400" /> },
 
+  // DevOps & Programmability
   { slug: 'iac', name: 'NetDevOps IaC Studio', category: 'DEVOPS', versionTag: 'V4.5', description: 'Terraform, Ansible playbooks & Python Netmiko', icon: <FileCode className="w-4 h-4 text-emerald-400" /> },
   { slug: 'containerlab', name: 'Containerlab & EVE-NG', category: 'DEVOPS', versionTag: 'V4.6', description: 'Dockerized Arista cEOS & Nokia SRL bridge', icon: <Cpu className="w-4 h-4 text-emerald-400" /> },
   { slug: 'ebpf', name: 'eBPF & XDP Kernel Filter', category: 'DEVOPS', versionTag: 'V5.6', description: '14.8M PPS kernel bypass driver packet filtering', icon: <Cpu className="w-4 h-4 text-emerald-400" /> },
   { slug: 'aiops', name: 'Autonomous AI-Ops', category: 'DEVOPS', versionTag: 'V5.9', description: 'gNMI OpenConfig closed-loop self-healing', icon: <Bot className="w-4 h-4 text-emerald-400" /> },
   { slug: 'sonic', name: 'SONiC NOS & Silicon SAI', category: 'DEVOPS', versionTag: 'V6.8', description: 'Azure open-source NOS microservices & Redis DB state', icon: <Server className="w-4 h-4 text-emerald-400" /> },
+  { slug: 'oran', name: 'O-RAN RIC Architecture', category: 'DEVOPS', versionTag: 'V7.4', description: 'Near-RT RIC, xApps & rApps Open Radio Access Network', icon: <Radio className="w-4 h-4 text-emerald-400" /> },
+  { slug: 'p4', name: 'P4 Programmable Switch', category: 'DEVOPS', versionTag: 'V7.5', description: 'P4-16 data plane pipelines & In-Band Network Telemetry', icon: <Cpu className="w-4 h-4 text-emerald-400" /> },
+  { slug: 'wasm', name: 'Wasm SmartNIC / DPU', category: 'DEVOPS', versionTag: 'V8.4', description: 'Sandboxed WebAssembly packet processors on line-rate DPUs', icon: <Cpu className="w-4 h-4 text-emerald-400" /> },
+  { slug: 'neuromorphic', name: 'Neuromorphic SNN Engine', category: 'DEVOPS', versionTag: 'V8.2', description: 'Spiking neural network sub-microsecond packet classification', icon: <Bot className="w-4 h-4 text-emerald-400" /> },
 
+  // Operations & Systems
   { slug: 'multiplayer', name: 'Multiplayer P2P Canvas', category: 'OPERATIONS', versionTag: 'V6.1', description: 'Real-time WebRTC collaborative topology editing & chat', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
   { slug: 'graphrag', name: 'GraphRAG & AI Query', category: 'OPERATIONS', versionTag: 'V6.7', description: 'Natural Language to Cypher graph topology search', icon: <Bot className="w-4 h-4 text-amber-400" /> },
   { slug: 'orchestrator', name: 'Sovereign Fabric AI', category: 'OPERATIONS', versionTag: 'V7.0', description: 'Intent-to-Fabric compiler & multi-layer orchestration', icon: <Award className="w-4 h-4 text-amber-400" /> },
@@ -67,6 +91,8 @@ const ENGINES: EngineCatalogItem[] = [
   { slug: 'proctor', name: 'AI Exam Proctoring', category: 'OPERATIONS', versionTag: 'V4.9', description: 'Anti-cheat facial gaze mesh & on-chain diplomas', icon: <Award className="w-4 h-4 text-amber-400" /> },
   { slug: 'noc', name: 'Global NOC Command', category: 'OPERATIONS', versionTag: 'V6.0', description: 'Enterprise video-wall & zero-trust kill switch', icon: <Monitor className="w-4 h-4 text-amber-400" /> },
   { slug: 'import', name: 'Multimodal AI Import', category: 'OPERATIONS', versionTag: 'V6.10', description: 'Diagram OCR & High-DPI Vector PDF Diplomas', icon: <UploadCloud className="w-4 h-4 text-amber-400" /> },
+  { slug: 'depin', name: 'DePIN Web3 Mesh', category: 'OPERATIONS', versionTag: 'V7.9', description: 'Decentralized physical infrastructure network & libp2p DHT', icon: <Layers className="w-4 h-4 text-amber-400" /> },
+  { slug: 'planetary-twin', name: 'Planetary Digital Twin', category: 'OPERATIONS', versionTag: 'V8.0', description: 'Global multi-cloud, subsea & satellite cyber-terrain twin', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
 ];
 
 export default function WorkbenchPage() {
@@ -87,14 +113,14 @@ export default function WorkbenchPage() {
               NetVision Master Sandbox
             </span>
             <span className="px-2 py-0.5 rounded-full bg-cyan-950/60 text-[#00f0ff] border border-cyan-500/30 text-[10px] font-mono font-bold">
-              20 Autonomous Engines
+              40+ Autonomous Engines
             </span>
           </div>
           <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
             Simulation Workbench & Interactive Showcase
           </h1>
           <p className="text-xs text-zinc-400 mt-1 max-w-xl">
-            Launch, inspect, and interact with any of the 20 real-time network simulation studios across Cloud, Cyber-Defense, NetDevOps, and Quantum Physics.
+            Launch, inspect, and interact with any of the 40+ real-time network simulation studios across Cloud, Cyber-Defense, NetDevOps, Photonics, and Quantum Physics.
           </p>
         </div>
 
