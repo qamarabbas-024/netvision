@@ -55,6 +55,7 @@ import { SonicNosStudio } from '../simulation/SonicNosStudio';
 import { MptcpQuicStudio } from '../simulation/MptcpQuicStudio';
 import { AutonomousOrchestratorStudio } from '../simulation/AutonomousOrchestratorStudio';
 import { RoceLosslessStudio } from '../simulation/RoceLosslessStudio';
+import { UltraEthernetStudio } from '../simulation/UltraEthernetStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -230,6 +231,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('roce') || slug.includes('rdma') || slug.includes('pfc') || slug.includes('dcqcn') || slug.includes('lossless') || slug.includes('gpu-cluster') || slug.includes('allreduce')) {
     return <RoceLosslessStudio />;
+  }
+
+  if (slug.includes('uec') || slug.includes('ultra-ethernet') || slug.includes('packet-spray') || slug.includes('inc') || slug.includes('collective-reduction')) {
+    return <UltraEthernetStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
