@@ -85,6 +85,7 @@ import { SubnetAutoGenesisStudio } from '../simulation/SubnetAutoGenesisStudio';
 import { OrbitalDatacenterStudio } from '../simulation/OrbitalDatacenterStudio';
 import { DnaStorageStudio } from '../simulation/DnaStorageStudio';
 import { MultiverseHypervisorStudio } from '../simulation/MultiverseHypervisorStudio';
+import { UniversalSingularityStudio } from '../simulation/UniversalSingularityStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -380,6 +381,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('multiverse-hypervisor') || slug.includes('cross-simulation') || slug.includes('parallel-universes') || slug.includes('timeline-merge') || slug.includes('v9.9')) {
     return <MultiverseHypervisorStudio />;
+  }
+
+  if (slug.includes('singularity') || slug.includes('v10.0') || slug.includes('v10') || slug.includes('universal-matrix') || slug.includes('master-nexus') || slug.includes('omnipresent-network')) {
+    return <UniversalSingularityStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
