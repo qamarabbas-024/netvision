@@ -50,6 +50,7 @@ import { TsnDeterministicStudio } from '../simulation/TsnDeterministicStudio';
 import { ThreatIntelligenceStudio } from '../simulation/ThreatIntelligenceStudio';
 import { EncryptedDnsStudio } from '../simulation/EncryptedDnsStudio';
 import { DwdmPhotonicStudio } from '../simulation/DwdmPhotonicStudio';
+import { NetworkGraphRagStudio } from '../simulation/NetworkGraphRagStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -205,6 +206,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('dwdm') || slug.includes('optical') || slug.includes('photonics') || slug.includes('roadm') || slug.includes('edfa') || slug.includes('coherent') || slug.includes('800g') || slug.includes('wavelength')) {
     return <DwdmPhotonicStudio />;
+  }
+
+  if (slug.includes('graphrag') || slug.includes('nl-query') || slug.includes('graph') || slug.includes('cypher') || slug.includes('topology-search') || slug.includes('spof') || slug.includes('ai-query')) {
+    return <NetworkGraphRagStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
