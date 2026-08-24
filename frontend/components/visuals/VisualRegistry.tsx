@@ -69,6 +69,7 @@ import { NeuromorphicPacketStudio } from '../simulation/NeuromorphicPacketStudio
 import { SubseaAcousticStudio } from '../simulation/SubseaAcousticStudio';
 import { WasmSmartNicStudio } from '../simulation/WasmSmartNicStudio';
 import { HollowCoreFiberStudio } from '../simulation/HollowCoreFiberStudio';
+import { OpticalMemsStudio } from '../simulation/OpticalMemsStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -300,6 +301,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('hollow-core') || slug.includes('hcf') || slug.includes('nanf') || slug.includes('speed-of-light') || slug.includes('hft-latency') || slug.includes('fiber-physics') || slug.includes('v8.5')) {
     return <HollowCoreFiberStudio />;
+  }
+
+  if (slug.includes('optical-mems') || slug.includes('silicon-photonics') || slug.includes('ocs') || slug.includes('photonic-switch') || slug.includes('mzi') || slug.includes('all-optical') || slug.includes('v8.6')) {
+    return <OpticalMemsStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
