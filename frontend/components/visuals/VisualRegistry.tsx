@@ -56,6 +56,7 @@ import { MptcpQuicStudio } from '../simulation/MptcpQuicStudio';
 import { AutonomousOrchestratorStudio } from '../simulation/AutonomousOrchestratorStudio';
 import { RoceLosslessStudio } from '../simulation/RoceLosslessStudio';
 import { UltraEthernetStudio } from '../simulation/UltraEthernetStudio';
+import { QuantumRoutingStudio } from '../simulation/QuantumRoutingStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -235,6 +236,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('uec') || slug.includes('ultra-ethernet') || slug.includes('packet-spray') || slug.includes('inc') || slug.includes('collective-reduction')) {
     return <UltraEthernetStudio />;
+  }
+
+  if (slug.includes('qkd') || slug.includes('quantum-routing') || slug.includes('entanglement') || slug.includes('bb84') || slug.includes('bell-state') || slug.includes('quantum-repeater') || slug.includes('quantum-internet')) {
+    return <QuantumRoutingStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
