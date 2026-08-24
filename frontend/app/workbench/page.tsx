@@ -74,6 +74,7 @@ const ENGINES: EngineCatalogItem[] = [
   { slug: 'anycast', name: 'Anycast DDoS Scrubbing', category: 'SECURITY', versionTag: 'V7.8', description: 'Multi-Tbps BGP Anycast scrubbing & eBPF edge filtering', icon: <ShieldAlert className="w-4 h-4 text-rose-400" /> },
   { slug: 'zkp', name: 'ZKP Network Verifier', category: 'SECURITY', versionTag: 'V8.9', description: 'Zero-Knowledge zk-SNARK Groth16 cryptographic policy audit', icon: <Shield className="w-4 h-4 text-rose-400" /> },
   { slug: 'ids-signature', name: 'Snort 3 / Suricata IDS', category: 'SECURITY', versionTag: 'V9.5', description: 'Hyperscan DPI pattern matching, rule syntax & live alert streaming', icon: <ShieldAlert className="w-4 h-4 text-rose-400" /> },
+  { slug: 'quantum-coproc', name: 'Quantum Co-Processor QPU', category: 'SECURITY', versionTag: 'V9.6', description: '128-qubit QAOA Hamiltonian routing optimization & Grover speedup', icon: <Zap className="w-4 h-4 text-rose-400" /> },
 
   // DevOps & Programmability
   { slug: 'iac', name: 'NetDevOps IaC Studio', category: 'DEVOPS', versionTag: 'V4.5', description: 'Terraform, Ansible playbooks & Python Netmiko', icon: <FileCode className="w-4 h-4 text-emerald-400" /> },
