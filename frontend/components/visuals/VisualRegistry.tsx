@@ -54,6 +54,7 @@ import { NetworkGraphRagStudio } from '../simulation/NetworkGraphRagStudio';
 import { SonicNosStudio } from '../simulation/SonicNosStudio';
 import { MptcpQuicStudio } from '../simulation/MptcpQuicStudio';
 import { AutonomousOrchestratorStudio } from '../simulation/AutonomousOrchestratorStudio';
+import { RoceLosslessStudio } from '../simulation/RoceLosslessStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -225,6 +226,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('orchestrator') || slug.includes('intent') || slug.includes('fabric-architect') || slug.includes('sovereign') || slug.includes('v7') || slug.includes('autonomous-fabric')) {
     return <AutonomousOrchestratorStudio />;
+  }
+
+  if (slug.includes('roce') || slug.includes('rdma') || slug.includes('pfc') || slug.includes('dcqcn') || slug.includes('lossless') || slug.includes('gpu-cluster') || slug.includes('allreduce')) {
+    return <RoceLosslessStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
