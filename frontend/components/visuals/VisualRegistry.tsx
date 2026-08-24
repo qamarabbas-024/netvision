@@ -79,6 +79,7 @@ import { SelfEvolvingTopologyStudio } from '../simulation/SelfEvolvingTopologySt
 import { TerahertzWirelessStudio } from '../simulation/TerahertzWirelessStudio';
 import { K8sCniMeshStudio } from '../simulation/K8sCniMeshStudio';
 import { IdsSignatureStudio } from '../simulation/IdsSignatureStudio';
+import { QuantumCoProcStudio } from '../simulation/QuantumCoProcStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -350,6 +351,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('ids') || slug.includes('ips') || slug.includes('snort') || slug.includes('suricata') || slug.includes('hyperscan') || slug.includes('threat-signature') || slug.includes('v9.5')) {
     return <IdsSignatureStudio />;
+  }
+
+  if (slug.includes('quantum-coprocessor') || slug.includes('qaoa') || slug.includes('hybrid-qpu') || slug.includes('cryo-qubit') || slug.includes('neuromorphic-quantum') || slug.includes('qpu')) {
+    return <QuantumCoProcStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
