@@ -81,6 +81,7 @@ import { K8sCniMeshStudio } from '../simulation/K8sCniMeshStudio';
 import { IdsSignatureStudio } from '../simulation/IdsSignatureStudio';
 import { QuantumCoProcStudio } from '../simulation/QuantumCoProcStudio';
 import { HolographicMatrixStudio } from '../simulation/HolographicMatrixStudio';
+import { SubnetAutoGenesisStudio } from '../simulation/SubnetAutoGenesisStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -360,6 +361,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('holographic') || slug.includes('telepresence') || slug.includes('volumetric') || slug.includes('light-field') || slug.includes('voxels') || slug.includes('spatial-streaming')) {
     return <HolographicMatrixStudio />;
+  }
+
+  if (slug.includes('subnet-genesis') || slug.includes('auto-genesis') || slug.includes('ai-subnet') || slug.includes('zero-touch-ipam') || slug.includes('v9.6')) {
+    return <SubnetAutoGenesisStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {

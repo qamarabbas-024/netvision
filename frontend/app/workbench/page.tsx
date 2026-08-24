@@ -98,6 +98,8 @@ const ENGINES: EngineCatalogItem[] = [
   { slug: 'depin', name: 'DePIN Web3 Mesh', category: 'OPERATIONS', versionTag: 'V7.9', description: 'Decentralized physical infrastructure network & libp2p DHT', icon: <Layers className="w-4 h-4 text-amber-400" /> },
   { slug: 'planetary-twin', name: 'Planetary Digital Twin', category: 'OPERATIONS', versionTag: 'V8.0', description: 'Global multi-cloud, subsea & satellite cyber-terrain twin', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
   { slug: 'self-evolving', name: 'Self-Evolving Topology', category: 'OPERATIONS', versionTag: 'V9.3', description: 'Autonomous genetic topology mutation & traffic congestion avoidance', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
+  { slug: 'holographic', name: 'Holographic Telepresence', category: 'OPERATIONS', versionTag: 'V9.7', description: 'Volumetric point-cloud voxel streaming & 0.1ms frame synchronization', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
+  { slug: 'subnet-genesis', name: 'Subnet Auto-Genesis IPAM', category: 'DEVOPS', versionTag: 'V9.8', description: 'Zero-collision dual-stack IPv4/IPv6 VLSM AI address synthesizer', icon: <Bot className="w-4 h-4 text-emerald-400" /> },
 ];
 
 export default function WorkbenchPage() {
