@@ -62,6 +62,7 @@ import { P4DataPlaneStudio } from '../simulation/P4DataPlaneStudio';
 import { MultiCloudWanStudio } from '../simulation/MultiCloudWanStudio';
 import { ConfidentialNetStudio } from '../simulation/ConfidentialNetStudio';
 import { AnycastDdosStudio } from '../simulation/AnycastDdosStudio';
+import { DepinMeshStudio } from '../simulation/DepinMeshStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -265,6 +266,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('anycast') || slug.includes('ddos') || slug.includes('scrubbing') || slug.includes('volumetric') || slug.includes('syn-flood') || slug.includes('mitigation')) {
     return <AnycastDdosStudio />;
+  }
+
+  if (slug.includes('depin') || slug.includes('libp2p') || slug.includes('gossipsub') || slug.includes('dht') || slug.includes('kademlia') || slug.includes('web3-mesh') || slug.includes('peer-routing')) {
+    return <DepinMeshStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
