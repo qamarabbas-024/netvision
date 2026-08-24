@@ -44,6 +44,7 @@ import { SatelliteMeshStudio } from '../simulation/SatelliteMeshStudio';
 import { AutonomousAiOpsStudio } from '../simulation/AutonomousAiOpsStudio';
 import { GlobalNocCommandStudio } from '../simulation/GlobalNocCommandStudio';
 import { MultimodalImportStudio } from '../tools/MultimodalImportStudio';
+import { MultiplayerCanvasStudio } from '../simulation/MultiplayerCanvasStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -175,6 +176,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('import') || slug.includes('ocr') || slug.includes('multimodal') || slug.includes('chat-import') || slug.includes('pdf-export') || slug.includes('diploma')) {
     return <MultimodalImportStudio />;
+  }
+
+  if (slug.includes('multiplayer') || slug.includes('collab') || slug.includes('webrtc') || slug.includes('p2p') || slug.includes('peer') || slug.includes('presence')) {
+    return <MultiplayerCanvasStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
