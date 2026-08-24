@@ -49,6 +49,7 @@ import { Srv6PolicyStudio } from '../simulation/Srv6PolicyStudio';
 import { TsnDeterministicStudio } from '../simulation/TsnDeterministicStudio';
 import { ThreatIntelligenceStudio } from '../simulation/ThreatIntelligenceStudio';
 import { EncryptedDnsStudio } from '../simulation/EncryptedDnsStudio';
+import { DwdmPhotonicStudio } from '../simulation/DwdmPhotonicStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -200,6 +201,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('doh') || slug.includes('dot') || slug.includes('ech') || slug.includes('encrypted-dns') || slug.includes('dnssec') || slug.includes('privacy') || slug.includes('sni')) {
     return <EncryptedDnsStudio />;
+  }
+
+  if (slug.includes('dwdm') || slug.includes('optical') || slug.includes('photonics') || slug.includes('roadm') || slug.includes('edfa') || slug.includes('coherent') || slug.includes('800g') || slug.includes('wavelength')) {
+    return <DwdmPhotonicStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
