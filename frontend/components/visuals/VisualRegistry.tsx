@@ -47,6 +47,7 @@ import { MultimodalImportStudio } from '../tools/MultimodalImportStudio';
 import { MultiplayerCanvasStudio } from '../simulation/MultiplayerCanvasStudio';
 import { Srv6PolicyStudio } from '../simulation/Srv6PolicyStudio';
 import { TsnDeterministicStudio } from '../simulation/TsnDeterministicStudio';
+import { ThreatIntelligenceStudio } from '../simulation/ThreatIntelligenceStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -190,6 +191,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('tsn') || slug.includes('802.1qbv') || slug.includes('time-sensitive') || slug.includes('gcl') || slug.includes('deterministic') || slug.includes('industrial-iot') || slug.includes('automotive')) {
     return <TsnDeterministicStudio />;
+  }
+
+  if (slug.includes('threat-intel') || slug.includes('stix') || slug.includes('taxii') || slug.includes('mitre') || slug.includes('att&ck') || slug.includes('ioc') || slug.includes('flowspec') || slug.includes('soc')) {
+    return <ThreatIntelligenceStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
