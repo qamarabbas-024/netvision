@@ -53,6 +53,7 @@ import { DwdmPhotonicStudio } from '../simulation/DwdmPhotonicStudio';
 import { NetworkGraphRagStudio } from '../simulation/NetworkGraphRagStudio';
 import { SonicNosStudio } from '../simulation/SonicNosStudio';
 import { MptcpQuicStudio } from '../simulation/MptcpQuicStudio';
+import { AutonomousOrchestratorStudio } from '../simulation/AutonomousOrchestratorStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -220,6 +221,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('mptcp') || slug.includes('quic') || slug.includes('http3') || slug.includes('multipath') || slug.includes('subflow') || slug.includes('connection-migration') || slug.includes('0-rtt')) {
     return <MptcpQuicStudio />;
+  }
+
+  if (slug.includes('orchestrator') || slug.includes('intent') || slug.includes('fabric-architect') || slug.includes('sovereign') || slug.includes('v7') || slug.includes('autonomous-fabric')) {
+    return <AutonomousOrchestratorStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
