@@ -44,6 +44,7 @@ const ENGINES: EngineCatalogItem[] = [
   { slug: 'hollow-core', name: 'Hollow-Core NANF Fiber', category: 'PHYSICS', versionTag: 'V8.5', description: '0.997c air-core photon propagation & ultra-low latency', icon: <Zap className="w-4 h-4 text-cyan-400" /> },
   { slug: 'optical-mems', name: 'Optical MEMS 3D Switch', category: 'PHYSICS', versionTag: 'V8.6', description: 'Sub-microsecond all-optical silicon photonic mirror matrix', icon: <Sparkles className="w-4 h-4 text-cyan-400" /> },
   { slug: 'interplanetary', name: 'Interplanetary DTN Bundle', category: 'PHYSICS', versionTag: 'V9.0', description: 'RFC 5050 Deep-Space Bundle Protocol & Mars relay telemetry', icon: <Radio className="w-4 h-4 text-cyan-400" /> },
+  { slug: 'terahertz', name: '6G Sub-THz Beamforming', category: 'PHYSICS', versionTag: 'V9.2', description: '0.3 THz sub-millimeter propagation & Reconfigurable Metamaterials (RIS)', icon: <Wifi className="w-4 h-4 text-cyan-400" /> },
 
   // Cloud & Advanced Fabrics
   { slug: 'bgp', name: 'BGP EVPN Spine-Leaf', category: 'CLOUD', versionTag: 'V4.4', description: 'Data center Clos underlay & VXLAN UDP 4789 overlay', icon: <Server className="w-4 h-4 text-indigo-400" /> },
@@ -58,6 +59,7 @@ const ENGINES: EngineCatalogItem[] = [
   { slug: 'bgp-leak', name: 'BGP RFC 9234 Auto-Fix', category: 'CLOUD', versionTag: 'V8.7', description: 'Autonomous route leak mitigation & RPKI ROA enforcement', icon: <Server className="w-4 h-4 text-indigo-400" /> },
   { slug: 'slicing', name: '5G Industrial URLLC', category: 'CLOUD', versionTag: 'V8.8', description: '3GPP 5G Network Slicing & deterministic millisecond SLA', icon: <Radio className="w-4 h-4 text-indigo-400" /> },
   { slug: 'sagin', name: 'Space-Air-Ground SAGIN', category: 'CLOUD', versionTag: 'V8.1', description: 'Integrated multi-tier NTN mesh bridging LEO, HAPS & Terrestrial', icon: <Radio className="w-4 h-4 text-indigo-400" /> },
+  { slug: 'k8s-cni', name: 'Kubernetes CNI & Cilium', category: 'CLOUD', versionTag: 'V9.4', description: 'Pod-to-Pod eBPF host routing bypass & CiliumNetworkPolicy enforcement', icon: <Server className="w-4 h-4 text-indigo-400" /> },
 
   // Security & Cryptography
   { slug: 'cyber', name: 'Red/Blue Cyber Defense', category: 'SECURITY', versionTag: 'V4.7', description: 'Volumetric SYN flood & DAI/DNSSEC mitigations', icon: <ShieldAlert className="w-4 h-4 text-rose-400" /> },
@@ -71,6 +73,7 @@ const ENGINES: EngineCatalogItem[] = [
   { slug: 'confidential', name: 'Confidential Cloud Net', category: 'SECURITY', versionTag: 'V7.7', description: 'AMD SEV-SNP & Intel TDX hardware memory encryption enclave', icon: <Shield className="w-4 h-4 text-rose-400" /> },
   { slug: 'anycast', name: 'Anycast DDoS Scrubbing', category: 'SECURITY', versionTag: 'V7.8', description: 'Multi-Tbps BGP Anycast scrubbing & eBPF edge filtering', icon: <ShieldAlert className="w-4 h-4 text-rose-400" /> },
   { slug: 'zkp', name: 'ZKP Network Verifier', category: 'SECURITY', versionTag: 'V8.9', description: 'Zero-Knowledge zk-SNARK Groth16 cryptographic policy audit', icon: <Shield className="w-4 h-4 text-rose-400" /> },
+  { slug: 'ids-signature', name: 'Snort 3 / Suricata IDS', category: 'SECURITY', versionTag: 'V9.5', description: 'Hyperscan DPI pattern matching, rule syntax & live alert streaming', icon: <ShieldAlert className="w-4 h-4 text-rose-400" /> },
 
   // DevOps & Programmability
   { slug: 'iac', name: 'NetDevOps IaC Studio', category: 'DEVOPS', versionTag: 'V4.5', description: 'Terraform, Ansible playbooks & Python Netmiko', icon: <FileCode className="w-4 h-4 text-emerald-400" /> },
@@ -93,6 +96,7 @@ const ENGINES: EngineCatalogItem[] = [
   { slug: 'import', name: 'Multimodal AI Import', category: 'OPERATIONS', versionTag: 'V6.10', description: 'Diagram OCR & High-DPI Vector PDF Diplomas', icon: <UploadCloud className="w-4 h-4 text-amber-400" /> },
   { slug: 'depin', name: 'DePIN Web3 Mesh', category: 'OPERATIONS', versionTag: 'V7.9', description: 'Decentralized physical infrastructure network & libp2p DHT', icon: <Layers className="w-4 h-4 text-amber-400" /> },
   { slug: 'planetary-twin', name: 'Planetary Digital Twin', category: 'OPERATIONS', versionTag: 'V8.0', description: 'Global multi-cloud, subsea & satellite cyber-terrain twin', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
+  { slug: 'self-evolving', name: 'Self-Evolving Topology', category: 'OPERATIONS', versionTag: 'V9.3', description: 'Autonomous genetic topology mutation & traffic congestion avoidance', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
 ];
 
 export default function WorkbenchPage() {

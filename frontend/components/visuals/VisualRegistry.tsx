@@ -76,6 +76,9 @@ import { ZkpNetworkStudio } from '../simulation/ZkpNetworkStudio';
 import { InterplanetaryBundleStudio } from '../simulation/InterplanetaryBundleStudio';
 import { PostQuantumTlsStudio } from '../simulation/PostQuantumTlsStudio';
 import { SelfEvolvingTopologyStudio } from '../simulation/SelfEvolvingTopologyStudio';
+import { TerahertzWirelessStudio } from '../simulation/TerahertzWirelessStudio';
+import { K8sCniMeshStudio } from '../simulation/K8sCniMeshStudio';
+import { IdsSignatureStudio } from '../simulation/IdsSignatureStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -335,6 +338,18 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('self-evolving') || slug.includes('topology-morph') || slug.includes('genetic-network') || slug.includes('autonomous-mesh') || slug.includes('v9.2')) {
     return <SelfEvolvingTopologyStudio />;
+  }
+
+  if (slug.includes('terahertz') || slug.includes('thz') || slug.includes('ris') || slug.includes('metamaterial') || slug.includes('sub-thz') || slug.includes('wireless-backhaul') || slug.includes('v9.3')) {
+    return <TerahertzWirelessStudio />;
+  }
+
+  if (slug.includes('k8s') || slug.includes('cni') || slug.includes('cilium') || slug.includes('calico') || slug.includes('pod-network') || slug.includes('kubernetes') || slug.includes('v9.4')) {
+    return <K8sCniMeshStudio />;
+  }
+
+  if (slug.includes('ids') || slug.includes('ips') || slug.includes('snort') || slug.includes('suricata') || slug.includes('hyperscan') || slug.includes('threat-signature') || slug.includes('v9.5')) {
+    return <IdsSignatureStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
