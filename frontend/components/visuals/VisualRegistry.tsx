@@ -71,6 +71,7 @@ import { WasmSmartNicStudio } from '../simulation/WasmSmartNicStudio';
 import { HollowCoreFiberStudio } from '../simulation/HollowCoreFiberStudio';
 import { OpticalMemsStudio } from '../simulation/OpticalMemsStudio';
 import { BgpAutoRemediationStudio } from '../simulation/BgpAutoRemediationStudio';
+import { IndustrialSlicingStudio } from '../simulation/IndustrialSlicingStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -310,6 +311,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('bgp-leak') || slug.includes('rfc9234') || slug.includes('auto-remediation') || slug.includes('bgp-otc') || slug.includes('rpki-roa') || slug.includes('v8.7')) {
     return <BgpAutoRemediationStudio />;
+  }
+
+  if (slug.includes('slicing') || slug.includes('urllc') || slug.includes('private-5g') || slug.includes('embb') || slug.includes('mmtc') || slug.includes('s-nssai') || slug.includes('v8.8')) {
+    return <IndustrialSlicingStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
