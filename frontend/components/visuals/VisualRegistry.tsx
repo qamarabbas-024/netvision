@@ -66,6 +66,7 @@ import { DepinMeshStudio } from '../simulation/DepinMeshStudio';
 import { PlanetaryTwinStudio } from '../simulation/PlanetaryTwinStudio';
 import { SaginMultiTierStudio } from '../simulation/SaginMultiTierStudio';
 import { NeuromorphicPacketStudio } from '../simulation/NeuromorphicPacketStudio';
+import { SubseaAcousticStudio } from '../simulation/SubseaAcousticStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -285,6 +286,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('neuromorphic') || slug.includes('snn') || slug.includes('spiking') || slug.includes('lif-neuron') || slug.includes('loihi') || slug.includes('low-power') || slug.includes('v8.2')) {
     return <NeuromorphicPacketStudio />;
+  }
+
+  if (slug.includes('subsea') || slug.includes('submarine') || slug.includes('das') || slug.includes('acoustic-sensing') || slug.includes('otdr') || slug.includes('transatlantic') || slug.includes('v8.3')) {
+    return <SubseaAcousticStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
