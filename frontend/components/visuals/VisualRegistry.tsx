@@ -48,6 +48,7 @@ import { MultiplayerCanvasStudio } from '../simulation/MultiplayerCanvasStudio';
 import { Srv6PolicyStudio } from '../simulation/Srv6PolicyStudio';
 import { TsnDeterministicStudio } from '../simulation/TsnDeterministicStudio';
 import { ThreatIntelligenceStudio } from '../simulation/ThreatIntelligenceStudio';
+import { EncryptedDnsStudio } from '../simulation/EncryptedDnsStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -195,6 +196,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('threat-intel') || slug.includes('stix') || slug.includes('taxii') || slug.includes('mitre') || slug.includes('att&ck') || slug.includes('ioc') || slug.includes('flowspec') || slug.includes('soc')) {
     return <ThreatIntelligenceStudio />;
+  }
+
+  if (slug.includes('doh') || slug.includes('dot') || slug.includes('ech') || slug.includes('encrypted-dns') || slug.includes('dnssec') || slug.includes('privacy') || slug.includes('sni')) {
+    return <EncryptedDnsStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
