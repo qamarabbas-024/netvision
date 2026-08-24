@@ -84,6 +84,7 @@ import { HolographicMatrixStudio } from '../simulation/HolographicMatrixStudio';
 import { SubnetAutoGenesisStudio } from '../simulation/SubnetAutoGenesisStudio';
 import { OrbitalDatacenterStudio } from '../simulation/OrbitalDatacenterStudio';
 import { DnaStorageStudio } from '../simulation/DnaStorageStudio';
+import { MultiverseHypervisorStudio } from '../simulation/MultiverseHypervisorStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -375,6 +376,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('dna-storage') || slug.includes('molecular-routing') || slug.includes('bio-network') || slug.includes('nucleotide') || slug.includes('microfluidic') || slug.includes('v9.8')) {
     return <DnaStorageStudio />;
+  }
+
+  if (slug.includes('multiverse-hypervisor') || slug.includes('cross-simulation') || slug.includes('parallel-universes') || slug.includes('timeline-merge') || slug.includes('v9.9')) {
+    return <MultiverseHypervisorStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
