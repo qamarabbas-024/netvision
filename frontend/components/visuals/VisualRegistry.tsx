@@ -61,6 +61,7 @@ import { OranStudio } from '../simulation/OranStudio';
 import { P4DataPlaneStudio } from '../simulation/P4DataPlaneStudio';
 import { MultiCloudWanStudio } from '../simulation/MultiCloudWanStudio';
 import { ConfidentialNetStudio } from '../simulation/ConfidentialNetStudio';
+import { AnycastDdosStudio } from '../simulation/AnycastDdosStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -260,6 +261,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('confidential') || slug.includes('enclave') || slug.includes('sev-snp') || slug.includes('sgx') || slug.includes('tdx') || slug.includes('nitro-tpm') || slug.includes('attestation')) {
     return <ConfidentialNetStudio />;
+  }
+
+  if (slug.includes('anycast') || slug.includes('ddos') || slug.includes('scrubbing') || slug.includes('volumetric') || slug.includes('syn-flood') || slug.includes('mitigation')) {
+    return <AnycastDdosStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
