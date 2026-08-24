@@ -67,6 +67,7 @@ import { PlanetaryTwinStudio } from '../simulation/PlanetaryTwinStudio';
 import { SaginMultiTierStudio } from '../simulation/SaginMultiTierStudio';
 import { NeuromorphicPacketStudio } from '../simulation/NeuromorphicPacketStudio';
 import { SubseaAcousticStudio } from '../simulation/SubseaAcousticStudio';
+import { WasmSmartNicStudio } from '../simulation/WasmSmartNicStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -290,6 +291,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('subsea') || slug.includes('submarine') || slug.includes('das') || slug.includes('acoustic-sensing') || slug.includes('otdr') || slug.includes('transatlantic') || slug.includes('v8.3')) {
     return <SubseaAcousticStudio />;
+  }
+
+  if (slug.includes('wasm') || slug.includes('smartnic') || slug.includes('wasi') || slug.includes('dpu') || slug.includes('bluefield') || slug.includes('pensando') || slug.includes('bytecode') || slug.includes('v8.4')) {
+    return <WasmSmartNicStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
