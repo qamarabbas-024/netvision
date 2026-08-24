@@ -83,6 +83,7 @@ import { QuantumCoProcStudio } from '../simulation/QuantumCoProcStudio';
 import { HolographicMatrixStudio } from '../simulation/HolographicMatrixStudio';
 import { SubnetAutoGenesisStudio } from '../simulation/SubnetAutoGenesisStudio';
 import { OrbitalDatacenterStudio } from '../simulation/OrbitalDatacenterStudio';
+import { DnaStorageStudio } from '../simulation/DnaStorageStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -370,6 +371,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('orbital-datacenter') || slug.includes('space-compute') || slug.includes('orbital-mesh') || slug.includes('laser-oisl') || slug.includes('v9.7')) {
     return <OrbitalDatacenterStudio />;
+  }
+
+  if (slug.includes('dna-storage') || slug.includes('molecular-routing') || slug.includes('bio-network') || slug.includes('nucleotide') || slug.includes('microfluidic') || slug.includes('v9.8')) {
+    return <DnaStorageStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
