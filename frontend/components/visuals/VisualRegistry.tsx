@@ -73,6 +73,7 @@ import { OpticalMemsStudio } from '../simulation/OpticalMemsStudio';
 import { BgpAutoRemediationStudio } from '../simulation/BgpAutoRemediationStudio';
 import { IndustrialSlicingStudio } from '../simulation/IndustrialSlicingStudio';
 import { ZkpNetworkStudio } from '../simulation/ZkpNetworkStudio';
+import { InterplanetaryBundleStudio } from '../simulation/InterplanetaryBundleStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -320,6 +321,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('zkp') || slug.includes('zk-snark') || slug.includes('groth16') || slug.includes('zero-knowledge') || slug.includes('compliance-proof') || slug.includes('v8.9')) {
     return <ZkpNetworkStudio />;
+  }
+
+  if (slug.includes('interplanetary') || slug.includes('dtn') || slug.includes('bundle-protocol') || slug.includes('rfc5050') || slug.includes('mars-relay') || slug.includes('deep-space') || slug.includes('v9.0') || slug.includes('v9')) {
+    return <InterplanetaryBundleStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
