@@ -45,6 +45,7 @@ import { AutonomousAiOpsStudio } from '../simulation/AutonomousAiOpsStudio';
 import { GlobalNocCommandStudio } from '../simulation/GlobalNocCommandStudio';
 import { MultimodalImportStudio } from '../tools/MultimodalImportStudio';
 import { MultiplayerCanvasStudio } from '../simulation/MultiplayerCanvasStudio';
+import { Srv6PolicyStudio } from '../simulation/Srv6PolicyStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -180,6 +181,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('multiplayer') || slug.includes('collab') || slug.includes('webrtc') || slug.includes('p2p') || slug.includes('peer') || slug.includes('presence')) {
     return <MultiplayerCanvasStudio />;
+  }
+
+  if (slug.includes('srv6') || slug.includes('segment-routing') || slug.includes('srh') || slug.includes('usid') || slug.includes('te-policy') || slug.includes('sr-mpls')) {
+    return <Srv6PolicyStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
