@@ -51,6 +51,7 @@ import { ThreatIntelligenceStudio } from '../simulation/ThreatIntelligenceStudio
 import { EncryptedDnsStudio } from '../simulation/EncryptedDnsStudio';
 import { DwdmPhotonicStudio } from '../simulation/DwdmPhotonicStudio';
 import { NetworkGraphRagStudio } from '../simulation/NetworkGraphRagStudio';
+import { SonicNosStudio } from '../simulation/SonicNosStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -210,6 +211,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('graphrag') || slug.includes('nl-query') || slug.includes('graph') || slug.includes('cypher') || slug.includes('topology-search') || slug.includes('spof') || slug.includes('ai-query')) {
     return <NetworkGraphRagStudio />;
+  }
+
+  if (slug.includes('sonic') || slug.includes('sai') || slug.includes('nos') || slug.includes('asic') || slug.includes('broadcom') || slug.includes('switch-state') || slug.includes('orchagent')) {
+    return <SonicNosStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
