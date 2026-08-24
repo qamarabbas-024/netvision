@@ -65,6 +65,7 @@ import { AnycastDdosStudio } from '../simulation/AnycastDdosStudio';
 import { DepinMeshStudio } from '../simulation/DepinMeshStudio';
 import { PlanetaryTwinStudio } from '../simulation/PlanetaryTwinStudio';
 import { SaginMultiTierStudio } from '../simulation/SaginMultiTierStudio';
+import { NeuromorphicPacketStudio } from '../simulation/NeuromorphicPacketStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -280,6 +281,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('sagin') || slug.includes('space-air-ground') || slug.includes('haps') || slug.includes('ntn') || slug.includes('non-terrestrial') || slug.includes('v8.1')) {
     return <SaginMultiTierStudio />;
+  }
+
+  if (slug.includes('neuromorphic') || slug.includes('snn') || slug.includes('spiking') || slug.includes('lif-neuron') || slug.includes('loihi') || slug.includes('low-power') || slug.includes('v8.2')) {
+    return <NeuromorphicPacketStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
