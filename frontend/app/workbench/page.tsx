@@ -37,26 +37,36 @@ const ENGINES: EngineCatalogItem[] = [
   { slug: 'physics', name: 'Buffer Queue Physics', category: 'PHYSICS', versionTag: 'V4.1', description: 'Newtonian force-directed graph & FIFO/RED queue drops', icon: <Activity className="w-4 h-4 text-cyan-400" /> },
   { slug: 'wifi7', name: 'Wi-Fi 7 & 5G RF Physics', category: 'PHYSICS', versionTag: 'V5.3', description: '802.11be MLO tri-band & 4096-QAM attenuation', icon: <Wifi className="w-4 h-4 text-cyan-400" /> },
   { slug: 'satellite', name: 'Satellite Laser Mesh', category: 'PHYSICS', versionTag: 'V5.8', description: '550km LEO orbital constellation & vacuum lasers', icon: <Radio className="w-4 h-4 text-cyan-400" /> },
+  { slug: 'tsn', name: 'TSN Time-Sensitive Net', category: 'PHYSICS', versionTag: 'V6.3', description: 'IEEE 802.1Qbv cyclic gate scheduling & 0-jitter queues', icon: <Activity className="w-4 h-4 text-amber-400" /> },
+  { slug: 'dwdm', name: '800G DWDM & Photonics', category: 'PHYSICS', versionTag: 'V6.6', description: 'C-Band optical ROADM wavelengths & EDFA amplification', icon: <Sparkles className="w-4 h-4 text-cyan-400" /> },
 
   { slug: 'bgp', name: 'BGP EVPN Spine-Leaf', category: 'CLOUD', versionTag: 'V4.4', description: 'Data center Clos underlay & VXLAN UDP 4789 overlay', icon: <Server className="w-4 h-4 text-indigo-400" /> },
   { slug: 'vpc', name: 'Cloud Transit Gateway', category: 'CLOUD', versionTag: 'V5.1', description: 'Multi-VPC AWS Transit Gateway hub-and-spoke', icon: <Cloud className="w-4 h-4 text-indigo-400" /> },
   { slug: 'sdwan', name: 'Enterprise SD-WAN & FEC', category: 'CLOUD', versionTag: 'V5.2', description: 'Dynamic SLA path steering & brownout failover', icon: <Layers className="w-4 h-4 text-indigo-400" /> },
   { slug: 'digital-twin', name: 'Global Internet Twin', category: 'CLOUD', versionTag: 'V5.0', description: 'Tier-1 BGP backbone & undersea cable cuts', icon: <Sparkles className="w-4 h-4 text-indigo-400" /> },
+  { slug: 'srv6', name: 'SRv6 Segment Routing', category: 'CLOUD', versionTag: 'V6.2', description: 'IPv6 SRH header execution & Traffic Engineering SLAs', icon: <Server className="w-4 h-4 text-indigo-400" /> },
+  { slug: 'mptcp', name: 'MP-TCP & QUIC 0-RTT', category: 'CLOUD', versionTag: 'V6.9', description: 'Dual-path subflow aggregation & dynamic CID migration', icon: <Zap className="w-4 h-4 text-indigo-400" /> },
 
   { slug: 'cyber', name: 'Red/Blue Cyber Defense', category: 'SECURITY', versionTag: 'V4.7', description: 'Volumetric SYN flood & DAI/DNSSEC mitigations', icon: <ShieldAlert className="w-4 h-4 text-rose-400" /> },
   { slug: 'pentest', name: 'Pen-Testing & CVEs', category: 'SECURITY', versionTag: 'V5.4', description: 'Nmap stealth SYN scan & Log4Shell / SMBGhost CVEs', icon: <Terminal className="w-4 h-4 text-rose-400" /> },
   { slug: 'zerotrust', name: 'Zero Trust (ZTNA)', category: 'SECURITY', versionTag: 'V5.5', description: 'NIST SP 800-207 posture check & WireGuard tunnels', icon: <Shield className="w-4 h-4 text-rose-400" /> },
   { slug: 'quantum', name: 'Post-Quantum Kyber-1024', category: 'SECURITY', versionTag: 'V5.7', description: 'NIST PQC lattice cryptography vs Shor’s attack', icon: <Zap className="w-4 h-4 text-rose-400" /> },
+  { slug: 'threat-intel', name: 'Threat Intel & MITRE', category: 'SECURITY', versionTag: 'V6.4', description: 'STIX 2.1 TAXII feeds & automated BGP Flowspec filters', icon: <ShieldAlert className="w-4 h-4 text-rose-400" /> },
+  { slug: 'doh', name: 'Encrypted DNS & ECH', category: 'SECURITY', versionTag: 'V6.5', description: 'DoH, DoT & Encrypted Client Hello wiretap defense', icon: <Shield className="w-4 h-4 text-rose-400" /> },
 
   { slug: 'iac', name: 'NetDevOps IaC Studio', category: 'DEVOPS', versionTag: 'V4.5', description: 'Terraform, Ansible playbooks & Python Netmiko', icon: <FileCode className="w-4 h-4 text-emerald-400" /> },
   { slug: 'containerlab', name: 'Containerlab & EVE-NG', category: 'DEVOPS', versionTag: 'V4.6', description: 'Dockerized Arista cEOS & Nokia SRL bridge', icon: <Cpu className="w-4 h-4 text-emerald-400" /> },
   { slug: 'ebpf', name: 'eBPF & XDP Kernel Filter', category: 'DEVOPS', versionTag: 'V5.6', description: '14.8M PPS kernel bypass driver packet filtering', icon: <Cpu className="w-4 h-4 text-emerald-400" /> },
   { slug: 'aiops', name: 'Autonomous AI-Ops', category: 'DEVOPS', versionTag: 'V5.9', description: 'gNMI OpenConfig closed-loop self-healing', icon: <Bot className="w-4 h-4 text-emerald-400" /> },
+  { slug: 'sonic', name: 'SONiC NOS & Silicon SAI', category: 'DEVOPS', versionTag: 'V6.8', description: 'Azure open-source NOS microservices & Redis DB state', icon: <Server className="w-4 h-4 text-emerald-400" /> },
 
+  { slug: 'multiplayer', name: 'Multiplayer P2P Canvas', category: 'OPERATIONS', versionTag: 'V6.1', description: 'Real-time WebRTC collaborative topology editing & chat', icon: <Sparkles className="w-4 h-4 text-amber-400" /> },
+  { slug: 'graphrag', name: 'GraphRAG & AI Query', category: 'OPERATIONS', versionTag: 'V6.7', description: 'Natural Language to Cypher graph topology search', icon: <Bot className="w-4 h-4 text-amber-400" /> },
+  { slug: 'orchestrator', name: 'Sovereign Fabric AI', category: 'OPERATIONS', versionTag: 'V7.0', description: 'Intent-to-Fabric compiler & multi-layer orchestration', icon: <Award className="w-4 h-4 text-amber-400" /> },
   { slug: 'chaos', name: 'Chaos Monkey Arena', category: 'OPERATIONS', versionTag: 'V4.8', description: 'Link flapping, jitter spikes & MTTR stopwatches', icon: <Flame className="w-4 h-4 text-amber-400" /> },
   { slug: 'proctor', name: 'AI Exam Proctoring', category: 'OPERATIONS', versionTag: 'V4.9', description: 'Anti-cheat facial gaze mesh & on-chain diplomas', icon: <Award className="w-4 h-4 text-amber-400" /> },
   { slug: 'noc', name: 'Global NOC Command', category: 'OPERATIONS', versionTag: 'V6.0', description: 'Enterprise video-wall & zero-trust kill switch', icon: <Monitor className="w-4 h-4 text-amber-400" /> },
-  { slug: 'import', name: 'Multimodal AI Import', category: 'OPERATIONS', versionTag: 'V6.1', description: 'Diagram OCR & High-DPI Vector PDF Diplomas', icon: <UploadCloud className="w-4 h-4 text-amber-400" /> },
+  { slug: 'import', name: 'Multimodal AI Import', category: 'OPERATIONS', versionTag: 'V6.10', description: 'Diagram OCR & High-DPI Vector PDF Diplomas', icon: <UploadCloud className="w-4 h-4 text-amber-400" /> },
 ];
 
 export default function WorkbenchPage() {
