@@ -63,6 +63,7 @@ import { MultiCloudWanStudio } from '../simulation/MultiCloudWanStudio';
 import { ConfidentialNetStudio } from '../simulation/ConfidentialNetStudio';
 import { AnycastDdosStudio } from '../simulation/AnycastDdosStudio';
 import { DepinMeshStudio } from '../simulation/DepinMeshStudio';
+import { PlanetaryTwinStudio } from '../simulation/PlanetaryTwinStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -270,6 +271,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('depin') || slug.includes('libp2p') || slug.includes('gossipsub') || slug.includes('dht') || slug.includes('kademlia') || slug.includes('web3-mesh') || slug.includes('peer-routing')) {
     return <DepinMeshStudio />;
+  }
+
+  if (slug.includes('planetary-twin') || slug.includes('digital-reality') || slug.includes('planetary-noc') || slug.includes('v8') || slug.includes('universal-matrix') || slug.includes('global-twin')) {
+    return <PlanetaryTwinStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
