@@ -52,6 +52,7 @@ import { EncryptedDnsStudio } from '../simulation/EncryptedDnsStudio';
 import { DwdmPhotonicStudio } from '../simulation/DwdmPhotonicStudio';
 import { NetworkGraphRagStudio } from '../simulation/NetworkGraphRagStudio';
 import { SonicNosStudio } from '../simulation/SonicNosStudio';
+import { MptcpQuicStudio } from '../simulation/MptcpQuicStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -215,6 +216,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('sonic') || slug.includes('sai') || slug.includes('nos') || slug.includes('asic') || slug.includes('broadcom') || slug.includes('switch-state') || slug.includes('orchagent')) {
     return <SonicNosStudio />;
+  }
+
+  if (slug.includes('mptcp') || slug.includes('quic') || slug.includes('http3') || slug.includes('multipath') || slug.includes('subflow') || slug.includes('connection-migration') || slug.includes('0-rtt')) {
+    return <MptcpQuicStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
