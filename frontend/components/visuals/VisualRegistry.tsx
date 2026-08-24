@@ -58,6 +58,7 @@ import { RoceLosslessStudio } from '../simulation/RoceLosslessStudio';
 import { UltraEthernetStudio } from '../simulation/UltraEthernetStudio';
 import { QuantumRoutingStudio } from '../simulation/QuantumRoutingStudio';
 import { OranStudio } from '../simulation/OranStudio';
+import { P4DataPlaneStudio } from '../simulation/P4DataPlaneStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -245,6 +246,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('oran') || slug.includes('open-ran') || slug.includes('ric') || slug.includes('xapp') || slug.includes('rapp') || slug.includes('gnodeb') || slug.includes('beamforming') || slug.includes('5g-ran')) {
     return <OranStudio />;
+  }
+
+  if (slug.includes('p4') || slug.includes('p4-16') || slug.includes('bmv2') || slug.includes('int-telemetry') || slug.includes('programmable-data-plane') || slug.includes('match-action')) {
+    return <P4DataPlaneStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
