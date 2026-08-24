@@ -80,6 +80,7 @@ import { TerahertzWirelessStudio } from '../simulation/TerahertzWirelessStudio';
 import { K8sCniMeshStudio } from '../simulation/K8sCniMeshStudio';
 import { IdsSignatureStudio } from '../simulation/IdsSignatureStudio';
 import { QuantumCoProcStudio } from '../simulation/QuantumCoProcStudio';
+import { HolographicMatrixStudio } from '../simulation/HolographicMatrixStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -355,6 +356,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('quantum-coprocessor') || slug.includes('qaoa') || slug.includes('hybrid-qpu') || slug.includes('cryo-qubit') || slug.includes('neuromorphic-quantum') || slug.includes('qpu')) {
     return <QuantumCoProcStudio />;
+  }
+
+  if (slug.includes('holographic') || slug.includes('telepresence') || slug.includes('volumetric') || slug.includes('light-field') || slug.includes('voxels') || slug.includes('spatial-streaming')) {
+    return <HolographicMatrixStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
