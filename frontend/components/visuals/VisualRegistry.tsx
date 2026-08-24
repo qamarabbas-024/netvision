@@ -60,6 +60,7 @@ import { QuantumRoutingStudio } from '../simulation/QuantumRoutingStudio';
 import { OranStudio } from '../simulation/OranStudio';
 import { P4DataPlaneStudio } from '../simulation/P4DataPlaneStudio';
 import { MultiCloudWanStudio } from '../simulation/MultiCloudWanStudio';
+import { ConfidentialNetStudio } from '../simulation/ConfidentialNetStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -255,6 +256,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('multi-cloud') || slug.includes('cloud-wan') || slug.includes('vwan') || slug.includes('ncc') || slug.includes('aws-wan') || slug.includes('azure-vwan') || slug.includes('gcp-ncc')) {
     return <MultiCloudWanStudio />;
+  }
+
+  if (slug.includes('confidential') || slug.includes('enclave') || slug.includes('sev-snp') || slug.includes('sgx') || slug.includes('tdx') || slug.includes('nitro-tpm') || slug.includes('attestation')) {
+    return <ConfidentialNetStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
