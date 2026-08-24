@@ -46,6 +46,7 @@ import { GlobalNocCommandStudio } from '../simulation/GlobalNocCommandStudio';
 import { MultimodalImportStudio } from '../tools/MultimodalImportStudio';
 import { MultiplayerCanvasStudio } from '../simulation/MultiplayerCanvasStudio';
 import { Srv6PolicyStudio } from '../simulation/Srv6PolicyStudio';
+import { TsnDeterministicStudio } from '../simulation/TsnDeterministicStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -185,6 +186,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('srv6') || slug.includes('segment-routing') || slug.includes('srh') || slug.includes('usid') || slug.includes('te-policy') || slug.includes('sr-mpls')) {
     return <Srv6PolicyStudio />;
+  }
+
+  if (slug.includes('tsn') || slug.includes('802.1qbv') || slug.includes('time-sensitive') || slug.includes('gcl') || slug.includes('deterministic') || slug.includes('industrial-iot') || slug.includes('automotive')) {
+    return <TsnDeterministicStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
