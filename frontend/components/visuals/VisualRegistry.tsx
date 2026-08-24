@@ -57,6 +57,7 @@ import { AutonomousOrchestratorStudio } from '../simulation/AutonomousOrchestrat
 import { RoceLosslessStudio } from '../simulation/RoceLosslessStudio';
 import { UltraEthernetStudio } from '../simulation/UltraEthernetStudio';
 import { QuantumRoutingStudio } from '../simulation/QuantumRoutingStudio';
+import { OranStudio } from '../simulation/OranStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -240,6 +241,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('qkd') || slug.includes('quantum-routing') || slug.includes('entanglement') || slug.includes('bb84') || slug.includes('bell-state') || slug.includes('quantum-repeater') || slug.includes('quantum-internet')) {
     return <QuantumRoutingStudio />;
+  }
+
+  if (slug.includes('oran') || slug.includes('open-ran') || slug.includes('ric') || slug.includes('xapp') || slug.includes('rapp') || slug.includes('gnodeb') || slug.includes('beamforming') || slug.includes('5g-ran')) {
+    return <OranStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
