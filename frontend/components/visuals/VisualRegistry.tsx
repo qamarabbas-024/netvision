@@ -68,6 +68,7 @@ import { SaginMultiTierStudio } from '../simulation/SaginMultiTierStudio';
 import { NeuromorphicPacketStudio } from '../simulation/NeuromorphicPacketStudio';
 import { SubseaAcousticStudio } from '../simulation/SubseaAcousticStudio';
 import { WasmSmartNicStudio } from '../simulation/WasmSmartNicStudio';
+import { HollowCoreFiberStudio } from '../simulation/HollowCoreFiberStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -295,6 +296,10 @@ export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => 
 
   if (slug.includes('wasm') || slug.includes('smartnic') || slug.includes('wasi') || slug.includes('dpu') || slug.includes('bluefield') || slug.includes('pensando') || slug.includes('bytecode') || slug.includes('v8.4')) {
     return <WasmSmartNicStudio />;
+  }
+
+  if (slug.includes('hollow-core') || slug.includes('hcf') || slug.includes('nanf') || slug.includes('speed-of-light') || slug.includes('hft-latency') || slug.includes('fiber-physics') || slug.includes('v8.5')) {
+    return <HollowCoreFiberStudio />;
   }
 
   if (slug.includes('scapy') || slug.includes('packet-craft') || slug.includes('packet_craft') || slug.includes('crafting')) {
