@@ -1600,8 +1600,11 @@ export class TopicsService {
       throw new BadRequestException(`Invalid anonymousId format "${anonymousId}". Must be a valid UUID.`);
     }
 
-    return await this.prisma.$transaction(
-      async (tx) => {
+    const maxRetries = 2;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        return await this.prisma.$transaction(
+          async (tx) => {
         const anonLearner = await tx.anonymousLearner.findUnique({
           where: { id: anonymousId },
         });
@@ -1789,7 +1792,16 @@ export class TopicsService {
       };
     },
     { timeout: 30000, maxWait: 10000 });
+  } catch (err: any) {
+      if (attempt < maxRetries && (err?.code === 'P1001' || err?.code === 'P2034' || err?.message?.includes('Can\'t reach database server') || err?.message?.includes('Transaction'))) {
+        await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+        continue;
+      }
+      throw err;
+    }
   }
+  throw new Error('Failed to claim progress after maximum transaction retries.');
+}
 
   async getCourseAssessment(identity: { userId?: string; anonymousId?: string }, courseIdOrSlug: string) {
     const { userId, anonymousId } = identity;
