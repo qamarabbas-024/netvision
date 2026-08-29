@@ -96,6 +96,7 @@ import { VoiceSreStudio } from '../simulation/VoiceSreStudio';
 import { IntentBasedNetStudio } from '../simulation/IntentBasedNetStudio';
 import { RcaMultiAgentStudio } from '../simulation/RcaMultiAgentStudio';
 import { RoutingHotPatcherStudio } from '../simulation/RoutingHotPatcherStudio';
+import { ChaosSreStudio } from '../simulation/ChaosSreStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -103,6 +104,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('chaos') || slug.includes('chaos-monkey') || slug.includes('fault-injection')) {
+    return <ChaosSreStudio />;
+  }
 
   if (slug.includes('hot-patch') || slug.includes('hotpatch') || slug.includes('graceful-restart')) {
     return <RoutingHotPatcherStudio />;
