@@ -111,6 +111,7 @@ import { EbpfSockOpsStudio } from '../simulation/EbpfSockOpsStudio';
 import { EbpfLsmSecurityStudio } from '../simulation/EbpfLsmSecurityStudio';
 import { EbpfBundleExportStudio } from '../simulation/EbpfBundleExportStudio';
 import { WasmProtocolSdkStudio } from '../simulation/WasmProtocolSdkStudio';
+import { P2pGossipMeshStudio } from '../simulation/P2pGossipMeshStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -118,6 +119,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('p2p-mesh') || slug.includes('gossip') || slug.includes('epidemic')) {
+    return <P2pGossipMeshStudio />;
+  }
 
   if (slug.includes('wasm-sdk') || slug.includes('wasm-protocol') || slug.includes('wasm-sandbox')) {
     return <WasmProtocolSdkStudio />;
