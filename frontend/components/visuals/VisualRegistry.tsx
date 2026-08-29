@@ -103,6 +103,7 @@ import { DatacenterWalkthroughStudio } from '../simulation/DatacenterWalkthrough
 import { LeoConstellationStudio } from '../simulation/LeoConstellationStudio';
 import { SubseaBathymetryStudio } from '../simulation/SubseaBathymetryStudio';
 import { SpatialPacketPhysicsStudio } from '../simulation/SpatialPacketPhysicsStudio';
+import { XrHandTrackingStudio } from '../simulation/XrHandTrackingStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -110,6 +111,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('hand-tracking') || slug.includes('gesture') || slug.includes('xr-hand')) {
+    return <XrHandTrackingStudio />;
+  }
 
   if (slug.includes('packet-physics') || slug.includes('buffer-queue') || slug.includes('tail-drop')) {
     return <SpatialPacketPhysicsStudio />;
