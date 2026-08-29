@@ -100,6 +100,7 @@ import { ChaosSreStudio } from '../simulation/ChaosSreStudio';
 import { TelemetryGraphRagStudio } from '../simulation/TelemetryGraphRagStudio';
 import { SpatialWebXrStudio } from '../simulation/SpatialWebXrStudio';
 import { DatacenterWalkthroughStudio } from '../simulation/DatacenterWalkthroughStudio';
+import { LeoConstellationStudio } from '../simulation/LeoConstellationStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -107,6 +108,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('leo-constellation') || slug.includes('satellite-mesh') || slug.includes('isl-laser')) {
+    return <LeoConstellationStudio />;
+  }
 
   if (slug.includes('datacenter-3d') || slug.includes('rack-walkthrough') || slug.includes('spine-leaf-3d')) {
     return <DatacenterWalkthroughStudio />;
