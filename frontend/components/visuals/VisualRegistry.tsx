@@ -91,6 +91,7 @@ import { FrrRoutingStudio } from '../simulation/FrrRoutingStudio';
 import { EveNgExportStudio } from '../simulation/EveNgExportStudio';
 import { OpenConfigYangStudio } from '../simulation/OpenConfigYangStudio';
 import { TunTapTunnelStudio } from '../simulation/TunTapTunnelStudio';
+import { PcapReplayStudio } from '../simulation/PcapReplayStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -98,6 +99,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('pcap') || slug.includes('packet-capture') || slug.includes('wireshark')) {
+    return <PcapReplayStudio />;
+  }
 
   if (slug.includes('tuntap') || slug.includes('tun-tap') || slug.includes('hardware-bridge')) {
     return <TunTapTunnelStudio />;
