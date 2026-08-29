@@ -109,6 +109,7 @@ import { EbpfTcRateLimitStudio } from '../simulation/EbpfTcRateLimitStudio';
 import { EbpfMaglevLbStudio } from '../simulation/EbpfMaglevLbStudio';
 import { EbpfSockOpsStudio } from '../simulation/EbpfSockOpsStudio';
 import { EbpfLsmSecurityStudio } from '../simulation/EbpfLsmSecurityStudio';
+import { EbpfBundleExportStudio } from '../simulation/EbpfBundleExportStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -116,6 +117,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('ebpf-bundle') || slug.includes('ebpf-export') || slug.includes('clang-makefile')) {
+    return <EbpfBundleExportStudio />;
+  }
 
   if (slug.includes('ebpf-security') || slug.includes('lsm') || slug.includes('ebpf-lsm')) {
     return <EbpfLsmSecurityStudio />;
