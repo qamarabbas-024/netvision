@@ -86,6 +86,7 @@ import { OrbitalDatacenterStudio } from '../simulation/OrbitalDatacenterStudio';
 import { DnaStorageStudio } from '../simulation/DnaStorageStudio';
 import { MultiverseHypervisorStudio } from '../simulation/MultiverseHypervisorStudio';
 import { UniversalSingularityStudio } from '../simulation/UniversalSingularityStudio';
+import { ContainerlabStudio } from '../simulation/ContainerlabStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -93,6 +94,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('containerlab') || slug.includes('clab') || slug.includes('nos-emulation')) {
+    return <ContainerlabStudio />;
+  }
 
   if (
     slug.includes('binary') ||
