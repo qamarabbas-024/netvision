@@ -89,6 +89,7 @@ import { UniversalSingularityStudio } from '../simulation/UniversalSingularitySt
 import { ContainerlabStudio } from '../simulation/ContainerlabStudio';
 import { FrrRoutingStudio } from '../simulation/FrrRoutingStudio';
 import { EveNgExportStudio } from '../simulation/EveNgExportStudio';
+import { OpenConfigYangStudio } from '../simulation/OpenConfigYangStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -96,6 +97,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('openconfig') || slug.includes('yang') || slug.includes('gnmi')) {
+    return <OpenConfigYangStudio />;
+  }
 
   if (slug.includes('eve-ng') || slug.includes('gns3') || slug.includes('unl')) {
     return <EveNgExportStudio />;
