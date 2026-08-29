@@ -72,14 +72,15 @@ export const StructuredPathwaySection: React.FC = () => {
           </div>
 
           {/* Connected 7-Stage Progression Flow */}
-          <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 items-stretch">
+          <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2.5 items-stretch">
             {steps.map((s, idx) => (
-              <div
+              <Link
                 key={s.num}
-                className={`p-3.5 rounded-xl border flex flex-col justify-between transition-all shadow-sm ${
+                href={s.isCredential ? '/certificates' : '/courses'}
+                className={`p-3.5 rounded-xl border flex flex-col justify-between transition-all shadow-sm cursor-pointer ${
                   s.isCredential
-                    ? 'bg-[#062419] border-[#22c55e]/60 text-white'
-                    : 'bg-[#0c1017] border-[#1e293b] hover:border-[#22c55e]/40'
+                    ? 'bg-[#062419] border-[#22c55e]/60 text-white hover:border-[#22c55e] hover:shadow-lg hover:shadow-emerald-950/40'
+                    : 'bg-[#0c1017] border-[#1e293b] hover:border-[#22c55e]/50 hover:bg-[#0e1420]'
                 }`}
               >
                 <div>
@@ -102,7 +103,13 @@ export const StructuredPathwaySection: React.FC = () => {
                     {s.desc}
                   </p>
                 </div>
-              </div>
+
+                {idx < steps.length - 1 && (
+                  <div className="hidden lg:block pt-2 text-[9px] font-mono text-[#22c55e]/40">
+                    ───›
+                  </div>
+                )}
+              </Link>
             ))}
           </div>
         </div>
