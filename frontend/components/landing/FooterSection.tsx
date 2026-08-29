@@ -2,76 +2,84 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Activity, Github, Twitter, Linkedin } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Github, Twitter, Linkedin } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 
 export const FooterSection: React.FC = () => {
   return (
-    <footer className="border-t border-[#2a2e39] surface-1 pt-12 sm:pt-16 pb-8 sm:pb-12 text-sm text-[#8e95a5] font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 sm:gap-12 mb-8 sm:mb-12">
+    <footer className="border-t border-[#1b2230] bg-[#070a10] pt-12 pb-8 text-xs text-[#94a3b8] font-sans">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 mb-10">
         {/* Brand Column */}
-        <div className="sm:col-span-2 md:col-span-4 flex flex-col gap-4">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#2563eb] flex items-center justify-center text-white shadow-sm">
-              <Activity className="w-4 h-4 font-bold" />
+        <div className="sm:col-span-2 md:col-span-4 flex flex-col gap-3">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="flex items-center text-[#22c55e] font-mono text-base font-extrabold tracking-tighter">
+              <span>⚬—⚬</span>
             </div>
-            <span className="font-extrabold text-lg tracking-tight text-[#f4f5f7]">
-              Net<span className="text-[#38bdf8]">Vision</span>
+            <span className="font-extrabold text-base tracking-tight text-white">
+              Net<span className="text-[#22c55e]">Vision</span>
             </span>
           </Link>
-          <p className="text-xs text-[#8e95a5] leading-relaxed max-w-sm">
-            Learn networking by seeing how it works. Free interactive computer networking education and deterministic packet simulation.
+          <p className="text-xs text-[#94a3b8] leading-relaxed max-w-sm">
+            Interactive networking education through real-time 3D visualization and hands-on labs.
           </p>
-          <div className="flex items-center gap-2.5 text-[#8e95a5]">
-            <a href="https://github.com/qamarabbas-024/netvision" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:text-[#f4f5f7] transition-colors" aria-label="GitHub">
-              <Github className="w-4 h-4" />
+          <div className="flex items-center gap-2.5 text-[#94a3b8] pt-1">
+            <a href="https://github.com/qamarabbas-024/netvision" target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-[#0f172a] border border-[#1e293b] hover:text-white transition-colors" aria-label="GitHub">
+              <Github className="w-3.5 h-3.5" />
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:text-[#f4f5f7] transition-colors" aria-label="Twitter">
-              <Twitter className="w-4 h-4" />
+            <a href="https://twitter.com" target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-[#0f172a] border border-[#1e293b] hover:text-white transition-colors" aria-label="Twitter">
+              <Twitter className="w-3.5 h-3.5" />
             </a>
-            <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:text-[#f4f5f7] transition-colors" aria-label="LinkedIn">
-              <Linkedin className="w-4 h-4" />
+            <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-[#0f172a] border border-[#1e293b] hover:text-white transition-colors" aria-label="LinkedIn">
+              <Linkedin className="w-3.5 h-3.5" />
             </a>
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div className="sm:col-span-1 md:col-span-2 flex flex-col gap-3">
-          <h4 className="text-xs font-mono font-bold uppercase text-[#f4f5f7] tracking-wider">Platform</h4>
-          <Link href="/courses" className="text-xs hover:text-[#38bdf8] transition-colors py-0.5">Course Catalog</Link>
-          <Link href="/simulations" className="text-xs hover:text-[#38bdf8] transition-colors py-0.5">Simulations</Link>
-          <Link href="/sandbox" className="text-xs hover:text-[#38bdf8] transition-colors py-0.5">Sandbox Lab</Link>
-          <Link href="/certificates" className="text-xs hover:text-[#38bdf8] transition-colors py-0.5">Certificates</Link>
+        {/* Platform Column */}
+        <div className="sm:col-span-1 md:col-span-2 flex flex-col gap-2.5">
+          <h4 className="text-xs font-mono font-bold text-white tracking-wider">Platform</h4>
+          <Link href="/courses" className="text-xs hover:text-white transition-colors">Courses</Link>
+          <Link href="/simulations" className="text-xs hover:text-white transition-colors">Simulations</Link>
+          <Link href="/sandbox" className="text-xs hover:text-white transition-colors">Sandbox Lab</Link>
+          <Link href="/troubleshooting" className="text-xs hover:text-white transition-colors">Troubleshooting</Link>
+          <Link href="/certificates" className="text-xs hover:text-white transition-colors">Certifications</Link>
         </div>
 
-        {/* Architecture & Docs */}
-        <div className="sm:col-span-1 md:col-span-2 flex flex-col gap-3">
-          <h4 className="text-xs font-mono font-bold uppercase text-[#f4f5f7] tracking-wider">Resources</h4>
-          <Link href="/docs/architecture" className="text-xs hover:text-[#38bdf8] transition-colors py-0.5">Architecture Doc</Link>
-          <Link href="/docs/design-system" className="text-xs hover:text-[#38bdf8] transition-colors py-0.5">Design System</Link>
-          <Link href="/docs/pedagogy-blueprint" className="text-xs hover:text-[#38bdf8] transition-colors py-0.5">Pedagogy Blueprint</Link>
-          <a href="https://github.com/qamarabbas-024/netvision" target="_blank" rel="noreferrer" className="text-xs hover:text-[#38bdf8] transition-colors py-0.5">GitHub Repository</a>
+        {/* Resources Column */}
+        <div className="sm:col-span-1 md:col-span-2 flex flex-col gap-2.5">
+          <h4 className="text-xs font-mono font-bold text-white tracking-wider">Resources</h4>
+          <Link href="/docs/architecture" className="text-xs hover:text-white transition-colors">Architecture Doc</Link>
+          <Link href="/docs/design-system" className="text-xs hover:text-white transition-colors">Design System</Link>
+          <Link href="/docs/pedagogy-blueprint" className="text-xs hover:text-white transition-colors">Pedagogy Blueprint</Link>
+          <a href="https://github.com/qamarabbas-024/netvision" target="_blank" rel="noreferrer" className="text-xs hover:text-white transition-colors">GitHub Repository</a>
         </div>
 
-        {/* Newsletter Signup */}
-        <div className="sm:col-span-2 md:col-span-4 flex flex-col gap-3">
-          <h4 className="text-xs font-mono font-bold uppercase text-[#f4f5f7] tracking-wider">Technical Updates</h4>
-          <p className="text-xs text-[#8e95a5] leading-relaxed">Get notified when new networking simulation modules and protocol analyzers launch.</p>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <Input placeholder="Enter email address" className="py-2 text-xs w-full" />
-            <Button variant="primary" size="sm" className="shrink-0 justify-center">Subscribe</Button>
+        {/* Legal Column */}
+        <div className="sm:col-span-1 md:col-span-1 flex flex-col gap-2.5">
+          <h4 className="text-xs font-mono font-bold text-white tracking-wider">Legal</h4>
+          <Link href="#" className="text-xs hover:text-white transition-colors">Privacy Policy</Link>
+          <Link href="#" className="text-xs hover:text-white transition-colors">Terms of Service</Link>
+          <Link href="#" className="text-xs hover:text-white transition-colors">Security</Link>
+        </div>
+
+        {/* Stay Updated Signup */}
+        <div className="sm:col-span-2 md:col-span-3 flex flex-col gap-2.5">
+          <h4 className="text-xs font-mono font-bold text-white tracking-wider">Stay Updated</h4>
+          <p className="text-xs text-[#94a3b8] leading-relaxed">Get notified when new simulations and courses launch.</p>
+          <div className="flex items-center gap-2 pt-1">
+            <Input placeholder="Enter your email" className="py-1.5 text-xs bg-[#0f172a] border-[#1e293b] text-white w-full" />
+            <button
+              type="button"
+              className="px-3.5 py-1.5 rounded-lg bg-[#22c55e] text-[#062817] hover:bg-[#16a34a] font-bold text-xs shrink-0 cursor-pointer transition-colors"
+            >
+              Subscribe
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 border-t border-[#2a2e39] flex flex-col sm:flex-row items-center justify-between text-xs text-[#646c7d] gap-4 text-center sm:text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 border-t border-[#1b2230] flex flex-col sm:flex-row items-center justify-between text-xs text-[#64748b] gap-3">
         <p>© 2026 NetVision Platform. Open-source educational project.</p>
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-          <a href="#" className="hover:text-[#8e95a5] transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-[#8e95a5] transition-colors">Terms of Service</a>
-          <a href="#" className="hover:text-[#8e95a5] transition-colors">Security</a>
-        </div>
       </div>
     </footer>
   );

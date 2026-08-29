@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, Menu, X, ArrowRight } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './Button';
 import { ThemeSwitcher } from './ThemeSwitcher';
@@ -18,6 +18,7 @@ export const defaultNavItems: NavItem[] = [
   { label: 'Simulations', href: '/simulations' },
   { label: 'Sandbox Lab', href: '/sandbox' },
   { label: 'Troubleshooting', href: '/troubleshooting' },
+  { label: 'Certifications', href: '/certificates' },
   { label: 'Docs', href: '/docs' },
 ];
 
@@ -26,20 +27,20 @@ export const Navbar: React.FC<{ items?: NavItem[] }> = ({ items = defaultNavItem
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[var(--surface-1)]/95 backdrop-blur-md border-b border-[var(--border-hairline)] px-4 sm:px-6 py-3 transition-all font-sans">
+    <header className="sticky top-0 z-40 w-full bg-[#090d14]/95 backdrop-blur-md border-b border-[#1b2230] px-4 sm:px-6 py-3 transition-all font-sans">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-[var(--accent-primary)] flex items-center justify-center shadow-sm group-hover:opacity-90 transition-opacity shrink-0">
-            <Activity className="w-4 h-4 text-white font-bold" />
+          <div className="flex items-center text-[#22c55e] font-mono text-lg font-extrabold tracking-tighter">
+            <span>⚬—⚬</span>
           </div>
-          <span className="font-extrabold text-lg tracking-tight text-[var(--foreground)]">
-            Net<span className="text-[var(--accent-cyan)]">Vision</span>
+          <span className="font-extrabold text-lg tracking-tight text-white">
+            Net<span className="text-[#22c55e]">Vision</span>
           </span>
         </Link>
 
         {/* Desktop Nav Items */}
-        <nav className="hidden md:flex items-center gap-6 text-xs font-semibold uppercase tracking-wider font-mono">
+        <nav className="hidden md:flex items-center gap-6 text-xs font-semibold font-mono">
           {items.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -48,12 +49,12 @@ export const Navbar: React.FC<{ items?: NavItem[] }> = ({ items = defaultNavItem
                 href={item.href}
                 className={cn(
                   'transition-colors relative py-1',
-                  isActive ? 'text-[var(--accent-cyan)] font-bold' : 'text-[var(--text-muted)] hover:text-[var(--foreground)]'
+                  isActive ? 'text-[#22c55e] font-bold' : 'text-[#94a3b8] hover:text-white'
                 )}
               >
                 {item.label}
                 {isActive ? (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent-cyan)] rounded-full" />
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#22c55e] rounded-full" />
                 ) : null}
               </Link>
             );
@@ -64,14 +65,17 @@ export const Navbar: React.FC<{ items?: NavItem[] }> = ({ items = defaultNavItem
         <div className="hidden md:flex items-center gap-3">
           <ThemeSwitcher />
           <Link href="/login">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="text-xs text-[#94a3b8] hover:text-white">
               Sign In
             </Button>
           </Link>
           <Link href="/courses">
-            <Button variant="primary" size="sm" rightIcon={<ArrowRight className="w-3.5 h-3.5" />}>
+            <button
+              type="button"
+              className="px-4 py-2 rounded-lg bg-[#22c55e] text-[#062817] hover:bg-[#16a34a] font-bold text-xs transition-colors shadow-sm cursor-pointer"
+            >
               Start Learning
-            </Button>
+            </button>
           </Link>
         </div>
 
