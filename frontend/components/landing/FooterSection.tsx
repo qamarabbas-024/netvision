@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Github, Twitter, Linkedin } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
+import { NetVisionLogoIcon } from '@/components/ui/Navigation';
 
 export const FooterSection: React.FC = () => {
   return (
@@ -11,11 +12,11 @@ export const FooterSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 mb-10">
         {/* Brand Column */}
         <div className="sm:col-span-2 md:col-span-4 flex flex-col gap-3">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="flex items-center text-[#22c55e] font-mono text-base font-extrabold tracking-tighter">
-              <span>⚬—⚬</span>
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-[#0c121e] border border-[#1e293b] flex items-center justify-center group-hover:border-[#22c55e]/50 transition-colors">
+              <NetVisionLogoIcon className="w-5 h-5" />
             </div>
-            <span className="font-extrabold text-base tracking-tight text-white">
+            <span className="font-extrabold text-base tracking-tight text-white font-sans">
               Net<span className="text-[#22c55e]">Vision</span>
             </span>
           </Link>
@@ -23,13 +24,31 @@ export const FooterSection: React.FC = () => {
             Interactive networking education through real-time 3D visualization and hands-on labs.
           </p>
           <div className="flex items-center gap-2.5 text-[#94a3b8] pt-1">
-            <a href="https://github.com/qamarabbas-024/netvision" target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-[#0f172a] border border-[#1e293b] hover:text-white transition-colors" aria-label="GitHub">
+            <a
+              href="https://github.com/qamarabbas-024/netvision"
+              target="_blank"
+              rel="noreferrer"
+              className="p-1.5 rounded-lg bg-[#0f172a] border border-[#1e293b] hover:text-white transition-colors"
+              aria-label="GitHub"
+            >
               <Github className="w-3.5 h-3.5" />
             </a>
-            <a href="https://twitter.com" target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-[#0f172a] border border-[#1e293b] hover:text-white transition-colors" aria-label="Twitter">
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              rel="noreferrer"
+              className="p-1.5 rounded-lg bg-[#0f172a] border border-[#1e293b] hover:text-white transition-colors"
+              aria-label="Twitter"
+            >
               <Twitter className="w-3.5 h-3.5" />
             </a>
-            <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="p-1.5 rounded-lg bg-[#0f172a] border border-[#1e293b] hover:text-white transition-colors" aria-label="LinkedIn">
+            <a
+              href="https://linkedin.com"
+              target="_blank"
+              rel="noreferrer"
+              className="p-1.5 rounded-lg bg-[#0f172a] border border-[#1e293b] hover:text-white transition-colors"
+              aria-label="LinkedIn"
+            >
               <Linkedin className="w-3.5 h-3.5" />
             </a>
           </div>
@@ -43,6 +62,7 @@ export const FooterSection: React.FC = () => {
           <Link href="/sandbox" className="text-xs hover:text-white transition-colors">Sandbox Lab</Link>
           <Link href="/troubleshooting" className="text-xs hover:text-white transition-colors">Troubleshooting</Link>
           <Link href="/certificates" className="text-xs hover:text-white transition-colors">Certifications</Link>
+          <Link href="/docs" className="text-xs hover:text-white transition-colors">Docs</Link>
         </div>
 
         {/* Resources Column */}
