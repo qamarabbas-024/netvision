@@ -110,6 +110,7 @@ import { EbpfMaglevLbStudio } from '../simulation/EbpfMaglevLbStudio';
 import { EbpfSockOpsStudio } from '../simulation/EbpfSockOpsStudio';
 import { EbpfLsmSecurityStudio } from '../simulation/EbpfLsmSecurityStudio';
 import { EbpfBundleExportStudio } from '../simulation/EbpfBundleExportStudio';
+import { WasmProtocolSdkStudio } from '../simulation/WasmProtocolSdkStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -117,6 +118,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('wasm-sdk') || slug.includes('wasm-protocol') || slug.includes('wasm-sandbox')) {
+    return <WasmProtocolSdkStudio />;
+  }
 
   if (slug.includes('ebpf-bundle') || slug.includes('ebpf-export') || slug.includes('clang-makefile')) {
     return <EbpfBundleExportStudio />;
