@@ -93,6 +93,7 @@ import { OpenConfigYangStudio } from '../simulation/OpenConfigYangStudio';
 import { TunTapTunnelStudio } from '../simulation/TunTapTunnelStudio';
 import { PcapReplayStudio } from '../simulation/PcapReplayStudio';
 import { VoiceSreStudio } from '../simulation/VoiceSreStudio';
+import { IntentBasedNetStudio } from '../simulation/IntentBasedNetStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -100,6 +101,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('intent') || slug.includes('ibn') || slug.includes('intent-net')) {
+    return <IntentBasedNetStudio />;
+  }
 
   if (slug.includes('voice') || slug.includes('voice-sre') || slug.includes('speech-ai')) {
     return <VoiceSreStudio />;
