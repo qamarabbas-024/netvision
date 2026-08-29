@@ -114,6 +114,7 @@ import { WasmProtocolSdkStudio } from '../simulation/WasmProtocolSdkStudio';
 import { P2pGossipMeshStudio } from '../simulation/P2pGossipMeshStudio';
 import { MpquicSchedulerStudio } from '../simulation/MpquicSchedulerStudio';
 import { ScionArchitectureStudio } from '../simulation/ScionArchitectureStudio';
+import { PluginMarketplaceStudio } from '../simulation/PluginMarketplaceStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -121,6 +122,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('marketplace') || slug.includes('plugin-store') || slug.includes('registry')) {
+    return <PluginMarketplaceStudio />;
+  }
 
   if (slug.includes('scion') || slug.includes('scion-net') || slug.includes('isd-as')) {
     return <ScionArchitectureStudio />;
