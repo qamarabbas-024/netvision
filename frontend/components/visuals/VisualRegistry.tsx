@@ -90,6 +90,7 @@ import { ContainerlabStudio } from '../simulation/ContainerlabStudio';
 import { FrrRoutingStudio } from '../simulation/FrrRoutingStudio';
 import { EveNgExportStudio } from '../simulation/EveNgExportStudio';
 import { OpenConfigYangStudio } from '../simulation/OpenConfigYangStudio';
+import { TunTapTunnelStudio } from '../simulation/TunTapTunnelStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -97,6 +98,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('tuntap') || slug.includes('tun-tap') || slug.includes('hardware-bridge')) {
+    return <TunTapTunnelStudio />;
+  }
 
   if (slug.includes('openconfig') || slug.includes('yang') || slug.includes('gnmi')) {
     return <OpenConfigYangStudio />;
