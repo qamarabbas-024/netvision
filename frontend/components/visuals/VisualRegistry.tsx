@@ -97,6 +97,7 @@ import { IntentBasedNetStudio } from '../simulation/IntentBasedNetStudio';
 import { RcaMultiAgentStudio } from '../simulation/RcaMultiAgentStudio';
 import { RoutingHotPatcherStudio } from '../simulation/RoutingHotPatcherStudio';
 import { ChaosSreStudio } from '../simulation/ChaosSreStudio';
+import { TelemetryGraphRagStudio } from '../simulation/TelemetryGraphRagStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -104,6 +105,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('telemetry-rag') || slug.includes('syslog-rag') || slug.includes('netflow-rag')) {
+    return <TelemetryGraphRagStudio />;
+  }
 
   if (slug.includes('chaos') || slug.includes('chaos-monkey') || slug.includes('fault-injection')) {
     return <ChaosSreStudio />;
