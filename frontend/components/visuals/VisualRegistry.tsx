@@ -98,6 +98,7 @@ import { RcaMultiAgentStudio } from '../simulation/RcaMultiAgentStudio';
 import { RoutingHotPatcherStudio } from '../simulation/RoutingHotPatcherStudio';
 import { ChaosSreStudio } from '../simulation/ChaosSreStudio';
 import { TelemetryGraphRagStudio } from '../simulation/TelemetryGraphRagStudio';
+import { SpatialWebXrStudio } from '../simulation/SpatialWebXrStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -105,6 +106,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('webxr') || slug.includes('spatial') || slug.includes('holo-3d')) {
+    return <SpatialWebXrStudio />;
+  }
 
   if (slug.includes('telemetry-rag') || slug.includes('syslog-rag') || slug.includes('netflow-rag')) {
     return <TelemetryGraphRagStudio />;
