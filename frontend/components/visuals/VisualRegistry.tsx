@@ -95,6 +95,7 @@ import { PcapReplayStudio } from '../simulation/PcapReplayStudio';
 import { VoiceSreStudio } from '../simulation/VoiceSreStudio';
 import { IntentBasedNetStudio } from '../simulation/IntentBasedNetStudio';
 import { RcaMultiAgentStudio } from '../simulation/RcaMultiAgentStudio';
+import { RoutingHotPatcherStudio } from '../simulation/RoutingHotPatcherStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -102,6 +103,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('hot-patch') || slug.includes('hotpatch') || slug.includes('graceful-restart')) {
+    return <RoutingHotPatcherStudio />;
+  }
 
   if (slug.includes('rca') || slug.includes('root-cause') || slug.includes('multi-agent')) {
     return <RcaMultiAgentStudio />;
