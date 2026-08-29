@@ -88,6 +88,7 @@ import { MultiverseHypervisorStudio } from '../simulation/MultiverseHypervisorSt
 import { UniversalSingularityStudio } from '../simulation/UniversalSingularityStudio';
 import { ContainerlabStudio } from '../simulation/ContainerlabStudio';
 import { FrrRoutingStudio } from '../simulation/FrrRoutingStudio';
+import { EveNgExportStudio } from '../simulation/EveNgExportStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -95,6 +96,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('eve-ng') || slug.includes('gns3') || slug.includes('unl')) {
+    return <EveNgExportStudio />;
+  }
 
   if (slug.includes('frr') || slug.includes('frrouting') || slug.includes('vtysh')) {
     return <FrrRoutingStudio />;
