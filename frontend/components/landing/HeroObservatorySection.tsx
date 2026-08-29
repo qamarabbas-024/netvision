@@ -1,18 +1,105 @@
 'use client';
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowRight, User, Package, ShieldCheck, Pause, Play, RotateCw, Layers } from 'lucide-react';
+import {
+  ArrowRight,
+  User,
+  Package,
+  ShieldCheck,
+  Pause,
+  Play,
+  RotateCw,
+  Layers,
+  SlidersHorizontal,
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  X,
+} from 'lucide-react';
+
+export type NetworkScenario = 'normal' | 'degraded' | 'failure' | 'recovery';
+
+export interface DeviceInfo {
+  id: string;
+  name: string;
+  role: string;
+  ip: string;
+  mac: string;
+  layer: string;
+  description: string;
+  details: string[];
+}
+
+const DEVICE_METADATA: Record<string, DeviceInfo> = {
+  workstation: {
+    id: 'workstation',
+    name: 'WORKSTATION',
+    role: 'Client Endpoint',
+    ip: '192.168.1.10',
+    mac: '00:50:56:C0:00:08',
+    layer: 'L7 / Application & Host',
+    description: 'Originates DNS query lookups, TCP 3-way handshakes, and HTTP/3 secure requests.',
+    details: ['OS: NetVision Linux', 'Active Sockets: 4', 'Default GW: 192.168.1.1'],
+  },
+  switch: {
+    id: 'switch',
+    name: 'L2 SWITCH',
+    role: 'Layer-2 Switching Chassis',
+    ip: '192.168.1.2 (Mgmt)',
+    mac: 'F0:9F:C2:7B:11:A0',
+    layer: 'L2 / Data Link',
+    description: 'Inspects 802.3 Ethernet frames, maintains CAM MAC address tables, forwards traffic at line rate.',
+    details: ['Ports: 24x 1GbE / 4x 10GbE SFP+', 'VLANs: 10 (Data), 20 (Mgmt)', 'Buffer: 4MB Shared'],
+  },
+  router: {
+    id: 'router',
+    name: 'CORE ROUTER',
+    role: 'Network Layer Gateway & Forwarder',
+    ip: '192.168.1.1 / 10.0.0.1',
+    mac: '00:1A:2B:3C:4D:5E',
+    layer: 'L3 / Network',
+    description: 'Evaluates destination IPv4 addresses, inspects routing tables, decrements TTL, selects next hop.',
+    details: ['Protocols: BGP / OSPF / Static', 'Throughput: 40 Gbps', 'Routing Table: 850k routes'],
+  },
+  gateway: {
+    id: 'gateway',
+    name: 'EDGE GATEWAY',
+    role: 'Security & NAT Appliance',
+    ip: '198.51.100.1 (WAN)',
+    mac: '3C:08:F6:E1:92:01',
+    layer: 'L4-L7 / Stateful Security',
+    description: 'Performs SNAT/DNAT translations, stateful firewall inspection, and TLS packet verification.',
+    details: ['State Table: 128k Conns', 'IPS Rules: Active', 'Threat Level: 0.00% (Clean)'],
+  },
+  server: {
+    id: 'server',
+    name: 'ORIGIN SERVER',
+    role: 'Enterprise Web & DNS Server',
+    ip: '142.250.72.14',
+    mac: '52:54:00:8F:A2:14',
+    layer: 'L7 / Server Services',
+    description: 'Terminates QUIC / TLS 1.3 encrypted streams, processes API requests, serves signed payloads.',
+    details: ['Services: HTTP/3, DNS (BIND9)', 'Uptime: 99.99%', 'Latency: 0.42 ms'],
+  },
+};
 
 export const HeroObservatorySection: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Simulation Controls State
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [speed, setSpeed] = useState<number>(1);
-  const [showControlsDropdown, setShowControlsDropdown] = useState<boolean>(false);
   const [showLegend, setShowLegend] = useState<boolean>(true);
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [scenario, setScenario] = useState<NetworkScenario>('normal');
+  const [showScenarioMenu, setShowScenarioMenu] = useState<boolean>(false);
 
-  // Perspective angles matching the reference image exactly
+  // Device Inspection State
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [selectedNode, setSelectedNode] = useState<DeviceInfo | null>(null);
+
+  // Perspective camera angles matching the reference image exactly
   const [rotationAngle, setRotationAngle] = useState<{ x: number; y: number }>({ x: 22, y: -26 });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -33,43 +120,67 @@ export const HeroObservatorySection: React.FC = () => {
     }
   }, []);
 
-  // 3D Isometric Projection Engine
-  const project3D = (
-    x: number,
-    y: number,
-    z: number,
-    cx: number,
-    cy: number,
-    rotX = rotationAngle.x,
-    rotY = rotationAngle.y,
-    zoom = 1.06
-  ) => {
-    const radX = (rotX * Math.PI) / 180;
-    const radY = (rotY * Math.PI) / 180;
+  // Smooth Scroll-Driven Scene Storytelling without hijacking browser scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (prefersReducedMotion) return;
+      const scrollY = window.scrollY;
+      const heroHeight = containerRef.current?.offsetHeight || 800;
+      const progress = Math.min(Math.max(scrollY / heroHeight, 0), 1);
 
-    // Y-axis rotation
-    const cosY = Math.cos(radY);
-    const sinY = Math.sin(radY);
-    const x1 = x * cosY + z * sinY;
-    const z1 = -x * sinY + z * cosY;
-
-    // X-axis rotation
-    const cosX = Math.cos(radX);
-    const sinX = Math.sin(radX);
-    const y2 = y * cosX - z1 * sinX;
-    const z2 = y * sinX + z1 * cosX;
-
-    // Perspective Focal Scale
-    const fov = 480;
-    const scale = (fov / (fov + z2)) * zoom;
-
-    return {
-      x: cx + x1 * scale,
-      y: cy + y2 * scale,
-      scale,
-      depth: z2,
+      // Subtle dynamic camera depth shift as user begins reading downward
+      if (!isDragging) {
+        setRotationAngle({
+          x: 22 + progress * 4,
+          y: -26 + progress * 8,
+        });
+      }
     };
-  };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isDragging, prefersReducedMotion]);
+
+  // 3D Isometric Projection Engine
+  const project3D = useCallback(
+    (
+      x: number,
+      y: number,
+      z: number,
+      cx: number,
+      cy: number,
+      rotX = rotationAngle.x,
+      rotY = rotationAngle.y,
+      zoom = 1.05
+    ) => {
+      const radX = (rotX * Math.PI) / 180;
+      const radY = (rotY * Math.PI) / 180;
+
+      // Y-axis rotation
+      const cosY = Math.cos(radY);
+      const sinY = Math.sin(radY);
+      const x1 = x * cosY + z * sinY;
+      const z1 = -x * sinY + z * cosY;
+
+      // X-axis rotation
+      const cosX = Math.cos(radX);
+      const sinX = Math.sin(radX);
+      const y2 = y * cosX - z1 * sinX;
+      const z2 = y * sinX + z1 * cosX;
+
+      // Perspective Focal Scale
+      const fov = 480;
+      const scale = (fov / (fov + z2)) * zoom;
+
+      return {
+        x: cx + x1 * scale,
+        y: cy + y2 * scale,
+        scale,
+        depth: z2,
+      };
+    },
+    [rotationAngle.x, rotationAngle.y]
+  );
 
   // Main 60 FPS Render Loop
   useEffect(() => {
@@ -113,7 +224,7 @@ export const HeroObservatorySection: React.FC = () => {
       // 1. Draw Ground Plane Technical Grid
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
       ctx.lineWidth = 1;
-      const span = 340;
+      const span = 350;
       const step = 40;
 
       for (let i = -span; i <= span; i += step) {
@@ -147,27 +258,48 @@ export const HeroObservatorySection: React.FC = () => {
       const pGateway = project3D(devPos.gateway.x, devPos.gateway.y, devPos.gateway.z, cx, cy);
       const pServer = project3D(devPos.server.x, devPos.server.y, devPos.server.z, cx, cy);
 
-      // 3. Draw Connecting Glowing Conduits with Segmented Flow
+      // Node Hit Testing registration
+      (canvas as any).__nodeHitTargets = [
+        { id: 'workstation', x: pWorkstation.x, y: pWorkstation.y, r: 35 * pWorkstation.scale },
+        { id: 'switch', x: pSwitch.x, y: pSwitch.y, r: 32 * pSwitch.scale },
+        { id: 'router', x: pRouter.x, y: pRouter.y, r: 30 * pRouter.scale },
+        { id: 'gateway', x: pGateway.x, y: pGateway.y, r: 30 * pGateway.scale },
+        { id: 'server', x: pServer.x, y: pServer.y, r: 36 * pServer.scale },
+      ];
 
-      // Conduit 1: Workstation to Switch (Cyan/Emerald Segmented Tube)
+      // 3. Draw Connecting Glowing Conduits with Segmented Pulse Flow
+      // Scenario color modulations
+      const conduit1Color = '#10b981';
+      const conduit1Glow = '#22d3ee';
+
+      const conduit2Color = scenario === 'degraded' ? '#f59e0b' : '#10b981';
+      const conduit2Glow = scenario === 'degraded' ? '#fbbf24' : '#22d3ee';
+
+      const conduit3Color = scenario === 'failure' ? '#ef4444' : '#10b981';
+      const conduit3Glow = scenario === 'failure' ? '#f87171' : '#22d3ee';
+
+      const conduit4Color = '#10b981';
+      const conduit4Glow = '#22d3ee';
+
+      // Conduit 1: Workstation to Switch
       const wsP = { x: pWorkstation.x + 32 * pWorkstation.scale, y: pWorkstation.y - 12 * pWorkstation.scale };
       const swP1 = { x: pSwitch.x - 26 * pSwitch.scale, y: pSwitch.y + 4 * pSwitch.scale };
-      drawSegmentedConduit(ctx, wsP.x, wsP.y, swP1.x, swP1.y, '#10b981', '#22d3ee', t);
+      drawSegmentedConduit(ctx, wsP.x, wsP.y, swP1.x, swP1.y, conduit1Color, conduit1Glow, t, false);
 
-      // Conduit 2: Switch to Router (Segmented Conduit)
+      // Conduit 2: Switch to Router
       const swP2 = { x: pSwitch.x + 26 * pSwitch.scale, y: pSwitch.y - 8 * pSwitch.scale };
       const rtrP1 = { x: pRouter.x - 22 * pRouter.scale, y: pRouter.y + 8 * pRouter.scale };
-      drawSegmentedConduit(ctx, swP2.x, swP2.y, rtrP1.x, rtrP1.y, '#10b981', '#22d3ee', t + 0.3);
+      drawSegmentedConduit(ctx, swP2.x, swP2.y, rtrP1.x, rtrP1.y, conduit2Color, conduit2Glow, t + 0.3, scenario === 'degraded');
 
-      // Conduit 3: Router to Gateway (Segmented Conduit)
+      // Conduit 3: Router to Gateway
       const rtrP2 = { x: pRouter.x + 22 * pRouter.scale, y: pRouter.y - 8 * pRouter.scale };
       const gwP1 = { x: pGateway.x - 24 * pGateway.scale, y: pGateway.y + 8 * pGateway.scale };
-      drawSegmentedConduit(ctx, rtrP2.x, rtrP2.y, gwP1.x, gwP1.y, '#10b981', '#22d3ee', t + 0.6);
+      drawSegmentedConduit(ctx, rtrP2.x, rtrP2.y, gwP1.x, gwP1.y, conduit3Color, conduit3Glow, t + 0.6, scenario === 'failure');
 
-      // Conduit 4: Gateway to Server (Segmented Conduit)
+      // Conduit 4: Gateway to Server
       const gwP2 = { x: pGateway.x + 24 * pGateway.scale, y: pGateway.y - 8 * pGateway.scale };
       const srvP = { x: pServer.x - 26 * pServer.scale, y: pServer.y + 10 * pServer.scale };
-      drawSegmentedConduit(ctx, gwP2.x, gwP2.y, srvP.x, srvP.y, '#10b981', '#22d3ee', t + 0.9);
+      drawSegmentedConduit(ctx, gwP2.x, gwP2.y, srvP.x, srvP.y, conduit4Color, conduit4Glow, t + 0.9, false);
 
       // 4. Draw Floating Inspection Packet Badges (Exact content from reference image)
       if (showLegend) {
@@ -188,7 +320,7 @@ export const HeroObservatorySection: React.FC = () => {
           (swP2.y + rtrP1.y) / 2 - 58,
           'TCP SYN',
           ['SRC: 192.168.1.10:54321', 'DST: 142.250.72.14:443', 'SEQ: 105338'],
-          '#22c55e'
+          scenario === 'degraded' ? '#f59e0b' : '#22c55e'
         );
 
         // Tag 3: IP PACKET
@@ -198,7 +330,7 @@ export const HeroObservatorySection: React.FC = () => {
           (rtrP2.y + gwP1.y) / 2 - 52,
           'IP PACKET',
           ['SRC: 192.168.1.10', 'DST: 142.250.72.14', 'TTL: 63'],
-          '#22c55e'
+          scenario === 'failure' ? '#ef4444' : '#22c55e'
         );
 
         // Tag 4: HTTP/3 RESPONSE
@@ -218,20 +350,29 @@ export const HeroObservatorySection: React.FC = () => {
       const p1y = wsP.y + (swP1.y - wsP.y) * pProg1;
       drawGlowingPacket(ctx, p1x, p1y, '#22c55e', 4.5);
 
-      const pProg2 = ((t * 0.9) + 0.3) % 1;
+      const pProg2 = (t * 0.9 + 0.3) % 1;
       const p2x = swP2.x + (rtrP1.x - swP2.x) * pProg2;
       const p2y = swP2.y + (rtrP1.y - swP2.y) * pProg2;
-      drawGlowingPacket(ctx, p2x, p2y, '#22c55e', 5);
+      drawGlowingPacket(ctx, p2x, p2y, scenario === 'degraded' ? '#f59e0b' : '#22c55e', 5);
 
-      const pProg3 = ((t * 0.9) + 0.6) % 1;
-      const p3x = rtrP2.x + (gwP1.x - rtrP2.x) * pProg3;
-      const p3y = rtrP2.y + (gwP1.y - rtrP2.y) * pProg3;
-      drawGlowingPacket(ctx, p3x, p3y, '#22c55e', 5);
+      if (scenario !== 'failure') {
+        const pProg3 = (t * 0.9 + 0.6) % 1;
+        const p3x = rtrP2.x + (gwP1.x - rtrP2.x) * pProg3;
+        const p3y = rtrP2.y + (gwP1.y - rtrP2.y) * pProg3;
+        drawGlowingPacket(ctx, p3x, p3y, '#22c55e', 5);
 
-      const pProg4 = ((t * 0.85) + 0.15) % 1;
-      const p4x = gwP2.x + (srvP.x - gwP2.x) * pProg4;
-      const p4y = gwP2.y + (srvP.y - gwP2.y) * pProg4;
-      drawGlowingPacket(ctx, p4x, p4y, '#22c55e', 4.5);
+        const pProg4 = (t * 0.85 + 0.15) % 1;
+        const p4x = gwP2.x + (srvP.x - gwP2.x) * pProg4;
+        const p4y = gwP2.y + (srvP.y - gwP2.y) * pProg4;
+        drawGlowingPacket(ctx, p4x, p4y, '#22c55e', 4.5);
+      } else {
+        // Draw Dropped Packet Animation at router
+        const dropAlpha = (Math.sin(t * 8) + 1) / 2;
+        ctx.fillStyle = `rgba(239, 68, 68, ${dropAlpha})`;
+        ctx.font = 'bold 9px JetBrains Mono, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('✕ PACKET DROP', rtrP2.x + 30, rtrP2.y - 12);
+      }
 
       // 6. Draw Realistic Hardware Devices
 
@@ -263,7 +404,7 @@ export const HeroObservatorySection: React.FC = () => {
 
     animFrame = requestAnimationFrame(render);
     return () => cancelAnimationFrame(animFrame);
-  }, [isPlaying, speed, rotationAngle, showLegend, hoveredNode, prefersReducedMotion]);
+  }, [isPlaying, speed, rotationAngle, showLegend, hoveredNode, scenario, prefersReducedMotion, project3D]);
 
   // Segmented Glowing Conduit Helper
   const drawSegmentedConduit = (
@@ -274,14 +415,18 @@ export const HeroObservatorySection: React.FC = () => {
     y2: number,
     baseColor: string,
     glowColor: string,
-    t: number
+    t: number,
+    isJitter: boolean
   ) => {
+    const jitterX = isJitter ? (Math.random() - 0.5) * 1.5 : 0;
+    const jitterY = isJitter ? (Math.random() - 0.5) * 1.5 : 0;
+
     // Base Conduit Tube
     ctx.lineWidth = 4;
-    ctx.strokeStyle = 'rgba(16, 185, 129, 0.3)';
+    ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
     ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
+    ctx.moveTo(x1 + jitterX, y1 + jitterY);
+    ctx.lineTo(x2 + jitterX, y2 + jitterY);
     ctx.stroke();
 
     // Luminous Active Flow Line
@@ -305,12 +450,12 @@ export const HeroObservatorySection: React.FC = () => {
     lines: string[],
     accentColor: string
   ) => {
-    const w = 110;
+    const w = 112;
     const h = 20 + lines.length * 11;
 
     // Dark Card Container
     ctx.fillStyle = 'rgba(10, 15, 23, 0.92)';
-    ctx.strokeStyle = 'rgba(34, 197, 94, 0.4)';
+    ctx.strokeStyle = accentColor;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, 6);
@@ -375,7 +520,7 @@ export const HeroObservatorySection: React.FC = () => {
     const mw = 44 * s;
     const mh = 32 * s;
     ctx.fillStyle = isHovered ? '#1e293b' : '#0f172a';
-    ctx.strokeStyle = '#334155';
+    ctx.strokeStyle = isHovered ? '#22c55e' : '#334155';
     ctx.lineWidth = 1.8 * s;
     ctx.beginPath();
     ctx.roundRect(x - mw / 2 - 10 * s, y - mh / 2 - 8 * s, mw, mh, 4);
@@ -434,7 +579,7 @@ export const HeroObservatorySection: React.FC = () => {
 
     // 1U Switch Rack Chassis
     ctx.fillStyle = isHovered ? '#1e293b' : '#0f172a';
-    ctx.strokeStyle = '#334155';
+    ctx.strokeStyle = isHovered ? '#22c55e' : '#334155';
     ctx.lineWidth = 1.8 * s;
     ctx.beginPath();
     ctx.roundRect(x - sw / 2, y - sh / 2, sw, sh, 4);
@@ -471,7 +616,7 @@ export const HeroObservatorySection: React.FC = () => {
 
     // Cylindrical Base Disc
     ctx.fillStyle = isHovered ? '#1e293b' : '#0f172a';
-    ctx.strokeStyle = '#334155';
+    ctx.strokeStyle = isHovered ? '#22c55e' : '#334155';
     ctx.lineWidth = 2 * s;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -538,7 +683,7 @@ export const HeroObservatorySection: React.FC = () => {
 
     // Square Edge Gateway Chassis
     ctx.fillStyle = isHovered ? '#1e293b' : '#0f172a';
-    ctx.strokeStyle = '#334155';
+    ctx.strokeStyle = isHovered ? '#22c55e' : '#334155';
     ctx.lineWidth = 1.8 * s;
     ctx.beginPath();
     ctx.roundRect(x - gw / 2, y - gh / 2, gw, gh, 4);
@@ -580,7 +725,7 @@ export const HeroObservatorySection: React.FC = () => {
 
     // Enterprise Server Tower Chassis
     ctx.fillStyle = isHovered ? '#1e293b' : '#0f172a';
-    ctx.strokeStyle = '#334155';
+    ctx.strokeStyle = isHovered ? '#22c55e' : '#334155';
     ctx.lineWidth = 1.8 * s;
     ctx.beginPath();
     ctx.roundRect(x - sw / 2, y - sh / 2, sw, sh, 4);
@@ -607,21 +752,62 @@ export const HeroObservatorySection: React.FC = () => {
     ctx.fill();
   };
 
-  // Mouse Orbital Handlers
+  // Mouse Orbital & Hit Handlers
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
     dragStartRef.current = { x: e.clientX, y: e.clientY };
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    const dx = e.clientX - dragStartRef.current.x;
-    const dy = e.clientY - dragStartRef.current.y;
-    setRotationAngle((prev) => ({
-      x: Math.max(10, Math.min(45, prev.x + dy * 0.25)),
-      y: (prev.y + dx * 0.25) % 360,
-    }));
-    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Handle Drag Orbit
+    if (isDragging) {
+      const dx = e.clientX - dragStartRef.current.x;
+      const dy = e.clientY - dragStartRef.current.y;
+      setRotationAngle((prev) => ({
+        x: Math.max(10, Math.min(45, prev.x + dy * 0.25)),
+        y: (prev.y + dx * 0.25) % 360,
+      }));
+      dragStartRef.current = { x: e.clientX, y: e.clientY };
+      return;
+    }
+
+    // Handle Hover Node Detection
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    const targets = (canvas as any).__nodeHitTargets || [];
+    let hit: string | null = null;
+    for (const target of targets) {
+      const dist = Math.hypot(mx - target.x, my - target.y);
+      if (dist <= target.r) {
+        hit = target.id;
+        break;
+      }
+    }
+    setHoveredNode(hit);
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    const targets = (canvas as any).__nodeHitTargets || [];
+    for (const target of targets) {
+      const dist = Math.hypot(mx - target.x, my - target.y);
+      if (dist <= target.r) {
+        setSelectedNode(DEVICE_METADATA[target.id] || null);
+        return;
+      }
+    }
+    // If clicked empty canvas, clear selection
+    setSelectedNode(null);
   };
 
   const handleMouseUp = () => {
@@ -630,20 +816,25 @@ export const HeroObservatorySection: React.FC = () => {
 
   const resetView = () => {
     setRotationAngle({ x: 22, y: -26 });
+    setScenario('normal');
   };
 
   return (
-    <section className="relative pt-6 pb-12 bg-net-grid-pattern bg-[#070a10] border-b border-[#1b2230] font-sans">
+    <section
+      ref={containerRef}
+      className="relative pt-6 pb-12 bg-net-grid-pattern bg-[#070a10] border-b border-[#1b2230] font-sans"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Main Master Hero Container Card */}
         <div className="relative w-full rounded-2xl border border-[#1e293b] bg-[#0c1017] shadow-2xl overflow-hidden">
           {/* 3D Canvas Viewport */}
           <div
-            className="relative w-full h-[580px] sm:h-[660px] lg:h-[720px] bg-[#090d14] cursor-grab active:cursor-grabbing overflow-hidden select-none"
+            className="relative w-full h-[580px] sm:h-[660px] lg:h-[730px] bg-[#090d14] cursor-grab active:cursor-grabbing overflow-hidden select-none"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
+            onClick={handleClick}
           >
             <canvas ref={canvasRef} className="w-full h-full block" />
 
@@ -654,7 +845,7 @@ export const HeroObservatorySection: React.FC = () => {
               <span className="text-[#64748b] ml-1 font-bold">60 FPS</span>
             </div>
 
-            {/* Top-Right Simulation Controls Dropdown */}
+            {/* Top-Right Simulation Controls Bar */}
             <div className="absolute top-4 right-4 z-20 font-mono text-xs">
               <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#0f172a]/90 backdrop-blur-md border border-[#1e293b]">
                 <button
@@ -663,7 +854,11 @@ export const HeroObservatorySection: React.FC = () => {
                   aria-label={isPlaying ? 'Pause simulation' : 'Resume simulation'}
                   className="px-2.5 py-1 rounded-md text-[#94a3b8] hover:text-white hover:bg-[#1e293b] transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-[#22c55e]" />}
+                  {isPlaying ? (
+                    <Pause className="w-3.5 h-3.5" />
+                  ) : (
+                    <Play className="w-3.5 h-3.5 text-[#22c55e]" />
+                  )}
                   <span>{isPlaying ? 'Pause' : 'Resume'}</span>
                 </button>
 
@@ -686,6 +881,57 @@ export const HeroObservatorySection: React.FC = () => {
                   <Layers className="w-3.5 h-3.5" />
                   <span>Legend</span>
                 </button>
+
+                {/* Scenario Toggle */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowScenarioMenu(!showScenarioMenu)}
+                    aria-label="Select Scenario"
+                    className="px-2.5 py-1 rounded-md text-[#94a3b8] hover:text-white hover:bg-[#1e293b] transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span className="capitalize">{scenario}</span>
+                  </button>
+
+                  {showScenarioMenu && (
+                    <div className="absolute right-0 mt-2 w-44 rounded-xl bg-[#0f172a] border border-[#1e293b] shadow-2xl p-1.5 z-30 flex flex-col gap-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setScenario('normal');
+                          setShowScenarioMenu(false);
+                        }}
+                        className="px-2.5 py-1.5 text-left text-xs rounded-lg hover:bg-[#1e293b] text-[#22c55e] flex items-center justify-between cursor-pointer"
+                      >
+                        <span>Normal Flow</span>
+                        {scenario === 'normal' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setScenario('degraded');
+                          setShowScenarioMenu(false);
+                        }}
+                        className="px-2.5 py-1.5 text-left text-xs rounded-lg hover:bg-[#1e293b] text-[#f59e0b] flex items-center justify-between cursor-pointer"
+                      >
+                        <span>Link Congestion</span>
+                        {scenario === 'degraded' && <AlertTriangle className="w-3.5 h-3.5" />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setScenario('failure');
+                          setShowScenarioMenu(false);
+                        }}
+                        className="px-2.5 py-1.5 text-left text-xs rounded-lg hover:bg-[#1e293b] text-[#ef4444] flex items-center justify-between cursor-pointer"
+                      >
+                        <span>Link Failure & Drop</span>
+                        {scenario === 'failure' && <Activity className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -697,7 +943,7 @@ export const HeroObservatorySection: React.FC = () => {
               </div>
 
               {/* Main Headline */}
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.12] mb-4">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.12] mb-4 font-sans">
                 Learn networking by <br />
                 <span className="text-white">seeing how it works.</span>
               </h1>
@@ -764,12 +1010,78 @@ export const HeroObservatorySection: React.FC = () => {
               </div>
             </div>
 
+            {/* Interactive Node Details Modal / HUD Overlay */}
+            {selectedNode && (
+              <div className="absolute bottom-16 right-6 w-80 p-4 rounded-xl bg-[#0c121e]/95 backdrop-blur-md border border-[#22c55e]/50 shadow-2xl z-30 font-sans animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between pb-2 border-b border-[#1e293b] mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#22c55e]" />
+                    <span className="font-mono font-bold text-xs text-white">{selectedNode.name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedNode(null)}
+                    className="text-[#94a3b8] hover:text-white p-0.5 rounded cursor-pointer"
+                    aria-label="Close details"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="space-y-1.5 text-xs">
+                  <div className="text-[11px] font-mono text-[#38bdf8]">{selectedNode.role}</div>
+                  <p className="text-[11px] text-[#94a3b8] leading-snug">{selectedNode.description}</p>
+
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#1e293b] font-mono text-[10px]">
+                    <div>
+                      <span className="text-[#64748b] block">IP Address</span>
+                      <strong className="text-[#f4f5f7]">{selectedNode.ip}</strong>
+                    </div>
+                    <div>
+                      <span className="text-[#64748b] block">OSI Layer</span>
+                      <strong className="text-[#22c55e]">{selectedNode.layer}</strong>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <span className="text-[9px] font-mono uppercase text-[#64748b] block mb-1">
+                      Device Telemetry
+                    </span>
+                    <ul className="text-[10px] font-mono text-[#94a3b8] space-y-0.5">
+                      {selectedNode.details.map((detail, idx) => (
+                        <li key={idx} className="flex items-center gap-1.5">
+                          <span className="text-[#22c55e]">›</span>
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Bottom Telemetry Strip */}
             <div className="absolute bottom-4 left-6 right-6 flex items-center justify-between font-mono text-xs text-[#94a3b8] pointer-events-none">
               <div className="flex items-center gap-6">
-                <span>LATENCY: <strong className="text-[#22c55e]">0.42 ms</strong></span>
-                <span>LINKS: <strong className="text-[#22c55e]">7/7 UP</strong></span>
-                <span>TOPOLOGY: <strong className="text-[#22d3ee]">DUAL-CORE MESH</strong></span>
+                <span>
+                  LATENCY:{' '}
+                  <strong className="text-[#22c55e]">
+                    {scenario === 'degraded' ? '48.20 ms' : '0.42 ms'}
+                  </strong>
+                </span>
+                <span>
+                  LINKS:{' '}
+                  <strong className={scenario === 'failure' ? 'text-[#ef4444]' : 'text-[#22c55e]'}>
+                    {scenario === 'failure' ? '6/7 DEGRADED' : '7/7 UP'}
+                  </strong>
+                </span>
+                <span>
+                  TOPOLOGY: <strong className="text-[#22d3ee]">DUAL-CORE MESH</strong>
+                </span>
+              </div>
+
+              <div className="hidden sm:block text-[11px] text-[#64748b]">
+                Drag to rotate · Click device to inspect
               </div>
             </div>
           </div>
