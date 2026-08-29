@@ -112,6 +112,7 @@ import { EbpfLsmSecurityStudio } from '../simulation/EbpfLsmSecurityStudio';
 import { EbpfBundleExportStudio } from '../simulation/EbpfBundleExportStudio';
 import { WasmProtocolSdkStudio } from '../simulation/WasmProtocolSdkStudio';
 import { P2pGossipMeshStudio } from '../simulation/P2pGossipMeshStudio';
+import { MpquicSchedulerStudio } from '../simulation/MpquicSchedulerStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -119,6 +120,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('quic-multipath') || slug.includes('mpquic') || slug.includes('stream-scheduler')) {
+    return <MpquicSchedulerStudio />;
+  }
 
   if (slug.includes('p2p-mesh') || slug.includes('gossip') || slug.includes('epidemic')) {
     return <P2pGossipMeshStudio />;
