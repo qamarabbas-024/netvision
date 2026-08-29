@@ -101,6 +101,7 @@ import { TelemetryGraphRagStudio } from '../simulation/TelemetryGraphRagStudio';
 import { SpatialWebXrStudio } from '../simulation/SpatialWebXrStudio';
 import { DatacenterWalkthroughStudio } from '../simulation/DatacenterWalkthroughStudio';
 import { LeoConstellationStudio } from '../simulation/LeoConstellationStudio';
+import { SubseaBathymetryStudio } from '../simulation/SubseaBathymetryStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -108,6 +109,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('subsea-3d') || slug.includes('bathymetry') || slug.includes('submarine-cable')) {
+    return <SubseaBathymetryStudio />;
+  }
 
   if (slug.includes('leo-constellation') || slug.includes('satellite-mesh') || slug.includes('isl-laser')) {
     return <LeoConstellationStudio />;
