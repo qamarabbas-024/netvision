@@ -259,6 +259,11 @@ The NetVision roadmap is prioritized across the following development tracks:
 8. **Production Email & Domain Setup**: Custom DNS domain verification and live transactional email activation via Resend HTTPS API.
 9. **Teacher & Classroom Features**: Cohort management, assignment dispatch, and student analytics dashboard (`Role.TEACHER`).
 10. **Advanced Networking Specializations**: Cloud VPC Peering, Kubernetes CNI networking, and Snort/Suricata IDS lab modules.
+11. **Epoch XI (Virtual NOS & Containerlab)**: Containerlab YAML generator, FRRouting daemons, EVE-NG/GNS3 exporters, OpenConfig gNMI telemetry streaming, TUN/TAP bridge, and real PCAP/PCAPNG dissector.
+12. **Epoch XII (Autonomous Voice AI SRE)**: Conversational Voice NetOps assistant, Intent-Based Networking (IBN) compiler, 3-agent Byzantine RCA consensus, zero-downtime routing hot-patcher, and GraphRAG telemetry intelligence.
+13. **Epoch XIII (Spatial WebXR 3D Holography)**: 6DoF stereoscopic WebXR canvas, 42U physical datacenter walkthrough, 550km LEO satellite orbit mesh, subsea bathymetric optical repeaters, 3D switch buffer packet collisions, and 25-joint hand tracking.
+14. **Epoch XIV (eBPF Kernel Generator)**: Line-rate 14.8M PPS XDP DDoS mitigation, TC Token Bucket Filter rate shaping, Meta Katran Maglev L4 load balancer with DSR, SockOps TCP bypass, LSM network access control, and 1-click Makefile bundle exporter.
+15. **Epoch XV (Universal WASM Protocol SDK)**: Sandboxed wasm32-wasi protocol runtime, P2P epidemic gossip broadcast, Multipath QUIC (MPQUIC) 5G/Wi-Fi stream bonding, SCION isolation domain architecture, and global community protocol plugin marketplace.
 
 ---
 
