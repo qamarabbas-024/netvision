@@ -92,6 +92,7 @@ import { EveNgExportStudio } from '../simulation/EveNgExportStudio';
 import { OpenConfigYangStudio } from '../simulation/OpenConfigYangStudio';
 import { TunTapTunnelStudio } from '../simulation/TunTapTunnelStudio';
 import { PcapReplayStudio } from '../simulation/PcapReplayStudio';
+import { VoiceSreStudio } from '../simulation/VoiceSreStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -99,6 +100,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('voice') || slug.includes('voice-sre') || slug.includes('speech-ai')) {
+    return <VoiceSreStudio />;
+  }
 
   if (slug.includes('pcap') || slug.includes('packet-capture') || slug.includes('wireshark')) {
     return <PcapReplayStudio />;
