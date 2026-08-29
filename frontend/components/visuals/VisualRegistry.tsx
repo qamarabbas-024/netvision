@@ -104,6 +104,7 @@ import { LeoConstellationStudio } from '../simulation/LeoConstellationStudio';
 import { SubseaBathymetryStudio } from '../simulation/SubseaBathymetryStudio';
 import { SpatialPacketPhysicsStudio } from '../simulation/SpatialPacketPhysicsStudio';
 import { XrHandTrackingStudio } from '../simulation/XrHandTrackingStudio';
+import { EbpfXdpGeneratorStudio } from '../simulation/EbpfXdpGeneratorStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -111,6 +112,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('ebpf-xdp') || slug.includes('xdp-c') || slug.includes('xdp-generator')) {
+    return <EbpfXdpGeneratorStudio />;
+  }
 
   if (slug.includes('hand-tracking') || slug.includes('gesture') || slug.includes('xr-hand')) {
     return <XrHandTrackingStudio />;
