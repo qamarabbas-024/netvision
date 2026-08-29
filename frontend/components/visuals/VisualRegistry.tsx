@@ -106,6 +106,7 @@ import { SpatialPacketPhysicsStudio } from '../simulation/SpatialPacketPhysicsSt
 import { XrHandTrackingStudio } from '../simulation/XrHandTrackingStudio';
 import { EbpfXdpGeneratorStudio } from '../simulation/EbpfXdpGeneratorStudio';
 import { EbpfTcRateLimitStudio } from '../simulation/EbpfTcRateLimitStudio';
+import { EbpfMaglevLbStudio } from '../simulation/EbpfMaglevLbStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -113,6 +114,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('maglev') || slug.includes('katran') || slug.includes('xdp-lb')) {
+    return <EbpfMaglevLbStudio />;
+  }
 
   if (slug.includes('ebpf-tc') || slug.includes('tc-rate-limit') || slug.includes('token-bucket')) {
     return <EbpfTcRateLimitStudio />;
