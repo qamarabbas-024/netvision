@@ -107,6 +107,7 @@ import { XrHandTrackingStudio } from '../simulation/XrHandTrackingStudio';
 import { EbpfXdpGeneratorStudio } from '../simulation/EbpfXdpGeneratorStudio';
 import { EbpfTcRateLimitStudio } from '../simulation/EbpfTcRateLimitStudio';
 import { EbpfMaglevLbStudio } from '../simulation/EbpfMaglevLbStudio';
+import { EbpfSockOpsStudio } from '../simulation/EbpfSockOpsStudio';
 
 export interface VisualRegistryProps {
   topicSlug: string;
@@ -114,6 +115,10 @@ export interface VisualRegistryProps {
 
 export const VisualRegistry: React.FC<VisualRegistryProps> = ({ topicSlug }) => {
   const slug = topicSlug.toLowerCase();
+
+  if (slug.includes('sockops') || slug.includes('sk_msg') || slug.includes('zero-copy')) {
+    return <EbpfSockOpsStudio />;
+  }
 
   if (slug.includes('maglev') || slug.includes('katran') || slug.includes('xdp-lb')) {
     return <EbpfMaglevLbStudio />;
