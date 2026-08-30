@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowRight, CheckCircle2, ExternalLink, ShieldCheck } from 'lucide-react';
 
 interface CertificationSectionProps {
-  onStartLearning: () => void;
+  onStartLearning?: () => void;
 }
 
-export const CertificationSection: React.FC<CertificationSectionProps> = ({ onStartLearning }) => {
+export const CertificationSection: React.FC<CertificationSectionProps> = () => {
   const [showVerifiedBadge, setShowVerifiedBadge] = useState(false);
 
   return (
@@ -78,18 +79,19 @@ export const CertificationSection: React.FC<CertificationSectionProps> = ({ onSt
             <div className="flex flex-wrap items-center gap-3.5 pt-2">
               <button
                 onClick={() => setShowVerifiedBadge(!showVerifiedBadge)}
-                className="px-5 py-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-xs flex items-center gap-2 shadow-[0_0_15px_rgba(2,132,199,0.3)] transition-all"
+                className="px-5 py-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-xs flex items-center gap-2 shadow-[0_0_15px_rgba(2,132,199,0.3)] transition-all cursor-pointer"
               >
                 <span>View Verified Credential</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
-              <button
-                onClick={onStartLearning}
-                className="px-5 py-3 rounded-xl bg-[#0f172a] hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-xs transition-all"
+              <Link
+                href="/certificates"
+                className="px-5 py-3 rounded-xl bg-[#0f172a] hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-2"
               >
-                Certification Exam Center
-              </button>
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Certification Exam Center</span>
+              </Link>
             </div>
 
             {showVerifiedBadge && (
@@ -158,10 +160,10 @@ export const CertificationSection: React.FC<CertificationSectionProps> = ({ onSt
 
               {/* Certificate Footer */}
               <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500">
-                <div className="flex items-center gap-1 text-slate-400">
+                <Link href="/certificates" className="flex items-center gap-1 text-slate-400 hover:text-[#38bdf8] transition-colors">
                   <ExternalLink className="w-3 h-3 text-[#38bdf8]" />
-                  <span>Searchable on LinkedIn</span>
-                </div>
+                  <span>Verify Credential Directory</span>
+                </Link>
                 <div className="text-emerald-400/80 font-semibold">
                   NV-NET Compliant
                 </div>

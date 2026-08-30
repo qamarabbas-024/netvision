@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { ArrowRight, ChevronRight, Layers, Globe, Shield, Terminal } from 'lucide-react';
 import { CURRICULUM_STEPS, CurriculumStep } from '@/data/curriculumData';
 import { CourseModal } from './CourseModal';
@@ -15,6 +16,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
   const featuredCourses = [
     {
       code: 'NET-101',
+      slug: 'net-101-digital-foundations',
       level: 'FOUNDATIONAL',
       levelColor: 'text-[#38bdf8] bg-[#0284c7]/15 border-[#0284c7]/30',
       icon: <Layers className="w-4 h-4 text-[#38bdf8]" />,
@@ -28,6 +30,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
     },
     {
       code: 'NET-201',
+      slug: 'net-201-layer2-ethernet',
       level: 'BEGINNER',
       levelColor: 'text-[#34d399] bg-[#10b981]/15 border-[#10b981]/30',
       icon: <Terminal className="w-4 h-4 text-[#34d399]" />,
@@ -41,6 +44,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
     },
     {
       code: 'NET-301',
+      slug: 'net-301-vlan-switching',
       level: 'BEGINNER',
       levelColor: 'text-[#34d399] bg-[#10b981]/15 border-[#10b981]/30',
       icon: <Globe className="w-4 h-4 text-[#34d399]" />,
@@ -54,6 +58,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
     },
     {
       code: 'NET-401',
+      slug: 'net-401-bgp-routing',
       level: 'ADVANCED',
       levelColor: 'text-[#f87171] bg-[#ef4444]/15 border-[#ef4444]/30',
       icon: <Shield className="w-4 h-4 text-[#f87171]" />,
@@ -85,13 +90,13 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
             </p>
           </div>
 
-          <button
-            onClick={() => setSelectedStep(CURRICULUM_STEPS[0])}
+          <Link
+            href="/courses"
             className="px-4 py-2.5 rounded-xl bg-[#0f172a] border border-[#10b981]/40 text-[#34d399] hover:bg-[#10b981]/15 text-xs font-mono font-bold transition-all flex items-center gap-2 self-start md:self-end shrink-0"
           >
-            <span>Explore Full Courses</span>
+            <span>Explore Full Courses Catalog</span>
             <ChevronRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
 
         {/* 4 Featured Course Cards */}

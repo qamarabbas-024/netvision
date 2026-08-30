@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { CurriculumStep } from '@/data/curriculumData';
-import { X, BookOpen, Clock, CheckCircle2, Play } from 'lucide-react';
+import { X, BookOpen, Clock, CheckCircle2, Play, ExternalLink } from 'lucide-react';
 
 interface CourseModalProps {
   step: CurriculumStep | null;
@@ -12,6 +13,29 @@ interface CourseModalProps {
 
 export const CourseModal: React.FC<CourseModalProps> = ({ step, onClose, onStartLab }) => {
   if (!step) return null;
+
+  const getCourseSlug = (code: string): string => {
+    switch (code) {
+      case 'NET-101':
+        return 'net-101-digital-foundations';
+      case 'NET-102':
+        return 'net-102-network-fundamentals';
+      case 'NET-103':
+        return 'net-103-reference-models';
+      case 'NET-201':
+        return 'net-201-layer2-ethernet';
+      case 'NET-202':
+        return 'net-202-ipv4-subnetting';
+      case 'NET-301':
+        return 'net-301-vlan-switching';
+      case 'NET-401':
+        return 'net-401-bgp-routing';
+      default:
+        return 'net-101-digital-foundations';
+    }
+  };
+
+  const courseSlug = getCourseSlug(step.code);
 
   return (
     <div
@@ -41,7 +65,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({ step, onClose, onStart
           <button
             onClick={onClose}
             aria-label="Close course details"
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -52,7 +76,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({ step, onClose, onStart
           <div className="flex items-center gap-4 text-xs font-mono text-slate-400">
             <div className="flex items-center gap-1.5 px-3 py-1 bg-[#0b1120] border border-slate-800 rounded-lg">
               <Clock className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Estimated Duration: {step.duration}</span>
+              <span>Duration: {step.duration}</span>
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1 bg-[#0b1120] border border-slate-800 rounded-lg">
               <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
@@ -75,25 +99,25 @@ export const CourseModal: React.FC<CourseModalProps> = ({ step, onClose, onStart
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 bg-[#0b1120] border-t border-[#1e293b] flex items-center justify-between">
-          <button
+        {/* Footer with dual action buttons */}
+        <div className="px-6 py-4 bg-[#0b1120] border-t border-[#1e293b] flex items-center justify-between gap-3">
+          <Link
+            href={`/courses/${courseSlug}`}
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-slate-200"
+            className="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800/80 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-700 flex items-center gap-1.5 transition-colors"
           >
-            Back to Curriculum
-          </button>
+            <span>Open Full Syllabus</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </Link>
 
-          <button
-            onClick={() => {
-              onStartLab();
-              onClose();
-            }}
+          <Link
+            href={`/courses/${courseSlug}`}
+            onClick={onClose}
             className="px-5 py-2.5 rounded-xl bg-[#10b981] hover:bg-[#059669] text-slate-950 font-bold text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all flex items-center gap-2"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
-            <span>Launch Simulation Lab</span>
-          </button>
+            <span>Start Learning Course</span>
+          </Link>
         </div>
       </div>
     </div>

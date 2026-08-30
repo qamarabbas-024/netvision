@@ -58,20 +58,39 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
   }
 }
 
+import { FALLBACK_COURSES, getFallbackTopicDetail, getFallbackLessonDetail } from './courseCatalogData';
+
 export async function getTopicsApi(level?: string, category?: string) {
-  const params = new URLSearchParams();
-  if (level) params.append('level', level);
-  if (category) params.append('category', category);
-  const queryStr = params.toString() ? `?${params.toString()}` : '';
-  return await fetchApi<any[]>(`/courses${queryStr}`);
+  try {
+    const params = new URLSearchParams();
+    if (level) params.append('level', level);
+    if (category) params.append('category', category);
+    const queryStr = params.toString() ? `?${params.toString()}` : '';
+    const res = await fetchApi<any[]>(`/courses${queryStr}`);
+    if (Array.isArray(res) && res.length > 0) return res;
+    return FALLBACK_COURSES;
+  } catch (err) {
+    console.warn('[NetVision API] Using local course catalog data fallback.');
+    return FALLBACK_COURSES;
+  }
 }
 
 export async function getTopicDetailApi(slug: string) {
-  return await fetchApi<any>(`/courses/${slug}`);
+  try {
+    return await fetchApi<any>(`/courses/${slug}`);
+  } catch (err) {
+    console.warn(`[NetVision API] Using local course detail fallback for: ${slug}`);
+    return getFallbackTopicDetail(slug);
+  }
 }
 
 export async function getLessonDetailApi(slug: string) {
-  return await fetchApi<any>(`/lessons/${slug}`);
+  try {
+    return await fetchApi<any>(`/lessons/${slug}`);
+  } catch (err) {
+    console.warn(`[NetVision API] Using local lesson detail fallback for: ${slug}`);
+    return getFallbackLessonDetail(slug);
+  }
 }
 
 export async function submitQuizApi(quizId: string, answers: Record<string, number>) {

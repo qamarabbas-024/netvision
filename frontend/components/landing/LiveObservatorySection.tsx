@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, Maximize2, ShieldAlert, CheckCircle2, Search, Activity, ArrowRight, RefreshCw } from 'lucide-react';
+import Link from 'next/link';
+import { Play, Pause, Maximize2, ShieldAlert, CheckCircle2, Search, Activity, ArrowRight, RefreshCw, Layers } from 'lucide-react';
 import { NetworkScenario } from '@/types/network';
 
 interface LiveObservatorySectionProps {
@@ -35,6 +36,17 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
     }
   };
 
+  const handleTabClick = (tab: 'routing' | 'resilient' | 'hands_on' | 'convergence') => {
+    setActiveTab(tab);
+    if (tab === 'routing') {
+      setIsSimulatingDegradation(true);
+      onScenarioChange('degraded');
+    } else if (tab === 'convergence') {
+      setIsSimulatingDegradation(false);
+      onScenarioChange('healthy');
+    }
+  };
+
   return (
     <section id="live-observatory-section" className="relative w-full bg-[#070a10] border-b border-[#1e293b]/70 py-16 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -48,55 +60,48 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
             Step Inside the Live Network
           </h2>
           <p className="text-sm sm:text-base text-slate-400 max-w-3xl leading-relaxed">
-            Experience the real topology network in network communication. Packets protect framing, routing conditions, the cable, and live-healing convergence in real time.
+            Experience real topology dynamics in live network communication. Packets, framing, routing loop detection, and self-healing convergence in real time.
           </p>
 
           {/* Filter Pills */}
           <div className="flex flex-wrap items-center gap-2 pt-3 font-mono text-xs">
             <button
-              onClick={() => setActiveTab('routing')}
-              className={`px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 ${
+              onClick={() => handleTabClick('routing')}
+              className={`px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'routing'
                   ? 'bg-[#10b981]/20 border-[#10b981] text-[#34d399] font-bold shadow-[0_0_12px_rgba(16,185,129,0.2)]'
                   : 'bg-[#0f172a] border-slate-800 text-slate-400 hover:text-slate-200'
               }`}
             >
-              <span className="text-[10px] text-emerald-500 font-bold">[RAND+ZWAR]</span>
+              <span className="text-[10px] text-emerald-500 font-bold">[SIM]</span>
               <span>Routing Loops</span>
             </button>
 
-            <button
-              onClick={() => setActiveTab('resilient')}
-              className={`px-3 py-1.5 rounded-lg border transition-all ${
-                activeTab === 'resilient'
-                  ? 'bg-[#06b6d4]/20 border-[#06b6d4] text-[#22d3ee] font-bold'
-                  : 'bg-[#0f172a] border-slate-800 text-slate-400 hover:text-slate-200'
-              }`}
+            <Link
+              href="/sandbox"
+              className="px-3 py-1.5 rounded-lg border bg-[#0f172a] border-slate-800 text-slate-400 hover:text-[#22d3ee] hover:border-[#06b6d4]/50 transition-all flex items-center gap-1.5"
             >
-              Resilient Labs
-            </button>
+              <Layers className="w-3.5 h-3.5" />
+              <span>Resilient Sandbox Labs →</span>
+            </Link>
+
+            <Link
+              href="/courses"
+              className="px-3 py-1.5 rounded-lg border bg-[#0f172a] border-slate-800 text-slate-400 hover:text-purple-300 hover:border-purple-500/50 transition-all flex items-center gap-1.5"
+            >
+              <span>Hands-On Courses →</span>
+            </Link>
 
             <button
-              onClick={() => setActiveTab('hands_on')}
-              className={`px-3 py-1.5 rounded-lg border transition-all ${
-                activeTab === 'hands_on'
-                  ? 'bg-purple-500/20 border-purple-500 text-purple-300 font-bold'
-                  : 'bg-[#0f172a] border-slate-800 text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              Hands-On Labs
-            </button>
-
-            <button
-              onClick={() => setActiveTab('convergence')}
-              className={`px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 ${
+              onClick={() => handleTabClick('convergence')}
+              className={`px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeTab === 'convergence'
                   ? 'bg-[#10b981]/20 border-[#10b981] text-[#34d399] font-bold'
                   : 'bg-[#0f172a] border-slate-800 text-slate-400 hover:text-slate-200'
               }`}
             >
               <Activity className="w-3.5 h-3.5" />
-              <span>Convergence</span>
+              <span>Fast Convergence</span>
             </button>
           </div>
         </div>
@@ -109,7 +114,7 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
             <div className="space-y-5">
               {/* Badge */}
               <div className="inline-block px-2.5 py-1 rounded-md bg-[#10b981]/15 border border-[#10b981]/30 text-[#34d399] text-[10px] font-mono font-bold tracking-wider uppercase">
-                [1555 MB // MASTERY PROGRESSION]
+                [LIVE LAB // MASTERY PROGRESSION]
               </div>
 
               {/* Headline */}
@@ -118,7 +123,7 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
               </h3>
 
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-normal">
-                Understand the root causality before taking action. Parse packet paths and network conditions before executing or verifying.
+                Understand root causality before taking action. Parse packet paths and network conditions in the terminal before executing configuration changes.
               </p>
 
               {/* 3 Step Progression List */}
@@ -145,7 +150,11 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
 
                 {/* Step 2 */}
                 <div
-                  onClick={() => setActiveStep(2)}
+                  onClick={() => {
+                    setActiveStep(2);
+                    setIsSimulatingDegradation(true);
+                    onScenarioChange('degraded');
+                  }}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 ${
                     activeStep === 2
                       ? 'bg-[#0f1a2e] border-cyan-500/50 shadow-md'
@@ -165,7 +174,11 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
 
                 {/* Step 3 */}
                 <div
-                  onClick={() => setActiveStep(3)}
+                  onClick={() => {
+                    setActiveStep(3);
+                    setIsSimulatingDegradation(false);
+                    onScenarioChange('healthy');
+                  }}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer flex items-start gap-3 ${
                     activeStep === 3
                       ? 'bg-[#0f1a2e] border-emerald-500/50 shadow-md'
@@ -188,11 +201,18 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
             <div className="pt-6 mt-4 border-t border-slate-800/80 flex items-center justify-between">
               <button
                 onClick={onOpenTerminal}
-                className="text-xs font-mono font-semibold text-[#34d399] hover:text-emerald-300 flex items-center gap-1.5 transition-colors"
+                className="text-xs font-mono font-semibold text-[#34d399] hover:text-emerald-300 flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <span>Launch Debug Terminal</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
+
+              <Link
+                href="/troubleshooting"
+                className="text-xs font-mono text-slate-400 hover:text-white flex items-center gap-1 transition-colors"
+              >
+                <span>All Scenarios →</span>
+              </Link>
             </div>
           </div>
 
@@ -206,24 +226,24 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
                 <span className="font-bold text-slate-200 text-[11px] tracking-wide">
                   INTERACTIVE NETWORK OBSERVATORY
                 </span>
-                <span className="text-slate-500 text-[10px] hidden sm:inline">Changes: Observed</span>
+                <span className="text-slate-500 text-[10px] hidden sm:inline">Changes: Live Observed</span>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsSimulationPaused(!isSimulationPaused)}
-                  className="px-2.5 py-1 rounded bg-[#111827] border border-slate-800 text-slate-300 hover:text-white text-[10px] flex items-center gap-1"
+                  className="px-2.5 py-1 rounded bg-[#111827] border border-slate-800 text-slate-300 hover:text-white text-[10px] flex items-center gap-1 cursor-pointer"
                 >
                   {isSimulationPaused ? <Play className="w-3 h-3 text-emerald-400" /> : <Pause className="w-3 h-3 text-amber-400" />}
                   <span>{isSimulationPaused ? 'Resume' : 'Pause'}</span>
                 </button>
-                <button
-                  onClick={onOpenTerminal}
-                  className="p-1 rounded bg-[#111827] border border-slate-800 text-slate-400 hover:text-white"
-                  title="Expand to Fullscreen Sandbox"
+                <Link
+                  href="/sandbox"
+                  className="p-1 rounded bg-[#111827] border border-slate-800 text-slate-400 hover:text-white flex items-center"
+                  title="Open Fullscreen Sandbox Lab"
                 >
                   <Maximize2 className="w-3.5 h-3.5" />
-                </button>
+                </Link>
               </div>
             </div>
 
@@ -369,7 +389,7 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
 
                 <button
                   onClick={handleToggleDegradation}
-                  className={`mt-2.5 w-full py-1.5 px-2.5 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1.5 ${
+                  className={`mt-2.5 w-full py-1.5 px-2.5 rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                     isSimulatingDegradation
                       ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
                       : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
