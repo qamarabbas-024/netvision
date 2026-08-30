@@ -3,13 +3,13 @@ import { NetworkDevice, NetworkLink, EducationalPacket, StoryStage } from '../ty
 export const NETWORK_DEVICES: NetworkDevice[] = [
   {
     id: 'workstation',
-    name: 'WORKSTATION',
+    name: 'Workstation Client',
     label: 'Host Client (Ubuntu / NetVision OS)',
     type: 'workstation',
     layer: 'Layer 7 Application / Layer 3 Host',
     ip: '192.168.1.10/24',
     mac: '70:85:C2:54:19:A1',
-    position: [-6.2, 0, 1.2],
+    position: [-3.8, -0.6, 2.2],
     description: 'User client workstation generating HTTP/3 web requests and DNS queries.',
     role: 'Originates application payloads and executes socket requests via TCP/UDP.',
     status: 'healthy',
@@ -30,13 +30,13 @@ export const NETWORK_DEVICES: NetworkDevice[] = [
   },
   {
     id: 'switch',
-    name: 'L2 SWITCH',
+    name: '24-port switch',
     label: 'Enterprise Access Switch (24-Port Gigabit)',
     type: 'switch',
     layer: 'Layer 2 Data Link',
     ip: '192.168.1.2/24 (Mgmt)',
     mac: '00:1B:67:8A:4F:01',
-    position: [-2.8, 0, -0.4],
+    position: [-2.8, 1.4, -2.0],
     description: 'Hardware wire-speed frame forwarding based on CAM MAC address table.',
     role: 'Receives Ethernet frames, checks FCS checksums, and forwards to target egress ports without modifying IP packets.',
     status: 'healthy',
@@ -56,13 +56,13 @@ export const NETWORK_DEVICES: NetworkDevice[] = [
   },
   {
     id: 'router',
-    name: 'ROUTER',
+    name: 'Core Central Router',
     label: 'Core Edge Router (Dual-Stack IPv4/IPv6)',
     type: 'router',
     layer: 'Layer 3 Network',
     ip: '192.168.1.1 & 10.0.0.1',
     mac: '00:0A:95:9D:68:16',
-    position: [0.8, 0.2, 0.4],
+    position: [0.0, 0.0, 0.0],
     description: 'Layer 3 forwarding engine evaluating longest-prefix match routing tables, decrementing TTL, and recalculating IP checksums.',
     role: 'Receives packets and chooses where to forward them based on FIB routing tables and dynamic routing protocols (BGP/OSPF).',
     status: 'healthy',
@@ -84,13 +84,13 @@ export const NETWORK_DEVICES: NetworkDevice[] = [
   },
   {
     id: 'gateway',
-    name: 'EDGE GATEWAY',
-    label: 'Next-Gen Firewall & State Engine',
+    name: 'Firewall gateway',
+    label: 'Next-Gen Firewall (Primary WAN)',
     type: 'gateway',
     layer: 'Layer 4-7 Security & NAT',
     ip: '10.0.0.2 & 172.16.0.1',
     mac: '52:54:00:12:34:56',
-    position: [4.4, 0, -0.6],
+    position: [2.6, 1.2, -1.8],
     description: 'Stateful packet inspection, NAT translation, TLS handshakes, and DDoS ingress filtering.',
     role: 'Validates TCP sequence numbers, inspects protocol headers, and ensures secure edge boundary defense.',
     status: 'healthy',
@@ -110,14 +110,40 @@ export const NETWORK_DEVICES: NetworkDevice[] = [
     }
   },
   {
+    id: 'gateway-south',
+    name: 'Firewall gateway',
+    label: 'Next-Gen Firewall (Redundant Path)',
+    type: 'gateway',
+    layer: 'Layer 4-7 Security & NAT',
+    ip: '10.0.0.6 & 172.16.0.2',
+    mac: '52:54:00:12:34:58',
+    position: [2.2, -0.9, 1.8],
+    description: 'Redundant firewall gateway with active failover and state synchronization.',
+    role: 'Provides high availability routing and state table replication.',
+    status: 'healthy',
+    interfaces: [
+      { name: 'eth0 (WAN Redundant)', ip: '10.0.0.6/30', mac: '52:54:00:12:34:58', status: 'up', speed: '10 Gbps' },
+      { name: 'eth1 (DMZ Redundant)', ip: '172.16.0.2/24', mac: '52:54:00:12:34:59', status: 'up', speed: '10 Gbps' }
+    ],
+    details: {
+      cpuUsage: '14%',
+      memoryUsage: '3.8 GB / 16 GB',
+      throughput: '420 Mbps',
+      firewallRules: [
+        { rule: 'ALLOW TCP:443 (HTTPS)', action: 'ALLOW', protocol: 'TCP' },
+        { rule: 'SYNC STATE TABLE', action: 'ALLOW', protocol: 'INTERNAL' }
+      ]
+    }
+  },
+  {
     id: 'server',
-    name: 'SERVER',
+    name: 'Server',
     label: 'Primary Application Server (HTTP/3 & Database)',
     type: 'server',
     layer: 'Layer 7 Application Server',
     ip: '142.250.72.14/24',
     mac: '90:B1:1C:77:88:99',
-    position: [8.0, 0.4, 0.6],
+    position: [4.8, 0.4, 0.0],
     description: 'High-performance edge server handling HTTP/3 QUIC requests and returning cryptographically signed responses.',
     role: 'Processes application requests, terminates TLS 1.3 encryption, and streams dynamic learning assets.',
     status: 'healthy',
@@ -172,9 +198,29 @@ export const NETWORK_LINKS: NetworkLink[] = [
     to: 'server',
     status: 'healthy',
     speed: '25 Gbps Multi-Mode Fiber',
-    latencyMs: 0.42,
-    utilizationPercent: 19,
-    medium: 'OM4 Fiber'
+    latencyMs: 0.08,
+    utilizationPercent: 55,
+    medium: 'Fiber Optic'
+  },
+  {
+    id: 'link-router-gateway-south',
+    from: 'router',
+    to: 'gateway-south',
+    status: 'healthy',
+    speed: '10 Gbps SFP+ Fiber',
+    latencyMs: 0.24,
+    utilizationPercent: 18,
+    medium: 'Fiber Optic'
+  },
+  {
+    id: 'link-gateway-south-server',
+    from: 'gateway-south',
+    to: 'server',
+    status: 'healthy',
+    speed: '25 Gbps Multi-Mode Fiber',
+    latencyMs: 0.09,
+    utilizationPercent: 20,
+    medium: 'Fiber Optic'
   }
 ];
 
