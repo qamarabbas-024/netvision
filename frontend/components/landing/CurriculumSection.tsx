@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, ChevronRight, Layers, Globe, Shield, Terminal } from 'lucide-react';
 import { CURRICULUM_STEPS, CurriculumStep } from '@/data/curriculumData';
 import { CourseModal } from './CourseModal';
@@ -17,34 +18,37 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
     {
       code: 'NET-101',
       slug: 'net-101-digital-foundations',
+      image: '/courses/net-101.png',
       level: 'FOUNDATIONAL',
       levelColor: 'text-[#38bdf8] bg-[#0284c7]/15 border-[#0284c7]/30',
       icon: <Layers className="w-4 h-4 text-[#38bdf8]" />,
       title: 'Digital & Physical Foundations',
-      summary: 'Understand the core concepts of digital communications, signal processing, and basic electronics.',
+      summary: 'Understand core digital communications, binary arithmetic, signal processing, and hardware interfaces.',
       bullets: [
-        'Network layers in OSI model',
-        'Cohesive packet flow & fiber physics',
+        'Binary & hexadecimal conversions in real time',
+        'Physical transmission media & fiber physics',
       ],
       stepNumber: '01',
     },
     {
       code: 'NET-201',
       slug: 'net-201-layer2-ethernet',
+      image: '/courses/net-201.png',
       level: 'BEGINNER',
       levelColor: 'text-[#34d399] bg-[#10b981]/15 border-[#10b981]/30',
       icon: <Terminal className="w-4 h-4 text-[#34d399]" />,
       title: 'Network Architecture & Frameworks',
       summary: 'Explore the design of scalable, resilient networks and the application of modern architectural principles.',
       bullets: [
-        'Understanding the layered frame design',
-        'Routing metrics & IPv4/IPv6 addressing',
+        'Ethernet II frame headers & FCS CRC32',
+        'CAM / MAC table address learning mechanics',
       ],
       stepNumber: '02',
     },
     {
       code: 'NET-301',
       slug: 'net-301-vlan-switching',
+      image: '/courses/net-301.png',
       level: 'BEGINNER',
       levelColor: 'text-[#34d399] bg-[#10b981]/15 border-[#10b981]/30',
       icon: <Globe className="w-4 h-4 text-[#34d399]" />,
@@ -59,13 +63,14 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
     {
       code: 'NET-401',
       slug: 'net-401-bgp-routing',
+      image: '/courses/net-401.png',
       level: 'ADVANCED',
       levelColor: 'text-[#f87171] bg-[#ef4444]/15 border-[#ef4444]/30',
       icon: <Shield className="w-4 h-4 text-[#f87171]" />,
       title: 'Autonomous & Cloud Networking',
       summary: 'Deep-dive into autonomous systems, BGP routing protocols, overlay networks, and zero-trust perimeter defense.',
       bullets: [
-        'Multi-hop BGP route tables',
+        'Multi-hop BGP route tables & AS-Path filters',
         'VXLAN programmable packet filtering',
       ],
       stepNumber: '04',
@@ -80,7 +85,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="text-xs font-bold font-mono text-[#38bdf8] uppercase tracking-wider">
-              SCATTER 07 // NEXT GEN ACTUAL STUDY
+              CANONICAL 07 // NEXT GEN ACTUAL STUDY
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               The Seven-Stage Mastery Pathway
@@ -99,7 +104,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
           </Link>
         </div>
 
-        {/* 4 Featured Course Cards */}
+        {/* 4 Featured Course Cards with Generated Custom Artwork */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {featuredCourses.map((course) => (
             <div
@@ -108,23 +113,33 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
                 const step = CURRICULUM_STEPS.find((s) => s.stepNumber === course.stepNumber) || CURRICULUM_STEPS[0];
                 setSelectedStep(step);
               }}
-              className="group relative bg-[#0f172a]/90 hover:bg-[#111c30] border border-slate-800 hover:border-slate-700 rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col justify-between shadow-lg"
+              className="group relative bg-[#0f172a]/90 hover:bg-[#111c30] border border-slate-800 hover:border-slate-700 rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 cursor-pointer flex flex-col justify-between shadow-lg overflow-hidden"
             >
               <div>
-                {/* Header Tag Row */}
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-800/80">
-                  <span className="text-xs font-mono font-bold text-slate-300">
-                    {course.code}
-                  </span>
-                  <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold flex items-center gap-1 ${course.levelColor}`}>
+                {/* Course Visual Banner */}
+                <div className="relative w-full h-32 mb-4 rounded-xl overflow-hidden border border-slate-800/80 bg-[#070a10]">
+                  <img
+                    src={course.image}
+                    alt={course.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-90 group-hover:opacity-100"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent" />
+                  
+                  {/* Floating Tag */}
+                  <span className={`absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold flex items-center gap-1 backdrop-blur-md ${course.levelColor}`}>
                     <span>•</span>
                     <span>{course.level}</span>
                   </span>
                 </div>
 
-                {/* Icon box */}
-                <div className="w-8 h-8 rounded-lg bg-[#090d16] border border-slate-800 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                  {course.icon}
+                {/* Header Tag Row */}
+                <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800/60">
+                  <span className="text-xs font-mono font-bold text-slate-300">
+                    {course.code}
+                  </span>
+                  <div className="w-6 h-6 rounded-md bg-[#090d16] border border-slate-800 flex items-center justify-center">
+                    {course.icon}
+                  </div>
                 </div>
 
                 {/* Title */}
@@ -133,7 +148,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
                 </h3>
 
                 {/* Summary */}
-                <p className="text-xs text-slate-400 leading-relaxed line-clamp-3 mb-4">
+                <p className="text-xs text-slate-400 leading-relaxed line-clamp-2 mb-4">
                   {course.summary}
                 </p>
 
@@ -155,7 +170,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
                   <ArrowRight className="w-3.5 h-3.5" />
                 </span>
                 <span className="text-[10px] text-slate-500">
-                  Hands On Labs Included
+                  Interactive Labs
                 </span>
               </div>
             </div>

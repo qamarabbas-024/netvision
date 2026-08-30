@@ -104,10 +104,10 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
 
           {/* Right Column: High-Fidelity Certificate Mockup */}
           <div className="lg:col-span-6">
-            <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[#0c1322] via-[#090d16] to-[#0b101c] border border-slate-700/80 shadow-2xl space-y-6 font-sans">
+            <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[#0c1322] via-[#090d16] to-[#0b101c] border border-slate-700/80 shadow-2xl space-y-6 font-sans overflow-hidden">
               
               {/* Top Header Row */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-800 relative z-10">
                 <div className="flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-lg bg-[#10b981]/15 border border-[#10b981]/40 flex items-center justify-center">
                     <svg className="w-4 h-4 text-[#34d399]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -126,21 +126,32 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
                 </div>
               </div>
 
-              {/* Certificate Title */}
-              <div className="space-y-2">
-                <div className="text-[10px] font-mono uppercase tracking-widest text-[#38bdf8]">
-                  OFFICIAL INDUSTRY CERTIFICATION
+              {/* Certificate Title with Hologram Seal */}
+              <div className="flex items-start justify-between gap-4 relative z-10">
+                <div className="space-y-2 max-w-sm">
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-[#38bdf8]">
+                    OFFICIAL INDUSTRY CERTIFICATION
+                  </div>
+                  <h3 className="text-2xl font-extrabold text-white tracking-tight">
+                    NV-NET Certified Associate
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Demonstrated deep understanding of core network topologies, switching, routing algorithms, and packet parsing under fault conditions.
+                  </p>
                 </div>
-                <h3 className="text-2xl font-extrabold text-white tracking-tight">
-                  NV-NET Certified Associate
-                </h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Demonstrated deep understanding of core network topologies, switching, routing algorithms, and packet parsing under fault conditions.
-                </p>
+
+                {/* Hologram Seal */}
+                <div className="hidden sm:block w-20 h-20 shrink-0 opacity-90 hover:opacity-100 transition-opacity">
+                  <img
+                    src="/certificate-seal.png"
+                    alt="Cryptographic Verification Seal"
+                    className="w-full h-full object-contain filter drop-shadow-[0_0_12px_rgba(16,185,129,0.4)]"
+                  />
+                </div>
               </div>
 
               {/* Learner Info Card */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-[#060910] border border-slate-800/80 font-mono text-[11px]">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-[#060910] border border-slate-800/80 font-mono text-[11px] relative z-10">
                 <div>
                   <div className="text-slate-500 text-[10px]">RECIPIENT</div>
                   <div className="text-slate-200 font-bold mt-0.5">Qualified Learner</div>
@@ -159,7 +170,7 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
               </div>
 
               {/* Certificate Footer */}
-              <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500">
+              <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500 relative z-10">
                 <Link href="/certificates" className="flex items-center gap-1 text-slate-400 hover:text-[#38bdf8] transition-colors">
                   <ExternalLink className="w-3 h-3 text-[#38bdf8]" />
                   <span>Verify Credential Directory</span>
