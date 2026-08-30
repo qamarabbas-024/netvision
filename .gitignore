@@ -36,8 +36,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Archives
+# Archives & Media
 *.zip
+*.mp4
+*.mov
+*.webm
+*.avi
 
 # Prisma
 backend/prisma/migrations/dev.db
