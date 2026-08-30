@@ -1,31 +1,128 @@
-import React from 'react';
-import { Navbar } from '@/components/ui/Navigation';
-import { HeroObservatorySection } from '@/components/landing/HeroObservatorySection';
-import { FeatureBarSection } from '@/components/landing/FeatureBarSection';
-import { StructuredPathwaySection } from '@/components/landing/StructuredPathwaySection';
-import { CredentialAndMetricsSection } from '@/components/landing/CredentialAndMetricsSection';
+'use client';
+
+import React, { useState } from 'react';
+import { Navigation } from '@/components/landing/Navigation';
+import { HeroSection } from '@/components/landing/HeroSection';
+import { FeatureHighlights } from '@/components/landing/FeatureHighlights';
+import { LiveObservatorySection } from '@/components/landing/LiveObservatorySection';
+import { CurriculumSection } from '@/components/landing/CurriculumSection';
+import { CertificationSection } from '@/components/landing/CertificationSection';
+import { FAQSection } from '@/components/landing/FaqSection';
 import { FooterSection } from '@/components/landing/FooterSection';
+import { DeviceDetailsModal } from '@/components/3d/DeviceDetailsModal';
+import { PacketInspectorModal } from '@/components/3d/PacketInspectorModal';
+import { InteractiveTerminalModal } from '@/components/landing/InteractiveTerminalModal';
+import { SignInModal } from '@/components/landing/SignInModal';
+import { NetworkDevice, NetworkScenario } from '@/types/network';
 
 export default function Home() {
+  const [currentStageId] = useState(1);
+  const [scenario, setScenario] = useState<NetworkScenario>('healthy');
+  const [selectedDevice, setSelectedDevice] = useState<NetworkDevice | null>(null);
+  const [inspectedPacketId, setInspectedPacketId] = useState<string | null>(null);
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [isSignInOpen, setIsSignInOpen] = useState(false);
+
+  // Smooth scroll handler to curriculum section
+  const handleExploreCurriculum = () => {
+    const el = document.getElementById('structured-curriculum-pathway');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Scroll handler to certifications section
+  const handleScrollToCertifications = () => {
+    const el = document.getElementById('certifications-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleInjectFaultFromCLI = (fault: string) => {
+    if (fault === 'packet_loss') setScenario('packet_loss');
+    else if (fault === 'degraded') setScenario('degraded');
+    else setScenario('healthy');
+  };
+
   return (
-    <div className="min-h-screen bg-[#070a10] text-[#f4f5f7] font-sans selection:bg-[#22c55e] selection:text-black">
-      {/* Primary Navigation Header */}
-      <Navbar />
+    <div className="min-h-screen bg-[#0b0f17] text-[#e2e8f0] font-sans antialiased overflow-x-hidden selection:bg-[#10b981]/30 selection:text-[#34d399]">
+      {/* Top Navigation */}
+      <Navigation
+        onOpenSignIn={() => setIsSignInOpen(true)}
+        onOpenTerminal={() => setIsTerminalOpen(true)}
+        onExploreCurriculum={handleExploreCurriculum}
+        onScrollToCertifications={handleScrollToCertifications}
+      />
 
-      {/* Hero Section: 3D Network Observatory + Editorial Controls */}
-      <HeroObservatorySection />
+      <main>
+        {/* Hero Section with 3D Network Observatory */}
+        <HeroSection
+          currentStageId={currentStageId}
+          scenario={scenario}
+          onScenarioChange={setScenario}
+          onExploreCurriculum={handleExploreCurriculum}
+          onEnterInteractiveNetwork={() => setIsTerminalOpen(true)}
+          onSelectDevice={setSelectedDevice}
+          onPacketClick={setInspectedPacketId}
+        />
 
-      {/* Feature Bar: 5 Interactive Capability Modules */}
-      <FeatureBarSection />
+        {/* 5-Item Feature Highlights Bar */}
+        <FeatureHighlights
+          onOpenTerminal={() => setIsTerminalOpen(true)}
+          onExploreCurriculum={handleExploreCurriculum}
+          onScrollToCertifications={handleScrollToCertifications}
+        />
 
-      {/* Structured Learning Pathway: 7-Stage Progression Flow */}
-      <StructuredPathwaySection />
+        {/* The Interactive Observatory ("Step Inside the Live Network") */}
+        <LiveObservatorySection
+          onOpenTerminal={() => setIsTerminalOpen(true)}
+          scenario={scenario}
+          onScenarioChange={setScenario}
+        />
 
-      {/* Lower Section: Verifiable Credentials, Platform Metrics & CTA */}
-      <CredentialAndMetricsSection />
+        {/* The Seven-Stage Mastery Pathway */}
+        <CurriculumSection
+          onStartLab={() => setIsTerminalOpen(true)}
+        />
 
-      {/* Global Footer */}
+        {/* Prove Your Competence With Cryptographic Verification */}
+        <CertificationSection
+          onStartLearning={handleExploreCurriculum}
+        />
+
+        {/* Frequently Asked Questions */}
+        <FAQSection />
+      </main>
+
+      {/* Footer */}
       <FooterSection />
+
+      {/* Interactive Modals */}
+      <DeviceDetailsModal
+        device={selectedDevice}
+        onClose={() => setSelectedDevice(null)}
+      />
+
+      <PacketInspectorModal
+        packetId={inspectedPacketId}
+        onClose={() => setInspectedPacketId(null)}
+      />
+
+      <InteractiveTerminalModal
+        isOpen={isTerminalOpen}
+        onClose={() => setIsTerminalOpen(false)}
+        onInjectFault={handleInjectFaultFromCLI}
+      />
+
+      <SignInModal
+        isOpen={isSignInOpen}
+        onClose={() => setIsSignInOpen(false)}
+        onContinueAsGuest={() => {
+          setIsSignInOpen(false);
+          handleExploreCurriculum();
+        }}
+      />
     </div>
   );
 }

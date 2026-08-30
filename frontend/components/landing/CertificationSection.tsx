@@ -1,0 +1,178 @@
+'use client';
+
+import React, { useState } from 'react';
+import { ArrowRight, CheckCircle2, ExternalLink } from 'lucide-react';
+
+interface CertificationSectionProps {
+  onStartLearning: () => void;
+}
+
+export const CertificationSection: React.FC<CertificationSectionProps> = ({ onStartLearning }) => {
+  const [showVerifiedBadge, setShowVerifiedBadge] = useState(false);
+
+  return (
+    <section id="certifications-section" className="relative w-full bg-[#070a10] border-b border-[#1e293b]/70 py-16 lg:py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        
+        {/* Header */}
+        <div className="space-y-2 max-w-3xl">
+          <div className="text-xs font-bold font-mono text-[#38bdf8] uppercase tracking-wider">
+            VERIFIED CERTIFICATE // INDUSTRY CREDENTIAL
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Prove Your Competence With Cryptographic Verification
+          </h2>
+          <p className="text-sm sm:text-base text-slate-400 leading-relaxed font-normal">
+            NetVision certificates come with cryptographic verification codes and verifiable configuration telemetry data.
+          </p>
+        </div>
+
+        {/* Main Grid: Left 2x2 Steps & Actions, Right Certificate Card */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          
+          {/* Left Column: 2x2 Steps & Buttons */}
+          <div className="lg:col-span-6 space-y-8">
+            
+            {/* 2x2 Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              {/* 01. Learn */}
+              <div className="p-4 rounded-xl bg-[#0b0f17] border border-slate-800 space-y-1.5">
+                <div className="text-xs font-mono font-bold text-[#34d399]">01. Learn</div>
+                <h4 className="text-sm font-bold text-slate-200">Interactive 3D Study</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Broaden intuition with interactive 3D simulations and active packet flows.
+                </p>
+              </div>
+
+              {/* 02. Practice */}
+              <div className="p-4 rounded-xl bg-[#0b0f17] border border-slate-800 space-y-1.5">
+                <div className="text-xs font-mono font-bold text-[#38bdf8]">02. Practice</div>
+                <h4 className="text-sm font-bold text-slate-200">Hands-on Scenarios</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Hands-on network scenarios and stress scenarios inside sandbox CLI.
+                </p>
+              </div>
+
+              {/* 03. Prove */}
+              <div className="p-4 rounded-xl bg-[#0b0f17] border border-slate-800 space-y-1.5">
+                <div className="text-xs font-mono font-bold text-purple-400">03. Prove</div>
+                <h4 className="text-sm font-bold text-slate-200">Real-Time Exam</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Pass real-time stress testing without accidental network failure.
+                </p>
+              </div>
+
+              {/* 04. Earn */}
+              <div className="p-4 rounded-xl bg-[#0b0f17] border border-slate-800 space-y-1.5">
+                <div className="text-xs font-mono font-bold text-amber-400">04. Earn</div>
+                <h4 className="text-sm font-bold text-slate-200">Verified Certificate</h4>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Obtain cryptographically verified digital certificate for employers.
+                </p>
+              </div>
+
+            </div>
+
+            {/* Buttons */}
+            <div className="flex flex-wrap items-center gap-3.5 pt-2">
+              <button
+                onClick={() => setShowVerifiedBadge(!showVerifiedBadge)}
+                className="px-5 py-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-xs flex items-center gap-2 shadow-[0_0_15px_rgba(2,132,199,0.3)] transition-all"
+              >
+                <span>View Verified Credential</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={onStartLearning}
+                className="px-5 py-3 rounded-xl bg-[#0f172a] hover:bg-slate-800 border border-slate-700 text-slate-200 font-semibold text-xs transition-all"
+              >
+                Certification Exam Center
+              </button>
+            </div>
+
+            {showVerifiedBadge && (
+              <div className="p-3 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-xs font-mono text-emerald-300 flex items-center gap-2 animate-fadeIn">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Certificate Hash verified against NetVision Public Key: 0x48b...ef02</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: High-Fidelity Certificate Mockup */}
+          <div className="lg:col-span-6">
+            <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[#0c1322] via-[#090d16] to-[#0b101c] border border-slate-700/80 shadow-2xl space-y-6 font-sans">
+              
+              {/* Top Header Row */}
+              <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-[#10b981]/15 border border-[#10b981]/40 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#34d399]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M6 18V6l12 12V6" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-white tracking-tight">NetVision Assembly</div>
+                    <div className="text-[10px] font-mono text-slate-400">Verified Certificate (NV-NET)</div>
+                  </div>
+                </div>
+
+                <div className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] font-bold flex items-center gap-1">
+                  <span>+</span>
+                  <span>VERIFIED</span>
+                </div>
+              </div>
+
+              {/* Certificate Title */}
+              <div className="space-y-2">
+                <div className="text-[10px] font-mono uppercase tracking-widest text-[#38bdf8]">
+                  OFFICIAL INDUSTRY CERTIFICATION
+                </div>
+                <h3 className="text-2xl font-extrabold text-white tracking-tight">
+                  NV-NET Certified Associate
+                </h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Demonstrated deep understanding of core network topologies, switching, routing algorithms, and packet parsing under fault conditions.
+                </p>
+              </div>
+
+              {/* Learner Info Card */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-[#060910] border border-slate-800/80 font-mono text-[11px]">
+                <div>
+                  <div className="text-slate-500 text-[10px]">RECIPIENT</div>
+                  <div className="text-slate-200 font-bold mt-0.5">Qualified Learner</div>
+                </div>
+                <div>
+                  <div className="text-slate-500 text-[10px]">CERTIFICATE ID</div>
+                  <div className="text-[#38bdf8] font-bold mt-0.5">0x8F9C...42A1</div>
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <div className="text-slate-500 text-[10px]">STATUS</div>
+                  <div className="text-[#34d399] font-bold mt-0.5 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
+                    <span>Authenticated</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Certificate Footer */}
+              <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500">
+                <div className="flex items-center gap-1 text-slate-400">
+                  <ExternalLink className="w-3 h-3 text-[#38bdf8]" />
+                  <span>Searchable on LinkedIn</span>
+                </div>
+                <div className="text-emerald-400/80 font-semibold">
+                  NV-NET Compliant
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  );
+};

@@ -1,71 +1,77 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
-export const FaqSection: React.FC = () => {
+export const FAQSection: React.FC = () => {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
   const faqs = [
     {
-      q: 'Do I need an account to start learning?',
-      a: 'No. NetVision provides 100% open guest access. You can jump directly into foundational lessons, launch visualizers, and execute labs immediately without any signup friction. Progress is automatically synced locally until you decide to create an account.',
+      question: 'Do I need an account to start learning?',
+      answer:
+        'No. You can jump directly into guest sandbox mode and interact with live 3D topologies, packet visualizers, and interactive CLI labs immediately without entering credentials or billing information.',
     },
     {
-      q: 'Do I need prior computer networking experience?',
-      a: 'Not at all. NetVision begins at Tier 0 (bits, bytes, physical cables, and digital representation) and progressively builds up to advanced OSPF routing, VLAN segmentation, and firewall security policies.',
+      question: 'Do I need prior computer networking experience?',
+      answer:
+        'No prior experience is required. The curriculum begins at NET-101 (Digital & Physical Foundations), breaking down binary signals, frame encoding, and OSI layers with interactive 3D physics.',
     },
     {
-      q: 'How does NetVision compare to Cisco Packet Tracer?',
-      a: 'NetVision is 100% web-native, requires zero desktop installation, and is built around pedagogical packet inspection: you can step through protocol framing, observe live ARP and DNS handshakes, and run deterministic CLI diagnostics in real time.',
+      question: 'How does NetVision compare to Cisco Packet Tracer?',
+      answer:
+        'NetVision runs entirely client-side in standard web browsers with interactive 3D spatial visualization, real-time packet inspection, live loop convergence, and cryptographic competency certification.',
     },
     {
-      q: 'Are certificates cryptographically verifiable?',
-      a: 'Yes. Upon completing course pathways and passing the final assessments, you receive a digital certificate containing a unique server-authoritative hash code that can be verified publicly by employers or academic institutions.',
+      question: 'Are certificates cryptographically verifiable?',
+      answer:
+        'Yes. Every awarded certificate includes a tamper-proof cryptographic SHA-256 verification hash and public key signature that employers can authenticate directly on LinkedIn or our verification ledger.',
     },
   ];
 
-  const [openIdx, setOpenIdx] = useState<number | null>(0);
-
   return (
-    <section className="py-16 sm:py-20 bg-net-grid-pattern relative surface-0 font-sans border-b border-[#2a2e39]">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="text-center mb-12">
-          <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold mb-2 block">
-            QUESTIONS & ARCHITECTURE
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight mb-3">
+    <section id="faq-section" className="relative w-full bg-[#0b0f17] border-b border-[#1e293b]/70 py-16 lg:py-24">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        
+        {/* Header */}
+        <div className="space-y-2">
+          <div className="text-xs font-bold font-mono text-[#38bdf8] uppercase tracking-wider">
+            FREQUENTLY ASKED QUESTIONS
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
             Frequently Asked Questions
           </h2>
         </div>
 
-        <div className="flex flex-col gap-3.5">
-          {faqs.map((faq, idx) => {
-            const isOpen = openIdx === idx;
+        {/* Accordions */}
+        <div className="space-y-3 pt-2">
+          {faqs.map((faq, index) => {
+            const isOpen = openIndex === index;
             return (
               <div
-                key={idx}
-                className="surface-2 rounded-xl border border-[#2a2e39] overflow-hidden transition-all shadow-instrument"
+                key={index}
+                className="rounded-2xl bg-[#0f172a]/80 border border-slate-800 overflow-hidden transition-all duration-200"
               >
                 <button
-                  onClick={() => setOpenIdx(isOpen ? null : idx)}
-                  aria-expanded={isOpen}
-                  className="w-full p-5 text-left flex items-center justify-between font-bold text-[#f4f5f7] text-sm sm:text-base hover:text-[#38bdf8] transition-colors cursor-pointer"
+                  onClick={() => setOpenIndex(isOpen ? null : index)}
+                  className="w-full px-6 py-4 flex items-center justify-between text-left font-sans font-semibold text-sm sm:text-base text-slate-200 hover:text-white transition-colors"
                 >
-                  <span>{faq.q}</span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-[#8e95a5] transition-transform duration-200 shrink-0 ml-3 ${
-                      isOpen ? 'rotate-180 text-[#38bdf8]' : ''
-                    }`}
-                  />
+                  <span>{faq.question}</span>
+                  <span className="p-1 rounded-lg bg-[#0b101c] text-slate-400">
+                    {isOpen ? <ChevronUp className="w-4 h-4 text-[#38bdf8]" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                  </span>
                 </button>
-                {isOpen ? (
-                  <div className="px-5 pb-5 text-xs sm:text-sm text-[#8e95a5] leading-relaxed border-t border-[#2a2e39] pt-4">
-                    {faq.a}
+
+                {isOpen && (
+                  <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-slate-400 leading-relaxed font-sans border-t border-slate-800/60 animate-fadeIn">
+                    {faq.answer}
                   </div>
-                ) : null}
+                )}
               </div>
             );
           })}
         </div>
+
       </div>
     </section>
   );
