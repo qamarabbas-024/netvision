@@ -38,6 +38,8 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { NetworkNode, NetworkLink, NetworkPacket, NodeType } from '@/types';
+import { TopologyTemplate } from '@/data/topologyTemplates';
+import { audioEngine } from '@/lib/audioEngine';
 import { DeviceConfigModal } from '../simulation/DeviceConfigModal';
 import { PacketInspectorModal } from '../simulation/PacketInspectorModal';
 import { Interactive3DPacketJourney } from '../simulation/Interactive3DPacketJourney';
@@ -120,7 +122,12 @@ const BUILT_IN_CHALLENGES: ChallengeSpec[] = [
   },
 ];
 
-export const SandboxCanvas: React.FC = () => {
+export interface SandboxCanvasProps {
+  externalTemplate?: TopologyTemplate | null;
+  onTemplateLoaded?: () => void;
+}
+
+export const SandboxCanvas: React.FC<SandboxCanvasProps> = ({ externalTemplate, onTemplateLoaded }) => {
   const [nodes, setNodes] = useState<NetworkNode[]>([
     {
       id: 'sb-1',
@@ -211,6 +218,53 @@ export const SandboxCanvas: React.FC = () => {
   const [challengeResult, setChallengeResult] = useState<{ passed: boolean; feedback: string } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Template loader effect
+  React.useEffect(() => {
+    if (!externalTemplate) return;
+
+    const typeMap: Record<string, NodeType> = {
+      WORKSTATION: 'pc',
+      SWITCH: 'switch',
+      ROUTER: 'router',
+      FIREWALL: 'firewall',
+      SERVER: 'server',
+    };
+
+    const newNodes: NetworkNode[] = externalTemplate.devices.map((d, index) => ({
+      id: `sb-tpl-${index + 1}`,
+      name: d.name,
+      type: typeMap[d.type] || 'pc',
+      ipAddress: d.ip,
+      macAddress: `00:1A:2B:${(index + 10).toString(16).padStart(2, '0').toUpperCase()}:${(index + 10).toString(16).padStart(2, '0').toUpperCase()}:${(index + 10).toString(16).padStart(2, '0').toUpperCase()}`,
+      subnetMask: d.subnet || '255.255.255.0',
+      defaultGateway: externalTemplate.devices.find((dev) => dev.type === 'ROUTER')?.ip || '192.168.1.1',
+      status: 'online',
+      position: {
+        x: 100 + index * 190,
+        y: 220 + (index % 2 === 1 ? 40 : -30),
+      },
+    }));
+
+    const newLinks: NetworkLink[] = [];
+    for (let i = 0; i < newNodes.length - 1; i++) {
+      newLinks.push({
+        id: `sbl-tpl-${i + 1}`,
+        sourceNodeId: newNodes[i].id,
+        targetNodeId: newNodes[i + 1].id,
+        sourcePort: `eth0/${i + 1}`,
+        targetPort: `eth0/${i + 1}`,
+        bandwidthMbps: 1000,
+        latencyMs: 2,
+        status: 'connected',
+      });
+    }
+
+    setNodes(newNodes);
+    setLinks(newLinks);
+    audioEngine.playSuccessChime();
+    onTemplateLoaded?.();
+  }, [externalTemplate, onTemplateLoaded]);
 
   // Find Path Between Source & Destination (BFS on links graph)
   const findPath = (srcId: string, dstId: string): string[] => {
