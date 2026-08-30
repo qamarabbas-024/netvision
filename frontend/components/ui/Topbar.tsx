@@ -9,6 +9,7 @@ import { searchApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { MobileSidebarDrawer } from './Sidebar';
 import { HyperThemeStudio } from './HyperThemeStudio';
+import { SoundToggle } from './SoundToggle';
 
 export const AppTopbar: React.FC = () => {
   const router = useRouter();
@@ -215,6 +216,8 @@ export const AppTopbar: React.FC = () => {
               <Layers className="w-4 h-4" />
             </div>
           </Link>
+
+          <SoundToggle />
 
           <button
             type="button"
