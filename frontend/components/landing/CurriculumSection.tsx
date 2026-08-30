@@ -85,13 +85,13 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="text-xs font-bold font-mono text-[#38bdf8] uppercase tracking-wider">
-              CANONICAL 07 // NEXT GEN ACTUAL STUDY
+              CANONICAL CURRICULUM // 7-STAGE MASTERY TRACK
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
               The Seven-Stage Mastery Pathway
             </h2>
-            <p className="text-sm sm:text-base text-slate-400 leading-relaxed font-normal">
-              The seven-step track teaches complex networking topologies and scenarios that build solid intuition from protocol needs all the way to enterprise-grade cloud architecture.
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+              A comprehensive progressive track from physical bitstream fundamentals to multi-AS BGP cloud architecture and zero-trust security.
             </p>
           </div>
 
