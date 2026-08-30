@@ -10,9 +10,11 @@ import { UniversalChatHistoryImporter } from '@/components/learning/UniversalCha
 import { PdfReportStudio } from '@/components/ui/PdfReportStudio';
 import { NetworkBufferPhysicsVisualizer } from '@/components/simulation/NetworkBufferPhysicsVisualizer';
 import { AiDiagnosticCopilot } from '@/components/learning/AiDiagnosticCopilot';
+import { TopologyTemplatesModal } from '@/components/sandbox/TopologyTemplatesModal';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Image as ImageIcon, Bot, Printer, Zap, Network, Sparkles } from 'lucide-react';
+import { Image as ImageIcon, Bot, Printer, Zap, Network, Sparkles, LayoutGrid } from 'lucide-react';
+import { TopologyTemplate } from '@/data/topologyTemplates';
 
 export default function SandboxPage() {
   const [viewTab, setViewTab] = React.useState<'sandbox' | 'physics'>('sandbox');
@@ -20,6 +22,8 @@ export default function SandboxPage() {
   const [showChatImporter, setShowChatImporter] = React.useState<boolean>(false);
   const [showPdfStudio, setShowPdfStudio] = React.useState<boolean>(false);
   const [showCopilot, setShowCopilot] = React.useState<boolean>(false);
+  const [showTemplates, setShowTemplates] = React.useState<boolean>(false);
+  const [loadedTemplate, setLoadedTemplate] = React.useState<TopologyTemplate | null>(null);
 
   return (
     <ProtectedRoute>
@@ -46,6 +50,16 @@ export default function SandboxPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowTemplates(true)}
+                    leftIcon={<LayoutGrid className="w-3.5 h-3.5 text-cyan-400" />}
+                    className="text-xs font-bold bg-cyan-500/10 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20"
+                  >
+                    Topology Templates (3)
+                  </Button>
+
                   <Button
                     variant="secondary"
                     size="sm"
@@ -89,6 +103,15 @@ export default function SandboxPage() {
               </div>
 
               {/* Modals */}
+              <TopologyTemplatesModal
+                isOpen={showTemplates}
+                onClose={() => setShowTemplates(false)}
+                onSelectTemplate={(tpl) => {
+                  setLoadedTemplate(tpl);
+                  setViewTab('sandbox');
+                }}
+              />
+
               {showCopilot && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
                   <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -145,7 +168,14 @@ export default function SandboxPage() {
               </div>
 
               {/* Main Content View */}
-              {viewTab === 'sandbox' ? <SandboxCanvas /> : <NetworkBufferPhysicsVisualizer />}
+              {viewTab === 'sandbox' ? (
+                <SandboxCanvas
+                  externalTemplate={loadedTemplate}
+                  onTemplateLoaded={() => setLoadedTemplate(null)}
+                />
+              ) : (
+                <NetworkBufferPhysicsVisualizer />
+              )}
             </div>
           </main>
         </div>
