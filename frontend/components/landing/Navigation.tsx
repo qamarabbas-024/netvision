@@ -2,194 +2,209 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, LayoutGrid } from 'lucide-react';
+import {
+  Activity,
+  Menu,
+  X,
+  ChevronDown,
+  Terminal,
+  ExternalLink
+} from 'lucide-react';
+import { SoundToggle } from '@/components/ui/SoundToggle';
 
 interface NavigationProps {
   onOpenSignIn: () => void;
   onOpenTerminal: () => void;
-  onExploreCurriculum?: () => void;
-  onScrollToCertifications?: () => void;
+  onExploreCurriculum: () => void;
+  onScrollToCertifications: () => void;
 }
 
 export const Navigation: React.FC<NavigationProps> = ({
   onOpenSignIn,
   onOpenTerminal,
 }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCoursesDropdownOpen, setIsCoursesDropdownOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#0b0f17]/95 backdrop-blur-md border-b border-[#1e293b]/70 transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        
-        {/* Brand Logo */}
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            {/* Stylized N glyph network icon */}
-            <div className="relative w-7 h-7 rounded-lg bg-[#10b981]/15 border border-[#10b981]/40 flex items-center justify-center transition-transform group-hover:scale-105 shadow-[0_0_12px_rgba(16,185,129,0.2)]">
-              <svg className="w-4 h-4 text-[#34d399]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <header className="sticky top-0 z-50 w-full bg-[#0b0f17]/95 backdrop-blur-md border-b border-[#1e293b]/70">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-20">
+          
+          {/* Left: Brand Logo */}
+          <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
+            <div className="w-8 h-8 rounded-lg bg-[#10b981]/15 border border-[#10b981]/40 flex items-center justify-center group-hover:scale-105 group-hover:shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all">
+              <svg className="w-5 h-5 text-[#34d399]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M6 18V6l12 12V6" />
-                <circle cx="6" cy="6" r="1.5" fill="#06b6d4" />
-                <circle cx="6" cy="18" r="1.5" fill="#06b6d4" />
-                <circle cx="18" cy="6" r="1.5" fill="#06b6d4" />
-                <circle cx="18" cy="18" r="1.5" fill="#06b6d4" />
               </svg>
             </div>
-            <span className="text-base font-bold tracking-tight text-white font-sans">
+            <span className="font-extrabold text-xl tracking-tight text-white group-hover:text-[#34d399] transition-colors">
               Net<span className="text-[#34d399]">Vision</span>
             </span>
           </Link>
-        </div>
 
-        {/* Desktop Primary Nav Links */}
-        <nav className="hidden md:flex items-center space-x-1 lg:space-x-4 text-xs lg:text-sm font-medium text-slate-300">
-          <Link
-            href="/courses"
-            className="px-2.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/60 transition-colors"
-          >
-            Courses
-          </Link>
-          <Link
-            href="/simulations"
-            className="px-2.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/60 transition-colors"
-          >
-            Simulations
-          </Link>
-          <Link
-            href="/sandbox"
-            className="px-2.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/60 transition-colors"
-          >
-            Sandbox Lab
-          </Link>
-          <Link
-            href="/troubleshooting"
-            className="px-2.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/60 transition-colors"
-          >
-            Troubleshooting
-          </Link>
-          <Link
-            href="/certificates"
-            className="px-2.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/60 transition-colors"
-          >
-            Certifications
-          </Link>
-          <Link
-            href="/docs"
-            className="px-2.5 py-1.5 rounded-lg hover:text-white hover:bg-slate-800/60 transition-colors"
-          >
-            Docs
-          </Link>
-        </nav>
+          {/* Center: Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8 font-sans text-sm font-medium text-slate-300">
+            {/* Courses Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={() => setIsCoursesDropdownOpen(true)}
+              onMouseLeave={() => setIsCoursesDropdownOpen(false)}
+            >
+              <Link
+                href="/courses"
+                className="flex items-center gap-1 hover:text-[#34d399] transition-colors py-2"
+              >
+                <span>Courses</span>
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </Link>
 
-        {/* Right Nav Utilities */}
-        <div className="hidden md:flex items-center space-x-3">
-          {/* Matrix button (Terminal Launcher) */}
-          <button
-            onClick={onOpenTerminal}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-medium text-slate-300 bg-[#0f172a] border border-slate-800 hover:border-slate-700 rounded-lg transition-colors shadow-sm cursor-pointer"
-            title="Launch Interactive NetVision OS Terminal"
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
-            <span>Matrix</span>
-            <LayoutGrid className="w-3.5 h-3.5 text-slate-400" />
-          </button>
+              {isCoursesDropdownOpen && (
+                <div className="absolute top-full left-0 w-64 p-2 bg-[#0b1320] border border-slate-800 rounded-xl shadow-2xl animate-fadeIn z-50">
+                  <Link
+                    href="/courses"
+                    className="block p-2 rounded-lg hover:bg-slate-800/80 text-xs font-semibold text-white"
+                  >
+                    <div className="text-emerald-400 font-mono">Catalog Overview</div>
+                    <div className="text-slate-400 text-[11px] mt-0.5">Explore all 7 canonical networking courses</div>
+                  </Link>
+                  <Link
+                    href="/courses/net-101-digital-foundations"
+                    className="block p-2 rounded-lg hover:bg-slate-800/80 text-xs font-semibold text-white"
+                  >
+                    <div className="text-cyan-400 font-mono">NET-101 Foundations</div>
+                    <div className="text-slate-400 text-[11px] mt-0.5">Digital &amp; Physical Network Foundations</div>
+                  </Link>
+                  <Link
+                    href="/courses/net-201-layer2-ethernet"
+                    className="block p-2 rounded-lg hover:bg-slate-800/80 text-xs font-semibold text-white"
+                  >
+                    <div className="text-purple-400 font-mono">NET-201 Switching</div>
+                    <div className="text-slate-400 text-[11px] mt-0.5">Layer 2 Ethernet &amp; Architecture</div>
+                  </Link>
+                </div>
+              )}
+            </div>
 
-          {/* Sign In */}
-          <button
-            id="nav-signin-btn"
-            onClick={onOpenSignIn}
-            className="px-3 py-1.5 text-xs font-semibold text-slate-200 hover:text-white transition-colors cursor-pointer"
-          >
-            Sign In
-          </button>
+            <Link href="/simulations" className="hover:text-[#34d399] transition-colors">
+              Simulations
+            </Link>
 
-          {/* Start Learning (Direct access to full course catalog) */}
-          <Link
-            id="nav-start-learning-btn"
-            href="/courses"
-            className="px-4 py-2 text-xs font-bold rounded-lg bg-[#10b981] hover:bg-[#059669] text-slate-950 shadow-[0_0_15px_rgba(16,185,129,0.25)] transition-all transform hover:scale-[1.02] active:scale-[0.98] inline-flex items-center justify-center"
-          >
-            Start Learning
-          </Link>
-        </div>
+            <Link href="/sandbox" className="hover:text-[#34d399] transition-colors">
+              Sandbox Lab
+            </Link>
 
-        {/* Mobile Menu Trigger */}
-        <div className="md:hidden flex items-center gap-2">
-          <button
-            onClick={onOpenTerminal}
-            className="p-1.5 text-slate-300 bg-[#0f172a] border border-slate-800 rounded-lg text-xs"
-            aria-label="Open Terminal"
-          >
-            <LayoutGrid className="w-4 h-4 text-emerald-400" />
-          </button>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-slate-400 hover:text-white rounded-lg"
-            aria-label="Toggle navigation menu"
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+            <Link href="/troubleshooting" className="hover:text-[#34d399] transition-colors">
+              Troubleshooting
+            </Link>
+
+            <Link href="/certificates" className="hover:text-[#34d399] transition-colors">
+              Certifications
+            </Link>
+
+            <Link href="/docs" className="hover:text-[#34d399] transition-colors">
+              Docs
+            </Link>
+          </nav>
+
+          {/* Right: Sound Toggle + Matrix Pulse Badge + Start Learning CTA */}
+          <div className="hidden sm:flex items-center gap-3">
+            {/* SFX Sound Toggle */}
+            <SoundToggle />
+
+            {/* Matrix Pulse Badge */}
+            <button
+              onClick={onOpenTerminal}
+              className="px-3 py-1.5 rounded-full bg-[#06151b] hover:bg-[#09222b] border border-[#10b981]/50 hover:border-[#10b981] text-[#34d399] text-xs font-mono font-semibold flex items-center gap-2 shadow-[0_0_12px_rgba(16,185,129,0.2)] transition-all cursor-pointer"
+              title="Launch interactive NetVision OS terminal"
+            >
+              <Activity className="w-3.5 h-3.5 text-[#34d399] animate-pulse" />
+              <span>Matrix pulse</span>
+            </button>
+
+            {/* Start Learning Emerald CTA */}
+            <Link
+              href="/courses"
+              className="px-5 py-2.5 rounded-xl bg-[#10b981] hover:bg-[#059669] text-[#051a14] hover:text-white font-bold text-xs shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            >
+              Start Learning
+            </Link>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="flex md:hidden items-center gap-2">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-white"
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
         </div>
       </div>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-b border-[#1e293b] bg-[#0b0f17] px-4 pt-2 pb-6 space-y-3 font-sans">
+      {/* Mobile Menu Dropdown */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-slate-800 bg-[#0b0f17] px-4 pt-4 pb-6 space-y-3 font-sans">
           <Link
             href="/courses"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block w-full text-left py-2 text-sm text-slate-200 font-medium"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block py-2 text-slate-200 hover:text-[#34d399] text-sm font-semibold"
           >
-            Courses
+            Courses Catalog
           </Link>
           <Link
             href="/simulations"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block w-full text-left py-2 text-sm text-slate-200 font-medium"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block py-2 text-slate-200 hover:text-[#34d399] text-sm font-semibold"
           >
             Simulations
           </Link>
           <Link
             href="/sandbox"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block w-full text-left py-2 text-sm text-slate-200 font-medium"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block py-2 text-slate-200 hover:text-[#34d399] text-sm font-semibold"
           >
             Sandbox Lab
           </Link>
           <Link
             href="/troubleshooting"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block w-full text-left py-2 text-sm text-slate-200 font-medium"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block py-2 text-slate-200 hover:text-[#34d399] text-sm font-semibold"
           >
             Troubleshooting
           </Link>
           <Link
             href="/certificates"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block w-full text-left py-2 text-sm text-slate-200 font-medium"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block py-2 text-slate-200 hover:text-[#34d399] text-sm font-semibold"
           >
             Certifications
           </Link>
           <Link
             href="/docs"
-            onClick={() => setMobileMenuOpen(false)}
-            className="block w-full text-left py-2 text-sm text-slate-200 font-medium"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block py-2 text-slate-200 hover:text-[#34d399] text-sm font-semibold"
           >
-            Docs
+            Documentation
           </Link>
-          <div className="pt-4 border-t border-slate-800 flex flex-col gap-2">
+
+          <div className="pt-3 border-t border-slate-800 flex flex-col gap-2">
             <button
               onClick={() => {
-                onOpenSignIn();
-                setMobileMenuOpen(false);
+                setIsMobileMenuOpen(false);
+                onOpenTerminal();
               }}
-              className="w-full py-2.5 text-center text-sm font-semibold rounded-lg bg-slate-800 text-white cursor-pointer"
+              className="w-full py-2.5 rounded-xl bg-[#06151b] border border-[#10b981]/50 text-[#34d399] font-mono text-xs font-bold flex items-center justify-center gap-2"
             >
-              Sign In
+              <Terminal className="w-4 h-4" />
+              <span>Launch Matrix Terminal</span>
             </button>
             <Link
               href="/courses"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full py-2.5 text-center text-sm font-bold rounded-lg bg-[#10b981] text-slate-950 block"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="w-full py-2.5 rounded-xl bg-[#10b981] text-[#051a14] font-bold text-xs text-center"
             >
               Start Learning
             </Link>
