@@ -18,7 +18,7 @@ const jetbrainsMono = JetBrains_Mono({
 const SITE_URL = 'https://netvision-three.vercel.app';
 
 export const viewport: Viewport = {
-  themeColor: '#09090b',
+  themeColor: '#0b0f17',
   colorScheme: 'dark',
   width: 'device-width',
   initialScale: 1,
@@ -136,7 +136,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
         />
       </head>
-      <body className="bg-[#09090b] text-[#f4f4f5] antialiased selection:bg-cyan-500 selection:text-black">
+      <body className="bg-[#0b0f17] text-[#e2e8f0] antialiased selection:bg-[#10b981]/30 selection:text-[#34d399]">
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
