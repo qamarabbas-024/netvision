@@ -588,10 +588,10 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
     scene.background = new THREE.Color(0x0b0f17); // Dark graphite
     scene.fog = new THREE.FogExp2(0x0b0f17, 0.028);
 
-    // Camera
-    const initialCamPos = new THREE.Vector3(0, 8.5, 14);
-    const initialCamLookAt = new THREE.Vector3(0.5, 0, 0);
-    const initialFov = 38;
+    // Camera (Isometric angle matching reference blueprint)
+    const initialCamPos = new THREE.Vector3(0.5, 9.0, 11.5);
+    const initialCamLookAt = new THREE.Vector3(0.2, 0.3, 0);
+    const initialFov = 34;
 
     const camera = new THREE.PerspectiveCamera(initialFov, width / height, 0.1, 100);
     camera.position.copy(initialCamPos);
@@ -1063,6 +1063,9 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
                     <span className="text-slate-200 font-semibold">{String(v)}</span>
                   </div>
                 ))}
+                <div className="pt-1.5 mt-1 border-t border-slate-800/80 text-[9px] text-[#34d399] flex items-center justify-center gap-1 font-sans">
+                  <span>✦ Click node to inspect hardware</span>
+                </div>
               </div>
             </div>
             {/* Downward connecting line/pointer */}
@@ -1076,6 +1079,71 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
           </div>
         );
       })}
+
+      {/* Persistent HUD Widgets matching screenshot */}
+      {/* 1. Switch Telemetry Line Chart HUD */}
+      <div className="absolute top-12 left-8 pointer-events-none hidden md:block bg-[#0b1320]/90 backdrop-blur-md border border-[#06b6d4]/40 rounded-xl p-3 shadow-[0_0_20px_rgba(6,182,212,0.15)] font-mono text-[10px] w-48 animate-fadeIn">
+        <div className="flex items-center justify-between pb-1 mb-1.5 border-b border-slate-800 text-slate-400">
+          <span className="text-[#38bdf8] font-bold">HUD Telemetry</span>
+          <span className="text-emerald-400">3.02 Gbps</span>
+        </div>
+        <div className="h-10 w-full flex items-end">
+          <svg className="w-full h-full" viewBox="0 0 100 30">
+            <path
+              d="M 0 25 Q 20 15, 40 20 T 70 8 T 100 12"
+              fill="none"
+              stroke="#06b6d4"
+              strokeWidth="1.5"
+            />
+            <path
+              d="M 0 25 Q 20 15, 40 20 T 70 8 T 100 12 L 100 30 L 0 30 Z"
+              fill="rgba(6, 182, 212, 0.15)"
+            />
+          </svg>
+        </div>
+        <div className="flex justify-between text-[9px] text-slate-500 pt-1">
+          <span>Buffer: 21.09%</span>
+          <span className="text-[#34d399]">0 Drops</span>
+        </div>
+      </div>
+
+      {/* 2. Server Disk/Memory Circular Gauge HUD */}
+      <div className="absolute top-12 right-8 pointer-events-none hidden md:block bg-[#0b1320]/90 backdrop-blur-md border border-[#06b6d4]/40 rounded-xl p-3 shadow-[0_0_20px_rgba(6,182,212,0.15)] font-mono text-[10px] w-44 animate-fadeIn">
+        <div className="flex items-center justify-between pb-1 mb-1.5 border-b border-slate-800 text-slate-400">
+          <span className="text-[#38bdf8] font-bold">HUD Memory</span>
+          <span className="text-cyan-300 font-bold">68%</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative w-10 h-10 shrink-0">
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="#1e293b"
+                strokeWidth="3"
+              />
+              <path
+                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none"
+                stroke="#34d399"
+                strokeWidth="3"
+                strokeDasharray="68, 100"
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white">68%</span>
+          </div>
+          <div className="text-[9px] text-slate-400 space-y-0.5">
+            <div>POOL: <span className="text-white">123.33 TB</span></div>
+            <div>STATUS: <span className="text-emerald-400">OPTIMAL</span></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Camera Interactive Controls Helper Pill */}
+      <div className="absolute bottom-6 right-8 pointer-events-auto hidden sm:flex items-center gap-2 font-mono text-[10px] bg-[#0c121e]/90 backdrop-blur-md border border-slate-800 rounded-full px-3 py-1.5 shadow-lg text-slate-400">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
+        <span>3D WebGL: Left-Click to Orbit • Right-Click to Pan • Scroll to Zoom</span>
+      </div>
 
       {/* Ambient Floor Vignette Overlay */}
       <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-[#0b0f17] via-transparent to-transparent opacity-80" />
