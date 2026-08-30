@@ -125,7 +125,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark scroll-smooth ${inter.variable} ${jetbrainsMono.variable}`}>
+    <html
+      lang="en"
+      className={`dark scroll-smooth ${inter.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           type="application/ld+json"
@@ -136,7 +140,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
         />
       </head>
-      <body className="bg-[#0b0f17] text-[#e2e8f0] antialiased selection:bg-[#10b981]/30 selection:text-[#34d399]">
+      <body
+        className="bg-[#0b0f17] text-[#e2e8f0] antialiased selection:bg-[#10b981]/30 selection:text-[#34d399]"
+        suppressHydrationWarning
+      >
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
