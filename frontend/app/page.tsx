@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Navigation } from '@/components/landing/Navigation';
 import { HeroSection } from '@/components/landing/HeroSection';
-import { FeatureHighlights } from '@/components/landing/FeatureHighlights';
 import { LiveObservatorySection } from '@/components/landing/LiveObservatorySection';
 import { CurriculumSection } from '@/components/landing/CurriculumSection';
 import { CertificationSection } from '@/components/landing/CertificationSection';
@@ -46,7 +45,10 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f17] text-[#e2e8f0] font-sans antialiased overflow-x-hidden selection:bg-[#10b981]/30 selection:text-[#34d399]">
+    <div
+      className="min-h-screen bg-[#0b0f17] text-[#e2e8f0] font-sans antialiased overflow-x-hidden selection:bg-[#10b981]/30 selection:text-[#34d399]"
+      suppressHydrationWarning
+    >
       {/* Top Navigation */}
       <Navigation
         onOpenSignIn={() => setIsSignInOpen(true)}
@@ -56,7 +58,7 @@ export default function Home() {
       />
 
       <main>
-        {/* Hero Section with 3D Network Observatory */}
+        {/* Hero Section with 3D Network Observatory and 2x3 Feature Matrix */}
         <HeroSection
           currentStageId={currentStageId}
           scenario={scenario}
@@ -67,14 +69,7 @@ export default function Home() {
           onPacketClick={setInspectedPacketId}
         />
 
-        {/* 5-Item Feature Highlights Bar */}
-        <FeatureHighlights
-          onOpenTerminal={() => setIsTerminalOpen(true)}
-          onExploreCurriculum={handleExploreCurriculum}
-          onScrollToCertifications={handleScrollToCertifications}
-        />
-
-        {/* The Interactive Observatory ("Step Inside the Live Network") */}
+        {/* The Interactive Observatory & 3 Glassmorphism Course Cards */}
         <LiveObservatorySection
           onOpenTerminal={() => setIsTerminalOpen(true)}
           scenario={scenario}
