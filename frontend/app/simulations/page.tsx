@@ -5,6 +5,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { SimulationEngineCanvas } from '@/components/simulation/SimulationEngineCanvas';
+import { TimeTravelPacketScrubber } from '@/components/simulation/TimeTravelPacketScrubber';
 import { MultimodalDiagramParser } from '@/components/simulation/MultimodalDiagramParser';
 import { UniversalChatHistoryImporter } from '@/components/learning/UniversalChatHistoryImporter';
 import { PdfReportStudio } from '@/components/ui/PdfReportStudio';
@@ -98,6 +99,9 @@ export default function SimulationsPage() {
 
               {/* Main Simulation Engine Canvas */}
               <SimulationEngineCanvas />
+
+              {/* Time-Travel Packet Scrubber & Wireshark PCAP Exporter */}
+              <TimeTravelPacketScrubber />
 
               {/* Protocol Details Information Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
