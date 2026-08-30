@@ -82,25 +82,25 @@ function computeStaggeredProtocolState(
   };
 }
 
-// Keyframe camera coordinates
+// Keyframe camera coordinates - Balanced cinematic framing
 const CAMERA_KEYFRAMES = {
-  // Stage 1: Network Overview (Hero aerial view)
+  // Stage 1: Network Overview (Hero aerial perspective)
   overview: {
-    position: [0, 9.5, 15.5] as [number, number, number],
+    position: [0, 8.5, 14.5] as [number, number, number],
     lookAt: [0, 0.4, 0] as [number, number, number],
     fov: 38,
   },
-  // Stage 2: Packet Inspection (Macro tactile zoom on router & switch packet flow)
+  // Stage 2: Packet Inspection (Balanced perspective showing full topology flow without extreme zoom)
   packetInspection: {
-    position: [0.8, 3.2, 5.8] as [number, number, number],
-    lookAt: [0.6, 1.1, 0.2] as [number, number, number],
-    fov: 30,
+    position: [0.4, 7.2, 12.8] as [number, number, number],
+    lookAt: [0.2, 0.4, 0.1] as [number, number, number],
+    fov: 37,
   },
   // Stage 3: Autonomous Cloud Routing (Balanced perspective view)
   autonomousRouting: {
-    position: [4.2, 4.8, 8.5] as [number, number, number],
-    lookAt: [3.2, 1.4, 0.2] as [number, number, number],
-    fov: 34,
+    position: [1.8, 7.6, 13.5] as [number, number, number],
+    lookAt: [0.8, 0.4, 0] as [number, number, number],
+    fov: 37,
   },
 };
 
