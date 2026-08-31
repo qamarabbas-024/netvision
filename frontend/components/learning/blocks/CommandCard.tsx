@@ -127,7 +127,7 @@ export const CommandCard: React.FC<CommandCardProps> = ({ command: item, compact
             <BookOpen className="w-3 h-3 text-[#00f0ff]" /> Related Lessons:
           </span>
           {item.relatedLessonSlugs.map((slug, idx) => (
-            <Link key={idx} href={`/courses/networking-fundamentals/lessons/${slug}`}>
+            <Link key={idx} href={`/courses/net-101-digital-foundations/lessons/${slug}`}>
               <Badge variant="cyan" className="cursor-pointer hover:underline text-[10px] font-mono">
                 {slug.replace(/-/g, ' ')}
               </Badge>
