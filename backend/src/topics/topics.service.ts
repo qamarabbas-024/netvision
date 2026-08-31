@@ -4,6 +4,7 @@ import { PrismaService } from '../database/prisma.service';
 import { CourseLevel } from '@prisma/client';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { AchievementsService } from '../achievements/achievements.service';
+import { NETWORKING_COMMANDS_CATALOG } from './commands-catalog';
 
 @Injectable()
 export class TopicsService {
@@ -749,68 +750,119 @@ export class TopicsService {
   }
 
   async getAllCommands(os?: string, category?: string, q?: string) {
-    const where: any = {};
+    try {
+      const where: any = {};
 
-    if (os && os !== 'ALL') {
-      where.OR = [{ operatingSystem: os.toUpperCase() as any }, { operatingSystem: 'ALL' as any }];
+      if (os && os.toUpperCase() !== 'ALL') {
+        where.OR = [{ operatingSystem: os.toUpperCase() as any }, { operatingSystem: 'ALL' as any }];
+      }
+
+      if (category && category.toUpperCase() !== 'ALL') {
+        where.category = { equals: category, mode: 'insensitive' };
+      }
+
+      if (q && q.trim()) {
+        where.OR = [
+          { command: { contains: q, mode: 'insensitive' } },
+          { purpose: { contains: q, mode: 'insensitive' } },
+          { explanation: { contains: q, mode: 'insensitive' } },
+        ];
+      }
+
+      const commands = await this.prisma.commandReference.findMany({
+        where,
+        orderBy: [{ operatingSystem: 'asc' }, { command: 'asc' }],
+      });
+
+      if (commands.length > 0) {
+        return commands.map((c) => ({
+          id: c.id,
+          command: c.command,
+          operatingSystem: c.operatingSystem,
+          category: c.category,
+          purpose: c.purpose,
+          syntax: c.syntax,
+          example: c.example,
+          expectedOutput: c.expectedOutput,
+          explanation: c.explanation,
+          warnings: c.warnings,
+          relatedLessonSlugs: (c.relatedLessonSlugs as string[]) || [],
+        }));
+      }
+    } catch {
+      // Fallback to in-memory catalog
     }
 
-    if (category && category !== 'ALL') {
-      where.category = { equals: category, mode: 'insensitive' };
+    // In-memory catalog fallback
+    let catalog = [...NETWORKING_COMMANDS_CATALOG];
+
+    if (os && os.toUpperCase() !== 'ALL') {
+      const targetOs = os.toUpperCase();
+      catalog = catalog.filter(
+        (c) => c.operatingSystem === targetOs || c.operatingSystem === 'ALL'
+      );
     }
 
-    if (q) {
-      where.OR = [
-        { command: { contains: q, mode: 'insensitive' } },
-        { purpose: { contains: q, mode: 'insensitive' } },
-        { explanation: { contains: q, mode: 'insensitive' } },
-      ];
+    if (category && category.toUpperCase() !== 'ALL') {
+      const targetCat = category.toLowerCase().trim();
+      catalog = catalog.filter(
+        (c) => c.category.toLowerCase().trim() === targetCat
+      );
     }
 
-    const commands = await this.prisma.commandReference.findMany({
-      where,
-      orderBy: [{ operatingSystem: 'asc' }, { command: 'asc' }],
-    });
+    if (q && q.trim()) {
+      const query = q.toLowerCase().trim();
+      catalog = catalog.filter(
+        (c) =>
+          c.command.toLowerCase().includes(query) ||
+          c.purpose.toLowerCase().includes(query) ||
+          c.syntax.toLowerCase().includes(query) ||
+          c.explanation.toLowerCase().includes(query) ||
+          c.category.toLowerCase().includes(query)
+      );
+    }
 
-    return commands.map((c) => ({
-      id: c.id,
-      command: c.command,
-      operatingSystem: c.operatingSystem,
-      category: c.category,
-      purpose: c.purpose,
-      syntax: c.syntax,
-      example: c.example,
-      expectedOutput: c.expectedOutput,
-      explanation: c.explanation,
-      warnings: c.warnings,
-      relatedLessonSlugs: (c.relatedLessonSlugs as string[]) || [],
-    }));
+    return catalog;
   }
 
   async getCommandById(idOrCmd: string) {
-    const c = await this.prisma.commandReference.findFirst({
-      where: {
-        OR: [{ id: idOrCmd }, { command: { equals: idOrCmd, mode: 'insensitive' } }],
-      },
-    });
+    try {
+      const c = await this.prisma.commandReference.findFirst({
+        where: {
+          OR: [{ id: idOrCmd }, { command: { equals: idOrCmd, mode: 'insensitive' } }],
+        },
+      });
 
-    if (!c) {
+      if (c) {
+        return {
+          id: c.id,
+          command: c.command,
+          operatingSystem: c.operatingSystem,
+          category: c.category,
+          purpose: c.purpose,
+          syntax: c.syntax,
+          example: c.example,
+          expectedOutput: c.expectedOutput,
+          explanation: c.explanation,
+          warnings: c.warnings,
+          relatedLessonSlugs: (c.relatedLessonSlugs as string[]) || [],
+        };
+      }
+    } catch {
+      // Fallback to catalog
+    }
+
+    const fallbackCmd = NETWORKING_COMMANDS_CATALOG.find(
+      (c) =>
+        c.id.toLowerCase() === idOrCmd.toLowerCase() ||
+        c.command.toLowerCase() === idOrCmd.toLowerCase()
+    );
+
+    if (!fallbackCmd) {
       throw new NotFoundException(`Command reference "${idOrCmd}" not found.`);
     }
 
-    return {
-      id: c.id,
-      command: c.command,
-      operatingSystem: c.operatingSystem,
-      category: c.category,
-      purpose: c.purpose,
-      syntax: c.syntax,
-      example: c.example,
-      expectedOutput: c.expectedOutput,
-      explanation: c.explanation,
-      warnings: c.warnings,
-      relatedLessonSlugs: (c.relatedLessonSlugs as string[]) || [],
-    };
+    return fallbackCmd;
   }
 
   async getQuizById(quizId: string) {
@@ -2101,3 +2153,4 @@ export class TopicsService {
     });
   }
 }
+
