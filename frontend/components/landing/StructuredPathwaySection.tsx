@@ -64,9 +64,9 @@ export const StructuredPathwaySection: React.FC = () => {
 
             <Link
               href="/courses"
-              className="text-xs font-mono font-bold text-[#22c55e] hover:text-white transition-colors flex items-center gap-1.5"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              <span>View All 16 Courses</span>
+              <span>View All 38 Courses</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>

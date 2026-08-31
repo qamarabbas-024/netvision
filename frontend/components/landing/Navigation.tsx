@@ -66,7 +66,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     className="block p-2 rounded-lg hover:bg-slate-800/80 text-xs font-semibold text-white"
                   >
                     <div className="text-emerald-400 font-mono">Catalog Overview</div>
-                    <div className="text-slate-400 text-[11px] mt-0.5">Explore all 7 canonical networking courses</div>
+                    <div className="text-slate-400 text-[11px] mt-0.5">Explore all 38 networking courses across 7 core pathways</div>
                   </Link>
                   <Link
                     href="/courses/net-101-digital-foundations"
