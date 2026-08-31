@@ -106,7 +106,11 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
       return undefined;
     })();
 
+  const [showXpToast, setShowXpToast] = useState<boolean>(false);
+
   const triggerLessonCompletion = async () => {
+    setShowXpToast(true);
+    setTimeout(() => setShowXpToast(false), 4000);
     try {
       if (!isAuthenticated) {
         GuestProgressService.markLessonCompleted(lesson.id, lesson.slug);
@@ -473,6 +477,17 @@ export const LessonViewer: React.FC<LessonViewerProps> = ({
           )}
         </main>
       </div>
+
+      {/* Floating XP Reward Particle */}
+      {showXpToast && (
+        <div className="fixed bottom-8 right-8 z-50 animate-bounce bg-gradient-to-r from-amber-500 to-emerald-500 p-0.5 rounded-2xl shadow-2xl">
+          <div className="bg-[#090d16] px-4 py-2.5 rounded-[14px] flex items-center gap-2.5 font-mono text-xs text-white">
+            <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
+            <span className="font-extrabold text-amber-400">+50 XP</span>
+            <span className="text-zinc-300">Lesson Mastery Completed!</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

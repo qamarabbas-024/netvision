@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { MobileSidebarDrawer } from './Sidebar';
 import { HyperThemeStudio } from './HyperThemeStudio';
 import { SoundToggle } from './SoundToggle';
+import { CommandPalette } from './CommandPalette';
 
 export const AppTopbar: React.FC = () => {
   const router = useRouter();
@@ -116,7 +117,11 @@ export const AppTopbar: React.FC = () => {
               >
                 <X className="w-3.5 h-3.5" />
               </button>
-            ) : null}
+            ) : (
+              <div className="absolute right-2.5 hidden sm:flex items-center gap-0.5 pointer-events-none">
+                <kbd className="px-1.5 py-0.5 text-[10px] font-mono rounded bg-zinc-800 text-zinc-400 border border-zinc-700">⌘K</kbd>
+              </div>
+            )}
           </div>
 
           {/* Search Results Dropdown */}
@@ -254,6 +259,9 @@ export const AppTopbar: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Global Command Palette (Cmd+K) */}
+      <CommandPalette />
 
       {/* Mobile Drawer Overlay */}
       <MobileSidebarDrawer isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

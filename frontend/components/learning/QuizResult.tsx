@@ -1,10 +1,8 @@
-'use client';
-
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Award, RotateCcw, ArrowRight, CheckCircle2, XCircle, AlertTriangle, BookOpen, Target } from 'lucide-react';
+import { Award, RotateCcw, ArrowRight, CheckCircle2, XCircle, AlertTriangle, BookOpen, Target, Sparkles } from 'lucide-react';
 
 export interface QuizResultProps {
   quizTitle: string;
@@ -44,8 +42,72 @@ export const QuizResult: React.FC<QuizResultProps> = ({
   onRetry,
   onContinue,
 }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Celebratory confetti burst when passed
+  useEffect(() => {
+    if (!passed || !canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = canvas.parentElement?.clientWidth || 600;
+    canvas.height = 250;
+
+    const colors = ['#00f0ff', '#10b981', '#a855f7', '#f59e0b', '#3b82f6'];
+    const particles = Array.from({ length: 60 }, () => ({
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 12,
+      vy: (Math.random() - 0.8) * 10,
+      size: Math.random() * 6 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: 1,
+      rotation: Math.random() * Math.PI * 2,
+      vRot: (Math.random() - 0.5) * 0.2,
+    }));
+
+    let animId: number;
+    const render = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = false;
+
+      particles.forEach((p) => {
+        if (p.alpha <= 0) return;
+        alive = true;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.25; // gravity
+        p.rotation += p.vRot;
+        p.alpha -= 0.015;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.restore();
+      });
+
+      if (alive) {
+        animId = requestAnimationFrame(render);
+      }
+    };
+
+    render();
+    return () => cancelAnimationFrame(animId);
+  }, [passed]);
+
   return (
-    <Card className="p-6 sm:p-8 surface-2 border border-[#2a2e39] rounded-xl flex flex-col gap-6 shadow-instrument">
+    <Card className="p-6 sm:p-8 surface-2 border border-[#2a2e39] rounded-xl flex flex-col gap-6 shadow-instrument relative overflow-hidden">
+      {/* Particle Canvas Overlay */}
+      {passed && (
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 pointer-events-none z-20 w-full h-full"
+        />
+      )}
       {/* Header Result Banner */}
       <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-5 sm:p-6 rounded-xl bg-[#14151a] border border-[#2a2e39]">
         <div className="flex items-center gap-4 text-center md:text-left">

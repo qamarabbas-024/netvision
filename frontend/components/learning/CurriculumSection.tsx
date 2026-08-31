@@ -97,7 +97,8 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ topics }) 
     if (activeStatus === 'NOT_STARTED') matchesStatus = isNotStarted;
     else if (activeStatus === 'IN_PROGRESS') matchesStatus = isInProgress;
     else if (activeStatus === 'COMPLETED') matchesStatus = isCompleted;
-    else if (activeStatus === 'LOCKED') matchesStatus = isLocked;
+    // Hide draft 0-lesson placeholder items if any
+    if (t.lessonsCount === 0) return false;
 
     return matchesTier && matchesCategory && matchesSearch && matchesStatus;
   });
