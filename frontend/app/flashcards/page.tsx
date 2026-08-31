@@ -15,6 +15,13 @@ export default function FlashcardsPage() {
     { question: 'Port 53', answer: 'DNS (Domain Name System)' },
     { question: 'Port 22', answer: 'SSH (Secure Shell)' },
     { question: 'Port 67/68', answer: 'DHCP (Dynamic Host Configuration Protocol)' },
+    { question: 'Port 20 / 21', answer: 'FTP (File Transfer Protocol — Data & Control)' },
+    { question: 'Port 25', answer: 'SMTP (Simple Mail Transfer Protocol)' },
+    { question: 'Port 110', answer: 'POP3 (Post Office Protocol v3)' },
+    { question: 'Port 143', answer: 'IMAP (Internet Message Access Protocol)' },
+    { question: 'Port 123', answer: 'NTP (Network Time Protocol)' },
+    { question: 'Port 161 / 162', answer: 'SNMP (Simple Network Management Protocol)' },
+    { question: 'Port 3389', answer: 'RDP (Remote Desktop Protocol)' },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
