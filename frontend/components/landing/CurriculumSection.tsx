@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowRight, ChevronRight, Layers, Globe, Shield, Terminal } from 'lucide-react';
+import { ArrowRight, ChevronRight, Layers, Globe, Shield, Terminal, BookOpen } from 'lucide-react';
 import { CURRICULUM_STEPS, CurriculumStep } from '@/data/curriculumData';
 import { CourseModal } from './CourseModal';
 
@@ -26,7 +25,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
       summary: 'Understand core digital communications, binary arithmetic, signal processing, and hardware interfaces.',
       bullets: [
         'Binary & hexadecimal conversions in real time',
-        'Physical transmission media & fiber physics',
+        'Physical transmission media & fiber optics',
       ],
       stepNumber: '01',
     },
@@ -97,14 +96,14 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
 
           <Link
             href="/courses"
-            className="px-4 py-2.5 rounded-xl bg-[#0f172a] border border-[#10b981]/40 text-[#34d399] hover:bg-[#10b981]/15 text-xs font-mono font-bold transition-all flex items-center gap-2 self-start md:self-end shrink-0"
+            className="px-4 py-2.5 rounded-xl bg-[#0f172a] border border-[#10b981]/40 text-[#34d399] hover:bg-[#10b981]/15 text-xs font-mono font-bold transition-all flex items-center gap-2 self-start md:self-end shrink-0 cursor-pointer"
           >
             <span>Explore Full Courses Catalog</span>
             <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
 
-        {/* 4 Featured Course Cards with Generated Custom Artwork */}
+        {/* 4 Featured Course Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {featuredCourses.map((course) => (
             <div
@@ -117,11 +116,14 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ onStartLab
             >
               <div>
                 {/* Course Visual Banner */}
-                <div className="relative w-full h-32 mb-4 rounded-xl overflow-hidden border border-slate-800/80 bg-[#070a10]">
+                <div className="relative w-full h-32 mb-4 rounded-xl overflow-hidden border border-slate-800/80 bg-[#070a10] flex items-center justify-center">
                   <img
                     src={course.image}
                     alt={course.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-90 group-hover:opacity-100"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a] via-transparent to-transparent" />
                   
