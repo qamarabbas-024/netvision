@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Layers, Globe, Terminal, RefreshCw, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Layers, Globe, Terminal, RefreshCw } from 'lucide-react';
 import { NetworkScenario } from '@/types/network';
 
 interface LiveObservatorySectionProps {
@@ -12,7 +12,6 @@ interface LiveObservatorySectionProps {
 }
 
 export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
-  onOpenTerminal,
   scenario,
   onScenarioChange,
 }) => {
@@ -177,7 +176,7 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
             </div>
 
             <div className="pt-3 mt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-500">
-              <span className="text-emerald-400">● LIVE TELEMETRY STREAM</span>
+              <span className="text-emerald-400 font-medium">● LIVE TELEMETRY STREAM</span>
               <span>100% Deterministic</span>
             </div>
           </div>
