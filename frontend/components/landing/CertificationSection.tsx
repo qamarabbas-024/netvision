@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, CheckCircle2, ExternalLink, ShieldCheck, QrCode, Copy, Check } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ShieldCheck, QrCode, Copy, Check, Lock, Award } from 'lucide-react';
 
 interface CertificationSectionProps {
   onStartLearning?: () => void;
@@ -89,143 +89,111 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
                 onClick={() => setShowVerifiedBadge(!showVerifiedBadge)}
                 className="px-5 py-3 rounded-xl bg-[#0284c7] hover:bg-[#0369a1] text-white font-bold text-xs flex items-center gap-2 shadow-[0_0_15px_rgba(2,132,199,0.3)] transition-all cursor-pointer"
               >
-                <span>View Verified Credential</span>
+                <span>{showVerifiedBadge ? 'Hide Verification Spec' : 'View Verified Credential'}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
 
               <Link
                 href="/certificates"
-                className="px-5 py-3 rounded-xl bg-[#0f172a] hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-2"
+                className="px-5 py-3 rounded-xl bg-[#0f172a] hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-2 cursor-pointer"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Certification Exam Center</span>
+                <span>Certification Registry</span>
               </Link>
             </div>
 
+            {/* Live Verification Telemetry Dropdown */}
             {showVerifiedBadge && (
-              <div className="p-3.5 bg-emerald-950/40 border border-emerald-500/40 rounded-xl text-xs font-mono text-emerald-300 space-y-2 animate-fadeIn">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span className="font-bold">Public Key Signature Verified: VALID</span>
-                  </div>
+              <div className="p-4 rounded-xl bg-[#0b1320] border border-cyan-500/40 space-y-2.5 animate-fadeIn font-mono text-xs">
+                <div className="flex items-center justify-between text-cyan-400 font-bold">
+                  <span className="flex items-center gap-1.5">
+                    <Lock className="w-3.5 h-3.5 text-cyan-400" /> Cryptographic Proof Signature
+                  </span>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">VALIDATED</span>
+                </div>
+                <div className="p-2 bg-black/60 rounded-lg text-[10px] text-slate-300 break-all border border-slate-800">
+                  {certHash}
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+                  <span>Signer: NetVision Autonomous Root CA</span>
                   <button
                     onClick={handleCopyHash}
-                    className="p-1 rounded bg-emerald-900/50 hover:bg-emerald-800 text-emerald-300 text-[10px] flex items-center gap-1 cursor-pointer"
+                    className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
                   >
                     {copiedHash ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                     <span>{copiedHash ? 'Copied' : 'Copy Hash'}</span>
                   </button>
                 </div>
-                <div className="text-[10px] text-slate-400 break-all bg-black/40 p-2 rounded border border-slate-800">
-                  {certHash}
-                </div>
               </div>
             )}
+
           </div>
 
-          {/* Right Column: High-Fidelity Certificate Mockup with QR Code & Seal */}
-          <div className="lg:col-span-6">
-            <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-[#0c1322] via-[#090d16] to-[#0b101c] border border-slate-700/80 shadow-2xl space-y-6 font-sans overflow-hidden">
+          {/* Right Column: Premium Certificate Mockup Card */}
+          <div className="lg:col-span-6 relative">
+            <div className="relative p-7 sm:p-8 rounded-2xl bg-gradient-to-br from-[#0f172a] via-[#0b1120] to-[#080d18] border border-slate-700/80 shadow-2xl space-y-6 overflow-hidden">
               
-              {/* Top Header Row */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800 relative z-10">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-[#10b981]/15 border border-[#10b981]/40 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-[#34d399]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                      <path d="M6 18V6l12 12V6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-white tracking-tight">NetVision Assembly</div>
-                    <div className="text-[10px] font-mono text-slate-400">Verified Certificate (NV-NET)</div>
-                  </div>
-                </div>
-
-                <div className="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 font-mono text-[10px] font-bold flex items-center gap-1">
-                  <span>+</span>
-                  <span>VERIFIED</span>
+              {/* Corner Ribbon */}
+              <div className="absolute top-0 right-0 p-4">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                  <Award className="w-6 h-6" />
                 </div>
               </div>
 
-              {/* Certificate Title with Hologram Seal & QR Code */}
-              <div className="flex items-start justify-between gap-4 relative z-10">
-                <div className="space-y-2 max-w-sm">
-                  <div className="text-[10px] font-mono uppercase tracking-widest text-[#38bdf8]">
-                    OFFICIAL INDUSTRY CERTIFICATION
-                  </div>
-                  <h3 className="text-2xl font-extrabold text-white tracking-tight">
-                    NV-NET Certified Associate
-                  </h3>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    Demonstrated deep understanding of core network topologies, switching, routing algorithms, and packet parsing under fault conditions.
-                  </p>
+              {/* Certificate Header */}
+              <div className="space-y-1">
+                <div className="text-[10px] font-mono tracking-widest text-[#38bdf8] uppercase font-bold">
+                  NETVISION CERTIFIED ARCHITECT
                 </div>
+                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  Advanced Enterprise Network Engineer
+                </h3>
+              </div>
 
-                {/* Right Badges: Hologram Seal & Scannable QR Code */}
-                <div className="flex items-center gap-3 shrink-0">
-                  {/* Hologram Seal */}
-                  <div className="hidden sm:block w-16 h-16 opacity-90 hover:opacity-100 transition-opacity">
-                    <img
-                      src="/certificate-seal.png"
-                      alt="Cryptographic Verification Seal"
-                      className="w-full h-full object-contain filter drop-shadow-[0_0_12px_rgba(16,185,129,0.4)]"
-                    />
-                  </div>
-
-                  {/* Scannable SVG QR Code */}
-                  <div
-                    className="relative w-14 h-14 p-2 rounded-xl bg-[#070b12] border border-emerald-500/40 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.25)] group cursor-pointer hover:border-emerald-400 hover:scale-105 transition-all"
-                    title="Scan to verify credential"
-                  >
-                    <div className="absolute -top-0.5 -left-0.5 w-1.5 h-1.5 border-t border-l border-emerald-400" />
-                    <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 border-t border-r border-emerald-400" />
-                    <div className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 border-b border-l border-emerald-400" />
-                    <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 border-b border-r border-emerald-400" />
-                    <svg className="w-full h-full text-emerald-400" viewBox="0 0 24 24" fill="currentColor">
-                      <rect x="2" y="2" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2" />
-                      <rect x="4.5" y="4.5" width="3" height="3" fill="currentColor" />
-                      <rect x="14" y="2" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2" />
-                      <rect x="16.5" y="4.5" width="3" height="3" fill="currentColor" />
-                      <rect x="2" y="14" width="8" height="8" rx="1.5" fill="none" stroke="currentColor" strokeWidth="2" />
-                      <rect x="4.5" y="16.5" width="3" height="3" fill="currentColor" />
-                      <rect x="14" y="14" width="3" height="3" fill="currentColor" />
-                      <rect x="19" y="14" width="3" height="3" fill="currentColor" />
-                      <rect x="14" y="19" width="3" height="3" fill="currentColor" />
-                      <rect x="19" y="19" width="3" height="3" fill="currentColor" />
-                    </svg>
-                  </div>
+              {/* Candidate Info */}
+              <div className="py-2 border-y border-slate-800/80 grid grid-cols-2 gap-4 text-xs font-mono">
+                <div>
+                  <span className="text-slate-500 block text-[10px]">ISSUED TO</span>
+                  <span className="text-slate-200 font-bold">Alex Morgan, NetOps</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 block text-[10px]">VERIFICATION ID</span>
+                  <span className="text-emerald-400 font-bold">NV-9042-PRO</span>
                 </div>
               </div>
 
-              {/* Learner Info Card */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-[#060910] border border-slate-800/80 font-mono text-[11px] relative z-10">
-                <div>
-                  <div className="text-slate-500 text-[10px]">RECIPIENT</div>
-                  <div className="text-slate-200 font-bold mt-0.5">Qualified Learner</div>
+              {/* Verified Competencies */}
+              <div className="space-y-2">
+                <div className="text-[11px] font-mono text-slate-400 uppercase font-semibold">
+                  Demonstrated Competencies:
                 </div>
-                <div>
-                  <div className="text-slate-500 text-[10px]">CERTIFICATE ID</div>
-                  <div className="text-[#38bdf8] font-bold mt-0.5">0x8F9C...42A1</div>
-                </div>
-                <div className="col-span-2 sm:col-span-1">
-                  <div className="text-slate-500 text-[10px]">STATUS</div>
-                  <div className="text-[#34d399] font-bold mt-0.5 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#10b981]" />
-                    <span>Authenticated</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-slate-300">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span>Multi-AS BGP Route Engineering</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span>OSPFv3 Area Convergence</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span>VXLAN / EVPN Fabric Tunnels</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span>Stateful Firewall Triage</span>
                   </div>
                 </div>
               </div>
 
               {/* Certificate Footer */}
-              <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-500 relative z-10">
-                <Link href="/certificates" className="flex items-center gap-1 text-slate-400 hover:text-[#38bdf8] transition-colors">
-                  <ExternalLink className="w-3 h-3 text-[#38bdf8]" />
-                  <span>Verify Credential Directory</span>
-                </Link>
-                <div className="text-emerald-400/80 font-semibold">
-                  NV-NET Compliant
+              <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-500">
+                <div className="flex items-center gap-1.5">
+                  <QrCode className="w-4 h-4 text-slate-400" />
+                  <span>Scan to verify on-chain</span>
                 </div>
+                <span className="text-emerald-400 font-semibold">100% Cryptographically Verified</span>
               </div>
 
             </div>
