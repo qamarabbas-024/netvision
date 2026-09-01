@@ -228,49 +228,129 @@ export interface AchievementItem {
 
 // Troubleshooting Engine API Client Methods
 
+import {
+  FALLBACK_TROUBLESHOOTING_SCENARIOS,
+  getFallbackScenarioBySlug,
+  createLocalTroubleshootingSession,
+  executeLocalCommand,
+} from '@/data/troubleshootingFallbackData';
+
+// Troubleshooting Engine API Client Methods with Robust Offline Fallback
+
 export async function getTroubleshootingScenariosApi(): Promise<any[]> {
-  return await fetchApi<any[]>('/troubleshooting/scenarios');
+  try {
+    const data = await fetchApi<any[]>('/troubleshooting/scenarios');
+    if (Array.isArray(data) && data.length > 0) return data;
+    return FALLBACK_TROUBLESHOOTING_SCENARIOS;
+  } catch (err) {
+    console.info('[NetVision API] Troubleshooting scenarios endpoint unreachable, using built-in catalog.');
+    return FALLBACK_TROUBLESHOOTING_SCENARIOS;
+  }
 }
 
 export async function getTroubleshootingScenarioDetailApi(idOrSlug: string): Promise<any> {
-  return await fetchApi<any>(`/troubleshooting/scenarios/${idOrSlug}`);
+  try {
+    return await fetchApi<any>(`/troubleshooting/scenarios/${idOrSlug}`);
+  } catch (err) {
+    console.info(`[NetVision API] Scenario ${idOrSlug} endpoint unreachable, using built-in detail.`);
+    const fallback = getFallbackScenarioBySlug(idOrSlug);
+    if (fallback) return fallback;
+    throw err;
+  }
 }
 
 export async function getTroubleshootingPostMortemApi(idOrSlug: string): Promise<any> {
-  return await fetchApi<any>(`/troubleshooting/scenarios/${idOrSlug}/post-mortem`);
+  try {
+    return await fetchApi<any>(`/troubleshooting/scenarios/${idOrSlug}/post-mortem`);
+  } catch (err) {
+    const fallback = getFallbackScenarioBySlug(idOrSlug);
+    if (fallback?.postMortem) return fallback.postMortem;
+    throw err;
+  }
 }
 
 export async function startTroubleshootingSessionApi(scenarioId: string): Promise<any> {
-  return await fetchApi<any>('/troubleshooting/session/start', {
-    method: 'POST',
-    body: JSON.stringify({ scenarioId }),
-  });
+  try {
+    return await fetchApi<any>('/troubleshooting/session/start', {
+      method: 'POST',
+      body: JSON.stringify({ scenarioId }),
+    });
+  } catch (err) {
+    const fallback = getFallbackScenarioBySlug(scenarioId);
+    if (fallback) return createLocalTroubleshootingSession(fallback);
+    throw err;
+  }
 }
 
 export async function executeTroubleshootingCommandApi(sessionId: string, scenarioId: string, command: string): Promise<any> {
-  return await fetchApi<any>('/troubleshooting/session/execute', {
-    method: 'POST',
-    body: JSON.stringify({ sessionId, scenarioId, command }),
-  });
+  try {
+    return await fetchApi<any>('/troubleshooting/session/execute', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, scenarioId, command }),
+    });
+  } catch (err) {
+    const fallback = getFallbackScenarioBySlug(scenarioId);
+    if (fallback) {
+      const mockSession = createLocalTroubleshootingSession(fallback);
+      return executeLocalCommand(fallback, mockSession, command);
+    }
+    throw err;
+  }
 }
 
 export async function submitTroubleshootingDiagnosisApi(sessionId: string, scenarioId: string, diagnosisId: string): Promise<any> {
-  return await fetchApi<any>('/troubleshooting/session/diagnose', {
-    method: 'POST',
-    body: JSON.stringify({ sessionId, scenarioId, diagnosisId }),
-  });
+  try {
+    return await fetchApi<any>('/troubleshooting/session/diagnose', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, scenarioId, diagnosisId }),
+    });
+  } catch (err) {
+    const fallback = getFallbackScenarioBySlug(scenarioId);
+    const correct = fallback?.hiddenRootCauseId === diagnosisId;
+    return {
+      isCorrect: correct,
+      message: correct ? 'Hypothesis verified! Root cause confirmed.' : 'Diagnosis rejected. Review symptom logs.',
+      nextStage: correct ? 'REMEDIATION' : 'DIAGNOSIS',
+      score: correct ? 100 : 40,
+    };
+  }
 }
 
 export async function applyTroubleshootingRemediationApi(sessionId: string, scenarioId: string, remediationId: string): Promise<any> {
-  return await fetchApi<any>('/troubleshooting/session/remediate', {
-    method: 'POST',
-    body: JSON.stringify({ sessionId, scenarioId, remediationId }),
-  });
+  try {
+    return await fetchApi<any>('/troubleshooting/session/remediate', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, scenarioId, remediationId }),
+    });
+  } catch (err) {
+    const fallback = getFallbackScenarioBySlug(scenarioId);
+    const correct = fallback?.correctRemediationId === remediationId;
+    return {
+      isApplied: correct,
+      message: correct ? 'Remediation patch applied successfully.' : 'Patch failed or caused regression.',
+      nextStage: correct ? 'VERIFICATION' : 'REMEDIATION',
+    };
+  }
 }
 
 export async function runTroubleshootingVerificationApi(sessionId: string, scenarioId: string): Promise<any> {
-  return await fetchApi<any>('/troubleshooting/session/verify', {
-    method: 'POST',
-    body: JSON.stringify({ sessionId, scenarioId }),
-  });
+  try {
+    return await fetchApi<any>('/troubleshooting/session/verify', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId, scenarioId }),
+    });
+  } catch (err) {
+    const fallback = getFallbackScenarioBySlug(scenarioId);
+    return {
+      allPassed: true,
+      testResults: fallback?.verificationTests.map((t) => ({
+        testId: t.id,
+        name: t.name,
+        passed: true,
+        output: t.successMessage,
+      })) || [],
+      isResolved: true,
+      score: 100,
+    };
+  }
 }
