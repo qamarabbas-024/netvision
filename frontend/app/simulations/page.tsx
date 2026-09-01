@@ -12,12 +12,20 @@ import { PdfReportStudio } from '@/components/ui/PdfReportStudio';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Cpu, ShieldCheck, Activity, Image as ImageIcon, Bot, Printer } from 'lucide-react';
+import { Cpu, ShieldCheck, Activity, Image as ImageIcon, Bot, Printer, Play, Zap } from 'lucide-react';
 
 export default function SimulationsPage() {
   const [showDiagramParser, setShowDiagramParser] = React.useState<boolean>(false);
   const [showChatImporter, setShowChatImporter] = React.useState<boolean>(false);
   const [showPdfStudio, setShowPdfStudio] = React.useState<boolean>(false);
+  const [activePreset, setActivePreset] = React.useState<string>('tcp_handshake');
+
+  const simulationPresets = [
+    { id: 'tcp_handshake', label: 'TCP 3-Way Handshake', protocol: 'TCP', color: 'border-cyan-500/40 text-cyan-300' },
+    { id: 'arp_broadcast', label: 'ARP Address Resolution', protocol: 'ARP', color: 'border-emerald-500/40 text-emerald-300' },
+    { id: 'dns_lookup', label: 'DNS Recursive Query', protocol: 'DNS', color: 'border-purple-500/40 text-purple-300' },
+    { id: 'bgp_keepalive', label: 'BGP Route Advertisement', protocol: 'BGP', color: 'border-amber-500/40 text-amber-300' },
+  ];
 
   return (
     <ProtectedRoute>
@@ -33,7 +41,7 @@ export default function SimulationsPage() {
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold block mb-1">
-                    PROTOCOL DISSECTION & SIMULATION
+                    PROTOCOL DISSECTION &amp; SIMULATION
                   </span>
                   <h1 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight">
                     Interactive Protocol Simulator
@@ -74,6 +82,28 @@ export default function SimulationsPage() {
                     PDF Export
                   </Button>
                 </div>
+              </div>
+
+              {/* Simulation Flow Quick Presets Bar */}
+              <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-[#0e1017] border border-[#2a2e39] font-mono text-xs">
+                <span className="text-[#8e95a5] flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider mr-1">
+                  <Zap className="w-3.5 h-3.5 text-amber-400" /> Quick Flow:
+                </span>
+                {simulationPresets.map((preset) => (
+                  <button
+                    key={preset.id}
+                    onClick={() => setActivePreset(preset.id)}
+                    className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                      activePreset === preset.id
+                        ? 'bg-[#10b981]/20 border-[#10b981] text-[#34d399] shadow-sm'
+                        : 'bg-[#161822] border-slate-800 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                    <span>{preset.label}</span>
+                    <Badge variant="neutral" className="text-[9px] py-0 px-1">{preset.protocol}</Badge>
+                  </button>
+                ))}
               </div>
 
               {/* Modals */}
