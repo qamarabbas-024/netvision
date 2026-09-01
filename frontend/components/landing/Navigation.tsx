@@ -107,19 +107,19 @@ export const Navigation: React.FC<NavigationProps> = ({
             </Link>
           </nav>
 
-          {/* Right: Sound Toggle + Matrix Pulse Badge + Start Learning CTA */}
+          {/* Right: Sound Toggle + CLI Terminal + Start Learning CTA */}
           <div className="hidden sm:flex items-center gap-3">
             {/* SFX Sound Toggle */}
             <SoundToggle />
 
-            {/* Matrix Pulse Badge */}
+            {/* Interactive Terminal Quick Launch */}
             <button
               onClick={onOpenTerminal}
               className="px-3 py-1.5 rounded-full bg-[#06151b] hover:bg-[#09222b] border border-[#10b981]/50 hover:border-[#10b981] text-[#34d399] text-xs font-mono font-semibold flex items-center gap-2 shadow-[0_0_12px_rgba(16,185,129,0.2)] transition-all cursor-pointer"
               title="Launch interactive NetVision OS terminal"
             >
-              <Activity className="w-3.5 h-3.5 text-[#34d399] animate-pulse" />
-              <span>Matrix pulse</span>
+              <Terminal className="w-3.5 h-3.5 text-[#34d399]" />
+              <span>CLI Terminal</span>
             </button>
 
             {/* Start Learning Emerald CTA */}
