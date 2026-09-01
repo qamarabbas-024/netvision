@@ -4,15 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowRight,
-  BookOpen,
-  Monitor,
-  Layers,
-  Settings,
-  Wrench,
-  Maximize2,
   ShieldCheck,
   Activity,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle2,
+  Terminal,
+  Cpu,
 } from 'lucide-react';
 import { NetworkCanvas } from '../3d/NetworkCanvas';
 import { NetworkDevice, NetworkScenario } from '@/types/network';
@@ -39,15 +36,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const [isPaused] = useState(false);
   const [hoveredDevice, setHoveredDevice] = useState<NetworkDevice | null>(null);
 
-  const featureItems = [
-    { label: 'Learn networking', href: '/courses', icon: <BookOpen className="w-3.5 h-3.5 text-[#34d399]" /> },
-    { label: 'Course Simulations', href: '/simulations', icon: <Monitor className="w-3.5 h-3.5 text-[#38bdf8]" /> },
-    { label: 'Sandbox Lab', href: '/sandbox', icon: <Layers className="w-3.5 h-3.5 text-[#34d399]" /> },
-    { label: 'Learning Solutions', href: '/courses', icon: <Settings className="w-3.5 h-3.5 text-[#34d399]" /> },
-    { label: 'Troubleshooting', href: '/troubleshooting', icon: <Wrench className="w-3.5 h-3.5 text-[#38bdf8]" /> },
-    { label: 'Feature Capability', href: '/docs', icon: <Maximize2 className="w-3.5 h-3.5 text-[#34d399]" /> },
-  ];
-
   return (
     <section id="hero-3d-network-observatory" className="relative w-full overflow-hidden bg-[#0b0f17] border-b border-[#1e293b]/70 pt-8 pb-14 lg:pt-14 lg:pb-20">
       {/* Background technical grid */}
@@ -59,12 +47,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* Main Hero Split Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
           
-          {/* Left Column: Headline, Supporting Text, CTAs, 2x3 Feature Grid */}
+          {/* Left Column: Headline, Supporting Text, CTAs, Technical Specs */}
           <div className="lg:col-span-5 space-y-6 z-10">
             
             {/* Tag Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#061e1b] border border-[#10b981]/40 text-xs font-mono font-medium text-[#34d399]">
-              <span className="w-2 h-2 rounded-full bg-[#10b981] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
               <span>Interactive Packet Simulation &amp; 3D Topology</span>
             </div>
 
@@ -105,22 +93,26 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </button>
             </div>
 
-            {/* 2x3 Feature Matrix Grid matching the blueprint image */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-800/80">
-              {featureItems.map((item, idx) => (
-                <Link
-                  key={idx}
-                  href={item.href}
-                  className="group p-2.5 rounded-xl bg-[#090d16]/80 hover:bg-[#0f172a] border border-slate-800/80 hover:border-[#10b981]/40 transition-all flex items-center gap-2"
-                >
-                  <div className="shrink-0 p-1.5 rounded-lg bg-[#06131c] border border-slate-800 group-hover:border-[#10b981]/40">
-                    {item.icon}
-                  </div>
-                  <span className="text-[11px] font-semibold text-slate-300 group-hover:text-white leading-tight">
-                    {item.label}
-                  </span>
-                </Link>
-              ))}
+            {/* Refined Technical Capability Badges (Replacing cluttered 2x3 matrix) */}
+            <div className="pt-4 border-t border-slate-800/80 grid grid-cols-3 gap-2 text-[11px] font-mono text-slate-400">
+              <div className="p-2.5 rounded-xl bg-[#090d16]/80 border border-slate-800/80 flex flex-col gap-1">
+                <span className="text-[#34d399] font-bold flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-[#34d399]" /> 7 Stages
+                </span>
+                <span className="text-[10px] text-slate-400">Bitstream to Cloud</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-[#090d16]/80 border border-slate-800/80 flex flex-col gap-1">
+                <span className="text-[#38bdf8] font-bold flex items-center gap-1">
+                  <Cpu className="w-3 h-3 text-[#38bdf8]" /> WebGL Engine
+                </span>
+                <span className="text-[10px] text-slate-400">60 FPS 3D Render</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-[#090d16]/80 border border-slate-800/80 flex flex-col gap-1">
+                <span className="text-[#a78bfa] font-bold flex items-center gap-1">
+                  <Terminal className="w-3 h-3 text-[#a78bfa]" /> Live CLI
+                </span>
+                <span className="text-[10px] text-slate-400">Deterministic Labs</span>
+              </div>
             </div>
 
             {/* Hovered Device Tooltip (if hovering) */}
@@ -179,7 +171,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </div>
 
               <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#0b1320]/80 border border-emerald-500/40 text-emerald-400 font-mono text-xs font-bold backdrop-blur-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
                 <span>3D WebGL Mesh</span>
               </div>
             </div>
@@ -199,8 +191,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             {/* Bottom 3D Canvas Telemetry Footer */}
             <div className="absolute bottom-3 left-4 right-4 z-20 pointer-events-none flex items-center justify-between text-[11px] font-mono text-slate-400 bg-[#0b1320]/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span className="text-slate-200">INTERACTIVE 3D TOPOLOGY</span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+                <span className="text-slate-200 font-medium">INTERACTIVE 3D TOPOLOGY</span>
               </div>
               <div className="flex items-center gap-3 text-slate-400">
                 <span>SCENARIO: <strong className="text-[#34d399] uppercase">{scenario}</strong></span>
