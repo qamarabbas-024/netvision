@@ -385,6 +385,22 @@ async function runProductCorrectnessTests() {
         },
       });
 
+      // Ensure NV-NET definition exists for test resilience across fresh runner environments
+      await prisma.certificationDefinition.upsert({
+        where: { code: 'NV-NET' },
+        update: {
+          requirementsJson: { requiredCourseCodes: ['NV-C02', 'NV-C03'], minAssessmentAvg: 80, requireAllLabs: true },
+        },
+        create: {
+          code: 'NV-NET',
+          title: 'NetVision Certified Network Administrator (Legacy)',
+          description: 'Historical network administration certification.',
+          level: CourseLevel.INTERMEDIATE,
+          isActive: false,
+          requirementsJson: { requiredCourseCodes: ['NV-C02', 'NV-C03'], minAssessmentAvg: 80, requireAllLabs: true },
+        },
+      });
+
       // Find required quiz in NV-C02
       const course201 = await prisma.course.findFirst({
         where: { code: 'NV-C02' },

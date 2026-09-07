@@ -648,20 +648,57 @@ async function main() {
     console.log(`  ✓ Credential Definition [${cred.code}] "${cred.title}"`);
   }
 
-  // Preserve legacy credentials as inactive (zero rows deleted)
-  const legacyCredCodes = ['NV-NET', 'NV-SEC', 'NV-CLOUD', 'NV-AIOPS'];
-  for (const legCode of legacyCredCodes) {
-    const existing = await prisma.certificationDefinition.findUnique({ where: { code: legCode } });
-    if (existing) {
-      await prisma.certificationDefinition.update({
-        where: { code: legCode },
-        data: {
-          isActive: false,
-          ...(legCode === 'NV-NET' ? { requirementsJson: { requiredCourseCodes: ['NV-C02', 'NV-C03'], minAssessmentAvg: 80, requireAllLabs: true } } : {}),
+  // Preserve legacy credentials as inactive (zero rows deleted, guaranteed present in fresh seed)
+  const legacyCredDefs = [
+    {
+      code: 'NV-NET',
+      title: 'NetVision Certified Network Administrator (Legacy)',
+      description: 'Historical comprehensive network administration certification covering IPv4 CIDR subnetting, VLAN configuration, routing, and firewall management.',
+      requirementsJson: { requiredCourseCodes: ['NV-C02', 'NV-C03'], minAssessmentAvg: 80, requireAllLabs: true },
+    },
+    {
+      code: 'NV-SEC',
+      title: 'NetVision Certified Security Specialist (Legacy)',
+      description: 'Historical network security and secure connectivity certification.',
+      requirementsJson: { requiredCourseCodes: ['NV-C04'], minAssessmentAvg: 80, requireAllLabs: true },
+    },
+    {
+      code: 'NV-CLOUD',
+      title: 'NetVision Certified Cloud Specialist (Legacy)',
+      description: 'Historical cloud networking certification.',
+      requirementsJson: {},
+    },
+    {
+      code: 'NV-AIOPS',
+      title: 'NetVision Certified AIOps Specialist (Legacy)',
+      description: 'Historical automated operations certification.',
+      requirementsJson: {},
+    },
+  ];
+
+  for (const leg of legacyCredDefs) {
+    await prisma.certificationDefinition.upsert({
+      where: { code: leg.code },
+      update: {
+        isActive: false,
+        requirementsJson: leg.requirementsJson,
+      },
+      create: {
+        code: leg.code,
+        title: leg.title,
+        description: leg.description,
+        level: CourseLevel.INTERMEDIATE,
+        isActive: false,
+        requirementsJson: leg.requirementsJson,
+        policyJson: {
+          maxAttempts: 3,
+          rollingWindowDays: 30,
+          cooldownAfterFirstFailure: 86400,
+          cooldownAfterSubsequentFailure: 259200,
         },
-      });
-      console.log(`  ℹ Preserved historical credential [${legCode}] as inactive`);
-    }
+      },
+    });
+    console.log(`  ℹ Preserved historical credential [${leg.code}] as inactive`);
   }
 
   console.log('✅ Phase 12C Curriculum Migration & Seed Completed Successfully!');
