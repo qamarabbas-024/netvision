@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Mic, MicOff, Volume2, Bot, User, Radio, ShieldCheck, Terminal, Play, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mic, MicOff, Bot, User } from 'lucide-react';
 import { synthesizeSreSpeech, generateSreAiResponse, VoiceDialogueTurn } from '@/lib/voiceSreEngine';
 
 export const VoiceSreStudio: React.FC = () => {
@@ -16,7 +16,7 @@ export const VoiceSreStudio: React.FC = () => {
       actionTaken: 'Initialized multi-modal audio telemetry engine.',
     },
   ]);
-  const [inputQuery, setInputQuery] = useState<string>('Why is packet loss occurring on Core-R1?');
+  const [inputQuery] = useState<string>('Why is packet loss occurring on Core-R1?');
 
   const handleSendPrompt = (promptText: string) => {
     if (!promptText.trim()) return;

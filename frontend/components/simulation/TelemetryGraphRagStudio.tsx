@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Database, Search, Bot, Radio, Network, Terminal, ShieldAlert, Check } from 'lucide-react';
-import { SAMPLE_SYSLOG_STREAM, queryTelemetryGraph, TelemetryLogEntry } from '@/lib/telemetryGraphRagEngine';
+import { Search, Bot } from 'lucide-react';
+import { queryTelemetryGraph } from '@/lib/telemetryGraphRagEngine';
 
 export const TelemetryGraphRagStudio: React.FC = () => {
   const [query, setQuery] = useState<string>('Find security incidents involving SYN flood or DDoS');

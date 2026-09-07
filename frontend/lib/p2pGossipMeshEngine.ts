@@ -28,7 +28,6 @@ export function createP2PMesh(nodeCount = 8): PeerNode[] {
 }
 
 export function propagateGossipStep(nodes: PeerNode[]): PeerNode[] {
-  const infectedIds = new Set(nodes.filter((n) => n.infected).map((n) => n.id));
   const newInfected = new Set<string>();
 
   nodes.forEach((node) => {

@@ -69,6 +69,13 @@ export const TsnDeterministicStudio: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsSimulating((prev) => !prev)}
+          >
+            {isSimulating ? 'Pause Clock' : 'Resume Clock'}
+          </Button>
+          <Button
             variant="primary"
             size="sm"
             onClick={handleDispatchBurst}

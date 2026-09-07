@@ -2,18 +2,15 @@
 
 import React, { useState } from 'react';
 import {
-  Layers,
   Cpu,
   Shield,
   ShieldCheck,
   ShieldAlert,
-  Zap,
   Send,
   RotateCcw,
   Activity,
   Boxes,
   Network,
-  CheckCircle2,
   Terminal,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';

@@ -16,7 +16,7 @@ export function compileNaturalLanguageIntent(intentPrompt: string): CompiledNetw
 
   let securityZone = 'GENERAL_WORKLOAD';
   let bandwidth = 10;
-  let redundancy: CompiledNetworkPolicy['redundancyTier'] = 'MULTI_PATH_ECMP';
+  const redundancy: CompiledNetworkPolicy['redundancyTier'] = 'MULTI_PATH_ECMP';
 
   if (text.includes('pci') || text.includes('database') || text.includes('isolate')) {
     securityZone = 'PCI_DSS_RESTRICTED';

@@ -1,10 +1,9 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './Card';
+import { Card } from './Card';
 import { Badge } from './Badge';
 import { Button } from './Button';
 import { Progress } from './Progress';
-import { PlayCircle, ArrowRight, Activity, Cpu, Radio, Shield, Server, Monitor } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { PlayCircle, ArrowRight } from 'lucide-react';
 
 export const LessonCard: React.FC<{ title: string; type: string; duration: string; completed?: boolean; onClick?: () => void }> = ({
   title,

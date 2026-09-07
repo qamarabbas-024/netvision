@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, GitCommit, Play, RotateCcw, Activity, ArrowRight, Zap, Check } from 'lucide-react';
+import { Play, RotateCcw, Activity, Zap } from 'lucide-react';
 import { generateHotPatchPlan, RoutingHotPatch } from '@/lib/routingHotPatcherEngine';
 
 export const RoutingHotPatcherStudio: React.FC = () => {

@@ -25,7 +25,7 @@ export const MultiplayerCanvasStudio: React.FC = () => {
   const [peers, setPeers] = useState<PeerUser[]>(() => MultiplayerCanvasEngine.getInitialPeers());
   const [nodes, setNodes] = useState<SharedCanvasNode[]>(() => MultiplayerCanvasEngine.getInitialNodes());
   const [links] = useState<SharedCanvasLink[]>(() => MultiplayerCanvasEngine.getInitialLinks());
-  const [isCollaborating, setIsCollaborating] = useState<boolean>(true);
+  const [isCollaborating] = useState<boolean>(true);
   const [peerBroadcastMsg, setPeerBroadcastMsg] = useState<string | null>(null);
 
   // Simulated peer cursor movement

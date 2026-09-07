@@ -16,7 +16,6 @@ import {
   Compass,
   ArrowRight,
   X,
-  Command,
 } from 'lucide-react';
 import { Badge } from './Badge';
 

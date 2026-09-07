@@ -92,8 +92,8 @@ export class CloudVpcEngine {
   public static routeCrossVpcTraffic(srcVpcId: string, dstVpcId: string): InterVpcPacket {
     return {
       id: `pkt-cloud-${Date.now()}`,
-      sourceVpc: 'VPC-Production (10.100.1.50)',
-      destVpc: 'VPC-Database-Cluster (10.50.1.10)',
+      sourceVpc: srcVpcId || 'VPC-Production (10.100.1.50)',
+      destVpc: dstVpcId || 'VPC-Database-Cluster (10.50.1.10)',
       sourceIp: '10.100.1.50',
       destIp: '10.50.1.10',
       transitHops: [

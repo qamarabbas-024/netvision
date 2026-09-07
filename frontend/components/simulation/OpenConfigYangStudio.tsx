@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Activity, Radio, Play, Pause, FolderTree, Database, Code, Check } from 'lucide-react';
-import { OPENCONFIG_INTERFACES_TREE, generateGnmiSubscribeRequest, YangPathNode } from '@/lib/openConfigYangEngine';
+import { Radio, Play, Pause, FolderTree } from 'lucide-react';
+import { generateGnmiSubscribeRequest } from '@/lib/openConfigYangEngine';
 
 export const OpenConfigYangStudio: React.FC = () => {
-  const [selectedPath, setSelectedPath] = useState<string>('/interfaces/interface[name=eth0]/state/counters/in-octets');
+  const [selectedPath] = useState<string>('/interfaces/interface[name=eth0]/state/counters/in-octets');
   const [isStreaming, setIsStreaming] = useState<boolean>(true);
   const [inOctets, setInOctets] = useState<number>(489201948);
   const [outOctets, setOutOctets] = useState<number>(129482019);

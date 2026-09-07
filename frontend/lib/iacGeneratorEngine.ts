@@ -83,9 +83,10 @@ ${devices
   /**
    * Generates Ansible Idempotent Network Playbook
    */
-  public static generateAnsiblePlaybook(devices: IacDevice[]): string {
+  public static generateAnsiblePlaybook(devices: IacDevice[] = []): string {
+    const targetHosts = devices.map(d => d.name).join(', ') || 'network_switches';
     return `---
-# NetVision Automated Ansible Network Provisioning Playbook
+# NetVision Automated Ansible Network Provisioning Playbook (${targetHosts})
 # Standard: Idempotent declarative configuration
 
 - name: Provision Enterprise Fleet Topologies

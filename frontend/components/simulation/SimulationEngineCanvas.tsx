@@ -16,12 +16,9 @@ import {
   Shield,
   Monitor,
   Globe,
-  AlertCircle,
   ShieldAlert,
-  Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import {
   NetworkNode,
   NetworkLink,
@@ -370,6 +367,32 @@ export const SimulationEngineCanvas: React.FC<SimulationEngineCanvasProps> = ({
               </button>
             ))}
           </div>
+
+          {/* Zoom Controls */}
+          <div className="flex items-center gap-1 bg-[#14151a] p-0.5 rounded-lg border border-[#2a2e39]">
+            <button
+              type="button"
+              onClick={() => setZoomLevel((z) => Math.max(0.6, Number((z - 0.1).toFixed(1))))}
+              className="p-1 rounded text-zinc-400 hover:text-white"
+              title="Zoom Out"
+            >
+              <ZoomOut className="w-3 h-3" />
+            </button>
+            <span className="text-[10px] font-mono px-1 text-zinc-400">{Math.round(zoomLevel * 100)}%</span>
+            <button
+              type="button"
+              onClick={() => setZoomLevel((z) => Math.min(1.5, Number((z + 0.1).toFixed(1))))}
+              className="p-1 rounded text-zinc-400 hover:text-white"
+              title="Zoom In"
+            >
+              <ZoomIn className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Lifecycle State Indicator */}
+          <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-cyan-400 font-bold hidden sm:inline-block">
+            {lifecycleState}
+          </span>
         </div>
 
         {/* Failure State Simulation Toggle */}

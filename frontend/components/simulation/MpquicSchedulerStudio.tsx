@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Wifi, Radio, Zap, ShieldCheck, Activity, ArrowRight, Play } from 'lucide-react';
+import { Wifi, Radio } from 'lucide-react';
 import { scheduleMpquicPacket, MpquicPath, MpquicSchedulerMode } from '@/lib/mpquicSchedulerEngine';
 
 export const MpquicSchedulerStudio: React.FC = () => {

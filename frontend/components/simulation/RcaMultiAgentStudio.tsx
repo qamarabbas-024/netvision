@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Users, Bot, ShieldAlert, CheckCircle2, ArrowRight, Play, RefreshCw, Cpu, Activity } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { runMultiAgentRca, RcaConsensusResult } from '@/lib/rcaMultiAgentEngine';
 
 export const RcaMultiAgentStudio: React.FC = () => {

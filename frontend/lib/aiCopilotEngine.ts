@@ -38,7 +38,6 @@ export class AiCopilotEngine {
    */
   public static analyzeTopology(context: TopologyInspectionContext): NetworkHealthReport {
     const issues: NetworkHealthIssue[] = [];
-    const nodeMap = new Map(context.nodes.map((n) => [n.id, n]));
     const linkMap = new Map<string, string[]>();
 
     for (const l of context.links) {

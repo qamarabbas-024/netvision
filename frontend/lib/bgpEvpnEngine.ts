@@ -80,8 +80,8 @@ export class BgpEvpnFabricEngine {
 
     return {
       id: `vxlan-${Date.now()}`,
-      sourceWorkload: 'App-VM-01 (192.168.10.11)',
-      destWorkload: 'App-VM-02 (192.168.10.12)',
+      sourceWorkload: srcWorkloadId || 'App-VM-01 (192.168.10.11)',
+      destWorkload: dstWorkloadId || 'App-VM-02 (192.168.10.12)',
       vni: 10001,
       underlaySourceIp: '10.0.0.11 (VTEP Leaf-01)',
       underlayDestIp: '10.0.0.12 (VTEP Leaf-02)',

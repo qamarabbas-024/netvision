@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Hand, Play, Pause, RotateCw, Activity, Sparkles, Check, Radio } from 'lucide-react';
 import { detectSpatialGesture, DetectedGesture } from '@/lib/xrHandTrackingEngine';
 
 export const XrHandTrackingStudio: React.FC = () => {
@@ -35,7 +34,7 @@ export const XrHandTrackingStudio: React.FC = () => {
       t += 0.02;
 
       const cx = w * 0.5;
-      const cy = h * 0.5;
+      const cy = h * 0.5 + Math.sin(t) * 3;
 
       // Draw Virtual 3D Network Node
       ctx.fillStyle = '#38bdf8';

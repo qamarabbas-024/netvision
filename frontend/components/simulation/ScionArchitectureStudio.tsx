@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldCheck, Globe, ArrowRight, Lock, Activity, Check, Radio } from 'lucide-react';
+import { Globe, ArrowRight, Lock } from 'lucide-react';
 import { SAMPLE_SCION_PATHS, ScionPathOption } from '@/lib/scionArchitectureEngine';
 
 export const ScionArchitectureStudio: React.FC = () => {

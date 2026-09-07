@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Box, Play, Pause, RotateCw, Activity, ShieldAlert, Cpu } from 'lucide-react';
+import { Play, Pause } from 'lucide-react';
 import { simulateBufferStep, PacketParticle, BufferQueueState } from '@/lib/spatialPacketPhysicsEngine';
 
 export const SpatialPacketPhysicsStudio: React.FC = () => {

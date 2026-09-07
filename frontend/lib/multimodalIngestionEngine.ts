@@ -61,7 +61,7 @@ export class MultimodalIngestionEngine {
   public static parseLlmChatLog(chatText: string): MultimodalIngestionResult {
     return {
       sourceType: 'LLM_CHAT_LOG',
-      summary: 'Extracted network topology design and Cisco IOS configuration commands from LLM chat transcript.',
+      summary: chatText ? `Extracted network topology design from chat transcript (${chatText.length} chars).` : 'Extracted network topology design and Cisco IOS configuration commands from LLM chat transcript.',
       nodes: [
         { id: 'llm-gw', name: 'Edge-Gateway', type: 'FIREWALL', ipAddress: '192.168.1.1', x: 250, y: 120 },
         { id: 'llm-core', name: 'Campus-Core-Switch', type: 'SWITCH', ipAddress: '192.168.1.2', x: 250, y: 260 },

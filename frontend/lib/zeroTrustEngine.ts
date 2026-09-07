@@ -50,18 +50,18 @@ export class ZeroTrustEngine {
       return {
         status: 'STEP_UP_MFA',
         reasons,
-        mTLSCertSubject: 'CN=Dev-Workstation-01, OU=Engineering',
-        spiffeId: 'spiffe://corp.netvision/sa/engineering-dev',
-        assignedTunnel: 'RESTRICTED (Ephemeral Sandbox Proxy)',
+        mTLSCertSubject: `CN=Dev-Workstation-01, OU=${userRole || 'Engineering'}`,
+        spiffeId: `spiffe://corp.netvision/sa/${userRole || 'engineering-dev'}`,
+        assignedTunnel: `RESTRICTED (Ephemeral Sandbox Proxy -> ${targetApp || 'Internal'})`,
       };
     }
 
     return {
       status: 'GRANTED',
       reasons: ['Device posture 100% compliant', 'mTLS identity authenticated', 'SPIFFE token valid'],
-      mTLSCertSubject: 'CN=Dev-Workstation-01, OU=Engineering',
-      spiffeId: 'spiffe://corp.netvision/sa/engineering-dev',
-      assignedTunnel: 'WireGuard-Mesh-Tunnel (AES-256-GCM / ChaCha20)',
+      mTLSCertSubject: `CN=Dev-Workstation-01, OU=${userRole || 'Engineering'}`,
+      spiffeId: `spiffe://corp.netvision/sa/${userRole || 'engineering-dev'}`,
+      assignedTunnel: `WireGuard-Mesh-Tunnel (AES-256-GCM -> ${targetApp || 'Production'})`,
     };
   }
 }

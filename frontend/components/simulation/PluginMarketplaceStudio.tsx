@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Package, Download, Star, Check, ShieldCheck, Search, Filter, Trash2, Cpu } from 'lucide-react';
+import { Download, Star, Search, Trash2 } from 'lucide-react';
 import { COMMUNITY_PLUGIN_CATALOG, ProtocolPluginPackage } from '@/lib/pluginMarketplaceEngine';
 
 export const PluginMarketplaceStudio: React.FC = () => {

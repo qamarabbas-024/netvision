@@ -13,7 +13,6 @@ import {
   Sparkles,
   Award,
   Layers,
-  ChevronRight,
   Info,
   Clock,
   ArrowRight,
@@ -720,6 +719,12 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
                   <span className="text-sm font-bold text-emerald-400">+{session?.scoreBreakdown?.verificationScore || 15} pts</span>
                 </div>
               </div>
+
+              {verificationResult?.testResults && (
+                <div className="text-[11px] font-mono text-emerald-400">
+                  ✓ {verificationResult.testResults.length} automated verification checks passed.
+                </div>
+              )}
 
               {/* Post-Mortem Technical Deep Dive */}
               <div className="flex flex-col gap-4 border-t border-zinc-800 pt-4">

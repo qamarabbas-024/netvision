@@ -18,7 +18,7 @@ import {
 import { SoundFx } from '@/lib/soundFx';
 
 export const ThreatIntelligenceStudio: React.FC = () => {
-  const [iocs, setIocs] = useState<ThreatIoc[]>(() => ThreatIntelEngine.getInitialIocs());
+  const [iocs] = useState<ThreatIoc[]>(() => ThreatIntelEngine.getInitialIocs());
   const [mitreCards] = useState<MitreTacticCard[]>(() => ThreatIntelEngine.getMitreMatrix());
   const [mitigatedIocs, setMitigatedIocs] = useState<string[]>([]);
   const [flowspecRule, setFlowspecRule] = useState<string | null>(null);

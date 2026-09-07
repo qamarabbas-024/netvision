@@ -8,12 +8,22 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, glowColor = 'none', interactive = false, children, ...props }, ref) => {
+    const glowStyles = {
+      cyan: 'hover:shadow-[0_0_20px_rgba(0,240,255,0.15)]',
+      blue: 'hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]',
+      purple: 'hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]',
+      emerald: 'hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]',
+      rose: 'hover:shadow-[0_0_20px_rgba(244,63,94,0.15)]',
+      none: '',
+    };
+
     return (
       <div
         ref={ref}
         className={cn(
           'surface-2 rounded-xl p-5 sm:p-6 shadow-instrument transition-all duration-150',
           interactive && 'hover:border-[#38bdf8]/40 hover:bg-[#1f222c] cursor-pointer',
+          glowStyles[glowColor],
           className
         )}
         {...props}

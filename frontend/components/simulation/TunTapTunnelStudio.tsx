@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Terminal, ShieldCheck, Activity, Copy, Download, Check, Radio, Network } from 'lucide-react';
+import { Terminal, Copy, Check, Radio } from 'lucide-react';
 import { generateTunTapSetupScript, TunTapDevice } from '@/lib/tunTapTunnelEngine';
 
 export const TunTapTunnelStudio: React.FC = () => {

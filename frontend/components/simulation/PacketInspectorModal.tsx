@@ -4,7 +4,7 @@ import React from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
 import { NetworkPacket } from '@/types';
-import { Layers, ShieldAlert, Cpu, ArrowRight } from 'lucide-react';
+import { Layers, ShieldAlert, ArrowRight } from 'lucide-react';
 
 export interface PacketInspectorModalProps {
   packet: NetworkPacket | null;

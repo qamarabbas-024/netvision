@@ -27,7 +27,7 @@ export const PdfReportStudio: React.FC<PdfReportStudioProps> = ({
 }) => {
   const [docType, setDocType] = useState<'certificate' | 'lab' | 'scorecard'>(initialType);
   const [candidateName, setCandidateName] = useState<string>(certificateData?.candidateName || 'Alex Rivers');
-  const [certTitle, setCertTitle] = useState<string>(certificateData?.certificationTitle || 'NV-NET 202: Certified IP Addressing & Subnetting Engineer');
+  const certTitle = certificateData?.certificationTitle || 'NV-NET 202: Certified IP Addressing & Subnetting Engineer';
   const [credentialId, setCredentialId] = useState<string>(certificateData?.credentialId || 'NV-NET-2026-8841');
 
   if (!isOpen) return null;

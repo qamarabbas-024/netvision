@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Share2, Play, RotateCcw, Activity, ShieldCheck, Users } from 'lucide-react';
+import { Play, RotateCcw } from 'lucide-react';
 import { createP2PMesh, propagateGossipStep, PeerNode } from '@/lib/p2pGossipMeshEngine';
 
 export const P2pGossipMeshStudio: React.FC = () => {

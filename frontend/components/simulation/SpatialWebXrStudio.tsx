@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Eye, RotateCw, Play, Pause, Sparkles, Layers, Box, Compass } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { SAMPLE_SPATIAL_NODES, projectSpatial3D, SpatialHoloNode } from '@/lib/spatialWebXrEngine';
 
 export const SpatialWebXrStudio: React.FC = () => {

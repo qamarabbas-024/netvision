@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Waves, Activity, ShieldCheck, Zap, Anchor, Compass, Radio } from 'lucide-react';
+import { Waves, Anchor } from 'lucide-react';
 import { SAMPLE_SUBSEA_CABLES, SubseaCableSystem } from '@/lib/subseaBathymetryEngine';
 
 export const SubseaBathymetryStudio: React.FC = () => {

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Cpu, Copy, Check, Play, ShieldCheck, Box, Activity } from 'lucide-react';
-import { generateRustWasmTemplate, WasmPluginSpec } from '@/lib/wasmProtocolSdkEngine';
+import { Copy, Check, Play, Activity } from 'lucide-react';
+import { generateRustWasmTemplate } from '@/lib/wasmProtocolSdkEngine';
 
 export const WasmProtocolSdkStudio: React.FC = () => {
   const [rustCode] = useState<string>(generateRustWasmTemplate());

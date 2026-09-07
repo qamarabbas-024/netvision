@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
-import { Radio, RotateCw, Play, Pause, Zap, Activity, Globe, Compass } from 'lucide-react';
+import { Play, Pause } from 'lucide-react';
 import { SAMPLE_LEO_SATELLITES, computeOrbitalCoordinate, SatelliteNode } from '@/lib/leoConstellationEngine';
 
 export const LeoConstellationStudio: React.FC = () => {

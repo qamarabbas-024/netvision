@@ -9,15 +9,8 @@ import {
   Layers,
   Send,
   Shield,
-  Server,
-  Monitor,
-  Network,
   Activity,
   AlertTriangle,
-  Info,
-  CheckCircle2,
-  Sliders,
-  Maximize2,
 } from 'lucide-react';
 import { SoundFx } from '@/lib/soundFx';
 
@@ -67,9 +60,8 @@ export interface Packet3D {
 export const Interactive3DPacketJourney: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
-  const [simulationSpeed, setSimulationSpeed] = useState<number>(1);
+  const [simulationSpeed] = useState<number>(1);
   const [selectedProtocol, setSelectedProtocol] = useState<'HTTPS' | 'DNS' | 'ICMP' | 'TCP SYN'>('HTTPS');
-  const [selectedNode, setSelectedNode] = useState<Node3D | null>(null);
   const [inspectedPacket, setInspectedPacket] = useState<Packet3D | null>(null);
   const [injectDrop, setInjectDrop] = useState<boolean>(false);
   const [telemetryMessage, setTelemetryMessage] = useState<string>('Simulator initialized. Ready to dispatch packets.');

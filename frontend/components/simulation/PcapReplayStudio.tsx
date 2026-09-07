@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Layers, FileCode, Play, Pause, RotateCw, Filter, ShieldCheck, ChevronRight, ChevronDown } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { SAMPLE_PCAP_STREAM, CapturedPacket } from '@/lib/pcapReplayEngine';
 
 export const PcapReplayStudio: React.FC = () => {
   const [packets] = useState<CapturedPacket[]>(SAMPLE_PCAP_STREAM);
   const [selectedId, setSelectedId] = useState<number>(3);
   const [filterText, setFilterText] = useState<string>('');
-  const [expandedSection, setExpandedSection] = useState<'eth' | 'ip' | 'tcp' | 'all'>('all');
 
   const selectedPacket = packets.find((p) => p.id === selectedId) || packets[0];
 

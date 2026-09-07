@@ -9,11 +9,7 @@ import {
   SkipForward,
   Download,
   Clock,
-  Layers,
-  Sparkles,
-  Sliders,
   CheckCircle2,
-  FileCode
 } from 'lucide-react';
 import { downloadPcapFile, PcapPacketData } from '@/lib/pcapExporter';
 

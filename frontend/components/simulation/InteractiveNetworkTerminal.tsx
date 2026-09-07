@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Terminal as TerminalIcon, Sparkles, Play, RotateCcw, Copy, Check, Minimize2, Maximize2 } from 'lucide-react';
+import { Terminal as TerminalIcon, RotateCcw, Copy, Check } from 'lucide-react';
 
 export interface TerminalLogLine {
   id: string;
@@ -179,8 +179,9 @@ ${domain}.		300	IN	A	172.67.180.99
         newLogs.push({
           id: `out-${Date.now()}-1`,
           type: 'output',
-          text: `HTTP/2 200 
-date: Sun, 23 Aug 2026 01:50:00 GMT
+          text: `* Connected to ${url} (104.21.48.1) port 443
+< HTTP/2 200 
+< date: Sun, 23 Aug 2026 01:50:00 GMT
 content-type: text/html; charset=UTF-8
 server: cloudflare
 strict-transport-security: max-age=31536000; includeSubDomains; preload

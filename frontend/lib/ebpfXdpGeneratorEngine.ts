@@ -8,8 +8,8 @@ export interface XdpFilterRule {
   action: 'XDP_DROP' | 'XDP_PASS' | 'XDP_TX';
 }
 
-export function generateEbpfXdpCCode(rules: XdpFilterRule[]): string {
-  return `// NetVision High-Performance eBPF XDP Driver Filter
+export function generateEbpfXdpCCode(rules: XdpFilterRule[] = []): string {
+  return `// NetVision High-Performance eBPF XDP Driver Filter (Rules: ${rules.length})
 // Target: Linux Kernel 6.x+ (clang -O2 -target bpf -c xdp_prog.c -o xdp_prog.o)
 
 #include <linux/bpf.h>
