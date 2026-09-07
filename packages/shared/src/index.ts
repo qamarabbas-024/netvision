@@ -4,6 +4,7 @@ export * from './models/KnowledgeModel';
 export * from './models/SandboxModel';
 export * from './models/TroubleshootingModel';
 export * from './data/troubleshootingScenarios';
+export * from './curriculum/flagshipCurriculum';
 
 export const API_ROUTES = {
   AUTH: {

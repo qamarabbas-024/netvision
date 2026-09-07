@@ -55,7 +55,7 @@ async function runProductCorrectnessTests() {
       await prisma.anonymousLearner.create({ data: { id: anonId } });
 
       let course = await prisma.course.findFirst({
-        where: { code: 'NET-404' },
+        where: { code: 'NV-C01' },
         include: { modules: { include: { lessons: true } } },
       });
       assert(!!course && course.modules.length > 0, 'Course exists for test');
@@ -131,7 +131,7 @@ async function runProductCorrectnessTests() {
       });
 
       let course = await prisma.course.findFirst({
-        where: { code: 'NET-404' },
+        where: { code: 'NV-C01' },
         include: { modules: { include: { lessons: { orderBy: { order: 'asc' } } } } },
       });
       const allLessons = course!.modules.flatMap((m) => m.lessons);
@@ -330,7 +330,7 @@ async function runProductCorrectnessTests() {
       await prisma.anonymousLearner.create({ data: { id: anonId } });
 
       let course = await prisma.course.findFirst({
-        where: { code: 'NET-404' },
+        where: { code: 'NV-C01' },
         include: { modules: { include: { lessons: true } } },
       });
       const lesson = course!.modules[0].lessons[0];
@@ -380,16 +380,16 @@ async function runProductCorrectnessTests() {
         },
       });
 
-      // Find required quiz in NET-201 (Core required course for NV-NET)
+      // Find required quiz in NV-C02
       const course201 = await prisma.course.findFirst({
-        where: { code: 'NET-201' },
+        where: { code: 'NV-C02' },
         include: { modules: { include: { lessons: { include: { quizzes: true } } } } },
       });
       const requiredQuiz = course201?.modules[0]?.lessons[0]?.quizzes[0];
 
-      // Find unrelated quiz in NET-404
+      // Find unrelated quiz in NV-C05
       const course404 = await prisma.course.findFirst({
-        where: { code: 'NET-404' },
+        where: { code: 'NV-C05' },
         include: { modules: { include: { lessons: { include: { quizzes: true } } } } },
       });
       const unrelatedQuiz = course404?.modules[0]?.lessons[0]?.quizzes[0];
@@ -499,9 +499,9 @@ async function runProductCorrectnessTests() {
         }
       }
 
-      // Find an unrelated lab from NET-404
+      // Find an unrelated lab from NV-C05
       const unrelatedCourse = await prisma.course.findFirst({
-        where: { code: 'NET-404' },
+        where: { code: 'NV-C05' },
         include: { modules: { include: { lessons: { include: { labs: true } } } } },
       });
       const unrelatedLab = unrelatedCourse?.modules[0]?.lessons.find((l) => l.labs.length > 0)?.labs[0];

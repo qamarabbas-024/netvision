@@ -3,6 +3,7 @@ import * as argon2 from 'argon2';
 import { TARGET_16_COURSES } from '../src/topics/curriculum-migration';
 import { BENCHMARK_LESSONS_FULL } from '../src/topics/benchmark-lessons-content';
 import { EXPANDED_ASSESSMENT_QUESTION_BANK } from '../src/topics/assessment-question-bank';
+import { FLAGSHIP_5_COURSES, CANONICAL_CREDENTIALS } from '@netvision/shared';
 
 const prisma = new PrismaClient();
 
@@ -51,8 +52,8 @@ async function main() {
     console.log('ℹ️ Production Environment Detected: Skipping default demo/test user creation.');
   }
 
-  // 2. Upsert 16 Target Progressive Courses
-  console.log('📚 Upserting 16 Progressive Target Courses (NET-101 to NET-404)...');
+  // 2A. Upsert 16 Historical Courses (Retained Intact as Historical Records, published: false)
+  console.log('📚 Retaining 16 Historical Courses as Archive Records (NET-101 to NET-404)...');
   const courseMap = new Map<string, string>(); // code -> course.id
   const targetModuleMap = new Map<string, string>(); // course.id -> first module.id
 
@@ -74,7 +75,7 @@ async function main() {
           level: cDef.level,
           icon: cDef.icon,
           estimatedHours: cDef.estimatedHours,
-          published: true,
+          published: false, // Preserved intact as historical record, hidden from active catalog
           prerequisitesJson: cDef.prerequisitesJson,
         },
       });
@@ -91,7 +92,7 @@ async function main() {
           level: cDef.level,
           icon: cDef.icon,
           estimatedHours: cDef.estimatedHours,
-          published: true,
+          published: false, // Preserved intact as historical record
           prerequisitesJson: cDef.prerequisitesJson,
         },
       });
@@ -99,7 +100,7 @@ async function main() {
 
     courseMap.set(cDef.code, course.id);
 
-    // Upsert Module 1 for this target course
+    // Upsert historical Module 1 for backward compatibility
     const mod = await prisma.module.upsert({
       where: { id: `mod-${cDef.code.toLowerCase()}-1` },
       update: {
@@ -118,15 +119,78 @@ async function main() {
     });
 
     targetModuleMap.set(course.id, mod.id);
-    console.log(`  ✓ Course [${cDef.code}] "${cDef.title}" (${cDef.level}) -> Module [${mod.title}]`);
   }
 
-  // 3. Upsert Benchmark Deep Lessons (NET-101, NET-202, NET-404, NET-302, NET-304)
-  console.log('📌 Upserting Benchmark Lessons with Full 18-Step Architecture, Questions & Labs...');
+  // 2B. Upsert 5 Flagship Professional Certification Courses (NV-C01 to NV-C05, published: true)
+  console.log('🏛️ Upserting 5 Flagship Professional Certification Courses (NV-C01 to NV-C05)...');
+  const flagshipCourseMap = new Map<string, string>(); // code -> course.id
+  const flagshipModuleMap = new Map<string, string>(); // legacyCode -> flagshipModule.id
+
+  for (const fDef of FLAGSHIP_5_COURSES) {
+    let flagshipCourse = await prisma.course.findFirst({
+      where: { OR: [{ code: fDef.code }, { slug: fDef.slug }] },
+    });
+
+    const courseData = {
+      code: fDef.code,
+      slug: fDef.slug,
+      order: fDef.order,
+      title: fDef.title,
+      tagline: fDef.tagline,
+      category: fDef.category,
+      description: fDef.description,
+      level: fDef.level as any,
+      icon: fDef.icon,
+      estimatedHours: fDef.estimatedHours,
+      published: true,
+      prerequisitesJson: fDef.prerequisites,
+    };
+
+    if (flagshipCourse) {
+      flagshipCourse = await prisma.course.update({
+        where: { id: flagshipCourse.id },
+        data: courseData,
+      });
+    } else {
+      flagshipCourse = await prisma.course.create({
+        data: courseData,
+      });
+    }
+
+    flagshipCourseMap.set(fDef.code, flagshipCourse.id);
+
+    // Upsert Flagship Domain Modules
+    for (const mDef of fDef.modules) {
+      const flagshipModule = await prisma.module.upsert({
+        where: { id: mDef.id },
+        update: {
+          courseId: flagshipCourse.id,
+          title: mDef.title,
+          description: mDef.description,
+          order: mDef.order,
+        },
+        create: {
+          id: mDef.id,
+          courseId: flagshipCourse.id,
+          title: mDef.title,
+          description: mDef.description,
+          order: mDef.order,
+        },
+      });
+
+      // Map each constituent legacy course code to this flagship domain module
+      for (const legCode of mDef.legacyCourseCodes) {
+        flagshipModuleMap.set(legCode, flagshipModule.id);
+      }
+    }
+    console.log(`  ✓ Flagship Course [${fDef.code}] "${fDef.title}" (${fDef.level}) -> ${fDef.modules.length} Modules`);
+  }
+
+  // 3. Upsert Benchmark Deep Lessons (Re-parented to Flagship Domain Modules)
+  console.log('📌 Upserting Benchmark Lessons into Flagship Domain Modules...');
   for (const bDef of BENCHMARK_LESSONS_FULL) {
-    const targetCourseId = courseMap.get(bDef.courseCode);
-    if (!targetCourseId) continue;
-    const targetModId = targetModuleMap.get(targetCourseId)!;
+    const targetModId = flagshipModuleMap.get(bDef.courseCode) || targetModuleMap.get(courseMap.get(bDef.courseCode) || '');
+    if (!targetModId) continue;
 
     const bLesson = await prisma.lesson.upsert({
       where: { slug: bDef.slug },
@@ -203,7 +267,7 @@ async function main() {
   // Level 0 Legacy Course
   const level0Course = await prisma.course.upsert({
     where: { slug: 'level-0-foundations' },
-    update: { title: 'Level 0: Computer & Network Foundations', level: CourseLevel.FOUNDATIONAL, code: 'LEGACY-0' },
+    update: { title: 'Level 0: Computer & Network Foundations', level: CourseLevel.FOUNDATIONAL, code: 'LEGACY-0', published: false },
     create: {
       slug: 'level-0-foundations',
       code: 'LEGACY-0',
@@ -215,7 +279,7 @@ async function main() {
       level: CourseLevel.FOUNDATIONAL,
       icon: 'Network',
       estimatedHours: 12,
-      published: true,
+      published: false,
     },
   });
 
@@ -248,7 +312,7 @@ async function main() {
   for (let idx = 0; idx < level0Lessons.length; idx++) {
     const lDef = level0Lessons[idx];
     const targetCId = courseMap.get(lDef.targetCode) || defaultTargetCourseId;
-    const targetMId = targetModuleMap.get(targetCId) || level0Mod.id;
+    const targetMId = flagshipModuleMap.get(lDef.targetCode) || targetModuleMap.get(targetCId) || level0Mod.id;
 
     if (benchmarkSlugs.has(lDef.slug)) {
       continue; // Handled with full 18-step metadata by BENCHMARK_LESSONS_FULL
@@ -327,7 +391,7 @@ async function main() {
     // Seed legacy Course wrapper for backward query compatibility
     const legCourse = await prisma.course.upsert({
       where: { slug: tDef.slug },
-      update: { title: tDef.title, code: `LEGACY-${idx + 1}` },
+      update: { title: tDef.title, code: `LEGACY-${idx + 1}`, published: false },
       create: {
         slug: tDef.slug,
         code: `LEGACY-${idx + 1}`,
@@ -339,7 +403,7 @@ async function main() {
         level: CourseLevel.BEGINNER,
         icon: 'Network',
         estimatedHours: 3,
-        published: true,
+        published: false,
       },
     });
 
@@ -354,7 +418,7 @@ async function main() {
     }
 
     const targetCId = courseMap.get(tDef.targetCode) || defaultTargetCourseId;
-    const targetMId = targetModuleMap.get(targetCId) || legMod.id;
+    const targetMId = flagshipModuleMap.get(tDef.targetCode) || targetModuleMap.get(targetCId) || legMod.id;
 
     const lesson = await prisma.lesson.upsert({
       where: { slug: tDef.lessonSlug },
@@ -476,232 +540,96 @@ async function main() {
     });
   }
 
-  // 6. Seed Initial Professional Certification Definition (NV-NET)
-  console.log('🎓 Seeding Professional Certification Definition (NV-NET)...');
-  await prisma.certificationDefinition.upsert({
-    where: { code: 'NV-NET' },
-    update: {
-      title: 'NetVision Certified Network Administrator',
-      description: 'Demonstrates professional competence in Ethernet Layer 2 switching, IPv4 CIDR subnetting, core IP services (ARP, ICMP, DNS, DHCP), and Transport Layer TCP/UDP protocol operations.',
-      level: CourseLevel.BEGINNER,
-      isActive: true,
-      requirementsJson: {
-        requiredCourseCodes: ['NET-201', 'NET-202', 'NET-203', 'NET-204', 'NET-302'],
-        minAssessmentAvg: 80,
-        requireAllLabs: true,
-      },
-      policyJson: {
-        maxAttempts: 3,
-        cooldownAfterFirstFailure: 86400, // 24 hours
-        cooldownAfterSubsequentFailure: 259200, // 72 hours
-        rollingWindowDays: 30,
-      },
-      theoryConfigJson: {
-        questionCount: 50,
-        durationSeconds: 3600, // 60 minutes
-        passingScore: 80,
-        troubleshootingMinimum: 70,
-      },
-      practicalConfigJson: {
-        durationSeconds: 5400, // 90 minutes
-        passingScore: 80,
-        maximumHints: 2,
-        hintPenalty: 5, // 5 percentage points penalty per hint
-        scenarioCode: 'NV-NET-PRACTICAL-SCENARIO-1',
-        scoringWeights: {
-          theoryWeight: 20,
-          practicalWeight: 35,
-          troubleshootingWeight: 25,
-          packetAnalysisWeight: 20,
-          componentMinimum: 60,
-          passingScore: 80,
-        },
-      },
-    },
-    create: {
-      code: 'NV-NET',
-      title: 'NetVision Certified Network Administrator',
-      description: 'Demonstrates professional competence in Ethernet Layer 2 switching, IPv4 CIDR subnetting, core IP services (ARP, ICMP, DNS, DHCP), and Transport Layer TCP/UDP protocol operations.',
-      level: CourseLevel.BEGINNER,
-      isActive: true,
-      requirementsJson: {
-        requiredCourseCodes: ['NET-201', 'NET-202', 'NET-203', 'NET-204', 'NET-302'],
-        minAssessmentAvg: 80,
-        requireAllLabs: true,
-      },
-      policyJson: {
-        maxAttempts: 3,
-        cooldownAfterFirstFailure: 86400, // 24 hours
-        cooldownAfterSubsequentFailure: 259200, // 72 hours
-        rollingWindowDays: 30,
-      },
-      theoryConfigJson: {
-        questionCount: 50,
-        durationSeconds: 3600, // 60 minutes
-        passingScore: 80,
-        troubleshootingMinimum: 70,
-      },
-      practicalConfigJson: {
-        durationSeconds: 5400, // 90 minutes
-        passingScore: 80,
-        maximumHints: 2,
-        hintPenalty: 5, // 5 percentage points penalty per hint
-        scenarioCode: 'NV-NET-PRACTICAL-SCENARIO-1',
-        scoringWeights: {
-          theoryWeight: 20,
-          practicalWeight: 35,
-          troubleshootingWeight: 25,
-          packetAnalysisWeight: 20,
-          componentMinimum: 60,
-          passingScore: 80,
-        },
-      },
-    },
-  });
+  // 6. Seed Authoritative Professional Certification Definitions (6 Canonical Credentials)
+  console.log('🎓 Seeding Authoritative Professional Certification Definitions (6 Canonical Credentials)...');
+  for (const cred of CANONICAL_CREDENTIALS) {
+    const levelEnum =
+      cred.level === 'FOUNDATIONAL'
+        ? CourseLevel.FOUNDATIONAL
+        : cred.level === 'INTERMEDIATE'
+        ? CourseLevel.INTERMEDIATE
+        : cred.level === 'ADVANCED'
+        ? CourseLevel.ADVANCED
+        : CourseLevel.BEGINNER;
 
-  await prisma.certificationDefinition.upsert({
-    where: { code: 'NV-SEC' },
-    update: {
-      title: 'NetVision Certified Cyber-Defense & Zero-Trust Specialist',
-      level: CourseLevel.ADVANCED,
-      isActive: true,
-    },
-    create: {
-      code: 'NV-SEC',
-      title: 'NetVision Certified Cyber-Defense & Zero-Trust Specialist',
-      description: 'Demonstrates elite mastery in Red/Blue cyber-defense, eBPF XDP firewall mitigation, NIST SP 800-207 Zero-Trust posture enforcement, and Post-Quantum Kyber-1024 encryption.',
-      level: CourseLevel.ADVANCED,
-      isActive: true,
-      requirementsJson: {
-        requiredCourseCodes: ['NET-404', 'NET-304'],
-        minAssessmentAvg: 85,
-        requireAllLabs: true,
-      },
-      policyJson: {
-        maxAttempts: 3,
-        cooldownAfterFirstFailure: 86400,
-        cooldownAfterSubsequentFailure: 259200,
-        rollingWindowDays: 30,
-      },
-      theoryConfigJson: {
-        questionCount: 60,
-        durationSeconds: 4500,
-        passingScore: 85,
-        troubleshootingMinimum: 75,
-      },
-      practicalConfigJson: {
-        durationSeconds: 5400,
-        passingScore: 85,
-        maximumHints: 1,
-        hintPenalty: 5,
-        scenarioCode: 'NV-SEC-PRACTICAL-SCENARIO-1',
-        scoringWeights: {
-          theoryWeight: 20,
-          practicalWeight: 40,
-          troubleshootingWeight: 25,
-          packetAnalysisWeight: 15,
-          componentMinimum: 70,
-          passingScore: 85,
-        },
-      },
-    },
-  });
+    const requirements = cred.isMastery
+      ? {
+          requiredCourseCodes: ['NV-C01', 'NV-C02', 'NV-C03', 'NV-C04', 'NV-C05'],
+          requiredCredentialCodes: ['NV-NET-C01', 'NV-NET-C02', 'NV-NET-C03', 'NV-NET-C04', 'NV-NET-C05'],
+          minAssessmentAvg: 85,
+          requireAllLabs: true,
+          isMastery: true,
+        }
+      : {
+          requiredCourseCodes: [cred.courseCode!],
+          minAssessmentAvg: 80,
+          requireAllLabs: true,
+          isMastery: false,
+        };
 
-  await prisma.certificationDefinition.upsert({
-    where: { code: 'NV-CLOUD' },
-    update: {
-      title: 'NetVision Certified Multi-Cloud Network Architect',
-      level: CourseLevel.ADVANCED,
-      isActive: true,
-    },
-    create: {
-      code: 'NV-CLOUD',
-      title: 'NetVision Certified Multi-Cloud Network Architect',
-      description: 'Demonstrates expert competence in AWS Transit Gateway hub-and-spoke topologies, BGP EVPN/VXLAN data center fabrics, SD-WAN dynamic path steering, and Multi-Cloud interconnection.',
-      level: CourseLevel.ADVANCED,
-      isActive: true,
-      requirementsJson: {
-        requiredCourseCodes: ['NET-304', 'NET-401'],
-        minAssessmentAvg: 85,
-        requireAllLabs: true,
+    await prisma.certificationDefinition.upsert({
+      where: { code: cred.code },
+      update: {
+        title: cred.title,
+        description: cred.description,
+        level: levelEnum,
+        isActive: true,
+        requirementsJson: requirements,
       },
-      policyJson: {
-        maxAttempts: 3,
-        cooldownAfterFirstFailure: 86400,
-        cooldownAfterSubsequentFailure: 259200,
-        rollingWindowDays: 30,
-      },
-      theoryConfigJson: {
-        questionCount: 60,
-        durationSeconds: 4500,
-        passingScore: 85,
-        troubleshootingMinimum: 75,
-      },
-      practicalConfigJson: {
-        durationSeconds: 5400,
-        passingScore: 85,
-        maximumHints: 1,
-        hintPenalty: 5,
-        scenarioCode: 'NV-CLOUD-PRACTICAL-SCENARIO-1',
-        scoringWeights: {
-          theoryWeight: 20,
-          practicalWeight: 40,
-          troubleshootingWeight: 25,
-          packetAnalysisWeight: 15,
-          componentMinimum: 70,
-          passingScore: 85,
+      create: {
+        code: cred.code,
+        title: cred.title,
+        description: cred.description,
+        level: levelEnum,
+        isActive: true,
+        requirementsJson: requirements,
+        policyJson: {
+          maxAttempts: 3,
+          cooldownAfterFirstFailure: 86400,
+          cooldownAfterSubsequentFailure: 259200,
+          rollingWindowDays: 30,
+        },
+        theoryConfigJson: {
+          questionCount: cred.isMastery ? 75 : 40,
+          durationSeconds: cred.isMastery ? 5400 : 3600,
+          passingScore: cred.isMastery ? 85 : 80,
+          troubleshootingMinimum: cred.isMastery ? 80 : 70,
+        },
+        practicalConfigJson: {
+          durationSeconds: cred.isMastery ? 7200 : 5400,
+          passingScore: cred.isMastery ? 85 : 80,
+          maximumHints: cred.isMastery ? 0 : 2,
+          hintPenalty: 5,
+          scenarioCode: `${cred.code}-PRACTICAL-SCENARIO`,
+          scoringWeights: {
+            theoryWeight: 20,
+            practicalWeight: 40,
+            troubleshootingWeight: 25,
+            packetAnalysisWeight: 15,
+            componentMinimum: 70,
+            passingScore: cred.isMastery ? 85 : 80,
+          },
         },
       },
-    },
-  });
+    });
+    console.log(`  ✓ Credential Definition [${cred.code}] "${cred.title}"`);
+  }
 
-  await prisma.certificationDefinition.upsert({
-    where: { code: 'NV-AIOPS' },
-    update: {
-      title: 'NetVision Certified Autonomous Network & NetDevOps Engineer',
-      level: CourseLevel.ADVANCED,
-      isActive: true,
-    },
-    create: {
-      code: 'NV-AIOPS',
-      title: 'NetVision Certified Autonomous Network & NetDevOps Engineer',
-      description: 'Demonstrates deep mastery in Infrastructure-as-Code (Terraform/Ansible/Netmiko), gNMI OpenConfig streaming telemetry, and autonomous closed-loop AI self-healing pipelines.',
-      level: CourseLevel.ADVANCED,
-      isActive: true,
-      requirementsJson: {
-        requiredCourseCodes: ['NET-403', 'NET-404'],
-        minAssessmentAvg: 85,
-        requireAllLabs: true,
-      },
-      policyJson: {
-        maxAttempts: 3,
-        cooldownAfterFirstFailure: 86400,
-        cooldownAfterSubsequentFailure: 259200,
-        rollingWindowDays: 30,
-      },
-      theoryConfigJson: {
-        questionCount: 60,
-        durationSeconds: 4500,
-        passingScore: 85,
-        troubleshootingMinimum: 75,
-      },
-      practicalConfigJson: {
-        durationSeconds: 5400,
-        passingScore: 85,
-        maximumHints: 1,
-        hintPenalty: 5,
-        scenarioCode: 'NV-AIOPS-PRACTICAL-SCENARIO-1',
-        scoringWeights: {
-          theoryWeight: 20,
-          practicalWeight: 40,
-          troubleshootingWeight: 25,
-          packetAnalysisWeight: 15,
-          componentMinimum: 70,
-          passingScore: 85,
+  // Preserve legacy credentials as inactive (zero rows deleted)
+  const legacyCredCodes = ['NV-NET', 'NV-SEC', 'NV-CLOUD', 'NV-AIOPS'];
+  for (const legCode of legacyCredCodes) {
+    const existing = await prisma.certificationDefinition.findUnique({ where: { code: legCode } });
+    if (existing) {
+      await prisma.certificationDefinition.update({
+        where: { code: legCode },
+        data: {
+          isActive: false,
+          ...(legCode === 'NV-NET' ? { requirementsJson: { requiredCourseCodes: ['NV-C02', 'NV-C03'], minAssessmentAvg: 80, requireAllLabs: true } } : {}),
         },
-      },
-    },
-  });
+      });
+      console.log(`  ℹ Preserved historical credential [${legCode}] as inactive`);
+    }
+  }
 
   console.log('✅ Phase 12C Curriculum Migration & Seed Completed Successfully!');
 }

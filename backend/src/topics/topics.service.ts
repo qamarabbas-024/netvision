@@ -5,6 +5,7 @@ import { CourseLevel } from '@prisma/client';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { AchievementsService } from '../achievements/achievements.service';
 import { NETWORKING_COMMANDS_CATALOG } from './commands-catalog';
+import { LEGACY_SLUG_COMPATIBILITY_MAP } from '@netvision/shared';
 
 @Injectable()
 export class TopicsService {
@@ -101,6 +102,7 @@ export class TopicsService {
         lessonsCount,
         completedLessons: completedCount,
         progressPercent,
+        prerequisites: (course.prerequisitesJson as string[]) || [],
       };
     });
 
@@ -114,8 +116,10 @@ export class TopicsService {
   }
 
   async getCourseBySlug(slug: string, identityInput?: string | { userId?: string; anonymousId?: string }) {
+    const resolvedSlug = LEGACY_SLUG_COMPATIBILITY_MAP[slug]?.flagshipSlug || slug;
+
     const course = await this.prisma.course.findUnique({
-      where: { slug },
+      where: { slug: resolvedSlug },
       include: {
         modules: {
           orderBy: { order: 'asc' },
@@ -131,7 +135,7 @@ export class TopicsService {
       },
     });
 
-    if (!course) {
+    if (!course || (!course.published && !LEGACY_SLUG_COMPATIBILITY_MAP[slug])) {
       throw new NotFoundException(`Course with slug "${slug}" not found.`);
     }
 
@@ -212,6 +216,7 @@ export class TopicsService {
       lessonsCount: allLessons.length,
       completedLessons: completedCount,
       progressPercent,
+      prerequisites: (course.prerequisitesJson as string[]) || [],
       modules,
     };
   }
@@ -1861,8 +1866,10 @@ export class TopicsService {
       throw new BadRequestException('Learner identity (userId or anonymousId) is required.');
     }
 
+    const resolvedSlug = LEGACY_SLUG_COMPATIBILITY_MAP[courseIdOrSlug]?.flagshipSlug || courseIdOrSlug;
+
     const course = await this.prisma.course.findFirst({
-      where: { OR: [{ id: courseIdOrSlug }, { slug: courseIdOrSlug }] },
+      where: { OR: [{ id: courseIdOrSlug }, { slug: resolvedSlug }] },
       include: {
         modules: {
           orderBy: { order: 'asc' },
