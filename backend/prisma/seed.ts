@@ -584,6 +584,43 @@ async function main() {
           isMastery: false,
         };
 
+    const policyConfig = {
+      maxAttempts: 3,
+      cooldownAfterFirstFailure: 86400,
+      cooldownAfterSubsequentFailure: 259200,
+      rollingWindowDays: cred.isMastery ? 90 : 30,
+    };
+
+    const theoryConfig = {
+      questionCount: cred.isMastery ? 75 : 40,
+      durationSeconds: cred.isMastery ? 7200 : 3600,
+      passingScore: cred.isMastery ? 85 : 80,
+      troubleshootingMinimum: cred.isMastery ? 80 : 70,
+    };
+
+    const practicalConfig = {
+      durationSeconds: cred.isMastery ? 7200 : 5400,
+      passingScore: cred.isMastery ? 85 : 80,
+      maximumHints: cred.isMastery ? 0 : 2,
+      hintPenalty: 5,
+      scenarioCode: `${cred.code}-PRACTICAL-SCENARIO`,
+      scoringWeights: cred.isMastery
+        ? {
+            theoryWeight: 40,
+            practicalWeight: 35,
+            packetAnalysisWeight: 25,
+            passingScore: 85,
+          }
+        : {
+            theoryWeight: 20,
+            practicalWeight: 40,
+            troubleshootingWeight: 25,
+            packetAnalysisWeight: 15,
+            componentMinimum: 70,
+            passingScore: 80,
+          },
+    };
+
     await prisma.certificationDefinition.upsert({
       where: { code: cred.code },
       update: {
@@ -592,6 +629,9 @@ async function main() {
         level: levelEnum,
         isActive: true,
         requirementsJson: requirements,
+        policyJson: policyConfig,
+        theoryConfigJson: theoryConfig,
+        practicalConfigJson: practicalConfig,
       },
       create: {
         code: cred.code,
@@ -600,33 +640,9 @@ async function main() {
         level: levelEnum,
         isActive: true,
         requirementsJson: requirements,
-        policyJson: {
-          maxAttempts: 3,
-          cooldownAfterFirstFailure: 86400,
-          cooldownAfterSubsequentFailure: 259200,
-          rollingWindowDays: 30,
-        },
-        theoryConfigJson: {
-          questionCount: cred.isMastery ? 75 : 40,
-          durationSeconds: cred.isMastery ? 5400 : 3600,
-          passingScore: cred.isMastery ? 85 : 80,
-          troubleshootingMinimum: cred.isMastery ? 80 : 70,
-        },
-        practicalConfigJson: {
-          durationSeconds: cred.isMastery ? 7200 : 5400,
-          passingScore: cred.isMastery ? 85 : 80,
-          maximumHints: cred.isMastery ? 0 : 2,
-          hintPenalty: 5,
-          scenarioCode: `${cred.code}-PRACTICAL-SCENARIO`,
-          scoringWeights: {
-            theoryWeight: 20,
-            practicalWeight: 40,
-            troubleshootingWeight: 25,
-            packetAnalysisWeight: 15,
-            componentMinimum: 70,
-            passingScore: cred.isMastery ? 85 : 80,
-          },
-        },
+        policyJson: policyConfig,
+        theoryConfigJson: theoryConfig,
+        practicalConfigJson: practicalConfig,
       },
     });
     console.log(`  ✓ Credential Definition [${cred.code}] "${cred.title}"`);

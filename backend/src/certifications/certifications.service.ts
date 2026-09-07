@@ -8,6 +8,7 @@ import {
 import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { ExamType, ExamAttemptStatus } from '@prisma/client';
+import { CertificationEligibilityService } from './certification-eligibility.service';
 
 export interface StartExamDto {
   certificationCode: string;
@@ -61,8 +62,14 @@ export interface PracticalScoringWeights {
 @Injectable()
 export class CertificationsService {
   private readonly logger = new Logger(CertificationsService.name);
+  private readonly eligibilityService: CertificationEligibilityService;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    eligibilityService?: CertificationEligibilityService,
+  ) {
+    this.eligibilityService = eligibilityService || new CertificationEligibilityService(prisma);
+  }
 
   async listCertifications() {
     const certs = await this.prisma.certificationDefinition.findMany({
@@ -1937,11 +1944,12 @@ export class CertificationsService {
       throw new NotFoundException(`User "${userId}" not found.`);
     }
 
-    // Check if certificate already exists for user and certificationCode (Idempotent claim)
+    // 1. Check if certificate already exists for user and certificationCode (Idempotent claim)
     const existingCert = await this.prisma.certificate.findFirst({
       where: {
         userId,
         certificationCode: code,
+        status: 'ACTIVE',
       },
     });
 
@@ -1965,7 +1973,145 @@ export class CertificationsService {
       };
     }
 
-    // Verify candidate has a PASSED exam attempt for this certification
+    // 2. Safe Issuance Boundary for Flagship Course Certifications (NV-NET-C01 through NV-NET-C05)
+    if (code.startsWith('NV-NET-C')) {
+      const eligibility = await this.eligibilityService.checkCourseEligibility(userId, code);
+      if (!eligibility.eligible) {
+        throw new BadRequestException(
+          `Certificate claim denied for ${certDef.title} (${code}): ${eligibility.blockingRequirements.join('; ')}`
+        );
+      }
+
+      const attemptScore = eligibility.breakdown.assessments.averageScore;
+      let grade = 'Passed';
+      if (attemptScore >= 95) grade = 'Pass with High Distinction';
+      else if (attemptScore >= 90) grade = 'Pass with Distinction';
+      else if (attemptScore >= 85) grade = 'Pass with Merit';
+
+      const course = await this.prisma.course.findFirst({
+        where: { code: eligibility.courseCode },
+      });
+
+      const uniqueSuffix = crypto.randomBytes(4).toString('hex').toUpperCase();
+      const credentialId = `${code}-2026-${uniqueSuffix}`;
+      const verificationCode = `NV-VERIFY-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+
+      const createdCert = await this.prisma.certificate.create({
+        data: {
+          userId,
+          courseId: course?.id || null,
+          credentialId,
+          verificationCode,
+          certificationCode: code,
+          certificationTitle: certDef.title,
+          recipientName: user.fullName || user.username,
+          status: 'ACTIVE',
+          metadataJson: {
+            candidateName: user.fullName || user.username,
+            certificationTitle: certDef.title,
+            certificationCode: code,
+            courseCode: eligibility.courseCode,
+            credentialId,
+            verificationCode,
+            issueDate: new Date().toISOString(),
+            grade,
+            overallScore: attemptScore,
+            componentScores: {
+              assessmentScore: attemptScore,
+              labsCompleted: eligibility.breakdown.labs.passedCount,
+              lessonsCompleted: eligibility.breakdown.lessons.completed,
+            },
+            skillsAssessed: certDef.description ? [certDef.description] : [],
+          },
+        },
+      });
+
+      return {
+        id: createdCert.id,
+        code: createdCert.code,
+        credentialId: createdCert.credentialId,
+        verificationCode: createdCert.verificationCode,
+        status: createdCert.status,
+        issuedAt: createdCert.issuedAt,
+        recipientName: createdCert.recipientName,
+        certificationTitle: createdCert.certificationTitle,
+        certificationCode: createdCert.certificationCode,
+        grade,
+        score: attemptScore,
+        isVerified: true,
+      };
+    }
+
+    // 3. Safe Issuance Boundary for Master Capstone Credential (NV-NET-MASTERY)
+    if (code === 'NV-NET-MASTERY') {
+      const masteryEligibility = await this.eligibilityService.checkMasteryEligibility(userId);
+      if (!masteryEligibility.eligible) {
+        throw new BadRequestException(
+          `Mastery certificate claim denied: ${masteryEligibility.blockingRequirements.join('; ')}`
+        );
+      }
+
+      const capstoneScore = masteryEligibility.breakdown.masterCapstone.score ?? 85;
+      let grade = 'Passed with Mastery';
+      if (capstoneScore >= 95) grade = 'Mastery with High Distinction';
+      else if (capstoneScore >= 90) grade = 'Mastery with Distinction';
+
+      const uniqueSuffix = crypto.randomBytes(4).toString('hex').toUpperCase();
+      const credentialId = `NV-MASTERY-2026-${uniqueSuffix}`;
+      const verificationCode = `NV-VERIFY-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+
+      const createdCert = await this.prisma.certificate.create({
+        data: {
+          userId,
+          courseId: null,
+          credentialId,
+          verificationCode,
+          certificationCode: code,
+          certificationTitle: certDef.title,
+          recipientName: user.fullName || user.username,
+          status: 'ACTIVE',
+          metadataJson: {
+            candidateName: user.fullName || user.username,
+            certificationTitle: certDef.title,
+            certificationCode: code,
+            credentialId,
+            verificationCode,
+            issueDate: new Date().toISOString(),
+            grade,
+            overallScore: capstoneScore,
+            componentScores: {
+              capstoneScore,
+              cumulativeAssessmentAverage: masteryEligibility.breakdown.cumulativeAssessments.cumulativeAverage,
+              courseCertificatesCount: 5,
+            },
+            skillsAssessed: [
+              'Comprehensive Enterprise Architecture & Protocol Reasoning',
+              'Advanced Multi-Layer Topology Incident Troubleshooting',
+              'Packet-Capture Forensics & Deep Protocol Dissection',
+              'Python Network Automation & YANG Data Modeling',
+              'Perimeter Security & Site-to-Site Cryptographic VPNs',
+            ],
+          },
+        },
+      });
+
+      return {
+        id: createdCert.id,
+        code: createdCert.code,
+        credentialId: createdCert.credentialId,
+        verificationCode: createdCert.verificationCode,
+        status: createdCert.status,
+        issuedAt: createdCert.issuedAt,
+        recipientName: createdCert.recipientName,
+        certificationTitle: createdCert.certificationTitle,
+        certificationCode: createdCert.certificationCode,
+        grade,
+        score: capstoneScore,
+        isVerified: true,
+      };
+    }
+
+    // 4. Legacy Certification Exam Path (Historical NV-NET, etc.)
     const passedAttempt = await this.prisma.examAttempt.findFirst({
       where: {
         userId,

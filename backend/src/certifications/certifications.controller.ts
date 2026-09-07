@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { CertificationsService, AnswerQuestionDto } from './certifications.service';
+import { CertificationEligibilityService } from './certification-eligibility.service';
+import { MasterCapstoneService } from './master-capstone.service';
 import { StartExamAttemptDto } from './dto/start-exam-attempt.dto';
 import { SubmitExamAttemptDto } from './dto/submit-exam-attempt.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -20,7 +22,11 @@ import { ExamType } from '@prisma/client';
 @ApiTags('Certification & Examination Architecture')
 @Controller()
 export class CertificationsController {
-  constructor(private readonly certsService: CertificationsService) { }
+  constructor(
+    private readonly certsService: CertificationsService,
+    private readonly eligibilityService: CertificationEligibilityService,
+    private readonly capstoneService: MasterCapstoneService,
+  ) { }
 
   @ApiOperation({ summary: 'List all active professional certification definitions' })
   @Get('certifications')
@@ -34,6 +40,23 @@ export class CertificationsController {
     return this.certsService.getCertificationByCode(code);
   }
 
+  @ApiOperation({ summary: 'Calculate course certification eligibility (NV-C01 through NV-C05)' })
+  @UseGuards(JwtAuthGuard)
+  @Get('certifications/courses/:courseCode/eligibility')
+  async calculateCourseEligibility(
+    @Req() req: any,
+    @Param('courseCode') courseCode: string
+  ) {
+    return this.eligibilityService.checkCourseEligibility(req.user.id, courseCode);
+  }
+
+  @ApiOperation({ summary: 'Calculate Mastery certification eligibility (NV-NET-MASTERY)' })
+  @UseGuards(JwtAuthGuard)
+  @Get('certifications/mastery/eligibility')
+  async calculateMasteryEligibility(@Req() req: any) {
+    return this.eligibilityService.checkMasteryEligibility(req.user.id);
+  }
+
   @ApiOperation({ summary: 'Calculate certification eligibility for authenticated learner' })
   @UseGuards(JwtAuthGuard)
   @Get('certifications/:code/eligibility')
@@ -41,7 +64,50 @@ export class CertificationsController {
     @Req() req: any,
     @Param('code') code: string
   ) {
+    const upper = (code || '').toUpperCase();
+    if (upper === 'NV-NET-MASTERY' || upper === 'MASTERY') {
+      return this.eligibilityService.checkMasteryEligibility(req.user.id);
+    }
+    if (upper.startsWith('NV-NET-C') || upper.startsWith('NV-C')) {
+      return this.eligibilityService.checkCourseEligibility(req.user.id, code);
+    }
     return this.certsService.calculateEligibility(req.user.id, code);
+  }
+
+  @ApiOperation({ summary: 'Get Master Capstone examination rules and blueprint' })
+  @Get('certifications/capstone/specification')
+  async getCapstoneSpecification() {
+    return this.capstoneService.getSpecification();
+  }
+
+  @ApiOperation({ summary: 'Start a timed 120-minute Master Capstone examination attempt' })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('certifications/capstone/start')
+  async startCapstoneAttempt(@Req() req: any) {
+    return this.capstoneService.startCapstoneAttempt(req.user.id);
+  }
+
+  @ApiOperation({ summary: 'Get active Master Capstone examination status with server-side time tracking' })
+  @UseGuards(JwtAuthGuard)
+  @Get('certifications/capstone/:attemptId')
+  async getCapstoneAttemptStatus(
+    @Req() req: any,
+    @Param('attemptId') attemptId: string
+  ) {
+    return this.capstoneService.getCapstoneAttemptStatus(req.user.id, attemptId);
+  }
+
+  @ApiOperation({ summary: 'Submit Master Capstone attempt for server-side evaluation (40/35/25 scoring)' })
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('certifications/capstone/:attemptId/submit')
+  async submitCapstoneAttempt(
+    @Req() req: any,
+    @Param('attemptId') attemptId: string,
+    @Body() payload: any
+  ) {
+    return this.capstoneService.submitCapstoneAttempt(req.user.id, attemptId, payload);
   }
 
   @ApiOperation({ summary: 'Start a final theory certification exam attempt' })
