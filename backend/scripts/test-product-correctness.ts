@@ -132,7 +132,12 @@ async function runProductCorrectnessTests() {
 
       let course = await prisma.course.findFirst({
         where: { code: 'NV-C01' },
-        include: { modules: { include: { lessons: { orderBy: { order: 'asc' } } } } },
+        include: {
+          modules: {
+            orderBy: { order: 'asc' },
+            include: { lessons: { orderBy: { order: 'asc' } } },
+          },
+        },
       });
       const allLessons = course!.modules.flatMap((m) => m.lessons);
       const lesson1 = allLessons[0];

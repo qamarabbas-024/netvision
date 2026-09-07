@@ -304,7 +304,7 @@ async function main() {
     { title: '11. DHCP: Automatic Network Configuration', slug: 'level-0-dhcp-automatic-ip-allocation', targetCode: 'NET-203' },
     { title: '12. Routers: Inter-Subnet Path Finders', slug: 'level-0-routers-inter-subnet-pathfinders', targetCode: 'NET-303' },
     { title: '13. Switches: Local LAN Frame Forwarders', slug: 'level-0-switches-local-lan-forwarders', targetCode: 'NET-301' },
-    { title: '14. Basic Network Troubleshooting Workflow', slug: 'level-0-basic-network-troubleshooting-workflow', targetCode: 'NET-404' },
+    { title: '14. Basic Network Troubleshooting Workflow', slug: 'level-0-basic-network-troubleshooting-workflow', targetCode: 'NET-TROUBLESHOOT' },
   ];
 
   const benchmarkSlugs = new Set(BENCHMARK_LESSONS_FULL.map((b) => b.slug));
@@ -381,7 +381,7 @@ async function main() {
     { slug: 'nat-pat', title: 'NAT & PAT', targetCode: 'NET-401', lessonSlug: 'nat-pat-overview' },
     { slug: 'vpn-crypto', title: 'VPN & Cryptography', targetCode: 'NET-402', lessonSlug: 'vpn-cryptography-overview' },
     { slug: 'wireless-networking', title: 'Wireless Networking', targetCode: 'NET-102', lessonSlug: 'wireless-networking-overview' },
-    { slug: 'network-troubleshooting', title: 'Network Troubleshooting', targetCode: 'NET-404', lessonSlug: 'network-troubleshooting-overview' },
+    { slug: 'network-troubleshooting', title: 'Network Troubleshooting', targetCode: 'NET-TROUBLESHOOT', lessonSlug: 'network-troubleshooting-overview' },
     { slug: 'sdn-cloud', title: 'SDN & Cloud Networking', targetCode: 'NET-403', lessonSlug: 'sdn-cloud-networking-overview' },
   ];
 
@@ -459,6 +459,23 @@ async function main() {
           initialTopologyJson: {},
         },
       });
+    }
+  }
+
+  // Handle any pre-existing historical lesson aliases to guarantee 100% curriculum coverage in flagship modules
+  const legacyLessonAliases: Record<string, string> = {
+    'what-is-computer-networking': 'NET-102',
+  };
+  for (const [legacySlug, targetCode] of Object.entries(legacyLessonAliases)) {
+    const existing = await prisma.lesson.findUnique({ where: { slug: legacySlug } });
+    if (existing) {
+      const targetModId = flagshipModuleMap.get(targetCode);
+      if (targetModId) {
+        await prisma.lesson.update({
+          where: { slug: legacySlug },
+          data: { moduleId: targetModId },
+        });
+      }
     }
   }
 
