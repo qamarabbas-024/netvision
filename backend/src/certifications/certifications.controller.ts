@@ -219,6 +219,13 @@ export class CertificationsController {
     return this.certsService.claimCertificationCertificate(req.user.id, code);
   }
 
+  @ApiOperation({ summary: 'List all active certificates owned by the authenticated learner (IDOR protected)' })
+  @UseGuards(JwtAuthGuard)
+  @Get('certificates/mine')
+  async getMyCertificates(@Req() req: any) {
+    return this.certsService.getUserCertificates(req.user.id);
+  }
+
   @ApiOperation({ summary: 'Publicly verify a professional certification or credential by ID / code' })
   @Get('certificates/verify/:credentialId')
   async verifyCertificate(

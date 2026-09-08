@@ -6,14 +6,14 @@ import { PrismaService } from '../src/database/prisma.service';
 import { FLAGSHIP_5_COURSES, CANONICAL_CREDENTIALS, LEGACY_SLUG_COMPATIBILITY_MAP } from '@netvision/shared';
 import * as crypto from 'crypto';
 
+const prisma = new PrismaClient();
+const prismaService = prisma as unknown as PrismaService;
+const achievementsService = new AchievementsService(prismaService);
+const certificationsService = new CertificationsService(prismaService);
+const topicsService = new TopicsService(prismaService, achievementsService);
+
 async function runDrop1Verification() {
   console.log('🧪 Starting Strengthened NetVision Drop #1 Verification: Curriculum Reconciliation & Safe Migration...\n');
-
-  const prisma = new PrismaClient();
-  const prismaService = new PrismaService();
-  const achievementsService = new AchievementsService(prismaService);
-  const certificationsService = new CertificationsService(prismaService);
-  const topicsService = new TopicsService(prismaService, achievementsService);
 
   let passed = 0;
   let failed = 0;

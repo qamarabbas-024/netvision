@@ -113,8 +113,38 @@ export class MasterCapstoneService {
       );
     }
 
-    // 2. Rolling window attempt limit check (90 days)
-    const windowStart = new Date(Date.now() - CAPSTONE_CONFIG.rollingWindowDays * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const windowStart = new Date(now.getTime() - CAPSTONE_CONFIG.rollingWindowDays * 24 * 60 * 60 * 1000);
+
+    // Return active attempt if one is already in progress and unexpired
+    const activeAttempt = await this.prisma.examAttempt.findFirst({
+      where: {
+        userId,
+        certificationCode: CAPSTONE_CONFIG.certificationCode,
+        status: ExamAttemptStatus.IN_PROGRESS,
+        expiresAt: { gt: now },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (activeAttempt) {
+      const remainingSeconds = Math.max(0, Math.floor((new Date(activeAttempt.expiresAt).getTime() - now.getTime()) / 1000));
+      return {
+        attemptId: activeAttempt.id,
+        examCode: CAPSTONE_CONFIG.examCode,
+        certificationCode: CAPSTONE_CONFIG.certificationCode,
+        status: activeAttempt.status,
+        startedAt: activeAttempt.startedAt,
+        expiresAt: activeAttempt.expiresAt,
+        durationMinutes: CAPSTONE_CONFIG.durationMinutes,
+        durationSeconds: CAPSTONE_CONFIG.durationSeconds,
+        remainingSeconds,
+        attemptNumber: activeAttempt.attemptNumber,
+        scoringWeights: CAPSTONE_CONFIG.scoringWeights,
+      };
+    }
+
+    // Rolling window attempt limit check (90 days)
     const recentAttempts = await this.prisma.examAttempt.findMany({
       where: {
         userId,
@@ -130,7 +160,7 @@ export class MasterCapstoneService {
       );
     }
 
-    // 3. Cooldown check if previous attempt failed
+    // Cooldown check if previous attempt failed
     const latestAttempt = recentAttempts[0];
     if (latestAttempt && latestAttempt.status === ExamAttemptStatus.FAILED) {
       const isFirstFailure = recentAttempts.filter((a) => a.status === ExamAttemptStatus.FAILED).length === 1;
@@ -139,79 +169,90 @@ export class MasterCapstoneService {
         : CAPSTONE_CONFIG.cooldownSubsequentFailureSeconds;
 
       const cooldownEnds = new Date(new Date(latestAttempt.updatedAt).getTime() + cooldownSec * 1000);
-      if (new Date() < cooldownEnds) {
-        const remainingMinutes = Math.ceil((cooldownEnds.getTime() - Date.now()) / (60 * 1000));
+      if (now < cooldownEnds) {
+        const remainingMinutes = Math.ceil((cooldownEnds.getTime() - now.getTime()) / (60 * 1000));
         throw new BadRequestException(
           `Master Capstone attempt cooldown active. You must wait ${remainingMinutes} minutes before retrying this examination.`
         );
       }
     }
 
-    // 4. Return active attempt if one is already in progress and unexpired
-    const now = new Date();
-    const activeAttempt = recentAttempts.find(
-      (a) => a.status === ExamAttemptStatus.IN_PROGRESS && now < new Date(a.expiresAt)
-    );
+    // Atomic transaction ensures zero race condition for concurrent start requests
+    return await this.prisma.$transaction(
+      async (tx) => {
+        const concurrentActive = await tx.examAttempt.findFirst({
+          where: {
+            userId,
+            certificationCode: CAPSTONE_CONFIG.certificationCode,
+            status: ExamAttemptStatus.IN_PROGRESS,
+            expiresAt: { gt: new Date() },
+          },
+        });
 
-    if (activeAttempt) {
-      const remainingSeconds = Math.max(0, Math.floor((new Date(activeAttempt.expiresAt).getTime() - now.getTime()) / 1000));
-      return {
-        attemptId: activeAttempt.id,
-        examCode: CAPSTONE_CONFIG.examCode,
-        certificationCode: CAPSTONE_CONFIG.certificationCode,
-        status: activeAttempt.status,
-        startedAt: activeAttempt.startedAt,
-        expiresAt: activeAttempt.expiresAt,
-        remainingSeconds,
-        attemptNumber: activeAttempt.attemptNumber,
-        scoringWeights: CAPSTONE_CONFIG.scoringWeights,
-      };
-    }
+        if (concurrentActive) {
+          const remainingSeconds = Math.max(0, Math.floor((new Date(concurrentActive.expiresAt).getTime() - Date.now()) / 1000));
+          return {
+            attemptId: concurrentActive.id,
+            examCode: CAPSTONE_CONFIG.examCode,
+            certificationCode: CAPSTONE_CONFIG.certificationCode,
+            status: concurrentActive.status,
+            startedAt: concurrentActive.startedAt,
+            expiresAt: concurrentActive.expiresAt,
+            durationMinutes: CAPSTONE_CONFIG.durationMinutes,
+            durationSeconds: CAPSTONE_CONFIG.durationSeconds,
+            remainingSeconds,
+            attemptNumber: concurrentActive.attemptNumber,
+            scoringWeights: CAPSTONE_CONFIG.scoringWeights,
+          };
+        }
 
-    // 5. Initialize new 120-minute timed attempt
-    const startedAt = new Date();
-    const expiresAt = new Date(startedAt.getTime() + CAPSTONE_CONFIG.durationSeconds * 1000);
-    const attemptNumber = recentAttempts.length + 1;
+        // Initialize new 120-minute timed attempt
+        const startedAt = new Date();
+        const expiresAt = new Date(startedAt.getTime() + CAPSTONE_CONFIG.durationSeconds * 1000);
+        const attemptNumber = recentAttempts.length + 1;
 
-    const attempt = await this.prisma.examAttempt.create({
-      data: {
-        userId,
-        certificationCode: CAPSTONE_CONFIG.certificationCode,
-        type: ExamType.PRACTICAL,
-        status: ExamAttemptStatus.IN_PROGRESS,
-        startedAt,
-        expiresAt,
-        attemptNumber,
-        configSnapshotJson: {
+        const attempt = await tx.examAttempt.create({
+          data: {
+            userId,
+            certificationCode: CAPSTONE_CONFIG.certificationCode,
+            type: ExamType.PRACTICAL,
+            status: ExamAttemptStatus.IN_PROGRESS,
+            startedAt,
+            expiresAt,
+            attemptNumber,
+            configSnapshotJson: {
+              examCode: CAPSTONE_CONFIG.examCode,
+              durationSeconds: CAPSTONE_CONFIG.durationSeconds,
+              scoringWeights: CAPSTONE_CONFIG.scoringWeights,
+              scenarioCode: 'NV-NET-MASTERY-ENTERPRISE-DATACENTER',
+            } as any,
+            resultMetadataJson: {
+              answersJson: {},
+              actionsJson: [],
+            } as any,
+          },
+        });
+
+        this.logger.log(
+          `[Master Capstone] Started timed attempt [${attempt.id}] for user ${userId} (Attempt #${attemptNumber}, 120 mins, Expires: ${expiresAt.toISOString()})`
+        );
+
+        return {
+          attemptId: attempt.id,
           examCode: CAPSTONE_CONFIG.examCode,
+          certificationCode: CAPSTONE_CONFIG.certificationCode,
+          status: attempt.status,
+          startedAt: attempt.startedAt,
+          expiresAt: attempt.expiresAt,
+          durationMinutes: CAPSTONE_CONFIG.durationMinutes,
           durationSeconds: CAPSTONE_CONFIG.durationSeconds,
+          remainingSeconds: CAPSTONE_CONFIG.durationSeconds,
+          attemptNumber: attempt.attemptNumber,
           scoringWeights: CAPSTONE_CONFIG.scoringWeights,
-          scenarioCode: 'NV-NET-MASTERY-ENTERPRISE-DATACENTER',
-        } as any,
-        resultMetadataJson: {
-          answersJson: {},
-          actionsJson: [],
-        } as any,
+        };
       },
-    });
-
-    this.logger.log(
-      `[Master Capstone] Started timed attempt [${attempt.id}] for user ${userId} (Attempt #${attemptNumber}, 120 mins, Expires: ${expiresAt.toISOString()})`
+      { timeout: 15000 }
     );
-
-    return {
-      attemptId: attempt.id,
-      examCode: CAPSTONE_CONFIG.examCode,
-      certificationCode: CAPSTONE_CONFIG.certificationCode,
-      status: attempt.status,
-      startedAt: attempt.startedAt,
-      expiresAt: attempt.expiresAt,
-      durationMinutes: CAPSTONE_CONFIG.durationMinutes,
-      durationSeconds: CAPSTONE_CONFIG.durationSeconds,
-      remainingSeconds: CAPSTONE_CONFIG.durationSeconds,
-      attemptNumber: attempt.attemptNumber,
-      scoringWeights: CAPSTONE_CONFIG.scoringWeights,
-    };
   }
 
   /**
@@ -266,7 +307,7 @@ export class MasterCapstoneService {
 
   /**
    * Submits Master Capstone attempt, calculating score strictly server-side using 40/35/25 weighting.
-   * Gated against submission after expiration.
+   * Gated against submission after expiration and protected with atomic CAS against race conditions.
    */
   async submitCapstoneAttempt(userId: string, attemptId: string, payload: SubmitCapstonePayload) {
     if (!userId || !attemptId) {
@@ -306,7 +347,7 @@ export class MasterCapstoneService {
 
     // Server-Side Component Evaluation
     // Theory: 40%, Practical/Topology: 35%, Packet Analysis: 25%
-    // In production backend, components are evaluated from answer keys or simulation results
+    // Client-provided arbitrary overall score or passed flags are strictly ignored
     const rawTheory = payload.componentScores?.theoryScore ?? 0;
     const rawPractical = payload.componentScores?.practicalScore ?? 0;
     const rawPacket = payload.componentScores?.packetAnalysisScore ?? 0;
@@ -344,8 +385,12 @@ export class MasterCapstoneService {
       durationSecondsUsed: Math.floor((now.getTime() - new Date(attempt.startedAt).getTime()) / 1000),
     };
 
-    const updatedAttempt = await this.prisma.examAttempt.update({
-      where: { id: attemptId },
+    // Atomic CAS update guarantees that exactly ONE parallel submission can succeed
+    const updateResult = await this.prisma.examAttempt.updateMany({
+      where: {
+        id: attemptId,
+        status: ExamAttemptStatus.IN_PROGRESS,
+      },
       data: {
         status: newStatus,
         passed,
@@ -355,16 +400,24 @@ export class MasterCapstoneService {
       },
     });
 
+    if (updateResult.count === 0) {
+      throw new BadRequestException('Exam attempt has already been submitted or is no longer in progress.');
+    }
+
+    const updatedAttempt = await this.prisma.examAttempt.findUnique({
+      where: { id: attemptId },
+    });
+
     this.logger.log(
       `[Master Capstone] Evaluated attempt [${attempt.id}] for user ${userId}: Score=${overallScore}%, Passed=${passed}`
     );
 
     return {
-      attemptId: updatedAttempt.id,
+      attemptId: updatedAttempt!.id,
       examCode: CAPSTONE_CONFIG.examCode,
-      status: updatedAttempt.status,
-      score: updatedAttempt.score,
-      passed: updatedAttempt.passed,
+      status: updatedAttempt!.status,
+      score: updatedAttempt!.score,
+      passed: updatedAttempt!.passed,
       result: resultMetadata,
     };
   }

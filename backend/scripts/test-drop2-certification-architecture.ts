@@ -561,6 +561,60 @@ async function runDrop2Tests() {
     }
     check(expiredRejected, 'Submitting an exam attempt after 120-minute expiration is strictly rejected');
 
+    // 8. Test Forged Score Rejection (client passing score: 100, passed: true is strictly ignored)
+    const forgedAttempt = await prisma.examAttempt.create({
+      data: {
+        userId: userCapstone.id,
+        certificationCode: CAPSTONE_CONFIG.certificationCode,
+        type: ExamType.PRACTICAL,
+        status: ExamAttemptStatus.IN_PROGRESS,
+        startedAt: new Date(),
+        expiresAt: new Date(Date.now() + 7200000),
+      },
+    });
+
+    const forgedRes = await capstoneService.submitCapstoneAttempt(userCapstone.id, forgedAttempt.id, {
+      ...({ score: 100, passed: true, overallScore: 100 } as any),
+    });
+    check(forgedRes.passed === false, 'Client-forged passing score is strictly ignored (passed=false)');
+    check(forgedRes.score === 0, 'Client-forged score evaluated as 0% when no work performed');
+
+    // 9. Test Repeated Submission Rejection
+    let repeatedSubmissionBlocked = false;
+    try {
+      await capstoneService.submitCapstoneAttempt(userCapstone.id, forgedAttempt.id, {
+        componentScores: { theoryScore: 90, practicalScore: 90, packetAnalysisScore: 90 },
+      });
+    } catch (e: any) {
+      repeatedSubmissionBlocked = e.status === 400 && e.message?.includes('Cannot submit exam attempt with status');
+    }
+    check(repeatedSubmissionBlocked, 'Repeated submission on finalized attempt is strictly rejected');
+
+    // 10. Test Parallel Submission Race Condition (Atomic CAS Update)
+    const parallelAttempt = await prisma.examAttempt.create({
+      data: {
+        userId: userCapstone.id,
+        certificationCode: CAPSTONE_CONFIG.certificationCode,
+        type: ExamType.PRACTICAL,
+        status: ExamAttemptStatus.IN_PROGRESS,
+        startedAt: new Date(),
+        expiresAt: new Date(Date.now() + 7200000),
+      },
+    });
+
+    const [parallel1, parallel2] = await Promise.allSettled([
+      capstoneService.submitCapstoneAttempt(userCapstone.id, parallelAttempt.id, {
+        componentScores: { theoryScore: 90, practicalScore: 90, packetAnalysisScore: 90 },
+      }),
+      capstoneService.submitCapstoneAttempt(userCapstone.id, parallelAttempt.id, {
+        componentScores: { theoryScore: 90, practicalScore: 90, packetAnalysisScore: 90 },
+      }),
+    ]);
+
+    const oneFulfilled = (parallel1.status === 'fulfilled' && parallel2.status === 'rejected') ||
+      (parallel2.status === 'fulfilled' && parallel1.status === 'rejected');
+    check(oneFulfilled, 'Parallel submission race condition resolved atomically (exactly 1 succeeds, 1 rejected)');
+
     // =========================================================================
     // SUITE 4: SECURITY, TENANT ISOLATION & SAFE ISSUANCE BOUNDARY
     // =========================================================================
@@ -644,6 +698,13 @@ async function runDrop2Tests() {
       where: { userId: userEligible.id, certificationCode: 'NV-NET-C01' },
     });
     check(totalUserCerts === 1, 'Duplicate certificate claims strictly prevented (total count = 1)');
+
+    // Concurrent claim race condition check
+    const [concurrentClaim1, concurrentClaim2] = await Promise.all([
+      certificationsService.claimCertificationCertificate(userEligible.id, 'NV-NET-C01'),
+      certificationsService.claimCertificationCertificate(userEligible.id, 'NV-NET-C01'),
+    ]);
+    check(concurrentClaim1.credentialId === concurrentClaim2.credentialId, 'Concurrent claim requests return identical credential ID');
 
     // Public Verification Privacy check
     const verifiedData = await certificationsService.verifyCertificate(claimedCert1.credentialId!);
