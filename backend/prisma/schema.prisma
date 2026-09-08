@@ -470,6 +470,7 @@ model Certificate {
   user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   course             Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, certificationCode])
   @@index([userId])
   @@index([courseId])
   @@index([certificationCode])

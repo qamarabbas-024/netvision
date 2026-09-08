@@ -2045,15 +2045,101 @@ export class CertificationsService {
       else if (attemptScore >= 90) grade = 'Pass with Distinction';
       else if (attemptScore >= 85) grade = 'Pass with Merit';
 
+      const issuedAt = new Date();
+      const issuanceYear = issuedAt.getUTCFullYear();
       const uniqueSuffix = crypto.randomBytes(4).toString('hex').toUpperCase();
-      const credentialId = `${code}-2026-${uniqueSuffix}`;
+      const credentialId = `${code}-${issuanceYear}-${uniqueSuffix}`;
       // Cryptographically unpredictable verification code with 64 bits of entropy
       const verificationCode = `NV-VERIFY-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
 
       // Fast atomic transaction guarantees zero duplicate certificates can be issued concurrently
-      return await this.prisma.$transaction(
-        async (tx) => {
-          const doubleCheck = await tx.certificate.findFirst({
+      try {
+        return await this.prisma.$transaction(
+          async (tx) => {
+            const doubleCheck = await tx.certificate.findFirst({
+              where: {
+                userId,
+                OR: [
+                  { certificationCode: code },
+                  { courseId: course.id },
+                ],
+                status: 'ACTIVE',
+              },
+            });
+            if (doubleCheck) {
+              const meta: any = doubleCheck.metadataJson || {};
+              return {
+                id: doubleCheck.id,
+                code: doubleCheck.code,
+                credentialId: doubleCheck.credentialId,
+                verificationCode: doubleCheck.verificationCode,
+                status: doubleCheck.status,
+                issuedAt: doubleCheck.issuedAt,
+                recipientName: doubleCheck.recipientName || user.fullName || user.username,
+                certificationTitle: doubleCheck.certificationTitle || certDef.title,
+                certificationCode: doubleCheck.certificationCode || code,
+                grade: meta.grade || 'Passed',
+                score: meta.overallScore || 80,
+                componentScores: meta.componentScores,
+                skillsAssessed: meta.skillsAssessed || [],
+                isVerified: true,
+              };
+            }
+
+            const createdCert = await tx.certificate.create({
+              data: {
+                userId,
+                courseId: course.id,
+                credentialId,
+                verificationCode,
+                certificationCode: code,
+                certificationTitle: certDef.title,
+                recipientName: user.fullName || user.username,
+                status: 'ACTIVE',
+                issuedAt,
+                metadataJson: {
+                  candidateName: user.fullName || user.username,
+                  certificationTitle: certDef.title,
+                  certificationCode: code,
+                  courseCode: expectedCourseCode,
+                  courseTitle: course.title,
+                  courseSlug: course.slug,
+                  credentialId,
+                  verificationCode,
+                  issueDate: issuedAt.toISOString(),
+                  grade,
+                  overallScore: attemptScore,
+                  componentScores: {
+                    assessmentScore: attemptScore,
+                    labsCompleted: eligibility.breakdown.labs.passedCount,
+                    lessonsCompleted: eligibility.breakdown.lessons.completed,
+                  },
+                  skillsAssessed: certDef.description ? [certDef.description] : [],
+                },
+              },
+            });
+
+            return {
+              id: createdCert.id,
+              code: createdCert.code,
+              credentialId: createdCert.credentialId,
+              verificationCode: createdCert.verificationCode,
+              status: createdCert.status,
+              issuedAt: createdCert.issuedAt,
+              recipientName: createdCert.recipientName,
+              certificationTitle: createdCert.certificationTitle,
+              certificationCode: createdCert.certificationCode,
+              grade,
+              score: attemptScore,
+              isVerified: true,
+            };
+          },
+          { timeout: 15000 }
+        );
+      } catch (err: any) {
+        // Database-level uniqueness guarantee fallback (e.g. cross-instance concurrent insert)
+        if (err.code === 'P2002') {
+          const fallbackCert = await this.prisma.certificate.findFirst({
             where: {
               userId,
               OR: [
@@ -2063,18 +2149,18 @@ export class CertificationsService {
               status: 'ACTIVE',
             },
           });
-          if (doubleCheck) {
-            const meta: any = doubleCheck.metadataJson || {};
+          if (fallbackCert) {
+            const meta: any = fallbackCert.metadataJson || {};
             return {
-              id: doubleCheck.id,
-              code: doubleCheck.code,
-              credentialId: doubleCheck.credentialId,
-              verificationCode: doubleCheck.verificationCode,
-              status: doubleCheck.status,
-              issuedAt: doubleCheck.issuedAt,
-              recipientName: doubleCheck.recipientName || user.fullName || user.username,
-              certificationTitle: doubleCheck.certificationTitle || certDef.title,
-              certificationCode: doubleCheck.certificationCode || code,
+              id: fallbackCert.id,
+              code: fallbackCert.code,
+              credentialId: fallbackCert.credentialId,
+              verificationCode: fallbackCert.verificationCode,
+              status: fallbackCert.status,
+              issuedAt: fallbackCert.issuedAt,
+              recipientName: fallbackCert.recipientName || user.fullName || user.username,
+              certificationTitle: fallbackCert.certificationTitle || certDef.title,
+              certificationCode: fallbackCert.certificationCode || code,
               grade: meta.grade || 'Passed',
               score: meta.overallScore || 80,
               componentScores: meta.componentScores,
@@ -2082,56 +2168,9 @@ export class CertificationsService {
               isVerified: true,
             };
           }
-
-          const createdCert = await tx.certificate.create({
-            data: {
-              userId,
-              courseId: course.id,
-              credentialId,
-              verificationCode,
-              certificationCode: code,
-              certificationTitle: certDef.title,
-              recipientName: user.fullName || user.username,
-              status: 'ACTIVE',
-              metadataJson: {
-                candidateName: user.fullName || user.username,
-                certificationTitle: certDef.title,
-                certificationCode: code,
-                courseCode: expectedCourseCode,
-                courseTitle: course.title,
-                courseSlug: course.slug,
-                credentialId,
-                verificationCode,
-                issueDate: new Date().toISOString(),
-                grade,
-                overallScore: attemptScore,
-                componentScores: {
-                  assessmentScore: attemptScore,
-                  labsCompleted: eligibility.breakdown.labs.passedCount,
-                  lessonsCompleted: eligibility.breakdown.lessons.completed,
-                },
-                skillsAssessed: certDef.description ? [certDef.description] : [],
-              },
-            },
-          });
-
-          return {
-            id: createdCert.id,
-            code: createdCert.code,
-            credentialId: createdCert.credentialId,
-            verificationCode: createdCert.verificationCode,
-            status: createdCert.status,
-            issuedAt: createdCert.issuedAt,
-            recipientName: createdCert.recipientName,
-            certificationTitle: createdCert.certificationTitle,
-            certificationCode: createdCert.certificationCode,
-            grade,
-            score: attemptScore,
-            isVerified: true,
-          };
-        },
-        { timeout: 15000 }
-      );
+        }
+        throw err;
+      }
     }
 
     // 3. Safe Issuance Boundary for Master Capstone Credential (NV-NET-MASTERY)
@@ -2148,28 +2187,109 @@ export class CertificationsService {
       if (capstoneScore >= 95) grade = 'Mastery with High Distinction';
       else if (capstoneScore >= 90) grade = 'Mastery with Distinction';
 
+      const issuedAt = new Date();
+      const issuanceYear = issuedAt.getUTCFullYear();
       const uniqueSuffix = crypto.randomBytes(4).toString('hex').toUpperCase();
-      const credentialId = `NV-MASTERY-2026-${uniqueSuffix}`;
-      const verificationCode = `NV-VERIFY-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+      const credentialId = `NV-MASTERY-${issuanceYear}-${uniqueSuffix}`;
+      const verificationCode = `NV-VERIFY-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
 
       // Fast atomic transaction guarantees zero duplicate Mastery certificates
-      return await this.prisma.$transaction(
-        async (tx) => {
-          const doubleCheck = await tx.certificate.findFirst({
+      try {
+        return await this.prisma.$transaction(
+          async (tx) => {
+            const doubleCheck = await tx.certificate.findFirst({
+              where: { userId, certificationCode: code, status: 'ACTIVE' },
+            });
+            if (doubleCheck) {
+              const meta: any = doubleCheck.metadataJson || {};
+              return {
+                id: doubleCheck.id,
+                code: doubleCheck.code,
+                credentialId: doubleCheck.credentialId,
+                verificationCode: doubleCheck.verificationCode,
+                status: doubleCheck.status,
+                issuedAt: doubleCheck.issuedAt,
+                recipientName: doubleCheck.recipientName || user.fullName || user.username,
+                certificationTitle: doubleCheck.certificationTitle || certDef.title,
+                certificationCode: doubleCheck.certificationCode || code,
+                grade: meta.grade || 'Passed with Mastery',
+                score: meta.overallScore || capstoneScore,
+                componentScores: meta.componentScores,
+                skillsAssessed: meta.skillsAssessed || [],
+                isVerified: true,
+              };
+            }
+
+            const createdCert = await tx.certificate.create({
+              data: {
+                userId,
+                courseId: null,
+                credentialId,
+                verificationCode,
+                certificationCode: code,
+                certificationTitle: certDef.title,
+                recipientName: user.fullName || user.username,
+                status: 'ACTIVE',
+                issuedAt,
+                metadataJson: {
+                  candidateName: user.fullName || user.username,
+                  certificationTitle: certDef.title,
+                  certificationCode: code,
+                  credentialId,
+                  verificationCode,
+                  issueDate: issuedAt.toISOString(),
+                  grade,
+                  overallScore: capstoneScore,
+                  componentScores: {
+                    capstoneScore,
+                    cumulativeAssessmentAverage: masteryEligibility.breakdown.cumulativeAssessments.cumulativeAverage,
+                    courseCertificatesCount: 5,
+                  },
+                  skillsAssessed: [
+                    'Comprehensive Enterprise Architecture & Protocol Reasoning',
+                    'Advanced Multi-Layer Topology Incident Troubleshooting',
+                    'Packet-Capture Forensics & Deep Protocol Dissection',
+                    'Python Network Automation & YANG Data Modeling',
+                    'Perimeter Security & Site-to-Site Cryptographic VPNs',
+                  ],
+                },
+              },
+            });
+
+            return {
+              id: createdCert.id,
+              code: createdCert.code,
+              credentialId: createdCert.credentialId,
+              verificationCode: createdCert.verificationCode,
+              status: createdCert.status,
+              issuedAt: createdCert.issuedAt,
+              recipientName: createdCert.recipientName,
+              certificationTitle: createdCert.certificationTitle,
+              certificationCode: createdCert.certificationCode,
+              grade,
+              score: capstoneScore,
+              isVerified: true,
+            };
+          },
+          { timeout: 15000 }
+        );
+      } catch (err: any) {
+        if (err.code === 'P2002') {
+          const fallbackCert = await this.prisma.certificate.findFirst({
             where: { userId, certificationCode: code, status: 'ACTIVE' },
           });
-          if (doubleCheck) {
-            const meta: any = doubleCheck.metadataJson || {};
+          if (fallbackCert) {
+            const meta: any = fallbackCert.metadataJson || {};
             return {
-              id: doubleCheck.id,
-              code: doubleCheck.code,
-              credentialId: doubleCheck.credentialId,
-              verificationCode: doubleCheck.verificationCode,
-              status: doubleCheck.status,
-              issuedAt: doubleCheck.issuedAt,
-              recipientName: doubleCheck.recipientName || user.fullName || user.username,
-              certificationTitle: doubleCheck.certificationTitle || certDef.title,
-              certificationCode: doubleCheck.certificationCode || code,
+              id: fallbackCert.id,
+              code: fallbackCert.code,
+              credentialId: fallbackCert.credentialId,
+              verificationCode: fallbackCert.verificationCode,
+              status: fallbackCert.status,
+              issuedAt: fallbackCert.issuedAt,
+              recipientName: fallbackCert.recipientName || user.fullName || user.username,
+              certificationTitle: fallbackCert.certificationTitle || certDef.title,
+              certificationCode: fallbackCert.certificationCode || code,
               grade: meta.grade || 'Passed with Mastery',
               score: meta.overallScore || capstoneScore,
               componentScores: meta.componentScores,
@@ -2177,59 +2297,9 @@ export class CertificationsService {
               isVerified: true,
             };
           }
-
-          const createdCert = await tx.certificate.create({
-            data: {
-              userId,
-              courseId: null,
-              credentialId,
-              verificationCode,
-              certificationCode: code,
-              certificationTitle: certDef.title,
-              recipientName: user.fullName || user.username,
-              status: 'ACTIVE',
-              metadataJson: {
-                candidateName: user.fullName || user.username,
-                certificationTitle: certDef.title,
-                certificationCode: code,
-                credentialId,
-                verificationCode,
-                issueDate: new Date().toISOString(),
-                grade,
-                overallScore: capstoneScore,
-                componentScores: {
-                  capstoneScore,
-                  cumulativeAssessmentAverage: masteryEligibility.breakdown.cumulativeAssessments.cumulativeAverage,
-                  courseCertificatesCount: 5,
-                },
-                skillsAssessed: [
-                  'Comprehensive Enterprise Architecture & Protocol Reasoning',
-                  'Advanced Multi-Layer Topology Incident Troubleshooting',
-                  'Packet-Capture Forensics & Deep Protocol Dissection',
-                  'Python Network Automation & YANG Data Modeling',
-                  'Perimeter Security & Site-to-Site Cryptographic VPNs',
-                ],
-              },
-            },
-          });
-
-          return {
-            id: createdCert.id,
-            code: createdCert.code,
-            credentialId: createdCert.credentialId,
-            verificationCode: createdCert.verificationCode,
-            status: createdCert.status,
-            issuedAt: createdCert.issuedAt,
-            recipientName: createdCert.recipientName,
-            certificationTitle: createdCert.certificationTitle,
-            certificationCode: createdCert.certificationCode,
-            grade,
-            score: capstoneScore,
-            isVerified: true,
-          };
-        },
-        { timeout: 15000 }
-      );
+        }
+        throw err;
+      }
     }
 
     // 4. Legacy Certification Exam Path (Historical NV-NET, etc.)
@@ -2274,9 +2344,11 @@ export class CertificationsService {
       'Core IP Infrastructure Protocols (ARP, DNS, DHCP, ICMP)',
     ];
 
+    const issuedAt = new Date();
+    const issuanceYear = issuedAt.getUTCFullYear();
     const uniqueSuffix = crypto.randomBytes(4).toString('hex').toUpperCase();
-    const credentialId = `NV-NET-2026-${uniqueSuffix}`;
-    const verificationCode = `NV-VERIFY-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+    const credentialId = `NV-NET-${issuanceYear}-${uniqueSuffix}`;
+    const verificationCode = `NV-VERIFY-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
 
     const certData = {
       userId,
@@ -2286,13 +2358,14 @@ export class CertificationsService {
       certificationTitle: certDef.title,
       recipientName: user.fullName || user.username,
       status: 'ACTIVE',
+      issuedAt,
       metadataJson: {
         candidateName: user.fullName || user.username,
         certificationTitle: certDef.title,
         certificationCode: code,
         credentialId,
         verificationCode,
-        issueDate: new Date().toISOString(),
+        issueDate: issuedAt.toISOString(),
         grade,
         overallScore: attemptScore,
         componentScores,
@@ -2300,23 +2373,72 @@ export class CertificationsService {
       },
     };
 
-    return await this.prisma.$transaction(
-      async (tx) => {
-        const doubleCheck = await tx.certificate.findFirst({
+    try {
+      return await this.prisma.$transaction(
+        async (tx) => {
+          const doubleCheck = await tx.certificate.findFirst({
+            where: { userId, certificationCode: code, status: 'ACTIVE' },
+          });
+          if (doubleCheck) {
+            const meta: any = doubleCheck.metadataJson || {};
+            return {
+              id: doubleCheck.id,
+              code: doubleCheck.code,
+              credentialId: doubleCheck.credentialId,
+              verificationCode: doubleCheck.verificationCode,
+              status: doubleCheck.status,
+              issuedAt: doubleCheck.issuedAt,
+              recipientName: doubleCheck.recipientName || user.fullName || user.username,
+              certificationTitle: doubleCheck.certificationTitle || certDef.title,
+              certificationCode: doubleCheck.certificationCode || code,
+              grade: meta.grade || 'Passed',
+              score: meta.overallScore || 80,
+              componentScores: meta.componentScores,
+              skillsAssessed: meta.skillsAssessed || [],
+              isVerified: true,
+            };
+          }
+
+          const createdCert = await tx.certificate.create({
+            data: certData,
+          });
+
+          return {
+            id: createdCert.id,
+            code: createdCert.code,
+            credentialId: createdCert.credentialId,
+            verificationCode: createdCert.verificationCode,
+            status: createdCert.status,
+            issuedAt: createdCert.issuedAt,
+            recipientName: createdCert.recipientName,
+            certificationTitle: createdCert.certificationTitle,
+            certificationCode: createdCert.certificationCode,
+            grade,
+            score: attemptScore,
+            componentScores,
+            skillsAssessed,
+            isVerified: true,
+          };
+        },
+        { timeout: 15000 }
+      );
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        const fallbackCert = await this.prisma.certificate.findFirst({
           where: { userId, certificationCode: code, status: 'ACTIVE' },
         });
-        if (doubleCheck) {
-          const meta: any = doubleCheck.metadataJson || {};
+        if (fallbackCert) {
+          const meta: any = fallbackCert.metadataJson || {};
           return {
-            id: doubleCheck.id,
-            code: doubleCheck.code,
-            credentialId: doubleCheck.credentialId,
-            verificationCode: doubleCheck.verificationCode,
-            status: doubleCheck.status,
-            issuedAt: doubleCheck.issuedAt,
-            recipientName: doubleCheck.recipientName || user.fullName || user.username,
-            certificationTitle: doubleCheck.certificationTitle || certDef.title,
-            certificationCode: doubleCheck.certificationCode || code,
+            id: fallbackCert.id,
+            code: fallbackCert.code,
+            credentialId: fallbackCert.credentialId,
+            verificationCode: fallbackCert.verificationCode,
+            status: fallbackCert.status,
+            issuedAt: fallbackCert.issuedAt,
+            recipientName: fallbackCert.recipientName || user.fullName || user.username,
+            certificationTitle: fallbackCert.certificationTitle || certDef.title,
+            certificationCode: fallbackCert.certificationCode || code,
             grade: meta.grade || 'Passed',
             score: meta.overallScore || 80,
             componentScores: meta.componentScores,
@@ -2324,30 +2446,9 @@ export class CertificationsService {
             isVerified: true,
           };
         }
-
-        const createdCert = await tx.certificate.create({
-          data: certData,
-        });
-
-        return {
-          id: createdCert.id,
-          code: createdCert.code,
-          credentialId: createdCert.credentialId,
-          verificationCode: createdCert.verificationCode,
-          status: createdCert.status,
-          issuedAt: createdCert.issuedAt,
-          recipientName: createdCert.recipientName,
-          certificationTitle: createdCert.certificationTitle,
-          certificationCode: createdCert.certificationCode,
-          grade,
-          score: attemptScore,
-          componentScores,
-          skillsAssessed,
-          isVerified: true,
-        };
-      },
-      { timeout: 15000 }
-    );
+      }
+      throw err;
+    }
   }
 
   async getUserCertificates(userId: string) {
@@ -2409,10 +2510,9 @@ export class CertificationsService {
     const recipient = cert.recipientName || cert.user?.fullName || cert.user?.username || null;
     const title = cert.certificationTitle || (cert.course ? cert.course.title : null);
 
-    // Strictly sanitized public verification DTO: Never exposes internal DB UUIDs, emails, or password hashes
+    // Strictly sanitized public verification DTO: Never exposes internal DB UUIDs, emails, password hashes, or secret verificationCodes
     return {
       credentialId: cert.credentialId || cert.code,
-      verificationCode: cert.verificationCode || cert.code,
       status: cert.status || 'ACTIVE',
       issuedAt: cert.issuedAt,
       recipientName: recipient,

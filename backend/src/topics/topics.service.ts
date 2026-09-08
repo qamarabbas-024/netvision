@@ -2032,7 +2032,8 @@ export class TopicsService {
     if (!certificate) {
       const user = await this.prisma.user.findUnique({ where: { id: userId } });
       const uniqueSuffix = crypto.randomBytes(6).toString('hex').toUpperCase();
-      const credentialId = `NV-NET-2026-${uniqueSuffix}`;
+      const issuanceYear = new Date().getUTCFullYear();
+      const credentialId = `NV-NET-${issuanceYear}-${uniqueSuffix}`;
       const verificationCode = `NV-VERIFY-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
 
       const metadataJson = {

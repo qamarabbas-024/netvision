@@ -25,8 +25,22 @@ function check(condition: boolean, message: string) {
   }
 }
 
+async function waitForDatabase(retries = 5, delayMs = 2500) {
+  for (let i = 1; i <= retries; i++) {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      return;
+    } catch (err) {
+      if (i === retries) throw err;
+      console.log(`⏳ Neon connection warmup... retrying in ${delayMs}ms (attempt ${i}/${retries})`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
 async function runDrop2Tests() {
   console.log('🧪 Starting NetVision Drop #2 Test Suite: Certification Architecture, Eligibility & Master Capstone...');
+  await waitForDatabase();
   const createdUserIds: string[] = [];
 
   try {

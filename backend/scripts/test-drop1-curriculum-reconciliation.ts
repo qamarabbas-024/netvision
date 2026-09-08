@@ -28,7 +28,22 @@ async function runDrop1Verification() {
     }
   }
 
+  async function waitForDatabase(retries = 5, delayMs = 2500) {
+    for (let i = 1; i <= retries; i++) {
+      try {
+        await prisma.$queryRaw`SELECT 1`;
+        return;
+      } catch (err) {
+        if (i === retries) throw err;
+        console.log(`⏳ Neon connection warmup... retrying in ${delayMs}ms (attempt ${i}/${retries})`);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+
   try {
+    await waitForDatabase();
+
     // =======================================================================
     // SUITE 1: CANONICAL FIVE FLAGSHIP COURSES & PREREQUISITES
     // =======================================================================

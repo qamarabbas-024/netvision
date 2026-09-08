@@ -93,41 +93,42 @@ async function runDrop3TestSuite() {
       assert(course, `Course ${courseCode} must exist`);
 
       const lessons = course.modules.flatMap((m) => m.lessons);
-      for (const lesson of lessons) {
-        await prisma.userProgress.create({
-          data: {
-            userId,
-            lessonId: lesson.id,
-            completed: true,
-            score: quizScore,
-            started: true,
-            viewed: true,
-            completedAt: new Date(),
-          },
-        });
+      const progressData = lessons.map((lesson) => ({
+        userId,
+        lessonId: lesson.id,
+        completed: true,
+        score: quizScore,
+        started: true,
+        viewed: true,
+        completedAt: new Date(),
+      }));
+      if (progressData.length > 0) {
+        await prisma.userProgress.createMany({ data: progressData });
+      }
 
-        for (const quiz of lesson.quizzes) {
-          await prisma.quizAttempt.create({
-            data: {
-              userId,
-              quizId: quiz.id,
-              score: quizScore,
-              passed: quizScore >= 80,
-              answersJson: {},
-            },
-          });
-        }
+      const quizAttemptsData = lessons.flatMap((l) =>
+        l.quizzes.map((quiz) => ({
+          userId,
+          quizId: quiz.id,
+          score: quizScore,
+          passed: quizScore >= 80,
+          answersJson: {},
+        }))
+      );
+      if (quizAttemptsData.length > 0) {
+        await prisma.quizAttempt.createMany({ data: quizAttemptsData });
+      }
 
-        for (const lab of lesson.labs) {
-          await prisma.labAttempt.create({
-            data: {
-              userId,
-              labId: lab.id,
-              passed: true,
-              score: 100,
-            },
-          });
-        }
+      const labAttemptsData = lessons.flatMap((l) =>
+        l.labs.map((lab) => ({
+          userId,
+          labId: lab.id,
+          passed: true,
+          score: 100,
+        }))
+      );
+      if (labAttemptsData.length > 0) {
+        await prisma.labAttempt.createMany({ data: labAttemptsData });
       }
       return course;
     }
@@ -152,9 +153,10 @@ async function runDrop3TestSuite() {
       const claimed = await certsService.claimCertificationCertificate(learner.id, mapping.credCode);
 
       check(claimed !== null && typeof claimed === 'object', `Claim for ${mapping.credCode} returns certificate object`);
+      const issuedYear = new Date(claimed.issuedAt).getUTCFullYear();
       check(
-        claimed.credentialId.startsWith(`${mapping.credCode}-2026-`),
-        `Credential ID format is valid (${claimed.credentialId})`
+        claimed.credentialId.startsWith(`${mapping.credCode}-${issuedYear}-`),
+        `Credential ID contains authoritative dynamic UTC year ${issuedYear} (${claimed.credentialId})`
       );
       check(
         /^NV-VERIFY-[A-F0-9]{16}$/.test(claimed.verificationCode),
@@ -214,17 +216,29 @@ async function runDrop3TestSuite() {
     });
     assert(course1, 'NV-C01 exists');
     const c1Lessons = course1.modules.flatMap((m) => m.lessons);
-    for (const lesson of c1Lessons) {
-      await prisma.userProgress.create({
-        data: { userId: learnerMissingLab.id, lessonId: lesson.id, completed: true, score: 90, started: true, viewed: true, completedAt: new Date() },
-      });
-      for (const quiz of lesson.quizzes) {
-        await prisma.quizAttempt.create({
-          data: { userId: learnerMissingLab.id, quizId: quiz.id, score: 90, passed: true, answersJson: {} },
-        });
-      }
-      // Intentionally omit lab attempts
-    }
+    await prisma.userProgress.createMany({
+      data: c1Lessons.map((l) => ({
+        userId: learnerMissingLab.id,
+        lessonId: l.id,
+        completed: true,
+        score: 90,
+        started: true,
+        viewed: true,
+        completedAt: new Date(),
+      })),
+    });
+    await prisma.quizAttempt.createMany({
+      data: c1Lessons.flatMap((l) =>
+        l.quizzes.map((q) => ({
+          userId: learnerMissingLab.id,
+          quizId: q.id,
+          score: 90,
+          passed: true,
+          answersJson: {},
+        }))
+      ),
+    });
+    // Intentionally omit lab attempts
     let blockedMissingLab = false;
     try {
       await certsService.claimCertificationCertificate(learnerMissingLab.id, 'NV-NET-C01');
@@ -286,11 +300,38 @@ async function runDrop3TestSuite() {
 
     check(claimA.credentialId === claimB.credentialId, 'Concurrent Claim A and B return identical credential ID');
     check(claimB.credentialId === claimC.credentialId, 'Concurrent Claim B and C return identical credential ID');
+    check(claimA.credentialId === claimC.credentialId, 'All concurrent responses refer to the exact same credential');
 
     const certCountConcurrent = await prisma.certificate.count({
       where: { userId: learnerConcurrent.id, certificationCode: 'NV-NET-C02' },
     });
     check(certCountConcurrent === 1, `Total certificates in database after parallel claims is exactly 1 (found: ${certCountConcurrent})`);
+
+    // Direct Database & Prisma Constraint Inspection:
+    // Attempting a direct insert bypassing the service layer must trigger P2002
+    let dbConstraintTriggered = false;
+    let constraintName = '';
+    try {
+      await prisma.certificate.create({
+        data: {
+          userId: learnerConcurrent.id,
+          certificationCode: 'NV-NET-C02',
+          code: 'DUPLICATE-ATTEMPT',
+          certificationTitle: 'Duplicate Test',
+          credentialId: `NV-NET-C02-${new Date().getUTCFullYear()}-DUPTEST123456`,
+          verificationCode: 'NV-VERIFY-DUPTEST123456',
+        },
+      });
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        dbConstraintTriggered = true;
+        constraintName = (err.meta?.target as string[] | undefined)?.join(',') || err.message;
+      }
+    }
+    check(
+      dbConstraintTriggered,
+      `Database @@unique([userId, certificationCode]) strictly prevents duplicates at engine level (Prisma P2002: ${constraintName})`
+    );
 
     // =========================================================================
     // SUITE 4: SECURITY, IDOR & PUBLIC SANITIZATION
@@ -333,6 +374,7 @@ async function runDrop3TestSuite() {
     check(publicVerification.courseTitle !== null, 'Public verification includes associated course title');
 
     // Sanitization checks: ensure zero private fields leak
+    check((publicVerification as any).verificationCode === undefined, 'Public verification NEVER exposes verificationCode');
     check((publicVerification as any).passwordHash === undefined, 'Public verification NEVER exposes passwordHash');
     check((publicVerification as any).email === undefined, 'Public verification NEVER exposes user email');
     check((publicVerification as any).id === undefined, 'Public verification NEVER exposes internal database UUID (id)');
