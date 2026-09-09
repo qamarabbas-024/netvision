@@ -33,7 +33,8 @@
     "test:drop1": "ts-node scripts/test-drop1-curriculum-reconciliation.ts",
     "test:drop2": "ts-node scripts/test-drop2-certification-architecture.ts",
     "test:drop3": "ts-node scripts/test-drop3-certificate-issuance.ts",
-    "test:all": "ts-node scripts/test-oauth-otp-security.ts && ts-node scripts/test-anonymous-claim-security.ts && ts-node scripts/test-monitoring-observability.ts && ts-node scripts/test-email-suite.ts && ts-node scripts/test-deployment-readiness.ts && ts-node scripts/test-network-troubleshooting-engine.ts && ts-node scripts/test-troubleshooting-catalog-flow.ts && ts-node scripts/test-beta-auth.ts && ts-node scripts/test-error-and-empty-states.ts && ts-node scripts/test-product-correctness.ts && ts-node scripts/test-drop1-curriculum-reconciliation.ts && ts-node scripts/test-drop2-certification-architecture.ts && ts-node scripts/test-drop3-certificate-issuance.ts"
+    "test:drop4": "ts-node scripts/test-drop4-mastery.ts",
+    "test:all": "ts-node scripts/test-oauth-otp-security.ts && ts-node scripts/test-anonymous-claim-security.ts && ts-node scripts/test-monitoring-observability.ts && ts-node scripts/test-email-suite.ts && ts-node scripts/test-deployment-readiness.ts && ts-node scripts/test-network-troubleshooting-engine.ts && ts-node scripts/test-troubleshooting-catalog-flow.ts && ts-node scripts/test-beta-auth.ts && ts-node scripts/test-error-and-empty-states.ts && ts-node scripts/test-product-correctness.ts && ts-node scripts/test-drop1-curriculum-reconciliation.ts && ts-node scripts/test-drop2-certification-architecture.ts && ts-node scripts/test-drop3-certificate-issuance.ts && ts-node scripts/test-drop4-mastery.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
