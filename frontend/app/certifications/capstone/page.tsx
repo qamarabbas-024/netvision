@@ -29,6 +29,11 @@ import {
   Activity,
   Send,
   AlertCircle,
+  Sparkles,
+  ExternalLink,
+  FileText,
+  Download,
+  Eye,
 } from 'lucide-react';
 import {
   getCapstoneSpecificationApi,
@@ -36,10 +41,13 @@ import {
   getCapstoneAttemptStatusApi,
   submitCapstoneAttemptApi,
   checkMasteryEligibilityApi,
+  claimCertificationCertificateApi,
+  downloadCertificatePdfApi,
   CapstoneSpecificationDto,
   CapstoneAttemptSessionDto,
   CapstoneSubmissionResultDto,
   MasteryEligibilityResult,
+  ClaimedCertificateResult,
   SubmitCapstonePayload,
 } from '@/lib/api';
 
@@ -72,6 +80,76 @@ export default function MasterCapstonePage() {
   const [theoryHypothesis, setTheoryHypothesis] = useState<string>('');
   const [incidentRemediation, setIncidentRemediation] = useState<string>('');
   const [packetForensicsNotes, setPacketForensicsNotes] = useState<string>('');
+
+  // Sub-Drop 5.5: Post-Exam Mastery Re-evaluation and Claim state
+  const [masteryReeval, setMasteryReeval] = useState<MasteryEligibilityResult | null>(null);
+  const [isReevaluating, setIsReevaluating] = useState<boolean>(false);
+  const [reevalError, setReevalError] = useState<string | null>(null);
+  const [isClaimingMastery, setIsClaimingMastery] = useState<boolean>(false);
+  const [claimedMasteryCert, setClaimedMasteryCert] = useState<ClaimedCertificateResult | null>(null);
+  const [claimError, setClaimError] = useState<string | null>(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState<boolean>(false);
+  const [downloadPdfError, setDownloadPdfError] = useState<string | null>(null);
+
+  // Authoritative re-evaluation of 9-point Mastery criteria following Capstone submission
+  const reevaluateMasteryEligibility = useCallback(async () => {
+    setIsReevaluating(true);
+    setReevalError(null);
+    try {
+      const elig = await checkMasteryEligibilityApi();
+      setMasteryReeval(elig);
+      setEligibility(elig);
+    } catch (err: any) {
+      console.warn('Mastery eligibility re-evaluation error:', err);
+      setReevalError(err?.message || 'Failed to re-evaluate authoritative Mastery eligibility.');
+    } finally {
+      setIsReevaluating(false);
+    }
+  }, []);
+
+  // Claim Mastery Credential action via POST /certifications/NV-NET-MASTERY/claim-certificate
+  const handleClaimMastery = async () => {
+    if (isClaimingMastery) return;
+    setIsClaimingMastery(true);
+    setClaimError(null);
+
+    try {
+      const minted = await claimCertificationCertificateApi('NV-NET-MASTERY');
+      setClaimedMasteryCert(minted);
+      // Immediately refresh authoritative eligibility to reflect active certificate
+      await reevaluateMasteryEligibility();
+    } catch (err: any) {
+      console.error('Failed to claim Mastery certificate:', err);
+      setClaimError(err?.message || 'Certificate claim denied. Authoritative requirements not met.');
+      await reevaluateMasteryEligibility().catch(() => null);
+    } finally {
+      setIsClaimingMastery(false);
+    }
+  };
+
+  // Authoritative PDF Download
+  const handleDownloadMasteryPdf = async (credId: string) => {
+    if (isDownloadingPdf || !credId) return;
+    setIsDownloadingPdf(true);
+    setDownloadPdfError(null);
+
+    try {
+      const blob = await downloadCertificatePdfApi(credId);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `NetVision-NV-NET-MASTERY-${credId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      console.error('Failed to download Mastery certificate PDF:', err);
+      setDownloadPdfError(err?.message || 'Failed to download certificate document.');
+    } finally {
+      setIsDownloadingPdf(false);
+    }
+  };
 
   // Initial Load: Spec, Eligibility, and Session Recovery
   const loadPortalData = useCallback(async () => {
@@ -117,6 +195,9 @@ export default function MasterCapstonePage() {
                 result: status.result,
               });
               setView('RESULT');
+              if (status.status === 'PASSED') {
+                reevaluateMasteryEligibility();
+              }
             }
           }
         } catch {
@@ -132,7 +213,7 @@ export default function MasterCapstonePage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [reevaluateMasteryEligibility]);
 
   useEffect(() => {
     loadPortalData();
@@ -221,6 +302,11 @@ export default function MasterCapstonePage() {
 
       if (typeof window !== 'undefined') {
         sessionStorage.removeItem('nv_capstone_active_attempt_id');
+      }
+
+      // If passed, immediately trigger authoritative Mastery eligibility re-evaluation
+      if (result.passed) {
+        reevaluateMasteryEligibility();
       }
     } catch (err: any) {
       console.error('Failed to submit Capstone attempt:', err);
@@ -902,20 +988,206 @@ export default function MasterCapstonePage() {
                     </div>
                   )}
 
-                  {/* Context Guidance */}
-                  <div className="text-xs text-[#8e95a5] leading-relaxed">
+                  {/* Mastery Certification Pathway & Authoritative Re-Evaluation */}
+                  <div className="pt-4 border-t border-[#2a2e39] flex flex-col gap-4">
                     {submissionResult.passed ? (
-                      <p>
-                        Congratulations! You have fulfilled the Master Capstone examination requirement for the NetVision Network Engineering Mastery credential. You may now return to the Certification Dashboard to claim your NV-NET-MASTERY certificate.
-                      </p>
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between pb-2 border-b border-[#2a2e39]/60">
+                          <div>
+                            <span className="text-[10px] font-mono uppercase text-[#38bdf8] font-bold block">
+                              Mastery Certification Pathway
+                            </span>
+                            <h3 className="text-sm font-bold text-white">
+                              Mastery eligibility has been re-evaluated.
+                            </h3>
+                          </div>
+                          {isReevaluating && (
+                            <Badge variant="cyan" dot={true} className="font-mono text-[10px]">
+                              SYNCHRONIZING...
+                            </Badge>
+                          )}
+                        </div>
+
+                        {isReevaluating ? (
+                          <div className="py-6 flex justify-center items-center">
+                            <PulsePacketLoader label="Querying authoritative backend Mastery eligibility engine..." />
+                          </div>
+                        ) : reevalError ? (
+                          <div className="p-4 rounded-xl border bg-rose-500/10 border-rose-500/30 text-rose-300 flex items-start justify-between gap-3 text-xs font-mono">
+                            <div className="flex items-center gap-2">
+                              <ShieldAlert className="w-4 h-4 shrink-0" />
+                              <span>{reevalError}</span>
+                            </div>
+                            <Button variant="secondary" size="sm" onClick={reevaluateMasteryEligibility}>
+                              Retry Evaluation
+                            </Button>
+                          </div>
+                        ) : (
+                          <>
+                            {/* CASE 1: Active Mastery Certificate Minted / Already Owned */}
+                            {(claimedMasteryCert || masteryReeval?.hasCertificate) && (() => {
+                              const credId =
+                                claimedMasteryCert?.credentialId ||
+                                masteryReeval?.existingCertificate?.credentialId ||
+                                'NV-NET-MASTERY';
+                              return (
+                                <div className="p-5 rounded-xl border border-emerald-500/40 bg-emerald-500/5 flex flex-col gap-4">
+                                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2.5">
+                                      <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                                        <Award className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <Badge variant="emerald" dot={true} className="font-mono text-[10px]">
+                                          ACTIVE CREDENTIAL ISSUED
+                                        </Badge>
+                                        <h4 className="text-sm font-bold text-white mt-0.5">
+                                          NetVision Certified Network Engineering Master
+                                        </h4>
+                                      </div>
+                                    </div>
+                                    <div className="text-left sm:text-right font-mono">
+                                      <span className="text-[10px] text-[#8e95a5] block uppercase">
+                                        Authoritative Credential ID
+                                      </span>
+                                      <span className="text-xs font-bold text-emerald-300">
+                                        {credId}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <p className="text-xs text-[#8e95a5] leading-relaxed">
+                                    Your official cryptographic Mastery certificate is active in the NetVision registry. You can inspect your credential record, download the verified PDF, or share the public verification ledger.
+                                  </p>
+
+                                  {downloadPdfError && (
+                                    <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-mono">
+                                      {downloadPdfError}
+                                    </div>
+                                  )}
+
+                                  <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-[#2a2e39]/60">
+                                    <Link href={`/certificates/${encodeURIComponent(credId)}`}>
+                                      <Button variant="primary" size="sm" className="flex items-center gap-1.5 text-xs font-semibold">
+                                        <FileText className="w-3.5 h-3.5" />
+                                        <span>View Credential Record</span>
+                                      </Button>
+                                    </Link>
+
+                                    <Button
+                                      variant="secondary"
+                                      size="sm"
+                                      isLoading={isDownloadingPdf}
+                                      onClick={() => handleDownloadMasteryPdf(credId)}
+                                      className="flex items-center gap-1.5 text-xs"
+                                    >
+                                      <Download className="w-3.5 h-3.5" />
+                                      <span>Download PDF</span>
+                                    </Button>
+
+                                    <Link href={`/certificates/verify/${encodeURIComponent(credId)}`}>
+                                      <Button variant="secondary" size="sm" className="flex items-center gap-1.5 text-xs text-[#10b981]">
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                        <span>Public Verification</span>
+                                      </Button>
+                                    </Link>
+                                  </div>
+                                </div>
+                              );
+                            })()}
+
+                            {/* CASE 2: Eligible to Claim Mastery Credential */}
+                            {!claimedMasteryCert && !masteryReeval?.hasCertificate && masteryReeval?.eligible && (
+                              <div className="p-5 rounded-xl border border-cyan-500/40 bg-cyan-500/5 flex flex-col gap-4">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                  <div>
+                                    <Badge variant="cyan" dot={true} className="font-mono text-[10px]">
+                                      ALL 9 REQUIREMENTS SATISFIED
+                                    </Badge>
+                                    <h4 className="text-base font-bold text-white mt-1">
+                                      Eligible to Claim NV-NET-MASTERY Credential
+                                    </h4>
+                                    <p className="text-xs text-[#8e95a5] mt-1 max-w-xl leading-relaxed">
+                                      The server-authoritative eligibility engine has validated all 5 active course credentials, 100% flagship curriculum, 85%+ cumulative assessment average, practical labs, and your passing Master Capstone score.
+                                    </p>
+                                  </div>
+
+                                  <Button
+                                    variant="cyan"
+                                    size="md"
+                                    isLoading={isClaimingMastery}
+                                    onClick={handleClaimMastery}
+                                    className="font-bold px-6 shadow-glow flex items-center gap-2 shrink-0"
+                                  >
+                                    <Sparkles className="w-4 h-4" />
+                                    <span>Claim Mastery Credential</span>
+                                  </Button>
+                                </div>
+
+                                {claimError && (
+                                  <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-mono">
+                                    {claimError}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* CASE 3: Capstone Passed, but Mastery Pending Other Prerequisites */}
+                            {!claimedMasteryCert && !masteryReeval?.hasCertificate && !masteryReeval?.eligible && (
+                              <div className="p-5 rounded-xl border border-amber-500/40 bg-amber-500/5 flex flex-col gap-3">
+                                <div>
+                                  <Badge variant="amber" className="font-mono text-[10px]">
+                                    PREREQUISITES PENDING
+                                  </Badge>
+                                  <h4 className="text-sm font-bold text-white mt-1">
+                                    Master Capstone Passed — Additional Criteria Pending
+                                  </h4>
+                                  <p className="text-xs text-[#8e95a5] mt-1 leading-relaxed">
+                                    Although you have passed the Master Capstone examination, the server-authoritative eligibility engine reports remaining unmet criteria before the NV-NET-MASTERY credential can be issued:
+                                  </p>
+                                </div>
+
+                                {masteryReeval?.blockingRequirements && masteryReeval.blockingRequirements.length > 0 && (
+                                  <div className="p-3 rounded-lg bg-[#14151a] border border-amber-500/30 text-xs font-mono text-amber-200">
+                                    <span className="font-bold block mb-1 uppercase text-[10px]">Remaining Blocker(s):</span>
+                                    <ul className="list-disc list-inside space-y-1">
+                                      {masteryReeval.blockingRequirements.map((req, idx) => (
+                                        <li key={idx}>{req}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+
+                                <div className="pt-2">
+                                  <Link href="/certificates">
+                                    <Button variant="secondary" size="sm" className="text-xs flex items-center gap-1.5">
+                                      <span>Review All Credentials</span>
+                                      <ArrowRight className="w-3.5 h-3.5" />
+                                    </Button>
+                                  </Link>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
                     ) : (
-                      <p>
-                        Your overall score of {submissionResult.score}% did not meet the mandatory 85% benchmark. A 24-hour mandatory study cooldown interval is now active. Review diagnostic incident post-mortems before re-attempting.
-                      </p>
+                      /* Capstone Failed: Show Cooldown Guidance */
+                      <div className="p-5 rounded-xl border border-rose-500/40 bg-rose-500/5 flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <ShieldAlert className="w-4 h-4 text-rose-400" />
+                          <h4 className="text-sm font-bold text-white">
+                            Mandatory Study Cooldown Active
+                          </h4>
+                        </div>
+                        <p className="text-xs text-[#8e95a5] leading-relaxed">
+                          Your overall evaluation score of {submissionResult.score}% did not meet the mandatory 85% passing benchmark. In accordance with authoritative certification policy, a 24-hour mandatory study cooldown is enforced following your first failed attempt (72 hours for subsequent attempts). The client cannot bypass this cooldown.
+                        </p>
+                      </div>
                     )}
                   </div>
 
-                  {/* Action Link */}
+                  {/* Navigation Links */}
                   <div className="pt-4 border-t border-[#2a2e39] flex flex-wrap items-center justify-between gap-3">
                     <Link href="/dashboard" className="w-full sm:w-auto">
                       <Button variant="primary" className="w-full sm:w-auto flex items-center justify-center gap-2">

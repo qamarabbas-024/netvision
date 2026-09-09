@@ -18,7 +18,7 @@ async function main() {
 
     console.log('[TEST 3/3] Running Certification Dashboard Integration Tests...');
     runCertificationDashboardTests();
-    console.log('  ✓ Passed: Authoritative credentials, course eligibility, 9-point Mastery, and Master Capstone exam contracts verified.\n');
+    console.log('  ✓ Passed: Authoritative credentials, course eligibility, 9-point Mastery, Master Capstone, and E2E Journey Tests (A-J) verified.\n');
 
     console.log('================================================================');
     console.log('🎉 ALL FRONTEND TESTS PASSED SUCCESSFULLY (3/3 suites)');

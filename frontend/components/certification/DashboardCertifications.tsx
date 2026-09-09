@@ -21,6 +21,7 @@ import {
   AlertCircle,
   X,
   FileCheck2,
+  FileText,
 } from 'lucide-react';
 import {
   getUserCertificatesApi,
@@ -362,11 +363,18 @@ export const DashboardCertifications: React.FC<DashboardCertificationsProps> = (
                 {/* Primary Action Button */}
                 <div className="shrink-0 flex items-center gap-3">
                   {hasMasteryCert ? (
-                    <Link href={`/certificates/verify/${encodeURIComponent(masteryCert?.credentialId || 'NV-NET-MASTERY')}`}>
-                      <Button variant="primary" size="md" className="flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4" /> Verify Credential
-                      </Button>
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link href={`/certificates/${encodeURIComponent(masteryCert?.credentialId || 'NV-NET-MASTERY')}`}>
+                        <Button variant="secondary" size="sm" className="flex items-center gap-1.5 text-xs">
+                          <FileText className="w-3.5 h-3.5" /> View Record
+                        </Button>
+                      </Link>
+                      <Link href={`/certificates/verify/${encodeURIComponent(masteryCert?.credentialId || 'NV-NET-MASTERY')}`}>
+                        <Button variant="primary" size="sm" className="flex items-center gap-1.5 text-xs">
+                          <ShieldCheck className="w-3.5 h-3.5" /> Verify
+                        </Button>
+                      </Link>
+                    </div>
                   ) : isMasteryEligible ? (
                     <Button
                       variant="cyan"
