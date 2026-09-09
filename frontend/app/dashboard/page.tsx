@@ -15,6 +15,7 @@ import { RouterIcon } from '@/components/ui/Icons';
 import { getUserProgressApi, getTopicsApi } from '@/lib/api';
 import { useAuthStore } from '@/stores/authStore';
 import { PulsePacketLoader } from '@/components/ui/Loading';
+import { DashboardCertifications } from '@/components/certification/DashboardCertifications';
 import {
   Flame,
   Zap,
@@ -299,7 +300,10 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* 4. WHAT HAVE I ACHIEVED? - Activity Timeline & Earned Badges */}
+                {/* 4. PROFESSIONAL CERTIFICATIONS & CREDENTIALS REGISTRY */}
+                <DashboardCertifications isAuthenticated={isAuthenticated} />
+
+                {/* 5. WHAT HAVE I ACHIEVED? - Activity Timeline & Earned Badges */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
                   {/* Recent Activity Timeline */}
                   <div className="lg:col-span-7 flex flex-col gap-4">
