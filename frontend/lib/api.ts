@@ -179,7 +179,7 @@ export async function claimAnonymousProgressApi(anonymousId: string) {
 }
 
 export async function getCertificateByIdApi(idOrCode: string) {
-  return await fetchApi<any>(`/certificates/${idOrCode}`);
+  return await fetchApi<any>(`/certificates/${encodeURIComponent(idOrCode)}`);
 }
 
 // =========================================================================
