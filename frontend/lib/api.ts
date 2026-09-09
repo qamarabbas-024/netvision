@@ -182,12 +182,342 @@ export async function getCertificateByIdApi(idOrCode: string) {
   return await fetchApi<any>(`/certificates/${idOrCode}`);
 }
 
-export async function getUserCertificatesApi(): Promise<any[]> {
+// =========================================================================
+// Certification Architecture & Verification API (Drops #1 - #5)
+// =========================================================================
+
+export interface PublicVerifiedCertificateDto {
+  credentialId: string;
+  status: string;
+  issuedAt: string;
+  recipientName: string | null;
+  certificationTitle: string | null;
+  certificationCode: string;
+  courseTitle: string | null;
+  courseSlug: string | null;
+  grade: string;
+  score: number | null;
+  componentScores: any | null;
+  skillsAssessed: string[];
+  isVerified: boolean;
+}
+
+export interface UserCertificateItem {
+  credentialId: string;
+  verificationCode?: string;
+  status: string;
+  issuedAt: string;
+  recipientName: string;
+  certificationTitle: string;
+  certificationCode: string;
+  courseCode?: string;
+  courseTitle?: string;
+  grade?: string;
+  score?: number | null;
+  componentScores?: any;
+  skillsAssessed?: string[];
+}
+
+export interface CourseEligibilityResult {
+  courseCode: string;
+  courseTitle: string;
+  credentialCode: string;
+  credentialTitle: string;
+  eligible: boolean;
+  hasCertificate: boolean;
+  existingCertificate?: {
+    id: string;
+    credentialId?: string;
+    issuedAt: string;
+    status: string;
+  };
+  blockingRequirements: string[];
+  breakdown: {
+    lessons: {
+      total: number;
+      completed: number;
+      passed: boolean;
+    };
+    assessments: {
+      requiredCount: number;
+      attemptedCount: number;
+      averageScore: number;
+      minRequiredScore: number;
+      passed: boolean;
+    };
+    labs: {
+      total: number;
+      passedCount: number;
+      passed: boolean;
+    };
+  };
+}
+
+export interface MasteryEligibilityResult {
+  credentialCode: string;
+  credentialTitle: string;
+  eligible: boolean;
+  hasCertificate: boolean;
+  existingCertificate?: {
+    id: string;
+    credentialId?: string;
+    issuedAt: string;
+    status: string;
+  };
+  blockingRequirements: string[];
+  breakdown: {
+    courseCertificates: {
+      requiredCodes: string[];
+      acquiredCodes: string[];
+      missingCodes: string[];
+      passed: boolean;
+    };
+    flagshipLessons: {
+      total: number;
+      completed: number;
+      passed: boolean;
+    };
+    cumulativeAssessments: {
+      requiredQuizzes: number;
+      attemptedQuizzes: number;
+      cumulativeAverage: number;
+      minRequiredAverage: number;
+      passed: boolean;
+    };
+    flagshipLabs: {
+      total: number;
+      passedCount: number;
+      passed: boolean;
+    };
+    masterCapstone: {
+      passed: boolean;
+      score: number | null;
+      attemptId?: string;
+      status?: string;
+    };
+  };
+}
+
+export interface ClaimedCertificateResult {
+  id: string;
+  code?: string;
+  credentialId: string;
+  verificationCode?: string;
+  status: string;
+  issuedAt: string;
+  recipientName: string;
+  certificationTitle: string;
+  certificationCode: string;
+  grade?: string;
+  score?: number;
+  componentScores?: any;
+  skillsAssessed?: string[];
+  isVerified: boolean;
+}
+
+export interface CapstoneSpecificationDto {
+  examCode: string;
+  certificationCode: string;
+  title: string;
+  durationMinutes: number;
+  durationSeconds: number;
+  passingScore: number;
+  scoringWeights: {
+    theoryWeight: number;
+    practicalWeight: number;
+    packetAnalysisWeight: number;
+    passingScore: number;
+  };
+  policy: {
+    maxAttempts: number;
+    rollingWindowDays: number;
+  };
+}
+
+export interface CapstoneAttemptSessionDto {
+  attemptId: string;
+  examCode: string;
+  certificationCode: string;
+  status: string;
+  startedAt: string;
+  expiresAt: string;
+  submittedAt?: string | null;
+  durationMinutes: number;
+  durationSeconds: number;
+  remainingSeconds: number;
+  attemptNumber: number;
+  score?: number | null;
+  passed?: boolean | null;
+  scoringWeights?: {
+    theoryWeight: number;
+    practicalWeight: number;
+    packetAnalysisWeight: number;
+    passingScore: number;
+  };
+  result?: any;
+}
+
+export interface SubmitCapstonePayload {
+  theoryAnswers?: Record<string, number | string>;
+  troubleshootingActions?: Array<{ action: string; target: string; value?: string }>;
+  incidentHypothesis?: string;
+  packetAnalysisAnswers?: Record<string, string>;
+  componentScores?: {
+    theoryScore?: number;
+    practicalScore?: number;
+    packetAnalysisScore?: number;
+  };
+}
+
+export interface CapstoneSubmissionResultDto {
+  attemptId: string;
+  examCode: string;
+  status: string;
+  score: number;
+  passed: boolean;
+  result: {
+    overallScore: number;
+    passed: boolean;
+    passingThreshold: number;
+    componentScores: {
+      theoryScore: number;
+      practicalScore: number;
+      packetAnalysisScore: number;
+    };
+    weightedScores: {
+      theoryWeighted: number;
+      practicalWeighted: number;
+      packetAnalysisWeighted: number;
+    };
+    scoringWeights: {
+      theoryWeight: number;
+      practicalWeight: number;
+      packetAnalysisWeight: number;
+      passingScore: number;
+    };
+    submittedAt: string;
+    durationSecondsUsed: number;
+  };
+}
+
+/**
+ * Publicly verifies a credential ID without authentication headers.
+ * Consumes the sanitized public verification DTO from GET /certificates/verify/:credentialId.
+ */
+export async function verifyCertificatePublicApi(credentialId: string): Promise<PublicVerifiedCertificateDto> {
+  const url = `${API_BASE}/certificates/verify/${encodeURIComponent(credentialId)}`;
   try {
-    return await fetchApi<any[]>('/certificates');
-  } catch {
-    return [];
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      const msg = errJson.message || (res.status === 404 ? 'Credential ID not found or invalid.' : 'Verification lookup failed.');
+      const error: any = new Error(msg);
+      error.status = res.status;
+      throw error;
+    }
+
+    return await res.json();
+  } catch (err: any) {
+    console.warn(`[NetVision Verification] Public verify lookup failed: ${err.message}`);
+    throw err;
   }
+}
+
+/**
+ * Retrieves all active certificates owned by the authenticated learner (IDOR protected).
+ */
+export async function getUserCertificatesApi(): Promise<UserCertificateItem[]> {
+  try {
+    return await fetchApi<UserCertificateItem[]>('/certificates/mine');
+  } catch {
+    try {
+      return await fetchApi<UserCertificateItem[]>('/certificates');
+    } catch {
+      return [];
+    }
+  }
+}
+
+/**
+ * Checks server-authoritative certification eligibility for a flagship course (NV-C01 to NV-C05).
+ */
+export async function checkCourseEligibilityApi(courseCode: string): Promise<CourseEligibilityResult> {
+  return await fetchApi<CourseEligibilityResult>(`/certifications/courses/${encodeURIComponent(courseCode)}/eligibility`);
+}
+
+/**
+ * Checks server-authoritative 9-point Mastery certification eligibility for NV-NET-MASTERY.
+ */
+export async function checkMasteryEligibilityApi(): Promise<MasteryEligibilityResult> {
+  return await fetchApi<MasteryEligibilityResult>('/certifications/mastery/eligibility');
+}
+
+/**
+ * Claims an official professional certificate for an eligible course credential or Mastery.
+ */
+export async function claimCertificationCertificateApi(code: string): Promise<ClaimedCertificateResult> {
+  return await fetchApi<ClaimedCertificateResult>(`/certifications/${encodeURIComponent(code)}/claim-certificate`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Retrieves Master Capstone examination specification, rules, and scoring weights.
+ */
+export async function getCapstoneSpecificationApi(): Promise<CapstoneSpecificationDto> {
+  return await fetchApi<CapstoneSpecificationDto>('/certifications/capstone/specification');
+}
+
+/**
+ * Starts or resumes a 120-minute timed Master Capstone examination attempt.
+ */
+export async function startCapstoneAttemptApi(): Promise<CapstoneAttemptSessionDto> {
+  return await fetchApi<CapstoneAttemptSessionDto>('/certifications/capstone/start', {
+    method: 'POST',
+  });
+}
+
+/**
+ * Retrieves active Master Capstone examination attempt status with server-calculated remaining seconds.
+ */
+export async function getCapstoneAttemptStatusApi(attemptId: string): Promise<CapstoneAttemptSessionDto> {
+  return await fetchApi<CapstoneAttemptSessionDto>(`/certifications/capstone/${encodeURIComponent(attemptId)}`);
+}
+
+/**
+ * Submits Master Capstone examination attempt for server-side evaluation (40/35/25 scoring).
+ */
+export async function submitCapstoneAttemptApi(attemptId: string, payload: SubmitCapstonePayload): Promise<CapstoneSubmissionResultDto> {
+  return await fetchApi<CapstoneSubmissionResultDto>(`/certifications/capstone/${encodeURIComponent(attemptId)}/submit`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
+ * Downloads official certificate PDF directly from the server (authorized owner only).
+ */
+export async function downloadCertificatePdfApi(idOrCode: string): Promise<Blob> {
+  const url = `${API_BASE}/certificates/${encodeURIComponent(idOrCode)}/download`;
+  const res = await fetch(url, {
+    credentials: 'include',
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to download certificate document.');
+  }
+
+  return await res.blob();
 }
 
 export async function getSavedLessonsApi(): Promise<any[]> {
