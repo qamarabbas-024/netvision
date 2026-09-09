@@ -517,12 +517,14 @@ export default function CertificatesCatalogPage() {
                                   <Sparkles className="w-4 h-4" /> Claim Mastery Credential
                                 </Button>
                               ) : (
-                                <div className="text-right">
-                                  <span className="text-[11px] font-mono text-[#8e95a5] block">
-                                    Mastery Status:
-                                  </span>
-                                  <span className="text-xs font-mono font-bold text-[#818cf8]">
-                                    PREREQUISITES PENDING
+                                <div className="flex flex-col items-end gap-1.5">
+                                  <Link href="/certifications/capstone">
+                                    <Button variant="secondary" size="sm" className="flex items-center gap-1.5 text-xs text-[#818cf8] hover:text-white font-semibold">
+                                      <Clock className="w-3.5 h-3.5" /> Capstone Workspace
+                                    </Button>
+                                  </Link>
+                                  <span className="text-[10px] font-mono text-[#8e95a5]">
+                                    Prerequisites Tracking
                                   </span>
                                 </div>
                               )}

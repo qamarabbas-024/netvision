@@ -331,6 +331,8 @@ export interface CapstoneSpecificationDto {
   policy: {
     maxAttempts: number;
     rollingWindowDays: number;
+    cooldownFirstFailureHours?: number;
+    cooldownSubsequentFailureHours?: number;
   };
 }
 

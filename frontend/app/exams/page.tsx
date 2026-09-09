@@ -8,7 +8,7 @@ import { AppTopbar } from '@/components/ui/Topbar';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { Clock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Clock, ShieldCheck, ArrowRight, Award } from 'lucide-react';
 
 export default function ExamsPage() {
   const exams = [
@@ -27,6 +27,16 @@ export default function ExamsPage() {
       duration: '60 mins',
       passingScore: '85%',
       icon: <ShieldCheck className="w-7 h-7 text-[#818cf8]" />,
+      link: '/courses',
+    },
+    {
+      title: 'NetVision Network Engineering Master Capstone (NV-NET-MASTERY-EXAM)',
+      level: 'Pinnacle Mastery',
+      questions: '3 Assessment Domains',
+      duration: '120 mins',
+      passingScore: '85%',
+      icon: <Award className="w-7 h-7 text-[#818cf8]" />,
+      link: '/certifications/capstone',
     },
   ];
 
@@ -77,9 +87,9 @@ export default function ExamsPage() {
                       </div>
                     </div>
 
-                    <Link href="/courses">
+                    <Link href={ex.link || '/courses'}>
                       <Button variant="primary" size="md" className="w-full justify-center font-bold text-xs shadow-sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                        Start Exam Simulation
+                        {ex.link?.includes('capstone') ? 'Enter Capstone Portal' : 'Start Exam Simulation'}
                       </Button>
                     </Link>
                   </Card>
