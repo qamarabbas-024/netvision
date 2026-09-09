@@ -81,6 +81,19 @@ export default function MasterCapstonePage() {
   const [incidentRemediation, setIncidentRemediation] = useState<string>('');
   const [packetForensicsNotes, setPacketForensicsNotes] = useState<string>('');
 
+  // Authoritative structured candidate answers (Drop #8)
+  const [theoryAnswers, setTheoryAnswers] = useState<Record<string, number>>({});
+  const [incidentAnswers, setIncidentAnswers] = useState<{
+    layerDomain?: string;
+    protocolFailure?: string;
+    rootCause?: string;
+    diagnosticOrder?: string[];
+    remediationChoice?: string;
+  }>({
+    diagnosticOrder: ['CMD_SYSLOG', 'CMD_MAC_TABLE', 'CMD_CDP_NEIGHBOR', 'CMD_INTERFACE_CONFIG'],
+  });
+  const [forensicsAnswers, setForensicsAnswers] = useState<Record<string, number>>({});
+
   // Sub-Drop 5.5: Post-Exam Mastery Re-evaluation and Claim state
   const [masteryReeval, setMasteryReeval] = useState<MasteryEligibilityResult | null>(null);
   const [isReevaluating, setIsReevaluating] = useState<boolean>(false);
@@ -285,6 +298,9 @@ export default function MasterCapstonePage() {
     setSubmitError(null);
 
     const payload: SubmitCapstonePayload = {
+      theoryAnswers,
+      incidentAnswers,
+      forensicsAnswers,
       incidentHypothesis: theoryHypothesis,
       troubleshootingActions: [
         { action: 'APPLY_ENTERPRISE_PATCH', target: 'CORE_GATEWAY_ROUTER', value: incidentRemediation },
@@ -701,7 +717,7 @@ export default function MasterCapstonePage() {
                   </button>
                 </div>
 
-                {/* Tab 1: Theory Assessment Shell */}
+                {/* Tab 1: Theory Assessment */}
                 {activeTab === 'theory' && (
                   <Card className="p-6 surface-2 border border-[#2a2e39] rounded-xl flex flex-col gap-6">
                     <div>
@@ -715,30 +731,66 @@ export default function MasterCapstonePage() {
                         Multi-Protocol Theoretical Reasoning &amp; Convergence Analysis
                       </h2>
                       <p className="text-xs text-[#8e95a5] mt-1 leading-relaxed">
-                        Authoritative evaluation of Layer 1 through Layer 4 protocol engineering, Dijkstra shortest path first mechanics, CIDR routing prefixes, and stateful cryptographic encapsulation.
+                        Authoritative evaluation of Layer 1 through Layer 4 protocol engineering, Dijkstra shortest path first mechanics, CIDR routing prefixes, and stateful cryptographic encapsulation. Select your answers for all 10 questions below.
                       </p>
                     </div>
 
-                    <div className="p-4 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs font-mono space-y-2">
-                      <div className="flex items-center gap-2 text-[#38bdf8]">
-                        <Activity className="w-4 h-4" />
-                        <span className="font-bold">Authoritative Assessment Delivery Pipeline</span>
-                      </div>
-                      <p className="text-[#8e95a5] leading-relaxed">
-                        The Master Capstone server validates comprehensive multi-protocol reasoning. Submit your theoretical reasoning hypothesis below for server-side evaluation.
-                      </p>
+                    {/* Render Real Theory Questions */}
+                    <div className="space-y-6">
+                      {(attempt.assessment?.theorySection?.questions || []).map((q: any, qIdx: number) => {
+                        const selectedIdx = theoryAnswers[q.id];
+                        return (
+                          <div key={q.id} className="p-4 rounded-xl bg-[#14151a] border border-[#2a2e39] space-y-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[10px] font-mono text-[#38bdf8] font-bold uppercase">
+                                Question {qIdx + 1} of 10 // {q.category || q.id}
+                              </span>
+                              <span className="text-[10px] font-mono text-zinc-400">
+                                {q.points} Points
+                              </span>
+                            </div>
+                            <p className="text-xs text-white font-medium leading-relaxed">
+                              {q.prompt}
+                            </p>
+                            <div className="space-y-2 pt-1">
+                              {q.options.map((opt: string, optIdx: number) => {
+                                const isSelected = selectedIdx === optIdx;
+                                return (
+                                  <button
+                                    key={optIdx}
+                                    type="button"
+                                    onClick={() => setTheoryAnswers((prev) => ({ ...prev, [q.id]: optIdx }))}
+                                    className={`w-full text-left p-3 rounded-lg border text-xs font-mono transition-all flex items-start gap-3 ${
+                                      isSelected
+                                        ? 'border-[#38bdf8] bg-[#38bdf8]/10 text-white shadow-sm'
+                                        : 'border-[#2a2e39] bg-[#0c0d10] text-[#8e95a5] hover:text-white hover:border-[#38bdf8]/50'
+                                    }`}
+                                  >
+                                    <span className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 text-[9px] ${
+                                      isSelected ? 'border-[#38bdf8] bg-[#38bdf8] text-[#0c0d10] font-bold' : 'border-[#4a5060]'
+                                    }`}>
+                                      {String.fromCharCode(65 + optIdx)}
+                                    </span>
+                                    <span className="leading-snug">{opt}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
 
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 pt-4 border-t border-[#2a2e39]">
                       <label htmlFor="theory-hypothesis" className="text-xs font-mono font-bold text-[#8e95a5]">
-                        Candidate Protocol Reasoning &amp; Hypothesis Submission:
+                        Candidate Protocol Reasoning &amp; Hypothesis Notes (Optional):
                       </label>
                       <textarea
                         id="theory-hypothesis"
                         value={theoryHypothesis}
                         onChange={(e) => setTheoryHypothesis(e.target.value)}
                         placeholder="Detail your theoretical analysis of MTU fragmentation thresholds, OSPF link-state advertisement pacing, and BGP AS-path loop prevention mechanisms..."
-                        rows={6}
+                        rows={3}
                         className="w-full p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-[#38bdf8]"
                       />
                     </div>
@@ -756,33 +808,122 @@ export default function MasterCapstonePage() {
                         <Badge variant="purple">Weight: {spec.scoringWeights.practicalWeight}%</Badge>
                       </div>
                       <h2 className="text-lg font-bold text-white">
-                        Datacenter Spine-Leaf Incident Diagnostics
+                        {attempt.assessment?.incidentSection?.scenario?.title || 'Datacenter Core Switch Incident Challenge'}
                       </h2>
                       <p className="text-xs text-[#8e95a5] mt-1 leading-relaxed">
-                        Authoritative simulation scenario: NV-NET-MASTERY-ENTERPRISE-DATACENTER. Analyze simulated gateway routing telemetry, asymmetric link convergence, and ACL filtering bottlenecks.
+                        {attempt.assessment?.incidentSection?.scenario?.description || 'Analyze simulated gateway routing telemetry, asymmetric link convergence, and ACL filtering bottlenecks.'}
                       </p>
                     </div>
 
-                    <div className="p-4 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs font-mono space-y-2">
-                      <div className="flex items-center gap-2 text-[#818cf8]">
+                    {/* Topology and Syslog Evidence Box */}
+                    <div className="p-4 rounded-lg bg-[#14151a] border border-[#2a2e39] space-y-3">
+                      <div className="flex items-center gap-2 text-[#818cf8] text-xs font-mono font-bold">
                         <Terminal className="w-4 h-4" />
-                        <span className="font-bold">Active Diagnostic Scenario: Enterprise Core Fabric</span>
+                        <span>Live Incident Evidence &amp; Telemetry Stream</span>
                       </div>
-                      <p className="text-[#8e95a5] leading-relaxed">
-                        Spine-leaf interconnect reports intermittent packet drops across VLAN 100 trunk boundaries. Formulate your remediation patch payload below.
-                      </p>
+                      {attempt.assessment?.incidentSection?.scenario?.topologySummary && (
+                        <div className="p-2.5 rounded bg-[#090a0d] border border-[#232733] text-[11px] font-mono text-zinc-300">
+                          <span className="text-[#818cf8] font-bold block mb-1">TOPOLOGY CONTEXT:</span>
+                          {attempt.assessment.incidentSection.scenario.topologySummary}
+                        </div>
+                      )}
+                      {attempt.assessment?.incidentSection?.scenario?.syslogSnippet && (
+                        <div className="p-2.5 rounded bg-[#090a0d] border border-[#232733] text-[11px] font-mono text-amber-300/90 whitespace-pre-wrap leading-relaxed">
+                          <span className="text-amber-400 font-bold block mb-1">CRITICAL SYSLOG EXCERPT:</span>
+                          {attempt.assessment.incidentSection.scenario.syslogSnippet}
+                        </div>
+                      )}
                     </div>
 
-                    <div className="flex flex-col gap-2">
+                    {/* Structured Tasks */}
+                    <div className="space-y-6">
+                      {(attempt.assessment?.incidentSection?.scenario?.tasks || []).map((task: any, tIdx: number) => {
+                        let currentVal: any = undefined;
+                        if (task.taskId === 'INCIDENT-TASK1') currentVal = incidentAnswers.layerDomain;
+                        else if (task.taskId === 'INCIDENT-TASK2') currentVal = incidentAnswers.protocolFailure;
+                        else if (task.taskId === 'INCIDENT-TASK3') currentVal = incidentAnswers.rootCause;
+                        else if (task.taskId === 'INCIDENT-TASK4') currentVal = incidentAnswers.diagnosticOrder;
+                        else if (task.taskId === 'INCIDENT-TASK5') currentVal = incidentAnswers.remediationChoice;
+
+                        return (
+                          <div key={task.taskId} className="p-4 rounded-xl bg-[#14151a] border border-[#2a2e39] space-y-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[10px] font-mono text-[#818cf8] font-bold uppercase">
+                                Task {tIdx + 1} of 5 // {task.title}
+                              </span>
+                              <span className="text-[10px] font-mono text-zinc-400">
+                                {task.points} Points
+                              </span>
+                            </div>
+                            <p className="text-xs text-white font-medium leading-relaxed">
+                              {task.prompt}
+                            </p>
+
+                            {task.type === 'CHOICE' && (
+                              <div className="space-y-2 pt-1">
+                                {task.options.map((opt: any) => {
+                                  const isSelected = currentVal === opt.id;
+                                  return (
+                                    <button
+                                      key={opt.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setIncidentAnswers((prev) => {
+                                          if (task.taskId === 'INCIDENT-TASK1') return { ...prev, layerDomain: opt.id };
+                                          if (task.taskId === 'INCIDENT-TASK2') return { ...prev, protocolFailure: opt.id };
+                                          if (task.taskId === 'INCIDENT-TASK3') return { ...prev, rootCause: opt.id };
+                                          if (task.taskId === 'INCIDENT-TASK5') return { ...prev, remediationChoice: opt.id };
+                                          return { ...prev, [task.taskId]: opt.id };
+                                        });
+                                      }}
+                                      className={`w-full text-left p-3 rounded-lg border text-xs font-mono transition-all flex items-start gap-3 ${
+                                        isSelected
+                                          ? 'border-[#818cf8] bg-[#818cf8]/10 text-white shadow-sm'
+                                          : 'border-[#2a2e39] bg-[#0c0d10] text-[#8e95a5] hover:text-white hover:border-[#818cf8]/50'
+                                      }`}
+                                    >
+                                      <span className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 text-[9px] ${
+                                        isSelected ? 'border-[#818cf8] bg-[#818cf8] text-[#0c0d10] font-bold' : 'border-[#4a5060]'
+                                      }`}>
+                                        •
+                                      </span>
+                                      <span className="leading-snug">{opt.label}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {task.type === 'ORDERING' && (
+                              <div className="space-y-2 pt-1">
+                                <div className="p-3 rounded-lg bg-[#0c0d10] border border-[#2a2e39] space-y-1.5 text-xs font-mono">
+                                  <span className="text-[#8e95a5] text-[10px] block uppercase font-bold">Standard Diagnostic Sequence:</span>
+                                  {task.options.map((opt: any, oIdx: number) => (
+                                    <div key={opt.id} className="flex items-center gap-2 text-zinc-300 py-1 border-b border-[#2a2e39]/40 last:border-0">
+                                      <span className="w-5 h-5 rounded bg-[#818cf8]/15 text-[#818cf8] flex items-center justify-center font-bold text-[10px]">
+                                        {oIdx + 1}
+                                      </span>
+                                      <span className="text-xs">{opt.label}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex flex-col gap-2 pt-4 border-t border-[#2a2e39]">
                       <label htmlFor="remediation-input" className="text-xs font-mono font-bold text-[#8e95a5]">
-                        Candidate Remediation Strategy &amp; Patch Definition:
+                        Candidate Remediation Rationale &amp; CLI Patch Directives (Optional):
                       </label>
                       <textarea
                         id="remediation-input"
                         value={incidentRemediation}
                         onChange={(e) => setIncidentRemediation(e.target.value)}
                         placeholder="Configure router ospf 1 / neighbor commands, verify MTU consistency across 802.1Q trunk interfaces, or formulate ACL permit directives..."
-                        rows={6}
+                        rows={3}
                         className="w-full p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-[#818cf8]"
                       />
                     </div>
@@ -800,33 +941,111 @@ export default function MasterCapstonePage() {
                         <Badge variant="emerald">Weight: {spec.scoringWeights.packetAnalysisWeight}%</Badge>
                       </div>
                       <h2 className="text-lg font-bold text-white">
-                        PCAP Stream Anomaly Dissection
+                        {attempt.assessment?.forensicsSection?.scenario?.title || 'PCAP Stream Anomaly Dissection'}
                       </h2>
                       <p className="text-xs text-[#8e95a5] mt-1 leading-relaxed">
-                        Identify TCP SYN-ACK retransmission loops, zero-window window probing, and fragmented IP payloads from the simulated capture stream.
+                        {attempt.assessment?.forensicsSection?.scenario?.description || 'Identify TCP SYN-ACK retransmission loops, zero-window window probing, and fragmented IP payloads from the simulated capture stream.'}
                       </p>
                     </div>
 
-                    <div className="p-4 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs font-mono space-y-2">
-                      <div className="flex items-center gap-2 text-[#10b981]">
-                        <Activity className="w-4 h-4" />
-                        <span className="font-bold">Capture Stream: dc-ingress-01.pcap</span>
+                    {/* PCAP Frames Telemetry Table */}
+                    {attempt.assessment?.forensicsSection?.scenario?.frames && (
+                      <div className="p-4 rounded-lg bg-[#14151a] border border-[#2a2e39] space-y-3">
+                        <div className="flex items-center gap-2 text-[#10b981] text-xs font-mono font-bold">
+                          <Activity className="w-4 h-4" />
+                          <span>Captured TCP Stream Telemetry (tap0 ingress)</span>
+                        </div>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-left text-[11px] font-mono">
+                            <thead>
+                              <tr className="border-b border-[#2a2e39] text-[#8e95a5]">
+                                <th className="py-1.5 px-2">No.</th>
+                                <th className="py-1.5 px-2">Time</th>
+                                <th className="py-1.5 px-2">Source</th>
+                                <th className="py-1.5 px-2">Destination</th>
+                                <th className="py-1.5 px-2">Proto</th>
+                                <th className="py-1.5 px-2">Flags</th>
+                                <th className="py-1.5 px-2">Info</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#2a2e39]/50 text-zinc-300">
+                              {attempt.assessment.forensicsSection.scenario.frames.map((frame: any) => (
+                                <tr key={frame.frameNumber} className="hover:bg-[#1a1c24]">
+                                  <td className="py-1.5 px-2 font-bold text-white">{frame.frameNumber}</td>
+                                  <td className="py-1.5 px-2 text-[#8e95a5]">{frame.timestamp}</td>
+                                  <td className="py-1.5 px-2 text-cyan-400">{frame.sourceIp}:{frame.srcPort}</td>
+                                  <td className="py-1.5 px-2 text-indigo-400">{frame.destIp}:{frame.dstPort}</td>
+                                  <td className="py-1.5 px-2 font-bold">{frame.protocol}</td>
+                                  <td className="py-1.5 px-2">
+                                    <span className="px-1.5 py-0.5 rounded bg-[#2a2e39] text-[10px] text-emerald-400">
+                                      {(frame.tcpFlags || []).join(', ')}
+                                    </span>
+                                  </td>
+                                  <td className="py-1.5 px-2 text-zinc-400 truncate max-w-xs">{frame.info}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                      <p className="text-[#8e95a5] leading-relaxed">
-                        Capture trace exhibits TCP out-of-order delivery followed by RST injection. Provide your forensic analysis below.
-                      </p>
+                    )}
+
+                    {/* Forensics Questions */}
+                    <div className="space-y-6">
+                      {(attempt.assessment?.forensicsSection?.scenario?.questions || []).map((q: any, qIdx: number) => {
+                        const selectedIdx = forensicsAnswers[q.id];
+                        return (
+                          <div key={q.id} className="p-4 rounded-xl bg-[#14151a] border border-[#2a2e39] space-y-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-[10px] font-mono text-[#10b981] font-bold uppercase">
+                                Forensics Task {qIdx + 1} of 4 // {q.id}
+                              </span>
+                              <span className="text-[10px] font-mono text-zinc-400">
+                                {q.points} Points
+                              </span>
+                            </div>
+                            <p className="text-xs text-white font-medium leading-relaxed">
+                              {q.prompt}
+                            </p>
+                            <div className="space-y-2 pt-1">
+                              {q.options.map((opt: string, optIdx: number) => {
+                                const isSelected = selectedIdx === optIdx;
+                                return (
+                                  <button
+                                    key={optIdx}
+                                    type="button"
+                                    onClick={() => setForensicsAnswers((prev) => ({ ...prev, [q.id]: optIdx }))}
+                                    className={`w-full text-left p-3 rounded-lg border text-xs font-mono transition-all flex items-start gap-3 ${
+                                      isSelected
+                                        ? 'border-[#10b981] bg-[#10b981]/10 text-white shadow-sm'
+                                        : 'border-[#2a2e39] bg-[#0c0d10] text-[#8e95a5] hover:text-white hover:border-[#10b981]/50'
+                                    }`}
+                                  >
+                                    <span className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 text-[9px] ${
+                                      isSelected ? 'border-[#10b981] bg-[#10b981] text-[#0c0d10] font-bold' : 'border-[#4a5060]'
+                                    }`}>
+                                      {String.fromCharCode(65 + optIdx)}
+                                    </span>
+                                    <span className="leading-snug">{opt}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
 
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 pt-4 border-t border-[#2a2e39]">
                       <label htmlFor="packet-forensics" className="text-xs font-mono font-bold text-[#8e95a5]">
-                        Forensic Packet Analysis Findings:
+                        Forensic Packet Analysis Findings &amp; Observations (Optional):
                       </label>
                       <textarea
                         id="packet-forensics"
                         value={packetForensicsNotes}
                         onChange={(e) => setPacketForensicsNotes(e.target.value)}
                         placeholder="Detail the TCP window scale option negotiation, sequence number progression, and source of RST termination..."
-                        rows={6}
+                        rows={3}
                         className="w-full p-3 rounded-lg bg-[#14151a] border border-[#2a2e39] text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-[#10b981]"
                       />
                     </div>

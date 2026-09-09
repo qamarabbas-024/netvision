@@ -5,6 +5,7 @@ export * from './models/SandboxModel';
 export * from './models/TroubleshootingModel';
 export * from './data/troubleshootingScenarios';
 export * from './curriculum/flagshipCurriculum';
+export * from './curriculum/capstonePublicTypes';
 
 export const API_ROUTES = {
   AUTH: {

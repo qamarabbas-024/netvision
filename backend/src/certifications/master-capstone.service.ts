@@ -7,14 +7,13 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { ExamAttemptStatus, ExamType } from '@prisma/client';
-
-export interface CapstoneScoringWeights {
-  theoryWeight: number;           // 40% (Theory & Protocol Reasoning)
-  practicalWeight: number;        // 35% (Multi-layer Topology Incident Challenge)
-  packetAnalysisWeight: number;   // 25% (Packet-Capture Forensics)
-  passingScore: number;           // 85%
-  [key: string]: any;
-}
+import {
+  CapstoneScoringWeights,
+  CandidateCapstoneSubmission,
+  CapstoneGradingEngine,
+  getPublicAssessment,
+  LATEST_CAPSTONE_VERSION,
+} from './capstone-assessment';
 
 export const CAPSTONE_CONFIG = {
   examCode: 'NV-NET-MASTERY-EXAM',
@@ -34,19 +33,6 @@ export const CAPSTONE_CONFIG = {
   } as CapstoneScoringWeights,
 };
 
-export interface SubmitCapstonePayload {
-  theoryAnswers?: Record<string, number | string>;
-  troubleshootingActions?: Array<{ action: string; target: string; value?: string }>;
-  incidentHypothesis?: string;
-  packetAnalysisAnswers?: Record<string, string>;
-  // Note: Raw scores provided by client are strictly IGNORED; server evaluates or scores inputs
-  componentScores?: {
-    theoryScore?: number;
-    practicalScore?: number;
-    packetAnalysisScore?: number;
-  };
-}
-
 @Injectable()
 export class MasterCapstoneService {
   private readonly logger = new Logger(MasterCapstoneService.name);
@@ -54,17 +40,41 @@ export class MasterCapstoneService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Returns public-safe Capstone examination blueprint and rules.
+   * Returns public-safe Capstone examination blueprint, versioning, and rules.
+   * NEVER exposes answer keys or internal scoring rubrics.
    */
   getSpecification() {
+    const publicAssessment = getPublicAssessment(LATEST_CAPSTONE_VERSION);
+
     return {
       examCode: CAPSTONE_CONFIG.examCode,
       certificationCode: CAPSTONE_CONFIG.certificationCode,
       title: CAPSTONE_CONFIG.title,
+      version: LATEST_CAPSTONE_VERSION,
       durationMinutes: CAPSTONE_CONFIG.durationMinutes,
       durationSeconds: CAPSTONE_CONFIG.durationSeconds,
       passingScore: CAPSTONE_CONFIG.scoringWeights.passingScore,
       scoringWeights: CAPSTONE_CONFIG.scoringWeights,
+      domains: [
+        {
+          domain: 'THEORY',
+          title: publicAssessment.theorySection.title,
+          weightPercent: CAPSTONE_CONFIG.scoringWeights.theoryWeight,
+          questionCount: publicAssessment.theorySection.questions.length,
+        },
+        {
+          domain: 'INCIDENT',
+          title: publicAssessment.incidentSection.title,
+          weightPercent: CAPSTONE_CONFIG.scoringWeights.practicalWeight,
+          taskCount: publicAssessment.incidentSection.scenario.tasks.length,
+        },
+        {
+          domain: 'FORENSICS',
+          title: publicAssessment.forensicsSection.title,
+          weightPercent: CAPSTONE_CONFIG.scoringWeights.packetAnalysisWeight,
+          questionCount: publicAssessment.forensicsSection.scenario.questions.length,
+        },
+      ],
       policy: {
         maxAttempts: CAPSTONE_CONFIG.maxAttempts,
         rollingWindowDays: CAPSTONE_CONFIG.rollingWindowDays,
@@ -88,6 +98,7 @@ export class MasterCapstoneService {
    * 2. Rolling attempt limit (max 3 per 90 days)
    * 3. Server-side cooldown enforcement
    * 4. Idempotent return of currently running active attempt
+   * 5. Authoritative version snapshotting per attempt
    */
   async startCapstoneAttempt(userId: string) {
     if (!userId) {
@@ -129,10 +140,14 @@ export class MasterCapstoneService {
 
     if (activeAttempt) {
       const remainingSeconds = Math.max(0, Math.floor((new Date(activeAttempt.expiresAt).getTime() - now.getTime()) / 1000));
+      const configSnap = (activeAttempt.configSnapshotJson as any) || {};
+      const version = configSnap.assessmentVersion || LATEST_CAPSTONE_VERSION;
+
       return {
         attemptId: activeAttempt.id,
         examCode: CAPSTONE_CONFIG.examCode,
         certificationCode: CAPSTONE_CONFIG.certificationCode,
+        assessmentVersion: version,
         status: activeAttempt.status,
         startedAt: activeAttempt.startedAt,
         expiresAt: activeAttempt.expiresAt,
@@ -141,6 +156,7 @@ export class MasterCapstoneService {
         remainingSeconds,
         attemptNumber: activeAttempt.attemptNumber,
         scoringWeights: CAPSTONE_CONFIG.scoringWeights,
+        assessment: getPublicAssessment(version),
       };
     }
 
@@ -191,10 +207,14 @@ export class MasterCapstoneService {
 
         if (concurrentActive) {
           const remainingSeconds = Math.max(0, Math.floor((new Date(concurrentActive.expiresAt).getTime() - Date.now()) / 1000));
+          const configSnap = (concurrentActive.configSnapshotJson as any) || {};
+          const version = configSnap.assessmentVersion || LATEST_CAPSTONE_VERSION;
+
           return {
             attemptId: concurrentActive.id,
             examCode: CAPSTONE_CONFIG.examCode,
             certificationCode: CAPSTONE_CONFIG.certificationCode,
+            assessmentVersion: version,
             status: concurrentActive.status,
             startedAt: concurrentActive.startedAt,
             expiresAt: concurrentActive.expiresAt,
@@ -203,13 +223,15 @@ export class MasterCapstoneService {
             remainingSeconds,
             attemptNumber: concurrentActive.attemptNumber,
             scoringWeights: CAPSTONE_CONFIG.scoringWeights,
+            assessment: getPublicAssessment(version),
           };
         }
 
-        // Initialize new 120-minute timed attempt
+        // Initialize new 120-minute timed attempt with snapshot of authoritative version
         const startedAt = new Date();
         const expiresAt = new Date(startedAt.getTime() + CAPSTONE_CONFIG.durationSeconds * 1000);
         const attemptNumber = recentAttempts.length + 1;
+        const assessmentVersion = LATEST_CAPSTONE_VERSION;
 
         const attempt = await tx.examAttempt.create({
           data: {
@@ -222,9 +244,10 @@ export class MasterCapstoneService {
             attemptNumber,
             configSnapshotJson: {
               examCode: CAPSTONE_CONFIG.examCode,
+              assessmentVersion,
               durationSeconds: CAPSTONE_CONFIG.durationSeconds,
               scoringWeights: CAPSTONE_CONFIG.scoringWeights,
-              scenarioCode: 'NV-NET-MASTERY-ENTERPRISE-DATACENTER',
+              scenarioCode: 'INCIDENT-8492-DATACENTER-MELTDOWN',
             } as any,
             resultMetadataJson: {
               answersJson: {},
@@ -234,13 +257,14 @@ export class MasterCapstoneService {
         });
 
         this.logger.log(
-          `[Master Capstone] Started timed attempt [${attempt.id}] for user ${userId} (Attempt #${attemptNumber}, 120 mins, Expires: ${expiresAt.toISOString()})`
+          `[Master Capstone] Started timed attempt [${attempt.id}] for user ${userId} (Attempt #${attemptNumber}, v${assessmentVersion}, 120 mins, Expires: ${expiresAt.toISOString()})`
         );
 
         return {
           attemptId: attempt.id,
           examCode: CAPSTONE_CONFIG.examCode,
           certificationCode: CAPSTONE_CONFIG.certificationCode,
+          assessmentVersion,
           status: attempt.status,
           startedAt: attempt.startedAt,
           expiresAt: attempt.expiresAt,
@@ -249,6 +273,7 @@ export class MasterCapstoneService {
           remainingSeconds: CAPSTONE_CONFIG.durationSeconds,
           attemptNumber: attempt.attemptNumber,
           scoringWeights: CAPSTONE_CONFIG.scoringWeights,
+          assessment: getPublicAssessment(assessmentVersion),
         };
       },
       { timeout: 15000 }
@@ -287,11 +312,14 @@ export class MasterCapstoneService {
     }
 
     const remainingSeconds = Math.max(0, Math.floor((new Date(attempt.expiresAt).getTime() - now.getTime()) / 1000));
+    const configSnap = (attempt.configSnapshotJson as any) || {};
+    const version = configSnap.assessmentVersion || LATEST_CAPSTONE_VERSION;
 
-    return {
+    const response: any = {
       attemptId: attempt.id,
       examCode: CAPSTONE_CONFIG.examCode,
       certificationCode: attempt.certificationCode,
+      assessmentVersion: version,
       status: attempt.status,
       startedAt: attempt.startedAt,
       expiresAt: attempt.expiresAt,
@@ -303,13 +331,26 @@ export class MasterCapstoneService {
       scoringWeights: CAPSTONE_CONFIG.scoringWeights,
       result: attempt.resultMetadataJson,
     };
+
+    // Return public questions while in progress so browser can render or restore session
+    if (attempt.status === ExamAttemptStatus.IN_PROGRESS) {
+      response.assessment = getPublicAssessment(version);
+    }
+
+    return response;
   }
 
   /**
-   * Submits Master Capstone attempt, calculating score strictly server-side using 40/35/25 weighting.
-   * Gated against submission after expiration and protected with atomic CAS against race conditions.
+   * Submits Master Capstone attempt for authoritative server-side grading.
+   *
+   * CRITICAL SECURITY IMPLEMENTATION:
+   * 1. The server loads the attempt's snapshotted assessment version.
+   * 2. The server compares candidate responses against the authoritative rubric/keys.
+   * 3. Any client-supplied componentScores, finalScore, passed, or weights are STRICTLY IGNORED.
+   * 4. Overall score and passed status are computed mathematically and persisted immutably.
+   * 5. Gated against expired submissions and protected with atomic CAS against race conditions.
    */
-  async submitCapstoneAttempt(userId: string, attemptId: string, payload: SubmitCapstonePayload) {
+  async submitCapstoneAttempt(userId: string, attemptId: string, payload: CandidateCapstoneSubmission) {
     if (!userId || !attemptId) {
       throw new BadRequestException('User ID and Attempt ID are required.');
     }
@@ -345,42 +386,27 @@ export class MasterCapstoneService {
       throw new BadRequestException('Exam submission rejected: The 120-minute examination duration has expired.');
     }
 
-    // Server-Side Component Evaluation
-    // Theory: 40%, Practical/Topology: 35%, Packet Analysis: 25%
-    // Client-provided arbitrary overall score or passed flags are strictly ignored
-    const rawTheory = payload.componentScores?.theoryScore ?? 0;
-    const rawPractical = payload.componentScores?.practicalScore ?? 0;
-    const rawPacket = payload.componentScores?.packetAnalysisScore ?? 0;
+    // Load snapshotted assessment version for this attempt (reproducible historical grading)
+    const configSnap = (attempt.configSnapshotJson as any) || {};
+    const assessmentVersion = configSnap.assessmentVersion || LATEST_CAPSTONE_VERSION;
 
-    // Constrain component scores between 0 and 100
-    const clampedTheory = Math.min(100, Math.max(0, rawTheory));
-    const clampedPractical = Math.min(100, Math.max(0, rawPractical));
-    const clampedPacket = Math.min(100, Math.max(0, rawPacket));
-
-    const weights = CAPSTONE_CONFIG.scoringWeights;
-    const weightedTheory = (clampedTheory * weights.theoryWeight) / 100;
-    const weightedPractical = (clampedPractical * weights.practicalWeight) / 100;
-    const weightedPacket = (clampedPacket * weights.packetAnalysisWeight) / 100;
-
-    const overallScore = Math.round(weightedTheory + weightedPractical + weightedPacket);
-    const passed = overallScore >= weights.passingScore;
+    // Execute Server-Authoritative Grading Engine
+    // Client-provided scores, passed flags, and weights are completely ignored
+    const gradingSummary = CapstoneGradingEngine.gradeAttempt(assessmentVersion, payload);
+    const overallScore = gradingSummary.overallScore;
+    const passed = gradingSummary.passed;
     const newStatus = passed ? ExamAttemptStatus.PASSED : ExamAttemptStatus.FAILED;
 
     const resultMetadata = {
       overallScore,
       passed,
-      passingThreshold: weights.passingScore,
-      componentScores: {
-        theoryScore: clampedTheory,
-        practicalScore: clampedPractical,
-        packetAnalysisScore: clampedPacket,
-      },
-      weightedScores: {
-        theoryWeighted: weightedTheory,
-        practicalWeighted: weightedPractical,
-        packetAnalysisWeighted: weightedPacket,
-      },
-      scoringWeights: weights,
+      passingThreshold: gradingSummary.passingThreshold,
+      assessmentVersion,
+      componentScores: gradingSummary.componentScores,
+      weightedScores: gradingSummary.weightedScores,
+      scoringWeights: gradingSummary.scoringWeights,
+      sections: gradingSummary.sections,
+      candidateResponsesSnapshot: gradingSummary.candidateResponsesSnapshot,
       submittedAt: now.toISOString(),
       durationSecondsUsed: Math.floor((now.getTime() - new Date(attempt.startedAt).getTime()) / 1000),
     };
@@ -409,7 +435,7 @@ export class MasterCapstoneService {
     });
 
     this.logger.log(
-      `[Master Capstone] Evaluated attempt [${attempt.id}] for user ${userId}: Score=${overallScore}%, Passed=${passed}`
+      `[Master Capstone] Server-graded attempt [${attempt.id}] (v${assessmentVersion}) for user ${userId}: Score=${overallScore}%, Passed=${passed}`
     );
 
     return {

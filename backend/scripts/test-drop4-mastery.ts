@@ -331,22 +331,48 @@ async function runDrop4TestSuite() {
     check(statusResult.score === null, 'Score is null during active exam');
 
     // 4. Server-side scoring (40% theory, 35% topology incident, 25% packet forensics)
-    // Client attempts to forge passed=true and score=100 in payload; server computes 40/35/25
-    // Theory: 90 -> 90 * 0.40 = 36
-    // Practical: 80 -> 80 * 0.35 = 28
-    // Packet: 90 -> 90 * 0.25 = 22.5
-    // Total = 36 + 28 + 22.5 = 86.5 -> round to 87% (Passed >= 85)
-    const submitResult = await capstoneService.submitCapstoneAttempt(learnerWithCerts.id, startResult.attemptId, {
-      componentScores: {
-        theoryScore: 90,
-        practicalScore: 80,
-        packetAnalysisScore: 90,
+    // Client attempts to forge passed=true and score=100 and componentScores in payload;
+    // The server independently grades candidate responses!
+    // We supply:
+    // - 9 correct theory questions out of 10 -> 90% theory * 0.40 = 36%
+    // - Incident: tasks 1, 2, 3, 5 correct (85 pts), task 4 wrong -> 85% incident * 0.35 = 29.75%
+    // - Forensics: 4 correct questions (100 pts) -> 100% forensics * 0.25 = 25%
+    // Total = 36 + 29.75 + 25 = 90.75 -> round to 91% (Passed >= 85)
+    const validCandidateAnswers = {
+      theoryAnswers: {
+        'THEORY-Q1': 2,
+        'THEORY-Q2': 0,
+        'THEORY-Q3': 1,
+        'THEORY-Q4': 0,
+        'THEORY-Q5': 1,
+        'THEORY-Q6': 1,
+        'THEORY-Q7': 1,
+        'THEORY-Q8': 0,
+        'THEORY-Q9': 1,
+        'THEORY-Q10': 0, // incorrect (correct is 1) -> 9/10 = 90
       },
+      incidentAnswers: {
+        'INCIDENT-TASK1': 'LAYER_2_DATA_LINK', // 20
+        'INCIDENT-TASK2': 'SWITCHING_LOOP_BPDU_FILTER', // 25
+        'INCIDENT-TASK3': 'UNMANAGED_SWITCH_LOOP_WITH_BPDU_FILTER', // 25
+        'INCIDENT-TASK4': ['CMD_MAC_TABLE', 'CMD_SYSLOG'], // wrong -> 0
+        'INCIDENT-TASK5': 'REMOVE_BPDUFILTER_ENABLE_BPDUGUARD', // 15 -> total = 85
+      },
+      forensicsAnswers: {
+        'FORENSICS-Q1': 0, // 25
+        'FORENSICS-Q2': 0, // 25
+        'FORENSICS-Q3': 1, // 25
+        'FORENSICS-Q4': 0, // 25 -> total = 100
+      },
+    };
+
+    const submitResult = await capstoneService.submitCapstoneAttempt(learnerWithCerts.id, startResult.attemptId, {
+      ...validCandidateAnswers,
       // Client forged values to test server immunity
-      ...({ passed: false, score: 30, attemptNumber: 99 } as any),
+      ...({ componentScores: { theoryScore: 10, practicalScore: 10, packetAnalysisScore: 10 }, passed: false, score: 30, attemptNumber: 99 } as any),
     });
-    check(submitResult.status === ExamAttemptStatus.PASSED, 'Server determines PASSED status from weighted component scores');
-    check(submitResult.score === 87, `Server computed weighted score is 87% (${submitResult.score}%)`);
+    check(submitResult.status === ExamAttemptStatus.PASSED, 'Server determines PASSED status from authoritative grading');
+    check(submitResult.score === 91, `Server computed weighted score is 91% (${submitResult.score}%)`);
     check(submitResult.passed === true, 'Server-authoritative passed flag is true despite client forgery payload');
 
     // 5. Repeated submission rejected
@@ -377,7 +403,7 @@ async function runDrop4TestSuite() {
     let expiredRejected = false;
     try {
       await capstoneService.submitCapstoneAttempt(learnerExpired.id, expiredAttempt.id, {
-        componentScores: { theoryScore: 100, practicalScore: 100, packetAnalysisScore: 100 },
+        ...validCandidateAnswers,
       });
     } catch (err: any) {
       expiredRejected = err.message.includes('expired') || err.status === 400;
@@ -392,10 +418,10 @@ async function runDrop4TestSuite() {
     const raceAttempt = await capstoneService.startCapstoneAttempt(learnerRace.id);
     const parallelSubmissions = await Promise.allSettled([
       capstoneService.submitCapstoneAttempt(learnerRace.id, raceAttempt.attemptId, {
-        componentScores: { theoryScore: 90, practicalScore: 90, packetAnalysisScore: 90 },
+        ...validCandidateAnswers,
       }),
       capstoneService.submitCapstoneAttempt(learnerRace.id, raceAttempt.attemptId, {
-        componentScores: { theoryScore: 90, practicalScore: 90, packetAnalysisScore: 90 },
+        ...validCandidateAnswers,
       }),
     ]);
     const fulfilled = parallelSubmissions.filter((p) => p.status === 'fulfilled');
@@ -517,10 +543,10 @@ async function runDrop4TestSuite() {
     // 2. Fully eligible learner claims Mastery certificate
     const learnerMaster = await createTestLearner('Master Engineer Candidate');
     await fulfillAllFlagshipCourses(learnerMaster.id, 92);
-    // Pass Capstone with 94%
+    // Pass Capstone with authoritative candidate answers
     const masterExam = await capstoneService.startCapstoneAttempt(learnerMaster.id);
     await capstoneService.submitCapstoneAttempt(learnerMaster.id, masterExam.attemptId, {
-      componentScores: { theoryScore: 95, practicalScore: 92, packetAnalysisScore: 96 },
+      ...validCandidateAnswers,
     });
 
     const masteryCert = await certsService.claimCertificationCertificate(learnerMaster.id, 'NV-NET-MASTERY');
@@ -551,7 +577,7 @@ async function runDrop4TestSuite() {
     await fulfillAllFlagshipCourses(learnerConcurrent.id, 90);
     const concurrentExam = await capstoneService.startCapstoneAttempt(learnerConcurrent.id);
     await capstoneService.submitCapstoneAttempt(learnerConcurrent.id, concurrentExam.attemptId, {
-      componentScores: { theoryScore: 90, practicalScore: 90, packetAnalysisScore: 90 },
+      ...validCandidateAnswers,
     });
 
     const concurrentClaims = await Promise.all([
@@ -627,7 +653,7 @@ async function runDrop4TestSuite() {
     let idorSubmitBlocked = false;
     try {
       await capstoneService.submitCapstoneAttempt(userB.id, aliceExam.attemptId, {
-        componentScores: { theoryScore: 100, practicalScore: 100, packetAnalysisScore: 100 },
+        ...validCandidateAnswers,
       });
     } catch (err: any) {
       idorSubmitBlocked = err.message.includes('Access denied') || err.status === 403;

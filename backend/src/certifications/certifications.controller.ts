@@ -16,6 +16,7 @@ import { CertificationEligibilityService } from './certification-eligibility.ser
 import { MasterCapstoneService } from './master-capstone.service';
 import { StartExamAttemptDto } from './dto/start-exam-attempt.dto';
 import { SubmitExamAttemptDto } from './dto/submit-exam-attempt.dto';
+import { SubmitCapstoneAttemptDto } from './dto/submit-capstone-attempt.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ExamType } from '@prisma/client';
 
@@ -105,7 +106,7 @@ export class CertificationsController {
   async submitCapstoneAttempt(
     @Req() req: any,
     @Param('attemptId') attemptId: string,
-    @Body() payload: any
+    @Body() payload: SubmitCapstoneAttemptDto
   ) {
     return this.capstoneService.submitCapstoneAttempt(req.user.id, attemptId, payload);
   }

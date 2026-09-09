@@ -340,6 +340,7 @@ export interface CapstoneAttemptSessionDto {
   attemptId: string;
   examCode: string;
   certificationCode: string;
+  assessmentVersion?: number;
   status: string;
   startedAt: string;
   expiresAt: string;
@@ -356,19 +357,24 @@ export interface CapstoneAttemptSessionDto {
     packetAnalysisWeight: number;
     passingScore: number;
   };
+  assessment?: any;
   result?: any;
 }
 
 export interface SubmitCapstonePayload {
   theoryAnswers?: Record<string, number | string>;
+  incidentAnswers?: {
+    layerDomain?: string;
+    protocolFailure?: string;
+    rootCause?: string;
+    diagnosticOrder?: string[];
+    remediationChoice?: string;
+    [key: string]: any;
+  };
+  forensicsAnswers?: Record<string, number | string>;
   troubleshootingActions?: Array<{ action: string; target: string; value?: string }>;
   incidentHypothesis?: string;
   packetAnalysisAnswers?: Record<string, string>;
-  componentScores?: {
-    theoryScore?: number;
-    practicalScore?: number;
-    packetAnalysisScore?: number;
-  };
 }
 
 export interface CapstoneSubmissionResultDto {
