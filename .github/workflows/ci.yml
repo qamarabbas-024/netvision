@@ -28,7 +28,7 @@ jobs:
 
     env:
       DATABASE_URL: "postgresql://netvision:netvision_secure_password@localhost:5432/netvision_db?schema=public"
-      JWT_SECRET: "netvision_ci_test_secret"
+      JWT_SECRET: "netvision_ci_test_secret_must_be_over_32_characters_long"
 
     steps:
       - name: Checkout Source Code
@@ -40,31 +40,38 @@ jobs:
           node-version: 20
 
       - name: Setup PNPM Package Manager
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 11.20.0
 
       - name: Install Monorepo Dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Generate Prisma Client & Migrate DB
+      - name: Generate Prisma Client & Run Migrations
         run: |
           cd backend
-          npx prisma db push --accept-data-loss
+          npx prisma generate
+          npx prisma migrate deploy
           npx ts-node prisma/seed.ts
 
       - name: Run TypeScript Typecheck (5 Projects)
         run: pnpm typecheck
 
       - name: Run ESLint Code Quality
-        run: pnpm lint || true
+        run: pnpm lint
 
-      - name: Run P0 Product Correctness Test Suite (15 Tests)
+      - name: Run Frontend Regression & Unit Tests
+        run: pnpm --filter netvision-frontend test
+
+      - name: Run Backend Certification & Product Correctness Suite
         run: |
           cd backend
           npx ts-node scripts/test-product-correctness.ts
-
-      - name: Run Curriculum Content Architecture V2 Test Suite (28 Tests)
-        run: |
-          cd backend
           npx ts-node scripts/test-curriculum-content-v2.ts
+          npx ts-node scripts/test-drop1-curriculum-reconciliation.ts
+          npx ts-node scripts/test-drop2-certification-architecture.ts
+          npx ts-node scripts/test-drop3-certificate-issuance.ts
+          npx ts-node scripts/test-drop4-mastery.ts
+
+      - name: Build Production Artifacts
+        run: pnpm build

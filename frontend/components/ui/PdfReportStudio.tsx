@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Button } from './Button';
 import { VectorPdfGenerator, CertificatePdfData, LabReportPdfData } from '@/lib/pdfGenerator';
+import { SITE_URL } from '@/lib/siteConfig';
 
 export interface PdfReportStudioProps {
   initialType?: 'certificate' | 'lab' | 'scorecard';
@@ -48,7 +49,7 @@ export const PdfReportStudio: React.FC<PdfReportStudioProps> = ({
           'ARP Resolution Protocol',
           'IPv6 SLAAC Interface Autoconfiguration',
         ],
-        verificationUrl: typeof window !== 'undefined' ? window.location.href : 'https://netvision-three.vercel.app/certificates/' + credentialId,
+        verificationUrl: typeof window !== 'undefined' ? window.location.href : `${SITE_URL}/certificates/verify/${credentialId}`,
       });
     } else {
       VectorPdfGenerator.printLabReport({

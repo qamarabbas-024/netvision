@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/siteConfig';
 
 export const metadata: Metadata = {
   title: 'Network Engineering Daily Challenges & Scenarios',
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
     title: 'Networking Challenges & Scenarios | NetVision',
     description:
       'Solve real-world networking scenarios and troubleshoot broken network paths.',
-    url: 'https://netvision-three.vercel.app/challenges',
+    url: `${SITE_URL}/challenges`,
   },
 };
 

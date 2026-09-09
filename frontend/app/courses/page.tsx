@@ -6,29 +6,29 @@ import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { CurriculumSection } from '@/components/learning/CurriculumSection';
 import { getTopicsApi } from '@/lib/api';
-import { CURRICULUM_STEPS } from '@/data/curriculumData';
+import { FLAGSHIP_5_COURSES } from '@netvision/shared';
 
-// Fallback initial dataset to provide instantaneous 0ms page load
-const INITIAL_TOPICS = CURRICULUM_STEPS.map((step, idx) => ({
-  id: `topic-${step.code.toLowerCase()}`,
-  slug: `${step.code.toLowerCase()}-${step.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
-  code: step.code,
-  title: step.title,
-  tagline: step.summary,
-  category: idx <= 1 ? 'Foundations' : idx <= 3 ? 'Switching' : idx <= 4 ? 'Routing' : 'Security',
-  description: step.topics.join(' • '),
-  level: idx <= 1 ? 'FOUNDATIONAL' : idx <= 3 ? 'BEGINNER' : idx <= 5 ? 'INTERMEDIATE' : 'ADVANCED',
-  estimatedHours: parseInt(step.duration) || 8,
-  lessonsCount: step.topics.length * 3,
-  labsCount: step.labsCount,
+// Canonical flagship initial dataset provides instant 0ms render without legacy flash
+const INITIAL_TOPICS = FLAGSHIP_5_COURSES.map((course) => ({
+  id: `course-${course.code.toLowerCase()}`,
+  slug: course.slug,
+  code: course.code,
+  title: course.title,
+  tagline: course.tagline,
+  category: course.category,
+  description: course.description,
+  level: course.level,
+  estimatedHours: course.estimatedHours,
+  lessonsCount: course.modules.length * 4,
+  labsCount: course.modules.length * 2,
   completedLessons: 0,
   progressPercent: 0,
-  isLocked: step.isLocked || false,
+  isLocked: false,
 }));
 
 export default function CourseCatalogPage() {
   const [topics, setTopics] = useState<any[]>(INITIAL_TOPICS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
 
   const loadTopics = async () => {
     try {
@@ -37,8 +37,8 @@ export default function CourseCatalogPage() {
         setTopics(data);
       }
     } catch (err: any) {
-      // Retain instant local curriculum fallback
-      console.warn('Live topics sync fallback to local canonical dataset:', err?.message);
+      // Retain instant canonical flagship curriculum fallback
+      console.warn('Live topics sync fallback to canonical flagship dataset:', err?.message);
     } finally {
       setIsLoading(false);
     }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/siteConfig';
 
 export const metadata: Metadata = {
   title: 'Deterministic Network CLI Sandbox',
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
     title: 'Network CLI Sandbox | NetVision',
     description:
       'Practice real diagnostic networking commands in a deterministic virtual sandbox.',
-    url: 'https://netvision-three.vercel.app/sandbox',
+    url: `${SITE_URL}/sandbox`,
   },
 };
 

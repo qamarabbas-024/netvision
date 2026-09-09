@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/Progress';
 import { PulsePacketLoader } from '@/components/ui/Loading';
 import { DifficultyBadge } from '@/components/learning/DifficultyBadge';
 import { getTopicDetailApi } from '@/lib/api';
+import { SITE_URL } from '@/lib/siteConfig';
 import {
   PlayCircle,
   ArrowLeft,
@@ -173,7 +174,7 @@ export default function CourseDetailPage() {
     provider: {
       '@type': 'EducationalOrganization',
       name: 'NetVision',
-      url: 'https://netvision-three.vercel.app',
+      url: SITE_URL,
     },
     hasCourseInstance: {
       '@type': 'CourseInstance',

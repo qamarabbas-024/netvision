@@ -6,7 +6,7 @@ export class DNSProtocolPlugin implements ProtocolPlugin {
   public id = 'plugin-dns';
   public name = 'DNS Domain Name System Protocol Plugin';
   public protocolName = 'DNS';
-  public layer: 'Layer7' = 'Layer7';
+  public layer = 'Layer7' as const;
 
   public processPacket(packet: Packet, node: Node): Packet | null {
     packet.payload = 'DNS A-Record Query: netvision.edu -> 172.16.0.5';

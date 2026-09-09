@@ -6,7 +6,7 @@ export class TCPProtocolPlugin implements ProtocolPlugin {
   public id = 'plugin-tcp';
   public name = 'TCP Transmission Control Protocol Plugin';
   public protocolName = 'TCP';
-  public layer: 'Layer4' = 'Layer4';
+  public layer = 'Layer4' as const;
 
   public processPacket(packet: Packet, node: Node): Packet | null {
     if (packet.flags.includes('SYN')) {

@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "lint": "echo \"@netvision/shared lint ok\""
+    "lint": "eslint \"src/**/*.ts\""
   },
   "devDependencies": {
     "typescript": "^5.4.5"

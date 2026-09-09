@@ -1,25 +1,10 @@
 import { MetadataRoute } from 'next';
+import { FLAGSHIP_5_COURSES } from '@netvision/shared';
+import { SITE_URL } from '../lib/siteConfig';
 
-const BASE_URL = 'https://netvision-three.vercel.app';
+const BASE_URL = SITE_URL;
 
-const COURSE_SLUGS = [
-  'net-101-digital-foundations',
-  'net-102-network-fundamentals',
-  'net-103-reference-models',
-  'net-201-layer2-ethernet',
-  'net-202-ipv4-subnetting',
-  'net-203-core-ip-services',
-  'net-204-transport-protocols',
-  'net-301-switching-vlans',
-  'net-302-spanning-tree',
-  'net-303-static-routing',
-  'net-304-dynamic-routing-ospf',
-  'net-305-acls-firewalls',
-  'net-401-nat-pat',
-  'net-402-vpn-crypto',
-  'net-403-network-automation',
-  'net-404-packet-analysis',
-];
+const COURSE_SLUGS = FLAGSHIP_5_COURSES.map((c) => c.slug);
 
 const TROUBLESHOOTING_SLUGS = [
   'dns-resolution-failure',

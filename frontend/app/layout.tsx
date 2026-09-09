@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ClientProviders } from '@/components/providers/ClientProviders';
+import { SITE_URL } from '@/lib/siteConfig';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -14,8 +15,6 @@ const jetbrainsMono = JetBrains_Mono({
   variable: '--font-mono',
   display: 'swap',
 });
-
-const SITE_URL = 'https://netvision-three.vercel.app';
 
 export const viewport: Viewport = {
   themeColor: '#0b0f17',

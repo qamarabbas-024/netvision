@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
+import { SITE_URL } from '../lib/siteConfig';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://netvision-three.vercel.app';
+  const baseUrl = SITE_URL;
 
   return {
     rules: [
@@ -23,11 +24,15 @@ export default function robots(): MetadataRoute.Robots {
           '/glossary',
           '/flashcards',
           '/certificates',
-          '/certificates/*',
+          '/certificates/verify',
+          '/certificates/verify/*',
           '/docs',
           '/docs/*',
         ],
         disallow: [
+          '/certifications',
+          '/certifications/*',
+          '/certificates/*',
           '/dashboard',
           '/dashboard/*',
           '/admin',
@@ -36,6 +41,7 @@ export default function robots(): MetadataRoute.Robots {
           '/profile/*',
           '/settings',
           '/settings/*',
+          '/auth',
           '/auth/*',
           '/login',
           '/register',

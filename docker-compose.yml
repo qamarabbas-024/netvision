@@ -1,20 +1,18 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: netvision-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: netvision
-      POSTGRES_PASSWORD: netvision_secure_password
-      POSTGRES_DB: netvision_db
+      POSTGRES_USER: ${POSTGRES_USER:-netvision}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable is required}
+      POSTGRES_DB: ${POSTGRES_DB:-netvision_db}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U netvision -d netvision_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-netvision} -d ${POSTGRES_DB:-netvision_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -44,9 +42,13 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      DATABASE_URL: postgresql://netvision:netvision_secure_password@postgres:5432/netvision_db?schema=public
+      API_PREFIX: /api/v1
+      DATABASE_URL: postgresql://${POSTGRES_USER:-netvision}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable is required}@postgres:5432/${POSTGRES_DB:-netvision_db}?schema=public
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: netvision_enterprise_jwt_secret_key_2026
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET environment variable is required}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      API_URL: ${API_URL:-http://localhost:4000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,7 +66,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api/v1}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
     depends_on:
       - backend
 

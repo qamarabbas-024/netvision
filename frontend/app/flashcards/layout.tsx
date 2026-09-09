@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/siteConfig';
 
 export const metadata: Metadata = {
   title: 'Interactive Networking Flashcards & Study Decks',
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
     title: 'Networking Flashcards & Study Decks | NetVision',
     description:
       'Test and reinforce your knowledge of networking concepts with interactive study decks.',
-    url: 'https://netvision-three.vercel.app/flashcards',
+    url: `${SITE_URL}/flashcards`,
   },
 };
 

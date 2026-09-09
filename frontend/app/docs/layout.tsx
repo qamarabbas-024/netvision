@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/siteConfig';
 
 export const metadata: Metadata = {
   title: 'Platform Documentation & Learning Guides',
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
     title: 'Documentation & Guides | NetVision',
     description:
       'Platform documentation, visual guides, and specifications for NetVision.',
-    url: 'https://netvision-three.vercel.app/docs',
+    url: `${SITE_URL}/docs`,
   },
 };
 

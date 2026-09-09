@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/siteConfig';
 
 export const metadata: Metadata = {
   title: 'Computer Networking Terms & Protocol Glossary',
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
     title: 'Computer Networking Glossary & Terms | NetVision',
     description:
       'Searchable dictionary of computer networking terminology and protocol definitions.',
-    url: 'https://netvision-three.vercel.app/glossary',
+    url: `${SITE_URL}/glossary`,
   },
 };
 

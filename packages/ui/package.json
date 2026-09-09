@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "lint": "echo \"@netvision/ui lint ok\""
+    "lint": "eslint \"src/**/*.{ts,tsx}\""
   },
   "dependencies": {
     "clsx": "^2.1.1",

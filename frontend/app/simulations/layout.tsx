@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/siteConfig';
 
 export const metadata: Metadata = {
   title: 'Interactive Network Protocol Simulator',
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
     title: 'Interactive Protocol Simulator | NetVision',
     description:
       'Simulate TCP handshakes, ARP, Subnetting, and DNS queries in real-time.',
-    url: 'https://netvision-three.vercel.app/simulations',
+    url: `${SITE_URL}/simulations`,
   },
 };
 
