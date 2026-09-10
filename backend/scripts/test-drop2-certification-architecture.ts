@@ -437,12 +437,36 @@ async function runDrop2Tests() {
     check(statusRes.remainingSeconds > 7150 && statusRes.remainingSeconds <= 7200, 'Server-side remaining time accurately calculated');
 
     // 4. Scoring Weights: Theory=40%, Practical=35%, Packet=25%
-    // Pass case: Theory 90, Practical 90, Packet 90 -> overall 90% (>=85% -> PASSED)
+    // Authoritative v1 candidate responses engineered to yield exactly 90% overall:
+    // - Theory: 9/10 correct = 90% -> weighted: 90 * 0.40 = 36.0%
+    // - Incident: 5/5 tasks correct = 100% -> weighted: 100 * 0.35 = 35.0%
+    // - Forensics: 3/4 correct = 75% -> weighted: 75 * 0.25 = 18.75%
+    // Overall = Math.round(36.0 + 35.0 + 18.75) = Math.round(89.75) = 90% (>=85% -> PASSED)
     const submitPassRes = await capstoneService.submitCapstoneAttempt(userCapstone.id, startRes.attemptId, {
-      componentScores: {
-        theoryScore: 90,
-        practicalScore: 90,
-        packetAnalysisScore: 90,
+      theoryAnswers: {
+        'THEORY-Q1': 2,
+        'THEORY-Q2': 0,
+        'THEORY-Q3': 1,
+        'THEORY-Q4': 0,
+        'THEORY-Q5': 1,
+        'THEORY-Q6': 1,
+        'THEORY-Q7': 1,
+        'THEORY-Q8': 0,
+        'THEORY-Q9': 1,
+        'THEORY-Q10': 0, // Incorrect (correct is 1) -> 9/10 = 90%
+      },
+      incidentAnswers: {
+        'INCIDENT-TASK1': 'LAYER_2_DATA_LINK', // 20 pts
+        'INCIDENT-TASK2': 'SWITCHING_LOOP_BPDU_FILTER', // 25 pts
+        'INCIDENT-TASK3': 'UNMANAGED_SWITCH_LOOP_WITH_BPDU_FILTER', // 25 pts
+        'INCIDENT-TASK4': ['CMD_SYSLOG', 'CMD_MAC_TABLE', 'CMD_CDP_NEIGHBOR', 'CMD_INTERFACE_CONFIG'], // 15 pts
+        'INCIDENT-TASK5': 'REMOVE_BPDUFILTER_ENABLE_BPDUGUARD', // 15 pts -> 100/100 = 100%
+      },
+      forensicsAnswers: {
+        'FORENSICS-Q1': 0, // 25 pts
+        'FORENSICS-Q2': 0, // 25 pts
+        'FORENSICS-Q3': 1, // 25 pts
+        'FORENSICS-Q4': 1, // Incorrect (correct is 0) -> 3/4 = 75%
       },
     });
     check(submitPassRes.passed === true, 'Candidate with 90% weighted score PASSES Capstone');
