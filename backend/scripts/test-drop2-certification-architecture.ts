@@ -436,13 +436,73 @@ async function runDrop2Tests() {
     check(statusRes.status === ExamAttemptStatus.IN_PROGRESS, 'Attempt status is IN_PROGRESS');
     check(statusRes.remainingSeconds > 7150 && statusRes.remainingSeconds <= 7200, 'Server-side remaining time accurately calculated');
 
-    // 4. Scoring Weights: Theory=40%, Practical=35%, Packet=25%
-    // Authoritative v1 candidate responses engineered to yield exactly 90% overall:
-    // - Theory: 9/10 correct = 90% -> weighted: 90 * 0.40 = 36.0%
-    // - Incident: 5/5 tasks correct = 100% -> weighted: 100 * 0.35 = 35.0%
-    // - Forensics: 3/4 correct = 75% -> weighted: 75 * 0.25 = 18.75%
-    // Overall = Math.round(36.0 + 35.0 + 18.75) = Math.round(89.75) = 90% (>=85% -> PASSED)
-    const submitPassRes = await capstoneService.submitCapstoneAttempt(userCapstone.id, startRes.attemptId, {
+    // 4. Authoritative Scoring & Pass/Fail Threshold Verification
+    // Blueprint Invariants: Theory=40%, Practical=35%, Packet Forensics=25%, Pass Threshold=85%
+    //
+    // Authoritative v1 Candidate Answer Payloads:
+    // Case A: Below-threshold 80% payload (Theory: 50%, Practical: 100%, Forensics: 100%)
+    //         Weighted: 50*0.40 + 100*0.35 + 100*0.25 = 20.0 + 35.0 + 25.0 = 80.0% (<85% -> FAILED)
+    const payload80Percent = {
+      theoryAnswers: {
+        'THEORY-Q1': 2,
+        'THEORY-Q2': 0,
+        'THEORY-Q3': 1,
+        'THEORY-Q4': 0,
+        'THEORY-Q5': 1,
+        'THEORY-Q6': 0, // Incorrect (correct is 1)
+        'THEORY-Q7': 0, // Incorrect (correct is 1)
+        'THEORY-Q8': 1, // Incorrect (correct is 0)
+        'THEORY-Q9': 0, // Incorrect (correct is 1)
+        'THEORY-Q10': 0, // Incorrect (correct is 1) -> 5/10 = 50%
+      },
+      incidentAnswers: {
+        'INCIDENT-TASK1': 'LAYER_2_DATA_LINK', // 20 pts
+        'INCIDENT-TASK2': 'SWITCHING_LOOP_BPDU_FILTER', // 25 pts
+        'INCIDENT-TASK3': 'UNMANAGED_SWITCH_LOOP_WITH_BPDU_FILTER', // 25 pts
+        'INCIDENT-TASK4': ['CMD_SYSLOG', 'CMD_MAC_TABLE', 'CMD_CDP_NEIGHBOR', 'CMD_INTERFACE_CONFIG'], // 15 pts
+        'INCIDENT-TASK5': 'REMOVE_BPDUFILTER_ENABLE_BPDUGUARD', // 15 pts -> 100/100 = 100%
+      },
+      forensicsAnswers: {
+        'FORENSICS-Q1': 0, // 25 pts
+        'FORENSICS-Q2': 0, // 25 pts
+        'FORENSICS-Q3': 1, // 25 pts
+        'FORENSICS-Q4': 0, // 25 pts -> 4/4 = 100%
+      },
+    };
+
+    // Case B: Exact Pass-Threshold 85% payload (Theory: 80%, Practical: 80%, Forensics: 100%)
+    //         Weighted: 80*0.40 + 80*0.35 + 100*0.25 = 32.0 + 28.0 + 25.0 = 85.0% (>=85% -> PASSED)
+    const payload85Percent = {
+      theoryAnswers: {
+        'THEORY-Q1': 2,
+        'THEORY-Q2': 0,
+        'THEORY-Q3': 1,
+        'THEORY-Q4': 0,
+        'THEORY-Q5': 1,
+        'THEORY-Q6': 1,
+        'THEORY-Q7': 1,
+        'THEORY-Q8': 0,
+        'THEORY-Q9': 0, // Incorrect (correct is 1)
+        'THEORY-Q10': 0, // Incorrect (correct is 1) -> 8/10 = 80%
+      },
+      incidentAnswers: {
+        'INCIDENT-TASK1': 'LAYER_3_NETWORK', // Incorrect (0 pts)
+        'INCIDENT-TASK2': 'SWITCHING_LOOP_BPDU_FILTER', // 25 pts
+        'INCIDENT-TASK3': 'UNMANAGED_SWITCH_LOOP_WITH_BPDU_FILTER', // 25 pts
+        'INCIDENT-TASK4': ['CMD_SYSLOG', 'CMD_MAC_TABLE', 'CMD_CDP_NEIGHBOR', 'CMD_INTERFACE_CONFIG'], // 15 pts
+        'INCIDENT-TASK5': 'REMOVE_BPDUFILTER_ENABLE_BPDUGUARD', // 15 pts -> 80/100 = 80%
+      },
+      forensicsAnswers: {
+        'FORENSICS-Q1': 0, // 25 pts
+        'FORENSICS-Q2': 0, // 25 pts
+        'FORENSICS-Q3': 1, // 25 pts
+        'FORENSICS-Q4': 0, // 25 pts -> 4/4 = 100%
+      },
+    };
+
+    // Case C: High-Score 90% payload (Theory: 90%, Practical: 100%, Forensics: 75%)
+    //         Weighted: 90*0.40 + 100*0.35 + 75*0.25 = 36.0 + 35.0 + 18.75 = 89.75% -> 90% (>=85% -> PASSED)
+    const payload90Percent = {
       theoryAnswers: {
         'THEORY-Q1': 2,
         'THEORY-Q2': 0,
@@ -468,7 +528,72 @@ async function runDrop2Tests() {
         'FORENSICS-Q3': 1, // 25 pts
         'FORENSICS-Q4': 1, // Incorrect (correct is 0) -> 3/4 = 75%
       },
+    };
+
+    // Verification 4a: Candidate with 80% weighted score FAILS Capstone (<85% threshold)
+    const userThreshold80 = await prisma.user.create({
+      data: {
+        email: `drop2-thresh80-${Date.now()}@netvision.test`,
+        username: `drop2_thresh80_${Date.now()}`,
+        fullName: 'Below Threshold Candidate',
+        passwordHash: 'dummy',
+        role: Role.STUDENT,
+        isVerified: true,
+      },
     });
+    createdUserIds.push(userThreshold80.id);
+
+    for (let i = 1; i <= 5; i++) {
+      await prisma.certificate.create({
+        data: {
+          userId: userThreshold80.id,
+          certificationCode: `NV-NET-C0${i}`,
+          certificationTitle: `Course ${i} Cert`,
+          credentialId: `NV-T80-C0${i}-${Date.now()}`,
+          status: 'ACTIVE',
+        },
+      });
+    }
+
+    const startRes80 = await capstoneService.startCapstoneAttempt(userThreshold80.id);
+    const submitFail80Res = await capstoneService.submitCapstoneAttempt(userThreshold80.id, startRes80.attemptId, payload80Percent);
+    check(submitFail80Res.passed === false, 'Candidate with 80% weighted score FAILS Capstone (<85% threshold)');
+    check(submitFail80Res.score === 80, 'Calculated below-threshold score is exactly 80%');
+    check(submitFail80Res.status === ExamAttemptStatus.FAILED, 'Below-threshold attempt status updated to FAILED');
+
+    // Verification 4b: Candidate with 85% weighted score PASSES Capstone (Exact >=85% threshold boundary)
+    const userThreshold85 = await prisma.user.create({
+      data: {
+        email: `drop2-thresh85-${Date.now()}@netvision.test`,
+        username: `drop2_thresh85_${Date.now()}`,
+        fullName: 'Threshold Pass Candidate',
+        passwordHash: 'dummy',
+        role: Role.STUDENT,
+        isVerified: true,
+      },
+    });
+    createdUserIds.push(userThreshold85.id);
+
+    for (let i = 1; i <= 5; i++) {
+      await prisma.certificate.create({
+        data: {
+          userId: userThreshold85.id,
+          certificationCode: `NV-NET-C0${i}`,
+          certificationTitle: `Course ${i} Cert`,
+          credentialId: `NV-T85-C0${i}-${Date.now()}`,
+          status: 'ACTIVE',
+        },
+      });
+    }
+
+    const startRes85 = await capstoneService.startCapstoneAttempt(userThreshold85.id);
+    const submitPass85Res = await capstoneService.submitCapstoneAttempt(userThreshold85.id, startRes85.attemptId, payload85Percent);
+    check(submitPass85Res.passed === true, 'Candidate with 85% weighted score PASSES Capstone (exact >=85% threshold boundary)');
+    check(submitPass85Res.score === 85, 'Calculated boundary overall score is exactly 85%');
+    check(submitPass85Res.status === ExamAttemptStatus.PASSED, 'Boundary attempt status updated to PASSED');
+
+    // Verification 4c: Candidate with 90% weighted score PASSES Capstone
+    const submitPassRes = await capstoneService.submitCapstoneAttempt(userCapstone.id, startRes.attemptId, payload90Percent);
     check(submitPassRes.passed === true, 'Candidate with 90% weighted score PASSES Capstone');
     check(submitPassRes.score === 90, 'Calculated overall score is 90%');
     check(submitPassRes.status === ExamAttemptStatus.PASSED, 'Attempt status updated to PASSED');
@@ -509,15 +634,9 @@ async function runDrop2Tests() {
       },
     });
 
-    // Fail attempt 1: Theory 60, Practical 60, Packet 60 -> overall 60% (<85% -> FAILED)
-    const submitFailRes = await capstoneService.submitCapstoneAttempt(userCooldown.id, coolAttempt1.id, {
-      componentScores: {
-        theoryScore: 60,
-        practicalScore: 60,
-        packetAnalysisScore: 60,
-      },
-    });
-    check(submitFailRes.passed === false, 'Candidate with 60% fails capstone');
+    // Fail attempt 1: Authoritative submission yielding 80% (<85% -> FAILED)
+    const submitFailRes = await capstoneService.submitCapstoneAttempt(userCooldown.id, coolAttempt1.id, payload80Percent);
+    check(submitFailRes.passed === false, 'Candidate with 80% fails capstone (<85% threshold)');
     check(submitFailRes.status === ExamAttemptStatus.FAILED, 'Attempt status updated to FAILED');
 
     // Immediately attempting to start again must trigger cooldown blocker
@@ -591,9 +710,7 @@ async function runDrop2Tests() {
 
     let expiredRejected = false;
     try {
-      await capstoneService.submitCapstoneAttempt(userCapstone.id, expiredAttempt.id, {
-        componentScores: { theoryScore: 100, practicalScore: 100, packetAnalysisScore: 100 },
-      });
+      await capstoneService.submitCapstoneAttempt(userCapstone.id, expiredAttempt.id, payload90Percent);
     } catch (e: any) {
       expiredRejected = e.status === 400 && e.message?.includes('duration has expired');
     }
@@ -620,9 +737,7 @@ async function runDrop2Tests() {
     // 9. Test Repeated Submission Rejection
     let repeatedSubmissionBlocked = false;
     try {
-      await capstoneService.submitCapstoneAttempt(userCapstone.id, forgedAttempt.id, {
-        componentScores: { theoryScore: 90, practicalScore: 90, packetAnalysisScore: 90 },
-      });
+      await capstoneService.submitCapstoneAttempt(userCapstone.id, forgedAttempt.id, payload90Percent);
     } catch (e: any) {
       repeatedSubmissionBlocked = e.status === 400 && e.message?.includes('Cannot submit exam attempt with status');
     }
@@ -641,12 +756,8 @@ async function runDrop2Tests() {
     });
 
     const [parallel1, parallel2] = await Promise.allSettled([
-      capstoneService.submitCapstoneAttempt(userCapstone.id, parallelAttempt.id, {
-        componentScores: { theoryScore: 90, practicalScore: 90, packetAnalysisScore: 90 },
-      }),
-      capstoneService.submitCapstoneAttempt(userCapstone.id, parallelAttempt.id, {
-        componentScores: { theoryScore: 90, practicalScore: 90, packetAnalysisScore: 90 },
-      }),
+      capstoneService.submitCapstoneAttempt(userCapstone.id, parallelAttempt.id, payload90Percent),
+      capstoneService.submitCapstoneAttempt(userCapstone.id, parallelAttempt.id, payload90Percent),
     ]);
 
     const oneFulfilled = (parallel1.status === 'fulfilled' && parallel2.status === 'rejected') ||
