@@ -194,9 +194,99 @@ export class MasterCapstoneService {
     }
 
     // Atomic transaction ensures zero race condition for concurrent start requests
-    return await this.prisma.$transaction(
-      async (tx) => {
-        const concurrentActive = await tx.examAttempt.findFirst({
+    try {
+      return await this.prisma.$transaction(
+        async (tx) => {
+          const concurrentActive = await tx.examAttempt.findFirst({
+            where: {
+              userId,
+              certificationCode: CAPSTONE_CONFIG.certificationCode,
+              status: ExamAttemptStatus.IN_PROGRESS,
+              expiresAt: { gt: new Date() },
+            },
+          });
+
+          if (concurrentActive) {
+            const remainingSeconds = Math.max(0, Math.floor((new Date(concurrentActive.expiresAt).getTime() - Date.now()) / 1000));
+            const configSnap = (concurrentActive.configSnapshotJson as any) || {};
+            const version = configSnap.assessmentVersion || LATEST_CAPSTONE_VERSION;
+
+            return {
+              attemptId: concurrentActive.id,
+              examCode: CAPSTONE_CONFIG.examCode,
+              certificationCode: CAPSTONE_CONFIG.certificationCode,
+              assessmentVersion: version,
+              status: concurrentActive.status,
+              startedAt: concurrentActive.startedAt,
+              expiresAt: concurrentActive.expiresAt,
+              durationMinutes: CAPSTONE_CONFIG.durationMinutes,
+              durationSeconds: CAPSTONE_CONFIG.durationSeconds,
+              remainingSeconds,
+              attemptNumber: concurrentActive.attemptNumber,
+              scoringWeights: CAPSTONE_CONFIG.scoringWeights,
+              assessment: getPublicAssessment(version),
+            };
+          }
+
+          // Initialize new 120-minute timed attempt with snapshot of authoritative version
+          const startedAt = new Date();
+          const expiresAt = new Date(startedAt.getTime() + CAPSTONE_CONFIG.durationSeconds * 1000);
+          const attemptNumber = recentAttempts.length + 1;
+          const assessmentVersion = LATEST_CAPSTONE_VERSION;
+
+          const attempt = await tx.examAttempt.create({
+            data: {
+              userId,
+              certificationCode: CAPSTONE_CONFIG.certificationCode,
+              type: ExamType.PRACTICAL,
+              status: ExamAttemptStatus.IN_PROGRESS,
+              startedAt,
+              expiresAt,
+              attemptNumber,
+              configSnapshotJson: {
+                examCode: CAPSTONE_CONFIG.examCode,
+                assessmentVersion,
+                durationSeconds: CAPSTONE_CONFIG.durationSeconds,
+                scoringWeights: CAPSTONE_CONFIG.scoringWeights,
+                scenarioCode: 'INCIDENT-8492-DATACENTER-MELTDOWN',
+              } as any,
+              resultMetadataJson: {
+                answersJson: {},
+                actionsJson: [],
+              } as any,
+            },
+          });
+
+          this.logger.log(
+            `[Master Capstone] Started timed attempt [${attempt.id}] for user ${userId} (Attempt #${attemptNumber}, v${assessmentVersion}, 120 mins, Expires: ${expiresAt.toISOString()})`
+          );
+
+          return {
+            attemptId: attempt.id,
+            examCode: CAPSTONE_CONFIG.examCode,
+            certificationCode: CAPSTONE_CONFIG.certificationCode,
+            assessmentVersion,
+            status: attempt.status,
+            startedAt: attempt.startedAt,
+            expiresAt: attempt.expiresAt,
+            durationMinutes: CAPSTONE_CONFIG.durationMinutes,
+            durationSeconds: CAPSTONE_CONFIG.durationSeconds,
+            remainingSeconds: CAPSTONE_CONFIG.durationSeconds,
+            attemptNumber: attempt.attemptNumber,
+            scoringWeights: CAPSTONE_CONFIG.scoringWeights,
+            assessment: getPublicAssessment(assessmentVersion),
+          };
+        },
+        { timeout: 15000 }
+      );
+    } catch (err: any) {
+      // Database-level uniqueness conflict resolution:
+      // If a concurrent request created the active attempt, catch P2002 and safely converge on the active attempt.
+      if (err.code === 'P2002') {
+        this.logger.warn(
+          `[Master Capstone] Concurrent attempt creation conflict intercepted for user ${userId}. Converging on existing active attempt.`
+        );
+        const activeExisting = await this.prisma.examAttempt.findFirst({
           where: {
             userId,
             certificationCode: CAPSTONE_CONFIG.certificationCode,
@@ -204,80 +294,30 @@ export class MasterCapstoneService {
             expiresAt: { gt: new Date() },
           },
         });
-
-        if (concurrentActive) {
-          const remainingSeconds = Math.max(0, Math.floor((new Date(concurrentActive.expiresAt).getTime() - Date.now()) / 1000));
-          const configSnap = (concurrentActive.configSnapshotJson as any) || {};
+        if (activeExisting) {
+          const remainingSeconds = Math.max(0, Math.floor((new Date(activeExisting.expiresAt).getTime() - Date.now()) / 1000));
+          const configSnap = (activeExisting.configSnapshotJson as any) || {};
           const version = configSnap.assessmentVersion || LATEST_CAPSTONE_VERSION;
 
           return {
-            attemptId: concurrentActive.id,
+            attemptId: activeExisting.id,
             examCode: CAPSTONE_CONFIG.examCode,
             certificationCode: CAPSTONE_CONFIG.certificationCode,
             assessmentVersion: version,
-            status: concurrentActive.status,
-            startedAt: concurrentActive.startedAt,
-            expiresAt: concurrentActive.expiresAt,
+            status: activeExisting.status,
+            startedAt: activeExisting.startedAt,
+            expiresAt: activeExisting.expiresAt,
             durationMinutes: CAPSTONE_CONFIG.durationMinutes,
             durationSeconds: CAPSTONE_CONFIG.durationSeconds,
             remainingSeconds,
-            attemptNumber: concurrentActive.attemptNumber,
+            attemptNumber: activeExisting.attemptNumber,
             scoringWeights: CAPSTONE_CONFIG.scoringWeights,
             assessment: getPublicAssessment(version),
           };
         }
-
-        // Initialize new 120-minute timed attempt with snapshot of authoritative version
-        const startedAt = new Date();
-        const expiresAt = new Date(startedAt.getTime() + CAPSTONE_CONFIG.durationSeconds * 1000);
-        const attemptNumber = recentAttempts.length + 1;
-        const assessmentVersion = LATEST_CAPSTONE_VERSION;
-
-        const attempt = await tx.examAttempt.create({
-          data: {
-            userId,
-            certificationCode: CAPSTONE_CONFIG.certificationCode,
-            type: ExamType.PRACTICAL,
-            status: ExamAttemptStatus.IN_PROGRESS,
-            startedAt,
-            expiresAt,
-            attemptNumber,
-            configSnapshotJson: {
-              examCode: CAPSTONE_CONFIG.examCode,
-              assessmentVersion,
-              durationSeconds: CAPSTONE_CONFIG.durationSeconds,
-              scoringWeights: CAPSTONE_CONFIG.scoringWeights,
-              scenarioCode: 'INCIDENT-8492-DATACENTER-MELTDOWN',
-            } as any,
-            resultMetadataJson: {
-              answersJson: {},
-              actionsJson: [],
-            } as any,
-          },
-        });
-
-        this.logger.log(
-          `[Master Capstone] Started timed attempt [${attempt.id}] for user ${userId} (Attempt #${attemptNumber}, v${assessmentVersion}, 120 mins, Expires: ${expiresAt.toISOString()})`
-        );
-
-        return {
-          attemptId: attempt.id,
-          examCode: CAPSTONE_CONFIG.examCode,
-          certificationCode: CAPSTONE_CONFIG.certificationCode,
-          assessmentVersion,
-          status: attempt.status,
-          startedAt: attempt.startedAt,
-          expiresAt: attempt.expiresAt,
-          durationMinutes: CAPSTONE_CONFIG.durationMinutes,
-          durationSeconds: CAPSTONE_CONFIG.durationSeconds,
-          remainingSeconds: CAPSTONE_CONFIG.durationSeconds,
-          attemptNumber: attempt.attemptNumber,
-          scoringWeights: CAPSTONE_CONFIG.scoringWeights,
-          assessment: getPublicAssessment(assessmentVersion),
-        };
-      },
-      { timeout: 15000 }
-    );
+      }
+      throw err;
+    }
   }
 
   /**
@@ -374,8 +414,8 @@ export class MasterCapstoneService {
     const now = new Date();
     // Server-side timing enforcement: Strict rejection if submitted after expiration
     if (now > new Date(attempt.expiresAt)) {
-      await this.prisma.examAttempt.update({
-        where: { id: attemptId },
+      await this.prisma.examAttempt.updateMany({
+        where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
         data: {
           status: ExamAttemptStatus.EXPIRED,
           submittedAt: now,
@@ -430,20 +470,17 @@ export class MasterCapstoneService {
       throw new BadRequestException('Exam attempt has already been submitted or is no longer in progress.');
     }
 
-    const updatedAttempt = await this.prisma.examAttempt.findUnique({
-      where: { id: attemptId },
-    });
-
     this.logger.log(
       `[Master Capstone] Server-graded attempt [${attempt.id}] (v${assessmentVersion}) for user ${userId}: Score=${overallScore}%, Passed=${passed}`
     );
 
     return {
-      attemptId: updatedAttempt!.id,
+      attemptId: attempt.id,
       examCode: CAPSTONE_CONFIG.examCode,
-      status: updatedAttempt!.status,
-      score: updatedAttempt!.score,
-      passed: updatedAttempt!.passed,
+      status: newStatus,
+      score: overallScore,
+      passed,
+      submittedAt: now,
       result: resultMetadata,
     };
   }

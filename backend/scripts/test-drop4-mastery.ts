@@ -91,6 +91,20 @@ async function runDrop4TestSuite() {
     const allQuizzes = allLessons.flatMap((l) => l.quizzes);
     const allLabs = allLessons.flatMap((l) => l.labs);
 
+    async function withRetry<T>(fn: () => Promise<T>, retries = 3): Promise<T> {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          return await fn();
+        } catch (err: any) {
+          if (attempt === retries || !err.message?.includes('Server has closed the connection')) {
+            throw err;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        }
+      }
+      return fn();
+    }
+
     // High-performance batch helper to fulfill courses, assessments, labs and certificates
     async function fulfillAllFlagshipCourses(
       userId: string,
@@ -100,40 +114,46 @@ async function runDrop4TestSuite() {
       const allCourseCertCodes = ['NV-NET-C01', 'NV-NET-C02', 'NV-NET-C03', 'NV-NET-C04', 'NV-NET-C05'];
 
       if (!options.omitLessons && allLessons.length > 0) {
-        await prisma.userProgress.createMany({
-          data: allLessons.map((lesson) => ({
-            userId,
-            lessonId: lesson.id,
-            completed: true,
-            score: quizScore,
-            started: true,
-            viewed: true,
-            completedAt: new Date(),
-          })),
-        });
+        await withRetry(() =>
+          prisma.userProgress.createMany({
+            data: allLessons.map((lesson) => ({
+              userId,
+              lessonId: lesson.id,
+              completed: true,
+              score: quizScore,
+              started: true,
+              viewed: true,
+              completedAt: new Date(),
+            })),
+          })
+        );
       }
 
       if (allQuizzes.length > 0) {
-        await prisma.quizAttempt.createMany({
-          data: allQuizzes.map((quiz) => ({
-            userId,
-            quizId: quiz.id,
-            score: quizScore,
-            passed: quizScore >= 80,
-            answersJson: {},
-          })),
-        });
+        await withRetry(() =>
+          prisma.quizAttempt.createMany({
+            data: allQuizzes.map((quiz) => ({
+              userId,
+              quizId: quiz.id,
+              score: quizScore,
+              passed: quizScore >= 80,
+              answersJson: {},
+            })),
+          })
+        );
       }
 
       if (!options.omitLabs && allLabs.length > 0) {
-        await prisma.labAttempt.createMany({
-          data: allLabs.map((lab) => ({
-            userId,
-            labId: lab.id,
-            passed: true,
-            score: 100,
-          })),
-        });
+        await withRetry(() =>
+          prisma.labAttempt.createMany({
+            data: allLabs.map((lab) => ({
+              userId,
+              labId: lab.id,
+              passed: true,
+              score: 100,
+            })),
+          })
+        );
       }
 
       const certsToCreate = options.omitCertCode

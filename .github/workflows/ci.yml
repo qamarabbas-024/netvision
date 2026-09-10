@@ -73,6 +73,7 @@ jobs:
           npx ts-node scripts/test-drop3-certificate-issuance.ts
           npx ts-node scripts/test-drop4-mastery.ts
           npx ts-node scripts/test-drop8-capstone-grading.ts
+          npx ts-node scripts/test-drop9-certification-integrity.ts
 
       - name: Build Production Artifacts
         run: pnpm build

@@ -3,12 +3,23 @@ import {
   PublicCapstoneAssessment,
 } from './capstone-assessment.types';
 import { CAPSTONE_V1_ASSESSMENT } from './capstone-v1.content';
+import { validateAssessmentDefinition } from './capstone-validator';
 
 export const LATEST_CAPSTONE_VERSION = 1;
 
 const ASSESSMENTS: Record<number, CapstoneAssessmentDefinition> = {
   1: CAPSTONE_V1_ASSESSMENT,
 };
+
+// Startup invariant verification: Validate all registered assessments
+for (const [v, def] of Object.entries(ASSESSMENTS)) {
+  const report = validateAssessmentDefinition(def);
+  if (!report.isValid) {
+    throw new Error(
+      `[FATAL] Capstone Assessment definition v${v} failed validation invariants: ${report.errors.join('; ')}`
+    );
+  }
+}
 
 /**
  * Returns the authoritative assessment definition for a given version.
