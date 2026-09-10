@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { NetworkCanvas } from '../3d/NetworkCanvas';
 import { NetworkDevice, NetworkScenario } from '@/types/network';
+import { BorderBeam, CyberGlitchText, AnimatedRays } from '@/components/ui';
 
 interface HeroSectionProps {
   onExploreCurriculum: () => void;
@@ -41,6 +42,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       {/* Background technical grid */}
       <div className="absolute inset-0 bg-tech-grid opacity-15 pointer-events-none" />
       <div className="absolute inset-0 bg-radial-glow pointer-events-none" />
+      <AnimatedRays className="opacity-20 pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -53,7 +55,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             {/* Tag Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#061e1b] border border-[#10b981]/40 text-xs font-mono font-medium text-[#34d399]">
               <span className="w-2 h-2 rounded-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-              <span>Interactive Packet Simulation &amp; 3D Topology</span>
+              <CyberGlitchText text="Interactive Packet Simulation & 3D Topology" scrambleDuration={30} />
             </div>
 
             {/* Main Headline */}
@@ -129,6 +131,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Right Column: Isometric 3D Network Canvas */}
           <div className="lg:col-span-7 relative h-[480px] sm:h-[540px] lg:h-[580px] rounded-2xl bg-[#070b12] border border-slate-800/80 overflow-hidden shadow-2xl flex flex-col justify-between">
+            <BorderBeam size={320} duration={14} delay={0} colorFrom="#10b981" colorTo="#06b6d4" />
             
             {/* Top Interactive Scenario Controls Overlay */}
             <div className="absolute top-4 left-4 right-4 z-20 flex flex-wrap items-center justify-between gap-2 pointer-events-auto">

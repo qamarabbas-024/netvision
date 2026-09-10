@@ -12,6 +12,7 @@ import { DeviceDetailsModal } from '@/components/3d/DeviceDetailsModal';
 import { PacketInspectorModal } from '@/components/3d/PacketInspectorModal';
 import { InteractiveTerminalModal } from '@/components/landing/InteractiveTerminalModal';
 import { SignInModal } from '@/components/landing/SignInModal';
+import { RegistryComponentsShowcase } from '@/components/landing/RegistryComponentsShowcase';
 import { NetworkDevice, NetworkScenario } from '@/types/network';
 
 export default function Home() {
@@ -75,6 +76,9 @@ export default function Home() {
           scenario={scenario}
           onScenarioChange={setScenario}
         />
+
+        {/* Animated UI Registry Showcase (Vengeance UI, Skiper UI, GSAP) */}
+        <RegistryComponentsShowcase />
 
         {/* The Seven-Stage Mastery Pathway */}
         <CurriculumSection
