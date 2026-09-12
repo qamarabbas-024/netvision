@@ -55,14 +55,14 @@ export const RegistryComponentsShowcase: React.FC = () => {
             <span>Modern Animated UI Registry Integration</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white text-balance">
             Next-Gen Interface Power with{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500">
               <CyberGlitchText text="Vengeance UI & Skiper UI" scrambleDuration={35} />
             </span>
           </h2>
 
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+          <p className="text-slate-400 text-sm sm:text-base leading-relaxed text-pretty">
             Curated motion design components engineered for enterprise network observatories, live packet forensics, and low-latency interactive simulation dashboards.
           </p>
         </div>
@@ -106,10 +106,10 @@ export const RegistryComponentsShowcase: React.FC = () => {
               </div>
 
               <div className="pt-4 border-t border-slate-800/60 flex items-center justify-between text-[11px] font-mono text-slate-400">
-                <span className="flex items-center gap-1 text-emerald-400">
+                <span className="flex items-center gap-1 text-emerald-400 tabular-nums">
                   <CheckCircle2 className="w-3.5 h-3.5" /> 0 dropped packets
                 </span>
-                <span>Latency: 0.12µs</span>
+                <span className="tabular-nums">Latency: 0.12µs</span>
               </div>
             </GlowBorderCard>
           </div>
@@ -124,7 +124,7 @@ export const RegistryComponentsShowcase: React.FC = () => {
                   <Shield className="w-4 h-4" />
                   <span>Authoritative Certification</span>
                 </div>
-                <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] font-mono font-bold">
+                <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] font-mono font-bold tabular-nums">
                   PASS: 85%
                 </span>
               </div>
@@ -133,22 +133,22 @@ export const RegistryComponentsShowcase: React.FC = () => {
                 NV-NET-MASTERY Capstone
               </h3>
 
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-400 leading-relaxed text-pretty">
                 120-minute server-graded examination testing 40% Theory, 35% Multi-layer practical troubleshooting, and 25% Packet forensics.
               </p>
 
-              <div className="p-3 bg-[#060a12] rounded-lg border border-slate-800/80 space-y-1.5 font-mono text-[11px]">
+              <div className="p-3 bg-[#060a12] rounded-lg border border-slate-800/80 space-y-1.5 font-mono text-[11px] tabular-nums">
                 <div className="flex justify-between text-slate-300">
                   <span>Theory Weight:</span>
-                  <span className="text-emerald-400">40%</span>
+                  <span className="text-emerald-400 font-semibold">40%</span>
                 </div>
                 <div className="flex justify-between text-slate-300">
                   <span>Incident Challenge:</span>
-                  <span className="text-cyan-400">35%</span>
+                  <span className="text-cyan-400 font-semibold">35%</span>
                 </div>
                 <div className="flex justify-between text-slate-300">
                   <span>Packet Forensics:</span>
-                  <span className="text-blue-400">25%</span>
+                  <span className="text-blue-400 font-semibold">25%</span>
                 </div>
               </div>
             </div>
@@ -176,7 +176,7 @@ export const RegistryComponentsShowcase: React.FC = () => {
                 Kinetic Navigation Transitions
               </h3>
 
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-slate-400 leading-relaxed text-pretty">
                 Hover over the protocol links below to experience Skiper UI&apos;s dynamic fluid underline and cursor transitions:
               </p>
 
@@ -198,7 +198,7 @@ export const RegistryComponentsShowcase: React.FC = () => {
 
             <div className="pt-4 border-t border-slate-800/60 flex items-center justify-between text-[11px] font-mono text-slate-400">
               <span className="text-purple-400 font-semibold">GSAP + Motion.dev Powered</span>
-              <span>60 FPS</span>
+              <span className="tabular-nums">60 FPS</span>
             </div>
           </div>
         </div>

@@ -15,9 +15,10 @@ import { PrismaClient, Role, ExamAttemptStatus, ExamType } from '@prisma/client'
 import { CertificationsService } from '../src/certifications/certifications.service';
 import { CertificationEligibilityService } from '../src/certifications/certification-eligibility.service';
 import { MasterCapstoneService, CAPSTONE_CONFIG } from '../src/certifications/master-capstone.service';
+import { PrismaService } from '../src/database/prisma.service';
 import * as assert from 'assert';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaService();
 
 let passCount = 0;
 let failCount = 0;

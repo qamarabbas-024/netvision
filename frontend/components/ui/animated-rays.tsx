@@ -50,10 +50,10 @@ export function AnimatedRays({
     )`;
 
     return (
-        <section className={cn("relative w-full h-full overflow-hidden", className)}>
+        <section className={cn("relative w-full h-full overflow-hidden pointer-events-none", className)}>
             {/* Aurora Background — matches original .hero */}
             <div
-                className="absolute inset-0"
+                className="absolute inset-0 pointer-events-none"
                 style={{
                     backgroundImage: `${stripes}, ${rainbow}`,
                     backgroundSize: "300%, 200%",
@@ -67,7 +67,7 @@ export function AnimatedRays({
             >
                 {/* Animated overlay — matches original .hero::after */}
                 <div
-                    className="absolute inset-0 animate-aurora-bg"
+                    className="absolute inset-0 animate-aurora-bg motion-reduce:animate-none"
                     style={{
                         backgroundImage: `${stripes}, ${rainbow}`,
                         backgroundSize: "200%, 100%",

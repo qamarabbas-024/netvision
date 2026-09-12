@@ -45,3 +45,10 @@ yarn-error.log*
 
 # Prisma
 backend/prisma/migrations/dev.db
+
+# Playwright Test Artifacts
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+

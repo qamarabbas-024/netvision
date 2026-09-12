@@ -59,7 +59,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-[50px] font-extrabold tracking-tight text-white leading-[1.14]">
+            <h1 className="text-4xl sm:text-5xl lg:text-[50px] font-extrabold tracking-tight text-white leading-[1.14] text-balance">
               Learn networking by{' '}
               <span className="block mt-1">
                 seeing how it{' '}
@@ -70,7 +70,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </h1>
 
             {/* Supporting Text */}
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal max-w-md">
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal max-w-md text-pretty">
               Visualize live packet dynamics, inject network faults, and build real intuition from physical bitstreams to cloud routing.
             </p>
 
@@ -80,15 +80,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <Link
                 id="hero-start-learning-btn"
                 href="/courses"
-                className="px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-[#051a14] hover:text-white font-bold text-xs shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-[#10b981] hover:bg-[#059669] text-[#051a14] hover:text-white font-bold text-xs shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b0f17]"
               >
                 Start Learning
               </Link>
 
               {/* Secondary CTA */}
               <button
+                type="button"
                 onClick={onExploreCurriculum}
-                className="px-5 py-3 rounded-xl bg-[#0b1320] hover:bg-slate-800/80 border border-slate-700/80 hover:border-slate-500 text-slate-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-3 rounded-xl bg-[#0b1320] hover:bg-slate-800/80 border border-slate-700/80 hover:border-slate-500 text-slate-200 hover:text-white font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b0f17]"
               >
                 <span>Explore Curriculum</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -98,16 +99,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             {/* Refined Technical Capability Badges (Replacing cluttered 2x3 matrix) */}
             <div className="pt-4 border-t border-slate-800/80 grid grid-cols-3 gap-2 text-[11px] font-mono text-slate-400">
               <div className="p-2.5 rounded-xl bg-[#090d16]/80 border border-slate-800/80 flex flex-col gap-1">
-                <span className="text-[#34d399] font-bold flex items-center gap-1">
+                <span className="text-[#34d399] font-bold flex items-center gap-1 tabular-nums">
                   <CheckCircle2 className="w-3 h-3 text-[#34d399]" /> 7 Stages
                 </span>
                 <span className="text-[10px] text-slate-400">Bitstream to Cloud</span>
               </div>
               <div className="p-2.5 rounded-xl bg-[#090d16]/80 border border-slate-800/80 flex flex-col gap-1">
-                <span className="text-[#38bdf8] font-bold flex items-center gap-1">
+                <span className="text-[#38bdf8] font-bold flex items-center gap-1 tabular-nums">
                   <Cpu className="w-3 h-3 text-[#38bdf8]" /> WebGL Engine
                 </span>
-                <span className="text-[10px] text-slate-400">60 FPS 3D Render</span>
+                <span className="text-[10px] text-slate-400 tabular-nums">60 FPS 3D Render</span>
               </div>
               <div className="p-2.5 rounded-xl bg-[#090d16]/80 border border-slate-800/80 flex flex-col gap-1">
                 <span className="text-[#a78bfa] font-bold flex items-center gap-1">
@@ -197,7 +198,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
                 <span className="text-slate-200 font-medium">INTERACTIVE 3D TOPOLOGY</span>
               </div>
-              <div className="flex items-center gap-3 text-slate-400">
+              <div className="flex items-center gap-3 text-slate-400 tabular-nums">
                 <span>SCENARIO: <strong className="text-[#34d399] uppercase">{scenario}</strong></span>
                 <span>NODES: <strong className="text-[#38bdf8]">6 ACTIVE</strong></span>
               </div>

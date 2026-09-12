@@ -40,6 +40,7 @@ export interface CourseEligibilityResult {
 
 export interface MasteryEligibilityResult {
   credentialCode: string;
+  certificationCode?: string;
   credentialTitle: string;
   eligible: boolean;
   hasCertificate: boolean;
@@ -481,6 +482,7 @@ export class CertificationEligibilityService {
 
     return {
       credentialCode: 'NV-NET-MASTERY',
+      certificationCode: 'NV-NET-MASTERY',
       credentialTitle,
       eligible,
       hasCertificate: !!existingMasteryCert,

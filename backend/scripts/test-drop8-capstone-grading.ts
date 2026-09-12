@@ -36,7 +36,9 @@ import {
   getPublicAssessment,
 } from '../src/certifications/capstone-assessment';
 
-const prisma = new PrismaClient();
+import { PrismaService } from '../src/database/prisma.service';
+
+const prisma = new PrismaService();
 const eligibilityService = new CertificationEligibilityService(prisma as any);
 const capstoneService = new MasterCapstoneService(prisma as any);
 

@@ -21,9 +21,19 @@ export function CyberGlitchText({
 }: CyberGlitchTextProps) {
   const [displayText, setDisplayText] = useState(text);
   const [isHovered, setIsHovered] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
   const scramble = () => {
+    if (prefersReducedMotion) return;
     let iteration = 0;
     clearInterval(intervalRef.current as NodeJS.Timeout);
 
@@ -49,23 +59,30 @@ export function CyberGlitchText({
   };
 
   useEffect(() => {
-    if (scrambleOnMount) {
+    if (scrambleOnMount && !prefersReducedMotion) {
       scramble();
+    } else {
+      setDisplayText(text);
     }
     return () => clearInterval(intervalRef.current as NodeJS.Timeout);
-  }, [text, scrambleOnMount]);
+  }, [text, scrambleOnMount, prefersReducedMotion]);
 
   return (
-    <div
+    <span
       className={cn("relative inline-block group", className)}
+      aria-label={text}
       onMouseEnter={() => {
-        setIsHovered(true);
-        scramble();
+        if (!prefersReducedMotion) {
+          setIsHovered(true);
+          scramble();
+        }
       }}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Base Text */}
-      <span className="relative z-10">{displayText}</span>
+      <span className="relative z-10" aria-hidden={displayText !== text}>
+        {displayText}
+      </span>
 
       {/* Glitch Layers for Chromatic Aberration */}
       {isHovered && (
@@ -90,14 +107,14 @@ export function CyberGlitchText({
           </motion.span>
           
           {/* Slice Glitch Overlay */}
-          <motion.div
-            className="absolute inset-0 bg-white/10 dark:bg-black/10 z-20 pointer-events-none mix-blend-overlay"
+          <motion.span
+            className="absolute inset-0 bg-white/10 dark:bg-black/10 z-20 pointer-events-none mix-blend-overlay block"
             initial={{ top: "0%", height: "0%" }}
             animate={{ top: ["0%", "40%", "80%", "0%"], height: ["2px", "5px", "1px", "0px"] }}
             transition={{ duration: 0.3, repeat: Infinity }}
           />
         </>
       )}
-    </div>
+    </span>
   );
 }

@@ -77,3 +77,24 @@ jobs:
 
       - name: Build Production Artifacts
         run: pnpm build
+
+      - name: Install Playwright Chromium Browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run Playwright E2E Certification Suite
+        run: pnpm test:e2e
+        env:
+          CI: true
+          NODE_ENV: test
+          DATABASE_URL: "postgresql://netvision:netvision_secure_password@localhost:5432/netvision_db?schema=public"
+          JWT_SECRET: "netvision_ci_test_secret_must_be_over_32_characters_long"
+
+      - name: Upload Playwright E2E Artifacts on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-e2e-artifacts
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14

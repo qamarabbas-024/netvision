@@ -30,11 +30,14 @@ const Link000 = ({
   href: string;
   className?: string;
 }) => {
+  const isExternal = href.startsWith("http");
   return (
     <Link
       href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
       className={cn(
-        "group relative flex items-center",
+        "group relative flex items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-sm",
         className,
         "before:pointer-events-none before:absolute before:bottom-0 before:left-0 before:h-[0.05em] before:w-full before:bg-current before:content-['']",
         "before:origin-right before:scale-x-0 before:transition-transform before:duration-300 before:ease-[cubic-bezier(0.4,0,0.2,1)]",
@@ -45,6 +48,7 @@ const Link000 = ({
     </Link>
   );
 };
+
 const Link001 = ({
   children,
   href,
@@ -54,12 +58,14 @@ const Link001 = ({
   href: string;
   className?: string;
 }) => {
+  const isExternal = href.startsWith("http");
   return (
-    <a
+    <Link
       href={href}
-      target="_blank"
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
       className={cn(
-        "group relative flex items-center",
+        "group relative flex items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-sm",
         "before:pointer-events-none before:absolute before:left-0 before:top-[1.5em] before:h-[0.05em] before:w-full before:bg-current before:content-['']",
         "before:origin-right before:scale-x-0 before:transition-transform before:duration-300 before:ease-[cubic-bezier(0.4,0,0.2,1)]",
         "hover:before:origin-left hover:before:scale-x-100",
@@ -68,7 +74,7 @@ const Link001 = ({
     >
       {children}
       <svg
-        className="ml-[0.3em] mt-[0em] size-[0.55em] translate-y-1 opacity-0 transition-all duration-300 [motion-reduce:transition-none] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none"
+        className="ml-[0.3em] mt-[0em] size-[0.55em] translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none"
         fill="none"
         viewBox="0 0 10 10"
         xmlns="http://www.w3.org/2000/svg"
@@ -82,9 +88,10 @@ const Link001 = ({
           strokeLinejoin="round"
         ></path>
       </svg>
-    </a>
+    </Link>
   );
 };
+
 const Link002 = ({
   children,
   href,
@@ -94,11 +101,14 @@ const Link002 = ({
   href: string;
   className?: string;
 }) => {
+  const isExternal = href.startsWith("http");
   return (
-    <a
+    <Link
       href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
       className={cn(
-        "group relative flex items-center",
+        "group relative flex items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-sm",
         className,
         "before:pointer-events-none before:absolute before:left-0 before:top-[1.5em] before:h-[0.05em] before:w-full before:bg-current before:content-['']",
         "before:origin-right before:scale-x-0 before:transition-transform before:duration-300 before:ease-[cubic-bezier(0.4,0,0.2,1)]",
@@ -108,7 +118,7 @@ const Link002 = ({
     >
       {children}
       <svg
-        className="ml-[0.3em] mt-[0em] size-[0.55em] translate-y-1 opacity-0 transition-all duration-300 [motion-reduce:transition-none] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none"
+        className="ml-[0.3em] mt-[0em] size-[0.55em] translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none"
         fill="none"
         viewBox="0 0 10 10"
         xmlns="http://www.w3.org/2000/svg"
@@ -122,9 +132,10 @@ const Link002 = ({
           strokeLinejoin="round"
         ></path>
       </svg>
-    </a>
+    </Link>
   );
 };
+
 const Link003 = ({
   children,
   href,
@@ -134,11 +145,14 @@ const Link003 = ({
   href: string;
   className?: string;
 }) => {
+  const isExternal = href.startsWith("http");
   return (
-    <a
+    <Link
       href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
       className={cn(
-        "group relative flex items-center",
+        "group relative flex items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-sm",
         className,
         "before:pointer-events-none before:absolute before:left-0 before:top-[1.5em] before:h-[0.05em] before:w-full before:bg-current before:content-['']",
         "before:origin-right before:scale-x-0 before:transition-transform before:duration-300 before:ease-[cubic-bezier(0.4,0,0.2,1)]",
@@ -148,7 +162,7 @@ const Link003 = ({
     >
       {children}
       <svg
-        className="ml-[0.3em] mt-[0em] size-[0.55em] translate-y-1 opacity-0 transition-all duration-300 [motion-reduce:transition-none] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none"
+        className="ml-[0.3em] mt-[0em] size-[0.55em] translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:transition-none"
         fill="none"
         viewBox="0 0 10 10"
         xmlns="http://www.w3.org/2000/svg"
@@ -162,7 +176,7 @@ const Link003 = ({
           strokeLinejoin="round"
         ></path>
       </svg>
-    </a>
+    </Link>
   );
 };
 
@@ -175,11 +189,14 @@ const Link004 = ({
   href: string;
   className?: string;
 }) => {
+  const isExternal = href.startsWith("http");
   return (
-    <a
+    <Link
       href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
       className={cn(
-        "group relative flex items-center",
+        "group relative flex items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-sm",
         className,
         "before:pointer-events-none before:absolute before:left-0 before:w-full before:bg-white before:content-['']",
         "before:origin-right before:scale-x-0 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.4,0,0.2,1)]",
@@ -189,7 +206,7 @@ const Link004 = ({
     >
       {children}
       <svg
-        className="z-0 ml-[0.6em] mt-[0em] size-[0.55em] translate-y-1 opacity-0 transition-all duration-300 [motion-reduce:transition-none] group-hover:translate-y-0 group-hover:rotate-45 group-hover:opacity-100 motion-reduce:transition-none"
+        className="z-0 ml-[0.6em] mt-[0em] size-[0.55em] translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:rotate-45 group-hover:opacity-100 motion-reduce:transition-none"
         fill="none"
         viewBox="0 0 10 10"
         xmlns="http://www.w3.org/2000/svg"
@@ -203,9 +220,10 @@ const Link004 = ({
           strokeLinejoin="round"
         ></path>
       </svg>
-    </a>
+    </Link>
   );
 };
+
 const Link005 = ({
   children,
   href,
@@ -215,12 +233,15 @@ const Link005 = ({
   href: string;
   className?: string;
 }) => {
+  const isExternal = href.startsWith("http");
   return (
-    <a
+    <Link
       href={href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
       className={cn(
         className,
-        "group relative flex items-center",
+        "group relative flex items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 rounded-sm",
         "before:pointer-events-none before:absolute before:left-0 before:w-full before:bg-white before:content-['']",
         "before:scale-x-1 before:transition-all before:duration-300 before:ease-[cubic-bezier(0.4,0,0.2,1)]",
         "before:origin-left md:before:top-0",
@@ -229,7 +250,7 @@ const Link005 = ({
     >
       {children}
       <svg
-        className="z-0 ml-[0.6em] mt-[0em] size-[0.55em] -translate-x-1 rotate-45 opacity-0 transition-all duration-300 [motion-reduce:transition-none] group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transition-none"
+        className="z-0 ml-[0.6em] mt-[0em] size-[0.55em] -translate-x-1 rotate-45 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transition-none"
         fill="none"
         viewBox="0 0 10 10"
         xmlns="http://www.w3.org/2000/svg"
@@ -243,7 +264,7 @@ const Link005 = ({
           strokeLinejoin="round"
         ></path>
       </svg>
-    </a>
+    </Link>
   );
 };
 

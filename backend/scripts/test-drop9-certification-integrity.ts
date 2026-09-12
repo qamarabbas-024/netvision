@@ -29,7 +29,9 @@ import {
   validateAssessmentDefinition,
 } from '../src/certifications/capstone-assessment';
 
-const prisma = new PrismaClient();
+import { PrismaService } from '../src/database/prisma.service';
+
+const prisma = new PrismaService();
 const eligibilityService = new CertificationEligibilityService(prisma as any);
 const certsService = new CertificationsService(prisma as any, eligibilityService);
 const capstoneService = new MasterCapstoneService(prisma as any);
@@ -278,11 +280,7 @@ async function runDrop9TestSuite() {
     // 1. Two parallel submissions against the active attempt
     const concurrentSubmissions = await Promise.allSettled([
       capstoneService.submitCapstoneAttempt(userConcurrentSubmit.id, activeExam.attemptId, validCandidateAnswers),
-      capstoneService.submitCapstoneAttempt(userConcurrentSubmit.id, activeExam.attemptId, {
-        theoryAnswers: {},
-        incidentAnswers: {},
-        forensicsAnswers: {},
-      }),
+      capstoneService.submitCapstoneAttempt(userConcurrentSubmit.id, activeExam.attemptId, validCandidateAnswers),
     ]);
 
     const fulfilledSubmissions = concurrentSubmissions.filter((s) => s.status === 'fulfilled');

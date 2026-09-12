@@ -150,11 +150,11 @@ export const GlowBorderCard = React.forwardRef<HTMLDivElement, GlowBorderCardPro
                 */}
                 <div
                     className={cn(
-                        "absolute -z-10",
+                        "absolute -z-10 pointer-events-none",
                         // Inset logic handled by style or arbitrary values if fixed
                         "border-solid rounded-[inherit]",
                         // The Gradient Animation Class
-                        "glow-conic",
+                        "glow-conic motion-reduce:animate-none",
                         // Pause State
                         paused && "[animation-play-state:paused]"
                     )}

@@ -5,11 +5,10 @@ import { CertificationsService } from '../src/certifications/certifications.serv
 import { PrismaService } from '../src/database/prisma.service';
 import * as assert from 'assert';
 
-const prisma = new PrismaClient();
-const prismaService = prisma as unknown as PrismaService;
-const eligibilityService = new CertificationEligibilityService(prismaService);
-const capstoneService = new MasterCapstoneService(prismaService);
-const certificationsService = new CertificationsService(prismaService, eligibilityService);
+const prisma = new PrismaService();
+const eligibilityService = new CertificationEligibilityService(prisma);
+const capstoneService = new MasterCapstoneService(prisma);
+const certificationsService = new CertificationsService(prisma, eligibilityService);
 
 let passed = 0;
 let failed = 0;

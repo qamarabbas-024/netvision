@@ -385,8 +385,12 @@ export default function MasterCapstonePage() {
     );
   }
 
-  const isEligible = !!eligibility?.eligible;
-  const blockingReqs = eligibility?.blockingRequirements || [];
+  // Candidate is eligible to attempt Capstone if all 5 prerequisite course certificates are active
+  const courseCertsPassed = !!eligibility?.breakdown?.courseCertificates?.passed;
+  const isEligible = !!eligibility?.eligible || courseCertsPassed;
+  const blockingReqs = (eligibility?.blockingRequirements || []).filter(
+    (req) => !req.toLowerCase().includes('capstone')
+  );
 
   return (
     <ProtectedRoute>

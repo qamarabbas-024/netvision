@@ -307,6 +307,49 @@ pre, code {
   animation: pulseGlow 2.5s ease-in-out infinite;
 }
 
+/* Registry Motion Components Keyframes */
+@keyframes aurora-bg {
+  0% {
+    background-position: 50% 50%, 50% 50%;
+  }
+  100% {
+    background-position: 350% 50%, 350% 50%;
+  }
+}
+
+.animate-aurora-bg {
+  animation: aurora-bg 60s linear infinite;
+}
+
+@property --glow-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes glow-rotate {
+  0% {
+    --glow-angle: 0deg;
+  }
+  100% {
+    --glow-angle: 360deg;
+  }
+}
+
+.glow-conic {
+  background: conic-gradient(
+    from var(--glow-angle, 0deg),
+    var(--glow-color-1, #06b6d4),
+    var(--glow-color-2, #10b981),
+    var(--glow-color-3, #3b82f6),
+    var(--glow-color-4, #06b6d4),
+    var(--glow-color-5, #10b981),
+    var(--glow-color-6, #3b82f6),
+    var(--glow-color-1, #06b6d4)
+  );
+  animation: glow-rotate var(--glow-animation-duration, 4s) linear infinite;
+}
+
 /* Accessibility: Respect Prefers Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
