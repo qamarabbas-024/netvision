@@ -196,7 +196,7 @@ export default function CertificatesCatalogPage() {
                       Official Certifications &amp; Credentials
                     </h1>
                     <p className="text-xs sm:text-sm text-[#8e95a5] mt-1 max-w-2xl leading-relaxed">
-                      Authoritative networking credentials backed by cryptographic ledger verification. Earn five foundational specialist certifications to unlock the Master Capstone.
+                      Authoritative networking credentials backed by authoritative certification registry. Earn five foundational specialist certifications to unlock the Master Capstone.
                     </p>
                   </div>
 
@@ -235,13 +235,13 @@ export default function CertificatesCatalogPage() {
                               href={`/certificates/${encodeURIComponent(claimFeedback.credentialId)}`}
                               className="text-xs font-mono underline font-bold text-emerald-300 hover:text-white inline-flex items-center gap-1"
                             >
-                              <FileText className="w-3 h-3" /> View Credential Record
+                              <FileText className="w-3 h-3" /> View Certificate
                             </Link>
                             <Link
                               href={`/certificates/verify/${encodeURIComponent(claimFeedback.credentialId)}`}
                               className="text-xs font-mono underline font-bold text-emerald-300 hover:text-white inline-flex items-center gap-1"
                             >
-                              <ExternalLink className="w-3 h-3" /> Verify in Public Ledger
+                              <ExternalLink className="w-3 h-3" /> Verify in Public Registry
                             </Link>
                           </div>
                         )}
@@ -293,7 +293,7 @@ export default function CertificatesCatalogPage() {
                     </div>
                     {earnedCount > 0 && (
                       <Badge variant="emerald" dot={true}>
-                        {earnedCount} Active Record{earnedCount > 1 ? 's' : ''}
+                        {earnedCount} Active Credential{earnedCount > 1 ? 's' : ''}
                       </Badge>
                     )}
                   </div>
@@ -373,7 +373,7 @@ export default function CertificatesCatalogPage() {
                                   className="w-full justify-center text-xs font-bold"
                                   rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
                                 >
-                                  View Record
+                                  View Certificate
                                 </Button>
                               </Link>
 
@@ -414,7 +414,7 @@ export default function CertificatesCatalogPage() {
                       </div>
                       <h3 className="text-base font-bold text-white">No Certificates Claimed Yet</h3>
                       <p className="text-xs text-[#8e95a5] max-w-md">
-                        Complete 100% of curriculum lessons, pass all required practical labs, and achieve $\ge 80\%$ on diagnostic benchmark quizzes in a course track below to unlock your verifiable certificate.
+                        Complete 100% of curriculum lessons, pass all required practical labs, and achieve ≥ 80% on diagnostic benchmark quizzes in a course track below to unlock your verifiable certificate.
                       </p>
                     </div>
                   )}
@@ -488,7 +488,7 @@ export default function CertificatesCatalogPage() {
                                 <div className="flex items-center gap-2">
                                   <Link href={`/certificates/${encodeURIComponent(masteryCredId)}`}>
                                     <Button variant="primary" size="sm" className="flex items-center gap-1.5">
-                                      <FileText className="w-3.5 h-3.5" /> View Record
+                                      <FileText className="w-3.5 h-3.5" /> View Certificate
                                     </Button>
                                   </Link>
                                   <Link href={`/certificates/verify/${encodeURIComponent(masteryCredId)}`}>
@@ -769,7 +769,7 @@ export default function CertificatesCatalogPage() {
                                     className="w-full text-xs font-semibold flex items-center justify-center gap-1"
                                   >
                                     <FileText className="w-3.5 h-3.5" />
-                                    <span>Record</span>
+                                    <span>View Certificate</span>
                                   </Button>
                                 </Link>
                                 <Link
@@ -779,7 +779,7 @@ export default function CertificatesCatalogPage() {
                                     variant="secondary"
                                     size="sm"
                                     className="text-xs flex items-center gap-1"
-                                    title="Verify in public ledger"
+                                    title="Verify in public registry"
                                   >
                                     <ShieldCheck className="w-3.5 h-3.5 text-[#38bdf8]" />
                                   </Button>
