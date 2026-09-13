@@ -34,11 +34,13 @@ import {
   FileText,
   Download,
   Eye,
+  ListOrdered,
 } from 'lucide-react';
 import {
   getCapstoneSpecificationApi,
   startCapstoneAttemptApi,
   getCapstoneAttemptStatusApi,
+  getLatestCapstoneAttemptApi,
   submitCapstoneAttemptApi,
   checkMasteryEligibilityApi,
   claimCertificationCertificateApi,
@@ -69,6 +71,39 @@ export default function MasterCapstonePage() {
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [startError, setStartError] = useState<string | null>(null);
 
+  // Dynamic server-authoritative cooldown state (Drop #12 P2-D)
+  const [cooldownInfo, setCooldownInfo] = useState<{
+    inCooldown: boolean;
+    cooldownEndsAt: string | null;
+    remainingSeconds: number;
+  }>({ inCooldown: false, cooldownEndsAt: null, remainingSeconds: 0 });
+
+  // Cooldown countdown timer (Display Only — server authoritative)
+  useEffect(() => {
+    if (!cooldownInfo.inCooldown || cooldownInfo.remainingSeconds <= 0) return;
+
+    const timer = setInterval(() => {
+      setCooldownInfo((prev) => {
+        const next = Math.max(0, prev.remainingSeconds - 1);
+        if (next === 0) {
+          return { ...prev, inCooldown: false, remainingSeconds: 0 };
+        }
+        return { ...prev, remainingSeconds: next };
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldownInfo.inCooldown, cooldownInfo.remainingSeconds]);
+
+  const formatCooldownTime = (sec: number) => {
+    const hours = Math.floor(sec / 3600);
+    const minutes = Math.floor((sec % 3600) / 60);
+    const seconds = sec % 60;
+    if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+    if (minutes > 0) return `${minutes}m ${seconds}s`;
+    return `${seconds}s`;
+  };
+
   // Workspace timing (Display Only — server authoritative)
   const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -93,6 +128,16 @@ export default function MasterCapstonePage() {
     diagnosticOrder: ['CMD_SYSLOG', 'CMD_MAC_TABLE', 'CMD_CDP_NEIGHBOR', 'CMD_INTERFACE_CONFIG'],
   });
   const [forensicsAnswers, setForensicsAnswers] = useState<Record<string, number>>({});
+
+  // Real-time answered examination items count (Drop #12 P2-E)
+  const answeredCount =
+    Object.keys(theoryAnswers).length +
+    (incidentAnswers.layerDomain ? 1 : 0) +
+    (incidentAnswers.protocolFailure ? 1 : 0) +
+    (incidentAnswers.rootCause ? 1 : 0) +
+    (incidentAnswers.diagnosticOrder && incidentAnswers.diagnosticOrder.length > 0 ? 1 : 0) +
+    (incidentAnswers.remediationChoice ? 1 : 0) +
+    Object.keys(forensicsAnswers).length;
 
   // Sub-Drop 5.5: Post-Exam Mastery Re-evaluation and Claim state
   const [masteryReeval, setMasteryReeval] = useState<MasteryEligibilityResult | null>(null);
@@ -171,10 +216,14 @@ export default function MasterCapstonePage() {
     setStartError(null);
 
     try {
-      const [specData, eligData] = await Promise.all([
+      const [specData, eligData, latestAttemptData] = await Promise.all([
         getCapstoneSpecificationApi(),
         checkMasteryEligibilityApi().catch((err) => {
           console.warn('Could not fetch mastery eligibility:', err);
+          return null;
+        }),
+        getLatestCapstoneAttemptApi().catch((err) => {
+          console.warn('Could not fetch latest capstone attempt:', err);
           return null;
         }),
       ]);
@@ -182,41 +231,81 @@ export default function MasterCapstonePage() {
       setSpec(specData);
       setEligibility(eligData);
 
-      // Check if candidate has an active attempt in progress to recover
-      // 1. Check mastery eligibility breakdown for active attempt
-      const activeAttemptId =
-        typeof window !== 'undefined'
-          ? sessionStorage.getItem('nv_capstone_active_attempt_id')
-          : null;
+      if (latestAttemptData?.cooldownInfo) {
+        setCooldownInfo(latestAttemptData.cooldownInfo);
+      }
 
-      if (activeAttemptId) {
-        try {
-          const status = await getCapstoneAttemptStatusApi(activeAttemptId);
-          if (status.status === 'IN_PROGRESS' && status.remainingSeconds > 0) {
-            setAttempt(status);
-            setRemainingSeconds(status.remainingSeconds);
-            setView('WORKSPACE');
-          } else if (status.status === 'PASSED' || status.status === 'FAILED') {
-            setAttempt(status);
-            if (status.result) {
-              setSubmissionResult({
-                attemptId: status.attemptId,
-                examCode: status.examCode,
-                status: status.status,
-                score: status.score ?? 0,
-                passed: status.passed ?? false,
-                result: status.result,
-              });
+      // Server-authoritative session and result recovery (Drop #12 P1-C)
+      const serverAttempt = latestAttemptData?.attempt;
+      const storedLastView = typeof window !== 'undefined' ? sessionStorage.getItem('nv_capstone_view') : null;
+      const isResultUrl = typeof window !== 'undefined' && window.location.search.includes('view=result');
+
+      if (serverAttempt) {
+        if (serverAttempt.status === 'IN_PROGRESS' && serverAttempt.remainingSeconds > 0) {
+          setAttempt(serverAttempt);
+          setRemainingSeconds(serverAttempt.remainingSeconds);
+          setView('WORKSPACE');
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('nv_capstone_active_attempt_id', serverAttempt.attemptId);
+          }
+        } else if (serverAttempt.status === 'PASSED' || serverAttempt.status === 'FAILED') {
+          setAttempt(serverAttempt);
+          if (serverAttempt.result) {
+            setSubmissionResult({
+              attemptId: serverAttempt.attemptId,
+              examCode: serverAttempt.examCode,
+              status: serverAttempt.status,
+              score: serverAttempt.score ?? 0,
+              passed: serverAttempt.passed ?? false,
+              result: serverAttempt.result,
+            });
+
+            // If learner was viewing RESULT or requested via query param, recover RESULT view
+            if (storedLastView === 'RESULT' || isResultUrl) {
               setView('RESULT');
-              if (status.status === 'PASSED') {
+              if (serverAttempt.status === 'PASSED') {
                 reevaluateMasteryEligibility();
               }
             }
           }
-        } catch {
-          // Attempt expired or not found, clear stale session id
-          if (typeof window !== 'undefined') {
-            sessionStorage.removeItem('nv_capstone_active_attempt_id');
+        }
+      } else {
+        // Fallback: Check if candidate has active attempt ID stored locally
+        const activeAttemptId =
+          typeof window !== 'undefined'
+            ? sessionStorage.getItem('nv_capstone_active_attempt_id')
+            : null;
+
+        if (activeAttemptId) {
+          try {
+            const status = await getCapstoneAttemptStatusApi(activeAttemptId);
+            if (status.status === 'IN_PROGRESS' && status.remainingSeconds > 0) {
+              setAttempt(status);
+              setRemainingSeconds(status.remainingSeconds);
+              setView('WORKSPACE');
+            } else if (status.status === 'PASSED' || status.status === 'FAILED') {
+              setAttempt(status);
+              if (status.result) {
+                setSubmissionResult({
+                  attemptId: status.attemptId,
+                  examCode: status.examCode,
+                  status: status.status,
+                  score: status.score ?? 0,
+                  passed: status.passed ?? false,
+                  result: status.result,
+                });
+                if (storedLastView === 'RESULT' || isResultUrl) {
+                  setView('RESULT');
+                  if (status.status === 'PASSED') {
+                    reevaluateMasteryEligibility();
+                  }
+                }
+              }
+            }
+          } catch {
+            if (typeof window !== 'undefined') {
+              sessionStorage.removeItem('nv_capstone_active_attempt_id');
+            }
           }
         }
       }
@@ -317,8 +406,19 @@ export default function MasterCapstonePage() {
       setShowSubmitModal(false);
 
       if (typeof window !== 'undefined') {
+        sessionStorage.setItem('nv_capstone_view', 'RESULT');
+        sessionStorage.setItem('nv_capstone_last_attempt_id', result.attemptId);
         sessionStorage.removeItem('nv_capstone_active_attempt_id');
       }
+
+      // Re-fetch latest attempt from server to populate accurate cooldown
+      getLatestCapstoneAttemptApi()
+        .then((latest) => {
+          if (latest?.cooldownInfo) {
+            setCooldownInfo(latest.cooldownInfo);
+          }
+        })
+        .catch(() => null);
 
       // If passed, immediately trigger authoritative Mastery eligibility re-evaluation
       if (result.passed) {
@@ -338,6 +438,17 @@ export default function MasterCapstonePage() {
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // Question navigation helper (Drop #12 P2-E)
+  const handleJumpToQuestion = (domain: 'theory' | 'practical' | 'packet', elementId: string) => {
+    setActiveTab(domain);
+    setTimeout(() => {
+      const el = document.getElementById(elementId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 50);
   };
 
   // Determine timer warning styling
@@ -564,6 +675,57 @@ export default function MasterCapstonePage() {
                           : 'You must fulfill all prerequisite criteria before starting the Master Capstone examination.'}
                       </p>
 
+                      {/* Active Cooldown Banner (Drop #12 P2-D) */}
+                      {cooldownInfo.inCooldown && (
+                        <div className="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
+                          <Clock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                          <div>
+                            <h4 className="text-sm font-bold text-white">Mandatory Study Cooldown Active</h4>
+                            <p className="text-xs text-amber-200/90 mt-1">
+                              Next attempt available in{' '}
+                              <span className="font-mono font-bold text-amber-300">
+                                {formatCooldownTime(cooldownInfo.remainingSeconds)}
+                              </span>
+                            </p>
+                            {cooldownInfo.cooldownEndsAt && (
+                              <p className="text-[11px] font-mono text-zinc-400 mt-0.5">
+                                Server unlock time: {new Date(cooldownInfo.cooldownEndsAt).toUTCString()}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Previous Result Access (Drop #12 P1-C) */}
+                      {submissionResult && (
+                        <div className="mt-4 p-4 rounded-xl bg-[#14151a] border border-[#2a2e39] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                          <div>
+                            <span className="text-[10px] font-mono text-[#8e95a5] uppercase block">Previous Assessment Attempt</span>
+                            <span className="text-sm font-bold text-white font-mono">
+                              Status: {submissionResult.passed ? (
+                                <span className="text-emerald-400">PASSED ({submissionResult.score}%)</span>
+                              ) : (
+                                <span className="text-rose-400">NOT PASSED ({submissionResult.score}%)</span>
+                              )}
+                            </span>
+                          </div>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => {
+                              if (typeof window !== 'undefined') {
+                                sessionStorage.setItem('nv_capstone_view', 'RESULT');
+                              }
+                              setView('RESULT');
+                            }}
+                            className="flex items-center gap-1.5 text-xs font-semibold"
+                          >
+                            <FileCheck2 className="w-3.5 h-3.5 text-[#38bdf8]" />
+                            <span>View Diagnostic Report</span>
+                          </Button>
+                        </div>
+                      )}
+
                       {/* Blocking requirements list if ineligible */}
                       {!isEligible && blockingReqs.length > 0 && (
                         <div className="mt-4 p-3.5 rounded-lg bg-[#09090b] border border-rose-500/30 text-xs font-mono text-rose-300">
@@ -580,16 +742,29 @@ export default function MasterCapstonePage() {
                     {/* Start Action */}
                     <div className="shrink-0 flex flex-col items-center sm:items-end gap-2">
                       {isEligible ? (
-                        <Button
-                          variant="cyan"
-                          size="lg"
-                          isLoading={isStarting}
-                          onClick={handleStartExam}
-                          className="font-bold px-8 shadow-glow flex items-center gap-2"
-                        >
-                          <Clock className="w-4 h-4" />
-                          <span>Start 120-Minute Exam</span>
-                        </Button>
+                        cooldownInfo.inCooldown ? (
+                          <Button
+                            variant="secondary"
+                            size="lg"
+                            disabled
+                            className="font-bold px-8 opacity-70 cursor-not-allowed flex items-center gap-2"
+                            title={`Examination locked during cooldown (${formatCooldownTime(cooldownInfo.remainingSeconds)} remaining)`}
+                          >
+                            <Clock className="w-4 h-4 text-amber-400" />
+                            <span>Cooldown Active ({formatCooldownTime(cooldownInfo.remainingSeconds)})</span>
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="cyan"
+                            size="lg"
+                            isLoading={isStarting}
+                            onClick={handleStartExam}
+                            className="font-bold px-8 shadow-glow flex items-center gap-2"
+                          >
+                            <Clock className="w-4 h-4" />
+                            <span>Start 120-Minute Exam</span>
+                          </Button>
+                        )
                       ) : (
                         <Link href="/certificates">
                           <Button variant="secondary" size="md" className="flex items-center gap-2">
@@ -673,6 +848,122 @@ export default function MasterCapstonePage() {
 
               {/* Workspace Content Shell (Zero Fabricated Questions) */}
               <div className="p-4 sm:p-8 max-w-6xl mx-auto w-full flex flex-col gap-6 flex-1 overflow-y-auto">
+                {/* Question Navigator (Drop #12 P2-E) */}
+                <div className="bg-[#14151a] border border-[#2a2e39] rounded-xl p-3.5 sm:p-4 flex flex-col gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <ListOrdered className="w-4 h-4 text-[#38bdf8]" />
+                      <span className="text-xs font-mono font-bold text-white uppercase tracking-wider">
+                        Examination Item Navigator
+                      </span>
+                      <span className="text-[11px] font-mono text-[#8e95a5]">
+                        ({answeredCount} of 19 answered)
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] font-mono text-[#8e95a5]">
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#10b981]" /> Answered
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#2a2e39] border border-[#4a5060]" /> Unanswered
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-[#2a2e39]/60">
+                    {/* Theory Section (Q1 - Q10) */}
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between text-[10px] font-mono">
+                        <span className="text-[#38bdf8] font-bold">1. Theory &amp; Protocol</span>
+                        <span className="text-zinc-500">Q1–Q10</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {(attempt.assessment?.theorySection?.questions || []).map((q: any, idx: number) => {
+                          const isAns = theoryAnswers[q.id] !== undefined;
+                          return (
+                            <button
+                              key={q.id}
+                              type="button"
+                              onClick={() => handleJumpToQuestion('theory', `theory-q-${q.id}`)}
+                              title={`Jump to Theory Question ${idx + 1}`}
+                              className={`w-7 h-7 rounded text-[11px] font-mono font-bold transition-all flex items-center justify-center ${
+                                isAns
+                                  ? 'bg-emerald-500/20 border border-emerald-500/60 text-emerald-300 hover:bg-emerald-500/30'
+                                  : 'bg-[#0c0d10] border border-[#2a2e39] text-[#8e95a5] hover:border-[#38bdf8] hover:text-white'
+                              }`}
+                            >
+                              {idx + 1}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Incident Section (T11 - T15) */}
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between text-[10px] font-mono">
+                        <span className="text-[#818cf8] font-bold">2. Incident Challenge</span>
+                        <span className="text-zinc-500">T11–T15</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {(attempt.assessment?.incidentSection?.scenario?.tasks || []).map((task: any, idx: number) => {
+                          let isAns = false;
+                          if (task.taskId === 'INCIDENT-TASK1') isAns = incidentAnswers.layerDomain !== undefined;
+                          else if (task.taskId === 'INCIDENT-TASK2') isAns = incidentAnswers.protocolFailure !== undefined;
+                          else if (task.taskId === 'INCIDENT-TASK3') isAns = incidentAnswers.rootCause !== undefined;
+                          else if (task.taskId === 'INCIDENT-TASK4') isAns = incidentAnswers.diagnosticOrder !== undefined && incidentAnswers.diagnosticOrder.length > 0;
+                          else if (task.taskId === 'INCIDENT-TASK5') isAns = incidentAnswers.remediationChoice !== undefined;
+                          else isAns = (incidentAnswers as any)[task.taskId] !== undefined;
+
+                          return (
+                            <button
+                              key={task.taskId}
+                              type="button"
+                              onClick={() => handleJumpToQuestion('practical', `incident-task-${task.taskId}`)}
+                              title={`Jump to Incident Task ${idx + 1}`}
+                              className={`w-7 h-7 rounded text-[11px] font-mono font-bold transition-all flex items-center justify-center ${
+                                isAns
+                                  ? 'bg-emerald-500/20 border border-emerald-500/60 text-emerald-300 hover:bg-emerald-500/30'
+                                  : 'bg-[#0c0d10] border border-[#2a2e39] text-[#8e95a5] hover:border-[#818cf8] hover:text-white'
+                              }`}
+                            >
+                              {idx + 11}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Forensics Section (Q16 - Q19) */}
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between text-[10px] font-mono">
+                        <span className="text-[#10b981] font-bold">3. PCAP Forensics</span>
+                        <span className="text-zinc-500">Q16–Q19</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {(attempt.assessment?.forensicsSection?.scenario?.questions || []).map((q: any, idx: number) => {
+                          const isAns = forensicsAnswers[q.id] !== undefined;
+                          return (
+                            <button
+                              key={q.id}
+                              type="button"
+                              onClick={() => handleJumpToQuestion('packet', `forensics-q-${q.id}`)}
+                              title={`Jump to Forensics Task ${idx + 1}`}
+                              className={`w-7 h-7 rounded text-[11px] font-mono font-bold transition-all flex items-center justify-center ${
+                                isAns
+                                  ? 'bg-emerald-500/20 border border-emerald-500/60 text-emerald-300 hover:bg-emerald-500/30'
+                                  : 'bg-[#0c0d10] border border-[#2a2e39] text-[#8e95a5] hover:border-[#10b981] hover:text-white'
+                              }`}
+                            >
+                              {idx + 16}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Domain Switcher Navigation */}
                 <div className="flex flex-wrap gap-2 border-b border-[#2a2e39] pb-3" role="tablist">
                   <button
@@ -744,7 +1035,7 @@ export default function MasterCapstonePage() {
                       {(attempt.assessment?.theorySection?.questions || []).map((q: any, qIdx: number) => {
                         const selectedIdx = theoryAnswers[q.id];
                         return (
-                          <div key={q.id} className="p-4 rounded-xl bg-[#14151a] border border-[#2a2e39] space-y-3">
+                          <div key={q.id} id={`theory-q-${q.id}`} className="p-4 rounded-xl bg-[#14151a] border border-[#2a2e39] space-y-3 scroll-mt-20">
                             <div className="flex items-center justify-between gap-2">
                               <span className="text-[10px] font-mono text-[#38bdf8] font-bold uppercase">
                                 Question {qIdx + 1} of 10 // {q.category || q.id}
@@ -850,7 +1141,7 @@ export default function MasterCapstonePage() {
                         else if (task.taskId === 'INCIDENT-TASK5') currentVal = incidentAnswers.remediationChoice;
 
                         return (
-                          <div key={task.taskId} className="p-4 rounded-xl bg-[#14151a] border border-[#2a2e39] space-y-3">
+                          <div key={task.taskId} id={`incident-task-${task.taskId}`} className="p-4 rounded-xl bg-[#14151a] border border-[#2a2e39] space-y-3 scroll-mt-20">
                             <div className="flex items-center justify-between gap-2">
                               <span className="text-[10px] font-mono text-[#818cf8] font-bold uppercase">
                                 Task {tIdx + 1} of 5 // {task.title}
@@ -952,14 +1243,16 @@ export default function MasterCapstonePage() {
                       </p>
                     </div>
 
-                    {/* PCAP Frames Telemetry Table */}
+                    {/* PCAP Frames Telemetry (Desktop Table + Mobile Cards - Drop #12 P2-F) */}
                     {attempt.assessment?.forensicsSection?.scenario?.frames && (
                       <div className="p-4 rounded-lg bg-[#14151a] border border-[#2a2e39] space-y-3">
                         <div className="flex items-center gap-2 text-[#10b981] text-xs font-mono font-bold">
                           <Activity className="w-4 h-4" />
                           <span>Captured TCP Stream Telemetry (tap0 ingress)</span>
                         </div>
-                        <div className="overflow-x-auto">
+
+                        {/* Desktop & Tablet Table */}
+                        <div className="hidden sm:block overflow-x-auto">
                           <table className="w-full text-left text-[11px] font-mono">
                             <thead>
                               <tr className="border-b border-[#2a2e39] text-[#8e95a5]">
@@ -991,6 +1284,37 @@ export default function MasterCapstonePage() {
                             </tbody>
                           </table>
                         </div>
+
+                        {/* Mobile Card Layout (sm:hidden) */}
+                        <div className="block sm:hidden space-y-2">
+                          {attempt.assessment.forensicsSection.scenario.frames.map((frame: any) => (
+                            <div
+                              key={frame.frameNumber}
+                              className="p-3 rounded-lg bg-[#0c0d10] border border-[#232733] space-y-1.5 text-[11px] font-mono"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-white">#{frame.frameNumber}</span>
+                                  <span className="text-[#8e95a5] text-[10px]">{frame.timestamp}</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-bold text-[#38bdf8] text-[10px]">{frame.protocol}</span>
+                                  <span className="px-1.5 py-0.5 rounded bg-[#2a2e39] text-[9px] text-emerald-400 font-bold">
+                                    {(frame.tcpFlags || []).join(', ')}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="text-[10px] text-zinc-300 break-all">
+                                <span className="text-cyan-400">{frame.sourceIp}:{frame.srcPort}</span>
+                                <span className="text-[#8e95a5] mx-1">→</span>
+                                <span className="text-indigo-400">{frame.destIp}:{frame.dstPort}</span>
+                              </div>
+                              <div className="text-[10px] text-zinc-400 leading-snug">
+                                {frame.info}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
 
@@ -999,7 +1323,7 @@ export default function MasterCapstonePage() {
                       {(attempt.assessment?.forensicsSection?.scenario?.questions || []).map((q: any, qIdx: number) => {
                         const selectedIdx = forensicsAnswers[q.id];
                         return (
-                          <div key={q.id} className="p-4 rounded-xl bg-[#14151a] border border-[#2a2e39] space-y-3">
+                          <div key={q.id} id={`forensics-q-${q.id}`} className="p-4 rounded-xl bg-[#14151a] border border-[#2a2e39] space-y-3 scroll-mt-20">
                             <div className="flex items-center justify-between gap-2">
                               <span className="text-[10px] font-mono text-[#10b981] font-bold uppercase">
                                 Forensics Task {qIdx + 1} of 4 // {q.id}
@@ -1280,7 +1604,7 @@ export default function MasterCapstonePage() {
                                   </div>
 
                                   <p className="text-xs text-[#8e95a5] leading-relaxed">
-                                    Your official cryptographic Mastery certificate is active in the NetVision registry. You can inspect your credential record, download the verified PDF, or share the public verification ledger.
+                                    Your official cryptographic Mastery certificate is active in the NetVision registry. You can inspect your credential record, download the verified PDF, or share the public verification link.
                                   </p>
 
                                   {downloadPdfError && (
@@ -1396,28 +1720,56 @@ export default function MasterCapstonePage() {
                       </div>
                     ) : (
                       /* Capstone Failed: Show Cooldown Guidance */
-                      <div className="p-5 rounded-xl border border-rose-500/40 bg-rose-500/5 flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <ShieldAlert className="w-4 h-4 text-rose-400" />
-                          <h4 className="text-sm font-bold text-white">
-                            Mandatory Study Cooldown Active
-                          </h4>
+                      <div className="p-5 rounded-xl border border-rose-500/40 bg-rose-500/5 flex flex-col gap-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0" />
+                            <h4 className="text-sm font-bold text-white">
+                              Mandatory Study Cooldown Active
+                            </h4>
+                          </div>
+                          {cooldownInfo?.inCooldown && cooldownInfo.remainingSeconds > 0 && (
+                            <Badge variant="rose" className="font-mono text-[10px]">
+                              TIME REMAINING: {formatCooldownTime(cooldownInfo.remainingSeconds)}
+                            </Badge>
+                          )}
                         </div>
                         <p className="text-xs text-[#8e95a5] leading-relaxed">
                           Your overall evaluation score of {submissionResult.score}% did not meet the mandatory 85% passing benchmark. In accordance with authoritative certification policy, a 24-hour mandatory study cooldown is enforced following your first failed attempt (72 hours for subsequent attempts). The client cannot bypass this cooldown.
                         </p>
+                        {cooldownInfo?.inCooldown && cooldownInfo.cooldownEndsAt && (
+                          <div className="p-3 rounded-lg bg-[#14151a] border border-rose-500/30 flex items-center justify-between text-xs font-mono">
+                            <span className="text-[#8e95a5]">Cooldown expires at:</span>
+                            <span className="text-white font-bold">{new Date(cooldownInfo.cooldownEndsAt).toLocaleString()}</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
 
                   {/* Navigation Links */}
                   <div className="pt-4 border-t border-[#2a2e39] flex flex-wrap items-center justify-between gap-3">
-                    <Link href="/dashboard" className="w-full sm:w-auto">
-                      <Button variant="primary" className="w-full sm:w-auto flex items-center justify-center gap-2">
-                        <FileCheck2 className="w-4 h-4" />
-                        <span>Return to Dashboard</span>
+                    <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                      <Button
+                        variant="secondary"
+                        onClick={() => {
+                          setView('PORTAL');
+                          if (typeof window !== 'undefined') {
+                            sessionStorage.removeItem('nv_capstone_view');
+                          }
+                        }}
+                        className="w-full sm:w-auto flex items-center justify-center gap-2"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        <span>Return to Exam Portal</span>
                       </Button>
-                    </Link>
+                      <Link href="/dashboard" className="w-full sm:w-auto">
+                        <Button variant="primary" className="w-full sm:w-auto flex items-center justify-center gap-2">
+                          <FileCheck2 className="w-4 h-4" />
+                          <span>Return to Dashboard</span>
+                        </Button>
+                      </Link>
+                    </div>
                     <Link href="/certificates" className="w-full sm:w-auto">
                       <Button variant="secondary" className="w-full sm:w-auto">
                         View All Credentials
