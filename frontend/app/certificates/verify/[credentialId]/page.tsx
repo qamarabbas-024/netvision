@@ -90,10 +90,10 @@ export default function CertificateVerifyPage() {
       <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col justify-between p-4 sm:p-8 font-sans">
         <div className="max-w-4xl mx-auto w-full mb-6">
           <Link
-            href="/certificates"
+            href="/"
             className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-[#00f0ff] transition-colors"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Certifications
+            <ArrowLeft className="w-3.5 h-3.5" /> Return to NetVision Home
           </Link>
         </div>
         <div className="max-w-lg mx-auto w-full p-8 sm:p-10 rounded-2xl bg-[#121217] border border-rose-500/30 text-center my-auto flex flex-col items-center gap-4">
@@ -113,11 +113,8 @@ export default function CertificateVerifyPage() {
             >
               Retry
             </Button>
-            <Link href="/certificates">
-              <Button variant="secondary" size="sm">Browse Certifications</Button>
-            </Link>
-            <Link href="/courses">
-              <Button variant="primary" size="sm">Explore Curriculum</Button>
+            <Link href="/">
+              <Button variant="secondary" size="sm">NetVision Homepage</Button>
             </Link>
           </div>
         </div>
@@ -131,10 +128,10 @@ export default function CertificateVerifyPage() {
       <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col justify-between p-4 sm:p-8 font-sans">
         <div className="max-w-4xl mx-auto w-full mb-6">
           <Link
-            href="/certificates"
+            href="/"
             className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-[#00f0ff] transition-colors"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Certifications
+            <ArrowLeft className="w-3.5 h-3.5" /> Return to NetVision Home
           </Link>
         </div>
         <div className="max-w-lg mx-auto w-full p-8 sm:p-10 rounded-2xl bg-[#121217] border border-amber-500/30 text-center my-auto flex flex-col items-center gap-4">
@@ -154,8 +151,8 @@ export default function CertificateVerifyPage() {
             >
               Retry Verification
             </Button>
-            <Link href="/certificates">
-              <Button variant="secondary" size="sm">Browse Certifications</Button>
+            <Link href="/">
+              <Button variant="secondary" size="sm">NetVision Homepage</Button>
             </Link>
           </div>
         </div>
@@ -170,10 +167,10 @@ export default function CertificateVerifyPage() {
       <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col p-4 sm:p-8 font-sans">
         <div className="max-w-3xl mx-auto w-full mb-6">
           <Link
-            href="/certificates"
+            href="/"
             className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-[#00f0ff] transition-colors"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Certifications Directory
+            <ArrowLeft className="w-3.5 h-3.5" /> Return to NetVision Home
           </Link>
         </div>
 
@@ -296,10 +293,10 @@ export default function CertificateVerifyPage() {
     <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col p-4 sm:p-8 font-sans">
       <div className="max-w-3xl mx-auto w-full mb-6">
         <Link
-          href="/certificates"
+          href="/"
           className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-[#00f0ff] transition-colors"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Certifications Directory
+          <ArrowLeft className="w-3.5 h-3.5" /> Return to NetVision Home
         </Link>
       </div>
 
@@ -318,7 +315,7 @@ export default function CertificateVerifyPage() {
                 </Badge>
               </div>
               <p className="text-xs text-emerald-300/80 mt-0.5">
-                Cryptographic signature and public authority ledger validation succeeded.
+                Cryptographic signature and authoritative registry validation succeeded.
               </p>
             </div>
           </div>
