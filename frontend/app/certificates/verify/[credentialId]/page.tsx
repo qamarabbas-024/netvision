@@ -26,7 +26,12 @@ type VerificationState = 'loading' | 'verified' | 'revoked' | 'not_found' | 'err
 export default function CertificateVerifyPage() {
   const params = useParams();
   const rawId = params?.credentialId as string;
-  const credentialId = decodeURIComponent(rawId || '');
+  let credentialId = '';
+  try {
+    credentialId = decodeURIComponent(rawId || '');
+  } catch {
+    credentialId = rawId || '';
+  }
 
   const [certData, setCertData] = useState<PublicVerifiedCertificateDto | null>(null);
   const [state, setState] = useState<VerificationState>('loading');
@@ -87,8 +92,8 @@ export default function CertificateVerifyPage() {
   // State: Invalid / Not Found
   if (state === 'not_found' || !credentialId) {
     return (
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col justify-between p-4 sm:p-8 font-sans">
-        <div className="max-w-4xl mx-auto w-full mb-6">
+      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col p-4 sm:p-8 font-sans">
+        <div className="max-w-3xl mx-auto w-full mb-6">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-[#00f0ff] transition-colors"
@@ -96,26 +101,28 @@ export default function CertificateVerifyPage() {
             <ArrowLeft className="w-3.5 h-3.5" /> Return to NetVision Home
           </Link>
         </div>
-        <div className="max-w-lg mx-auto w-full p-8 sm:p-10 rounded-2xl bg-[#121217] border border-rose-500/30 text-center my-auto flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
-            <ShieldAlert className="w-6 h-6" />
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Credential Not Verified</h1>
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-            {errorMessage || `The requested credential ID "${credentialId}" could not be located in the NetVision registry or is invalid.`}
-          </p>
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleRetry}
-              leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
-            >
-              Retry
-            </Button>
-            <Link href="/">
-              <Button variant="secondary" size="sm">NetVision Homepage</Button>
-            </Link>
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="max-w-lg mx-auto w-full p-8 sm:p-10 rounded-2xl bg-[#121217] border border-rose-500/30 text-center flex flex-col items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">Credential Not Verified</h1>
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              {errorMessage || `The requested credential ID "${credentialId}" could not be located in the NetVision registry or is invalid.`}
+            </p>
+            <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleRetry}
+                leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+              >
+                Retry
+              </Button>
+              <Link href="/">
+                <Button variant="secondary" size="sm">NetVision Homepage</Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -125,8 +132,8 @@ export default function CertificateVerifyPage() {
   // State: Network / Server Error
   if (state === 'error') {
     return (
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col justify-between p-4 sm:p-8 font-sans">
-        <div className="max-w-4xl mx-auto w-full mb-6">
+      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col p-4 sm:p-8 font-sans">
+        <div className="max-w-3xl mx-auto w-full mb-6">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-[#00f0ff] transition-colors"
@@ -134,35 +141,39 @@ export default function CertificateVerifyPage() {
             <ArrowLeft className="w-3.5 h-3.5" /> Return to NetVision Home
           </Link>
         </div>
-        <div className="max-w-lg mx-auto w-full p-8 sm:p-10 rounded-2xl bg-[#121217] border border-amber-500/30 text-center my-auto flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
-            <AlertCircle className="w-6 h-6" />
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white">Verification Service Unavailable</h1>
-          <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
-            {errorMessage || 'Unable to connect to the NetVision verification service. Please check your network connection and retry.'}
-          </p>
-          <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-            <Button
-              variant="cyan"
-              size="sm"
-              onClick={handleRetry}
-              leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
-            >
-              Retry Verification
-            </Button>
-            <Link href="/">
-              <Button variant="secondary" size="sm">NetVision Homepage</Button>
-            </Link>
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="max-w-lg mx-auto w-full p-8 sm:p-10 rounded-2xl bg-[#121217] border border-amber-500/30 text-center flex flex-col items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">Verification Service Unavailable</h1>
+            <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              {errorMessage || 'Unable to connect to the NetVision verification service. Please check your network connection and retry.'}
+            </p>
+            <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+              <Button
+                variant="cyan"
+                size="sm"
+                onClick={handleRetry}
+                leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+              >
+                Retry Verification
+              </Button>
+              <Link href="/">
+                <Button variant="secondary" size="sm">NetVision Homepage</Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  // State: Revoked / Inactive
+  // State: Revoked / Inactive / Cryptographic Fail
   if (state === 'revoked' && certData) {
     const isRevoked = certData.status === 'REVOKED';
+    const isTampered = !certData.isVerified;
+
     return (
       <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col p-4 sm:p-8 font-sans">
         <div className="max-w-3xl mx-auto w-full mb-6">
@@ -182,13 +193,17 @@ export default function CertificateVerifyPage() {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-bold text-white">Credential Record: {certData.status}</h1>
+                  <h1 className="text-lg font-bold text-white">
+                    {isTampered ? 'Cryptographic Verification Failed' : `Credential Record: ${certData.status}`}
+                  </h1>
                   <Badge variant="rose" className="text-[10px] uppercase font-mono">
-                    {certData.status}
+                    {isTampered ? 'INVALID / TAMPERED' : certData.status}
                   </Badge>
                 </div>
                 <p className="text-xs text-rose-300/80 mt-0.5">
-                  {isRevoked
+                  {isTampered
+                    ? 'This credential record failed cryptographic signature verification or may have been modified.'
+                    : isRevoked
                     ? 'This certificate has been formally revoked by NetVision and is no longer valid.'
                     : 'This certificate record is marked as inactive or expired in the public registry.'}
                 </p>
@@ -216,10 +231,10 @@ export default function CertificateVerifyPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant="neutral" className="font-mono text-xs">
-                  {certData.certificationCode}
+                  {certData.certificationCode || 'NV-SPECIALIST'}
                 </Badge>
                 <Badge variant="rose" className="font-mono text-xs">
-                  {certData.status}
+                  {isTampered ? 'TAMPERED' : certData.status}
                 </Badge>
               </div>
             </div>
@@ -261,15 +276,17 @@ export default function CertificateVerifyPage() {
                 <ShieldAlert className="w-5 h-5 text-rose-400" />
                 <div>
                   <span className="text-[10px] font-mono text-zinc-500 uppercase block">Verification Status</span>
-                  <span className="text-sm font-bold text-rose-400">{certData.status} — NOT ACTIVE</span>
+                  <span className="text-sm font-bold text-rose-400">
+                    {isTampered ? 'INVALID SIGNATURE — TAMPERED' : `${certData.status} — NOT ACTIVE`}
+                  </span>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-zinc-800">
-              <Link href="/certificates" className="flex-1 sm:flex-none">
+              <Link href="/" className="flex-1 sm:flex-none">
                 <Button variant="secondary" className="w-full">
-                  Browse Certifications
+                  Return to NetVision Home
                 </Button>
               </Link>
               <Link href="/courses" className="flex-1 sm:flex-none">
@@ -335,12 +352,12 @@ export default function CertificateVerifyPage() {
                 Certification Program
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-white">
-                {certData.certificationTitle || certData.courseTitle || 'NetVision Certified Network Professional'}
+                {certData.certificationTitle || certData.courseTitle || 'NetVision Certified Specialist'}
               </h2>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="cyan" className="font-mono text-xs">
-                {certData.certificationCode || 'NV-NET'}
+                {certData.certificationCode || 'NV-SPECIALIST'}
               </Badge>
               {certData.grade && (
                 <Badge variant="purple" className="font-mono text-xs">

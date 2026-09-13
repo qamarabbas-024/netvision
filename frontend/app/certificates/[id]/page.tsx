@@ -220,11 +220,6 @@ export default function CertificateDetailPage() {
 
   return (
     <div className="min-h-screen surface-0 text-[#f4f5f7] flex flex-col justify-between p-4 sm:p-8 font-sans print:p-0 print:bg-white print:text-black">
-      {/* Privacy meta: prevent search engines from indexing authenticated detail view */}
-      <head>
-        <meta name="robots" content="noindex, nofollow" />
-      </head>
-
       {/* Top Navigation & Action Controls */}
       <div className="max-w-4xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8 print:hidden">
         <Link
