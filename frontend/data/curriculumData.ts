@@ -31,7 +31,7 @@ export const CURRICULUM_STEPS: CurriculumStep[] = [
       'Comprehensive 120-minute timed capstone exam',
       'Enterprise multi-layer datacenter incident recovery',
       'Wireshark packet capture stream dissection',
-      'Cryptographically verified public credential ledger',
+      'Cryptographically verified public credential registry',
     ],
     duration: '120-Min Exam',
     labsCount: 1,

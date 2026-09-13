@@ -25,7 +25,7 @@ export const FAQSection: React.FC = () => {
     {
       question: 'Are certificates cryptographically verifiable?',
       answer:
-        'Yes. Every awarded certificate includes a tamper-proof cryptographic SHA-256 verification hash and public key signature that employers can authenticate directly on LinkedIn or our verification ledger.',
+        'Yes. Every awarded certificate includes a tamper-proof cryptographic SHA-256 verification hash and public key signature that employers can authenticate directly on LinkedIn or our verification registry.',
     },
   ];
 
