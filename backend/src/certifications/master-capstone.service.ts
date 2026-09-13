@@ -484,4 +484,68 @@ export class MasterCapstoneService {
       result: resultMetadata,
     };
   }
+
+  /**
+   * Server-authoritative retrieval of candidate's latest Capstone attempt and cooldown status.
+   * Enables seamless session restoration on page refresh / return navigation without client score tampering.
+   */
+  async getLatestCapstoneAttempt(userId: string) {
+    if (!userId) {
+      throw new BadRequestException('User ID is required.');
+    }
+
+    const latestAttempt = await this.prisma.examAttempt.findFirst({
+      where: {
+        userId,
+        certificationCode: CAPSTONE_CONFIG.certificationCode,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const recentAttempts = await this.prisma.examAttempt.findMany({
+      where: {
+        userId,
+        certificationCode: CAPSTONE_CONFIG.certificationCode,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    });
+
+    let cooldownInfo: {
+      inCooldown: boolean;
+      cooldownEndsAt: string | null;
+      remainingSeconds: number;
+    } = { inCooldown: false, cooldownEndsAt: null, remainingSeconds: 0 };
+
+    if (latestAttempt && latestAttempt.status === ExamAttemptStatus.FAILED) {
+      const failedCount = recentAttempts.filter((a) => a.status === ExamAttemptStatus.FAILED).length;
+      const isFirstFailure = failedCount === 1;
+      const cooldownSec = isFirstFailure
+        ? CAPSTONE_CONFIG.cooldownFirstFailureSeconds
+        : CAPSTONE_CONFIG.cooldownSubsequentFailureSeconds;
+
+      const cooldownEnds = new Date(new Date(latestAttempt.updatedAt).getTime() + cooldownSec * 1000);
+      const now = new Date();
+      if (now < cooldownEnds) {
+        cooldownInfo = {
+          inCooldown: true,
+          cooldownEndsAt: cooldownEnds.toISOString(),
+          remainingSeconds: Math.max(0, Math.floor((cooldownEnds.getTime() - now.getTime()) / 1000)),
+        };
+      }
+    }
+
+    if (!latestAttempt) {
+      return {
+        attempt: null,
+        cooldownInfo,
+      };
+    }
+
+    const attemptStatus = await this.getCapstoneAttemptStatus(userId, latestAttempt.id);
+    return {
+      attempt: attemptStatus,
+      cooldownInfo,
+    };
+  }
 }

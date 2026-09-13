@@ -491,6 +491,22 @@ export async function startCapstoneAttemptApi(): Promise<CapstoneAttemptSessionD
   });
 }
 
+export interface CapstoneLatestAttemptResponse {
+  attempt: CapstoneAttemptSessionDto | null;
+  cooldownInfo: {
+    inCooldown: boolean;
+    cooldownEndsAt: string | null;
+    remainingSeconds: number;
+  };
+}
+
+/**
+ * Retrieves the candidate's latest Master Capstone attempt and authoritative cooldown status.
+ */
+export async function getLatestCapstoneAttemptApi(): Promise<CapstoneLatestAttemptResponse> {
+  return await fetchApi<CapstoneLatestAttemptResponse>('/certifications/capstone/my-latest-attempt');
+}
+
 /**
  * Retrieves active Master Capstone examination attempt status with server-calculated remaining seconds.
  */

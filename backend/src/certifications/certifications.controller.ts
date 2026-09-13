@@ -89,6 +89,13 @@ export class CertificationsController {
     return this.capstoneService.startCapstoneAttempt(req.user.id);
   }
 
+  @ApiOperation({ summary: 'Get latest Master Capstone examination attempt and server-authoritative cooldown status' })
+  @UseGuards(JwtAuthGuard)
+  @Get('certifications/capstone/my-latest-attempt')
+  async getLatestCapstoneAttempt(@Req() req: any) {
+    return this.capstoneService.getLatestCapstoneAttempt(req.user.id);
+  }
+
   @ApiOperation({ summary: 'Get active Master Capstone examination status with server-side time tracking' })
   @UseGuards(JwtAuthGuard)
   @Get('certifications/capstone/:attemptId')
