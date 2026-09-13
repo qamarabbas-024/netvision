@@ -26,6 +26,7 @@ import {
   FileCheck2,
 } from 'lucide-react';
 import { getCertificateByIdApi, downloadCertificatePdfApi } from '@/lib/api';
+import { CANONICAL_CREDENTIALS } from '@netvision/shared';
 
 export default function CertificateDetailPage() {
   const params = useParams();
@@ -183,13 +184,29 @@ export default function CertificateDetailPage() {
 
   // Authoritative certificate fields (Strict exclusion of private fields: no verificationCode, userId, email, passwordHash)
   const candidateName = certData.recipientName || 'Verified Candidate';
-  const certificationTitle = certData.certificationTitle || certData.courseTitle || 'NetVision Certified Network Professional';
   const certificationCode = certData.certificationCode || 'NV-NET';
   const credentialId = certData.credentialId || certData.code || certId;
+  const canonicalCred = CANONICAL_CREDENTIALS.find((c) => c.code === certificationCode);
+  const isMastery = certificationCode === 'NV-NET-MASTERY' || !!canonicalCred?.isMastery;
+  const certificationTitle =
+    certData.certificationTitle ||
+    canonicalCred?.title ||
+    certData.courseTitle ||
+    'NetVision Certified Network Professional';
   const skillsAssessed: string[] = Array.isArray(certData.skillsAssessed) ? certData.skillsAssessed : [];
   const status = certData.status || 'ACTIVE';
   const isRevoked = status === 'REVOKED';
   const isInactive = status !== 'ACTIVE';
+  const ribbonText = isRevoked
+    ? 'CREDENTIAL REVOKED'
+    : isInactive
+    ? `CREDENTIAL ${status}`
+    : isMastery
+    ? 'OFFICIAL CERTIFICATE OF MASTERY'
+    : 'OFFICIAL SPECIALIST CERTIFICATION';
+  const tierBadgeText = isMastery
+    ? 'PINNACLE MASTERY TIER'
+    : `${canonicalCred?.level || 'SPECIALIST'} CERTIFICATION TIER`;
   const issueDateFormatted = certData.issuedAt
     ? new Date(certData.issuedAt).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -304,9 +321,15 @@ export default function CertificateDetailPage() {
         </div>
 
         {/* Status Tag */}
-        <div className="mb-6 flex items-center gap-2">
+        <div className="mb-6 flex flex-wrap items-center gap-2">
           <Badge variant="cyan" className="font-mono text-xs">
             {certificationCode}
+          </Badge>
+          <Badge
+            variant={isMastery ? 'amber' : 'blue'}
+            className="font-mono text-xs font-bold"
+          >
+            {tierBadgeText}
           </Badge>
           <div
             className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider font-bold ${
@@ -316,13 +339,7 @@ export default function CertificateDetailPage() {
             }`}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
-            <span>
-              {isRevoked
-                ? 'CREDENTIAL REVOKED'
-                : isInactive
-                ? `CREDENTIAL ${status}`
-                : 'OFFICIAL CERTIFICATE OF MASTERY'}
-            </span>
+            <span>{ribbonText}</span>
           </div>
         </div>
 
@@ -393,7 +410,7 @@ export default function CertificateDetailPage() {
 
           <div className="text-center sm:text-right">
             <span className="block text-[#646c7d] text-[9px] print:text-zinc-500">CREDENTIAL ID</span>
-            <span className="text-[#38bdf8] font-bold print:text-black">{credentialId}</span>
+            <span className="text-[#38bdf8] font-bold print:text-black break-all">{credentialId}</span>
           </div>
         </div>
       </div>
