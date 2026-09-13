@@ -12,6 +12,7 @@ import {
   User,
   Settings,
   ShieldAlert,
+  ShieldCheck,
   Wrench,
   LogOut,
   X,
@@ -29,6 +30,7 @@ export interface SidebarItem {
 export const sidebarItems: SidebarItem[] = [
   { label: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: 'Course Catalog', href: '/courses', icon: <BookOpen className="w-4 h-4" /> },
+  { label: 'Certifications', href: '/certificates', icon: <ShieldCheck className="w-4 h-4" /> },
   { label: 'Troubleshooting', href: '/troubleshooting', icon: <Wrench className="w-4 h-4" /> },
   { label: 'Command Library', href: '/commands', icon: <Cpu className="w-4 h-4" /> },
   { label: 'Practical Labs', href: '/labs', icon: <Box className="w-4 h-4" /> },
@@ -70,7 +72,11 @@ export const AppSidebar: React.FC = () => {
             NAVIGATION
           </span>
           {filteredItems.map((item) => {
-            const isActive = !!pathname && (pathname === item.href || pathname.startsWith(item.href + '/'));
+            const isActive =
+              !!pathname &&
+              (pathname === item.href ||
+                pathname.startsWith(item.href + '/') ||
+                (item.href === '/certificates' && pathname.startsWith('/certifications')));
             return (
               <Link
                 key={item.href}
@@ -154,7 +160,11 @@ export const MobileSidebarDrawer: React.FC<{ isOpen: boolean; onClose: () => voi
               NAVIGATION
             </span>
             {filteredItems.map((item) => {
-              const isActive = !!pathname && (pathname === item.href || pathname.startsWith(item.href + '/'));
+              const isActive =
+                !!pathname &&
+                (pathname === item.href ||
+                  pathname.startsWith(item.href + '/') ||
+                  (item.href === '/certificates' && pathname.startsWith('/certifications')));
               return (
                 <Link
                   key={item.href}
