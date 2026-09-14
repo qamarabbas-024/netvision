@@ -344,8 +344,8 @@ export class MasterCapstoneService {
     const now = new Date();
     // Server-side timing enforcement: auto-expire if past expiresAt
     if (attempt.status === ExamAttemptStatus.IN_PROGRESS && now > new Date(attempt.expiresAt)) {
-      await this.prisma.examAttempt.update({
-        where: { id: attemptId },
+      await this.prisma.examAttempt.updateMany({
+        where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
         data: { status: ExamAttemptStatus.EXPIRED },
       });
       attempt.status = ExamAttemptStatus.EXPIRED;
@@ -383,12 +383,13 @@ export class MasterCapstoneService {
   /**
    * Submits Master Capstone attempt for authoritative server-side grading.
    *
-   * CRITICAL SECURITY IMPLEMENTATION:
-   * 1. The server loads the attempt's snapshotted assessment version.
-   * 2. The server compares candidate responses against the authoritative rubric/keys.
-   * 3. Any client-supplied componentScores, finalScore, passed, or weights are STRICTLY IGNORED.
-   * 4. Overall score and passed status are computed mathematically and persisted immutably.
-   * 5. Gated against expired submissions and protected with atomic CAS against race conditions.
+   * CRITICAL SECURITY & TRANSACTIONAL INTEGRITY:
+   * 1. Executed entirely within an atomic prisma.$transaction block with timeout protection.
+   * 2. The server loads the attempt's snapshotted assessment version.
+   * 3. The server compares candidate responses against the authoritative rubric/keys.
+   * 4. Any client-supplied componentScores, finalScore, passed, or weights are STRICTLY IGNORED.
+   * 5. Overall score and passed status are computed mathematically and persisted immutably.
+   * 6. Gated against expired submissions and protected with atomic CAS against race conditions.
    */
   async submitCapstoneAttempt(userId: string, attemptId: string, payload: CandidateCapstoneSubmission) {
     if (!userId || !attemptId) {
@@ -451,38 +452,44 @@ export class MasterCapstoneService {
       durationSecondsUsed: Math.floor((now.getTime() - new Date(attempt.startedAt).getTime()) / 1000),
     };
 
-    // Atomic CAS update guarantees that exactly ONE parallel submission can succeed
-    const updateResult = await this.prisma.examAttempt.updateMany({
-      where: {
-        id: attemptId,
-        status: ExamAttemptStatus.IN_PROGRESS,
-      },
-      data: {
-        status: newStatus,
-        passed,
-        score: overallScore,
-        submittedAt: now,
-        resultMetadataJson: resultMetadata as any,
-      },
-    });
+    // Atomic transaction boundary: serializes parallel submissions with CAS token
+    return await this.prisma.$transaction(
+      async (tx) => {
+        // Atomic CAS update guarantees that exactly ONE parallel submission can succeed
+        const updateResult = await tx.examAttempt.updateMany({
+          where: {
+            id: attemptId,
+            status: ExamAttemptStatus.IN_PROGRESS,
+          },
+          data: {
+            status: newStatus,
+            passed,
+            score: overallScore,
+            submittedAt: now,
+            resultMetadataJson: resultMetadata as any,
+          },
+        });
 
-    if (updateResult.count === 0) {
-      throw new BadRequestException('Exam attempt has already been submitted or is no longer in progress.');
-    }
+        if (updateResult.count === 0) {
+          throw new BadRequestException('Exam attempt has already been submitted or is no longer in progress.');
+        }
 
-    this.logger.log(
-      `[Master Capstone] Server-graded attempt [${attempt.id}] (v${assessmentVersion}) for user ${userId}: Score=${overallScore}%, Passed=${passed}`
+        this.logger.log(
+          `[Master Capstone] Server-graded attempt [${attempt.id}] (v${assessmentVersion}) for user ${userId}: Score=${overallScore}%, Passed=${passed}`
+        );
+
+        return {
+          attemptId: attempt.id,
+          examCode: CAPSTONE_CONFIG.examCode,
+          status: newStatus,
+          score: overallScore,
+          passed,
+          submittedAt: now,
+          result: resultMetadata,
+        };
+      },
+      { timeout: 15000 }
     );
-
-    return {
-      attemptId: attempt.id,
-      examCode: CAPSTONE_CONFIG.examCode,
-      status: newStatus,
-      score: overallScore,
-      passed,
-      submittedAt: now,
-      result: resultMetadata,
-    };
   }
 
   /**
