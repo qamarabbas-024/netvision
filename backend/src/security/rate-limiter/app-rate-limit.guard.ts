@@ -128,6 +128,7 @@ export class AppRateLimitGuard implements CanActivate {
       url.includes('/auth/register') ||
       url.includes('/auth/verify-otp') ||
       url.includes('/auth/resend-otp') ||
+      url.includes('/auth/refresh') ||
       url.includes('/certificates/verify') ||
       url.includes('/certificates/')
     ) {

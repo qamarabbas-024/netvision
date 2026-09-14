@@ -37,6 +37,7 @@
     "test:drop8": "ts-node scripts/test-drop8-capstone-grading.ts",
     "test:drop9": "ts-node scripts/test-drop9-certification-integrity.ts",
     "test:drop:d": "ts-node scripts/test-drop-d-c04-curriculum.ts",
+    "test:drop:d:auth": "ts-node scripts/test-drop-d-auth-hardening.ts",
     "test:drop:e": "ts-node scripts/test-drop-e-curriculum-completeness.ts",
     "test:drop:f": "ts-node scripts/test-drop-f-transaction-hardening.ts",
     "test:drop:g": "ts-node scripts/test-drop-g-security-sanitization.ts",

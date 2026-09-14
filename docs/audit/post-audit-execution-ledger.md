@@ -26,6 +26,11 @@ This ledger tracks every forensic finding, root cause, implementation fix, autom
 | **A11Y-001** | Modal focus trapping missing, absence of ARIA live regions for CLI terminals/quizzes, and low contrast | **P2** | YES | Modals lacked Tab boundary focus trapping and dialog roles; dynamic terminal and quiz outputs lacked aria-live regions | Implemented focus trapping in `Modal.tsx`, added `aria-live="polite"` and `role="region"` to terminals, and boosted text contrast to >6.5:1 | `frontend/__tests__/dropIAccessibilityAndContrast.test.ts` | Dialog roles, focus loop, live regions, and contrast verified; 8/8 suites pass | **VERIFIED FIXED** |
 | **UI-001** | Horizontal document overflow on 320px–375px mobile viewports from long hashes and crowded Topbar actions | **P2** | YES | Missing `break-all` on credential strings and absence of responsive hiding (`hidden sm:flex`) on auxiliary Topbar controls | Added `break-all` to credential ID views, clamped auxiliary Topbar actions to `sm:`, and verified drawer/modal/codeblock scroll constraints | `frontend/__tests__/dropJMobileResponsiveness.test.ts` | 5/5 responsive checks passed; 9/9 frontend suites green | **VERIFIED FIXED** |
 | **PERF-001** | Initial bundle bloat from synchronous 3D WebGL mesh loading and un-split modal studios | **P2** | YES | Three.js and heavy visual studios statically imported on homepage, simulations, and sandbox routes | Applied `next/dynamic` lazy-loading to 3D canvas, code-split 6 modal studios, hardened vector PDF DOM cleanup, and added font fallbacks | `frontend/__tests__/dropKPerformanceAndPdf.test.ts` | 5/5 performance & PDF checks passed; 10/10 frontend suites green | **VERIFIED FIXED** |
+| **SEC-004** | 7-day default JWT lifespan exposes extended window of vulnerability | **P1** | YES | `JWT_EXPIRATION` defaulted to `'7d'` in `auth.module.ts` without short-lived access token enforcement | Shortened default access token lifespan to `15m` (900s) and passed explicit expiration on token generation | `backend/scripts/test-drop-d-auth-hardening.ts` | Exp - iat strictly equals 900s; verified | **VERIFIED FIXED** |
+| **SEC-005** | Plain localStorage token storage susceptible to XSS exfiltration | **P2** | YES | Client stored bearer tokens exclusively in `localStorage` | Dual-transport architecture: set HTTP-only, secure cookies (`netvision_auth_token`, `netvision_refresh_token`) alongside JSON responses | `backend/scripts/test-drop-d-auth-hardening.ts` | HTTP-only cookies verified on login/refresh; strategy reads cookies | **VERIFIED FIXED** |
+| **SEC-006** | Absence of refresh token rotation forcing architectural reliance on long-lived tokens | **P1** | YES | Single access token generated with no refresh tokens or `/auth/refresh` endpoint | Implemented 64-char crypto refresh tokens, rotation with reuse detection, and family invalidation via `TokenRevocationService` | `backend/scripts/test-drop-d-auth-hardening.ts` | Rotation changes token; replay attack revokes entire family | **VERIFIED FIXED** |
+| **SEC-007** | Absence of server-side logout invalidation and stolen-token rejection | **P1** | YES | `logout` only cleared response cookies while backend stateless JWTs remained valid until expiry | Implemented in-memory SHA-256 token revocation registry & session cutoffs; `JwtStrategy` rejects revoked tokens with 401 | `backend/scripts/test-drop-d-auth-hardening.ts` | Stolen token blocked with UnauthorizedException after logout | **VERIFIED FIXED** |
+| **SEC-008** | High-risk endpoints (refresh, Capstone start/submit, certificate download) vulnerable to abusive burst traffic | **P1** | YES | High-resource routes lacked specialized rate limit tiers | Added `/auth/refresh` to `AUTH` tier (10 req/min) and Capstone start/submit & certificate download to `@UserRateLimit()` (30 req/min) | `backend/scripts/test-drop-d-auth-hardening.ts` | Rate limit tier resolution and decorators verified; IDOR enforced | **VERIFIED FIXED** |
 
 ---
 
@@ -35,6 +40,7 @@ This ledger tracks every forensic finding, root cause, implementation fix, autom
 - **Drop B (Legal, Compliance & Trust)**: COMPLETED (`35d4b69` / `dee7de5`)
 - **Drop C (Public Browsing Unlock & SEO)**: COMPLETED (`60be540` / `94fa68c`)
 - **Drop D (NV-C04 Benchmark Seeding)**: COMPLETED (`3c115b6` / `c320f9a`)
+- **Drop D Security (Auth, Session Security & API Abuse)**: COMPLETED
 - **Drop E (Curriculum Completeness & DB Warmup)**: COMPLETED (`47b8f47` / `5ac49da`)
 - **Drop F (Master Capstone Transaction Hardening)**: COMPLETED (`19da2c0` / `16c7339`)
 - **Drop G (Security Sanitization & Rate Limiting)**: COMPLETED (`1d3e46a`)
@@ -44,7 +50,7 @@ This ledger tracks every forensic finding, root cause, implementation fix, autom
 - **Drop K (Performance & PDF Optimization)**: COMPLETED (`d49a67d`)
 - **Drop L (End-to-End System Verification & Master Report)**: COMPLETED
 
-**All 22 Findings Verified Fixed. 0 Regressions. Monorepo Quality Gate: GREEN.**
+**All 27 Findings Verified Fixed. 0 Regressions. Monorepo Quality Gate: GREEN.**
 
 
 

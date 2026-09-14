@@ -1,20 +1,24 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Optional } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../database/prisma.service';
+import { TokenRevocationService } from './token-revocation.service';
 
 export interface JwtPayload {
   sub: string;
   email: string;
   role: string;
+  iat?: number;
+  exp?: number;
 }
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    @Optional() private readonly tokenRevocationService?: TokenRevocationService
   ) {
     const isProd = configService.get<string>('NODE_ENV') === 'production';
     const secret = configService.get<string>('JWT_SECRET');
@@ -49,10 +53,37 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ]),
       ignoreExpiration: false,
       secretOrKey: secret || 'super_secret_netvision_jwt_key',
+      passReqToCallback: true,
     });
   }
 
-  async validate(payload: JwtPayload) {
+  async validate(reqOrPayload: any, maybePayload?: any) {
+    let req: any;
+    let payload: JwtPayload;
+
+    if (maybePayload) {
+      req = reqOrPayload;
+      payload = maybePayload;
+    } else {
+      payload = reqOrPayload;
+      req = null;
+    }
+
+    // 1. Check server-side token revocation and logout invalidation
+    if (req) {
+      const rawToken = ExtractJwt.fromExtractors([
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+        (r: any) => (r && r.cookies ? r.cookies['netvision_auth_token'] || r.cookies['accessToken'] : null),
+      ])(req);
+
+      if (rawToken && this.tokenRevocationService?.isRevoked(rawToken, payload)) {
+        throw new UnauthorizedException('Token has been revoked or session terminated.');
+      }
+    } else if (payload && this.tokenRevocationService?.isRevoked('', payload)) {
+      throw new UnauthorizedException('Token has been revoked or session terminated.');
+    }
+
+    // 2. Validate user identity in database
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
     });

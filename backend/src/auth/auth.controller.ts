@@ -46,9 +46,84 @@ export class AuthController {
   @AuthRateLimit()
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() dto: LoginDto, @Req() req: any) {
+  async login(
+    @Body() dto: LoginDto,
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response
+  ) {
     const clientIp = req.ips?.[0] || req.ip || '127.0.0.1';
-    return this.authService.login(dto, clientIp);
+    const result = await this.authService.login(dto, clientIp);
+    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
+
+    if (result.accessToken) {
+      res.cookie('netvision_auth_token', result.accessToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        maxAge: 15 * 60 * 1000, // 15 minutes
+        path: '/',
+      });
+      res.cookie('accessToken', result.accessToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        maxAge: 15 * 60 * 1000,
+        path: '/',
+      });
+    }
+
+    if (result.refreshToken) {
+      res.cookie('netvision_refresh_token', result.refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        path: '/',
+      });
+    }
+
+    return result;
+  }
+
+  @AuthRateLimit()
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  async refresh(
+    @Body() body: { refreshToken?: string },
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const rawRefreshToken =
+      body?.refreshToken ||
+      req.cookies?.['netvision_refresh_token'] ||
+      req.cookies?.['refreshToken'];
+
+    const result = await this.authService.refreshTokens(rawRefreshToken);
+    const isProd = this.configService.get<string>('NODE_ENV') === 'production';
+
+    res.cookie('netvision_auth_token', result.accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+      path: '/',
+    });
+    res.cookie('accessToken', result.accessToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+      path: '/',
+    });
+    res.cookie('netvision_refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    return result;
   }
 
   @StrictAuthRateLimit()
@@ -79,6 +154,7 @@ export class AuthController {
   async googleAuthCallback(@Req() req: any, @Res() res: Response) {
     const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
     const token = req.user?.accessToken;
+    const refreshToken = req.user?.refreshToken;
     if (!token) {
       return res.redirect(`${frontendUrl}/login?error=OAuthAuthenticationFailed`);
     }
@@ -88,9 +164,18 @@ export class AuthController {
       httpOnly: true,
       secure: isProd,
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 15 * 60 * 1000, // 15 minutes
       path: '/',
     });
+    if (refreshToken) {
+      res.cookie('netvision_refresh_token', refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
+      });
+    }
 
     return res.redirect(`${frontendUrl}/auth/callback`);
   }
@@ -107,6 +192,7 @@ export class AuthController {
   async githubAuthCallback(@Req() req: any, @Res() res: Response) {
     const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
     const token = req.user?.accessToken;
+    const refreshToken = req.user?.refreshToken;
     if (!token) {
       return res.redirect(`${frontendUrl}/login?error=OAuthAuthenticationFailed`);
     }
@@ -116,19 +202,61 @@ export class AuthController {
       httpOnly: true,
       secure: isProd,
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 15 * 60 * 1000, // 15 minutes
       path: '/',
     });
+    if (refreshToken) {
+      res.cookie('netvision_refresh_token', refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
+      });
+    }
 
     return res.redirect(`${frontendUrl}/auth/callback`);
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('netvision_auth_token', { path: '/' });
-    res.clearCookie('accessToken', { path: '/' });
-    return { message: 'Logged out successfully.' };
+  async logout(@Req() reqOrRes: any, @Res({ passthrough: true }) maybeRes?: Response) {
+    let req: any = null;
+    let res: Response = reqOrRes;
+
+    if (maybeRes) {
+      req = reqOrRes;
+      res = maybeRes;
+    }
+
+    let rawAccessToken = '';
+    const authHeader = req?.headers?.authorization || req?.headers?.Authorization;
+    if (typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
+      rawAccessToken = authHeader.substring(7).trim();
+    } else if (req?.cookies) {
+      rawAccessToken = req.cookies['netvision_auth_token'] || req.cookies['accessToken'] || '';
+    }
+
+    const rawRefreshToken =
+      req?.body?.refreshToken ||
+      req?.cookies?.['netvision_refresh_token'] ||
+      req?.cookies?.['refreshToken'] ||
+      '';
+
+    const userId = req?.user?.id || req?.user?.sub;
+
+    if (this.authService?.invalidateSession) {
+      await this.authService.invalidateSession(rawAccessToken, rawRefreshToken, userId);
+    }
+
+    if (res && typeof res.clearCookie === 'function') {
+      res.clearCookie('netvision_auth_token', { path: '/' });
+      res.clearCookie('accessToken', { path: '/' });
+      res.clearCookie('netvision_refresh_token', { path: '/' });
+      res.clearCookie('refreshToken', { path: '/' });
+    }
+
+    return { message: 'Logged out successfully. Session invalidated on server.' };
   }
 
   @UseGuards(JwtAuthGuard)

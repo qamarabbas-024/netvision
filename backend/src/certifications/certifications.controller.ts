@@ -18,7 +18,7 @@ import { StartExamAttemptDto } from './dto/start-exam-attempt.dto';
 import { SubmitExamAttemptDto } from './dto/submit-exam-attempt.dto';
 import { SubmitCapstoneAttemptDto } from './dto/submit-capstone-attempt.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { AuthRateLimit } from '../security/rate-limiter/rate-limit.decorators';
+import { AuthRateLimit, UserRateLimit } from '../security/rate-limiter/rate-limit.decorators';
 import { ExamType } from '@prisma/client';
 
 
@@ -84,6 +84,7 @@ export class CertificationsController {
   }
 
   @ApiOperation({ summary: 'Start a timed 120-minute Master Capstone examination attempt' })
+  @UserRateLimit()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('certifications/capstone/start')
@@ -109,6 +110,7 @@ export class CertificationsController {
   }
 
   @ApiOperation({ summary: 'Submit Master Capstone attempt for server-side evaluation (40/35/25 scoring)' })
+  @UserRateLimit()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('certifications/capstone/:attemptId/submit')
@@ -246,6 +248,7 @@ export class CertificationsController {
   }
 
   @ApiOperation({ summary: 'Download official certificate PDF document (Authorized Owner Only)' })
+  @UserRateLimit()
   @UseGuards(JwtAuthGuard)
   @Get('certificates/:id/download')
   async downloadCertificate(

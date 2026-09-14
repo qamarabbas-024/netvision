@@ -12,6 +12,8 @@ import { MonitoringModule } from '../monitoring/monitoring.module';
 
 import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
 
+import { TokenRevocationService } from './token-revocation.service';
+
 @Module({
   imports: [
     PassportModule,
@@ -43,14 +45,21 @@ import { OptionalJwtAuthGuard } from './guards/optional-jwt-auth.guard';
         return {
           secret: secret || 'super_secret_netvision_jwt_key',
           signOptions: {
-            expiresIn: configService.get<string>('JWT_EXPIRATION', '7d') as any,
+            expiresIn: configService.get<string>('JWT_EXPIRATION', '15m') as any,
           },
         };
       },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy, GithubStrategy, OptionalJwtAuthGuard],
-  exports: [AuthService, OptionalJwtAuthGuard],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    GoogleStrategy,
+    GithubStrategy,
+    OptionalJwtAuthGuard,
+    TokenRevocationService,
+  ],
+  exports: [AuthService, OptionalJwtAuthGuard, TokenRevocationService],
 })
 export class AuthModule {}

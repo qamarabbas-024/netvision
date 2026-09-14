@@ -22,6 +22,8 @@ import { ResendOtpDto } from './dto/resend-otp.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
+import { TokenRevocationService } from './token-revocation.service';
+
 export interface RegisterResponse {
   message: string;
   email: string;
@@ -48,7 +50,8 @@ export class AuthService {
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
     @Optional() private readonly rateLimiterService?: RateLimiterService,
-    @Optional() private readonly monitoringService?: MonitoringService
+    @Optional() private readonly monitoringService?: MonitoringService,
+    @Optional() private readonly tokenRevocationService?: TokenRevocationService
   ) {}
 
   getDevOtpForTest(email: string): string | null {
@@ -551,7 +554,68 @@ export class AuthService {
 
   private async generateTokens(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };
-    const accessToken = await this.jwtService.signAsync(payload);
-    return { accessToken };
+    const expiresIn = this.configService.get<string>('JWT_EXPIRATION', '15m');
+    const accessToken = await this.jwtService.signAsync(payload, { expiresIn } as any);
+    const rawRefreshToken = crypto.randomBytes(32).toString('hex');
+    const familyId = crypto.randomUUID();
+    this.tokenRevocationService?.registerRefreshToken(userId, rawRefreshToken, familyId);
+    return { accessToken, refreshToken: rawRefreshToken };
+  }
+
+  async refreshTokens(rawRefreshToken: string) {
+    if (!rawRefreshToken || typeof rawRefreshToken !== 'string') {
+      throw new UnauthorizedException('Refresh token is required.');
+    }
+
+    const rawNewRefreshToken = crypto.randomBytes(32).toString('hex');
+    const rotationResult = this.tokenRevocationService?.rotateRefreshToken(
+      rawRefreshToken,
+      rawNewRefreshToken
+    );
+
+    if (!rotationResult) {
+      throw new UnauthorizedException('Invalid, expired, or revoked refresh token.');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: rotationResult.userId },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User session no longer exists.');
+    }
+
+    if (this.isEmailVerificationEnabled() && !user.isVerified) {
+      throw new UnauthorizedException('User account is unverified.');
+    }
+
+    const payload = { sub: user.id, email: user.email, role: user.role };
+    const expiresIn = this.configService.get<string>('JWT_EXPIRATION', '15m');
+    const accessToken = await this.jwtService.signAsync(payload, { expiresIn } as any);
+
+    return {
+      accessToken,
+      refreshToken: rawNewRefreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        role: user.role,
+        isVerified: user.isVerified,
+      },
+    };
+  }
+
+  async invalidateSession(rawAccessToken?: string, rawRefreshToken?: string, userId?: string) {
+    if (rawAccessToken) {
+      this.tokenRevocationService?.revokeToken(rawAccessToken);
+    }
+    if (rawRefreshToken) {
+      this.tokenRevocationService?.revokeToken(rawRefreshToken);
+    }
+    if (userId) {
+      this.tokenRevocationService?.revokeUserSessions(userId);
+      this.tokenRevocationService?.revokeUserRefreshTokens(userId);
+    }
   }
 }
