@@ -68,7 +68,7 @@ export class VectorPdfExportEngine {
     <rect x="0" y="0" width="400" height="90" rx="12" fill="#10131d" stroke="#262c42" stroke-width="1" />
     <text x="20" y="30" fill="#94a3b8" font-size="11" font-family="monospace">CRYPTOGRAPHIC AUDIT SIGNATURE</text>
     <text x="20" y="55" fill="#00f0ff" font-size="12" font-family="monospace" font-weight="bold">${payload.sha256Signature}</text>
-    <text x="20" y="75" fill="#64748b" font-size="10" font-family="monospace">SHA-256 Tamper-Proof On-Chain Hash</text>
+    <text x="20" y="75" fill="#64748b" font-size="10" font-family="monospace">SHA-256 Registry Verification Digest</text>
   </g>
 
   <g transform="translate(760, 600)">

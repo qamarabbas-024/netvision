@@ -37,7 +37,7 @@ export const FooterSection: React.FC = () => {
             </Link>
 
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-              Learn computer networking by seeing how it works. Free interactive 3D WebGL observatory, deterministic protocol packet simulators, and verified on-chain credentials.
+              Learn computer networking by seeing how it works. Interactive 3D WebGL observatory, deterministic protocol packet simulators, and verified digital credentials.
             </p>
 
             {/* Social Links with Hover Glow */}
@@ -149,20 +149,26 @@ export const FooterSection: React.FC = () => {
         </div>
 
         {/* Bottom Bar: Copyright, System Status & Legal */}
-        <div className="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500 font-mono">
-          <div className="flex items-center gap-2">
-            <span>© 2026 NetVision Platform. Open-source educational project.</span>
+        <div className="pt-8 border-t border-slate-800/80 space-y-4">
+          <div className="text-[11px] text-slate-500 leading-relaxed max-w-4xl">
+            <span className="font-semibold text-slate-400">Educational Disclaimer:</span> NetVision is an independent educational training platform and autonomous certification registry. NetVision is not affiliated with, sponsored by, authorized by, or endorsed by Cisco Systems, Inc., CompTIA, or any other commercial vendor or certification organization. All product trademarks and registered marks belong to their respective owners.
           </div>
 
-          <div className="flex items-center gap-2 text-emerald-400">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>All Systems Operational</span>
-          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500 font-mono pt-2 border-t border-slate-800/40">
+            <div className="flex items-center gap-2">
+              <span>© 2026 NetVision Platform. Open-source educational project.</span>
+            </div>
 
-          <div className="flex gap-5">
-            <Link href="/docs" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
-            <Link href="/docs" className="hover:text-slate-400 transition-colors">Terms of Service</Link>
-            <Link href="/docs/architecture" className="hover:text-slate-400 transition-colors">Security Specs</Link>
+            <div className="flex items-center gap-2 text-emerald-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>All Systems Operational</span>
+            </div>
+
+            <div className="flex gap-5">
+              <Link href="/privacy" className="hover:text-slate-400 transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-slate-400 transition-colors">Terms of Service</Link>
+              <Link href="/docs/architecture" className="hover:text-slate-400 transition-colors">Security Specs</Link>
+            </div>
           </div>
         </div>
 

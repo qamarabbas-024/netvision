@@ -11,7 +11,7 @@ interface CertificationSectionProps {
 export const CertificationSection: React.FC<CertificationSectionProps> = () => {
   const [showVerifiedBadge, setShowVerifiedBadge] = useState(false);
   const [copiedHash, setCopiedHash] = useState(false);
-  const certHash = '0x8F9C42A1E7B9045D813F60D29E11C4958A7308D64A5E82B63CD19F02';
+  const certHash = 'sha256:8f9c42a1e7b9045d813f60d29e11c4958a7308d64a5e82b63cd19f0298a002bc';
 
   const handleCopyHash = () => {
     navigator.clipboard.writeText(certHash);
@@ -32,7 +32,7 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
             Prove Your Competence With Cryptographic Verification
           </h2>
           <p className="text-sm sm:text-base text-slate-400 leading-relaxed font-normal">
-            NetVision certificates come with cryptographic verification codes, verifiable configuration telemetry data, and dynamic on-chain validator hashes.
+            NetVision certificates come with unique verification identifiers, verifiable configuration telemetry data, and authoritative registry integrity digests.
           </p>
         </div>
 
@@ -107,7 +107,7 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
               <div className="p-4 rounded-xl bg-[#0b1320] border border-cyan-500/40 space-y-2.5 animate-fadeIn font-mono text-xs">
                 <div className="flex items-center justify-between text-cyan-400 font-bold">
                   <span className="flex items-center gap-1.5">
-                    <Lock className="w-3.5 h-3.5 text-cyan-400" /> Cryptographic Proof Signature
+                    <Lock className="w-3.5 h-3.5 text-cyan-400" /> Registry Verification Record
                   </span>
                   <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">VALIDATED</span>
                 </div>
@@ -115,7 +115,7 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
                   {certHash}
                 </div>
                 <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-                  <span>Signer: NetVision Autonomous Root CA</span>
+                  <span>Issuer: NetVision Authoritative Certification Registry</span>
                   <button
                     onClick={handleCopyHash}
                     className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer"
@@ -191,9 +191,9 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
               <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between text-[10px] font-mono text-slate-500">
                 <div className="flex items-center gap-1.5">
                   <QrCode className="w-4 h-4 text-slate-400" />
-                  <span>Scan to verify on-chain</span>
+                  <span>Scan to verify credential</span>
                 </div>
-                <span className="text-emerald-400 font-semibold">100% Cryptographically Verified</span>
+                <span className="text-emerald-400 font-semibold">Registry Verified & Tamper-Evident</span>
               </div>
 
             </div>
