@@ -16,9 +16,10 @@
 import { PrismaClient, Role } from '@prisma/client';
 import { CertificationsService } from '../src/certifications/certifications.service';
 import { CertificationEligibilityService } from '../src/certifications/certification-eligibility.service';
+import { PrismaService } from '../src/database/prisma.service';
 import * as assert from 'assert';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaService();
 
 let passCount = 0;
 let failCount = 0;
@@ -33,7 +34,7 @@ function check(condition: boolean, message: string) {
   }
 }
 
-async function waitForDatabase(retries = 5, delayMs = 2500) {
+async function waitForDatabase(retries = 10, delayMs = 3000) {
   for (let i = 1; i <= retries; i++) {
     try {
       await prisma.$queryRaw`SELECT 1`;

@@ -24,7 +24,7 @@ function check(condition: boolean, message: string) {
   }
 }
 
-async function waitForDatabase(retries = 5, delayMs = 2500) {
+async function waitForDatabase(retries = 10, delayMs = 3000) {
   for (let i = 1; i <= retries; i++) {
     try {
       await prisma.$queryRaw`SELECT 1`;
