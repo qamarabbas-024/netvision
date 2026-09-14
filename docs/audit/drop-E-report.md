@@ -89,7 +89,8 @@ All 5 courses and 17 modules are complete and verified. Moving to Drop F to audi
 Zero risk. Test harness upgrades ensure deterministic CI and local verification runs.
 
 ## Commit SHA
-PENDING
+`47b8f47`
 
 ## Verdict
 **GREEN**
+
