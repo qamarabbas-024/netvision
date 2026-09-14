@@ -90,7 +90,19 @@ export class VectorPdfExportEngine {
     const a = document.createElement('a');
     a.href = url;
     a.download = filename.endsWith('.svg') ? filename : `${filename}.svg`;
-    a.click();
-    URL.revokeObjectURL(url);
+    a.style.display = 'none';
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        if (a.parentNode) {
+          a.parentNode.removeChild(a);
+        }
+        URL.revokeObjectURL(url);
+      }, 1500);
+    } else {
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   }
 }

@@ -5,16 +5,36 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { SandboxCanvas } from '@/components/sandbox/SandboxCanvas';
-import { MultimodalDiagramParser } from '@/components/simulation/MultimodalDiagramParser';
-import { UniversalChatHistoryImporter } from '@/components/learning/UniversalChatHistoryImporter';
-import { PdfReportStudio } from '@/components/ui/PdfReportStudio';
-import { NetworkBufferPhysicsVisualizer } from '@/components/simulation/NetworkBufferPhysicsVisualizer';
-import { AiDiagnosticCopilot } from '@/components/learning/AiDiagnosticCopilot';
-import { TopologyTemplatesModal } from '@/components/sandbox/TopologyTemplatesModal';
+import dynamic from 'next/dynamic';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Image as ImageIcon, Bot, Printer, Zap, Network, Sparkles, LayoutGrid } from 'lucide-react';
 import { TopologyTemplate } from '@/data/topologyTemplates';
+
+const MultimodalDiagramParser = dynamic(
+  () => import('@/components/simulation/MultimodalDiagramParser').then((m) => m.MultimodalDiagramParser),
+  { ssr: false }
+);
+const UniversalChatHistoryImporter = dynamic(
+  () => import('@/components/learning/UniversalChatHistoryImporter').then((m) => m.UniversalChatHistoryImporter),
+  { ssr: false }
+);
+const PdfReportStudio = dynamic(
+  () => import('@/components/ui/PdfReportStudio').then((m) => m.PdfReportStudio),
+  { ssr: false }
+);
+const NetworkBufferPhysicsVisualizer = dynamic(
+  () => import('@/components/simulation/NetworkBufferPhysicsVisualizer').then((m) => m.NetworkBufferPhysicsVisualizer),
+  { ssr: false }
+);
+const AiDiagnosticCopilot = dynamic(
+  () => import('@/components/learning/AiDiagnosticCopilot').then((m) => m.AiDiagnosticCopilot),
+  { ssr: false }
+);
+const TopologyTemplatesModal = dynamic(
+  () => import('@/components/sandbox/TopologyTemplatesModal').then((m) => m.TopologyTemplatesModal),
+  { ssr: false }
+);
 
 export default function SandboxPage() {
   const [viewTab, setViewTab] = React.useState<'sandbox' | 'physics'>('sandbox');

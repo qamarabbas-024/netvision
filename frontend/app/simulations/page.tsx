@@ -6,13 +6,24 @@ import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { SimulationEngineCanvas } from '@/components/simulation/SimulationEngineCanvas';
 import { TimeTravelPacketScrubber } from '@/components/simulation/TimeTravelPacketScrubber';
-import { MultimodalDiagramParser } from '@/components/simulation/MultimodalDiagramParser';
-import { UniversalChatHistoryImporter } from '@/components/learning/UniversalChatHistoryImporter';
-import { PdfReportStudio } from '@/components/ui/PdfReportStudio';
+import dynamic from 'next/dynamic';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Cpu, ShieldCheck, Activity, Image as ImageIcon, Bot, Printer, Play, Zap } from 'lucide-react';
+
+const MultimodalDiagramParser = dynamic(
+  () => import('@/components/simulation/MultimodalDiagramParser').then((m) => m.MultimodalDiagramParser),
+  { ssr: false }
+);
+const UniversalChatHistoryImporter = dynamic(
+  () => import('@/components/learning/UniversalChatHistoryImporter').then((m) => m.UniversalChatHistoryImporter),
+  { ssr: false }
+);
+const PdfReportStudio = dynamic(
+  () => import('@/components/ui/PdfReportStudio').then((m) => m.PdfReportStudio),
+  { ssr: false }
+);
 
 export default function SimulationsPage() {
   const [showDiagramParser, setShowDiagramParser] = React.useState<boolean>(false);

@@ -7,6 +7,7 @@ import { runDropBLegalAndTrustTests } from './dropBLegalAndTrust.test';
 import { runDropCPublicBrowsingAndSeoTests } from './dropCPublicBrowsingAndSeo.test';
 import { runDropIAccessibilityAndContrastTests } from './dropIAccessibilityAndContrast.test';
 import { runDropJMobileResponsivenessTests } from './dropJMobileResponsiveness.test';
+import { runDropKTests } from './dropKPerformanceAndPdf.test';
 
 async function main() {
   console.log('================================================================');
@@ -46,12 +47,16 @@ async function main() {
     runDropIAccessibilityAndContrastTests();
     console.log('  ✓ Passed: Modal focus trap, terminal regions, aria-live, and contrast verified.\n');
 
-    console.log('[TEST 9/9] Running Drop J Mobile Viewport & Responsiveness Tests...');
+    console.log('[TEST 9/10] Running Drop J Mobile Viewport & Responsiveness Tests...');
     runDropJMobileResponsivenessTests();
     console.log('  ✓ Passed: Small viewport drawer clamping, topbar action hiding, modal max-h, and word-break verified.\n');
 
+    console.log('[TEST 10/10] Running Drop K Performance & PDF Engine Optimization Tests...');
+    await runDropKTests();
+    console.log('  ✓ Passed: Lazy 3D canvas, dynamic modal code-splitting, PDF anchor cleanup, and font fallbacks verified.\n');
+
     console.log('================================================================');
-    console.log('🎉 ALL FRONTEND TESTS PASSED SUCCESSFULLY (9/9 suites)');
+    console.log('🎉 ALL FRONTEND TESTS PASSED SUCCESSFULLY (10/10 suites)');
     console.log('================================================================');
     process.exit(0);
   } catch (error) {

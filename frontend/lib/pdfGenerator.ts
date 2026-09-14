@@ -58,7 +58,7 @@ export class VectorPdfGenerator {
           }
           
           body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             background: #09090b;
             color: #ffffff;
             width: 297mm;
@@ -288,7 +288,7 @@ export class VectorPdfGenerator {
           }
           
           body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             background: #ffffff;
             color: #09090b;
             line-height: 1.5;

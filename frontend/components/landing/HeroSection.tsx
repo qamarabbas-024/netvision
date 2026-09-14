@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
   ArrowRight,
   ShieldCheck,
@@ -11,9 +12,21 @@ import {
   Terminal,
   Cpu,
 } from 'lucide-react';
-import { NetworkCanvas } from '../3d/NetworkCanvas';
 import { NetworkDevice, NetworkScenario } from '@/types/network';
 import { BorderBeam, CyberGlitchText, AnimatedRays } from '@/components/ui';
+
+const NetworkCanvas = dynamic(
+  () => import('../3d/NetworkCanvas').then((mod) => mod.NetworkCanvas),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950/40 text-xs font-mono text-zinc-500 gap-2">
+        <div className="w-6 h-6 border-2 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
+        <span>Initializing 3D WebGL Topology...</span>
+      </div>
+    ),
+  }
+);
 
 interface HeroSectionProps {
   onExploreCurriculum: () => void;
