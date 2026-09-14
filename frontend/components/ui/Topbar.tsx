@@ -213,7 +213,7 @@ export const AppTopbar: React.FC = () => {
             </Badge>
           </div>
 
-          <Link href="/workbench" aria-label="Simulation Workbench">
+          <Link href="/workbench" aria-label="Simulation Workbench" className="hidden sm:block">
             <div
               className="w-8 h-8 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-[#00f0ff] flex items-center justify-center text-[#8e95a5] hover:text-[#00f0ff] transition-colors cursor-pointer"
               title="Open Master Simulation Workbench"
@@ -228,7 +228,7 @@ export const AppTopbar: React.FC = () => {
             type="button"
             aria-label="Theme Studio"
             onClick={() => setShowThemeStudio(true)}
-            className="w-8 h-8 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-[#00f0ff] flex items-center justify-center text-[#8e95a5] hover:text-[#00f0ff] transition-colors"
+            className="hidden sm:flex w-8 h-8 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-[#00f0ff] items-center justify-center text-[#8e95a5] hover:text-[#00f0ff] transition-colors"
             title="Open Hyper-Theme Studio (Version 4.3)"
           >
             <Palette className="w-4 h-4" />
@@ -237,7 +237,7 @@ export const AppTopbar: React.FC = () => {
           <button
             type="button"
             aria-label="Notifications"
-            className="w-8 h-8 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-zinc-500 flex items-center justify-center text-[#8e95a5] hover:text-[#f4f5f7] transition-colors relative"
+            className="hidden sm:flex w-8 h-8 rounded-lg bg-[#14151a] border border-[#2a2e39] hover:border-zinc-500 items-center justify-center text-[#8e95a5] hover:text-[#f4f5f7] transition-colors relative"
           >
             <Bell className="w-4 h-4" />
             <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#38bdf8]" />

@@ -268,7 +268,7 @@ export default function CertificateVerifyPage() {
                 <Award className="w-5 h-5 text-zinc-400" />
                 <div>
                   <span className="text-[10px] font-mono text-zinc-500 uppercase block">Credential ID</span>
-                  <span className="text-sm font-mono font-bold text-zinc-300">{certData.credentialId}</span>
+                  <span className="text-sm font-mono font-bold text-zinc-300 break-all">{certData.credentialId}</span>
                 </div>
               </div>
 
@@ -402,7 +402,7 @@ export default function CertificateVerifyPage() {
               <Award className="w-5 h-5 text-[#00f0ff]" />
               <div>
                 <span className="text-[10px] font-mono text-zinc-500 uppercase block">Credential ID</span>
-                <span className="text-sm font-mono font-bold text-[#00f0ff]">
+                <span className="text-sm font-mono font-bold text-[#00f0ff] break-all">
                   {certData.credentialId || credentialId}
                 </span>
               </div>
