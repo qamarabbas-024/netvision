@@ -84,7 +84,7 @@ export default function CertificateVerifyPage() {
     return (
       <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col items-center justify-center p-6 font-sans">
         <div className="w-8 h-8 border-2 border-[#00f0ff] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xs font-mono text-zinc-400">Verifying Cryptographic Credential Record...</p>
+        <p className="text-xs font-mono text-zinc-400">Verifying Credential in Authoritative Registry...</p>
       </div>
     );
   }
@@ -202,7 +202,7 @@ export default function CertificateVerifyPage() {
                 </div>
                 <p className="text-xs text-rose-300/80 mt-0.5">
                   {isTampered
-                    ? 'This credential record failed cryptographic signature verification or may have been modified.'
+                    ? 'This credential record failed authoritative registry verification or may have been modified.'
                     : isRevoked
                     ? 'This certificate has been formally revoked by NetVision and is no longer valid.'
                     : 'This certificate record is marked as inactive or expired in the public registry.'}
@@ -332,7 +332,7 @@ export default function CertificateVerifyPage() {
                 </Badge>
               </div>
               <p className="text-xs text-emerald-300/80 mt-0.5">
-                Cryptographic signature and authoritative registry validation succeeded.
+                Official NetVision registry record and integrity verification succeeded.
               </p>
             </div>
           </div>

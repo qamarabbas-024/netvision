@@ -24,6 +24,8 @@ import { CourseLevel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { LearnerIdentity, LearnerIdentityContext } from '../auth/decorators/learner-identity.decorator';
+import { AuthRateLimit } from '../security/rate-limiter/rate-limit.decorators';
+
 
 @ApiTags('courses', 'topics', 'lessons', 'quizzes', 'labs', 'search', 'progress', 'learners')
 @Controller()
@@ -270,6 +272,7 @@ export class TopicsController {
   }
 
   @ApiOperation({ summary: 'Get certificate details by ID or verification code' })
+  @AuthRateLimit()
   @Get('certificates/:id')
   async getCertificateById(@Param('id') id: string) {
     return this.topicsService.getCertificateById(id);

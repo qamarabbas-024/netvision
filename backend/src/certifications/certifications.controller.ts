@@ -18,7 +18,9 @@ import { StartExamAttemptDto } from './dto/start-exam-attempt.dto';
 import { SubmitExamAttemptDto } from './dto/submit-exam-attempt.dto';
 import { SubmitCapstoneAttemptDto } from './dto/submit-capstone-attempt.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthRateLimit } from '../security/rate-limiter/rate-limit.decorators';
 import { ExamType } from '@prisma/client';
+
 
 @ApiTags('Certification & Examination Architecture')
 @Controller()
@@ -235,6 +237,7 @@ export class CertificationsController {
   }
 
   @ApiOperation({ summary: 'Publicly verify a professional certification or credential by ID / code' })
+  @AuthRateLimit()
   @Get('certificates/verify/:credentialId')
   async verifyCertificate(
     @Param('credentialId') credentialId: string

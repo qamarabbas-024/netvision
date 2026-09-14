@@ -2105,11 +2105,9 @@ export class TopicsService {
       throw new NotFoundException(`Certificate "${certificateIdOrCode}" not found.`);
     }
     const meta: any = cert.metadataJson || {};
+    // Strictly sanitized public verification DTO: Never exposes internal DB UUIDs, emails, or secret verificationCodes
     return {
-      id: cert.id,
-      code: cert.code,
       credentialId: cert.credentialId || cert.code,
-      verificationCode: cert.verificationCode || cert.code,
       status: cert.status || 'ACTIVE',
       issuedAt: cert.issuedAt,
       recipientName: cert.recipientName || cert.user?.fullName || cert.user?.username || 'Verified Candidate',
@@ -2126,7 +2124,7 @@ export class TopicsService {
         'IP Subnetting & Routing',
         'Network Diagnostics & Packet Analysis',
       ],
-      isVerified: true,
+      isVerified: cert.status === 'ACTIVE',
     };
   }
 

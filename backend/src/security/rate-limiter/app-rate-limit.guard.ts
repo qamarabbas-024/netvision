@@ -123,7 +123,14 @@ export class AppRateLimitGuard implements CanActivate {
 
     // 3. Check route path
     const url = req.originalUrl || req.url || '';
-    if (url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/verify-otp') || url.includes('/auth/resend-otp')) {
+    if (
+      url.includes('/auth/login') ||
+      url.includes('/auth/register') ||
+      url.includes('/auth/verify-otp') ||
+      url.includes('/auth/resend-otp') ||
+      url.includes('/certificates/verify') ||
+      url.includes('/certificates/')
+    ) {
       return 'AUTH';
     }
     if (url.includes('/auth/forgot-password') || url.includes('/auth/reset-password')) {
