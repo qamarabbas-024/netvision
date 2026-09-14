@@ -99,7 +99,13 @@ export const DeviceCliModal: React.FC<DeviceCliModalProps> = ({
     >
       <div className="flex flex-col gap-3 font-mono text-xs">
         {/* Terminal Screen Window */}
-        <div className="w-full h-80 bg-black/95 rounded-2xl border border-zinc-800 p-4 overflow-y-auto font-mono text-emerald-400 space-y-2 leading-relaxed">
+        <div
+          role="region"
+          aria-label="Simulated Terminal Output"
+          aria-live="polite"
+          tabIndex={0}
+          className="w-full h-80 bg-black/95 rounded-2xl border border-zinc-800 p-4 overflow-y-auto font-mono text-emerald-400 space-y-2 leading-relaxed focus:outline-none focus:ring-1 focus:ring-[#00f0ff]/50"
+        >
           {terminalHistory.map((item, idx) => (
             <div key={idx} className={item.type === 'input' ? 'text-[#00f0ff] font-bold' : 'text-emerald-300'}>
               <pre className="whitespace-pre-wrap font-mono font-normal">{item.text}</pre>
@@ -110,10 +116,12 @@ export const DeviceCliModal: React.FC<DeviceCliModalProps> = ({
 
         {/* Command Form */}
         <form onSubmit={handleExecuteCommand} className="flex items-center gap-2">
-          <div className="flex-1 px-3 py-2 rounded-xl bg-[#121217] border border-[#272732] flex items-center gap-2">
-            <Terminal className="w-4 h-4 text-[#00f0ff]" />
+          <div className="flex-1 px-3 py-2 rounded-xl bg-[#121217] border border-[#272732] flex items-center gap-2 focus-within:border-[#00f0ff]/80 transition-colors">
+            <Terminal className="w-4 h-4 text-[#00f0ff]" aria-hidden="true" />
             <input
               type="text"
+              id="device-cli-command-input"
+              aria-label="CLI Command Input"
               value={commandInput}
               onChange={(e) => setCommandInput(e.target.value)}
               placeholder="Type CLI command e.g. 'ping 192.168.1.1' or 'ipconfig'..."
@@ -122,9 +130,10 @@ export const DeviceCliModal: React.FC<DeviceCliModalProps> = ({
           </div>
           <button
             type="submit"
-            className="px-4 py-2 rounded-xl bg-[#00f0ff] text-black font-bold hover:bg-[#00f0ff]/80 transition-colors shrink-0 flex items-center gap-1.5"
+            aria-label="Execute CLI Command"
+            className="px-4 py-2 rounded-xl bg-[#00f0ff] text-black font-bold hover:bg-[#00f0ff]/80 transition-colors shrink-0 flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[#00f0ff]"
           >
-            <Send className="w-3.5 h-3.5" /> Execute
+            <Send className="w-3.5 h-3.5" aria-hidden="true" /> Execute
           </button>
         </form>
       </div>

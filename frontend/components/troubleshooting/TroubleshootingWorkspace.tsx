@@ -448,13 +448,14 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
 
             {/* Quick Diagnostic Command Pills */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-mono text-[#646c7d]">Allowed Commands:</span>
+              <span className="text-[10px] font-mono text-zinc-400 font-semibold">Allowed Commands:</span>
               {scenario.allowedCommands?.map((cmdObj: any, idx: number) => (
                 <button
                   key={idx}
                   onClick={() => handleRunCommand(cmdObj.command)}
                   disabled={isExecutingCmd}
-                  className="text-[10px] font-mono px-2.5 py-1 rounded-md bg-[#1b1e26] hover:bg-[#2563eb]/20 hover:text-[#38bdf8] text-[#8e95a5] border border-[#2a2e39] transition-all cursor-pointer"
+                  aria-label={`Run diagnostic command ${cmdObj.command}`}
+                  className="text-[10px] font-mono px-2.5 py-1 rounded-md bg-[#1b1e26] hover:bg-[#2563eb]/20 hover:text-[#38bdf8] text-zinc-300 border border-[#2a2e39] transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
                 >
                   $ {cmdObj.command}
                 </button>
@@ -462,8 +463,14 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
             </div>
 
             {/* Terminal Output Screen */}
-            <div className="h-64 rounded-lg bg-[#101115] p-4 font-mono text-xs text-[#e2e4e9] overflow-y-auto flex flex-col gap-3 border border-[#242731]">
-              <div className="text-[#646c7d] text-[11px]">
+            <div
+              role="region"
+              aria-label="Diagnostic Terminal Output"
+              aria-live="polite"
+              tabIndex={0}
+              className="h-64 rounded-lg bg-[#101115] p-4 font-mono text-xs text-[#e2e4e9] overflow-y-auto flex flex-col gap-3 border border-[#242731] focus:outline-none focus-visible:ring-1 focus-visible:ring-[#38bdf8]/50"
+            >
+              <div className="text-zinc-400 text-[11px]">
                 NetVision Incident Diagnostic Shell [Version 1.0.0]
                 <br />
                 Connected to virtual topology node. Type commands below to gather telemetry.
@@ -474,7 +481,7 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
                   <div className="text-[#38bdf8] flex items-center gap-2">
                     <span>netvision@incident:~$</span>
                     <span className="text-white font-bold">{entry.command}</span>
-                    <span className="text-[9px] text-[#646c7d] ml-auto">{entry.timestamp}</span>
+                    <span className="text-[9px] text-zinc-400 ml-auto">{entry.timestamp}</span>
                   </div>
                   <pre className="text-[#34d399] font-mono text-[11px] whitespace-pre-wrap pl-2 border-l border-[#242731]">
                     {entry.output}
@@ -487,20 +494,23 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
             <div className="flex items-center gap-2">
               <input
                 type="text"
+                id="troubleshooting-cli-input"
+                aria-label="Investigation CLI Command Input"
                 value={cliInput}
                 onChange={(e) => setCliInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleRunCommand();
                 }}
                 placeholder="Type diagnostic command (e.g. ping, nslookup, ipconfig, show...)"
-                className="flex-1 bg-[#101115] border border-[#242731] rounded-lg px-3.5 py-2 text-xs font-mono text-[#f4f5f7] focus:outline-none focus:border-[#38bdf8]"
+                className="flex-1 bg-[#101115] border border-[#242731] rounded-lg px-3.5 py-2 text-xs font-mono text-[#f4f5f7] focus:outline-none focus:border-[#38bdf8] focus-visible:ring-2 focus-visible:ring-[#38bdf8]/50"
               />
               <Button
                 variant="primary"
                 size="sm"
                 onClick={() => handleRunCommand()}
                 disabled={isExecutingCmd || !cliInput.trim()}
-                leftIcon={<Play className="w-3.5 h-3.5" />}
+                aria-label="Execute diagnostic command"
+                leftIcon={<Play className="w-3.5 h-3.5" aria-hidden="true" />}
               >
                 Execute
               </Button>

@@ -109,7 +109,12 @@ export const QuizResult: React.FC<QuizResultProps> = ({
         />
       )}
       {/* Header Result Banner */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-5 sm:p-6 rounded-xl bg-[#14151a] border border-[#2a2e39]">
+      <div
+        role="region"
+        aria-label="Assessment Score Summary"
+        aria-live="polite"
+        className="flex flex-col md:flex-row items-center justify-between gap-6 p-5 sm:p-6 rounded-xl bg-[#14151a] border border-[#2a2e39]"
+      >
         <div className="flex items-center gap-4 text-center md:text-left">
           <div
             className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${

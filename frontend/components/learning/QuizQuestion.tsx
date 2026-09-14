@@ -71,6 +71,8 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
 
         {resultFeedback && (
           <span
+            role="status"
+            aria-live="polite"
             className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded ${
               resultFeedback.isCorrect
                 ? 'bg-[#10b981]/15 text-[#10b981] border border-[#10b981]/30'
@@ -79,11 +81,11 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
           >
             {resultFeedback.isCorrect ? (
               <>
-                <CheckCircle2 className="w-3.5 h-3.5" /> Correct (+{question.points || 10} pts)
+                <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Correct (+{question.points || 10} pts)
               </>
             ) : (
               <>
-                <XCircle className="w-3.5 h-3.5" /> Incorrect
+                <XCircle className="w-3.5 h-3.5" aria-hidden="true" /> Incorrect
               </>
             )}
           </span>
