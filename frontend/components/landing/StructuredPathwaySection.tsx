@@ -3,43 +3,22 @@
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight, Lock } from 'lucide-react';
+import { FLAGSHIP_5_COURSES } from '@netvision/shared';
 
 export const StructuredPathwaySection: React.FC = () => {
   const steps = [
-    {
-      num: '01',
-      title: 'Digital Foundations',
-      desc: 'Bits, bytes, media, topology basics',
-    },
-    {
-      num: '02',
-      title: 'Network Fundamentals',
-      desc: 'OSI, TCP/IP, Ethernet, addressing',
-    },
-    {
-      num: '03',
-      title: 'Local Networking',
-      desc: 'Switching, VLANs, trunking',
-    },
-    {
-      num: '04',
-      title: 'IP Networking',
-      desc: 'IPv4, subnetting, routing basics',
-    },
-    {
-      num: '05',
-      title: 'Transport & Services',
-      desc: 'TCP, UDP, DNS, DHCP, ICMP',
-    },
+    ...FLAGSHIP_5_COURSES.map((course, idx) => ({
+      num: `0${idx + 1}`,
+      title: course.title,
+      desc: course.tagline,
+      href: `/courses/${course.slug}`,
+      isCredential: false,
+    })),
     {
       num: '06',
-      title: 'Routing & Engineering',
-      desc: 'OSPF, ACLs, BGP, advanced topics',
-    },
-    {
-      num: '07',
-      title: 'Master Credential',
-      desc: 'Complete all & earn NV Professional Cert',
+      title: 'Master Capstone Credential',
+      desc: 'Authoritative multi-layer examination & NV-NET-MASTERY issuance',
+      href: '/certifications/capstone',
       isCredential: true,
     },
   ];
@@ -55,10 +34,10 @@ export const StructuredPathwaySection: React.FC = () => {
                 STRUCTURED LEARNING PATHWAY
               </span>
               <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight mb-3">
-                From Basics to Expert
+                From Foundations to Mastery
               </h2>
               <p className="text-xs text-[#94a3b8] leading-relaxed mb-6">
-                Follow a carefully designed path that builds real networking intuition step by step.
+                Progress through 5 comprehensive flagship courses and achieve the prestigious Master Capstone credential.
               </p>
             </div>
 
@@ -66,17 +45,17 @@ export const StructuredPathwaySection: React.FC = () => {
               href="/courses"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold text-xs shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              <span>View All 38 Courses</span>
+              <span>Explore Flagship Courses</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          {/* Connected 7-Stage Progression Flow */}
-          <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2.5 items-stretch">
+          {/* Connected Flagship Progression Flow */}
+          <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2.5 items-stretch">
             {steps.map((s, idx) => (
               <Link
                 key={s.num}
-                href={s.isCredential ? '/certificates' : '/courses'}
+                href={s.href}
                 className={`p-3.5 rounded-xl border flex flex-col justify-between transition-all shadow-sm cursor-pointer ${
                   s.isCredential
                     ? 'bg-[#062419] border-[#22c55e]/60 text-white hover:border-[#22c55e] hover:shadow-lg hover:shadow-emerald-950/40'
@@ -95,11 +74,11 @@ export const StructuredPathwaySection: React.FC = () => {
                     {s.isCredential && <Lock className="w-3 h-3 text-[#22c55e]" />}
                   </div>
 
-                  <h3 className="text-xs font-bold text-white mb-1 leading-snug">
+                  <h3 className="text-xs font-bold text-white mb-1 leading-snug line-clamp-2">
                     {s.title}
                   </h3>
 
-                  <p className="text-[10px] text-[#94a3b8] leading-relaxed">
+                  <p className="text-[10px] text-[#94a3b8] leading-relaxed line-clamp-3">
                     {s.desc}
                   </p>
                 </div>

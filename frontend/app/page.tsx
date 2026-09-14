@@ -80,7 +80,7 @@ export default function Home() {
         {/* Animated UI Registry Showcase (Vengeance UI, Skiper UI, GSAP) */}
         <RegistryComponentsShowcase />
 
-        {/* The Seven-Stage Mastery Pathway */}
+        {/* The Flagship Certification Pathway */}
         <CurriculumSection
           onStartLab={() => setIsTerminalOpen(true)}
         />

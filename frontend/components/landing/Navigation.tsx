@@ -66,21 +66,28 @@ export const Navigation: React.FC<NavigationProps> = ({
                     className="block p-2 rounded-lg hover:bg-slate-800/80 text-xs font-semibold text-white"
                   >
                     <div className="text-emerald-400 font-mono">Catalog Overview</div>
-                    <div className="text-slate-400 text-[11px] mt-0.5">Explore all 38 networking courses across 7 core pathways</div>
+                    <div className="text-slate-400 text-[11px] mt-0.5">Explore the 5 flagship specializations &amp; Capstone</div>
                   </Link>
                   <Link
-                    href="/courses/net-101-digital-foundations"
+                    href="/courses/foundations-network-architecture"
                     className="block p-2 rounded-lg hover:bg-slate-800/80 text-xs font-semibold text-white"
                   >
-                    <div className="text-cyan-400 font-mono">NET-101 Foundations</div>
-                    <div className="text-slate-400 text-[11px] mt-0.5">Digital &amp; Physical Network Foundations</div>
+                    <div className="text-cyan-400 font-mono">NV-C01 Foundations</div>
+                    <div className="text-slate-400 text-[11px] mt-0.5">Digital &amp; Physical Network Architecture</div>
                   </Link>
                   <Link
-                    href="/courses/net-201-layer2-ethernet"
+                    href="/courses/ethernet-switching-ip-networking"
                     className="block p-2 rounded-lg hover:bg-slate-800/80 text-xs font-semibold text-white"
                   >
-                    <div className="text-purple-400 font-mono">NET-201 Switching</div>
-                    <div className="text-slate-400 text-[11px] mt-0.5">Layer 2 Ethernet &amp; Architecture</div>
+                    <div className="text-purple-400 font-mono">NV-C02 Switching</div>
+                    <div className="text-slate-400 text-[11px] mt-0.5">Layer 2 Ethernet, VLANs &amp; Subnetting</div>
+                  </Link>
+                  <Link
+                    href="/certifications/capstone"
+                    className="block p-2 rounded-lg hover:bg-slate-800/80 text-xs font-semibold text-white"
+                  >
+                    <div className="text-amber-400 font-mono">Master Capstone</div>
+                    <div className="text-slate-400 text-[11px] mt-0.5">NV-NET-MASTERY Examination</div>
                   </Link>
                 </div>
               )}

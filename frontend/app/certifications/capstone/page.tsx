@@ -235,7 +235,7 @@ export default function MasterCapstonePage() {
         setCooldownInfo(latestAttemptData.cooldownInfo);
       }
 
-      // Server-authoritative session and result recovery (Drop #12 P1-C)
+      // Server-authoritative session and result recovery (Drop #12 P1-C & Drop A Reconciliation)
       const serverAttempt = latestAttemptData?.attempt;
       const storedLastView = typeof window !== 'undefined' ? sessionStorage.getItem('nv_capstone_view') : null;
       const isResultUrl = typeof window !== 'undefined' && window.location.search.includes('view=result');
@@ -247,25 +247,44 @@ export default function MasterCapstonePage() {
           setView('WORKSPACE');
           if (typeof window !== 'undefined') {
             sessionStorage.setItem('nv_capstone_active_attempt_id', serverAttempt.attemptId);
+            try {
+              const rawDraft = sessionStorage.getItem(`nv_capstone_draft_${serverAttempt.attemptId}`);
+              if (rawDraft) {
+                const draft = JSON.parse(rawDraft);
+                if (draft.theoryAnswers) setTheoryAnswers(draft.theoryAnswers);
+                if (draft.incidentAnswers) setIncidentAnswers(draft.incidentAnswers);
+                if (draft.forensicsAnswers) setForensicsAnswers(draft.forensicsAnswers);
+                if (draft.theoryHypothesis) setTheoryHypothesis(draft.theoryHypothesis);
+                if (draft.incidentRemediation) setIncidentRemediation(draft.incidentRemediation);
+                if (draft.packetForensicsNotes) setPacketForensicsNotes(draft.packetForensicsNotes);
+              }
+            } catch {
+              // Ignore draft recovery errors
+            }
           }
         } else if (serverAttempt.status === 'PASSED' || serverAttempt.status === 'FAILED') {
           setAttempt(serverAttempt);
-          if (serverAttempt.result) {
-            setSubmissionResult({
-              attemptId: serverAttempt.attemptId,
-              examCode: serverAttempt.examCode,
-              status: serverAttempt.status,
-              score: serverAttempt.score ?? 0,
+          const subResult: CapstoneSubmissionResultDto = {
+            attemptId: serverAttempt.attemptId,
+            examCode: serverAttempt.examCode,
+            status: serverAttempt.status,
+            score: serverAttempt.score ?? 0,
+            passed: serverAttempt.passed ?? false,
+            result: serverAttempt.result || {
+              overallScore: serverAttempt.score ?? 0,
               passed: serverAttempt.passed ?? false,
-              result: serverAttempt.result,
-            });
+              percentageScore: serverAttempt.score ?? 0,
+              passingScore: 85,
+            },
+          };
+          setSubmissionResult(subResult);
 
-            // If learner was viewing RESULT or requested via query param, recover RESULT view
-            if (storedLastView === 'RESULT' || isResultUrl) {
-              setView('RESULT');
-              if (serverAttempt.status === 'PASSED') {
-                reevaluateMasteryEligibility();
-              }
+          // Server attempt status is authoritative: finished attempts reconcile to RESULT view
+          // unless candidate explicitly chose to view the briefing PORTAL in this browser session
+          if (storedLastView !== 'PORTAL' || isResultUrl) {
+            setView('RESULT');
+            if (serverAttempt.status === 'PASSED') {
+              reevaluateMasteryEligibility();
             }
           }
         }
@@ -285,20 +304,24 @@ export default function MasterCapstonePage() {
               setView('WORKSPACE');
             } else if (status.status === 'PASSED' || status.status === 'FAILED') {
               setAttempt(status);
-              if (status.result) {
-                setSubmissionResult({
-                  attemptId: status.attemptId,
-                  examCode: status.examCode,
-                  status: status.status,
-                  score: status.score ?? 0,
+              const subResult: CapstoneSubmissionResultDto = {
+                attemptId: status.attemptId,
+                examCode: status.examCode,
+                status: status.status,
+                score: status.score ?? 0,
+                passed: status.passed ?? false,
+                result: status.result || {
+                  overallScore: status.score ?? 0,
                   passed: status.passed ?? false,
-                  result: status.result,
-                });
-                if (storedLastView === 'RESULT' || isResultUrl) {
-                  setView('RESULT');
-                  if (status.status === 'PASSED') {
-                    reevaluateMasteryEligibility();
-                  }
+                  percentageScore: status.score ?? 0,
+                  passingScore: 85,
+                },
+              };
+              setSubmissionResult(subResult);
+              if (storedLastView !== 'PORTAL' || isResultUrl) {
+                setView('RESULT');
+                if (status.status === 'PASSED') {
+                  reevaluateMasteryEligibility();
                 }
               }
             }
@@ -341,6 +364,33 @@ export default function MasterCapstonePage() {
 
     return () => clearInterval(timer);
   }, [view, attempt]);
+
+  // Candidate Answer Preservation across refreshes (Drop A)
+  useEffect(() => {
+    if (view !== 'WORKSPACE' || !attempt?.attemptId) return;
+    try {
+      const draft = {
+        theoryAnswers,
+        incidentAnswers,
+        forensicsAnswers,
+        theoryHypothesis,
+        incidentRemediation,
+        packetForensicsNotes,
+      };
+      sessionStorage.setItem(`nv_capstone_draft_${attempt.attemptId}`, JSON.stringify(draft));
+    } catch {
+      // Ignore sessionStorage quota errors
+    }
+  }, [
+    view,
+    attempt?.attemptId,
+    theoryAnswers,
+    incidentAnswers,
+    forensicsAnswers,
+    theoryHypothesis,
+    incidentRemediation,
+    packetForensicsNotes,
+  ]);
 
   // Server reconciliation when countdown expires
   const handleAutoExpire = async () => {
@@ -409,6 +459,7 @@ export default function MasterCapstonePage() {
         sessionStorage.setItem('nv_capstone_view', 'RESULT');
         sessionStorage.setItem('nv_capstone_last_attempt_id', result.attemptId);
         sessionStorage.removeItem('nv_capstone_active_attempt_id');
+        sessionStorage.removeItem(`nv_capstone_draft_${attempt.attemptId}`);
       }
 
       // Re-fetch latest attempt from server to populate accurate cooldown
@@ -1755,7 +1806,7 @@ export default function MasterCapstonePage() {
                         onClick={() => {
                           setView('PORTAL');
                           if (typeof window !== 'undefined') {
-                            sessionStorage.removeItem('nv_capstone_view');
+                            sessionStorage.setItem('nv_capstone_view', 'PORTAL');
                           }
                         }}
                         className="w-full sm:w-auto flex items-center justify-center gap-2"

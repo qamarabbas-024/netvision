@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { CurriculumStep } from '@/data/curriculumData';
+import { FLAGSHIP_5_COURSES } from '@netvision/shared';
 import { X, BookOpen, Clock, CheckCircle2, Play, ExternalLink } from 'lucide-react';
 
 interface CourseModalProps {
@@ -15,27 +16,13 @@ export const CourseModal: React.FC<CourseModalProps> = ({ step, onClose, onStart
   if (!step) return null;
 
   const getCourseSlug = (code: string): string => {
-    switch (code) {
-      case 'NET-101':
-        return 'net-101-digital-foundations';
-      case 'NET-102':
-        return 'net-102-network-fundamentals';
-      case 'NET-103':
-        return 'net-103-reference-models';
-      case 'NET-201':
-        return 'net-201-layer2-ethernet';
-      case 'NET-202':
-        return 'net-202-ipv4-subnetting';
-      case 'NET-301':
-        return 'net-301-vlan-switching';
-      case 'NET-401':
-        return 'net-401-bgp-routing';
-      default:
-        return 'net-101-digital-foundations';
-    }
+    const flagship = FLAGSHIP_5_COURSES.find((c) => c.code === code);
+    if (flagship) return flagship.slug;
+    return 'foundations-network-architecture';
   };
 
-  const courseSlug = getCourseSlug(step.code);
+  const isMastery = step.code === 'NV-NET-MASTERY';
+  const targetUrl = isMastery ? '/certifications/capstone' : `/courses/${getCourseSlug(step.code)}`;
 
   return (
     <div
@@ -102,21 +89,21 @@ export const CourseModal: React.FC<CourseModalProps> = ({ step, onClose, onStart
         {/* Footer with dual action buttons */}
         <div className="px-6 py-4 bg-[#0b1120] border-t border-[#1e293b] flex items-center justify-between gap-3">
           <Link
-            href={`/courses/${courseSlug}`}
+            href={targetUrl}
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800/80 text-xs font-semibold text-slate-200 hover:text-white hover:bg-slate-700 flex items-center gap-1.5 transition-colors"
           >
-            <span>Open Full Syllabus</span>
+            <span>{isMastery ? 'Open Capstone Blueprint' : 'Open Full Syllabus'}</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </Link>
 
           <Link
-            href={`/courses/${courseSlug}`}
+            href={targetUrl}
             onClick={onClose}
             className="px-5 py-2.5 rounded-xl bg-[#10b981] hover:bg-[#059669] text-slate-950 font-bold text-xs shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all flex items-center gap-2"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
-            <span>Start Learning Course</span>
+            <span>{isMastery ? 'Start Examination' : 'Start Learning Course'}</span>
           </Link>
         </div>
       </div>

@@ -100,9 +100,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <div className="pt-4 border-t border-slate-800/80 grid grid-cols-3 gap-2 text-[11px] font-mono text-slate-400">
               <div className="p-2.5 rounded-xl bg-[#090d16]/80 border border-slate-800/80 flex flex-col gap-1">
                 <span className="text-[#34d399] font-bold flex items-center gap-1 tabular-nums">
-                  <CheckCircle2 className="w-3 h-3 text-[#34d399]" /> 7 Stages
+                  <CheckCircle2 className="w-3 h-3 text-[#34d399]" /> 5 Courses
                 </span>
-                <span className="text-[10px] text-slate-400">Bitstream to Cloud</span>
+                <span className="text-[10px] text-slate-400">+ Master Capstone</span>
               </div>
               <div className="p-2.5 rounded-xl bg-[#090d16]/80 border border-slate-800/80 flex flex-col gap-1">
                 <span className="text-[#38bdf8] font-bold flex items-center gap-1 tabular-nums">

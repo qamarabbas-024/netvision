@@ -1,20 +1,7 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ClientProviders } from '@/components/providers/ClientProviders';
 import { SITE_URL } from '@/lib/siteConfig';
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-sans',
-  display: 'swap',
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
-});
 
 export const viewport: Viewport = {
   themeColor: '#0b0f17',
@@ -126,7 +113,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark scroll-smooth ${inter.variable} ${jetbrainsMono.variable}`}
+      className="dark scroll-smooth font-sans"
       suppressHydrationWarning
     >
       <head>
