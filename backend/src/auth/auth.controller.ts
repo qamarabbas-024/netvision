@@ -127,6 +127,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('netvision_auth_token', { path: '/' });
+    res.clearCookie('accessToken', { path: '/' });
     return { message: 'Logged out successfully.' };
   }
 

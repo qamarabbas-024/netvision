@@ -61,6 +61,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found or token invalid');
     }
 
+    const emailVerificationEnabled = this.configService.get<string>('EMAIL_VERIFICATION_ENABLED', 'false') === 'true';
+    if (emailVerificationEnabled && !user.isVerified) {
+      throw new UnauthorizedException('User account is unverified.');
+    }
+
     return {
       id: user.id,
       email: user.email,

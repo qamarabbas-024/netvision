@@ -42,6 +42,13 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
         errorMsg = 'The requested resource was not found.';
       } else if (res.status === 401) {
         errorMsg = 'Authentication session expired or invalid.';
+        if (typeof window !== 'undefined' && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/register')) {
+          localStorage.removeItem('netvision_token');
+          localStorage.removeItem('netvision_user');
+          sessionStorage.removeItem('netvision_token');
+          sessionStorage.removeItem('netvision_user');
+          window.dispatchEvent(new CustomEvent('netvision:auth-expired'));
+        }
       } else if (res.status === 403) {
         errorMsg = 'You do not have permission to access this resource.';
       } else if (res.status >= 500) {

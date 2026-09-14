@@ -14,6 +14,29 @@ interface AuthState {
   initializeAuth: () => Promise<void>;
 }
 
+function isJwtExpired(token: string | null): boolean {
+  if (!token || token === 'cookie-session') return false;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const decoded = JSON.parse(jsonPayload);
+    if (typeof decoded.exp === 'number') {
+      return Date.now() >= decoded.exp * 1000;
+    }
+  } catch (e) {
+    return false;
+  }
+  return false;
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   token: null,
@@ -69,8 +92,32 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   initializeAuth: async () => {
     if (typeof window === 'undefined') return;
+
+    // Attach event listener once for 401 session expiry events
+    if (!(window as any).__netvision_auth_listener_registered) {
+      (window as any).__netvision_auth_listener_registered = true;
+      window.addEventListener('netvision:auth-expired', () => {
+        set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+      });
+    }
+
     const token = localStorage.getItem('netvision_token') || sessionStorage.getItem('netvision_token');
     const storedUserJson = localStorage.getItem('netvision_user') || sessionStorage.getItem('netvision_user');
+
+    if (!token) {
+      set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+      return;
+    }
+
+    // Proactive client-side token expiration check
+    if (isJwtExpired(token)) {
+      localStorage.removeItem('netvision_token');
+      localStorage.removeItem('netvision_user');
+      sessionStorage.removeItem('netvision_token');
+      sessionStorage.removeItem('netvision_user');
+      set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+      return;
+    }
 
     try {
       const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
@@ -95,13 +142,17 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ user: null, token: null, isAuthenticated: false, isLoading: false });
       }
     } catch (err) {
-      if (token && storedUserJson) {
+      if (token && storedUserJson && !isJwtExpired(token)) {
         try {
           const parsedUser = JSON.parse(storedUserJson);
           set({ user: parsedUser, token, isAuthenticated: true, isLoading: false });
           return;
         } catch (e) {}
       }
+      localStorage.removeItem('netvision_token');
+      localStorage.removeItem('netvision_user');
+      sessionStorage.removeItem('netvision_token');
+      sessionStorage.removeItem('netvision_user');
       set({ user: null, token: null, isAuthenticated: false, isLoading: false });
     }
   },
