@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { CommandCard } from '@/components/learning/blocks/CommandCard';
@@ -56,8 +55,7 @@ export default function CommandsPage() {
   }, [searchQuery, selectedOs, selectedCategory]);
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+    <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
         <AppSidebar />
 
         <div className="flex-1 flex flex-col min-w-0">
@@ -203,6 +201,5 @@ export default function CommandsPage() {
           </main>
         </div>
       </div>
-    </ProtectedRoute>
   );
 }

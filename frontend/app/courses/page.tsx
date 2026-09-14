@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { CurriculumSection } from '@/components/learning/CurriculumSection';
 import { getTopicsApi } from '@/lib/api';
 import { FLAGSHIP_5_COURSES } from '@netvision/shared';
+import { SITE_URL } from '@/lib/siteConfig';
 
 // Canonical flagship initial dataset provides instant 0ms render without legacy flash
 const INITIAL_TOPICS = FLAGSHIP_5_COURSES.map((course) => ({
@@ -48,21 +48,47 @@ export default function CourseCatalogPage() {
     loadTopics();
   }, []);
 
+  // Schema.org Course Catalog ItemList Structured Data
+  const catalogJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'NetVision Canonical Networking Curriculum',
+    description: 'Comprehensive 5-tier progressive curriculum covering digital foundations to enterprise engineering.',
+    itemListElement: FLAGSHIP_5_COURSES.map((c, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Course',
+        name: c.title,
+        description: c.description,
+        courseCode: c.code,
+        url: `${SITE_URL}/courses/${c.slug}`,
+        provider: {
+          '@type': 'EducationalOrganization',
+          name: 'NetVision',
+          url: SITE_URL,
+        },
+      },
+    })),
+  };
+
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans" suppressHydrationWarning>
-        <AppSidebar />
+    <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans" suppressHydrationWarning>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(catalogJsonLd) }}
+      />
+      <AppSidebar />
 
-        <div className="flex-1 flex flex-col min-w-0">
-          <AppTopbar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <AppTopbar />
 
-          <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
-            <div className="max-w-7xl mx-auto flex flex-col gap-8">
-              <CurriculumSection topics={topics} />
-            </div>
-          </main>
-        </div>
+        <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+          <div className="max-w-7xl mx-auto flex flex-col gap-8">
+            <CurriculumSection topics={topics} />
+          </div>
+        </main>
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }

@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { Button } from '@/components/ui/Button';
@@ -62,51 +61,47 @@ export default function CourseDetailPage() {
 
   if (isLoading) {
     return (
-      <ProtectedRoute>
-        <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
-          <AppSidebar />
-          <div className="flex-1 flex flex-col min-w-0">
-            <AppTopbar />
-            <main className="p-8 flex-1 flex justify-center items-center">
-              <PulsePacketLoader label="Loading Course Syllabus & Roadmap..." />
-            </main>
-          </div>
+      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <AppTopbar />
+          <main className="p-8 flex-1 flex justify-center items-center">
+            <PulsePacketLoader label="Loading Course Syllabus & Roadmap..." />
+          </main>
         </div>
-      </ProtectedRoute>
+      </div>
     );
   }
 
   if (error || !topic) {
     const isNotFound = error?.toLowerCase().includes('not found') || !error;
     return (
-      <ProtectedRoute>
-        <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
-          <AppSidebar />
-          <div className="flex-1 flex flex-col min-w-0">
-            <AppTopbar />
-            <main className="p-8 flex-1 flex flex-col justify-center items-center text-center max-w-md mx-auto my-auto">
-              <h2 className="text-2xl font-bold text-white mb-2">
-                {isNotFound ? 'Course Not Found' : 'Failed to Load Course Syllabus'}
-              </h2>
-              <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
-                {isNotFound
-                  ? `The course slug "${slug}" could not be located in the curriculum catalog.`
-                  : error || 'An unexpected connection error occurred while retrieving course details.'}
-              </p>
-              <div className="flex items-center gap-3">
-                {!isNotFound && (
-                  <Button variant="cyan" onClick={loadTopicDetail}>
-                    Retry Loading
-                  </Button>
-                )}
-                <Link href="/courses">
-                  <Button variant={isNotFound ? 'cyan' : 'secondary'}>Back to Course Catalog</Button>
-                </Link>
-              </div>
-            </main>
-          </div>
+      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <AppTopbar />
+          <main className="p-8 flex-1 flex flex-col justify-center items-center text-center max-w-md mx-auto my-auto">
+            <h2 className="text-2xl font-bold text-white mb-2">
+              {isNotFound ? 'Course Not Found' : 'Failed to Load Course Syllabus'}
+            </h2>
+            <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
+              {isNotFound
+                ? `The course slug "${slug}" could not be located in the curriculum catalog.`
+                : error || 'An unexpected connection error occurred while retrieving course details.'}
+            </p>
+            <div className="flex items-center gap-3">
+              {!isNotFound && (
+                <Button variant="cyan" onClick={loadTopicDetail}>
+                  Retry Loading
+                </Button>
+              )}
+              <Link href="/courses">
+                <Button variant={isNotFound ? 'cyan' : 'secondary'}>Back to Course Catalog</Button>
+              </Link>
+            </div>
+          </main>
         </div>
-      </ProtectedRoute>
+      </div>
     );
   }
 
@@ -189,12 +184,11 @@ export default function CourseDetailPage() {
   };
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
-        />
+    <div className="min-h-screen surface-0 text-[#f4f5f7] flex font-sans">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
+      />
         <AppSidebar />
 
         <div className="flex-1 flex flex-col min-w-0">
@@ -448,6 +442,5 @@ export default function CourseDetailPage() {
           </main>
         </div>
       </div>
-    </ProtectedRoute>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { AppSidebar } from '@/components/ui/Sidebar';
 import { AppTopbar } from '@/components/ui/Topbar';
 import { SearchInput } from '@/components/ui/Input';
@@ -31,46 +30,44 @@ export default function GlossaryPage() {
   );
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
-        <AppSidebar />
+    <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
+      <AppSidebar />
 
-        <div className="flex-1 flex flex-col min-w-0">
-          <AppTopbar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <AppTopbar />
 
-          <main className="p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
-            <div className="max-w-6xl mx-auto flex flex-col gap-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
-                    Networking Dictionary
-                  </span>
-                  <h1 className="text-3xl font-extrabold text-white tracking-tight">
-                    Interactive Networking Glossary
-                  </h1>
-                </div>
-
-                <div className="w-full md:w-80">
-                  <SearchInput value={search} onChange={(e) => setSearch(e.target.value)} />
-                </div>
+        <main className="p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
+          <div className="max-w-6xl mx-auto flex flex-col gap-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <span className="text-xs font-mono text-[#00f0ff] uppercase tracking-widest font-semibold block mb-1">
+                  Networking Dictionary
+                </span>
+                <h1 className="text-3xl font-extrabold text-white tracking-tight">
+                  Interactive Networking Glossary
+                </h1>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filtered.map((item, idx) => (
-                  <Card key={idx} className="p-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-2xl font-extrabold text-[#00f0ff] font-mono">{item.term}</span>
-                      <Badge variant="cyan">{item.layer}</Badge>
-                    </div>
-                    <h3 className="text-xs font-bold text-white mb-2">{item.full}</h3>
-                    <p className="text-xs text-zinc-400 leading-relaxed">{item.desc}</p>
-                  </Card>
-                ))}
+              <div className="w-full md:w-80">
+                <SearchInput value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
             </div>
-          </main>
-        </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((item, idx) => (
+                <Card key={idx} className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl font-extrabold text-[#00f0ff] font-mono">{item.term}</span>
+                    <Badge variant="cyan">{item.layer}</Badge>
+                  </div>
+                  <h3 className="text-xs font-bold text-white mb-2">{item.full}</h3>
+                  <p className="text-xs text-zinc-400 leading-relaxed">{item.desc}</p>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </main>
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }
