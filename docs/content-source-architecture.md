@@ -87,14 +87,62 @@ export interface TextbookAttribution {
   standardsRefs: string[];
   /** Bloom's Taxonomy cognitive target */
   cognitiveLevel: 'RECALL' | 'UNDERSTANDING' | 'APPLICATION' | 'ANALYSIS' | 'EVALUATION';
+  /** Hash of canonical textbook excerpt to detect pedagogical drift upon edition updates */
+  sourceContentHash?: string;
+  /** Version timestamp of canonical source ingestion */
+  sourceVersion?: string;
+}
+
+export interface QuestionAttribution {
+  /** Textbook Chapter & Section from which question is derived */
+  chapterRef: number;
+  sectionRef: string;
+  /** Learning outcome or problem-set reference in the textbook */
+  textbookProblemRef?: string;
+  /** Documented learner misconception targeted by each distractor */
+  distractorRationaleMap: Record<number, string>;
 }
 ```
 
-This attribution is stored directly inside `lesson.contentJson.sourceAttribution`, allowing instructors, auditors, and students to trace every concept to its printed authority.
+This attribution is stored directly inside `lesson.contentJson.sourceAttribution` and `quizQuestion.metadataJson.attribution`, allowing instructors, auditors, and students to trace every concept and assessment item to its printed authority.
 
 ---
 
-## 4. Ingestion Workflow & Quality Gates
+## 4. Textbook Revision Management & Drift Detection
+
+When the textbook author updates an edition or refines an explanation, automated drift detection ensures the platform remains synchronized:
+
+1. **Source Version Tagging**: Every lesson records `sourceVersion` (e.g., `v1.0-ch04-ed2`).
+2. **Automated Drift Invariant**: An automated test (`test:curriculum:textbook-drift`) compares `sourceContentHash` against canonical chapter text.
+3. **Deprecation & Revision Flagging**: If a chapter section is revised in the textbook, any dependent lessons or quiz questions are flagged in the database with `requiresReview: true` rather than silently diverging.
+
+---
+
+## 5. Proposed Prisma Schema Extensions
+
+```prisma
+model Lesson {
+  // ... existing fields ...
+  sourceBookTitle   String?   @default("Authoritative Networking Textbook")
+  sourceEdition     String?   @default("1.0")
+  sourceChapter     Int?
+  sourceSection     String?
+  sourceRfcRefs     String[]  @default([])
+  sourceHash        String?
+  requiresReview    Boolean   @default(false)
+}
+
+model QuizQuestion {
+  // ... existing fields ...
+  sourceChapterRef  Int?
+  sourceSectionRef  String?
+  sourceProblemRef  String?
+}
+```
+
+---
+
+## 6. Ingestion Workflow & Quality Gates
 
 ```
 [Textbook Chapter]
@@ -118,9 +166,9 @@ This attribution is stored directly inside `lesson.contentJson.sourceAttribution
 
 ---
 
-## 5. Phased Roadmap
+## 7. Phased Roadmap
 
-1. **Phase 1 (Architecture & Schema)**: Define attribution interfaces and validation gates (Completed in this specification).
+1. **Phase 1 (Architecture & Schema)**: Define attribution interfaces, drift detection, and validation gates (Completed in this specification).
 2. **Phase 2 (Core Flagship Foundations - NV-C01 & NV-C02)**: Ingest Physical, Data Link, IPv4/IPv6, and Transport chapters from the textbook.
 3. **Phase 3 (Enterprise Routing & Switching - NV-C03)**: Ingest VLANs, Spanning-Tree, OSPF, and BGP chapters.
 4. **Phase 4 (Security & Programmability - NV-C04 & NV-C05)**: Ingest Firewalls, ACLs, IPsec VPNs, Telemetry, and Automation chapters.

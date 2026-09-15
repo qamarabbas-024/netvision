@@ -24,11 +24,11 @@ NetVision structures its professional networking curriculum into **5 Flagship Co
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                       5 FLAGSHIP CERTIFICATION COURSES                      │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  NV-C01: Network Foundations & Physical Layer Architecture                  │
-│  NV-C02: Internet Protocol & Core Transport Engineering                     │
-│  NV-C03: Advanced Enterprise Switching & Dynamic Routing Systems            │
-│  NV-C04: Network Security, Boundary Defense & Cryptographic Infrastructure   │
-│  NV-C05: Telemetry, Observability & Network Programmability                 │
+│  NV-C01: Foundations & Network Architecture                                 │
+│  NV-C02: Ethernet, Switching & IP Networking                                │
+│  NV-C03: Transport, Routing & Network Services                              │
+│  NV-C04: Network Security & Secure Connectivity                             │
+│  NV-C05: Network Engineering, Automation & Troubleshooting                 │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │
                                        ▼
@@ -41,7 +41,7 @@ NetVision structures its professional networking curriculum into **5 Flagship Co
                                        │
                                        ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                   NV-NET-MASTERY: NETWORK ENGINEERING MASTERY               │
+│             NV-NET-MASTERY: NETVISION CERTIFIED NETWORK ENGINEERING MASTER   │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -49,11 +49,11 @@ NetVision structures its professional networking curriculum into **5 Flagship Co
 
 | Course Code | Title | Target Level | Modules | Focus Areas |
 |:---|:---|:---:|:---:|:---|
-| **NV-C01** | Network Foundations & Physical Layer Architecture | Foundational | 2 Modules | Signals, Bits/Bytes, Topologies, Transmission Media, Framing |
-| **NV-C02** | Internet Protocol & Core Transport Engineering | Intermediate | 4 Modules | IPv4/IPv6, CIDR Subnetting, ARP, ICMP, TCP Handshakes, UDP Sockets |
-| **NV-C03** | Advanced Enterprise Switching & Dynamic Routing Systems | Intermediate | 3 Modules | VLANs, 802.1Q Trunks, STP, OSPF Multi-Area, BGP Path Attributes |
-| **NV-C04** | Network Security, Boundary Defense & Cryptographic Infrastructure | Advanced | 3 Modules | Stateless/Stateful ACLs, Connection Tracking, NAT/PAT, IPsec VPNs |
-| **NV-C05** | Telemetry, Observability & Network Programmability | Advanced | 2 Modules | PCAP Analysis, Wireshark, SNMP, NETCONF/YANG, Python Automation |
+| **NV-C01** | Foundations & Network Architecture | Foundational | 3 Modules | Digital Bits/Bytes, Hardware NIC/CPU, Topologies, Transmission Media, OSI/TCP-IP Models |
+| **NV-C02** | Ethernet, Switching & IP Networking | Beginner | 4 Modules | Ethernet Framing, MAC Tables, VLANs & 802.1Q Trunks, Spanning Tree (STP), IPv4 CIDR Subnetting |
+| **NV-C03** | Transport, Routing & Network Services | Intermediate | 4 Modules | Core Services (ARP, DNS, DHCP), TCP/UDP Sockets, Static Routing, Single-Area OSPFv2 |
+| **NV-C04** | Network Security & Secure Connectivity | Intermediate | 3 Modules | IPv4 ACLs & Firewalls, NAT/PAT Address Translation, Site-to-Site IPsec VPN Cryptography |
+| **NV-C05** | Network Engineering, Automation & Troubleshooting | Advanced | 3 Modules | Wireshark PCAP Stream Forensics, Multi-Layer Incident Diagnostics, Python NetDevOps & YANG |
 
 ---
 
@@ -63,12 +63,12 @@ NetVision issues six authoritative digital credentials. All evaluations occur se
 
 | Credential Code | Credential Designation | Prerequisites & Eligibility Rules |
 |:---|:---|:---|
-| **NV-NET-C01** | Network Foundations Certified Specialist | Complete 100% of NV-C01 lessons + Assessment Avg ≥ 80% + Required Labs |
-| **NV-NET-C02** | IP & Transport Protocol Certified Specialist | Complete 100% of NV-C02 lessons + Assessment Avg ≥ 80% + Required Labs |
-| **NV-NET-C03** | Enterprise Routing & Switching Certified Specialist | Complete 100% of NV-C03 lessons + Assessment Avg ≥ 80% + Required Labs |
-| **NV-NET-C04** | Network Security & Cryptographic Infrastructure Specialist | Complete 100% of NV-C04 lessons + Assessment Avg ≥ 80% + Required Labs |
-| **NV-NET-C05** | Network Telemetry & Programmability Certified Specialist | Complete 100% of NV-C05 lessons + Assessment Avg ≥ 80% + Required Labs |
-| **NV-NET-MASTERY** | NetVision Network Engineering Mastery | All 5 Specialist Credentials + Cumulative Avg ≥ 85% + Pass Master Capstone |
+| **NV-NET-C01** | NetVision Certified Network Foundations Specialist | Complete 100% of NV-C01 lessons + Assessment Avg ≥ 80% + Required Labs |
+| **NV-NET-C02** | NetVision Certified Switching & IP Networking Specialist | Complete 100% of NV-C02 lessons + Assessment Avg ≥ 80% + Required Labs |
+| **NV-NET-C03** | NetVision Certified Routing & Services Specialist | Complete 100% of NV-C03 lessons + Assessment Avg ≥ 80% + Required Labs |
+| **NV-NET-C04** | NetVision Certified Network Security Specialist | Complete 100% of NV-C04 lessons + Assessment Avg ≥ 80% + Required Labs |
+| **NV-NET-C05** | NetVision Certified Network Engineering Specialist | Complete 100% of NV-C05 lessons + Assessment Avg ≥ 80% + Required Labs |
+| **NV-NET-MASTERY** | NetVision Certified Network Engineering Master | All 5 Specialist Credentials + Cumulative Avg ≥ 85% + Pass Master Capstone |
 
 ---
 

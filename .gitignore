@@ -73,6 +73,8 @@ docs/curriculum-content-v2-migration-status.md
 backend/scripts/audit-*.ts
 backend/scripts/find-zero-*.ts
 backend/scripts/scan-*.js
+qa/
 *.dump
 *.sql.bak
 *.txt.dump
+
