@@ -84,6 +84,7 @@ export const FooterSection: React.FC = () => {
               <li><Link href="/troubleshooting" className="hover:text-[#34d399] transition-colors">Incident Break-Fix</Link></li>
               <li><Link href="/commands" className="hover:text-[#34d399] transition-colors">CLI Commands Shell</Link></li>
               <li><Link href="/certificates" className="hover:text-[#34d399] transition-colors">Certifications &amp; Seals</Link></li>
+              <li><Link href="/certificates/verify" className="hover:text-[#34d399] transition-colors">Verify Credential</Link></li>
             </ul>
           </div>
 

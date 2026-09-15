@@ -8,6 +8,7 @@ import { runDropCPublicBrowsingAndSeoTests } from './dropCPublicBrowsingAndSeo.t
 import { runDropIAccessibilityAndContrastTests } from './dropIAccessibilityAndContrast.test';
 import { runDropJMobileResponsivenessTests } from './dropJMobileResponsiveness.test';
 import { runDropKTests } from './dropKPerformanceAndPdf.test';
+import { runDropHSeoAndDiscoverabilityTests } from './dropHSeoAndDiscoverability.test';
 
 async function main() {
   console.log('================================================================');
@@ -15,48 +16,52 @@ async function main() {
   console.log('================================================================\n');
 
   try {
-    console.log('[TEST 1/9] Running Troubleshooting Fallback Engine Tests...');
+    console.log('[TEST 1/11] Running Troubleshooting Fallback Engine Tests...');
     runTroubleshootingFallbackTests();
     console.log('  ✓ Passed: Troubleshooting Fallback Scenarios, local sessions, & command execution verified.\n');
 
-    console.log('[TEST 2/9] Running Epoch XI-XV Next-Gen Engine Tests (FRR, IBN, Maglev, MPQUIC, Gossip)...');
+    console.log('[TEST 2/11] Running Epoch XI-XV Next-Gen Engine Tests (FRR, IBN, Maglev, MPQUIC, Gossip)...');
     runEpoch11to15Tests();
     console.log('  ✓ Passed: Epoch XI-XV configurations and simulation logic verified.\n');
 
-    console.log('[TEST 3/9] Running Certification Dashboard Integration Tests...');
+    console.log('[TEST 3/11] Running Certification Dashboard Integration Tests...');
     runCertificationDashboardTests();
     console.log('  ✓ Passed: Authoritative credentials, course eligibility, 9-point Mastery, Master Capstone, and E2E Journey Tests (A-J) verified.\n');
 
-    console.log('[TEST 4/9] Running Drop #7 Production DevOps, Security & Alignment Tests...');
+    console.log('[TEST 4/11] Running Drop #7 Production DevOps, Security & Alignment Tests...');
     runDrop7ProductionHardeningTests();
     console.log('  ✓ Passed: Flagship fallback, site URL, sitemap, robots, API config, Dockerfiles, and CI workflow verified.\n');
 
-    console.log('[TEST 5/9] Running Drop A CI Stability, Capstone & Navigation Tests...');
+    console.log('[TEST 5/11] Running Drop A CI Stability, Capstone & Navigation Tests...');
     runDropANavigationAndCapstoneTests();
     console.log('  ✓ Passed: 5 Flagship course links, Capstone reconciliation, and 404 navigation verified.\n');
 
-    console.log('[TEST 6/9] Running Drop B Legal, Compliance & Trust Tests...');
+    console.log('[TEST 6/11] Running Drop B Legal, Compliance & Trust Tests...');
     runDropBLegalAndTrustTests();
     console.log('  ✓ Passed: On-chain claim eradication, /terms & /privacy, vendor disclaimers verified.\n');
 
-    console.log('[TEST 7/9] Running Drop C Public Browsing & SEO Architecture Tests...');
+    console.log('[TEST 7/11] Running Drop C Public Browsing & SEO Architecture Tests...');
     runDropCPublicBrowsingAndSeoTests();
     console.log('  ✓ Passed: Public browsing unlock and Schema.org JSON-LD SEO verified.\n');
 
-    console.log('[TEST 8/9] Running Drop I Accessibility & WCAG 2.1 AA Tests...');
+    console.log('[TEST 8/11] Running Drop I Accessibility & WCAG 2.1 AA Tests...');
     runDropIAccessibilityAndContrastTests();
     console.log('  ✓ Passed: Modal focus trap, terminal regions, aria-live, and contrast verified.\n');
 
-    console.log('[TEST 9/10] Running Drop J Mobile Viewport & Responsiveness Tests...');
+    console.log('[TEST 9/11] Running Drop J Mobile Viewport & Responsiveness Tests...');
     runDropJMobileResponsivenessTests();
     console.log('  ✓ Passed: Small viewport drawer clamping, topbar action hiding, modal max-h, and word-break verified.\n');
 
-    console.log('[TEST 10/10] Running Drop K Performance & PDF Engine Optimization Tests...');
+    console.log('[TEST 10/11] Running Drop K Performance & PDF Engine Optimization Tests...');
     await runDropKTests();
     console.log('  ✓ Passed: Lazy 3D canvas, dynamic modal code-splitting, PDF anchor cleanup, and font fallbacks verified.\n');
 
+    console.log('[TEST 11/11] Running Drop H SEO & Public Discoverability Tests...');
+    runDropHSeoAndDiscoverabilityTests();
+    console.log('  ✓ Passed: Titles, meta descriptions, canonical URLs, robots, sitemap, Schema.org Course/Credential, and public verification verified.\n');
+
     console.log('================================================================');
-    console.log('🎉 ALL FRONTEND TESTS PASSED SUCCESSFULLY (10/10 suites)');
+    console.log('🎉 ALL FRONTEND TESTS PASSED SUCCESSFULLY (11/11 suites)');
     console.log('================================================================');
     process.exit(0);
   } catch (error) {

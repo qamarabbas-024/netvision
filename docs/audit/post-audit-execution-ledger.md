@@ -31,6 +31,7 @@ This ledger tracks every forensic finding, root cause, implementation fix, autom
 | **SEC-006** | Absence of refresh token rotation forcing architectural reliance on long-lived tokens | **P1** | YES | Single access token generated with no refresh tokens or `/auth/refresh` endpoint | Implemented 64-char crypto refresh tokens, rotation with reuse detection, and family invalidation via `TokenRevocationService` | `backend/scripts/test-drop-d-auth-hardening.ts` | Rotation changes token; replay attack revokes entire family | **VERIFIED FIXED** |
 | **SEC-007** | Absence of server-side logout invalidation and stolen-token rejection | **P1** | YES | `logout` only cleared response cookies while backend stateless JWTs remained valid until expiry | Implemented in-memory SHA-256 token revocation registry & session cutoffs; `JwtStrategy` rejects revoked tokens with 401 | `backend/scripts/test-drop-d-auth-hardening.ts` | Stolen token blocked with UnauthorizedException after logout | **VERIFIED FIXED** |
 | **SEC-008** | High-risk endpoints (refresh, Capstone start/submit, certificate download) vulnerable to abusive burst traffic | **P1** | YES | High-resource routes lacked specialized rate limit tiers | Added `/auth/refresh` to `AUTH` tier (10 req/min) and Capstone start/submit & certificate download to `@UserRateLimit()` (30 req/min) | `backend/scripts/test-drop-d-auth-hardening.ts` | Rate limit tier resolution and decorators verified; IDOR enforced | **VERIFIED FIXED** |
+| **SEO-004** | Incomplete public discoverability, missing Schema.org Course/Credential structured data, and unindexed public verification portal | **P1** | YES | Public verification portal missing dedicated lookup page; course/certificate pages lacked Schema.org Course and EducationalOccupationalCredential schemas; resource layouts omitted canonical URLs | Created `/certificates/verify` portal page & layouts; added Schema.org Course/Credential JSON-LD grounded in canonical data; added canonical URLs and Twitter cards across all resource hubs; updated sitemap and robots rules | `frontend/__tests__/dropHSeoAndDiscoverability.test.ts` | 7/7 test suites passed; 11/11 frontend suites green; 37/37 static pages built | **VERIFIED FIXED** |
 
 ---
 
@@ -40,17 +41,18 @@ This ledger tracks every forensic finding, root cause, implementation fix, autom
 - **Drop B (Legal, Compliance & Trust)**: COMPLETED (`35d4b69` / `dee7de5`)
 - **Drop C (Public Browsing Unlock & SEO)**: COMPLETED (`60be540` / `94fa68c`)
 - **Drop D (NV-C04 Benchmark Seeding)**: COMPLETED (`3c115b6` / `c320f9a`)
-- **Drop D Security (Auth, Session Security & API Abuse)**: COMPLETED
+- **Drop D Security (Auth, Session Security & API Abuse)**: COMPLETED (`f59b1e6`)
 - **Drop E (Curriculum Completeness & DB Warmup)**: COMPLETED (`47b8f47` / `5ac49da`)
 - **Drop F (Master Capstone Transaction Hardening)**: COMPLETED (`19da2c0` / `16c7339`)
 - **Drop G (Security Sanitization & Rate Limiting)**: COMPLETED (`1d3e46a`)
 - **Drop H (Session Security & JWT Lifecycle)**: COMPLETED (`0b097e0`)
+- **Drop H SEO (SEO & Public Discoverability)**: COMPLETED
 - **Drop I (Accessibility & WCAG 2.1 AA)**: COMPLETED (`0655613`)
 - **Drop J (Mobile 320px–375px Hardening)**: COMPLETED (`63d9eb5`)
 - **Drop K (Performance & PDF Optimization)**: COMPLETED (`d49a67d`)
 - **Drop L (End-to-End System Verification & Master Report)**: COMPLETED
 
-**All 27 Findings Verified Fixed. 0 Regressions. Monorepo Quality Gate: GREEN.**
+**All 28 Findings Verified Fixed. 0 Regressions. Monorepo Quality Gate: GREEN.**
 
 
 
