@@ -36,6 +36,7 @@ import {
   Eye,
   ListOrdered,
 } from 'lucide-react';
+import { MasteryCelebrationModal } from '@/components/certification/MasteryCelebrationModal';
 import {
   getCapstoneSpecificationApi,
   startCapstoneAttemptApi,
@@ -148,6 +149,7 @@ export default function MasterCapstonePage() {
   const [claimError, setClaimError] = useState<string | null>(null);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState<boolean>(false);
   const [downloadPdfError, setDownloadPdfError] = useState<string | null>(null);
+  const [showMasteryCelebration, setShowMasteryCelebration] = useState<boolean>(false);
 
   // Authoritative re-evaluation of 9-point Mastery criteria following Capstone submission
   const reevaluateMasteryEligibility = useCallback(async () => {
@@ -174,6 +176,7 @@ export default function MasterCapstonePage() {
     try {
       const minted = await claimCertificationCertificateApi('NV-NET-MASTERY');
       setClaimedMasteryCert(minted);
+      setShowMasteryCelebration(true);
       // Immediately refresh authoritative eligibility to reflect active certificate
       await reevaluateMasteryEligibility();
     } catch (err: any) {
@@ -471,8 +474,9 @@ export default function MasterCapstonePage() {
         })
         .catch(() => null);
 
-      // If passed, immediately trigger authoritative Mastery eligibility re-evaluation
+      // If passed, immediately trigger authoritative Mastery eligibility re-evaluation & celebration
       if (result.passed) {
+        setShowMasteryCelebration(true);
         reevaluateMasteryEligibility();
       }
     } catch (err: any) {
@@ -1833,6 +1837,14 @@ export default function MasterCapstonePage() {
           )}
         </div>
       </div>
+
+      {/* Drop L: Mastery Grand Celebration Modal */}
+      <MasteryCelebrationModal
+        isOpen={showMasteryCelebration}
+        onClose={() => setShowMasteryCelebration(false)}
+        credentialId={claimedMasteryCert?.credentialId || masteryReeval?.existingCertificate?.credentialId}
+        onDownloadPdf={(credId) => handleDownloadMasteryPdf(credId)}
+      />
     </ProtectedRoute>
   );
 }

@@ -244,13 +244,9 @@ export class AuthService {
       where: { email: normalizedEmail },
     });
 
-    if (!user) {
-      // Do not reveal email non-existence
-      return { message: 'If an account exists for this email, a new verification code has been dispatched.' };
-    }
-
-    if (user.isVerified) {
-      throw new BadRequestException('This account is already verified. You can log in directly.');
+    if (!user || user.isVerified) {
+      // Do not reveal email existence or verified status to untrusted callers
+      return { message: 'If an account exists for this email and requires verification, a new verification code has been dispatched.' };
     }
 
     // Rate limit check: 60 sec window

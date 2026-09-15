@@ -1,282 +1,228 @@
 # NetVision 🌐
 
-> **Learn Computer Networking by Seeing It.**  
-> An interactive, visual computer networking learning platform featuring dynamic packet animations, deterministic CLI sandbox simulations, multi-modal lessons, mastery-based assessments, and verifiable certifications.
+> **Visual Network Engineering & Verifiable Certification Platform**  
+> An interactive learning platform combining packet-flow visualizations, deterministic CLI sandbox labs, multi-modal networking curricula, and server-authoritative certification credentials.
 
 ---
 
-## 🚀 Live Public Beta
+## 📖 Overview
 
-- **Web Application (Production Frontend)**: [https://netvision-three.vercel.app/](https://netvision-three.vercel.app/)
-- **API Gateway (Staging Backend)**: [https://netvision-backend-staging.onrender.com](https://netvision-backend-staging.onrender.com)
-- **Service Health Check**: [https://netvision-backend-staging.onrender.com/api/v1/health](https://netvision-backend-staging.onrender.com/api/v1/health)
-- **Interactive API Documentation (Swagger OpenAPI)**: [https://netvision-backend-staging.onrender.com/api/docs](https://netvision-backend-staging.onrender.com/api/docs)
-- **Official GitHub Repository**: [https://github.com/qamarabbas-024/netvision](https://github.com/qamarabbas-024/netvision)
+Computer networking education has historically been divided between abstract textbook theory and opaque, heavyweight enterprise simulators. NetVision bridges this gap with an intuitive, web-native visual learning experience:
 
-> **Public Beta Status**: NetVision is currently running in public beta. Email OTP verification is temporarily deactivated (`EMAIL_VERIFICATION_ENABLED=false`) to enable immediate, zero-friction registration and exploration for learners worldwide. The backend is deployed on staging infrastructure connected to serverless PostgreSQL on Neon.
-
----
-
-## 📖 What NetVision Is
-
-Computer networking education is often polarized between abstract textbook theory (memorizing RFCs and static OSI diagrams) and complex enterprise simulators (Cisco Packet Tracer, GNS3).
-
-NetVision bridges this divide with an intuitive, web-native visual learning experience:
-1. **Visual Packet Mechanics**: Watch frames and packets move across topologies with step-by-step header encapsulation and decapsulation animations.
-2. **Multi-Modal Pedagogy**: Every lesson presents an intuitive real-world analogy, simplified explanation, RFC-level technical details, and a quick-reference cheatsheet.
-3. **Simulated CLI Labs**: Practice standard network diagnostics (`ping`, `traceroute`, `ifconfig`, `ip`, `arp`, `netstat`, `nslookup`, `route`) in a safe, deterministic browser sandbox.
-4. **Mastery-Based Progression**: Enforce real comprehension with multi-tiered quizzes requiring an 80% passing threshold before unlocking certifications.
+1. **Visual Packet Mechanics**: Inspect frames and packets moving across topologies with step-by-step encapsulation and decapsulation animations.
+2. **Multi-Modal Pedagogy**: Every concept integrates an intuitive real-world analogy, simplified explanation, RFC-grounded technical mechanics, and an operational cheatsheet.
+3. **Deterministic CLI Practice Labs**: Execute core network diagnostic commands (`ping`, `traceroute`, `ip`, `arp`, `netstat`, `route`, `iptables`, `tcpdump`) in an isolated browser-accessible terminal environment.
+4. **Server-Authoritative Certifications**: Earn rigorous digital credentials backed by cryptographically verifiable identifiers and server-side evaluation.
 
 ---
 
-## 🏗️ Repository Layout
+## 🏛️ Flagship Curriculum & Certification Architecture
 
-NetVision is organized as a clean **pnpm monorepo** managed with **Turborepo**:
+NetVision structures its professional networking curriculum into **5 Flagship Courses**, each leading to an industry-aligned specialist credential, capped by the comprehensive **NetVision Network Engineering Mastery** program.
 
 ```
-netvision/
-├── frontend/                 # Next.js 14 App Router, React 18, Tailwind CSS, Framer Motion, @xyflow/react
-├── backend/                  # NestJS 10 REST API, Prisma 5 ORM, Argon2, Passport JWT, Swagger OpenAPI
-├── packages/
-│   ├── shared/               # Shared TypeScript interfaces, DTOs, and curriculum models (@netvision/shared)
-│   ├── simulation-engine/    # Pure TypeScript packet simulation engine (@netvision/simulation-engine)
-│   └── ui/                   # Reusable UI component library and design system tokens (@netvision/ui)
-├── docs/                     # Architectural specifications, security audits, and curriculum reports
-├── docker-compose.yml        # Containerized PostgreSQL 16 development database
-├── turbo.json                # Turborepo build pipeline configuration
-├── pnpm-workspace.yaml       # pnpm workspace definition
-└── README.md                 # Project documentation
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       5 FLAGSHIP CERTIFICATION COURSES                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  NV-C01: Network Foundations & Physical Layer Architecture                  │
+│  NV-C02: Internet Protocol & Core Transport Engineering                     │
+│  NV-C03: Advanced Enterprise Switching & Dynamic Routing Systems            │
+│  NV-C04: Network Security, Boundary Defense & Cryptographic Infrastructure   │
+│  NV-C05: Telemetry, Observability & Network Programmability                 │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                      NETVISION MASTER CAPSTONE EXAMINATION                  │
+│                     (120 Minutes | 85% Composite Threshold)                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Theory: 40%  │  Incident Remediation: 35%  │  Packet Forensics: 25%        │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+                                       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                   NV-NET-MASTERY: NETWORK ENGINEERING MASTERY               │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+### 1. The 5 Flagship Courses
+
+| Course Code | Title | Target Level | Modules | Focus Areas |
+|:---|:---|:---:|:---:|:---|
+| **NV-C01** | Network Foundations & Physical Layer Architecture | Foundational | 2 Modules | Signals, Bits/Bytes, Topologies, Transmission Media, Framing |
+| **NV-C02** | Internet Protocol & Core Transport Engineering | Intermediate | 4 Modules | IPv4/IPv6, CIDR Subnetting, ARP, ICMP, TCP Handshakes, UDP Sockets |
+| **NV-C03** | Advanced Enterprise Switching & Dynamic Routing Systems | Intermediate | 3 Modules | VLANs, 802.1Q Trunks, STP, OSPF Multi-Area, BGP Path Attributes |
+| **NV-C04** | Network Security, Boundary Defense & Cryptographic Infrastructure | Advanced | 3 Modules | Stateless/Stateful ACLs, Connection Tracking, NAT/PAT, IPsec VPNs |
+| **NV-C05** | Telemetry, Observability & Network Programmability | Advanced | 2 Modules | PCAP Analysis, Wireshark, SNMP, NETCONF/YANG, Python Automation |
+
+---
+
+### 2. Professional Credentials & Eligibility Rules
+
+NetVision issues six authoritative digital credentials. All evaluations occur server-side; credentials carry a unique cryptographic identifier verifiable through the public registry.
+
+| Credential Code | Credential Designation | Prerequisites & Eligibility Rules |
+|:---|:---|:---|
+| **NV-NET-C01** | Network Foundations Certified Specialist | Complete 100% of NV-C01 lessons + Assessment Avg ≥ 80% + Required Labs |
+| **NV-NET-C02** | IP & Transport Protocol Certified Specialist | Complete 100% of NV-C02 lessons + Assessment Avg ≥ 80% + Required Labs |
+| **NV-NET-C03** | Enterprise Routing & Switching Certified Specialist | Complete 100% of NV-C03 lessons + Assessment Avg ≥ 80% + Required Labs |
+| **NV-NET-C04** | Network Security & Cryptographic Infrastructure Specialist | Complete 100% of NV-C04 lessons + Assessment Avg ≥ 80% + Required Labs |
+| **NV-NET-C05** | Network Telemetry & Programmability Certified Specialist | Complete 100% of NV-C05 lessons + Assessment Avg ≥ 80% + Required Labs |
+| **NV-NET-MASTERY** | NetVision Network Engineering Mastery | All 5 Specialist Credentials + Cumulative Avg ≥ 85% + Pass Master Capstone |
+
+---
+
+### 3. The Master Capstone Examination
+
+The **Master Capstone Examination** is the synoptic evaluation governing issuance of the `NV-NET-MASTERY` credential:
+
+- **Duration**: 120 minutes, single-session timed exam.
+- **Passing Threshold**: **≥ 85%** composite score.
+- **Scoring Weights**:
+  - **Component 1: Architectural Theory & Standards** — **40%**
+  - **Component 2: Active Incident Remediation** — **35%**
+  - **Component 3: Packet Forensics & Root-Cause Analysis** — **25%**
+- **Attempt & Cooldown Policy**:
+  - Maximum **3 attempts** within any rolling **90-day window**.
+  - **24-hour mandatory cooldown** following a first unsuccessful attempt.
+  - **72-hour mandatory cooldown** following any subsequent unsuccessful attempt.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Component | Technologies & Tools |
-|---|---|
-| **Frontend Client** | **Next.js 14** (App Router), **React 18**, **TypeScript 5**, **Tailwind CSS 3**, **Framer Motion**, **@xyflow/react**, **Zustand**, **@tanstack/react-query**, **Lucide React** |
-| **Backend API Gateway** | **NestJS 11**, **TypeScript 5**, **Prisma 5 ORM**, **Argon2**, **Passport JWT**, **Passport Google & GitHub**, **@nestjs/throttler**, **@nestjs/swagger**, **Helmet**, **Resend SDK** |
-| **Database** | **PostgreSQL 16** (Neon Serverless in Staging; Docker Compose in Local Development) |
-| **Monorepo & Build Tools** | **pnpm v11 Workspaces**, **Turborepo** |
+NetVision is built as a TypeScript monorepo with strict layer separation:
+
+| Layer | Technologies |
+|:---|:---|
+| **Frontend Application** | **Next.js 14** (App Router), **React 18**, **TypeScript 5**, **Tailwind CSS 3**, **Framer Motion**, **@xyflow/react**, **Zustand**, **Lucide Icons** |
+| **Backend API Gateway** | **NestJS 11**, **TypeScript 5**, **Prisma 5 ORM**, **Argon2id**, **Passport JWT**, **Throttler Rate-Limiting**, **Swagger OpenAPI** |
+| **Persistence** | **PostgreSQL 16** with relational foreign key integrity and ACID transactions |
+| **Monorepo Architecture** | **pnpm Workspaces**, **Turborepo** build orchestration |
+| **Verification & Testing** | **Jest**, **Playwright** end-to-end testing, custom academic integrity test harnesses |
 
 ---
 
-## ✨ Current Implemented Features
-
-### 1. Authentication & Identity
-- **Instant Beta Registration**: Create an account and receive immediate JWT tokens without mandatory OTP gates during public beta.
-- **Argon2id Password Security**: Passwords are securely hashed with memory-hard Argon2id (`$argon2id$`).
-- **OAuth 2.0 Integration**: Sign in with Google or GitHub OAuth.
-- **Guest-First Anonymous Mode**: Learn, run simulations, and take quizzes without an account via `X-Anonymous-ID` tracking.
-- **Atomic Progress Claiming**: Automatically merge anonymous guest progress into an account upon registration.
-- **Email Architecture**: Complete Resend HTTPS REST API and SMTP provider abstraction ready for future production activation.
-
-### 2. Interactive Learning System
-- **16-Course Progressive Curriculum**: Structured learning from digital bit fundamentals (NET-101) through BGP routing and PCAP packet forensics (NET-404).
-- **Multi-Modal Lessons**: 38 lessons featuring real-world analogies, simplified explanations, technical deep dives, and cheatsheets.
-- **Interactive Simulation Engines**:
-  - TCP 3-Way Handshake & 4-Way Teardown State Machine
-  - IPv4 Subnetting & CIDR Calculation Visualizer
-  - ARP Cache Resolution & Local Broadcast Framing
-  - DNS Hierarchical Resolution & DHCP 4-Step DORA State Machine
-  - Layer 3 Routing Table Forwarding & Longest Prefix Match
-- **Interactive Practice Labs**: 38 guided CLI labs with automated validation.
-- **Mastery Assessments**: 38 quizzes with 50 questions across Recall, Understanding, Application, and Troubleshooting cognitive tiers.
-- **Gamification & Achievements**: 10 automated achievement badge unlocks across 6 categories.
-- **Learner Dashboard**: Real-time course completion percentages, mastery scores, and recent lab activity.
-- **Verifiable Digital Certificates**: Cryptographic certificate generation (`NETVISION-CERT-FOUNDATIONS`) with public validation pages (`/certificates/[id]`).
-
-### 3. Sandbox Execution State
-- **Simulated Sandbox (ACTIVE)**: `SimulatedSandboxProvider` executes in pure TypeScript memory with deterministic telemetry for `ping`, `traceroute`, `ifconfig`, `ip`, `arp`, `netstat`, `nslookup`, `dig`, `route`, `iptables`, and `tcpdump`.
-- **Docker Sandbox (DISABLED)**: `DockerSandboxProvider` is intentionally disabled in public beta to eliminate host container security risks on shared cloud deployments.
-
----
-
-## 🗺️ Networking Curriculum (NET-101 to NET-404)
+## 📁 Repository Structure
 
 ```
-Level 1: Foundations (Foundational)
-├── NET-101: Computer & Digital Information Foundations (Binary, Hex, Octets, Bits & Bytes)
-├── NET-102: Network Fundamentals & Topologies (Nodes, Links, Topologies, LAN vs WAN)
-└── NET-103: The OSI & TCP/IP Reference Models (7-Layer OSI, 4-Layer TCP/IP, PDU Encapsulation)
-
-Level 2: Core Protocols & Addressing (Beginner)
-├── NET-201: Layer 2 Ethernet & Physical Media (Frames, 48-bit MAC Addresses, CSMA/CD)
-├── NET-202: IPv4 Addressing & CIDR Subnetting Mastery (VLSM, Network & Broadcast Calculation)
-├── NET-203: Core IP Services (ARP Resolution, ICMP Echo, DNS Tree, DHCP DORA)
-└── NET-204: Transport Layer Protocols (TCP Reliability, UDP Datagrams, Sockets & Ports)
-
-Level 3: Enterprise Infrastructure & Routing (Intermediate)
-├── NET-301: Enterprise Switching, VLANs & Trunking (802.1Q, Broadcast Domains, Access vs Trunk)
-├── NET-302: Spanning Tree Protocol & Switch Redundancy (Loop Prevention & BPDU Mechanics)
-├── NET-303: IP Routing & Static Route Administration (Longest Prefix Match, Routing Tables)
-├── NET-304: Dynamic Routing Protocols (Single-Area OSPF Adjacencies & Path Selection)
-└── NET-305: Network Security, ACLs & Stateful Firewalls (Packet Filtering, Port Restrictions)
-
-Level 4: Advanced Edge & Forensics (Advanced)
-├── NET-401: NAT, PAT & Edge WAN Connectivity (Network Address Translation, NAT Overload)
-├── NET-402: VPN Technology & Cryptography (IPsec Architecture, IKE Tunnels, AES/RSA)
-├── NET-403: BGP & Enterprise WAN Architecture (Autonomous Systems, Path Vector Routing)
-└── NET-404: Packet Capture Analysis & Troubleshooting (Wireshark PCAP Stream Forensics)
+netvision/
+├── frontend/                     # Next.js 14 web client & learning interface
+│   ├── app/                      # App router pages (courses, lessons, capstone, verify)
+│   ├── components/               # React components (simulations, terminals, modals)
+│   └── lib/                      # Client utilities (state stores, audio, particle engines)
+├── backend/                      # NestJS 11 API Gateway
+│   ├── prisma/                   # Prisma schema, migrations, and canonical seed scripts
+│   ├── src/
+│   │   ├── auth/                 # Identity, JWT, Argon2id, and OAuth providers
+│   │   ├── certifications/       # Authoritative certification & Master Capstone engines
+│   │   ├── topics/               # Curriculum content, quizzes, and simulation state
+│   │   └── sandbox/              # Deterministic CLI command execution provider
+│   └── scripts/                  # Verification and automated regression suites
+├── packages/
+│   ├── shared/                   # Shared TypeScript models, DTOs, and curriculum schemas
+│   └── simulation-engine/        # Topology state graph & packet animation models
+├── docs/                         # Architecture specifications and pedagogy documentation
+├── docker-compose.yml            # Local PostgreSQL 16 service container
+├── turbo.json                    # Turborepo build pipeline
+└── pnpm-workspace.yaml           # pnpm workspace definition
 ```
 
 ---
 
-## ⚡ Quick Start & Local Development
+## 🚀 Getting Started (Local Development)
 
 ### Prerequisites
-- **Node.js**: `>= 20.x`
-- **pnpm**: `11.20.0` (Install via `npm install -g pnpm@11.20.0`)
-- **Docker**: Docker Desktop or Docker Engine (for local PostgreSQL)
+
+- **Node.js**: `v20.x` or higher
+- **pnpm**: `v9.x` or higher (`corepack enable pnpm`)
+- **Docker**: For containerized PostgreSQL database (optional if running local PostgreSQL)
 
 ### 1. Clone & Install Dependencies
+
 ```bash
 git clone https://github.com/qamarabbas-024/netvision.git
 cd netvision
 pnpm install
 ```
 
-### 2. Configure Environment Variables
+### 2. Environment Configuration
+
+Copy example environment files to their active locations:
+
 ```bash
-# Backend environment configuration
+# Backend configuration
 cp backend/.env.example backend/.env
 
-# Frontend environment configuration
-cp frontend/.env.example frontend/.env.local
+# Frontend configuration
+cp frontend/.env.example frontend/.env
 ```
 
-### 3. Start Local Database & Run Migrations
+Review `backend/.env` to configure your PostgreSQL connection string and a secure `JWT_SECRET` (minimum 32 characters in production).
+
+### 3. Database Initialization
+
+Start a local PostgreSQL container and run migrations:
+
 ```bash
-# Start local PostgreSQL database container
-pnpm db:up
+# Start PostgreSQL via Docker Compose
+docker compose up -d postgres
 
-# Apply Prisma database migrations
-pnpm db:migrate
+# Generate Prisma Client and apply migrations
+pnpm --filter netvision-backend prisma:generate
+pnpm --filter netvision-backend prisma:migrate
 
-# Seed curriculum, lessons, labs, achievements, and certifications
+# Seed canonical courses, modules, and lessons
 pnpm --filter netvision-backend prisma:seed
 ```
 
 ### 4. Start Development Servers
+
 ```bash
+# Run both frontend and backend concurrently via Turborepo
 pnpm dev
 ```
 
-- **Frontend Application**: `http://localhost:3000`
-- **Backend REST API**: `http://localhost:4000/api/v1`
-- **Swagger Documentation**: `http://localhost:4000/api/docs`
+- **Frontend Client**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:4000/api/v1](http://localhost:4000/api/v1)
+- **API Documentation (Swagger)**: [http://localhost:4000/api/docs](http://localhost:4000/api/docs)
 
 ---
 
-## 🧪 Test Suites
+## 🧪 Verification & Testing
 
 ```bash
-# Run P0 product correctness & canonical state suite
-pnpm --filter netvision-backend test:product:correctness
-
-# Run anonymous claim security & session isolation tests
-pnpm --filter netvision-backend test:claim:security
-
-# Run security, OAuth cookies & OTP entropy hardening tests
-pnpm --filter netvision-backend test:security
-
-# Run Content V2 curriculum validation suite
-pnpm --filter netvision-backend test:curriculum:content-v2
-
-# Run error, empty state & resilience audit
-pnpm --filter netvision-backend test:audit:errors
-
-# Run network troubleshooting engine test suite
-pnpm --filter netvision-backend test:troubleshooting
-
-# Execute typecheck across all workspace packages
+# Typecheck across all workspace packages
 pnpm typecheck
 
-# Build both applications
+# Lint workspace
+pnpm lint
+
+# Production build verification
 pnpm build
+
+# Run certification integrity & grading regressions
+pnpm --filter netvision-backend test:drop8
+pnpm --filter netvision-backend test:drop9
 ```
 
 ---
 
-## 🗄️ Database Migration Policy
+## 🔒 Security & Verification Model
 
-Database schema integrity is managed strictly through **Prisma Migrations**:
-
-- **Staging & Production Deployments**: Must execute `pnpm prisma:migrate:prod` (`prisma migrate deploy`).
-- **Forbidden in Shared Environments**: `prisma db push` is strictly prohibited in staging and production to prevent unintended data loss or schema drifts.
-- **Local Development**: Create reproducible SQL migrations via `pnpm --filter netvision-backend prisma:migrate`.
-
----
-
-## 🔒 Security Controls
-
-- **Password Hashing**: Memory-hard **Argon2id** (`$argon2id$`) with cryptographically secure salts.
-- **JWT Authorization**: Stateless HMAC-SHA256 tokens with short lifetimes.
-- **Startup Protection**: `validateProductionConfig()` halts server boot if default or insecure JWT secrets are detected.
-- **IDOR Protection**: Strict per-user ownership verification on all sandbox sessions, exam attempts, and certificates.
-- **HTTP Hardening**: Helmet configured with strict Content Security Policy, HSTS, `X-Content-Type-Options: nosniff`, and `X-Frame-Options: SAMEORIGIN`.
-- **CORS Restriction**: Staging API allows origins strictly matching `https://netvision-three.vercel.app`.
-- **Rate Limiting**: Multi-tier request throttling via `@nestjs/throttler` (100 req/min global, 20 req/min auth, 5 req/min password reset) with `loopback` trust proxy configuration.
-- **Input Sanitization**: Global `ValidationPipe` with whitelist enforcement rejects unexpected request parameters.
-- **Sandbox Isolation**: Deterministic in-memory simulation; command injection patterns (`sudo`, `rm -rf`, `chmod`, `dd`, `mkfs`) are intercepted without spawning host processes.
+- **Server-Authoritative Evaluation**: Passing requirements, quiz scoring, and Capstone exams are evaluated strictly server-side. Answer keys and grading rubrics are never embedded in client bundles.
+- **Argon2id Password Hashing**: User credentials use memory-hard Argon2id hashing algorithms.
+- **Cryptographic Credential Verification**: Issued certificates carry unique, tamper-evident identifiers queryable via the public verification portal at `/certificates/verify/:credentialId`.
+- **Public Credential Metadata**: Verification pages embed schema.org `EducationalOccupationalCredential` structured data with XSS sanitization for search engine and employer verification.
 
 ---
 
-## 🔍 Search Engine Optimization (SEO)
+## 📚 Content Development & Roadmap
 
-Search Engine Optimization is an active project priority as NetVision prepares for wider organic reach:
-- Semantic HTML5 structure and dynamic metadata titles across all learning routes.
-- Next.js Server Components (RSC) provide fast, search-engine-readable static renderings of course catalogs and curriculum outlines.
-- Structured data schemas (JSON-LD Course/EducationalOrganization), dynamic XML sitemaps, and automated OpenGraph preview cards are currently in development as part of the Phase 2 SEO milestone.
-
----
-
-## 📜 Workspace Scripts
-
-| Command | Description |
-|---|---|
-| `pnpm dev` | Starts frontend and backend development servers concurrently |
-| `pnpm build` | Builds all applications and packages in the workspace |
-| `pnpm typecheck` | Executes `tsc --noEmit` across all workspace projects |
-| `pnpm lint` | Runs ESLint across all projects |
-| `pnpm db:up` | Boots local PostgreSQL database via Docker Compose |
-| `pnpm db:down` | Stops local database container |
-| `pnpm db:migrate` | Applies Prisma migrations locally |
-
----
-
-## 🛣️ Project Roadmap
-
-The NetVision roadmap is prioritized across the following development tracks:
-
-1. **Security Audit & Hardening**: Comprehensive continuous security testing, dependency auditing, and sandbox isolation verification.
-2. **SEO Foundation**: Dynamic XML sitemap, meta tags, OpenGraph preview cards, and JSON-LD educational schema markup.
-3. **Spanning Tree Protocol (STP)**: Interactive loop prevention visualizer and lesson content for course NET-302.
-4. **OSPF Dynamic Routing**: Single-Area OSPF neighbor adjacencies and route distribution mechanics for course NET-304.
-5. **Assessment & Question Expansion**: Scaling the mastery question bank from 50 to 150+ scenario-based questions.
-6. **Troubleshooting Engine**: Interactive multi-hop network break-and-repair incident scenarios with packet loss diagnostics.
-7. **Certification Improvements**: Multi-course comprehensive examination blueprints and anti-tampering verification badges.
-8. **Production Email & Domain Setup**: Custom DNS domain verification and live transactional email activation via Resend HTTPS API.
-9. **Teacher & Classroom Features**: Cohort management, assignment dispatch, and student analytics dashboard (`Role.TEACHER`).
-10. **Advanced Networking Specializations**: Cloud VPC Peering, Kubernetes CNI networking, and Snort/Suricata IDS lab modules.
-11. **Epoch XI (Virtual NOS & Containerlab)**: Containerlab YAML generator, FRRouting daemons, EVE-NG/GNS3 exporters, OpenConfig gNMI telemetry streaming, TUN/TAP bridge, and real PCAP/PCAPNG dissector.
-12. **Epoch XII (Autonomous Voice AI SRE)**: Conversational Voice NetOps assistant, Intent-Based Networking (IBN) compiler, 3-agent Byzantine RCA consensus, zero-downtime routing hot-patcher, and GraphRAG telemetry intelligence.
-13. **Epoch XIII (Spatial WebXR 3D Holography)**: 6DoF stereoscopic WebXR canvas, 42U physical datacenter walkthrough, 550km LEO satellite orbit mesh, subsea bathymetric optical repeaters, 3D switch buffer packet collisions, and 25-joint hand tracking.
-14. **Epoch XIV (eBPF Kernel Generator)**: Line-rate 14.8M PPS XDP DDoS mitigation, TC Token Bucket Filter rate shaping, Meta Katran Maglev L4 load balancer with DSR, SockOps TCP bypass, LSM network access control, and 1-click Makefile bundle exporter.
-15. **Epoch XV (Universal WASM Protocol SDK)**: Sandboxed wasm32-wasi protocol runtime, P2P epidemic gossip broadcast, Multipath QUIC (MPQUIC) 5G/Wi-Fi stream bonding, SCION isolation domain architecture, and global community protocol plugin marketplace.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-1. Fork the repository: [https://github.com/qamarabbas-024/netvision](https://github.com/qamarabbas-024/netvision).
-2. Create a feature branch (`git checkout -b feature/interactive-ospf-lab`).
-3. Ensure all tests and typechecks pass (`pnpm typecheck` and `pnpm build`).
-4. Submit a detailed Pull Request describing your changes.
+NetVision is committed to high-integrity curriculum engineering grounded in canonical networking literature. Educational content, packet diagrams, and assessment items are mapped systematically from authoritative reference texts. See [Content Source Architecture](docs/content-source-architecture.md) for our formal ingestion pipeline.
 
 ---
 
 ## 📄 License
 
-This project is open-source software licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE).

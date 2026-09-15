@@ -38,6 +38,8 @@ import {
   MasteryEligibilityResult,
 } from '@/lib/api';
 import { CANONICAL_CREDENTIALS, FLAGSHIP_5_COURSES } from '@netvision/shared';
+import { CourseCelebrationModal } from '@/components/certification/CourseCelebrationModal';
+import { MasteryCelebrationModal } from '@/components/certification/MasteryCelebrationModal';
 
 export default function CertificatesCatalogPage() {
   const { isAuthenticated } = useAuthStore();
@@ -58,6 +60,28 @@ export default function CertificatesCatalogPage() {
   } | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
 
+  // Drop L: Certification celebration state
+  const [courseCelebration, setCourseCelebration] = useState<{
+    isOpen: boolean;
+    courseCode: string;
+    courseTitle: string;
+    credentialId: string;
+    earnedCount: number;
+  }>({
+    isOpen: false,
+    courseCode: '',
+    courseTitle: '',
+    credentialId: '',
+    earnedCount: 1,
+  });
+
+  const [masteryCelebration, setMasteryCelebration] = useState<{
+    isOpen: boolean;
+    credentialId?: string;
+  }>({
+    isOpen: false,
+  });
+
   const loadAllData = useCallback(async () => {
     if (!isAuthenticated) {
       setIsLoading(false);
@@ -75,33 +99,31 @@ export default function CertificatesCatalogPage() {
         ...FLAGSHIP_5_COURSES.map((c) => checkCourseEligibilityApi(c.code)),
       ]);
 
-      if (certsResult.status === 'fulfilled' && Array.isArray(certsResult.value)) {
+      if (certsResult.status === 'fulfilled') {
         setUserCertificates(certsResult.value);
+      } else {
+        console.warn('Failed to fetch certificates:', certsResult.reason);
       }
 
-      if (masteryResult.status === 'fulfilled' && masteryResult.value) {
+      if (masteryResult.status === 'fulfilled') {
         setMasteryEligibility(masteryResult.value);
+      } else {
+        console.warn('Failed to fetch mastery eligibility:', masteryResult.reason);
       }
 
-      const courseMap: Record<string, CourseEligibilityResult> = {};
-      courseResults.forEach((res, idx) => {
-        const course = FLAGSHIP_5_COURSES[idx];
-        if (res.status === 'fulfilled' && res.value) {
-          courseMap[course.code] = res.value;
+      const eligibilities: Record<string, CourseEligibilityResult> = {};
+      courseResults.forEach((res, index) => {
+        const code = FLAGSHIP_5_COURSES[index].code;
+        if (res.status === 'fulfilled') {
+          eligibilities[code] = res.value;
+        } else {
+          console.warn(`Failed to fetch eligibility for ${code}:`, res.reason);
         }
       });
-      setCourseEligibilities(courseMap);
-
-      if (
-        certsResult.status === 'rejected' &&
-        masteryResult.status === 'rejected' &&
-        courseResults.every((r) => r.status === 'rejected')
-      ) {
-        setLoadError('Unable to connect to certificate registry. Please check your connection.');
-      }
+      setCourseEligibilities(eligibilities);
     } catch (err: any) {
-      console.error('Failed to load certificates:', err);
-      setLoadError(err?.message || 'Failed to retrieve authoritative certificate records.');
+      console.error('Failed to load certificates portal data:', err);
+      setLoadError(err?.message || 'Failed to load official certificates.');
     } finally {
       setIsLoading(false);
     }
@@ -111,7 +133,7 @@ export default function CertificatesCatalogPage() {
     loadAllData();
   }, [loadAllData]);
 
-  // Handle certificate claim
+  // Handle certificate claim with Drop L Celebration Experience
   const handleClaim = async (code: string) => {
     setClaimingCode(code);
     setClaimFeedback(null);
@@ -123,6 +145,28 @@ export default function CertificatesCatalogPage() {
         credentialId: minted.credentialId,
         message: `Certificate for ${minted.certificationCode || code} successfully minted! Credential ID: ${minted.credentialId}`,
       });
+
+      // Trigger Celebration Modal
+      if (code === 'NV-NET-MASTERY') {
+        setMasteryCelebration({
+          isOpen: true,
+          credentialId: minted.credentialId,
+        });
+      } else {
+        const matchingCourse = FLAGSHIP_5_COURSES.find((c) => c.code === code);
+        const nextEarnedCount = Math.min(
+          5,
+          userCertificates.filter((c) => c.certificationCode !== 'NV-NET-MASTERY').length + 1
+        );
+        setCourseCelebration({
+          isOpen: true,
+          courseCode: code,
+          courseTitle: matchingCourse?.title || minted.certificationTitle || `${code} Specialist`,
+          credentialId: minted.credentialId,
+          earnedCount: nextEarnedCount,
+        });
+      }
+
       await loadAllData();
     } catch (err: any) {
       console.warn(`[NetVision Claim] Claim request failed for ${code}:`, err);
@@ -829,6 +873,25 @@ export default function CertificatesCatalogPage() {
           </main>
         </div>
       </div>
+
+      {/* Drop L: Course Specialist Celebration Modal */}
+      <CourseCelebrationModal
+        isOpen={courseCelebration.isOpen}
+        onClose={() => setCourseCelebration((prev) => ({ ...prev, isOpen: false }))}
+        courseCode={courseCelebration.courseCode}
+        courseTitle={courseCelebration.courseTitle}
+        credentialId={courseCelebration.credentialId}
+        earnedCount={courseCelebration.earnedCount}
+        onDownloadPdf={handleDownloadPdf}
+      />
+
+      {/* Drop L: Mastery Grand Celebration Modal */}
+      <MasteryCelebrationModal
+        isOpen={masteryCelebration.isOpen}
+        onClose={() => setMasteryCelebration((prev) => ({ ...prev, isOpen: false }))}
+        credentialId={masteryCelebration.credentialId}
+        onDownloadPdf={(credId) => handleDownloadPdf(credId, 'NV-NET-MASTERY')}
+      />
     </ProtectedRoute>
   );
 }

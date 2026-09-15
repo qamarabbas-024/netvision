@@ -13,20 +13,24 @@ out/
 packages/*/src/**/*.js
 packages/*/src/**/*.d.ts
 
-# Environment variables
+# Environment variables & Local secrets
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.pfx
+*.p12
 
-# Databases & Caching
+# Databases & Local persistence
 *.sqlite
 *.sqlite-journal
 *.db
 docker-data/
+backend/prisma/migrations/dev.db
 
-# IDE & System
+# IDE & Operating System
 .vscode/
 .idea/
 .DS_Store
@@ -43,12 +47,32 @@ yarn-error.log*
 *.webm
 *.avi
 
-# Prisma
-backend/prisma/migrations/dev.db
-
 # Playwright Test Artifacts
 test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
 
+# Internal Audit Reports, Red-Team Assessments & Forensic Ledgers
+# (DO NOT COMMIT OR EXPOSE TO PUBLIC REPOSITORY)
+docs/audit/
+docs/historical-audits/
+docs/*-audit*.md
+docs/security-audit.md
+docs/security-test-results.md
+docs/dependency-security-audit.md
+docs/repository-publication-audit.md
+docs/repository-technical-debt-audit.md
+docs/netvision-release-audit.md
+docs/netvision-curriculum-audit-v2.md
+docs/netvision-content-report.md
+docs/netvision-lesson-relevance-audit.md
+docs/curriculum-content-v2-migration-status.md
+
+# Internal audit scripts & forensic dumps
+backend/scripts/audit-*.ts
+backend/scripts/find-zero-*.ts
+backend/scripts/scan-*.js
+*.dump
+*.sql.bak
+*.txt.dump

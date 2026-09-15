@@ -176,10 +176,17 @@ export class MasterCapstoneService {
       );
     }
 
-    // Cooldown check if previous attempt failed
+    // Cooldown check if previous attempt failed or expired
     const latestAttempt = recentAttempts[0];
-    if (latestAttempt && latestAttempt.status === ExamAttemptStatus.FAILED) {
-      const isFirstFailure = recentAttempts.filter((a) => a.status === ExamAttemptStatus.FAILED).length === 1;
+    const isUnsuccessful =
+      latestAttempt &&
+      (latestAttempt.status === ExamAttemptStatus.FAILED || latestAttempt.status === ExamAttemptStatus.EXPIRED);
+
+    if (isUnsuccessful) {
+      const unsuccessfulCount = recentAttempts.filter(
+        (a) => a.status === ExamAttemptStatus.FAILED || a.status === ExamAttemptStatus.EXPIRED
+      ).length;
+      const isFirstFailure = unsuccessfulCount === 1;
       const cooldownSec = isFirstFailure
         ? CAPSTONE_CONFIG.cooldownFirstFailureSeconds
         : CAPSTONE_CONFIG.cooldownSubsequentFailureSeconds;

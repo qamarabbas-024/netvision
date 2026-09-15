@@ -529,7 +529,7 @@ async function runEmailTestSuite() {
   // --------------------------------------------------------------------------
   console.log('\n[TEST 12] Security & Sanitization: No Secrets in Logs, Errors, or Diagnostics');
   {
-    const SECRET_KEY = 're_live_super_secret_api_key_99887766';
+    const SECRET_KEY = 'mock_resend_api_key_test_pattern_99887766';
     const SECRET_PASS = 'smtp_super_secret_password_112233';
     const SECRET_TOKEN = 'raw_reset_token_secret_abcdef123456';
     const SECRET_OTP = '889900';
