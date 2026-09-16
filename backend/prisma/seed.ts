@@ -1,11 +1,12 @@
-import { PrismaClient, CourseLevel, LessonType, Role, AchievementCategory } from '@prisma/client';
+import { CourseLevel, LessonType, Role, AchievementCategory } from '@prisma/client';
+import { PrismaService } from '../src/database/prisma.service';
 import * as argon2 from 'argon2';
 import { TARGET_16_COURSES } from '../src/topics/curriculum-migration';
 import { BENCHMARK_LESSONS_FULL } from '../src/topics/benchmark-lessons-content';
 import { EXPANDED_ASSESSMENT_QUESTION_BANK } from '../src/topics/assessment-question-bank';
 import { FLAGSHIP_5_COURSES, CANONICAL_CREDENTIALS } from '@netvision/shared';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaService();
 
 async function main() {
   console.log('🌱 Executing Phase 12C Curriculum Migration & Seed (16 Progressive Target Courses + Data Preservation)...');
@@ -479,8 +480,8 @@ async function main() {
     }
   }
 
-  // 5. Seed Assessment 2.0 Question Bank (170 Comprehensive Questions)
-  console.log('📝 Seeding Assessment 2.0 Question Bank (170 High-Quality Questions)...');
+  // 5. Seed Assessment 2.0 Question Bank (229 Comprehensive Questions)
+  console.log('📝 Seeding Assessment 2.0 Question Bank (229 High-Quality Questions)...');
   // Clean up legacy placeholder questions
   const deletedPlaceholders = await prisma.quizQuestion.deleteMany({
     where: {
@@ -494,15 +495,22 @@ async function main() {
     console.log(`  🧹 Cleaned ${deletedPlaceholders.count} legacy/updated quiz questions.`);
   }
 
+  // Pre-load all existing questions to eliminate 229 redundant findFirst network roundtrips
+  const allExistingQuestions = await prisma.quizQuestion.findMany({
+    select: { id: true, quizId: true, questionText: true },
+  });
+  const existingMap = new Map<string, string>();
+  for (const q of allExistingQuestions) {
+    existingMap.set(`${q.quizId}:::${q.questionText}`, q.id);
+  }
+
   let seededQCount = 0;
   for (const qDef of EXPANDED_ASSESSMENT_QUESTION_BANK) {
-    const existingQ = await prisma.quizQuestion.findFirst({
-      where: { quizId: qDef.quizId, questionText: qDef.text },
-    });
+    const existingQId = existingMap.get(`${qDef.quizId}:::${qDef.text}`);
 
-    if (existingQ) {
+    if (existingQId) {
       await prisma.quizQuestion.update({
-        where: { id: existingQ.id },
+        where: { id: existingQId },
         data: {
           optionsJson: qDef.options,
           correctOption: qDef.correctOption,
@@ -534,7 +542,7 @@ async function main() {
     }
     seededQCount++;
   }
-  console.log(`  ✓ Successfully seeded/updated ${seededQCount} questions across 40 curriculum quizzes!`);
+  console.log(`  ✓ Successfully synchronized ${seededQCount} assessment questions across all quizzes.`);
   console.log('🏆 Seeding Achievement Catalog...');
   const achievementsData = [
     { slug: 'FIRST_STEP', title: 'First Step', description: 'Completed your first interactive networking lesson.', badgeIcon: 'Zap', category: AchievementCategory.LEARNING, points: 50, isActive: true, criteriaJson: { type: 'LESSON_COMPLETED', count: 1 } },

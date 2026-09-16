@@ -1,0 +1,1650 @@
+{
+  "textbookMetadata": {
+    "title": "CS-221 Computer Networking: Complete Mastery Textbook",
+    "edition": "2026 Edition — University, CCNA & Packet-Level Engineering",
+    "author": "Qamar Abbas",
+    "curriculum": "CS-221 Computer Networking (BSCS Foundation Program)",
+    "pedagogicalModel": "Roman Urdu Explanations + English Technical Terminology (9-Level Progression)",
+    "coreMentalModel": "What actually happens to the packet?",
+    "canonicalFile": "CS221-Networking-Complete-Mastery.md",
+    "canonicalSha256": "9b9f6fc96723cbe4ba3d2338c11749a8233110f7dd6135b50bc2ed834e934017",
+    "totalLines": 7273,
+    "totalCharacters": 340110,
+    "standardsReferences": [
+      "RFC 768 (UDP)",
+      "RFC 791 (IPv4)",
+      "RFC 792 (ICMPv4)",
+      "RFC 793 (TCP)",
+      "RFC 826 (ARP)",
+      "RFC 896 (Congestion Control / Nagle)",
+      "RFC 1034 / 1035 (DNS)",
+      "RFC 1519 (CIDR)",
+      "RFC 1918 (Private IPv4 Address Allocation)",
+      "RFC 2018 (TCP SACK)",
+      "RFC 2131 (DHCP)",
+      "RFC 2328 (OSPFv2)",
+      "RFC 3022 (Traditional NAT / PAT)",
+      "RFC 4271 (BGP-4)",
+      "RFC 4861 / 4862 (IPv6 NDP & SLAAC)",
+      "RFC 4941 (IPv6 Privacy Extensions)",
+      "RFC 5952 (IPv6 Text Representation)",
+      "RFC 6762 (mDNS)",
+      "RFC 8200 (IPv6 Specification)",
+      "RFC 8446 (TLS 1.3)",
+      "RFC 9000 (QUIC)",
+      "RFC 9110 (HTTP Semantics)",
+      "RFC 9114 (HTTP/3)",
+      "RFC 9293 (TCP Modern Specification)",
+      "IEEE 802.3 (Ethernet)",
+      "IEEE 802.1Q (VLAN Tagging)",
+      "IEEE 802.1D / 802.1w (STP / RSTP)",
+      "IEEE 802.11a/b/g/n/ac/ax/be (Wi-Fi 4 through 7)"
+    ]
+  },
+  "parts": [
+    {
+      "partTitle": "PART I: FOUNDATIONS & LAYERED ARCHITECTURES",
+      "moduleRange": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "partTitle": "PART II: PHYSICAL LAYER & TRANSMISSION MEDIA",
+      "moduleRange": [
+        6,
+        7,
+        8
+      ]
+    },
+    {
+      "partTitle": "PART III: DATA LINK LAYER, SWITCHING & ETHERNET",
+      "moduleRange": [
+        9,
+        10,
+        11,
+        12,
+        13
+      ]
+    },
+    {
+      "partTitle": "PART IV: NETWORK LAYER & IP ADDRESSING",
+      "moduleRange": [
+        14,
+        15,
+        16,
+        17
+      ]
+    },
+    {
+      "partTitle": "PART V: ROUTING & ROUTING PROTOCOLS",
+      "moduleRange": [
+        18,
+        19
+      ]
+    },
+    {
+      "partTitle": "PART VI: TRANSPORT LAYER",
+      "moduleRange": [
+        20,
+        21,
+        22
+      ]
+    },
+    {
+      "partTitle": "PART VII: APPLICATION LAYER & SERVICES",
+      "moduleRange": [
+        23,
+        24,
+        25
+      ]
+    },
+    {
+      "partTitle": "PART VIII: WIRELESS & SECURITY",
+      "moduleRange": [
+        26,
+        27,
+        28,
+        29
+      ]
+    },
+    {
+      "partTitle": "PART IX: PRACTICAL MASTERY, LABS & REAL-WORLD SYNTHESIS",
+      "moduleRange": [
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45
+      ]
+    }
+  ],
+  "chapters": [
+    {
+      "chapterNumber": 0,
+      "chapterTitle": "PREREQUISITES",
+      "rawHeader": "MODULE 0 — PREREQUISITES",
+      "sections": [
+        "0.1 What Is Data?",
+        "0.2 Bits and Bytes",
+        "0.3 Number Systems",
+        "0.4 Basic Binary Skills for Networking"
+      ],
+      "subsections": [
+        "Concept",
+        "Explain Like I’m 5",
+        "Why Does This Exist?",
+        "Deep Technical Explanation",
+        "How It Works",
+        "Diagram",
+        "Common Mistakes",
+        "Quiz",
+        "Connection",
+        "Concept",
+        "Explain Like I’m 5",
+        "Deep Technical Explanation"
+      ],
+      "rfcs": [],
+      "diagramsCount": 10,
+      "hasAssessment": true,
+      "hasLab": false,
+      "characterCount": 7718,
+      "lineCount": 254,
+      "contentHash": "bd682edafb295856120b3a6312f8b6f89e78b2b9e07c841db3d6473984ac1e80"
+    },
+    {
+      "chapterNumber": 1,
+      "chapterTitle": "NETWORKING FUNDAMENTALS",
+      "rawHeader": "MODULE 1 — NETWORKING FUNDAMENTALS",
+      "sections": [
+        "1.1 What Is Data Communication?",
+        "1.2 Data Flow",
+        "1.3 Computer Networks",
+        "1.4 Network Types",
+        "1.5 Network Connection Types",
+        "1.6 Network Topologies",
+        "1.7 Network Performance"
+      ],
+      "subsections": [
+        "Concept",
+        "Explain Like I’m 5",
+        "Why Does This Exist?",
+        "Deep Technical Explanation",
+        "How It Works",
+        "Communication Tasks (Quality Criteria)",
+        "Real-World Example (Conceptual)",
+        "Common Mistakes",
+        "Quiz",
+        "Connection",
+        "Concept",
+        "Explain Like I’m 5"
+      ],
+      "rfcs": [],
+      "diagramsCount": 4,
+      "hasAssessment": true,
+      "hasLab": false,
+      "characterCount": 9622,
+      "lineCount": 303,
+      "contentHash": "4672d7aad5bb658a454a965cabd91e0cffcd8b2d31694c85bcea7ef08069c58e"
+    },
+    {
+      "chapterNumber": 2,
+      "chapterTitle": "PROTOCOLS & LAYERED ARCHITECTURE",
+      "rawHeader": "MODULE 2 — PROTOCOLS & LAYERED ARCHITECTURE",
+      "sections": [
+        "2.1 Protocols",
+        "2.2 Standards",
+        "2.3 Why Networking Uses Layers"
+      ],
+      "subsections": [
+        "Concept",
+        "Explain Like I’m 5",
+        "Why Does This Exist?",
+        "Deep Technical Explanation",
+        "Real-World Analogy",
+        "Quiz",
+        "Connection",
+        "Concept",
+        "Deep Technical Explanation",
+        "Why Standards Matter",
+        "Key Organizations",
+        "Common Mistakes"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": true,
+      "hasLab": false,
+      "characterCount": 4491,
+      "lineCount": 130,
+      "contentHash": "7625446daf5740833336a7e416316af3eab3b5a7ff62290645291655f02312e0"
+    },
+    {
+      "chapterNumber": 3,
+      "chapterTitle": "THE OSI MODEL",
+      "rawHeader": "MODULE 3 — THE OSI MODEL",
+      "sections": [
+        "Concept",
+        "Layer 7 — Application",
+        "Layer 6 — Presentation",
+        "Layer 5 — Session",
+        "Layer 4 — Transport",
+        "Layer 3 — Network",
+        "Layer 2 — Data Link",
+        "Layer 1 — Physical",
+        "Summary Table",
+        "Practical Exercise",
+        "Active Recall",
+        "Quiz",
+        "Common Mistakes (Overall)",
+        "Connection"
+      ],
+      "subsections": [
+        "Important Note",
+        "Purpose",
+        "Responsibilities",
+        "Common Protocols",
+        "PDU (Protocol Data Unit)",
+        "Real-World Example (Conceptual)",
+        "Common Mistake",
+        "Purpose",
+        "Responsibilities",
+        "Examples",
+        "PDU",
+        "Common Mistake"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": true,
+      "hasLab": false,
+      "characterCount": 8027,
+      "lineCount": 325,
+      "contentHash": "d9ee0f810b11d58bc1b4347480d8a3e3c9c5a9c25fbb0a8a69762b24c4427a21"
+    },
+    {
+      "chapterNumber": 4,
+      "chapterTitle": "THE TCP/IP PROTOCOL SUITE",
+      "rawHeader": "MODULE 4 — THE TCP/IP PROTOCOL SUITE",
+      "sections": [
+        "Concept",
+        "Why Did TCP/IP Win Over OSI?",
+        "The 4-Layer Architecture of TCP/IP",
+        "Layer-by-Layer Technical Breakdown"
+      ],
+      "subsections": [
+        "1. Application Layer (Layer 4)",
+        "2. Transport Layer (Layer 3)",
+        "3. Internet Layer (Layer 2)",
+        "4. Network Access / Link Layer (Layer 1)"
+      ],
+      "rfcs": [
+        "768",
+        "791",
+        "792",
+        "8200",
+        "826",
+        "9293"
+      ],
+      "diagramsCount": 1,
+      "hasAssessment": true,
+      "hasLab": false,
+      "characterCount": 5141,
+      "lineCount": 81,
+      "contentHash": "af90930577091715010eec9fe486075f9a13a0e9101cb45d5a2bb14fadac45d5"
+    },
+    {
+      "chapterNumber": 5,
+      "chapterTitle": "PDUs & ENCAPSULATION",
+      "rawHeader": "MODULE 5 — PDUs & ENCAPSULATION",
+      "sections": [
+        "Concept",
+        "Explain Like I’m 5",
+        "Deep Technical Explanation",
+        "Real-World Analogy",
+        "Common Mistakes",
+        "Practical Exercise",
+        "Active Recall",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Encapsulation Process (Sender Side)",
+        "Decapsulation Process (Receiver Side)",
+        "PDU Terminology Summary",
+        "Headers aur Trailers"
+      ],
+      "rfcs": [],
+      "diagramsCount": 1,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 3439,
+      "lineCount": 87,
+      "contentHash": "f077765002ea8e6ef904618c5a2e854beeb5b0258a42637f0ae7cce9fe5277cc"
+    },
+    {
+      "chapterNumber": 6,
+      "chapterTitle": "PHYSICAL LAYER & SIGNALS",
+      "rawHeader": "MODULE 6 — PHYSICAL LAYER & SIGNALS",
+      "sections": [
+        "6.1 Data and Signals",
+        "6.2 Periodic Signals",
+        "6.3 Composite Signals",
+        "6.4 Signal Domains",
+        "6.5 Digital Signals",
+        "6.6 Analog vs Digital Transmission",
+        "6.7 Transmission Impairments",
+        "6.8 Channel Capacity",
+        "Practice Problems",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Concept",
+        "Explain Like I’m 5",
+        "Concept",
+        "Key Terms",
+        "Practice Problem",
+        "Concept",
+        "Simplification (Teaching Level)",
+        "Real-World Analogy",
+        "Key Terms",
+        "Common Mistake",
+        "Concept",
+        "Real Causes"
+      ],
+      "rfcs": [],
+      "diagramsCount": 8,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 5766,
+      "lineCount": 195,
+      "contentHash": "83be24c56a8dc3f15ac04628a87436ee319237184c79ec9d17c9bbf13000ade1"
+    },
+    {
+      "chapterNumber": 7,
+      "chapterTitle": "TRANSMISSION MEDIA",
+      "rawHeader": "MODULE 7 — TRANSMISSION MEDIA",
+      "sections": [
+        "Concept",
+        "Guided Media",
+        "Unguided Media (Wireless)",
+        "Comparison Table",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Twisted Pair Cable",
+        "Coaxial Cable",
+        "Fiber Optic Cable",
+        "Types",
+        "Propagation Types",
+        "Antennas"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 3507,
+      "lineCount": 99,
+      "contentHash": "b445300a52d3368bb972597655675361d36bf122a3e21b6a9e60eaa967397c18"
+    },
+    {
+      "chapterNumber": 8,
+      "chapterTitle": "TRANSMISSION TECHNIQUES",
+      "rawHeader": "MODULE 8 — TRANSMISSION TECHNIQUES",
+      "sections": [
+        "Parallel vs Serial Transmission",
+        "Asynchronous vs Synchronous Transmission",
+        "Multiplexing",
+        "Bit Padding and Bit Stuffing",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Parallel Transmission",
+        "Serial Transmission",
+        "Why Serial Won",
+        "Asynchronous Transmission",
+        "Synchronous Transmission",
+        "Concept",
+        "FDM (Frequency Division Multiplexing)",
+        "TDM (Time Division Multiplexing)",
+        "Interleaving",
+        "Bit Padding",
+        "Bit Stuffing"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 3772,
+      "lineCount": 90,
+      "contentHash": "d5c76b8befc878c7f527c9b2948c54a7bd8cd0e682d85bfdc58c2e5e2bea3277"
+    },
+    {
+      "chapterNumber": 9,
+      "chapterTitle": "DATA LINK LAYER",
+      "rawHeader": "MODULE 9 — DATA LINK LAYER",
+      "sections": [
+        "9.1 Framing",
+        "9.2 MAC Addresses",
+        "9.3 Error Detection",
+        "9.4 Error Control",
+        "9.5 Flow Control",
+        "9.6 Multiple Access",
+        "Common Mistakes",
+        "Quiz",
+        "Practical Exercise",
+        "Connection"
+      ],
+      "subsections": [
+        "Concept",
+        "Why Framing Is Needed",
+        "How It Works (Conceptual)",
+        "Concept",
+        "Format",
+        "Local Delivery",
+        "Types of Delivery",
+        "MAC vs IP",
+        "Concept",
+        "Parity",
+        "Checksum",
+        "CRC (Cyclic Redundancy Check)"
+      ],
+      "rfcs": [],
+      "diagramsCount": 1,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 6861,
+      "lineCount": 175,
+      "contentHash": "1a0514069d0eb7e4913451544168f32f52506467e1d26d48edee856f2273c070"
+    },
+    {
+      "chapterNumber": 10,
+      "chapterTitle": "SWITCHING",
+      "rawHeader": "MODULE 10 — SWITCHING",
+      "sections": [
+        "10.1 Circuit Switching",
+        "10.2 Packet Switching",
+        "10.3 Packet Switching in the Internet",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Concept",
+        "Process",
+        "Real-World Analogy",
+        "Disadvantage",
+        "Concept",
+        "Datagram Networks (Connectionless)",
+        "Virtual Circuits (Connection-Oriented Packet Switching)",
+        "Circuit vs Packet Switching Comparison",
+        "Why Internet Is Fundamentally Packet-Switched",
+        "Trade-off"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 3081,
+      "lineCount": 82,
+      "contentHash": "21dea1d9adf6c3a8521462479d2031baa6fe058cdc71ea9de80aef821f036d47"
+    },
+    {
+      "chapterNumber": 11,
+      "chapterTitle": "ETHERNET & SWITCHED LANs",
+      "rawHeader": "MODULE 11 — ETHERNET & SWITCHED LANs",
+      "sections": [
+        "Concept",
+        "Wire-Level Ethernet II Frame Structure",
+        "Ethernet II vs IEEE 802.3 Framing",
+        "How a Switch Operates: The 3 Core Rules",
+        "Switching Modes"
+      ],
+      "subsections": [
+        "The CAM (Content Addressable Memory) Table"
+      ],
+      "rfcs": [],
+      "diagramsCount": 2,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 4613,
+      "lineCount": 89,
+      "contentHash": "6295acb7db7e6312adb62b087de5b4ed342d57a9532e9b776a144d1461b19000"
+    },
+    {
+      "chapterNumber": 12,
+      "chapterTitle": "NETWORKING DEVICES",
+      "rawHeader": "MODULE 12 — NETWORKING DEVICES",
+      "sections": [
+        "Concept",
+        "Device-by-Device Breakdown",
+        "Important Comparisons",
+        "Common Misconceptions Summary",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Repeater",
+        "Hub",
+        "Bridge",
+        "Switch",
+        "Router",
+        "Access Point",
+        "Modem",
+        "Firewall",
+        "Gateway",
+        "Hub vs Switch",
+        "Switch vs Router",
+        "Router vs Gateway"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 3862,
+      "lineCount": 105,
+      "contentHash": "ef1bc1fb01dde33fc751a79fa78efbad9aca034b46a194bb57467df196693b2c"
+    },
+    {
+      "chapterNumber": 13,
+      "chapterTitle": "VLANs & STP",
+      "rawHeader": "MODULE 13 — VLANs & STP",
+      "sections": [
+        "13.1 VLAN (Virtual LAN)",
+        "13.2 STP (Spanning Tree Protocol)",
+        "13.3 VTP (VLAN Trunking Protocol)",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Concept",
+        "Explain Like I’m 5",
+        "Why VLANs Exist",
+        "Key Terms",
+        "Inter-VLAN Routing",
+        "Common Mistakes",
+        "Concept",
+        "Why Layer-2 Loops Are Dangerous",
+        "How STP Solves This",
+        "Key Concepts",
+        "Real-World Analogy",
+        "Concept"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 4770,
+      "lineCount": 106,
+      "contentHash": "afbdc960bd00915047fc2814f723dd391e801967c9349303141c7cbce3498e38"
+    },
+    {
+      "chapterNumber": 14,
+      "chapterTitle": "IPv4",
+      "rawHeader": "MODULE 14 — IPv4",
+      "sections": [
+        "IPv4 Addressing",
+        "IPv4 Classes (Historical)",
+        "Special Addresses",
+        "Private vs Public IPv4",
+        "Common Mistakes",
+        "Practice Problem",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Concept",
+        "Structure",
+        "Network Portion vs Host Portion",
+        "Important Clarification",
+        "Private IPv4 Ranges (RFC 1918)",
+        "Why Private Addresses Exist"
+      ],
+      "rfcs": [
+        "1918"
+      ],
+      "diagramsCount": 2,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 2518,
+      "lineCount": 82,
+      "contentHash": "5f5a03f4b206efa25bee2e85e7d7efbf8e052f7aee923e7d3875e0acf8b331f1"
+    },
+    {
+      "chapterNumber": 15,
+      "chapterTitle": "SUBNET MASKS & CIDR",
+      "rawHeader": "MODULE 15 — SUBNET MASKS & CIDR",
+      "sections": [
+        "Concept",
+        "Subnet Mask",
+        "Prefix Length / CIDR Notation",
+        "Subnetting — Step by Step (Binary Method)",
+        "VLSM (Variable Length Subnet Masking)",
+        "Route Summarization",
+        "Common Mistakes",
+        "Practice Problems",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Example: 192.168.1.0/26",
+        "Shortcut Method (After Understanding Binary)",
+        "Why VLSM Exists",
+        "Step-by-Step VLSM Example",
+        "Why Summarization Exists",
+        "Conditions for Valid Summarization",
+        "Example"
+      ],
+      "rfcs": [],
+      "diagramsCount": 1,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 4679,
+      "lineCount": 125,
+      "contentHash": "dc6e4e911495f65aeca0121d9a581db59b16ca4138c3aba45e0634ec492a2a28"
+    },
+    {
+      "chapterNumber": 16,
+      "chapterTitle": "IPv6 ARCHITECTURE & PROTOCOLS",
+      "rawHeader": "MODULE 16 — IPv6 ARCHITECTURE & PROTOCOLS",
+      "sections": [
+        "Why IPv6 Exists",
+        "Hexadecimal Representation & Compression Rules",
+        "Major IPv6 Address Types & Prefixes",
+        "Neighbor Discovery Protocol (NDP — RFC 4861)",
+        "Stateless Address Autoconfiguration (SLAAC — RFC 4862)",
+        "Comprehensive IPv4 vs IPv6 Comparison"
+      ],
+      "subsections": [
+        "Compression Rule 1: Leading Zeros Omission",
+        "Compression Rule 2: Consecutive Zero Blocks (`::`)",
+        "Core NDP Messages:"
+      ],
+      "rfcs": [
+        "1918",
+        "4861",
+        "4862",
+        "4941",
+        "791",
+        "8200"
+      ],
+      "diagramsCount": 2,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 6178,
+      "lineCount": 101,
+      "contentHash": "5696b258263b740453f9115c975dfdb775d2f4706467991ab442ffddea2b868b"
+    },
+    {
+      "chapterNumber": 17,
+      "chapterTitle": "ARP, ICMP, DHCP, DNS & NAT",
+      "rawHeader": "MODULE 17 — ARP, ICMP, DHCP, DNS & NAT",
+      "sections": [
+        "ARP (Address Resolution Protocol)",
+        "ICMP (Internet Control Message Protocol)",
+        "DHCP (Dynamic Host Configuration Protocol)",
+        "DNS (Domain Name System)",
+        "NAT/PAT (Network Address Translation / Port Address Translation)",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "The Core Question",
+        "How ARP Works",
+        "ARP Cache",
+        "Local Subnet Behavior",
+        "Purpose",
+        "Key Uses",
+        "Ping aur Traceroute",
+        "Purpose",
+        "The DORA Process",
+        "Why DHCP Uses Broadcast (Early Stages)",
+        "What DHCP Provides",
+        "Purpose"
+      ],
+      "rfcs": [],
+      "diagramsCount": 2,
+      "hasAssessment": true,
+      "hasLab": false,
+      "characterCount": 6096,
+      "lineCount": 175,
+      "contentHash": "6764c20d43c37fce4232d3b0a6ab636607e7e9642f9d3590629e9449e1f8cf97"
+    },
+    {
+      "chapterNumber": 18,
+      "chapterTitle": "ROUTING",
+      "rawHeader": "MODULE 18 — ROUTING",
+      "sections": [
+        "Routing vs Forwarding",
+        "Routing Table",
+        "Longest Prefix Match (LPM)",
+        "Static Routing",
+        "Dynamic Routing",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Concept",
+        "Simple Way to Remember",
+        "Concept",
+        "Why This Matters",
+        "Worked Example",
+        "Concept",
+        "Types",
+        "Advantages/Disadvantages",
+        "Why Dynamic Routing Exists",
+        "How It Works (Conceptual)"
+      ],
+      "rfcs": [],
+      "diagramsCount": 1,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 3678,
+      "lineCount": 106,
+      "contentHash": "1d497893043909bc95da13deea97d4c1c10eed6d67533c48fd9c95bb4eab4c29"
+    },
+    {
+      "chapterNumber": 19,
+      "chapterTitle": "ROUTING PROTOCOLS",
+      "rawHeader": "MODULE 19 — ROUTING PROTOCOLS",
+      "sections": [
+        "RIP (Routing Information Protocol)",
+        "EIGRP (Enhanced Interior Gateway Routing Protocol)",
+        "OSPF (Open Shortest Path First)",
+        "BGP (Border Gateway Protocol)",
+        "Comparison Table",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Type",
+        "Metric",
+        "Limitations",
+        "Context",
+        "Description",
+        "Metric Concept",
+        "Neighbor Relationship",
+        "Practical Note",
+        "Type",
+        "How Link-State Works (Conceptual)",
+        "SPF (Shortest Path First) Algorithm",
+        "Cost Metric"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": true,
+      "characterCount": 4881,
+      "lineCount": 141,
+      "contentHash": "0a3f60356dab5d615cc17b9c625fbeaa937978a45886f8c82ff68fb1296e4d0c"
+    },
+    {
+      "chapterNumber": 20,
+      "chapterTitle": "TRANSPORT LAYER",
+      "rawHeader": "MODULE 20 — TRANSPORT LAYER",
+      "sections": [
+        "Process-to-Process Communication",
+        "Port Numbers",
+        "Sockets",
+        "Real-World Analogy",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Why IP Alone Is Not Enough",
+        "The Solution: Ports",
+        "Categories",
+        "Source Port vs Destination Port",
+        "Concept",
+        "Example",
+        "TCP Connection Identification"
+      ],
+      "rfcs": [],
+      "diagramsCount": 2,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 3476,
+      "lineCount": 84,
+      "contentHash": "e999503c1a3c7746b44ebb13887c265f0e5906bfe54d4d40ea17887d99616089"
+    },
+    {
+      "chapterNumber": 21,
+      "chapterTitle": "UDP",
+      "rawHeader": "MODULE 21 — UDP",
+      "sections": [
+        "Concept",
+        "Datagram / Connectionless Concept",
+        "UDP Header Fields",
+        "Advantages",
+        "Limitations",
+        "Use Cases",
+        "Important Clarification",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 2626,
+      "lineCount": 64,
+      "contentHash": "6f04b49fa590d63b2cee90eb9a34346a7708663a1b40ba26fd1b432ca8a350fa"
+    },
+    {
+      "chapterNumber": 22,
+      "chapterTitle": "TRANSMISSION CONTROL PROTOCOL (TCP)",
+      "rawHeader": "MODULE 22 — TRANSMISSION CONTROL PROTOCOL (TCP)",
+      "sections": [
+        "Concept",
+        "TCP Segment Wire-Level Header (20 to 60 Bytes)",
+        "The Three-Way Handshake & Sequence Number Math",
+        "Connection Teardown (Four-Way Handshake)",
+        "Flow Control vs Congestion Control",
+        "Advanced Wire Dynamics"
+      ],
+      "subsections": [
+        "Key Header Fields Explained:",
+        "1. Sliding Window Flow Control",
+        "2. Congestion Control (Slow Start, Avoidance, Fast Retransmit)",
+        "A. Silly Window Syndrome & Nagle's Algorithm (RFC 896)",
+        "B. Selective Acknowledgments (SACK — RFC 2018)"
+      ],
+      "rfcs": [
+        "2018",
+        "896",
+        "9293"
+      ],
+      "diagramsCount": 3,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 8841,
+      "lineCount": 136,
+      "contentHash": "3505c16ca4ad9cb3ec51f65717a9926ac013f59dbbafcb7745f5cfad56873056"
+    },
+    {
+      "chapterNumber": 23,
+      "chapterTitle": "APPLICATION LAYER",
+      "rawHeader": "MODULE 23 — APPLICATION LAYER",
+      "sections": [
+        "Client-Server Model",
+        "Peer-to-Peer (P2P)",
+        "WWW (World Wide Web)",
+        "HTTP (HyperText Transfer Protocol)",
+        "HTTPS (HTTP Secure)",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Concept",
+        "Real-World Example (Conceptual)",
+        "Concept",
+        "Example (Conceptual)",
+        "Key Components",
+        "Concept",
+        "Request Structure",
+        "Response Structure",
+        "HTTP Methods",
+        "Status Code Categories",
+        "Statelessness",
+        "Concept"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 3428,
+      "lineCount": 114,
+      "contentHash": "06b48ff8a831d216f14291bf03f2a11ac7781846f2c47997db5fcb8b581d749f"
+    },
+    {
+      "chapterNumber": 24,
+      "chapterTitle": "EMAIL",
+      "rawHeader": "MODULE 24 — EMAIL",
+      "sections": [
+        "Concept",
+        "SMTP (Simple Mail Transfer Protocol)",
+        "POP3 (Post Office Protocol v3)",
+        "IMAP (Internet Message Access Protocol)",
+        "Sending vs Receiving — Summary",
+        "Mail Server aur DNS MX Records",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Purpose",
+        "How It Works (Conceptual)",
+        "Purpose",
+        "Characteristic",
+        "Purpose",
+        "Characteristic"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 2555,
+      "lineCount": 76,
+      "contentHash": "b3d23c450b3fec41f531b54908ca6ece19a8480ad08c9ca4f2483c716110d61d"
+    },
+    {
+      "chapterNumber": 25,
+      "chapterTitle": "FTP, SSH & TELNET",
+      "rawHeader": "MODULE 25 — FTP, SSH & TELNET",
+      "sections": [
+        "FTP (File Transfer Protocol)",
+        "SSH (Secure Shell)",
+        "Telnet",
+        "Comparison Table",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Purpose",
+        "Basic Operation",
+        "Limitations",
+        "Purpose",
+        "Key Features",
+        "Use Case",
+        "Historical Use",
+        "Plaintext Nature",
+        "Why SSH Is Preferred Today"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 2771,
+      "lineCount": 81,
+      "contentHash": "40ff5dd3c95f35c521ef60a6b655d1726023c7cdad673c92cb14127b5140709a"
+    },
+    {
+      "chapterNumber": 26,
+      "chapterTitle": "WIRELESS NETWORKING",
+      "rawHeader": "MODULE 26 — WIRELESS NETWORKING",
+      "sections": [
+        "Concept",
+        "Key Terms",
+        "Wi-Fi Channels (2.4GHz Example)",
+        "CSMA/CA Recap",
+        "Important Clarification",
+        "Wireless Security",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "WPA2 / WPA3",
+        "Authentication Concepts",
+        "Encryption Concepts",
+        "Rogue AP",
+        "Evil Twin (Defensive/Educational Level)"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 3796,
+      "lineCount": 86,
+      "contentHash": "10cecf97beeae1081d04eb4b77d3f9f613ef3253a157afdb58c05856a66dca93"
+    },
+    {
+      "chapterNumber": 27,
+      "chapterTitle": "NETWORK SECURITY",
+      "rawHeader": "MODULE 27 — NETWORK SECURITY",
+      "sections": [
+        "CIA Triad",
+        "Authentication, Authorization, Accounting (AAA)",
+        "Cryptography Basics",
+        "TLS (High-Level)",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Concept",
+        "Real-World Examples",
+        "Authentication — “Who are you?”",
+        "Authorization — “What are you allowed to do?”",
+        "Accounting/Auditing — “What did you do?”",
+        "Real-World Analogy",
+        "Key Terms",
+        "Symmetric Cryptography",
+        "Asymmetric Cryptography",
+        "Hashing",
+        "Digital Signatures",
+        "Certificates"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 4015,
+      "lineCount": 118,
+      "contentHash": "2fed25564391b909049c05a36db38eb7fe6b26097400e1e12287397a352aa6ba"
+    },
+    {
+      "chapterNumber": 28,
+      "chapterTitle": "NETWORK ATTACKS",
+      "rawHeader": "MODULE 28 — NETWORK ATTACKS",
+      "sections": [
+        "Important Note Before We Start",
+        "DoS (Denial of Service)",
+        "DDoS (Distributed Denial of Service)",
+        "SYN Flood",
+        "Packet Sniffing",
+        "Man-in-the-Middle (MITM)",
+        "ARP Spoofing",
+        "DNS Spoofing/Poisoning",
+        "IP Spoofing",
+        "MAC Spoofing",
+        "VLAN-Related Attacks (Conceptual)",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "What Is It?",
+        "Layer/Concept Exploited",
+        "CIA Impact",
+        "Detection",
+        "Defense",
+        "What Is It?",
+        "CIA Impact",
+        "Defense",
+        "What Is It?",
+        "Layer/Concept Exploited",
+        "CIA Impact",
+        "Defense"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": true,
+      "characterCount": 5732,
+      "lineCount": 236,
+      "contentHash": "e8ed48e8dee61558e02b2c3b8924a29f3a3b7542cb1594c072c001eb26cd5c70"
+    },
+    {
+      "chapterNumber": 29,
+      "chapterTitle": "NETWORK DEFENSE",
+      "rawHeader": "MODULE 29 — NETWORK DEFENSE",
+      "sections": [
+        "Concept",
+        "Defense in Depth",
+        "Key Defense Mechanisms",
+        "Why Defense in Depth Matters (Practical Example)",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Why One Security Control Is Rarely Enough",
+        "Firewalls",
+        "ACLs (Access Control Lists)",
+        "Network Segmentation",
+        "VLAN Segmentation",
+        "IDS (Intrusion Detection System)",
+        "IPS (Intrusion Prevention System)",
+        "VPN (Virtual Private Network)",
+        "Secure Protocols",
+        "Authentication",
+        "Monitoring aur Logging",
+        "Rate Limiting"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 3925,
+      "lineCount": 113,
+      "contentHash": "0f2365adce1b70de90c2d70ca3edc6be583a79be3da042c21ed264c4cdbe70d5"
+    },
+    {
+      "chapterNumber": 30,
+      "chapterTitle": "NETWORK TROUBLESHOOTING",
+      "rawHeader": "MODULE 30 — NETWORK TROUBLESHOOTING",
+      "sections": [
+        "Concept",
+        "Complete Troubleshooting Methodology",
+        "Diagnostic Commands",
+        "Common Mistakes",
+        "Practical Exercise",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Step 1 — Define the Problem",
+        "Step 2 — Check Physical/Link Layer",
+        "Step 3 — Check Interface State",
+        "Step 4 — Check IP Configuration",
+        "Step 5 — Check Local Subnet",
+        "Step 6 — Check Default Gateway",
+        "Step 7 — Check DNS",
+        "Step 8 — Check Routing",
+        "Step 9 — Check Ports/Services",
+        "Step 10 — Check Firewall/Security Policy",
+        "Step 11 — Capture Packets if Necessary",
+        "Step 12 — Confirm the Fix"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": true,
+      "characterCount": 3140,
+      "lineCount": 113,
+      "contentHash": "1a0ffbcb8926f88eef99f4a967bd3024882a8997b4792bad6341df96f1d08cda"
+    },
+    {
+      "chapterNumber": 31,
+      "chapterTitle": "WIRESHARK",
+      "rawHeader": "MODULE 31 — WIRESHARK",
+      "sections": [
+        "Introduction",
+        "Packet Capture aur Interfaces",
+        "Filters",
+        "Analyzing Common Protocols",
+        "TCP Handshake Lab",
+        "DNS Lab",
+        "Troubleshooting Lab",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "What Is Wireshark?",
+        "Why It Matters",
+        "Why Filters Are Needed",
+        "Beginner Filters",
+        "More Specific Filtering",
+        "Goal",
+        "Expected Observation",
+        "Goal",
+        "Goal",
+        "Key Skill"
+      ],
+      "rfcs": [],
+      "diagramsCount": 2,
+      "hasAssessment": false,
+      "hasLab": true,
+      "characterCount": 3769,
+      "lineCount": 114,
+      "contentHash": "2c8a981a6b39276a576e52d9ced3f5559d12d40bd81344de939e3b73042fe6b9"
+    },
+    {
+      "chapterNumber": 32,
+      "chapterTitle": "CISCO PACKET TRACER",
+      "rawHeader": "MODULE 32 — CISCO PACKET TRACER",
+      "sections": [
+        "Introduction",
+        "Lab 1 — Basic LAN",
+        "Lab 2 — Two LANs",
+        "Lab 3 — Static Routing",
+        "Lab 4 — Default Routing",
+        "Lab 5 — VLSM",
+        "Lab 6 — VLAN",
+        "Lab 7 — Trunking",
+        "Lab 8 — Inter-VLAN Routing",
+        "Lab 9 — STP",
+        "Lab 10, 11, 12 — RIP, EIGRP, OSPF",
+        "Lab 13 — Network Troubleshooting",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Setup",
+        "Task",
+        "Learning Goal",
+        "Setup",
+        "Task",
+        "Learning Goal",
+        "Setup",
+        "Task",
+        "Learning Goal",
+        "Task",
+        "Learning Goal",
+        "Task"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": true,
+      "characterCount": 4817,
+      "lineCount": 213,
+      "contentHash": "43d7136434b43d2e5ddf351d68b0e5ceb08008a248691bfa6565b3c165d621fa"
+    },
+    {
+      "chapterNumber": 33,
+      "chapterTitle": "THE COMPLETE INTERNET PACKET JOURNEY",
+      "rawHeader": "MODULE 33 — THE COMPLETE INTERNET PACKET JOURNEY",
+      "sections": [
+        "Introduction",
+        "Scenario",
+        "The Complete Journey",
+        "Key Principles to Remember",
+        "Practical Exercise",
+        "Active Recall",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Step 1 — Application Layer: Browser Initiates Request",
+        "Step 2 — DNS Resolution",
+        "Step 3 — Local Subnet Decision",
+        "Step 4 — ARP / Neighbor Discovery",
+        "Step 5 — Default Gateway",
+        "Step 6 — Wi-Fi/Ethernet",
+        "Step 7 — Switch (agar beech mein ho)",
+        "Step 8 — Router",
+        "Step 9 — NAT",
+        "Step 10 — ISP",
+        "Step 11 — Internet Routers (BGP)",
+        "Step 12 — Destination Network"
+      ],
+      "rfcs": [],
+      "diagramsCount": 1,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 5680,
+      "lineCount": 151,
+      "contentHash": "32d1fd8ffd63f88f04f926f4cf26bbecb77658531b4bbc8cadbc89d09fc77768"
+    },
+    {
+      "chapterNumber": 34,
+      "chapterTitle": "REAL-WORLD NETWORK CASE STUDIES",
+      "rawHeader": "MODULE 34 — REAL-WORLD NETWORK CASE STUDIES",
+      "sections": [
+        "Important Note",
+        "Case Study 1 — DNS Outage: The Dyn DDoS Attack (2016)",
+        "Case Study 2 — BGP Routing Incident: The Facebook Outage (2021)",
+        "Case Study 3 — Cloud/Datacenter Networking Failure: AWS US-EAST-1 Outage (2021)",
+        "Case Study 4 — Security Breach: The Equifax Data Breach (2017)",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 8442,
+      "lineCount": 128,
+      "contentHash": "c8c94e1f11c7e413a8fb29e30d0c53d756271fb8d441fc388f0ac6ce39aaef45"
+    },
+    {
+      "chapterNumber": 35,
+      "chapterTitle": "NETWORK ARCHITECTURE",
+      "rawHeader": "MODULE 35 — NETWORK ARCHITECTURE",
+      "sections": [
+        "Concept",
+        "Why Large Networks Are Not Simply “PC → Router → Internet”",
+        "Three-Tier Architecture",
+        "WAN vs Data Center Basics",
+        "Edge, Core, aur Server Networks",
+        "Internet Edge",
+        "Redundancy aur High Availability",
+        "Load Balancing (Concept)",
+        "Network Segmentation",
+        "DMZ (Demilitarized Zone)",
+        "Common Mistakes",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Core Layer",
+        "Distribution Layer",
+        "Access Layer"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 4239,
+      "lineCount": 90,
+      "contentHash": "42d144245892ba2076b59d801c3e78534cf9349f07f7bc170eb44cebaa452c1f"
+    },
+    {
+      "chapterNumber": 36,
+      "chapterTitle": "NETWORK DESIGN THINKING",
+      "rawHeader": "MODULE 36 — NETWORK DESIGN THINKING",
+      "sections": [
+        "Concept",
+        "The Design Process",
+        "Worked Example",
+        "Common Mistakes",
+        "Practical Exercise",
+        "Quiz",
+        "Connection"
+      ],
+      "subsections": [
+        "Given Inputs (Requirements Gathering)",
+        "What the Student Must Determine",
+        "Scenario",
+        "Design Decisions"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 4035,
+      "lineCount": 99,
+      "contentHash": "d6240c339305497b87f13398bfb9370313ef9f86879a7a4559c0b3452281bb7e"
+    },
+    {
+      "chapterNumber": 37,
+      "chapterTitle": "EXAM PREPARATION",
+      "rawHeader": "MODULE 37 — EXAM PREPARATION",
+      "sections": [
+        "Part A: Key Definitions (50 Terms)",
+        "Part B: Short Questions (40)",
+        "Part C: Long Questions (20)",
+        "Connection"
+      ],
+      "subsections": [],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": true,
+      "hasLab": false,
+      "characterCount": 7297,
+      "lineCount": 130,
+      "contentHash": "4b3f5e6afb68e3eb1e2314bac67e73b45d7d225a9b39474398bd9cbb29564eaf"
+    },
+    {
+      "chapterNumber": 38,
+      "chapterTitle": "SUBNETTING MASTER CLASS",
+      "rawHeader": "MODULE 38 — SUBNETTING MASTER CLASS",
+      "sections": [
+        "Introduction",
+        "Binary Basics Recap",
+        "The Subnetting Formula Toolkit",
+        "EASY Problems",
+        "MEDIUM Problems",
+        "HARD Problems (VLSM)",
+        "Exam-Style Timed Challenge Set",
+        "Common Mistakes (Subnetting-Specific)",
+        "Active Recall",
+        "Connection"
+      ],
+      "subsections": [
+        "Problem 1",
+        "Problem 2",
+        "Problem 3",
+        "Problem 4",
+        "Problem 5",
+        "Problem 6",
+        "Problem 7",
+        "Problem 8 (Route Summarization)",
+        "Answers"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 4408,
+      "lineCount": 122,
+      "contentHash": "6b75731a75eb0772fb65ecdcc1e4000be5241d33dbb6296a2eff2f63d20df6c3"
+    },
+    {
+      "chapterNumber": 39,
+      "chapterTitle": "MASTER TECHNICAL COMPARISON TABLES",
+      "rawHeader": "MODULE 39 — MASTER TECHNICAL COMPARISON TABLES",
+      "sections": [
+        "21 Side-by-Side Architectural & Protocol Matrices"
+      ],
+      "subsections": [
+        "Table 1: Hub vs Switch",
+        "Table 2: Switch vs Router",
+        "Table 3: Router vs Gateway",
+        "Table 4: Modem vs Router",
+        "Table 5: MAC Address vs IP Address",
+        "Table 6: IPv4 vs IPv6",
+        "Table 7: TCP vs UDP",
+        "Table 8: HTTP vs HTTPS",
+        "Table 9: FTP vs SFTP vs FTPS",
+        "Table 10: DNS vs DHCP",
+        "Table 11: LAN vs WAN",
+        "Table 12: Bandwidth vs Throughput"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 15350,
+      "lineCount": 244,
+      "contentHash": "d4a0f15d52ded19799d6c17bfc237c7c7edfec3f994d57f2366ae205b4798c6f"
+    },
+    {
+      "chapterNumber": 40,
+      "chapterTitle": "FINAL MASTER EXAMINATION & QUESTION BANK",
+      "rawHeader": "MODULE 40 — FINAL MASTER EXAMINATION & QUESTION BANK",
+      "sections": [
+        "Comprehensive University & CCNA-Grade Assessment System"
+      ],
+      "subsections": [
+        "SECTION A: 100 OBJECTIVE MULTIPLE-CHOICE QUESTIONS (MCQs)",
+        "SECTION B: 30 SHORT-ANSWER CONCEPTUAL QUESTIONS",
+        "SECTION C: 10 LONG ANALYTICAL & ARCHITECTURAL QUESTIONS"
+      ],
+      "rfcs": [
+        "1918",
+        "4271",
+        "5952",
+        "6762",
+        "9114"
+      ],
+      "diagramsCount": 0,
+      "hasAssessment": true,
+      "hasLab": true,
+      "characterCount": 64143,
+      "lineCount": 953,
+      "contentHash": "c7d53993f7db9e8ccbbf3d168050c7cf8c498318bdcdab27af48be7149902c3c"
+    },
+    {
+      "chapterNumber": 41,
+      "chapterTitle": "THE FINAL MASTERY REQUIREMENT",
+      "rawHeader": "MODULE 41 — THE FINAL MASTERY REQUIREMENT",
+      "sections": [
+        "\"What Happens When I Open a Website?\" — The Complete Internet Packet Journey"
+      ],
+      "subsections": [
+        "Phase 1: Application Layer & Local Host Name Resolution",
+        "Phase 2: DNS Resolution Pipeline across the Internet",
+        "Phase 3: Local Subnet Decision & Layer 2 ARP Resolution",
+        "Phase 4: Local LAN & Edge Router Forwarding (Switching & NAT)",
+        "Phase 5: Autonomous System Traversal & BGP Internet Routing",
+        "Phase 6: Server Edge Arrival, Decapsulation & TCP Handshake",
+        "Phase 7: TLS 1.3 Cryptographic Handshake",
+        "Phase 8: HTTP/2 Request, Server Processing & DOM Rendering",
+        "The Complete Journey Summary Matrix"
+      ],
+      "rfcs": [],
+      "diagramsCount": 5,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 9243,
+      "lineCount": 167,
+      "contentHash": "19ddbda4795551ef4dba5f04e3312d3f5f70e6cb469dbac0af281730577bf661"
+    },
+    {
+      "chapterNumber": 44,
+      "chapterTitle": "NETWORKING MYTHS, TRAPS & FALLACIES",
+      "rawHeader": "MODULE 44 — NETWORKING MYTHS, TRAPS & FALLACIES",
+      "sections": [
+        "18 Critical Misconceptions Deconstructed for Engineers & Students"
+      ],
+      "subsections": [
+        "Myth 1: \"Bandwidth is Throughput.\"",
+        "Myth 2: \"Latency is Bandwidth.\"",
+        "Myth 3: \"Wi-Fi is the Internet.\"",
+        "Myth 4: \"A Switch is just a better Router.\"",
+        "Myth 5: \"MAC Addresses are used across the entire Internet.\"",
+        "Myth 6: \"A Router changes the Destination IP at every hop.\"",
+        "Myth 7: \"TCP is always better and faster than UDP.\"",
+        "Myth 8: \"UDP is broken, poor-quality, or bad.\"",
+        "Myth 9: \"DNS is the Internet.\"",
+        "Myth 10: \"NAT is a security Firewall.\"",
+        "Myth 11: \"Encryption and Hashing are the same thing.\"",
+        "Myth 12: \"Authentication and Authorization are identical.\""
+      ],
+      "rfcs": [
+        "1918"
+      ],
+      "diagramsCount": 0,
+      "hasAssessment": false,
+      "hasLab": false,
+      "characterCount": 5776,
+      "lineCount": 63,
+      "contentHash": "3cc605766a7a0e00e335f7a6fca794cb47547af2b3cb9995d5837a4d14831ec2"
+    },
+    {
+      "chapterNumber": 45,
+      "chapterTitle": "COMPLETE 30-DAY CURRICULUM STUDY SCHEDULE",
+      "rawHeader": "MODULE 45 — COMPLETE 30-DAY CURRICULUM STUDY SCHEDULE",
+      "sections": [
+        "Day-by-Day Mastery Roadmap: From Foundations to CCNA-Level Engineering"
+      ],
+      "subsections": [
+        "WEEK 1: Foundations, Layered Models & Encapsulation",
+        "WEEK 2: Physical Layer, Media & Data Link Fundamentals",
+        "WEEK 3: Switching, VLANs, IPv4 & Subnetting Master Class",
+        "WEEK 4: IPv6, Core Protocols, Routing, Transport, Security & Final Master Exam"
+      ],
+      "rfcs": [
+        "1918"
+      ],
+      "diagramsCount": 0,
+      "hasAssessment": true,
+      "hasLab": true,
+      "characterCount": 4536,
+      "lineCount": 52,
+      "contentHash": "f7adde06d38841a8638dd72209b54213fe8770928c7a959514395bebc655463a"
+    }
+  ],
+  "supplementalSections": [
+    {
+      "sectionTitle": "CS-221 COMPUTER NETWORKING: COMPLETE MASTERY TEXTBOOK",
+      "sections": [],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "characterCount": 477,
+      "lineCount": 11,
+      "contentHash": "0bd7d4f800e7a5cb97a18128bdf5a8c4a02bf77be519c0787f64597840084cee"
+    },
+    {
+      "sectionTitle": "MODULE 37 (CONTINUED) — MCQs, SCENARIOS & NETWORKING MYTHS",
+      "sections": [
+        "Part D: Multiple Choice Questions (60)",
+        "Part E: Scenario Questions",
+        "Part F: Networking Myths & Traps (Consolidated)",
+        "Connection"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "characterCount": 11055,
+      "lineCount": 170,
+      "contentHash": "dd23dace3316bd8963778a6ba38fce9da79cd3bdd92b697e4056749752c19d18"
+    },
+    {
+      "sectionTitle": "CS-221 Master Alphabetical Glossary of Computer Networking",
+      "sections": [
+        "Exhaustive Technical Lexicon (A – Z)"
+      ],
+      "rfcs": [
+        "1034",
+        "1519",
+        "1918",
+        "2131",
+        "2328",
+        "3022",
+        "4271",
+        "4861",
+        "768",
+        "791",
+        "792",
+        "793",
+        "8200",
+        "826",
+        "8446",
+        "9000",
+        "9110"
+      ],
+      "diagramsCount": 0,
+      "characterCount": 11515,
+      "lineCount": 72,
+      "contentHash": "d0165869e1e696f0bc90a20d78d27e38c33b474c1e7b674b0578f697d23e3044"
+    },
+    {
+      "sectionTitle": "CS-221 Wireshark Packet Analysis Master Workbook",
+      "sections": [
+        "Active Learning Framework: Predict → Capture → Inspect → Reason → Troubleshoot"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "characterCount": 7223,
+      "lineCount": 120,
+      "contentHash": "fec2f0d0120d5ca905095121d65cdc3f28ecaa0fc8797e3618b3db9efac8c3ef"
+    },
+    {
+      "sectionTitle": "CS-221 Cisco Packet Tracer Master Laboratory Manual",
+      "sections": [
+        "Diagnostic Engineering Loop: Build → Verify → Break → Diagnose → Repair → Verify"
+      ],
+      "rfcs": [],
+      "diagramsCount": 3,
+      "characterCount": 3086,
+      "lineCount": 74,
+      "contentHash": "e34db5b5ac97a799e4e43992fd6d0a23ef9525797e0db242ac83d229a8caea62"
+    },
+    {
+      "sectionTitle": "CS-221 Failure-Injection & Troubleshooting Playbook",
+      "sections": [
+        "Hands-On Diagnostic Scenarios: From Symptom to Root Cause"
+      ],
+      "rfcs": [],
+      "diagramsCount": 4,
+      "characterCount": 7517,
+      "lineCount": 130,
+      "contentHash": "6d8b907884311461ed4521ea1235a36093a82ea15196d71bc9e575564836faf4"
+    },
+    {
+      "sectionTitle": "CS-221 Master Real-World Network Case Studies",
+      "sections": [
+        "Five Verified Global Incidents: Root Causes, Protocols & Architectural Lessons"
+      ],
+      "rfcs": [],
+      "diagramsCount": 0,
+      "characterCount": 10497,
+      "lineCount": 98,
+      "contentHash": "6797fe1b40745180eab801022f7027c315e9959c27a8e038c0ad4e0ed85ff77e"
+    }
+  ]
+}

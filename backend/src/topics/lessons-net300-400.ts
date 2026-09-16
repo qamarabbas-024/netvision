@@ -33,7 +33,7 @@ export interface BenchmarkLessonFullDefinition {
   introduction: string;
   contentV2?: LessonContentV2;
   stepMetadata?: LessonStepMetadata;
-  questions: BenchmarkQuestionDef[];
+  questions?: BenchmarkQuestionDef[];
   lab?: BenchmarkLabDef;
 }
 

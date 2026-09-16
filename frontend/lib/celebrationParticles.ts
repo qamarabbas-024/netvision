@@ -79,7 +79,6 @@ export function triggerMasteryFireworks(): () => void {
 
   const duration = 3500;
   const animationEnd = Date.now() + duration;
-  let animationFrameId: number | null = null;
 
   const masteryColors = ['#fbbf24', '#f59e0b', '#38bdf8', '#818cf8', '#c084fc', '#ffffff'];
 
@@ -133,9 +132,6 @@ export function triggerMasteryFireworks(): () => void {
   // Return cancel handle
   return () => {
     clearInterval(interval);
-    if (animationFrameId !== null) {
-      cancelAnimationFrame(animationFrameId);
-    }
     try {
       confetti.reset();
     } catch {

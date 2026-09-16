@@ -62,6 +62,22 @@ export interface PracticeExerciseItem {
 }
 
 /**
+ * Canonical Textbook Source Attribution Schema
+ */
+export interface TextbookAttribution {
+  bookTitle: string;
+  edition: string;
+  chapterNumber: number;
+  chapterTitle: string;
+  sectionRef: string;
+  citationRef?: string;
+  standardsRefs: string[];
+  cognitiveLevel: 'RECALL' | 'UNDERSTANDING' | 'APPLICATION' | 'ANALYSIS' | 'EVALUATION';
+  sourceContentHash?: string;
+  sourceVersion?: string;
+}
+
+/**
  * CURRICULUM CONTENT ARCHITECTURE V2: TOPIC-DRIVEN CONTENT MODEL
  *
  * Every lesson contains only the components educationally appropriate for that topic.
@@ -74,6 +90,7 @@ export interface LessonContentV2 {
   whyItMatters?: string;
   explanation: string;
   recap: string[] | { summaryPoints: string[]; nextLessonBridge?: string };
+  sourceAttribution?: TextbookAttribution;
 
   // Optional Components (Present ONLY when pedagogically appropriate)
   components?: TechnicalComponent[];
