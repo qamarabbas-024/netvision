@@ -463,10 +463,8 @@ async function main() {
     }
   }
 
-  // Handle any pre-existing historical lesson aliases to guarantee 100% curriculum coverage in flagship modules
-  const legacyLessonAliases: Record<string, string> = {
-    'what-is-computer-networking': 'NET-102',
-  };
+  // Handle any pre-existing historical lesson aliases
+  const legacyLessonAliases: Record<string, string> = {};
   for (const [legacySlug, targetCode] of Object.entries(legacyLessonAliases)) {
     const existing = await prisma.lesson.findUnique({ where: { slug: legacySlug } });
     if (existing) {
@@ -482,26 +480,37 @@ async function main() {
 
   // 5. Seed Assessment 2.0 Question Bank (229 Comprehensive Questions)
   console.log('📝 Seeding Assessment 2.0 Question Bank (229 High-Quality Questions)...');
-  // Clean up legacy placeholder questions
-  const deletedPlaceholders = await prisma.quizQuestion.deleteMany({
-    where: {
-      OR: [
-        { questionText: { startsWith: '[EASY]' } },
-        { quizId: 'quiz-net-101-bits-bytes-binary-hex' },
-      ],
-    },
-  });
-  if (deletedPlaceholders.count > 0) {
-    console.log(`  🧹 Cleaned ${deletedPlaceholders.count} legacy/updated quiz questions.`);
-  }
 
-  // Pre-load all existing questions to eliminate 229 redundant findFirst network roundtrips
+  // Pre-load all existing questions
   const allExistingQuestions = await prisma.quizQuestion.findMany({
     select: { id: true, quizId: true, questionText: true },
   });
+
+  // Set of authoritative question keys
+  const authoritativeKeys = new Set(
+    EXPANDED_ASSESSMENT_QUESTION_BANK.map((q) => `${q.quizId}:::${q.text}`)
+  );
+
+  // Clean up legacy placeholder or orphan questions not in authoritative question bank
+  const orphanQuestions = allExistingQuestions.filter(
+    (q) => !authoritativeKeys.has(`${q.quizId}:::${q.questionText}`)
+  );
+  if (orphanQuestions.length > 0) {
+    const orphanIds = orphanQuestions.map((q) => q.id);
+    for (let i = 0; i < orphanIds.length; i += 50) {
+      const chunk = orphanIds.slice(i, i + 50);
+      await prisma.quizQuestion.deleteMany({
+        where: { id: { in: chunk } },
+      });
+    }
+    console.log(`  🧹 Purged ${orphanIds.length} legacy/orphan questions not in authoritative question bank.`);
+  }
+
   const existingMap = new Map<string, string>();
   for (const q of allExistingQuestions) {
-    existingMap.set(`${q.quizId}:::${q.questionText}`, q.id);
+    if (authoritativeKeys.has(`${q.quizId}:::${q.questionText}`)) {
+      existingMap.set(`${q.quizId}:::${q.questionText}`, q.id);
+    }
   }
 
   let seededQCount = 0;
