@@ -4,10 +4,12 @@ import { LESSONS_NET203_204 } from './lessons-net203-204';
 import { LESSONS_NET300_400, BenchmarkLessonFullDefinition } from './lessons-net300-400';
 import { LESSONS_NET_C04 } from './lessons-net-c04';
 import { REMEDIATED_12_LESSONS } from './lessons-remediated';
+import { ALL_CURRICULUM_LABS } from './curriculum-labs-catalog';
 
 export { BenchmarkQuestionDef, BenchmarkLabDef, BenchmarkLessonFullDefinition } from './lessons-net300-400';
 export { LESSONS_NET_C04 } from './lessons-net-c04';
 export { REMEDIATED_12_LESSONS } from './lessons-remediated';
+export { ALL_CURRICULUM_LABS } from './curriculum-labs-catalog';
 
 export const BENCHMARK_LESSONS_FULL: BenchmarkLessonFullDefinition[] = [
   ...LESSONS_NET100,
@@ -16,4 +18,7 @@ export const BENCHMARK_LESSONS_FULL: BenchmarkLessonFullDefinition[] = [
   ...LESSONS_NET300_400,
   ...LESSONS_NET_C04,
   ...REMEDIATED_12_LESSONS,
-];
+].map((lesson) => ({
+  ...lesson,
+  lab: ALL_CURRICULUM_LABS[lesson.slug] || lesson.lab,
+}));

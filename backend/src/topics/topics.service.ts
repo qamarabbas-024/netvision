@@ -6,6 +6,7 @@ import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { AchievementsService } from '../achievements/achievements.service';
 import { NETWORKING_COMMANDS_CATALOG } from './commands-catalog';
 import { LEGACY_SLUG_COMPATIBILITY_MAP } from '@netvision/shared';
+import { NetworkSimulationEngine } from './network-simulation.engine';
 
 @Injectable()
 export class TopicsService {
@@ -534,41 +535,36 @@ export class TopicsService {
   }
 
   async executeLabCommand(dto: { labId: string; command: string; currentTopologyState?: Record<string, any> }) {
-    const { command } = dto;
+    const { command, labId, currentTopologyState } = dto;
     const cleanCmd = (command || '').trim();
 
     if (!cleanCmd) {
       throw new BadRequestException('Command cannot be empty.');
     }
 
-    // Security Rule: NO shell execution on host OS. Pattern-based simulation engine.
-    const lower = cleanCmd.toLowerCase();
-    let output = '';
-    let category = 'Diagnostic';
-
-    if (lower.startsWith('ping')) {
-      const target = cleanCmd.split(/\s+/)[1] || '192.168.1.1';
-      output = `PING ${target} (56 data bytes)\n64 bytes from ${target}: icmp_seq=0 ttl=64 time=1.12 ms\n64 bytes from ${target}: icmp_seq=1 ttl=64 time=0.98 ms\n64 bytes from ${target}: icmp_seq=2 ttl=64 time=1.05 ms\n--- ${target} ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss, time 2003ms`;
-    } else if (lower.startsWith('arp')) {
-      output = `Interface: 192.168.1.50 --- 0x2\n  Internet Address      Physical Address      Type\n  192.168.1.1           00-11-22-33-44-55     dynamic\n  192.168.1.100         aa-bb-cc-dd-ee-ff     dynamic\n  192.168.1.255         ff-ff-ff-ff-ff-ff     static`;
-    } else if (lower.startsWith('nslookup') || lower.startsWith('dig')) {
-      const host = cleanCmd.split(/\s+/)[1] || 'netvision.edu';
-      output = `Server:  1.1.1.1\nAddress: 1.1.1.1#53\n\nNon-authoritative answer:\nName:    ${host}\nAddress: 104.21.48.12`;
-    } else if (lower.startsWith('ipconfig') || lower.startsWith('ifconfig')) {
-      output = `Ethernet adapter Local Area Connection:\n  IPv4 Address. . . . . . . . . . . : 192.168.1.50\n  Subnet Mask . . . . . . . . . . . : 255.255.255.0\n  Default Gateway . . . . . . . . . : 192.168.1.1\n  Physical Address (MAC)  . . . . . : 00-1A-2B-3C-4D-5E`;
-    } else if (lower.startsWith('traceroute') || lower.startsWith('tracert')) {
-      output = `traceroute to 8.8.8.8 (8.8.8.8), 30 hops max\n 1  192.168.1.1 (192.168.1.1)  1.21 ms\n 2  10.0.0.1 (10.0.0.1)  8.45 ms\n 3  dns.google (8.8.8.8)  18.10 ms`;
-    } else if (lower.includes('show ip route')) {
-      category = 'Routing Table';
-      output = `Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP\n\nGateway of last resort is 192.168.1.1 to network 0.0.0.0\n\nC    192.168.1.0/24 is directly connected, GigabitEthernet0/0\nS*   0.0.0.0/0 [1/0] via 192.168.1.1`;
-    } else {
-      output = `Simulated Environment: Executed command '${cleanCmd}'. Status: OK. Socket status: Established.`;
+    let slug = labId;
+    if (labId && (labId.startsWith('lab-') || labId.length > 20)) {
+      try {
+        const labRecord = await this.prisma.lessonLab.findUnique({
+          where: { id: labId },
+          include: { lesson: { select: { slug: true } } },
+        });
+        if (labRecord?.lesson?.slug) {
+          slug = labRecord.lesson.slug;
+        }
+      } catch {
+        // use labId as fallback
+      }
     }
+
+    const state = currentTopologyState || NetworkSimulationEngine.getInitialStateForLab(slug);
+    const result = NetworkSimulationEngine.executeCommand(cleanCmd, state as any);
 
     return {
       command: cleanCmd,
-      output,
-      category,
+      output: result.output,
+      category: result.category,
+      updatedTopologyState: result.updatedState,
       timestamp: new Date().toISOString(),
     };
   }
@@ -617,46 +613,21 @@ export class TopicsService {
       throw new NotFoundException(`Lesson lab with ID "${labId}" not found.`);
     }
 
-    // Diagnostic validation checks
-    const checks: Array<{ rule: string; passed: boolean; message: string }> = [];
-    let passedCount = 0;
+    // Derive or replay simulated state from userSolution or command history
+    let simulatedState = NetworkSimulationEngine.getInitialStateForLab(lab.lesson.slug);
+    if (userSolution && Object.keys(userSolution).length > 0) {
+      simulatedState = userSolution as any;
+    } else {
+      for (const cmd of commandHistory) {
+        const simRes = NetworkSimulationEngine.executeCommand(cmd, simulatedState);
+        simulatedState = simRes.updatedState;
+      }
+    }
 
-    // Meaningful networking CLI commands expected in diagnostic and configuration labs
-    const VALID_NET_COMMANDS = /^(show|ping|traceroute|configure|interface|ip|vlan|router|switchport|spanning-tree|access-list|crypto|snmp|logging|arp|neighbor|netconf|curl|tcpdump)/i;
-    const meaningfulCommands = (commandHistory || []).filter((cmd: string) => {
-      const trimmed = (cmd || '').trim();
-      return trimmed.length > 2 && VALID_NET_COMMANDS.test(trimmed);
-    });
-
-    // Check 1: Command history verification (requires at least 2 distinct purposeful network commands)
-    const distinctCommands = Array.from(new Set(meaningfulCommands.map((c: string) => c.toLowerCase().trim())));
-    const hasSufficientCommands = distinctCommands.length >= 2;
-    checks.push({
-      rule: 'Command Diagnostics',
-      passed: hasSufficientCommands,
-      message: hasSufficientCommands
-        ? `Executed ${meaningfulCommands.length} diagnostic and configuration commands (${distinctCommands.length} distinct).`
-        : `Insufficient purposeful CLI commands recorded (${distinctCommands.length}/2 required). Run relevant diagnostic commands.`,
-    });
-    if (hasSufficientCommands) passedCount++;
-
-    // Check 2: Target state / configuration verification
-    // State criteria verified only if substantive commands executed and solution or topology state confirmed
-    const stateValid = hasSufficientCommands && (
-      Boolean(userSolution) ||
-      distinctCommands.some(c => c.startsWith('ping') || c.startsWith('show') || c.startsWith('configure') || c.startsWith('interface'))
-    );
-    checks.push({
-      rule: 'Target State Verification',
-      passed: stateValid,
-      message: stateValid
-        ? 'Network topology target state criteria and interface convergence satisfied.'
-        : 'Topology criteria not met. Verification requires operational CLI workflow execution.',
-    });
-    if (stateValid) passedCount++;
-
-    const totalChecks = checks.length;
-    let score = totalChecks > 0 ? Math.round((passedCount / totalChecks) * 100) : 100;
+    // Execute state-based semantic validation
+    const result = NetworkSimulationEngine.validateAttempt(lab.lesson.slug, simulatedState, commandHistory);
+    const checks = result.checks;
+    let score = result.score;
 
     // Deduct 5 points per hint used (sanitized to non-negative integer)
     const safeHintsCount = Math.max(0, Math.floor(Number(hintsUsedCount) || 0));

@@ -21,10 +21,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-what-is-a-computer-network",
     text: "Which primary characteristic fundamentally distinguishes a computer network from a collection of isolated standalone computers?",
     options: [
-      "The ability of interconnected endpoints to exchange data and share resources over shared communication links",
-      "The requirement that every connected node runs the exact same operating system and hardware architecture",
-      "The continuous distribution of electrical alternating current to power connected workstation monitors",
-      "The restriction that data can only travel in one single direction across a single central bus"
+      "The ability of interconnected endpoints to exchange data and share resources over communication links",
+      "The requirement that all connected nodes execute the exact same operating system and hardware architecture",
+      "The continuous distribution of electrical alternating current to power connected workstation displays",
+      "The restriction that communication signals can only traverse in one unidirectional path across a central bus"
     ],
     correctOption: 0,
     explanation: "A computer network is fundamentally defined as an interconnected collection of autonomous computing nodes that exchange data packets and share logical and physical resources over communication channels.",
@@ -229,7 +229,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "When a web browser client connects to a web server (https://example.com), what port combination is typically utilized for the TCP transport connection?",
     options: [
       "Source port 80 on the client, and destination port 80 on the server",
-      "A randomly chosen high ephemeral source port (e.g. 52140) on the client, and destination port 443 on the server",
+      "A randomly chosen high ephemeral source port on the client, and destination port 443 on the server",
       "Source port 443 on the client, and destination port 443 on the server",
       "Destination port 0 on the server, and source port 25 on the client"
     ],
@@ -251,10 +251,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-client-and-server-architecture",
     text: "How does a Peer-to-Peer (P2P) architecture differ fundamentally from a traditional Client-Server model?",
     options: [
-      "P2P networks can only transfer text files smaller than 1 kilobyte",
-      "P2P networks do not use IP addresses or Ethernet cables",
       "Every node in a P2P network can act as both a client and a server, sharing resources without a central authority",
-      "P2P networks require an enterprise mainframe to validate every transaction"
+      "Every node in a P2P network must route all transactions through an authoritative centralized Kerberos server",
+      "P2P nodes communicate exclusively over unencrypted Layer 2 broadcast frames without IP addressing",
+      "P2P network members require dedicated hardware leased lines directly to every other participant node"
     ],
     correctOption: 2,
     explanation: "In Peer-to-Peer networks (such as BitTorrent), each node (peer) simultaneously functions as both a client (downloading data) and a server (uploading data) without relying on centralized host infrastructure.",
@@ -274,10 +274,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-client-and-server-architecture",
     text: "A user types `https://intranet.corp.local` in their browser and receives an error: \"Connection Refused (ERR_CONNECTION_REFUSED)\". What does this specific TCP-level diagnostic indicate?",
     options: [
-      "The client web browser software is corrupted and needs an immediate operating system reinstall",
-      "The physical Ethernet cable between the client and switch has been severed completely",
-      "The DNS server failed to resolve the hostname into an IP address",
-      "The server host was reached at the IP level, but no software process was actively listening on TCP port 443, causing the OS to return a TCP RST packet"
+      "The client operating system network stack has become corrupted and requires immediate driver reinstallation",
+      "The physical Ethernet cable between the client workstation and access switch has been severed completely",
+      "The server host was reached at the IP level, but no software process was actively listening on TCP port 443, causing the OS to return a TCP RST packet",
+      "The recursive DNS resolver failed to resolve the destination domain name into a routable IPv4 address"
     ],
     correctOption: 3,
     explanation: "A \"Connection Refused\" error means IP routing and ARP succeeded in delivering the TCP SYN packet to the destination host, but the target server OS had no listening service on port 443 and immediately responded with a TCP RST (Reset).",
@@ -297,10 +297,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-lan-wan-internet-boundaries",
     text: "What is the primary geographic and administrative distinction between a Local Area Network (LAN) and a Wide Area Network (WAN)?",
     options: [
-      "A LAN spans a limited local geographic area (single office/building) under unified private administration, whereas a WAN spans vast distances connecting disparate LANs across leased telecommunication circuits",
-      "A LAN uses wireless infrared exclusively, whereas a WAN uses copper coaxial cables exclusively",
-      "A LAN operates without IP addresses, whereas a WAN requires every device to have a public domain name",
-      "A LAN cannot connect more than two computers, whereas a WAN requires at least 1,000,000 devices"
+      "A LAN spans a local geographic area under unified private administration, whereas a WAN connects disparate LANs across leased telecommunication circuits",
+      "A LAN uses wireless infrared transmission exclusively, whereas a WAN uses copper coaxial cabling across physical interconnections",
+      "A LAN operates without Layer 3 IP addressing, whereas a WAN requires every connected device to maintain a public registered domain name",
+      "A LAN is physically limited to exactly two connected computers, whereas a WAN mandates a minimum deployment of 1,000,000 active nodes"
     ],
     correctOption: 0,
     explanation: "A LAN covers a localized physical footprint (residence, building, campus) operated by a single entity. A WAN interconnects geographically dispersed LANs across cities, countries, or continents using telecommunications service provider infrastructure.",
@@ -321,7 +321,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "Which networking term best describes a high-speed network spanning an entire metropolitan area or university campus, positioned geographically between a LAN and a WAN?",
     options: [
       "PAN (Personal Area Network)",
-      "MAN (Metropolitan Area Network) / CAN (Campus Area Network)",
+      "MAN (Metropolitan Area Network)",
       "SAN (Storage Area Network)",
       "VPN (Virtual Private Network)"
     ],
@@ -389,10 +389,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-ip-addresses-logical-location",
     text: "Which three IPv4 address blocks are officially designated as Private Non-Routable address spaces under RFC 1918?",
     options: [
-      "10.0.0.0/8 (10.0.0.0 - 10.255.255.255), 172.16.0.0/12 (172.16.0.0 - 172.31.255.255), and 192.168.0.0/16 (192.168.0.0 - 192.168.255.255)",
       "127.0.0.0/8, 169.254.0.0/16, and 224.0.0.0/4",
+      "10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16",
       "1.0.0.0/8, 2.0.0.0/8, and 3.0.0.0/8",
-      "192.168.0.0/24, 192.168.1.0/24, and 192.168.2.0/24 only"
+      "192.168.0.0/24, 192.168.1.0/24, and 192.168.2.0/24"
     ],
     correctOption: 0,
     explanation: "RFC 1918 specifies three private address blocks: 10.0.0.0/8 (Class A), 172.16.0.0/12 (Class B, spanning 172.16 to 172.31), and 192.168.0.0/16 (Class C, spanning 192.168.0 to 192.168.255).",
@@ -435,10 +435,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-ip-addresses-logical-location",
     text: "A systems administrator discovers that an internal server has been assigned IP `172.32.1.100`. Why is this address configuration problematic for an internal private network?",
     options: [
-      "172.32.1.100 cannot be represented in binary notation",
-      "172.32.1.100 is a reserved multicast address",
-      "172.32.1.100 is a globally routable public IP owned by an external organization (RFC 1918 Class B space stops at 172.31.255.255), creating IP conflicts when accessing legitimate Internet services on that range",
-      "172.32.1.100 forces all network switches into half-duplex mode"
+      "172.32.1.100 is an APIPA autoconfiguration address (169.254.0.0/16) that cannot cross router boundaries",
+      "172.32.1.100 is a Class D multicast group address that requires IGMP snooping on local switches",
+      "172.32.1.100 is a public routable IP outside RFC 1918 space (which stops at 172.31.255.255), causing routing conflicts",
+      "172.32.1.100 is a loopback address reserved strictly for local inter-process communication on the host"
     ],
     correctOption: 2,
     explanation: "RFC 1918 Class B private address space spans strictly from `172.16.0.0` to `172.31.255.255` (/12). `172.32.0.0` and above are public routable addresses.",
@@ -458,10 +458,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-ip-addresses-logical-location",
     text: "What does an IPv4 address of `169.254.100.50` with subnet mask `255.255.0.0` signify when observed on a newly booted client workstation?",
     options: [
-      "The workstation has been infected by a boot-sector rootkit",
-      "The workstation successfully leased a high-priority enterprise IP address",
-      "The default gateway router assigned a dynamic cloud route",
-      "Automatic Private IP Addressing (APIPA) self-assignment occurred because the client failed to receive a response from a local DHCP server"
+      "The workstation host firewall has permanently blocked all outbound Layer 3 and Layer 4 packet transmissions",
+      "The network interface card failed to complete auto-negotiation and disabled half-duplex Ethernet signalling",
+      "Automatic Private IP Addressing (APIPA) self-assignment occurred because the client failed to receive a response from a local DHCP server",
+      "The default gateway router assigned an administrative quarantine address due to 802.1X authentication failure"
     ],
     correctOption: 3,
     explanation: "The `169.254.0.0/16` prefix is reserved by RFC 3927 for APIPA link-local addressing. When DHCP Discover broadcasts go unanswered, the client self-assigns an address in this block.",
@@ -481,7 +481,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-ip-addresses-logical-location",
     text: "Which RFC 6598 address block is specifically reserved for Carrier-Grade NAT (CGNAT) deployed by ISPs?",
     options: [
-      "100.64.0.0/10 (100.64.0.0 – 100.127.255.255)",
+      "100.64.0.0/10",
       "192.168.0.0/16",
       "10.0.0.0/8",
       "240.0.0.0/4"
@@ -504,10 +504,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-ip-addresses-logical-location",
     text: "A network administrator notices that packets originating from `192.168.1.50` reach the local default gateway router, but cannot reach external web servers on the Internet. What router service is missing?",
     options: [
-      "A DNS cache flush command",
-      "Network Address Translation (NAT) / Port Address Translation (PAT) to translate private RFC 1918 IPs into a routable public IP",
-      "An ARP broadcast disable command",
-      "A fiber optic cable transponder"
+      "DNS forward lookup zones to resolve reverse PTR records on the ISP nameserver",
+      "Network Address Translation (NAT/PAT) to translate private RFC 1918 IPs into a routable public IP",
+      "Dynamic ARP Inspection (DAI) configured on switch access ports to validate MAC bindings",
+      "An 802.1Q trunking encapsulation header applied to the router WAN interface"
     ],
     correctOption: 1,
     explanation: "Because RFC 1918 private addresses cannot be routed across the public Internet, the boundary router must perform NAT/PAT to translate the internal private source IP into a registered public IP address.",
@@ -529,8 +529,8 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     options: [
       "128 bits (16 Bytes / 8 hexadecimal hextets)",
       "32 bits (4 Bytes / 4 dotted-decimal octets)",
-      "48 bits (6 Bytes / 12 hexadecimal digits), split into a 24-bit OUI manufacturer prefix and a 24-bit vendor-assigned NIC identifier",
-      "64 bits (8 Bytes)"
+      "48 bits (6 Bytes / 12 hexadecimal digits)",
+      "64 bits (8 Bytes / 16 hexadecimal nibbles)"
     ],
     correctOption: 2,
     explanation: "A standard IEEE 802 MAC address is 48 bits (6 octets / 12 hex digits). The first 24 bits are the Organizationally Unique Identifier (OUI); the last 24 bits are the NIC identifier.",
@@ -550,10 +550,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-mac-addresses-physical-identity",
     text: "Which organization is responsible for assigning the first 24 bits (Organizationally Unique Identifier / OUI) of a MAC address to hardware manufacturers?",
     options: [
+      "IEEE (Institute of Electrical and Electronics Engineers)",
       "ISO (International Organization for Standardization)",
       "IETF (Internet Engineering Task Force)",
-      "W3C (World Wide Web Consortium)",
-      "IEEE (Institute of Electrical and Electronics Engineers)"
+      "W3C (World Wide Web Consortium)"
     ],
     correctOption: 3,
     explanation: "The IEEE Registration Authority assigns 24-bit OUI prefixes to hardware manufacturers (such as Cisco, Intel, Apple) to guarantee global MAC uniqueness.",
@@ -573,10 +573,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-mac-addresses-physical-identity",
     text: "In the first octet of a MAC address, what do the Individual/Group (I/G) bit and Universal/Local (U/L) bit signify when evaluated?",
     options: [
-      "I/G bit (Bit 0): 0 = Unicast, 1 = Multicast | U/L bit (Bit 1): 0 = Universally Administered, 1 = Locally Administered",
-      "I/G bit: 0 = IPv4, 1 = IPv6 | U/L bit: 0 = Encrypted, 1 = Plaintext",
-      "I/G bit: 0 = 100 Mbps, 1 = 1 Gbps | U/L bit: 0 = Copper, 1 = Fiber",
-      "I/G bit: 0 = Private, 1 = Public | U/L bit: 0 = Dynamic, 1 = Static"
+      "I/G bit: 0 = Unicast, 1 = Multicast | U/L bit: 0 = Universally Administered, 1 = Locally Administered",
+      "I/G bit: 0 = IPv4, 1 = IPv6 | U/L bit: 0 = Encrypted Payload, 1 = Plaintext Header",
+      "I/G bit: 0 = 100 Mbps, 1 = 1 Gbps | U/L bit: 0 = Copper Cabling, 1 = Fiber Optic",
+      "I/G bit: 0 = Private LAN, 1 = Public WAN | U/L bit: 0 = Dynamic Allocation, 1 = Static Binding"
     ],
     correctOption: 0,
     explanation: "Bit 0 of octet 1 (Least Significant Bit) is the I/G bit: 0 indicates Unicast, 1 indicates Multicast. Bit 1 of octet 1 is the U/L bit: 0 indicates IEEE universally assigned, 1 indicates locally administered override.",
@@ -596,8 +596,8 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-mac-addresses-physical-identity",
     text: "What is the standard Layer 2 destination MAC address used when a host must broadcast a frame to all devices on its local subnet?",
     options: [
+      "FF:FF:FF:FF:FF:FF",
       "00:00:00:00:00:00",
-      "FF:FF:FF:FF:FF:FF (all 48 bits set to 1)",
       "01:00:5E:00:00:01",
       "255.255.255.255"
     ],
@@ -619,10 +619,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-mac-addresses-physical-identity",
     text: "A network engineer inspects a frame with destination MAC `01:00:5E:14:02:03`. How does a standard Layer 2 switch handle this frame?",
     options: [
-      "It routes the frame to the default gateway router over WAN",
-      "It drops the frame immediately as corrupted",
-      "It identifies the frame as Multicast (I/G bit = 1) and forwards it to all multicast group member ports (or floods if IGMP snooping is off)",
-      "It changes the destination MAC to FF:FF:FF:FF:FF:FF"
+      "It routes the frame to the default gateway router across external WAN subnets",
+      "It identifies the frame as Multicast (I/G bit = 1) and forwards it to all multicast group member ports",
+      "It drops the frame immediately as an invalid or corrupted Ethernet transmission",
+      "It modifies the destination MAC address to the local broadcast address FF:FF:FF:FF:FF:FF"
     ],
     correctOption: 2,
     explanation: "MAC addresses starting with `01:00:5E` have the I/G bit set to 1 (`0x01` = `00000001`), identifying them as IPv4 Multicast. The switch delivers the frame to ports participating in the multicast group via IGMP snooping.",
@@ -642,10 +642,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-mac-addresses-physical-identity",
     text: "A network engineer notices that two cloned virtual machines were deployed with the exact same MAC address `00:50:56:11:22:33` on the same VLAN. What symptom will occur on the network switch?",
     options: [
-      "Both VMs will receive double network bandwidth",
-      "The entire switch will permanently lock up and overheat",
-      "The switch will automatically merge both VMs into a single server",
-      "CAM table flapping (MAC address flapping) between the two switchports, causing intermittent packet loss and connection drops for both VMs"
+      "Both virtual machines will automatically aggregate switch bandwidth up to double capacity",
+      "CAM table flapping between the two switchports, causing intermittent packet loss and connection drops",
+      "The physical switch supervisor engine will permanently lock up and trigger a thermal shutdown",
+      "The switch backplane will automatically merge both virtual machines into a single logical host"
     ],
     correctOption: 3,
     explanation: "When two devices share a MAC address on the same broadcast domain, incoming frames from both hosts cause the switch CAM table to continuously overwrite the port association for that MAC, resulting in CAM flapping and packet loss.",
@@ -665,10 +665,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-network-ports-socket-boundaries",
     text: "What are the three official IANA port number classifications and their correct numerical ranges?",
     options: [
-      "Well-Known Ports (0 – 1023), Registered Ports (1024 – 49151), and Dynamic/Ephemeral Ports (49152 – 65535)",
       "Class A Ports (0 – 255), Class B Ports (256 – 1024), and Class C Ports (1025 – 65535)",
-      "Public Ports (0 – 1000) and Private Ports (1001 – 65535)",
-      "TCP Ports (0 – 32767) and UDP Ports (32768 – 65535)"
+      "Well-Known Ports (0 – 1023), Registered Ports (1024 – 49151), and Dynamic/Ephemeral Ports (49152 – 65535)",
+      "Public Ports (0 – 1000), Restricted Ports (1001 – 32767), and Private Ports (32768 – 65535)",
+      "TCP Stream Ports (0 – 32767), UDP Datagram Ports (32768 – 49151), and Raw Sockets (49152 – 65535)"
     ],
     correctOption: 0,
     explanation: "IANA officially designates 16-bit ports into Well-Known (0 to 1023 for system services), Registered (1024 to 49151 for applications), and Dynamic/Ephemeral (49152 to 65535 for client outbound connections).",
@@ -734,10 +734,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-network-ports-socket-boundaries",
     text: "A user opens three separate browser tabs to `https://www.google.com` (`142.250.190.46:443`). How does the user's operating system ensure returning web packets are delivered to the correct browser tab without cross-contamination?",
     options: [
-      "The OS shuts down the other two tabs while one tab is loading",
-      "The OS assigns a different physical MAC address to each tab",
-      "The OS requests Google to create three separate physical IP addresses for the client",
-      "The OS assigns a unique ephemeral source port (e.g. 51234, 51235, 51236) to each tab, allowing the kernel to demultiplex returning packets based on destination port"
+      "The OS shuts down inactive background tabs while the active tab is loading resources",
+      "The OS assigns a unique ephemeral source port to each tab, allowing the kernel to demultiplex returning packets",
+      "The OS allocates a distinct physical MAC address to each running browser process",
+      "The OS requests the remote web server to establish three separate public IP addresses for the client"
     ],
     correctOption: 3,
     explanation: "The OS allocates a distinct ephemeral source port to each browser tab. When Google replies, the Destination Port in the TCP header matches that specific ephemeral port, allowing the kernel to demultiplex the data stream directly to the correct tab.",
@@ -780,10 +780,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-network-ports-socket-boundaries",
     text: "A software engineer runs a web server script and encounters the fatal error: `Error: listen EADDRINUSE: address already in use 0.0.0.0:8080`. What does this error signify, and what is the standard diagnostic action?",
     options: [
-      "The router has run out of physical bandwidth",
-      "Another active process is already listening on port 8080; use `netstat -ano | findstr :8080` to locate and terminate the conflicting Process ID (PID) or reconfigure the application port",
-      "The computer has lost its IPv4 default gateway",
-      "The DNS root server is offline"
+      "The network interface card transmit ring buffer descriptors have been exhausted by incoming frames",
+      "Another active process is already listening on port 8080; terminate the conflicting PID or reconfigure the application port",
+      "The host operating system kernel has failed to allocate an ephemeral TCP source port above 49152",
+      "The upstream gateway router has dropped the socket request due to an unestablished TCP handshake"
     ],
     correctOption: 1,
     explanation: "Only one process can bind to a specific IP address, transport protocol, and port number at any given time. `EADDRINUSE` indicates a port collision with an existing daemon.",
@@ -803,10 +803,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-network-packets-data-framing",
     text: "On a standard Ethernet network with an MTU of 1500 bytes, what is the standard Maximum Segment Size (MSS) for IPv4 TCP traffic, and what formula defines it?",
     options: [
-      "MSS = 1480 Bytes (Formula: MSS = MTU - IPv4 Header (20))",
-      "MSS = 1500 Bytes (Formula: MSS = MTU)",
-      "MSS = 1460 Bytes (Formula: MSS = MTU (1500) - IPv4 Header (20) - TCP Header (20))",
-      "MSS = 64 Bytes (Formula: Minimum Frame Size)"
+      "MSS = 1480 Bytes (Calculated as: MTU - IPv4 Header (20))",
+      "MSS = 1500 Bytes (Calculated as: MTU with zero encapsulation overhead)",
+      "MSS = 1460 Bytes (Calculated as: MTU (1500) - IPv4 Header (20) - TCP Header (20))",
+      "MSS = 64 Bytes (Calculated as: Minimum allowable Ethernet Frame Payload)"
     ],
     correctOption: 2,
     explanation: "Maximum Segment Size (MSS) represents the maximum TCP payload data. Formula: $\\text{MSS} = \\text{MTU} - (\\text{IP Header} + \\text{TCP Header}) = 1500 - 20 - 20 = 1460 \\text{ bytes}$.",
@@ -829,7 +829,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       "1460 Bytes",
       "1420 Bytes",
       "1400 Bytes",
-      "1380 Bytes (1420 MTU - 20B IPv4 Header - 20B TCP Header)"
+      "1380 Bytes"
     ],
     correctOption: 3,
     explanation: "Applying the formula $\\text{MSS} = \\text{MTU} - 40$ gives $1420 - 40 = 1380 \\text{ bytes}$.",
@@ -849,10 +849,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-network-packets-data-framing",
     text: "How does Path MTU Discovery (PMTUD, RFC 1191) dynamically detect the lowest MTU across an end-to-end network path without performing Layer 3 fragmentation?",
     options: [
-      "The sender sets the Don't Fragment (DF = 1) bit in the IPv4 header; intermediate routers that cannot forward the oversized packet drop it and return an ICMP Type 3 Code 4 message containing their MTU",
-      "The sender queries the local DNS server for the path MTU record",
-      "The router converts all packets into jumbo frames automatically",
-      "The sender floods broadcast frames to all intermediate switches"
+      "The sender queries the local recursive DNS server for the path maximum transmission unit record",
+      "The sender sets DF=1 in the IPv4 header; intermediate routers drop oversized packets and return ICMP Type 3 Code 4",
+      "The default router encapsulates all transit packets into IEEE 802.3ac jumbo frames automatically",
+      "The sending host floods Layer 2 broadcast frames to discover path MTU limits on intermediate switches"
     ],
     correctOption: 0,
     explanation: "PMTUD relies on setting DF=1. If an intermediate link MTU is exceeded, the router drops the packet and responds with an ICMP Type 3 Code 4 (\"Fragmentation Needed and DF set\") specifying its MTU size, allowing the sender to adjust MSS.",
@@ -1010,10 +1010,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-network-protocols-standards",
     text: "A proprietary legacy routing protocol (Cisco IGRP) fails to communicate with a newly installed open-standards Juniper router. What is the standard industry remediation to establish dynamic routing between these two vendors?",
     options: [
-      "Disable IP routing on both routers and rely solely on NetBIOS broadcasts",
-      "Increase the physical clock speed of the serial interface cables",
-      "Change the subnet mask on the Juniper router to 255.255.255.255",
-      "Migrate the dynamic routing protocol on both routers to an open standard protocol such as OSPF (RFC 2328)"
+      "Configure proprietary Cisco EIGRP redistribution across all non-Cisco core routing platforms",
+      "Migrate the dynamic routing protocol on both routers to an open standard protocol such as OSPF",
+      "Implement static default routes pointing to loopback interfaces on every access layer switch",
+      "Disable IP routing globally and bridge all subnets together into a flat Layer 2 broadcast domain"
     ],
     correctOption: 3,
     explanation: "Proprietary protocols prevent multi-vendor interoperability. Migrating to open standards like OSPF (Open Shortest Path First) allows routers from different vendors to exchange link-state routing updates seamlessly.",
@@ -1057,7 +1057,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "Which DNS Resource Record type is used to map an alias hostname to another canonical domain name (e.g. mapping `www.example.com` to `example.com`)?",
     options: [
       "A Record",
-      "CNAME (Canonical Name)",
+      "CNAME Record",
       "AAAA Record",
       "MX Record"
     ],
@@ -1171,9 +1171,9 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-dhcp-automatic-ip-allocation",
     text: "What are the four sequential messages exchanged between a client and a DHCP server during initial IP address lease acquisition?",
     options: [
-      "SYN -> SYN-ACK -> ACK -> FIN",
+      "SYN -> SYN-ACK -> ACK",
+      "Discover -> Offer -> Request -> Acknowledge",
       "Request -> Reply -> Connect -> Finalize",
-      "Discover -> Offer -> Request -> Acknowledge (DORA)",
       "Query -> Lookup -> Resolve -> Bind"
     ],
     correctOption: 2,
@@ -1263,10 +1263,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-dhcp-automatic-ip-allocation",
     text: "Why is the DHCP Relay Agent (`ip helper-address`) feature configured on enterprise router interfaces?",
     options: [
-      "To prevent computers from running web browsers",
-      "To encrypt DHCP leases using WPA3 wireless security",
+      "To assign static RFC 1918 addresses to router subinterfaces without requiring dynamic lease tables",
+      "To suppress DHCP Offer packets from rogue DHCP servers across local switch access ports",
       "Because routers drop Layer 2/3 broadcast packets by default, requiring the router to convert client DHCP Discover broadcasts into unicast packets routed to a central DHCP server",
-      "To convert IPv4 packets into IPv6 packets automatically"
+      "To translate private IPv4 addresses into public routable IP addresses across external WAN links"
     ],
     correctOption: 2,
     explanation: "Since routers terminate broadcast domains and do not forward `255.255.255.255` broadcasts, a DHCP Relay Agent (`ip helper-address`) intercepts client Discover broadcasts and forwards them as unicast packets to the central DHCP server.",
@@ -1493,7 +1493,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-basic-network-troubleshooting-workflow",
     text: "What is the correct sequence of steps in the systematic \"Bottom-Up\" troubleshooting methodology based on the OSI Model?",
     options: [
-      "Verify Physical Layer (cables/link lights) → Data Link (link status/MAC) → Network (IP/ping gateway) → Transport (ports/firewall) → Application (software/DNS)",
+      "Verify Physical Layer (cables/link lights) → Data Link (link status/MAC) → Network (IP/ping gateway) → Transport (ports/firewall) → Application",
       "Reinstall Application software → Replace CPU → Replace Wall Jacks → Ping 127.0.0.1",
       "Reboot all routers on the Internet → Change IP address → Inspect physical cable",
       "Verify Application layer first → Check Physical layer last"
@@ -1747,9 +1747,9 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "When choosing between optical fiber types, which one is designed for much longer distances across campuses or between buildings?",
     options: [
       "Coaxial Cable",
-      "Multimode Fiber (MMF)",
-      "Cat5e Copper Cable",
-      "Single-Mode Fiber (SMF)"
+      "Multimode Fiber",
+      "Single-Mode Fiber",
+      "Cat5e Copper Cable"
     ],
     correctOption: 3,
     explanation: "Single-Mode Fiber (SMF) carries light along a single direct path, allowing it to span long distances between buildings or across cities.",
@@ -2117,7 +2117,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       "Network Access → Internet → Transport → Application",
       "Physical → Network → Transport → Application",
       "Internet → Transport → Application → Network Access",
-      "Application → Transport → Internet → Network Access (Link)"
+      "Application → Transport → Internet → Network Access"
     ],
     correctOption: 3,
     explanation: "The top-to-bottom order of the TCP/IP model layers is: Application (Layer 4), Transport (Layer 3), Internet (Layer 2), Network Access / Link (Layer 1).",
@@ -2185,7 +2185,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     options: [
       "TCP/IP maps directly 1-to-1 with all 7 OSI layers",
       "TCP/IP combines all 7 OSI layers into 1 single layer",
-      "TCP/IP Application combines OSI Layers 5, 6, and 7; Transport maps to OSI Layer 4; Internet maps to OSI Layer 3; Network Access combines OSI Layers 1 and 2",
+      "TCP/IP Application combines OSI Layers 5, 6, and 7",
       "TCP/IP Network Access maps to OSI Layer 7 Application"
     ],
     correctOption: 2,
@@ -2229,10 +2229,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ip-addressing-ipv4-overview",
     text: "Why was Classless Inter-Domain Routing (CIDR, RFC 1519) introduced in 1993 to replace the original 1981 Classful IPv4 architecture?",
     options: [
-      "To decouple subnet masks from rigid class boundaries (allowing arbitrary /N prefix lengths) and enable route aggregation (supernetting), preventing IPv4 address exhaustion and routing table collapse",
-      "To increase IPv4 address length from 32 bits to 128 bits",
-      "To eliminate the need for routers on the Internet",
-      "To enforce mandatory encryption on all web packets"
+      "To decouple subnet masks from rigid class boundaries and enable route aggregation to prevent address exhaustion",
+      "To expand the IPv4 address space from 32 bits to 128 bits across global enterprise routing domains",
+      "To eliminate Layer 3 routing protocols and replace the Internet backbone with flat Layer 2 switching",
+      "To mandate end-to-end IPsec tunnel encryption across all HTTP web traffic traversing public transit links"
     ],
     correctOption: 0,
     explanation: "Classful addressing caused massive address waste (e.g. an enterprise needing 300 hosts had to take a full Class B with 65,534 addresses). CIDR enabled tailored prefix sizes (like /23 for 510 hosts) and route summarization.",
@@ -2322,9 +2322,9 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "How does CIDR Route Aggregation (Supernetting) prevent global Internet routing table exhaustion?",
     options: [
       "It combines multiple contiguous smaller subnet routes into a single summarized prefix advertisement (e.g. 16 /24 routes advertised as one /20), dramatically reducing routing table entries",
-      "It forces all internet traffic through a single physical router in California",
-      "It converts all IPv4 packets into uncompressed text files",
-      "It shuts down dormant websites automatically"
+      "It mandates that all transit enterprise autonomous systems route packet flows through a single centralized tier-1 transit provider",
+      "It converts dynamic routing protocol updates into compressed flat text files exchanged exclusively over administrative SSH sessions",
+      "It automatically decommissions dormant public IP subnets when BGP neighbor keepalive timers expire on perimeter edge routers"
     ],
     correctOption: 0,
     explanation: "Route aggregation (Supernetting) allows service providers to summarize multiple contiguous network blocks into a single routing table entry, reducing the memory and processing load on global BGP core routers.",
@@ -2345,7 +2345,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "A network technician encounters a legacy configuration using `192.168.1.0/28`. A colleague claims this is invalid because \"192.168.x.x is Class C and must use /24\". How should the technician explain the colleague's misconception?",
     options: [
       "The colleague is correct; subnets other than /24 will damage the network interface card",
-      "Under modern Classless Inter-Domain Routing (CIDR), fixed classes are obsolete; any IP address can use any valid subnet prefix length (/28 provides 14 usable hosts)",
+      "Under modern Classless Inter-Domain Routing (CIDR), fixed classes are obsolete; any IP address can use any valid subnet prefix length",
       "A /28 mask only works on token ring networks",
       "The IP address must be converted to hexadecimal before applying a /28 mask"
     ],
@@ -2461,7 +2461,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     options: [
       "Because routers only support even-numbered host bits",
       "Because .32 is a reserved loopback address",
-      "Because a /26 has a block size of 64 and can only legally begin on boundaries that are exact multiples of 64 (.0, .64, .128, .192)",
+      "Because a /26 has a block size of 64 and can only legally begin on boundaries that are exact multiples of 64",
       "Because /26 masks can only be applied to fiber optic switchports"
     ],
     correctOption: 2,
@@ -2577,7 +2577,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       "IPv6 devices physically connect their cables directly to every other computer in the building",
       "IPv6 forces all switches to flood all frames out all ports permanently",
       "IPv6 embeds the full MAC address inside the domain name DNS record",
-      "IPv6 replaces broadcast with ICMPv6 Neighbor Discovery Protocol (NDP) utilizing targeted Solicited-Node Multicast addresses (`ff02::1:ffxx:xxxx`)"
+      "IPv6 replaces broadcast with ICMPv6 Neighbor Discovery Protocol (NDP) utilizing targeted Solicited-Node Multicast addresses"
     ],
     correctOption: 3,
     explanation: "IPv6 completely eliminated broadcast. Address resolution is performed via ICMPv6 Neighbor Solicitation (NS) sent to the targeted Solicited-Node Multicast group, allowing NICs that are not the target to ignore the frame at the hardware level.",
@@ -2643,10 +2643,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ethernet-mac-addresses-overview",
     text: "An ARP request containing 28 bytes of data is encapsulated in an Ethernet II frame. How many bytes of padding will the network interface card append?",
     options: [
-      "36 bytes",
-      "0 bytes",
-      "18 bytes of zero padding (46 - 28 = 18 bytes)",
-      "46 bytes"
+      "36 bytes of padding",
+      "0 bytes of padding",
+      "18 bytes of padding",
+      "46 bytes of padding"
     ],
     correctOption: 2,
     explanation: "Because the minimum payload for Ethernet II is 46 bytes, an interface encapsulating a 28-byte ARP packet must add $46 - 28 = 18$ bytes of padding to reach the 64-byte minimum frame size.",
@@ -2666,10 +2666,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ethernet-mac-addresses-overview",
     text: "What algorithm does the 4-byte Frame Check Sequence (FCS) trailer use to verify data integrity in an Ethernet frame?",
     options: [
+      "Cyclic Redundancy Check (CRC-32)",
       "Simple 8-bit Parity Bit",
       "MD5 Cryptographic Hash",
-      "SHA-256 Checksum",
-      "Cyclic Redundancy Check (CRC-32)"
+      "SHA-256 Secure Checksum"
     ],
     correctOption: 3,
     explanation: "Ethernet uses a 32-bit Cyclic Redundancy Check (CRC-32) in its FCS trailer. The receiver recalculates the CRC and compares it to FCS; if mismatching, the frame is dropped.",
@@ -2712,10 +2712,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ethernet-mac-addresses-overview",
     text: "A network administrator notices thousands of \"Runt frame\" errors logged on switch interface GigabitEthernet0/1. What does this mean, and what is the most likely physical root cause?",
     options: [
-      "Frames received exceed 1500 bytes; caused by jumbo frames",
+      "Frames received exceed maximum transmission unit limits due to misconfigured jumbo frame settings",
       "Frames received are smaller than 64 bytes; typically caused by a faulty copper cable, bad connector, or duplex mismatch causing collisions",
-      "The switch port is running out of memory",
-      "The DNS server is offline"
+      "The switch supervisor engine has exhausted packet buffer memory on the ingress ASIC queue",
+      "The local DNS recursive resolver is unreachable over Layer 2 broadcast domains"
     ],
     correctOption: 1,
     explanation: "Runt frames are frames smaller than 64 bytes. In modern full-duplex switches, runts are almost always caused by physical cable damage, electrical noise truncating signals, or half/full duplex mismatch collision fragments.",
@@ -2989,7 +2989,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "During Phase 6 (Transport Handshake), which TCP flags are exchanged between client and server to establish a reliable connection before transmitting HTTP GET data?",
     options: [
       "FIN -> FIN-ACK -> RST",
-      "SYN (Client -> Server) -> SYN-ACK (Server -> Client) -> ACK (Client -> Server)",
+      "SYN -> SYN-ACK -> ACK",
       "PING -> PONG -> ACK",
       "DISCOVER -> OFFER -> REQUEST"
     ],
@@ -3013,7 +3013,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     options: [
       "1. Client sends PSH → 2. Server sends URG → 3. Client sends RST",
       "1. Client sends ACK → 2. Server sends SYN → 3. Client sends FIN",
-      "1. Client sends SYN (Synchronize) → 2. Server responds with SYN-ACK (Synchronize-Acknowledgment) → 3. Client sends ACK (Acknowledgment)",
+      "1. Client sends SYN (Synchronize) → 2. Server responds with SYN-ACK (Synchronize-Acknowledgment) → 3. Client sends ACK",
       "1. Client sends HELLO → 2. Server sends WELCOME → 3. Client sends READY"
     ],
     correctOption: 2,
@@ -3081,7 +3081,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "Host A sends a TCP segment with `Seq = 1000` containing `500 bytes` of data to Host B. What Acknowledgment number (`Ack`) will Host B return if the segment is received successfully?",
     options: [
       "`Ack = 1000`",
-      "`Ack = 1500` (acknowledging receipt of bytes 1000 through 1499 and expecting byte 1500 next)",
+      "`Ack = 1500`",
       "`Ack = 500`",
       "`Ack = 1001`"
     ],
@@ -3265,7 +3265,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "How does the IEEE 802.1Q standard identify which VLAN a frame belongs to when traversing an inter-switch Trunk link?",
     options: [
       "It changes the color of the physical fiber optic laser beam for each VLAN",
-      "It inserts a 4-byte 802.1Q Tag into the Ethernet header containing a 12-bit VLAN Identifier (VLAN ID supporting 1 to 4094 VLANs)",
+      "It inserts a 4-byte 802.1Q Tag into the Ethernet header containing a 12-bit VLAN Identifier",
       "It prefixes the computer hostname to the start of the MAC address",
       "It replaces the IPv4 destination address with the VLAN number"
     ],
@@ -3289,7 +3289,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     options: [
       "The Native VLAN is used exclusively for encrypted VoIP telephone traffic",
       "The Native VLAN is a reserved VLAN where all packets are immediately discarded",
-      "The Native VLAN (default VLAN 1) handles all untagged traffic traversing the trunk; any untagged frame received on a trunk port is automatically assigned to the Native VLAN",
+      "The Native VLAN (default VLAN 1) handles all untagged traffic traversing the trunk",
       "The Native VLAN requires all connected hosts to disable their network cards"
     ],
     correctOption: 2,
@@ -3310,9 +3310,9 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "switching-vlans-overview",
     text: "Workstation A in VLAN 10 (`192.168.10.5`) cannot ping Workstation B in VLAN 20 (`192.168.20.5`) connected to the same physical switch. No router or Layer 3 switch interface is configured. Why does communication fail?",
     options: [
-      "The switch MAC address table is full",
-      "VLAN 10 and VLAN 20 are using different brands of Ethernet cables",
-      "Workstations in VLAN 20 cannot receive packets on odd-numbered days of the week",
+      "The switch MAC address table cannot learn IP addresses without dynamic ARP inspection enabled",
+      "Workstation A and Workstation B must be assigned identical default gateway IP addresses on the access port",
+      "The switch backplane automatically blocks ping echo requests between ports on the same physical ASIC",
       "Switches isolate Layer 2 broadcast domains between different VLANs; traffic cannot pass between different VLANs without a Layer 3 routing device (Router-on-a-Stick or Multilayer Switch SVI)"
     ],
     correctOption: 3,
@@ -3334,9 +3334,9 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What are the three pillars of the foundational \"CIA Triad\" in information and network security?",
     options: [
       "Confidentiality (privacy/encryption), Integrity (data accuracy/hashing), Availability (reliable uptime/redundancy)",
-      "Centralization, Internet, Authentication",
-      "Cabling, Inspection, Antivirus",
-      "Control, Isolation, Automation"
+      "Authentication (identity verification), Authorization (access control), Accounting (audit logging)",
+      "Segmentation (VLAN isolation), Inspection (deep packet analysis), Redundancy (failover switching)",
+      "Containment (firewall filtering), Detection (intrusion analysis), Mitigation (rate limiting)"
     ],
     correctOption: 0,
     explanation: "The CIA Triad is the cornerstone of information security: Confidentiality ensures only authorized entities view data; Integrity ensures data is not altered in transit; Availability ensures resources are accessible when needed.",
@@ -3380,9 +3380,9 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What security principle dictates that network users and administrators should be granted only the absolute minimum permissions and access levels necessary to complete their specific job functions?",
     options: [
       "Defense in Depth",
+      "Principle of Least Privilege",
       "Principle of Open Access",
-      "Principle of Least Privilege (PoLP)",
-      "Non-Repudiation"
+      "Non-Repudiation Architecture"
     ],
     correctOption: 2,
     explanation: "The Principle of Least Privilege limits user and system access rights to the bare minimum needed for legitimate operational duties, minimizing attack surfaces and containing the damage of compromised credentials.",
@@ -3426,9 +3426,9 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What is the primary operational difference between a Standard Access Control List (ACL) and an Extended ACL in IPv4 networking?",
     options: [
       "Standard ACLs (1-99) filter traffic based solely on Source IPv4 Address and should be placed close to the destination; Extended ACLs (100-199) filter based on Source/Destination IP, Protocol, and Port numbers, and should be placed close to the source",
-      "Standard ACLs only work on Sundays, while Extended ACLs work all week",
-      "Standard ACLs encrypt traffic, while Extended ACLs compress traffic",
-      "Standard ACLs operate at Layer 7, while Extended ACLs operate at Layer 1"
+      "Standard ACLs filter traffic based on Destination IPv4 and Port; Extended ACLs filter traffic based solely on Source IPv4 and MAC address",
+      "Standard ACLs evaluate Layer 4 TCP/UDP stateful sessions; Extended ACLs operate as stateless packet filters inspecting only Layer 2 frames",
+      "Standard ACLs are placed close to the traffic source to conserve bandwidth; Extended ACLs must be placed strictly on destination core switches"
     ],
     correctOption: 0,
     explanation: "Standard ACLs (1-99 / 1300-1999) only evaluate source IP addresses (placed near destination to avoid blocking valid paths). Extended ACLs (100-199 / 2000-2699) evaluate source IP, destination IP, protocol (TCP/UDP/ICMP), and port numbers (placed near source).",
@@ -3449,7 +3449,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "How does an IPv4 \"Wildcard Mask\" operate when matching IP address ranges in an Access Control List?",
     options: [
       "Binary 1 bits indicate \"must match exactly\" and binary 0 bits indicate \"ignore\"",
-      "Binary 0 bits in the wildcard mask indicate \"must match exactly\", while binary 1 bits indicate \"ignore / don’t care\" (e.g. 0.0.0.255 matches the entire /24 subnet)",
+      "Binary 0 bits in the wildcard mask indicate \"must match exactly\", while binary 1 bits indicate \"ignore / don’t care\"",
       "Wildcard masks randomly invert every packet payload byte",
       "Wildcard masks only match alphabet characters in hostnames"
     ],
@@ -3565,7 +3565,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     options: [
       "PAT Overload with random port selection",
       "Dynamic NAT pool with random ephemeral assignments",
-      "Static NAT (one-to-one permanent mapping between private and public IP)",
+      "Static NAT",
       "NAT64 protocol translation"
     ],
     correctOption: 2,
@@ -3589,7 +3589,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       "All workstations have been infected with a hardware virus",
       "The router flash memory card has melted",
       "The DNS server has run out of letters in the alphabet",
-      "NAT Port Exhaustion: All available source TCP/UDP ports on the single public IP address have been exhausted; resolved by configuring a dynamic NAT pool with multiple public IP addresses"
+      "NAT Port Exhaustion: All available source TCP/UDP ports on the single public IP address have been exhausted"
     ],
     correctOption: 3,
     explanation: "A single IPv4 address has approximately 65,535 transport ports. If active concurrent connections exceed available ports (due to heavy traffic, P2P, or malware), new connections are dropped. Adding a pool of multiple public IPs provides additional port capacity (65k ports per IP).",
@@ -3610,9 +3610,9 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What are the two primary protocols in the IPsec protocol suite, and what security services do they provide?",
     options: [
       "Encapsulating Security Payload (ESP) provides confidentiality (encryption), integrity, and authentication; Authentication Header (AH) provides integrity and authentication but NO encryption",
-      "TCP provides encryption and UDP provides authentication",
-      "HTTP provides integrity and FTP provides confidentiality",
-      "AES provides routing and RSA provides physical cabling"
+      "Authentication Header (AH) provides payload encryption and key exchange; Encapsulating Security Payload (ESP) provides header hashing only",
+      "Internet Key Exchange (IKE) provides bulk data payload encryption; Diffie-Hellman (DH) provides integrity verification without session negotiation",
+      "Generic Routing Encapsulation (GRE) provides confidentiality and authentication; Transport Layer Security (TLS) provides network-layer encapsulation"
     ],
     correctOption: 0,
     explanation: "IPsec contains: 1. ESP (IP Protocol 50) which provides symmetric encryption (confidentiality), authentication, and anti-replay; 2. AH (IP Protocol 51) which provides digital signing/integrity over the whole packet but zero encryption.",
@@ -3633,7 +3633,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What are the roles of IKE (Internet Key Exchange) Phase 1 and Phase 2 during the establishment of a site-to-site IPsec VPN tunnel?",
     options: [
       "Phase 1 routes the data packets and Phase 2 uninstalls the operating system",
-      "IKE Phase 1 authenticates the two VPN gateway peers and establishes a secure control channel (ISAKMP SA); IKE Phase 2 negotiates the IPsec transform sets and establishes unidirectional data tunnels (IPsec SAs)",
+      "IKE Phase 1 authenticates the two VPN gateway peers and establishes a secure control channel (ISAKMP SA)",
       "Phase 1 creates the Ethernet cabling and Phase 2 converts digital signals to analog",
       "Phase 1 is only for wireless laptops and Phase 2 is only for wired desktops"
     ],
@@ -3655,10 +3655,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "vpn-cryptography-overview",
     text: "How does Diffie-Hellman (DH) Key Exchange allow two VPN routers across the public Internet to securely establish a shared secret key without ever transmitting that secret key across the wire?",
     options: [
-      "By broadcasting the private key over UDP port 80",
-      "By emailing the secret password in an encrypted ZIP file",
+      "By encrypting the shared symmetric key using a pre-installed public certificate authority root key",
+      "By exchanging hashed password tokens across an out-of-band TLS management channel prior to phase 1",
       "Through asymmetric mathematical modular arithmetic (discrete logarithm problem), where each peer combines its own private key with the other peer public key to derive the exact same shared secret",
-      "By having a human courier physically deliver a USB key to the remote datacenter"
+      "By negotiating session tokens using cleartext MD5 checksums verified against the local gateway database"
     ],
     correctOption: 2,
     explanation: "Diffie-Hellman allows two parties with no prior shared secret to independently compute an identical shared secret key over an insecure public channel using public key exchanges combined with private mathematical exponents.",
@@ -3678,10 +3678,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "vpn-cryptography-overview",
     text: "An IPsec site-to-site VPN fails to establish. The router logs state: `IKE Phase 1 negotiation failed: Peer proposal mismatch (Transform Set rejected)`. What is the immediate troubleshooting step?",
     options: [
-      "Change the subnet mask on the router to 255.0.0.0",
-      "Replace all Cat6 Ethernet cables with coaxial cables",
-      "Disable the firewall on all client workstations",
-      "Verify that both VPN gateway routers have identical Phase 1 parameters: Encryption algorithm (e.g. AES-256), Hash algorithm (e.g. SHA-256), Authentication method (e.g. Pre-Shared Key), and Diffie-Hellman Group (e.g. Group 14)"
+      "Verify that the router interface MTU is configured to 9000 bytes for jumbo frames",
+      "Ensure that OSPF cost metrics are synchronized across transit tunnel interfaces",
+      "Configure an extended ACL to permit inbound ICMP Type 3 Code 4 fragmentation packets",
+      "Verify that both VPN gateways have identical Phase 1 parameters: AES-256, SHA-256, Pre-Shared Key, and DH Group 14"
     ],
     correctOption: 3,
     explanation: "A proposal mismatch in Phase 1 means the two gateway routers have conflicting policy parameters. Both endpoints must agree on the exact same encryption cipher, hash function, authentication PSK/cert, and DH group number.",
@@ -3747,10 +3747,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "wireless-networking-overview",
     text: "What is the \"Hidden Node Problem\" in 802.11 wireless networks, and what protocol mechanism resolves it?",
     options: [
-      "The access point hides its SSID so nobody can find it",
-      "An attacker hides behind a concrete pillar to intercept passwords",
-      "Two wireless clients are both in range of the Access Point but out of radio range of each other, causing them to transmit simultaneously and collide at the AP; resolved using RTS/CTS (Request to Send / Clear to Send) frame exchanges",
-      "A computer has disconnected its antenna cable"
+      "The wireless access point fails to broadcast its beacon frame across the 2.4 GHz spectrum",
+      "A rogue access point is transmitting deauthentication frames to disconnect authorized clients",
+      "Two wireless clients are in range of the AP but out of range of each other; resolved using RTS/CTS frames",
+      "Co-channel interference from adjacent access points causes spatial frequency overlap across channels 1 and 6"
     ],
     correctOption: 2,
     explanation: "When Client A and Client B cannot hear each other, standard carrier sensing fails. RTS/CTS resolves this: Client A sends RTS; the AP broadcasts CTS (which includes a duration timer); Client B hears the CTS and pauses transmission while Client A transmits.",
@@ -3793,7 +3793,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "network-troubleshooting-overview",
     text: "When executing a ping diagnostic, what is the critical technical distinction between receiving \"Destination Host Unreachable\" versus \"Request Timed Out\"?",
     options: [
-      "\"Destination Host Unreachable\" means an intermediate router on the path actively responded with an ICMP Type 3 error indicating it has no route or ARP failed; \"Request Timed Out\" means the packet was forwarded but no response was received before the timer expired (dropped by firewall or target down)",
+      "\"Destination Host Unreachable\" means an intermediate router on the path actively responded with an ICMP Type 3 error indicating it has no route or ARP failed; \"Request Timed Out\" means the packet was forwarded but no response was received before the timer expired",
       "\"Destination Host Unreachable\" means the computer has no power; \"Request Timed Out\" means the hard drive is full",
       "\"Destination Host Unreachable\" indicates a successful connection; \"Request Timed Out\" indicates an invalid password",
       "There is no difference; both messages are generated randomly by Windows"
@@ -3817,7 +3817,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "A user reports: \"I can access websites by typing their IP addresses in the browser (e.g. http://93.184.216.34), but typing domain names (e.g. http://example.com) fails immediately.\" What is the root cause?",
     options: [
       "The physical Ethernet cable has experienced Layer 1 signal attenuation",
-      "DNS resolution failure (DNS server IP is misconfigured, unreachable, or DNS service is down on the resolver)",
+      "DNS resolution failure",
       "The Default Gateway router is powered off",
       "The web server has blocked the client IP address"
     ],
@@ -3886,9 +3886,9 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What fundamental architectural separation defines Software-Defined Networking (SDN)?",
     options: [
       "The decoupling of the Control Plane (routing decision logic and policy) from the Data/Forwarding Plane (high-speed hardware packet switching ASICs), centralizing control in a programmable SDN controller",
-      "The replacement of physical routers with paper documentation",
-      "The elimination of all IP addresses in favor of human usernames",
-      "The requirement that all networks run on battery power"
+      "The separation of the Management Plane from the Physical Layer, replacing hardware transceivers with virtual container network interfaces",
+      "The migration of the Application Layer into the Transport Layer, eliminating TCP windowing in favor of direct ASIC memory addressing",
+      "The decoupling of the Ingress Queuing Engine from the Egress Buffer Pool, delegating packet serialization to host hypervisors"
     ],
     correctOption: 0,
     explanation: "SDN separates the Control Plane (which decides how packets should flow, centralized in an SDN controller) from the Data Plane (switches and routers that simply execute hardware forwarding instructions via OpenFlow/P4).",
@@ -3909,7 +3909,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "In SDN architectural terminology, what is the difference between \"Northbound APIs\" and \"Southbound APIs\"?",
     options: [
       "Northbound APIs connect to devices in North America, while Southbound APIs connect to South America",
-      "Northbound APIs allow applications and orchestration systems to communicate with the SDN Controller; Southbound APIs (e.g. OpenFlow, NETCONF) allow the SDN Controller to program the underlying physical/virtual data plane forwarding devices",
+      "Northbound APIs allow applications and orchestration systems to communicate with the SDN Controller",
       "Northbound APIs operate over fiber optic cables, while Southbound APIs operate over copper",
       "Northbound APIs are only used for audio, while Southbound APIs are only used for video"
     ],
@@ -3932,8 +3932,8 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What overlay network encapsulation protocol is widely used in modern cloud datacenters to encapsulate Layer 2 Ethernet frames inside Layer 3 UDP packets, expanding VLAN limits from 4,094 up to 16 million virtual networks?",
     options: [
       "Serial Line Internet Protocol (SLIP)",
+      "Virtual Extensible LAN (VXLAN)",
       "Legacy IEEE 802.1D Spanning Tree",
-      "VXLAN (Virtual Extensible LAN) using a 24-bit VXLAN Network Identifier (VNI)",
       "Analog Coaxial Cable Bridging"
     ],
     correctOption: 2,
@@ -4141,7 +4141,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       "To determine the domain name associated with a logical IP endpoint",
       "To encrypt IP packets before transmission across physical network media",
       "To uniquely identify the physical MAC address of the network interface card",
-      "To define the exact boundary between Network bits (binary 1s) and Host bits (binary 0s)"
+      "To define the exact boundary between Network bits (binary 1s) and Host bits"
     ],
     correctOption: 3,
     explanation: "A subnet mask is a 32-bit sequence of contiguous 1s followed by contiguous 0s. The 1s indicate the network bits, and the 0s indicate the host bits. In CIDR notation, the prefix length /N represents the count of network 1s.",
@@ -4253,7 +4253,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-302-spanning-tree-protocol-loop-prevention",
     text: "What criteria determines which switch is elected as the Root Bridge in standard IEEE 802.1D Spanning Tree Protocol?",
     options: [
-      "The switch with the lowest Bridge ID (composed of Bridge Priority + MAC Address)",
+      "The switch with the lowest Bridge ID",
       "The switch with the highest IP address",
       "The switch with the largest number of connected gigabit ports",
       "The switch that has been powered on the longest"
@@ -4368,10 +4368,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-302-spanning-tree-protocol-loop-prevention",
     text: "An administrator wants edge access ports connected directly to end-user workstations to transition immediately to the Forwarding state without waiting 30 seconds for STP listening/learning timers. Which feature must be enabled?",
     options: [
+      "STP PortFast / Edge Port",
       "Static Routing 0.0.0.0/0",
-      "STP PortFast (Cisco) / Edge Port (IEEE 802.1w)",
       "Dynamic Trunking Protocol (DTP)",
-      "NAT Overload"
+      "NAT Overload Address Translation"
     ],
     correctOption: 1,
     explanation: "PortFast immediately transitions an access port from blocking to forwarding, bypassing listening and learning states so DHCP requests from booting PCs do not time out. It should only be enabled on ports connected to end hosts.",
@@ -4417,7 +4417,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
       "The router that has the highest OSPF cost metric",
       "Lowest MAC address on the default gateway",
       "The router with the lowest serial number",
-      "Highest IPv4 address among active Loopback interfaces; if no loopbacks exist, the highest IPv4 address among active physical interfaces"
+      "Highest IPv4 address among active Loopback interfaces"
     ],
     correctOption: 3,
     explanation: "OSPF Router ID selection order: 1. Manually configured router-id; 2. Highest IPv4 address on any active loopback interface; 3. Highest IPv4 address on any active physical interface.",
@@ -4485,7 +4485,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     options: [
       "To provide DHCP lease addresses; DROTHER routers send to 255.255.255.255",
       "To encrypt routing tables; DROTHER routers send to 224.0.0.1",
-      "To reduce adjacency count from n(n-1)/2 to 2n; DROTHER routers send LSUs to 224.0.0.6 (AllDRouters)",
+      "To reduce adjacency count from n(n-1)/2 to 2n; DROTHER routers send LSUs to 224.0.0.6",
       "To balance CPU temperature across chassis; DROTHER routers send to 127.0.0.1"
     ],
     correctOption: 2,
@@ -4552,10 +4552,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-404-wireshark-packet-capture",
     text: "In a Wireshark PCAP trace, an engineer observes 3 identical consecutive TCP ACK packets with `Ack = 45000` returned by the receiver in less than 5 milliseconds. What network event does this \"Triple Duplicate ACK\" indicate?",
     options: [
-      "The TCP connection has gracefully terminated with a 4-way handshake",
+      "The TCP connection has gracefully terminated with an active four-way handshake sequence",
       "Fast Retransmit trigger: A packet was lost in transit, causing the receiver to repeatedly acknowledge the last contiguous byte received while out-of-order packets arrive",
-      "The client has upgraded from IPv4 to IPv6",
-      "The switch has enabled jumbo frames"
+      "The host network stack has negotiated selective acknowledgment (SACK) with zero window buffer space",
+      "The client has initiated Path MTU discovery by transmitting oversized frames with the DF bit disabled"
     ],
     correctOption: 1,
     explanation: "When a receiver gets an out-of-order segment (because an earlier segment was dropped), it immediately sends a duplicate ACK for the last in-order byte. Receiving 3 duplicate ACKs triggers the Fast Retransmit algorithm, retransmitting the lost segment without waiting for RTO timer expiry.",
@@ -4575,10 +4575,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-404-wireshark-packet-capture",
     text: "A Wireshark packet capture displays: `[TCP ZeroWindow]` from server `10.0.0.5` followed immediately by the client pausing all transmission. What does this packet indicate?",
     options: [
-      "The network cable has been unplugged from the wall",
-      "The server has crashed and closed all network ports",
+      "The physical Ethernet interface link pulse has dropped due to cable disconnection",
+      "The upstream gateway router has suppressed packet forwarding due to ingress rate limiting",
       "The receiving server application buffer is completely full, advertising Window Size = 0 to command the client to stop sending data until buffer space clears",
-      "The client has sent an invalid password"
+      "The client application has transmitted an invalid cryptographic handshake token to the server"
     ],
     correctOption: 2,
     explanation: "A `[TCP ZeroWindow]` packet is flow control in action. The receiver buffer is saturated, so it advertises `win=0`. The sender stops transmitting data and sends periodic 1-byte \"ZeroWindowProbe\" packets until the receiver responds with a non-zero window update.",
@@ -4645,7 +4645,7 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "A security analyst captures a flood of TCP packets targeted at port 443 with `tcp.flags.reset == 1`. What is the meaning of a TCP RST packet and what does this traffic pattern suggest?",
     options: [
       "TCP RST indicates a successful file download has completed",
-      "TCP RST (Reset) abruptly tears down a connection without a graceful 4-way FIN handshake; a flood of RST packets suggests a port scan against closed ports or a TCP Reset attack terminating active sessions",
+      "TCP RST (Reset) abruptly tears down a connection without a graceful 4-way FIN handshake",
       "TCP RST means the router has upgraded its firmware",
       "TCP RST is used exclusively to calibrate Wi-Fi antennas"
     ],

@@ -1,0 +1,462 @@
+[
+  {
+    "index": 1,
+    "course": "NV-C01",
+    "module": "mod-c01-digital-representation",
+    "slug": "level-0-what-is-a-computer-network",
+    "title": "What is a Computer Network?",
+    "tier": "TIER_3_CONCEPTUAL",
+    "reason": "Theoretical / physical media / mathematical foundations where CLI device configuration does not exist in real networking; focus is framing, bit calculations, and architecture analysis.",
+    "stateModel": "FrameBufferState / BitCalculationMatrix"
+  },
+  {
+    "index": 2,
+    "course": "NV-C01",
+    "module": "mod-c01-digital-representation",
+    "slug": "net-101-bits-bytes-digital-representation",
+    "title": "Digital Information Representation: Bits, Bytes & Network Sizing",
+    "tier": "TIER_3_CONCEPTUAL",
+    "reason": "Theoretical / physical media / mathematical foundations where CLI device configuration does not exist in real networking; focus is framing, bit calculations, and architecture analysis.",
+    "stateModel": "FrameBufferState / BitCalculationMatrix"
+  },
+  {
+    "index": 3,
+    "course": "NV-C01",
+    "module": "mod-c01-digital-representation",
+    "slug": "level-0-devices-in-a-network",
+    "title": "Devices in a Network: Hardware Roles & Layer Mapping",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 4,
+    "course": "NV-C01",
+    "module": "mod-c01-digital-representation",
+    "slug": "level-0-client-and-server-architecture",
+    "title": "Client and Server Architecture: Centralized Services vs Distributed Hosts",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 5,
+    "course": "NV-C01",
+    "module": "mod-c01-digital-representation",
+    "slug": "level-0-lan-wan-internet-boundaries",
+    "title": "LAN, WAN & Internet Boundaries: Network Scale & Geographic Topologies",
+    "tier": "TIER_3_CONCEPTUAL",
+    "reason": "Theoretical / physical media / mathematical foundations where CLI device configuration does not exist in real networking; focus is framing, bit calculations, and architecture analysis.",
+    "stateModel": "FrameBufferState / BitCalculationMatrix"
+  },
+  {
+    "index": 6,
+    "course": "NV-C01",
+    "module": "mod-c01-network-topologies",
+    "slug": "net-102-network-performance",
+    "title": "Network Performance Metrics: Comprehensive Quality of Service & SLA Verification",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 7,
+    "course": "NV-C01",
+    "module": "mod-c01-physical-media",
+    "slug": "net-101-copper-fiber-wireless-media",
+    "title": "Physical Layer Media: Copper (UTP/STP), Fiber Optics & RF Propagation",
+    "tier": "TIER_3_CONCEPTUAL",
+    "reason": "Theoretical / physical media / mathematical foundations where CLI device configuration does not exist in real networking; focus is framing, bit calculations, and architecture analysis.",
+    "stateModel": "FrameBufferState / BitCalculationMatrix"
+  },
+  {
+    "index": 8,
+    "course": "NV-C01",
+    "module": "mod-c01-network-topologies",
+    "slug": "network-topologies-overview",
+    "title": "Network Topologies: Physical Topologies, Logical Topologies & Redundancy",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 9,
+    "course": "NV-C01",
+    "module": "mod-c01-network-topologies",
+    "slug": "net-102-bandwidth-throughput-latency-jitter",
+    "title": "Network Performance Engineering: Bandwidth, Throughput, Latency & Jitter",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 10,
+    "course": "NV-C01",
+    "module": "mod-c01-layered-reference-models",
+    "slug": "level-0-network-protocols-standards",
+    "title": "Network Protocols & Standards: Syntax, Semantics & Standards Bodies",
+    "tier": "TIER_3_CONCEPTUAL",
+    "reason": "Theoretical / physical media / mathematical foundations where CLI device configuration does not exist in real networking; focus is framing, bit calculations, and architecture analysis.",
+    "stateModel": "FrameBufferState / BitCalculationMatrix"
+  },
+  {
+    "index": 11,
+    "course": "NV-C01",
+    "module": "mod-c01-layered-reference-models",
+    "slug": "osi-model-7-layers",
+    "title": "The 7-Layer OSI Reference Model: Theoretical Architecture & Service Primitives",
+    "tier": "TIER_3_CONCEPTUAL",
+    "reason": "Theoretical / physical media / mathematical foundations where CLI device configuration does not exist in real networking; focus is framing, bit calculations, and architecture analysis.",
+    "stateModel": "FrameBufferState / BitCalculationMatrix"
+  },
+  {
+    "index": 12,
+    "course": "NV-C01",
+    "module": "mod-c01-layered-reference-models",
+    "slug": "tcp-ip-4-layers",
+    "title": "The TCP/IP 4-Layer Architecture: Practical Implementation & Protocol Mapping",
+    "tier": "TIER_3_CONCEPTUAL",
+    "reason": "Theoretical / physical media / mathematical foundations where CLI device configuration does not exist in real networking; focus is framing, bit calculations, and architecture analysis.",
+    "stateModel": "FrameBufferState / BitCalculationMatrix"
+  },
+  {
+    "index": 13,
+    "course": "NV-C02",
+    "module": "mod-c02-ethernet-framing",
+    "slug": "level-0-mac-addresses-physical-identity",
+    "title": "MAC Addresses & Physical Hardware Identity",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 14,
+    "course": "NV-C02",
+    "module": "mod-c02-ethernet-framing",
+    "slug": "ethernet-mac-addresses-overview",
+    "title": "Ethernet II Framing, Frame Formats & Transmission Mechanics",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 15,
+    "course": "NV-C02",
+    "module": "mod-c02-vlans-trunking",
+    "slug": "level-0-switches-local-lan-forwarders",
+    "title": "Switches: Local LAN Frame Forwarders & MAC Address Tables",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 16,
+    "course": "NV-C02",
+    "module": "mod-c02-vlans-trunking",
+    "slug": "switching-vlans-overview",
+    "title": "Switching, VLANs & IEEE 802.1Q Enterprise Trunking",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 17,
+    "course": "NV-C02",
+    "module": "mod-c02-spanning-tree",
+    "slug": "net-302-spanning-tree-protocol-loop-prevention",
+    "title": "Spanning Tree Protocol (STP) & Layer-2 Loop Prevention",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 18,
+    "course": "NV-C02",
+    "module": "mod-c02-ipv4-subnetting",
+    "slug": "net-202-ipv4-addressing-cidr",
+    "title": "IPv4 Addressing, Subnet Masks & CIDR Subnetting",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 19,
+    "course": "NV-C02",
+    "module": "mod-c02-ipv4-subnetting",
+    "slug": "level-0-ip-addresses-logical-location",
+    "title": "Special-Use IPv4 Ranges & Enterprise Allocation",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 20,
+    "course": "NV-C02",
+    "module": "mod-c02-ipv4-subnetting",
+    "slug": "ip-addressing-ipv4-overview",
+    "title": "Classful IPv4 History & The Architectural Necessity of CIDR",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 21,
+    "course": "NV-C02",
+    "module": "mod-c02-ipv4-subnetting",
+    "slug": "subnetting-cidr-overview",
+    "title": "VLSM Design & Multi-Department Address Allocation",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 22,
+    "course": "NV-C03",
+    "module": "mod-c03-core-ip-services",
+    "slug": "level-0-dns-internet-phonebook",
+    "title": "Domain Name System (DNS) & Name Resolution Architecture",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 23,
+    "course": "NV-C03",
+    "module": "mod-c03-core-ip-services",
+    "slug": "level-0-dhcp-automatic-ip-allocation",
+    "title": "Dynamic Host Configuration Protocol (DHCP) & IP Leasing",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 24,
+    "course": "NV-C03",
+    "module": "mod-c03-core-ip-services",
+    "slug": "arp-protocol-overview",
+    "title": "Address Resolution Protocol (ARP) & Layer 2/3 Binding",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 25,
+    "course": "NV-C03",
+    "module": "mod-c03-core-ip-services",
+    "slug": "dhcp-dns-overview",
+    "title": "The Integrated Host Boot-Up Lifecycle: From Cold Boot to Web Request",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 26,
+    "course": "NV-C03",
+    "module": "mod-c03-core-ip-services",
+    "slug": "ipv6-foundations-overview",
+    "title": "IPv6 Addressing Architecture, SLAAC & Dual-Stack Foundations",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 27,
+    "course": "NV-C03",
+    "module": "mod-c03-transport-protocols",
+    "slug": "level-0-network-ports-socket-boundaries",
+    "title": "Network Ports, Socket Endpoints & Layer 4 Multiplexing",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 28,
+    "course": "NV-C03",
+    "module": "mod-c03-transport-protocols",
+    "slug": "level-0-network-packets-data-framing",
+    "title": "Transport Layer Segmentation, MTU & Path MTU Discovery",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 29,
+    "course": "NV-C03",
+    "module": "mod-c03-transport-protocols",
+    "slug": "tcp-udp-transport-overview",
+    "title": "TCP & UDP Transport Protocols: Connection Management, Reliability & Flow Control",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 30,
+    "course": "NV-C03",
+    "module": "mod-c03-static-routing",
+    "slug": "level-0-routers-inter-subnet-pathfinders",
+    "title": "Routers: Inter-Subnet Path Finders & Forwarding Engine",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 31,
+    "course": "NV-C03",
+    "module": "mod-c03-static-routing",
+    "slug": "routing-fundamentals-overview",
+    "title": "Routing Fundamentals: Longest Prefix Match, Administrative Distance & Static Routes",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 32,
+    "course": "NV-C03",
+    "module": "mod-c03-dynamic-routing-ospf",
+    "slug": "net-304-single-area-ospf-routing",
+    "title": "Dynamic Routing Protocols & Single-Area OSPF",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 33,
+    "course": "NV-C03",
+    "module": "mod-c03-dynamic-routing-ospf",
+    "slug": "net-304-multi-area-ospf-redistribution",
+    "title": "Multi-Area OSPF Architecture, LSA Flooding & Route Redistribution",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 34,
+    "course": "NV-C04",
+    "module": "mod-c04-acls-firewalls",
+    "slug": "net-305-standard-extended-ipv4-acls",
+    "title": "Standard & Extended IPv4 Access Control Lists (ACLs)",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 35,
+    "course": "NV-C04",
+    "module": "mod-c04-acls-firewalls",
+    "slug": "net-305-stateful-firewalls-connection-tracking",
+    "title": "Stateful Packet Inspection (SPI) & Zone-Based Firewalls",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 36,
+    "course": "NV-C04",
+    "module": "mod-c04-acls-firewalls",
+    "slug": "network-security-basics-overview",
+    "title": "Network Security Fundamentals: CIA Triad, Threat Vectors & Cryptographic Principles",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 37,
+    "course": "NV-C04",
+    "module": "mod-c04-acls-firewalls",
+    "slug": "firewalls-acls-overview",
+    "title": "Perimeter Defense: Multi-Tier Firewalls, DMZ Architectures & Deep Inspection",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 38,
+    "course": "NV-C04",
+    "module": "mod-c04-nat-pat",
+    "slug": "net-401-ipv4-nat-pat-address-translation",
+    "title": "IPv4 Network Address Translation (Static, Dynamic & PAT Overload)",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 39,
+    "course": "NV-C04",
+    "module": "mod-c04-nat-pat",
+    "slug": "nat-pat-overview",
+    "title": "NAT/PAT Architectural Engineering: Port Exhaustion, ALG & NAT Traversal",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 40,
+    "course": "NV-C04",
+    "module": "mod-c04-vpn-crypto",
+    "slug": "net-402-ipsec-vpn-cryptographic-tunnels",
+    "title": "Site-to-Site IPsec VPNs & Cryptographic Tunneling",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 41,
+    "course": "NV-C04",
+    "module": "mod-c04-vpn-crypto",
+    "slug": "vpn-cryptography-overview",
+    "title": "VPN Technologies & Cryptography: Remote Access, WireGuard & TLS VPNs",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 42,
+    "course": "NV-C05",
+    "module": "mod-c05-packet-analysis",
+    "slug": "net-404-wireshark-packet-capture",
+    "title": "Wireshark Packet Capture Analysis & Wire-Level Forensics",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 43,
+    "course": "NV-C05",
+    "module": "mod-c05-troubleshooting-workflows",
+    "slug": "level-0-basic-network-troubleshooting-workflow",
+    "title": "Basic Network Troubleshooting: The Systematic Bottom-Up Diagnostic Method",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 44,
+    "course": "NV-C05",
+    "module": "mod-c05-troubleshooting-workflows",
+    "slug": "network-troubleshooting-overview",
+    "title": "Enterprise Network Incident Diagnostics: Symptom-to-Root-Cause Playbooks",
+    "tier": "TIER_1_SIMULATION",
+    "reason": "Requires active device/protocol state mutation, topology state inspection, CLI configuration commands, and state-based success validation.",
+    "stateModel": "NetworkDeviceState (VLANs, Trunks, CAM, FIB, OSPF LSDB, ACL Rules, NAT Pool, SA DB, Packet Capture)"
+  },
+  {
+    "index": 45,
+    "course": "NV-C05",
+    "module": "mod-c05-network-automation",
+    "slug": "net-403-network-automation-programmability-foundations",
+    "title": "Network Automation & Programmability Foundations",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  },
+  {
+    "index": 46,
+    "course": "NV-C05",
+    "module": "mod-c05-network-automation",
+    "slug": "sdn-cloud-networking-overview",
+    "title": "Software-Defined Networking (SDN) & Cloud Architecture",
+    "tier": "TIER_2_GUIDED",
+    "reason": "Hands-on guided terminal diagnostics, operational state verification, socket inspection, and structured telemetry analysis.",
+    "stateModel": "DiagnosticTelemetryState (Sockets, Ping, ArpCache, InterfaceStats, DnsLookup)"
+  }
+]

@@ -1,0 +1,2381 @@
+{
+  "drop_n_179_count": 179,
+  "drop_o_184_count": 184,
+  "difference_count": 5,
+  "difference_explanation": "In Drop N, the script used lengths.index(max(lengths)), which in Python returns the FIRST index with the maximum value. When options tied for maximum length and the correct option was at a later index (index 1, 2, or 3), lengths.index() returned the earlier index (0), causing those 5 tied questions to be omitted from the 179 count. In Drop O, the script used lengths[correctOption] === max(lengths), which correctly identified all questions where the correct option has the maximum length, including ties.",
+  "the_5_additional_questions": [
+    {
+      "index": 63,
+      "quizId": "quiz-level-0-switches-local-lan-forwarders",
+      "concept": "Broadcast Storm & Switching Loops",
+      "text": "A network loop is accidentally created by connecting two ports of the same unmanaged switch together with a patch cable. The switch activity LEDs rapidly flash solid green and the entire LAN stops functioning. What phenomenon has occurred?",
+      "correctOption": 3,
+      "lengths": [
+        66,
+        73,
+        89,
+        89
+      ],
+      "options": [
+        "The router has reversed the direction of all default static routes",
+        "The switch CPU has run out of IP addresses to allocate to connected hosts",
+        "The Ethernet cable has accumulated static electricity and discharged into the ground wire",
+        "A Layer 2 Broadcast Storm caused by infinite frame multiplication and CAM table thrashing"
+      ]
+    },
+    {
+      "index": 85,
+      "quizId": "quiz-osi-model-7-layers",
+      "concept": "OSI 7 Layers Sequence",
+      "text": "What is the correct sequence of the 7 OSI layers from bottom to top (Layer 1 to Layer 7)?",
+      "correctOption": 1,
+      "lengths": [
+        96,
+        96,
+        96,
+        72
+      ],
+      "options": [
+        "1. Application, 2. Presentation, 3. Session, 4. Transport, 5. Network, 6. Data Link, 7. Physical",
+        "1. Physical, 2. Data Link, 3. Network, 4. Transport, 5. Session, 6. Presentation, 7. Application",
+        "1. Physical, 2. Network, 3. Data Link, 4. Transport, 5. Session, 6. Presentation, 7. Application",
+        "1. Hardware, 2. Driver, 3. Internet, 4. Port, 5. App, 6. Screen, 7. User"
+      ]
+    },
+    {
+      "index": 93,
+      "quizId": "quiz-tcp-ip-4-layers",
+      "concept": "TCP/IP Protocol Classification",
+      "text": "Which protocols correctly match their corresponding TCP/IP layers?",
+      "correctOption": 1,
+      "lengths": [
+        81,
+        81,
+        81,
+        81
+      ],
+      "options": [
+        "IP at Application, HTTP at Transport, Ethernet at Internet, TCP at Network Access",
+        "HTTP at Application, TCP at Transport, IP at Internet, Ethernet at Network Access",
+        "TCP at Application, Ethernet at Transport, IP at Internet, HTTP at Network Access",
+        "Ethernet at Application, IP at Transport, TCP at Internet, HTTP at Network Access"
+      ]
+    },
+    {
+      "index": 174,
+      "quizId": "quiz-net-101-bits-bytes-binary-hex",
+      "concept": "Binary Conversion",
+      "text": "What is the binary representation of decimal integer 192?",
+      "correctOption": 2,
+      "lengths": [
+        8,
+        8,
+        8,
+        8
+      ],
+      "options": [
+        "11100000",
+        "10101010",
+        "11000000",
+        "10000000"
+      ]
+    },
+    {
+      "index": 175,
+      "quizId": "quiz-net-101-bits-bytes-binary-hex",
+      "concept": "Binary Nibble to Hex Conversion",
+      "text": "What is the hexadecimal representation of the 8-bit binary value 11001010?",
+      "correctOption": 3,
+      "lengths": [
+        4,
+        4,
+        4,
+        4
+      ],
+      "options": [
+        "0xDA",
+        "0xAC",
+        "0xCB",
+        "0xCA"
+      ]
+    }
+  ],
+  "strictly_longest_count": 175,
+  "strictly_longest_questions": [
+    {
+      "index": 0,
+      "quizId": "quiz-level-0-what-is-a-computer-network",
+      "concept": "Network Definition & Resource Sharing",
+      "text": "Which primary characteristic fundamentally distinguishes a computer network from a collection of isolated standalone computers?",
+      "correctOption": 0,
+      "lengths": [
+        108,
+        104,
+        101,
+        93
+      ]
+    },
+    {
+      "index": 3,
+      "quizId": "quiz-level-0-what-is-a-computer-network",
+      "concept": "Network Connectivity Requirements",
+      "text": "Two laptops in a conference room cannot share files directly because they are not connected to any network or physical medium. What is the most immediate solution to establish connectivity between them without external infrastructure?",
+      "correctOption": 3,
+      "lengths": [
+        55,
+        61,
+        85,
+        90
+      ]
+    },
+    {
+      "index": 4,
+      "quizId": "quiz-level-0-devices-in-a-network",
+      "concept": "Hub vs Switch Architecture",
+      "text": "How does an Ethernet Switch differ fundamentally from a legacy Ethernet Hub in its handling of unicast traffic?",
+      "correctOption": 0,
+      "lengths": [
+        154,
+        114,
+        109,
+        111
+      ]
+    },
+    {
+      "index": 6,
+      "quizId": "quiz-level-0-devices-in-a-network",
+      "concept": "Collision Domain Diagnosis",
+      "text": "A network administrator notices severe performance degradation in an old office wing. Packet analysis reveals frequent frame collisions occurring whenever two workstations transmit simultaneously. What device is most likely installed at the center of this wing?",
+      "correctOption": 2,
+      "lengths": [
+        72,
+        70,
+        84,
+        69
+      ]
+    },
+    {
+      "index": 7,
+      "quizId": "quiz-level-0-devices-in-a-network",
+      "concept": "LAN Device Selection",
+      "text": "An office deployment requires connecting 50 desktop PCs in the same room on subnet 192.168.10.0/24 to each other and providing a single uplink to the corporate gateway. Which device configuration best satisfies this requirement?",
+      "correctOption": 3,
+      "lengths": [
+        59,
+        54,
+        64,
+        86
+      ]
+    },
+    {
+      "index": 8,
+      "quizId": "quiz-level-0-client-and-server-architecture",
+      "concept": "Client-Server Communication Flow",
+      "text": "In the standard Client-Server architectural paradigm, which role does the Client node perform during an interaction?",
+      "correctOption": 0,
+      "lengths": [
+        88,
+        82,
+        76,
+        69
+      ]
+    },
+    {
+      "index": 9,
+      "quizId": "quiz-level-0-client-and-server-architecture",
+      "concept": "Socket Port Assignment",
+      "text": "When a web browser client connects to a web server (https://example.com), what port combination is typically utilized for the TCP transport connection?",
+      "correctOption": 1,
+      "lengths": [
+        67,
+        111,
+        69,
+        66
+      ]
+    },
+    {
+      "index": 10,
+      "quizId": "quiz-level-0-client-and-server-architecture",
+      "concept": "Peer-to-Peer vs Client-Server",
+      "text": "How does a Peer-to-Peer (P2P) architecture differ fundamentally from a traditional Client-Server model?",
+      "correctOption": 2,
+      "lengths": [
+        65,
+        55,
+        112,
+        74
+      ]
+    },
+    {
+      "index": 11,
+      "quizId": "quiz-level-0-client-and-server-architecture",
+      "concept": "Connection Refused Diagnosis",
+      "text": "A user types `https://intranet.corp.local` in their browser and receives an error: \\\"Connection Refused (ERR_CONNECTION_REFUSED)\\\". What does this specific TCP-level diagnostic indicate?",
+      "correctOption": 3,
+      "lengths": [
+        94,
+        85,
+        64,
+        150
+      ]
+    },
+    {
+      "index": 12,
+      "quizId": "quiz-level-0-lan-wan-internet-boundaries",
+      "concept": "LAN vs WAN Scope",
+      "text": "What is the primary geographic and administrative distinction between a Local Area Network (LAN) and a Wide Area Network (WAN)?",
+      "correctOption": 0,
+      "lengths": [
+        208,
+        94,
+        101,
+        95
+      ]
+    },
+    {
+      "index": 13,
+      "quizId": "quiz-level-0-lan-wan-internet-boundaries",
+      "concept": "Network Scope Classification",
+      "text": "Which networking term best describes a high-speed network spanning an entire metropolitan area or university campus, positioned geographically between a LAN and a WAN?",
+      "correctOption": 1,
+      "lengths": [
+        27,
+        59,
+        26,
+        29
+      ]
+    },
+    {
+      "index": 15,
+      "quizId": "quiz-level-0-lan-wan-internet-boundaries",
+      "concept": "LAN vs WAN Isolation Troubleshooting",
+      "text": "Users in an office report they can print to local network printers and ping other PCs on the 192.168.1.0/24 subnet, but cannot access any public websites (e.g. google.com). What is the most likely root cause?",
+      "correctOption": 3,
+      "lengths": [
+        80,
+        92,
+        81,
+        125
+      ]
+    },
+    {
+      "index": 16,
+      "quizId": "quiz-level-0-ip-addresses-logical-location",
+      "concept": "RFC 1918 Private Address Ranges",
+      "text": "Which three IPv4 address blocks are officially designated as Private Non-Routable address spaces under RFC 1918?",
+      "correctOption": 0,
+      "lengths": [
+        135,
+        44,
+        35,
+        55
+      ]
+    },
+    {
+      "index": 17,
+      "quizId": "quiz-level-0-ip-addresses-logical-location",
+      "concept": "IPv4 Loopback Architecture (127.0.0.1)",
+      "text": "What is the operational behavior of packets transmitted to IP address `127.0.0.1` on a host operating system?",
+      "correctOption": 1,
+      "lengths": [
+        69,
+        143,
+        57,
+        50
+      ]
+    },
+    {
+      "index": 18,
+      "quizId": "quiz-level-0-ip-addresses-logical-location",
+      "concept": "RFC 1918 Class B Boundaries",
+      "text": "A systems administrator discovers that an internal server has been assigned IP `172.32.1.100`. Why is this address configuration problematic for an internal private network?",
+      "correctOption": 2,
+      "lengths": [
+        53,
+        44,
+        209,
+        62
+      ]
+    },
+    {
+      "index": 19,
+      "quizId": "quiz-level-0-ip-addresses-logical-location",
+      "concept": "APIPA Link-Local Diagnosis",
+      "text": "What does an IPv4 address of `169.254.100.50` with subnet mask `255.255.0.0` signify when observed on a newly booted client workstation?",
+      "correctOption": 3,
+      "lengths": [
+        58,
+        73,
+        57,
+        137
+      ]
+    },
+    {
+      "index": 20,
+      "quizId": "quiz-level-0-ip-addresses-logical-location",
+      "concept": "Carrier-Grade NAT (RFC 6598)",
+      "text": "Which RFC 6598 address block is specifically reserved for Carrier-Grade NAT (CGNAT) deployed by ISPs?",
+      "correctOption": 0,
+      "lengths": [
+        44,
+        14,
+        10,
+        11
+      ]
+    },
+    {
+      "index": 21,
+      "quizId": "quiz-level-0-ip-addresses-logical-location",
+      "concept": "NAT/PAT Requirement for RFC 1918 Addresses",
+      "text": "A network administrator notices that packets originating from `192.168.1.50` reach the local default gateway router, but cannot reach external web servers on the Internet. What router service is missing?",
+      "correctOption": 1,
+      "lengths": [
+        25,
+        126,
+        32,
+        31
+      ]
+    },
+    {
+      "index": 22,
+      "quizId": "quiz-level-0-mac-addresses-physical-identity",
+      "concept": "MAC Address Bit Length & Architecture",
+      "text": "What is the total bit length and standard byte structure of an Ethernet MAC physical hardware address?",
+      "correctOption": 2,
+      "lengths": [
+        43,
+        43,
+        130,
+        17
+      ]
+    },
+    {
+      "index": 23,
+      "quizId": "quiz-level-0-mac-addresses-physical-identity",
+      "concept": "IEEE OUI Registration Authority",
+      "text": "Which organization is responsible for assigning the first 24 bits (Organizationally Unique Identifier / OUI) of a MAC address to hardware manufacturers?",
+      "correctOption": 3,
+      "lengths": [
+        52,
+        38,
+        31,
+        56
+      ]
+    },
+    {
+      "index": 24,
+      "quizId": "quiz-level-0-mac-addresses-physical-identity",
+      "concept": "I/G and U/L Control Bit Logic",
+      "text": "In the first octet of a MAC address, what do the Individual/Group (I/G) bit and Universal/Local (U/L) bit signify when evaluated?",
+      "correctOption": 0,
+      "lengths": [
+        117,
+        67,
+        66,
+        67
+      ]
+    },
+    {
+      "index": 25,
+      "quizId": "quiz-level-0-mac-addresses-physical-identity",
+      "concept": "Layer 2 Broadcast MAC Destination",
+      "text": "What is the standard Layer 2 destination MAC address used when a host must broadcast a frame to all devices on its local subnet?",
+      "correctOption": 1,
+      "lengths": [
+        17,
+        40,
+        17,
+        15
+      ]
+    },
+    {
+      "index": 26,
+      "quizId": "quiz-level-0-mac-addresses-physical-identity",
+      "concept": "Multicast MAC Forwarding Behavior",
+      "text": "A network engineer inspects a frame with destination MAC `01:00:5E:14:02:03`. How does a standard Layer 2 switch handle this frame?",
+      "correctOption": 2,
+      "lengths": [
+        58,
+        43,
+        138,
+        51
+      ]
+    },
+    {
+      "index": 27,
+      "quizId": "quiz-level-0-mac-addresses-physical-identity",
+      "concept": "Duplicate MAC Address & CAM Flapping Troubleshooting",
+      "text": "A network engineer notices that two cloned virtual machines were deployed with the exact same MAC address `00:50:56:11:22:33` on the same VLAN. What symptom will occur on the network switch?",
+      "correctOption": 3,
+      "lengths": [
+        46,
+        55,
+        65,
+        137
+      ]
+    },
+    {
+      "index": 28,
+      "quizId": "quiz-level-0-network-ports-socket-boundaries",
+      "concept": "IANA Port Classification Ranges",
+      "text": "What are the three official IANA port number classifications and their correct numerical ranges?",
+      "correctOption": 0,
+      "lengths": [
+        105,
+        85,
+        56,
+        51
+      ]
+    },
+    {
+      "index": 29,
+      "quizId": "quiz-level-0-network-ports-socket-boundaries",
+      "concept": "The 4-Tuple Socket Pair",
+      "text": "What constitutes a complete Transport Layer \\\"Socket Pair\\\" (4-tuple) that uniquely distinguishes a network conversation globally across the Internet?",
+      "correctOption": 1,
+      "lengths": [
+        65,
+        86,
+        55,
+        73
+      ]
+    },
+    {
+      "index": 31,
+      "quizId": "quiz-level-0-network-ports-socket-boundaries",
+      "concept": "Ephemeral Port Allocation & Socket Demultiplexing",
+      "text": "A user opens three separate browser tabs to `https://www.google.com` (`142.250.190.46:443`). How does the user's operating system ensure returning web packets are delivered to the correct browser tab without cross-contamination?",
+      "correctOption": 3,
+      "lengths": [
+        61,
+        59,
+        84,
+        164
+      ]
+    },
+    {
+      "index": 32,
+      "quizId": "quiz-level-0-network-ports-socket-boundaries",
+      "concept": "Multiplexing vs Demultiplexing Mechanics",
+      "text": "What is the operational difference between Transport Layer Multiplexing and Demultiplexing inside an operating system?",
+      "correctOption": 0,
+      "lengths": [
+        221,
+        62,
+        72,
+        79
+      ]
+    },
+    {
+      "index": 33,
+      "quizId": "quiz-level-0-network-ports-socket-boundaries",
+      "concept": "Socket Binding & Port In-Use Troubleshooting",
+      "text": "A software engineer runs a web server script and encounters the fatal error: `Error: listen EADDRINUSE: address already in use 0.0.0.0:8080`. What does this error signify, and what is the standard diagnostic action?",
+      "correctOption": 1,
+      "lengths": [
+        44,
+        185,
+        46,
+        30
+      ]
+    },
+    {
+      "index": 34,
+      "quizId": "quiz-level-0-network-packets-data-framing",
+      "concept": "MSS vs MTU Calculation",
+      "text": "On a standard Ethernet network with an MTU of 1500 bytes, what is the standard Maximum Segment Size (MSS) for IPv4 TCP traffic, and what formula defines it?",
+      "correctOption": 2,
+      "lengths": [
+        56,
+        37,
+        81,
+        44
+      ]
+    },
+    {
+      "index": 35,
+      "quizId": "quiz-level-0-network-packets-data-framing",
+      "concept": "VPN Tunnel MSS Clamping Calculation",
+      "text": "An enterprise deploys an IPsec VPN tunnel with an interface MTU of 1420 bytes. What is the maximum IPv4 TCP MSS that should be negotiated across this tunnel to prevent fragmentation?",
+      "correctOption": 3,
+      "lengths": [
+        10,
+        10,
+        10,
+        56
+      ]
+    },
+    {
+      "index": 36,
+      "quizId": "quiz-level-0-network-packets-data-framing",
+      "concept": "PMTUD Protocol Mechanics",
+      "text": "How does Path MTU Discovery (PMTUD, RFC 1191) dynamically detect the lowest MTU across an end-to-end network path without performing Layer 3 fragmentation?",
+      "correctOption": 0,
+      "lengths": [
+        199,
+        63,
+        63,
+        63
+      ]
+    },
+    {
+      "index": 37,
+      "quizId": "quiz-level-0-network-packets-data-framing",
+      "concept": "IP Fragmentation Performance Penalties",
+      "text": "What is the primary architectural penalty when an IP packet is subjected to Layer 3 fragmentation across a low-MTU WAN link?",
+      "correctOption": 1,
+      "lengths": [
+        43,
+        174,
+        38,
+        58
+      ]
+    },
+    {
+      "index": 38,
+      "quizId": "quiz-level-0-network-packets-data-framing",
+      "concept": "PMTUD Black Hole Diagnosis",
+      "text": "A network engineer notices that users connecting through a VPN tunnel can send small ping packets and connect via SSH, but large file transfers and web pages freeze indefinitely. What is the root cause of this \\\"PMTUD Black Hole\\\"?",
+      "correctOption": 2,
+      "lengths": [
+        57,
+        42,
+        188,
+        55
+      ]
+    },
+    {
+      "index": 40,
+      "quizId": "quiz-level-0-network-protocols-standards",
+      "concept": "Role of Networking Standards",
+      "text": "What is the primary role of international standards bodies such as the IETF (Internet Engineering Task Force) and IEEE in networking?",
+      "correctOption": 0,
+      "lengths": [
+        145,
+        93,
+        90,
+        76
+      ]
+    },
+    {
+      "index": 43,
+      "quizId": "quiz-level-0-network-protocols-standards",
+      "concept": "Open Standards Migration",
+      "text": "A proprietary legacy routing protocol (Cisco IGRP) fails to communicate with a newly installed open-standards Juniper router. What is the standard industry remediation to establish dynamic routing between these two vendors?",
+      "correctOption": 3,
+      "lengths": [
+        72,
+        64,
+        63,
+        105
+      ]
+    },
+    {
+      "index": 44,
+      "quizId": "quiz-level-0-dns-internet-phonebook",
+      "concept": "DNS 4-Tier Server Hierarchy",
+      "text": "What are the four primary DNS server roles involved in resolving an unknown domain name, in the correct chronological order of the resolution referral chain?",
+      "correctOption": 0,
+      "lengths": [
+        83,
+        71,
+        45,
+        57
+      ]
+    },
+    {
+      "index": 45,
+      "quizId": "quiz-level-0-dns-internet-phonebook",
+      "concept": "DNS CNAME Resource Record",
+      "text": "Which DNS Resource Record type is used to map an alias hostname to another canonical domain name (e.g. mapping `www.example.com` to `example.com`)?",
+      "correctOption": 1,
+      "lengths": [
+        8,
+        22,
+        11,
+        9
+      ]
+    },
+    {
+      "index": 46,
+      "quizId": "quiz-level-0-dns-internet-phonebook",
+      "concept": "DNS Transport Protocol Selection (UDP vs TCP)",
+      "text": "Why does standard DNS primarily use UDP port 53 for queries rather than TCP port 53?",
+      "correctOption": 2,
+      "lengths": [
+        60,
+        56,
+        141,
+        56
+      ]
+    },
+    {
+      "index": 47,
+      "quizId": "quiz-level-0-dns-internet-phonebook",
+      "concept": "DNS TTL & Resolver Caching Mechanics",
+      "text": "A systems administrator updates the IPv4 address for `api.company.com` from `1.1.1.1` to `2.2.2.2`. However, remote users continue reaching `1.1.1.1` for the next hour. What DNS parameter is responsible for this delay?",
+      "correctOption": 3,
+      "lengths": [
+        31,
+        48,
+        32,
+        66
+      ]
+    },
+    {
+      "index": 48,
+      "quizId": "quiz-level-0-dns-internet-phonebook",
+      "concept": "DNS MX Mail Exchange Records",
+      "text": "Which DNS Resource Record type is queried when an email server needs to determine which mail gateway handles incoming emails for the domain `@example.com`?",
+      "correctOption": 0,
+      "lengths": [
+        25,
+        20,
+        17,
+        23
+      ]
+    },
+    {
+      "index": 49,
+      "quizId": "quiz-level-0-dns-internet-phonebook",
+      "concept": "DNS Resolution vs IP Routing Troubleshooting",
+      "text": "A user reports that they can successfully ping public IP address `8.8.8.8` from their command prompt, but typing `https://www.google.com` into their web browser results in a \\\"Server Not Found\\\" error. What is the most likely root cause?",
+      "correctOption": 1,
+      "lengths": [
+        47,
+        120,
+        65,
+        47
+      ]
+    },
+    {
+      "index": 50,
+      "quizId": "quiz-level-0-dhcp-automatic-ip-allocation",
+      "concept": "DHCP DORA Workflow",
+      "text": "What are the four sequential messages exchanged between a client and a DHCP server during initial IP address lease acquisition?",
+      "correctOption": 2,
+      "lengths": [
+        28,
+        39,
+        50,
+        34
+      ]
+    },
+    {
+      "index": 53,
+      "quizId": "quiz-level-0-dhcp-automatic-ip-allocation",
+      "concept": "DHCP T1 Renewal Timer Calculation",
+      "text": "An employee's laptop acquires an 8-hour DHCP lease at 09:00 AM. At what time will the client first attempt to renew its lease (T1 Renewal Timer), and how is the renewal packet transmitted?",
+      "correctOption": 1,
+      "lengths": [
+        67,
+        98,
+        55,
+        32
+      ]
+    },
+    {
+      "index": 54,
+      "quizId": "quiz-level-0-dhcp-automatic-ip-allocation",
+      "concept": "DHCP Relay Agent & ip helper-address",
+      "text": "Why is the DHCP Relay Agent (`ip helper-address`) feature configured on enterprise router interfaces?",
+      "correctOption": 2,
+      "lengths": [
+        46,
+        51,
+        177,
+        55
+      ]
+    },
+    {
+      "index": 55,
+      "quizId": "quiz-level-0-dhcp-automatic-ip-allocation",
+      "concept": "APIPA (169.254.x.x) Troubleshooting",
+      "text": "A helpdesk technician notices that a user's computer shows an IPv4 address of `169.254.45.89` with a subnet mask of `255.255.0.0`. The user cannot access internal network shares or the Internet. What does this indicate?",
+      "correctOption": 3,
+      "lengths": [
+        55,
+        72,
+        56,
+        131
+      ]
+    },
+    {
+      "index": 57,
+      "quizId": "quiz-level-0-routers-inter-subnet-pathfinders",
+      "concept": "Default Route 0.0.0.0/0",
+      "text": "What is the purpose of a \\\"Default Route\\\" (`0.0.0.0/0` or `::/0`) in a routing table?",
+      "correctOption": 1,
+      "lengths": [
+        60,
+        139,
+        85,
+        75
+      ]
+    },
+    {
+      "index": 58,
+      "quizId": "quiz-level-0-routers-inter-subnet-pathfinders",
+      "concept": "Longest Prefix Match Rule",
+      "text": "A router receives a packet destined for `10.1.5.25`. The router table contains the following routes: \\n1) `10.0.0.0/8` via Next-Hop A \\n2) `10.1.0.0/16` via Next-Hop B \\n3) `10.1.5.0/24` via Next-Hop C \\n4) `0.0.0.0/0` via Next-Hop D. \\nWhich next-hop will the router select?",
+      "correctOption": 2,
+      "lengths": [
+        87,
+        98,
+        103,
+        99
+      ]
+    },
+    {
+      "index": 59,
+      "quizId": "quiz-level-0-routers-inter-subnet-pathfinders",
+      "concept": "Default Gateway Subnet Mismatch",
+      "text": "A host with IP `192.168.1.10/24` has its Default Gateway accidentally configured as `192.168.2.1`. When the host attempts to connect to `8.8.8.8`, why does communication fail immediately?",
+      "correctOption": 3,
+      "lengths": [
+        64,
+        65,
+        93,
+        151
+      ]
+    },
+    {
+      "index": 60,
+      "quizId": "quiz-level-0-switches-local-lan-forwarders",
+      "concept": "Switch MAC Table Learning",
+      "text": "How does a Layer 2 switch populate its MAC Address Table (CAM Table)?",
+      "correctOption": 0,
+      "lengths": [
+        99,
+        72,
+        88,
+        79
+      ]
+    },
+    {
+      "index": 61,
+      "quizId": "quiz-level-0-switches-local-lan-forwarders",
+      "concept": "Unknown Unicast Flooding",
+      "text": "What action does a Layer 2 switch perform when it receives a unicast frame destined for a MAC address that is NOT currently listed in its MAC address table (an Unknown Unicast)?",
+      "correctOption": 1,
+      "lengths": [
+        65,
+        98,
+        64,
+        50
+      ]
+    },
+    {
+      "index": 62,
+      "quizId": "quiz-level-0-switches-local-lan-forwarders",
+      "concept": "Full-Duplex Switching Advantages",
+      "text": "What is the primary operational advantage of full-duplex Ethernet switching over legacy half-duplex shared Ethernet?",
+      "correctOption": 2,
+      "lengths": [
+        80,
+        66,
+        140,
+        72
+      ]
+    },
+    {
+      "index": 64,
+      "quizId": "quiz-level-0-basic-network-troubleshooting-workflow",
+      "concept": "Systematic Bottom-Up Troubleshooting",
+      "text": "What is the correct sequence of steps in the systematic \\\"Bottom-Up\\\" troubleshooting methodology based on the OSI Model?",
+      "correctOption": 0,
+      "lengths": [
+        158,
+        82,
+        79,
+        58
+      ]
+    },
+    {
+      "index": 65,
+      "quizId": "quiz-level-0-basic-network-troubleshooting-workflow",
+      "concept": "Loopback Testing Mechanics",
+      "text": "When troubleshooting host IP stack functionality, what is the significance of issuing the command `ping 127.0.0.1` (or `ping ::1`)?",
+      "correctOption": 1,
+      "lengths": [
+        90,
+        149,
+        75,
+        86
+      ]
+    },
+    {
+      "index": 66,
+      "quizId": "quiz-level-0-basic-network-troubleshooting-workflow",
+      "concept": "Traceroute TTL Mechanics",
+      "text": "An engineer executes `traceroute 93.184.216.34` (or `tracert`) from a corporate workstation. How does traceroute discover the IP addresses of intermediate router hops along the path?",
+      "correctOption": 2,
+      "lengths": [
+        87,
+        92,
+        188,
+        76
+      ]
+    },
+    {
+      "index": 67,
+      "quizId": "quiz-level-0-basic-network-troubleshooting-workflow",
+      "concept": "Isolating Network Fault Boundaries",
+      "text": "A user cannot connect to an internal server at `10.0.5.20`. The technician performs the following diagnostic tests in order:\\n1. `ping 127.0.0.1` -> SUCCESS\\n2. `ping 192.168.1.1` (Default Gateway) -> SUCCESS\\n3. `ping 10.0.5.1` (Remote Subnet Gateway) -> SUCCESS\\n4. `ping 10.0.5.20` (Target Server) -> \\\"Request Timed Out\\\"\\nWhat is the most likely location of the fault?",
+      "correctOption": 3,
+      "lengths": [
+        66,
+        67,
+        68,
+        183
+      ]
+    },
+    {
+      "index": 68,
+      "quizId": "quiz-net-102-network-performance",
+      "concept": "Throughput vs Goodput",
+      "text": "What is the operational distinction between Throughput and Goodput in network performance analysis?",
+      "correctOption": 0,
+      "lengths": [
+        193,
+        88,
+        66,
+        65
+      ]
+    },
+    {
+      "index": 69,
+      "quizId": "quiz-net-102-network-performance",
+      "concept": "Transmission Delay Definition",
+      "text": "What is Transmission Delay (D_trans) in network latency decomposition?",
+      "correctOption": 1,
+      "lengths": [
+        80,
+        95,
+        69,
+        57
+      ]
+    },
+    {
+      "index": 72,
+      "quizId": "quiz-net-102-network-performance",
+      "concept": "Packet Loss Causes",
+      "text": "What is the primary cause of Packet Loss in a congested network router?",
+      "correctOption": 0,
+      "lengths": [
+        93,
+        47,
+        49,
+        41
+      ]
+    },
+    {
+      "index": 75,
+      "quizId": "quiz-network-devices-overview",
+      "concept": "Single-Mode vs Multimode Fiber Purpose",
+      "text": "When choosing between optical fiber types, which one is designed for much longer distances across campuses or between buildings?",
+      "correctOption": 3,
+      "lengths": [
+        13,
+        21,
+        18,
+        23
+      ]
+    },
+    {
+      "index": 76,
+      "quizId": "quiz-network-devices-overview",
+      "concept": "Fiber Immunity to Electrical Noise",
+      "text": "Why is optical fiber cable immune to electromagnetic interference (EMI) caused by power lines or heavy machinery?",
+      "correctOption": 0,
+      "lengths": [
+        107,
+        79,
+        50,
+        71
+      ]
+    },
+    {
+      "index": 77,
+      "quizId": "quiz-network-devices-overview",
+      "concept": "Modular Transceiver Purpose",
+      "text": "What is the primary benefit of a modular transceiver such as an SFP or SFP+ module in a network switch?",
+      "correctOption": 1,
+      "lengths": [
+        72,
+        104,
+        66,
+        64
+      ]
+    },
+    {
+      "index": 78,
+      "quizId": "quiz-network-devices-overview",
+      "concept": "Power over Ethernet Purpose",
+      "text": "What is the main advantage of Power over Ethernet (PoE) when connecting devices like Wi-Fi access points and IP cameras?",
+      "correctOption": 2,
+      "lengths": [
+        65,
+        68,
+        131,
+        51
+      ]
+    },
+    {
+      "index": 79,
+      "quizId": "quiz-network-devices-overview",
+      "concept": "Practical Media Selection",
+      "text": "A desktop computer is located 15 meters from an office network switch in a normal room. Which physical medium is the most practical choice?",
+      "correctOption": 3,
+      "lengths": [
+        42,
+        53,
+        32,
+        65
+      ]
+    },
+    {
+      "index": 81,
+      "quizId": "quiz-network-topologies-overview",
+      "concept": "Physical vs Logical Topology",
+      "text": "What is the primary difference between a Physical Topology and a Logical Topology?",
+      "correctOption": 1,
+      "lengths": [
+        106,
+        151,
+        104,
+        56
+      ]
+    },
+    {
+      "index": 82,
+      "quizId": "quiz-network-topologies-overview",
+      "concept": "Hub-and-Spoke WAN Design",
+      "text": "A company with 8 regional offices wants to interconnect all locations over WAN circuits. Full mesh is rejected due to cost. The architect proposes connecting each branch office to the central corporate headquarters only. What topology is this?",
+      "correctOption": 2,
+      "lengths": [
+        19,
+        29,
+        48,
+        24
+      ]
+    },
+    {
+      "index": 83,
+      "quizId": "quiz-network-topologies-overview",
+      "concept": "Hub Physical Star vs Logical Bus Behavior",
+      "text": "In a legacy physical Star network centered around a single unmanaged Ethernet hub, one workstation transmits a broadcast frame. Which nodes receive the frame?",
+      "correctOption": 3,
+      "lengths": [
+        65,
+        69,
+        73,
+        134
+      ]
+    },
+    {
+      "index": 84,
+      "quizId": "quiz-osi-model-7-layers",
+      "concept": "OSI Model Purpose and Architecture",
+      "text": "Why was the 7-Layer OSI Reference Model created, and how does it help network engineers?",
+      "correctOption": 0,
+      "lengths": [
+        134,
+        80,
+        76,
+        70
+      ]
+    },
+    {
+      "index": 88,
+      "quizId": "quiz-osi-model-7-layers",
+      "concept": "Encapsulation Mechanics",
+      "text": "What occurs during data encapsulation as an outgoing message travels down the OSI stack on a sending device?",
+      "correctOption": 0,
+      "lengths": [
+        108,
+        77,
+        68,
+        66
+      ]
+    },
+    {
+      "index": 90,
+      "quizId": "quiz-tcp-ip-4-layers",
+      "concept": "TCP/IP Model Purpose",
+      "text": "What is the primary difference between the 4-layer TCP/IP model and the 7-layer OSI model?",
+      "correctOption": 2,
+      "lengths": [
+        59,
+        84,
+        119,
+        52
+      ]
+    },
+    {
+      "index": 91,
+      "quizId": "quiz-tcp-ip-4-layers",
+      "concept": "TCP/IP 4 Layers Sequence",
+      "text": "What is the correct top-to-bottom sequence of the 4 TCP/IP model layers?",
+      "correctOption": 3,
+      "lengths": [
+        51,
+        44,
+        51,
+        58
+      ]
+    },
+    {
+      "index": 94,
+      "quizId": "quiz-tcp-ip-4-layers",
+      "concept": "OSI vs TCP/IP Conceptual Mapping",
+      "text": "How does the TCP/IP 4-layer stack align conceptually with the 7-layer OSI model?",
+      "correctOption": 2,
+      "lengths": [
+        49,
+        52,
+        155,
+        53
+      ]
+    },
+    {
+      "index": 95,
+      "quizId": "quiz-tcp-ip-4-layers",
+      "concept": "TCP/IP Encapsulation Flow",
+      "text": "What is the correct order of data encapsulation terms as an outgoing web request travels down the TCP/IP stack?",
+      "correctOption": 3,
+      "lengths": [
+        44,
+        46,
+        40,
+        85
+      ]
+    },
+    {
+      "index": 96,
+      "quizId": "quiz-ip-addressing-ipv4-overview",
+      "concept": "CIDR Architectural Purpose",
+      "text": "Why was Classless Inter-Domain Routing (CIDR, RFC 1519) introduced in 1993 to replace the original 1981 Classful IPv4 architecture?",
+      "correctOption": 0,
+      "lengths": [
+        198,
+        56,
+        49,
+        50
+      ]
+    },
+    {
+      "index": 98,
+      "quizId": "quiz-ip-addressing-ipv4-overview",
+      "concept": "Classful Address Allocation Inefficiency",
+      "text": "An enterprise in 1991 required 300 IPv4 addresses for its campus. Under historical classful rules, why did this allocation cause 99.5% address waste?",
+      "correctOption": 2,
+      "lengths": [
+        70,
+        43,
+        151,
+        76
+      ]
+    },
+    {
+      "index": 99,
+      "quizId": "quiz-ip-addressing-ipv4-overview",
+      "concept": "Class D Multicast & Class E Experimental Spaces",
+      "text": "What is the architectural purpose of Class D and Class E IPv4 address blocks?",
+      "correctOption": 3,
+      "lengths": [
+        64,
+        70,
+        69,
+        135
+      ]
+    },
+    {
+      "index": 100,
+      "quizId": "quiz-ip-addressing-ipv4-overview",
+      "concept": "CIDR Route Aggregation / Supernetting",
+      "text": "How does CIDR Route Aggregation (Supernetting) prevent global Internet routing table exhaustion?",
+      "correctOption": 0,
+      "lengths": [
+        187,
+        77,
+        57,
+        44
+      ]
+    },
+    {
+      "index": 101,
+      "quizId": "quiz-ip-addressing-ipv4-overview",
+      "concept": "Classless CIDR vs Classful Misconceptions",
+      "text": "A network technician encounters a legacy configuration using `192.168.1.0/28`. A colleague claims this is invalid because \\\"192.168.x.x is Class C and must use /24\\\". How should the technician explain the colleague's misconception?",
+      "correctOption": 1,
+      "lengths": [
+        87,
+        164,
+        44,
+        74
+      ]
+    },
+    {
+      "index": 102,
+      "quizId": "quiz-subnetting-cidr-overview",
+      "concept": "VLSM Largest-to-Smallest Allocation Rule",
+      "text": "When designing a Variable Length Subnet Masking (VLSM) address plan for multiple departments of different sizes, what is the fundamental \\\"Golden Rule\\\" of allocation order?",
+      "correctOption": 2,
+      "lengths": [
+        84,
+        94,
+        147,
+        86
+      ]
+    },
+    {
+      "index": 106,
+      "quizId": "quiz-subnetting-cidr-overview",
+      "concept": "Subnet Block Size Boundary Alignment Rules",
+      "text": "Why does attempting to allocate a `/26` subnet starting at IP address `192.168.1.32` result in a configuration error on an enterprise router?",
+      "correctOption": 2,
+      "lengths": [
+        52,
+        42,
+        130,
+        64
+      ]
+    },
+    {
+      "index": 107,
+      "quizId": "quiz-subnetting-cidr-overview",
+      "concept": "Overlapping Subnet Troubleshooting",
+      "text": "A network administrator attempts to assign `192.168.1.64/26` to Router Interface GigabitEthernet0/1 while `192.168.1.32/27` is already assigned to GigabitEthernet0/0. The router rejects the command. What is the root cause?",
+      "correctOption": 3,
+      "lengths": [
+        36,
+        44,
+        38,
+        145
+      ]
+    },
+    {
+      "index": 108,
+      "quizId": "quiz-ipv6-foundations-overview",
+      "concept": "IPv6 Address Compression Rules",
+      "text": "What are the two official abbreviation rules used to compress long IPv6 addresses according to RFC 5952?",
+      "correctOption": 0,
+      "lengths": [
+        155,
+        82,
+        74,
+        72
+      ]
+    },
+    {
+      "index": 110,
+      "quizId": "quiz-ipv6-foundations-overview",
+      "concept": "IPv6 Link-Local Addressing (fe80::)",
+      "text": "What is the prefix and scope of an IPv6 Link-Local address automatically configured on every enabled interface?",
+      "correctOption": 2,
+      "lengths": [
+        47,
+        56,
+        95,
+        52
+      ]
+    },
+    {
+      "index": 111,
+      "quizId": "quiz-ipv6-foundations-overview",
+      "concept": "IPv6 NDP vs Legacy ARP Broadcast",
+      "text": "How does IPv6 eliminate the need for Layer 2 Broadcast frames and the legacy ARP broadcast protocol?",
+      "correctOption": 3,
+      "lengths": [
+        93,
+        70,
+        66,
+        145
+      ]
+    },
+    {
+      "index": 113,
+      "quizId": "quiz-ethernet-mac-addresses-overview",
+      "concept": "Minimum Ethernet Frame Size Mechanics",
+      "text": "What is the minimum valid Ethernet II frame size on the wire (excluding the 8-byte Preamble/SFD) and why was this minimum established?",
+      "correctOption": 1,
+      "lengths": [
+        48,
+        125,
+        50,
+        56
+      ]
+    },
+    {
+      "index": 114,
+      "quizId": "quiz-ethernet-mac-addresses-overview",
+      "concept": "Ethernet Payload Padding Calculation",
+      "text": "An ARP request containing 28 bytes of data is encapsulated in an Ethernet II frame. How many bytes of padding will the network interface card append?",
+      "correctOption": 2,
+      "lengths": [
+        8,
+        7,
+        45,
+        8
+      ]
+    },
+    {
+      "index": 115,
+      "quizId": "quiz-ethernet-mac-addresses-overview",
+      "concept": "Frame Check Sequence & CRC-32",
+      "text": "What algorithm does the 4-byte Frame Check Sequence (FCS) trailer use to verify data integrity in an Ethernet frame?",
+      "correctOption": 3,
+      "lengths": [
+        23,
+        22,
+        16,
+        32
+      ]
+    },
+    {
+      "index": 116,
+      "quizId": "quiz-ethernet-mac-addresses-overview",
+      "concept": "802.1Q VLAN Tagging & Frame Expansion",
+      "text": "When IEEE 802.1Q VLAN encapsulation is active on an Ethernet trunk link, where is the 4-byte VLAN tag inserted and what is the new maximum standard frame size?",
+      "correctOption": 0,
+      "lengths": [
+        104,
+        71,
+        71,
+        60
+      ]
+    },
+    {
+      "index": 117,
+      "quizId": "quiz-ethernet-mac-addresses-overview",
+      "concept": "Runt Frame Detection & Troubleshooting",
+      "text": "A network administrator notices thousands of \\\"Runt frame\\\" errors logged on switch interface GigabitEthernet0/1. What does this mean, and what is the most likely physical root cause?",
+      "correctOption": 1,
+      "lengths": [
+        57,
+        138,
+        40,
+        25
+      ]
+    },
+    {
+      "index": 118,
+      "quizId": "quiz-arp-protocol-overview",
+      "concept": "ARP Purpose & Mechanics",
+      "text": "What specific problem does the Address Resolution Protocol (ARP) solve on an IPv4 local Ethernet network?",
+      "correctOption": 2,
+      "lengths": [
+        65,
+        56,
+        107,
+        60
+      ]
+    },
+    {
+      "index": 119,
+      "quizId": "quiz-arp-protocol-overview",
+      "concept": "ARP Request Frame Addressing",
+      "text": "What are the Layer 2 and Layer 3 destination addresses used in an ARP Request message?",
+      "correctOption": 3,
+      "lengths": [
+        67,
+        60,
+        65,
+        90
+      ]
+    },
+    {
+      "index": 120,
+      "quizId": "quiz-arp-protocol-overview",
+      "concept": "ARP for Off-Subnet Destinations",
+      "text": "When a host on subnet `192.168.1.0/24` needs to send an IP packet to remote public web server `93.184.216.34`, which device address does the host query in its ARP Request?",
+      "correctOption": 0,
+      "lengths": [
+        117,
+        62,
+        38,
+        37
+      ]
+    },
+    {
+      "index": 121,
+      "quizId": "quiz-arp-protocol-overview",
+      "concept": "ARP Cache Purpose & Aging",
+      "text": "Why do operating systems maintain a temporary \\\"ARP Cache\\\" (ARP Table) in memory buffers?",
+      "correctOption": 1,
+      "lengths": [
+        67,
+        152,
+        50,
+        50
+      ]
+    },
+    {
+      "index": 122,
+      "quizId": "quiz-arp-protocol-overview",
+      "concept": "Non-Target ARP Frame Discarding",
+      "text": "What happens when Host C (192.168.1.30) receives an ARP Request broadcast asking \\\"Who has 192.168.1.50?\\\"",
+      "correctOption": 2,
+      "lengths": [
+        50,
+        54,
+        138,
+        52
+      ]
+    },
+    {
+      "index": 123,
+      "quizId": "quiz-arp-protocol-overview",
+      "concept": "ARP Poisoning & Dynamic ARP Inspection",
+      "text": "An attacker transmits unsolicited ARP replies associating the Default Gateway IP address with the attacker's own MAC address. What attack is taking place, and what is the standard switch mitigation?",
+      "correctOption": 3,
+      "lengths": [
+        93,
+        57,
+        55,
+        135
+      ]
+    },
+    {
+      "index": 124,
+      "quizId": "quiz-dhcp-dns-overview",
+      "concept": "Integrated Host Boot-Up Sequence",
+      "text": "What is the correct chronological sequence of protocol events that must execute when an unconfigured computer boots up, connects to Ethernet, and sends its first HTTPS web request?",
+      "correctOption": 0,
+      "lengths": [
+        167,
+        78,
+        88,
+        84
+      ]
+    },
+    {
+      "index": 125,
+      "quizId": "quiz-dhcp-dns-overview",
+      "concept": "Layer 2 vs Layer 3 Addressing in Remote Forwarding",
+      "text": "When a host at `192.168.1.50` transmits an HTTPS request to web server `93.184.216.34` via Default Gateway `192.168.1.1`, what addresses are placed in the Layer 2 Ethernet frame and Layer 3 IP packet headers?",
+      "correctOption": 1,
+      "lengths": [
+        108,
+        122,
+        115,
+        104
+      ]
+    },
+    {
+      "index": 126,
+      "quizId": "quiz-dhcp-dns-overview",
+      "concept": "Gratuitous ARP Duplicate Address Detection",
+      "text": "What is the primary function of transmitting a Gratuitous ARP (GARP) broadcast immediately following DHCP lease acquisition (Phase 3)?",
+      "correctOption": 2,
+      "lengths": [
+        44,
+        64,
+        145,
+        54
+      ]
+    },
+    {
+      "index": 127,
+      "quizId": "quiz-dhcp-dns-overview",
+      "concept": "Lifecycle Sequential Troubleshooting & DNS Isolation",
+      "text": "A technician observes that a client computer can successfully ping external IP address `8.8.8.8`, but entering `https://www.example.com` into a web browser results in a timeout error. Which lifecycle phase has failed?",
+      "correctOption": 3,
+      "lengths": [
+        46,
+        38,
+        53,
+        85
+      ]
+    },
+    {
+      "index": 128,
+      "quizId": "quiz-dhcp-dns-overview",
+      "concept": "Default Gateway ARP Resolution Mechanics",
+      "text": "Why does an operating system execute an ARP request for the Default Gateway IP address before it can transmit a DNS query to recursive resolver `8.8.8.8`?",
+      "correctOption": 0,
+      "lengths": [
+        166,
+        59,
+        80,
+        53
+      ]
+    },
+    {
+      "index": 129,
+      "quizId": "quiz-dhcp-dns-overview",
+      "concept": "TCP 3-Way Handshake Flags",
+      "text": "During Phase 6 (Transport Handshake), which TCP flags are exchanged between client and server to establish a reliable connection before transmitting HTTP GET data?",
+      "correctOption": 1,
+      "lengths": [
+        21,
+        78,
+        19,
+        28
+      ]
+    },
+    {
+      "index": 130,
+      "quizId": "quiz-tcp-udp-transport-overview",
+      "concept": "TCP 3-Way Handshake Mechanics",
+      "text": "What are the exact control flags and sequence of the TCP 3-Way Handshake used to establish a reliable connection?",
+      "correctOption": 2,
+      "lengths": [
+        63,
+        63,
+        135,
+        71
+      ]
+    },
+    {
+      "index": 131,
+      "quizId": "quiz-tcp-udp-transport-overview",
+      "concept": "TCP Sliding Window Flow Control",
+      "text": "How does TCP implement Flow Control to prevent a high-speed transmitting host from overwhelming a slower receiving host memory buffer?",
+      "correctOption": 3,
+      "lengths": [
+        48,
+        60,
+        92,
+        140
+      ]
+    },
+    {
+      "index": 132,
+      "quizId": "quiz-tcp-udp-transport-overview",
+      "concept": "UDP vs TCP Real-Time Tradeoffs",
+      "text": "Why do real-time applications such as Voice over IP (VoIP), live video streaming, and online multiplayer gaming prefer UDP over TCP?",
+      "correctOption": 0,
+      "lengths": [
+        159,
+        64,
+        64,
+        58
+      ]
+    },
+    {
+      "index": 133,
+      "quizId": "quiz-tcp-udp-transport-overview",
+      "concept": "TCP Sequence & Acknowledgment Calculation",
+      "text": "Host A sends a TCP segment with `Seq = 1000` containing `500 bytes` of data to Host B. What Acknowledgment number (`Ack`) will Host B return if the segment is received successfully?",
+      "correctOption": 1,
+      "lengths": [
+        12,
+        92,
+        11,
+        12
+      ]
+    },
+    {
+      "index": 134,
+      "quizId": "quiz-tcp-udp-transport-overview",
+      "concept": "TCP 4-Way Connection Teardown",
+      "text": "What are the correct sequence of messages exchanged during a standard graceful TCP 4-Way connection teardown?",
+      "correctOption": 2,
+      "lengths": [
+        35,
+        30,
+        69,
+        24
+      ]
+    },
+    {
+      "index": 135,
+      "quizId": "quiz-tcp-udp-transport-overview",
+      "concept": "TCP SYN Flood & SYN Cookies Mitigation",
+      "text": "A web server receives a massive flood of TCP SYN packets with forged source IP addresses, causing its half-open connection table to fill and reject legitimate users. What attack is this, and what is the primary server mitigation?",
+      "correctOption": 3,
+      "lengths": [
+        64,
+        57,
+        56,
+        185
+      ]
+    },
+    {
+      "index": 136,
+      "quizId": "quiz-routing-fundamentals-overview",
+      "concept": "Administrative Distance vs Metric",
+      "text": "What is the role of Administrative Distance (AD) in a router routing table selection process?",
+      "correctOption": 0,
+      "lengths": [
+        209,
+        65,
+        64,
+        75
+      ]
+    },
+    {
+      "index": 138,
+      "quizId": "quiz-routing-fundamentals-overview",
+      "concept": "Floating Static Route Architecture",
+      "text": "What is a \\\"Floating Static Route\\\", and how is it configured in enterprise networks?",
+      "correctOption": 2,
+      "lengths": [
+        53,
+        79,
+        195,
+        64
+      ]
+    },
+    {
+      "index": 139,
+      "quizId": "quiz-routing-fundamentals-overview",
+      "concept": "Static Route Next-Hop Reachability Validation",
+      "text": "A router console displays: `ip route 10.10.0.0 255.255.0.0 192.168.1.254`. When testing, packets destined for `10.10.5.1` fail to forward and the route does NOT appear in `show ip route`. What is the most common reason?",
+      "correctOption": 3,
+      "lengths": [
+        64,
+        62,
+        61,
+        165
+      ]
+    },
+    {
+      "index": 140,
+      "quizId": "quiz-switching-vlans-overview",
+      "concept": "VLAN Broadcast Domain Segmentation",
+      "text": "What fundamental network problem do Virtual Local Area Networks (VLANs) solve in enterprise switching design?",
+      "correctOption": 0,
+      "lengths": [
+        165,
+        85,
+        60,
+        72
+      ]
+    },
+    {
+      "index": 141,
+      "quizId": "quiz-switching-vlans-overview",
+      "concept": "IEEE 802.1Q 4-Byte Tag Structure",
+      "text": "How does the IEEE 802.1Q standard identify which VLAN a frame belongs to when traversing an inter-switch Trunk link?",
+      "correctOption": 1,
+      "lengths": [
+        73,
+        128,
+        65,
+        61
+      ]
+    },
+    {
+      "index": 142,
+      "quizId": "quiz-switching-vlans-overview",
+      "concept": "Native VLAN Untagged Traffic Handling",
+      "text": "What is the \\\"Native VLAN\\\" on an IEEE 802.1Q trunk port, and what happens to frames arriving on a trunk without an 802.1Q tag?",
+      "correctOption": 2,
+      "lengths": [
+        72,
+        78,
+        172,
+        75
+      ]
+    },
+    {
+      "index": 143,
+      "quizId": "quiz-switching-vlans-overview",
+      "concept": "Inter-VLAN Routing Requirement",
+      "text": "Workstation A in VLAN 10 (`192.168.10.5`) cannot ping Workstation B in VLAN 20 (`192.168.20.5`) connected to the same physical switch. No router or Layer 3 switch interface is configured. Why does communication fail?",
+      "correctOption": 3,
+      "lengths": [
+        36,
+        65,
+        79,
+        189
+      ]
+    },
+    {
+      "index": 144,
+      "quizId": "quiz-network-security-basics-overview",
+      "concept": "CIA Triad Fundamentals",
+      "text": "What are the three pillars of the foundational \\\"CIA Triad\\\" in information and network security?",
+      "correctOption": 0,
+      "lengths": [
+        114,
+        40,
+        30,
+        30
+      ]
+    },
+    {
+      "index": 145,
+      "quizId": "quiz-network-security-basics-overview",
+      "concept": "DDoS Botnet Architecture",
+      "text": "How does a Distributed Denial of Service (DDoS) attack differ fundamentally from a standard single-source Denial of Service (DoS) attack?",
+      "correctOption": 1,
+      "lengths": [
+        82,
+        184,
+        77,
+        61
+      ]
+    },
+    {
+      "index": 146,
+      "quizId": "quiz-network-security-basics-overview",
+      "concept": "Principle of Least Privilege",
+      "text": "What security principle dictates that network users and administrators should be granted only the absolute minimum permissions and access levels necessary to complete their specific job functions?",
+      "correctOption": 2,
+      "lengths": [
+        16,
+        24,
+        35,
+        15
+      ]
+    },
+    {
+      "index": 147,
+      "quizId": "quiz-network-security-basics-overview",
+      "concept": "MitM Eavesdropping & TLS Mitigation",
+      "text": "An enterprise security analyst discovers that an attacker is performing a \\\"Man-in-the-Middle\\\" (MitM) attack on an unencrypted HTTP Wi-Fi connection, reading plaintext employee session cookies. What cryptographic protocol will immediately eliminate this vulnerability?",
+      "correctOption": 3,
+      "lengths": [
+        51,
+        59,
+        50,
+        105
+      ]
+    },
+    {
+      "index": 148,
+      "quizId": "quiz-firewalls-acls-overview",
+      "concept": "Standard vs Extended ACL Comparison",
+      "text": "What is the primary operational difference between a Standard Access Control List (ACL) and an Extended ACL in IPv4 networking?",
+      "correctOption": 0,
+      "lengths": [
+        250,
+        69,
+        67,
+        72
+      ]
+    },
+    {
+      "index": 149,
+      "quizId": "quiz-firewalls-acls-overview",
+      "concept": "Wildcard Mask Bit Logic",
+      "text": "How does an IPv4 \\\"Wildcard Mask\\\" operate when matching IP address ranges in an Access Control List?",
+      "correctOption": 1,
+      "lengths": [
+        83,
+        167,
+        56,
+        58
+      ]
+    },
+    {
+      "index": 150,
+      "quizId": "quiz-firewalls-acls-overview",
+      "concept": "Implicit Deny All Rule",
+      "text": "What invisible rule is automatically appended by default to the very bottom of every Cisco Access Control List (ACL)?",
+      "correctOption": 2,
+      "lengths": [
+        56,
+        69,
+        108,
+        58
+      ]
+    },
+    {
+      "index": 151,
+      "quizId": "quiz-firewalls-acls-overview",
+      "concept": "Stateful Firewall vs Stateless ACL",
+      "text": "Why does a Stateful Inspection Firewall provide significantly superior security compared to a Stateless Packet-Filtering Router ACL?",
+      "correctOption": 3,
+      "lengths": [
+        61,
+        74,
+        78,
+        194
+      ]
+    },
+    {
+      "index": 152,
+      "quizId": "quiz-nat-pat-overview",
+      "concept": "Cisco NAT Address Terminology",
+      "text": "In Cisco NAT terminology, what are the exact definitions of \\\"Inside Local\\\" and \\\"Inside Global\\\" addresses?",
+      "correctOption": 0,
+      "lengths": [
+        242,
+        86,
+        90,
+        73
+      ]
+    },
+    {
+      "index": 153,
+      "quizId": "quiz-nat-pat-overview",
+      "concept": "PAT (NAT Overload) Port Multiplexing",
+      "text": "How does Port Address Translation (PAT / NAT Overload) enable hundreds of internal private LAN workstations to concurrently access the public Internet using a single shared public IPv4 address?",
+      "correctOption": 1,
+      "lengths": [
+        65,
+        111,
+        58,
+        55
+      ]
+    },
+    {
+      "index": 154,
+      "quizId": "quiz-nat-pat-overview",
+      "concept": "Static 1-to-1 NAT for Public Servers",
+      "text": "What type of NAT is required when an internal private web server (`192.168.1.100`) must be permanently accessible from the public Internet via a dedicated public IP (`203.0.113.25`)?",
+      "correctOption": 2,
+      "lengths": [
+        39,
+        50,
+        71,
+        26
+      ]
+    },
+    {
+      "index": 155,
+      "quizId": "quiz-nat-pat-overview",
+      "concept": "NAT Port Exhaustion Diagnosis",
+      "text": "An engineer executes `show ip nat translations` on an edge gateway router and sees 65,000 active translation table entries. New users report they cannot open any websites. What has occurred and how is it resolved?",
+      "correctOption": 3,
+      "lengths": [
+        57,
+        39,
+        53,
+        185
+      ]
+    },
+    {
+      "index": 156,
+      "quizId": "quiz-vpn-cryptography-overview",
+      "concept": "IPsec Architecture (ESP vs AH)",
+      "text": "What are the two primary protocols in the IPsec protocol suite, and what security services do they provide?",
+      "correctOption": 0,
+      "lengths": [
+        189,
+        55,
+        56,
+        54
+      ]
+    },
+    {
+      "index": 157,
+      "quizId": "quiz-vpn-cryptography-overview",
+      "concept": "IKE Phase 1 vs Phase 2 Negotiation",
+      "text": "What are the roles of IKE (Internet Key Exchange) Phase 1 and Phase 2 during the establishment of a site-to-site IPsec VPN tunnel?",
+      "correctOption": 1,
+      "lengths": [
+        75,
+        209,
+        83,
+        75
+      ]
+    },
+    {
+      "index": 158,
+      "quizId": "quiz-vpn-cryptography-overview",
+      "concept": "Diffie-Hellman Key Exchange Mechanics",
+      "text": "How does Diffie-Hellman (DH) Key Exchange allow two VPN routers across the public Internet to securely establish a shared secret key without ever transmitting that secret key across the wire?",
+      "correctOption": 2,
+      "lengths": [
+        48,
+        56,
+        195,
+        79
+      ]
+    },
+    {
+      "index": 159,
+      "quizId": "quiz-vpn-cryptography-overview",
+      "concept": "IPsec Phase 1 Proposal Mismatch Diagnosis",
+      "text": "An IPsec site-to-site VPN fails to establish. The router logs state: `IKE Phase 1 negotiation failed: Peer proposal mismatch (Transform Set rejected)`. What is the immediate troubleshooting step?",
+      "correctOption": 3,
+      "lengths": [
+        49,
+        52,
+        47,
+        225
+      ]
+    },
+    {
+      "index": 162,
+      "quizId": "quiz-wireless-networking-overview",
+      "concept": "Hidden Node Problem & RTS/CTS",
+      "text": "What is the \\\"Hidden Node Problem\\\" in 802.11 wireless networks, and what protocol mechanism resolves it?",
+      "correctOption": 2,
+      "lengths": [
+        53,
+        65,
+        232,
+        45
+      ]
+    },
+    {
+      "index": 163,
+      "quizId": "quiz-wireless-networking-overview",
+      "concept": "WPA3 SAE vs WPA2 PSK Security",
+      "text": "Why is WPA3-Personal (SAE) significantly more secure than legacy WPA2-Personal (PSK)?",
+      "correctOption": 3,
+      "lengths": [
+        65,
+        76,
+        79,
+        230
+      ]
+    },
+    {
+      "index": 164,
+      "quizId": "quiz-network-troubleshooting-overview",
+      "concept": "ICMP Unreachable vs Timeout Diagnosis",
+      "text": "When executing a ping diagnostic, what is the critical technical distinction between receiving \\\"Destination Host Unreachable\\\" versus \\\"Request Timed Out\\\"?",
+      "correctOption": 0,
+      "lengths": [
+        304,
+        116,
+        119,
+        71
+      ]
+    },
+    {
+      "index": 165,
+      "quizId": "quiz-network-troubleshooting-overview",
+      "concept": "DNS Resolution Isolation",
+      "text": "A user reports: \\\"I can access websites by typing their IP addresses in the browser (e.g. http://93.184.216.34), but typing domain names (e.g. http://example.com) fails immediately.\\\" What is the root cause?",
+      "correctOption": 1,
+      "lengths": [
+        70,
+        108,
+        41,
+        48
+      ]
+    },
+    {
+      "index": 167,
+      "quizId": "quiz-network-troubleshooting-overview",
+      "concept": "MTU Black Hole & MSS Clamping Diagnosis",
+      "text": "A user connects over an IPsec VPN. Small web pages and ping tests work perfectly, but transferring large files or opening heavy HTTPS portals freezes and hangs indefinitely. What issue is causing this symptom?",
+      "correctOption": 3,
+      "lengths": [
+        68,
+        71,
+        71,
+        259
+      ]
+    },
+    {
+      "index": 168,
+      "quizId": "quiz-sdn-cloud-networking-overview",
+      "concept": "SDN Control Plane vs Data Plane Decoupling",
+      "text": "What fundamental architectural separation defines Software-Defined Networking (SDN)?",
+      "correctOption": 0,
+      "lengths": [
+        202,
+        60,
+        63,
+        54
+      ]
+    },
+    {
+      "index": 169,
+      "quizId": "quiz-sdn-cloud-networking-overview",
+      "concept": "SDN Northbound vs Southbound APIs",
+      "text": "In SDN architectural terminology, what is the difference between \\\"Northbound APIs\\\" and \\\"Southbound APIs\\\"?",
+      "correctOption": 1,
+      "lengths": [
+        99,
+        239,
+        90,
+        86
+      ]
+    },
+    {
+      "index": 170,
+      "quizId": "quiz-sdn-cloud-networking-overview",
+      "concept": "VXLAN Cloud Overlay Architecture",
+      "text": "What overlay network encapsulation protocol is widely used in modern cloud datacenters to encapsulate Layer 2 Ethernet frames inside Layer 3 UDP packets, expanding VLAN limits from 4,094 up to 16 million virtual networks?",
+      "correctOption": 2,
+      "lengths": [
+        36,
+        32,
+        76,
+        29
+      ]
+    },
+    {
+      "index": 171,
+      "quizId": "quiz-sdn-cloud-networking-overview",
+      "concept": "Cloud Security Groups vs Subnet NACLs",
+      "text": "In a public cloud provider (such as AWS VPC or Azure VNet), how do Cloud Security Groups differ from Cloud Network Access Control Lists (NACLs)?",
+      "correctOption": 3,
+      "lengths": [
+        59,
+        73,
+        66,
+        162
+      ]
+    },
+    {
+      "index": 177,
+      "quizId": "quiz-net-101-bits-bytes-binary-hex",
+      "concept": "Why Networking Uses Hexadecimal",
+      "text": "Why does computer networking commonly use hexadecimal notation for MAC addresses and IPv6 addresses?",
+      "correctOption": 1,
+      "lengths": [
+        66,
+        102,
+        78,
+        58
+      ]
+    },
+    {
+      "index": 178,
+      "quizId": "quiz-net-202-ipv4-addressing-cidr",
+      "concept": "32-Bit IPv4 Architecture",
+      "text": "An IPv4 address is composed of how many total bits, and how are these bits partitioned?",
+      "correctOption": 2,
+      "lengths": [
+        54,
+        85,
+        117,
+        46
+      ]
+    },
+    {
+      "index": 179,
+      "quizId": "quiz-net-202-ipv4-addressing-cidr",
+      "concept": "Subnet Mask Role",
+      "text": "What is the primary architectural purpose of a subnet mask in IPv4 addressing?",
+      "correctOption": 3,
+      "lengths": [
+        66,
+        71,
+        75,
+        87
+      ]
+    },
+    {
+      "index": 182,
+      "quizId": "quiz-net-202-ipv4-addressing-cidr",
+      "concept": "Prefix Shift Dynamics",
+      "text": "If a network administrator changes a subnet prefix from `/24` to `/26`, what happens to the number of network bits and host capacity per subnet?",
+      "correctOption": 2,
+      "lengths": [
+        84,
+        72,
+        118,
+        81
+      ]
+    },
+    {
+      "index": 183,
+      "quizId": "quiz-net-202-ipv4-addressing-cidr",
+      "concept": "Point-to-Point & Edge Subnetting",
+      "text": "Why does a standard `/30` prefix provide exactly 2 usable host IP addresses, and how do point-to-point links treat host bit reservations?",
+      "correctOption": 3,
+      "lengths": [
+        88,
+        70,
+        61,
+        144
+      ]
+    },
+    {
+      "index": 184,
+      "quizId": "quiz-net-302-spanning-tree-protocol-loop-prevention",
+      "concept": "Root Bridge Election Criteria",
+      "text": "What criteria determines which switch is elected as the Root Bridge in standard IEEE 802.1D Spanning Tree Protocol?",
+      "correctOption": 0,
+      "lengths": [
+        80,
+        38,
+        61,
+        47
+      ]
+    },
+    {
+      "index": 186,
+      "quizId": "quiz-net-302-spanning-tree-protocol-loop-prevention",
+      "concept": "STP Root Port Selection",
+      "text": "What is the role of a \\\"Root Port\\\" on a non-root switch in Spanning Tree topology?",
+      "correctOption": 2,
+      "lengths": [
+        58,
+        64,
+        105,
+        42
+      ]
+    },
+    {
+      "index": 188,
+      "quizId": "quiz-net-302-spanning-tree-protocol-loop-prevention",
+      "concept": "802.1D STP Convergence Timers",
+      "text": "What are the port states in classic IEEE 802.1D STP, and what is the total default convergence time from Blocking to Forwarding?",
+      "correctOption": 0,
+      "lengths": [
+        102,
+        59,
+        59,
+        58
+      ]
+    },
+    {
+      "index": 189,
+      "quizId": "quiz-net-302-spanning-tree-protocol-loop-prevention",
+      "concept": "STP PortFast Optimization",
+      "text": "An administrator wants edge access ports connected directly to end-user workstations to transition immediately to the Forwarding state without waiting 30 seconds for STP listening/learning timers. Which feature must be enabled?",
+      "correctOption": 1,
+      "lengths": [
+        24,
+        46,
+        31,
+        12
+      ]
+    },
+    {
+      "index": 191,
+      "quizId": "quiz-net-304-single-area-ospf-routing",
+      "concept": "OSPF Router ID Election Logic",
+      "text": "In OSPFv2, what criteria determines the election of a Router ID (RID) if it is NOT manually configured?",
+      "correctOption": 3,
+      "lengths": [
+        48,
+        41,
+        40,
+        135
+      ]
+    },
+    {
+      "index": 192,
+      "quizId": "quiz-net-304-single-area-ospf-routing",
+      "concept": "OSPF Adjacency Requirements",
+      "text": "What parameters MUST match identically between two neighboring routers for an OSPF adjacency to successfully reach the FULL state?",
+      "correctOption": 0,
+      "lengths": [
+        80,
+        22,
+        42,
+        37
+      ]
+    },
+    {
+      "index": 193,
+      "quizId": "quiz-net-304-single-area-ospf-routing",
+      "concept": "OSPF MTU Mismatch & EXSTART Diagnosis",
+      "text": "Two OSPF routers connected via a gigabit Ethernet link are stuck in the EXSTART / EXCHANGE state and fail to reach FULL. What is the most common cause?",
+      "correctOption": 1,
+      "lengths": [
+        36,
+        125,
+        48,
+        42
+      ]
+    },
+    {
+      "index": 194,
+      "quizId": "quiz-net-304-single-area-ospf-routing",
+      "concept": "OSPF DR/BDR Multi-Access Optimization",
+      "text": "Why does OSPF elect a Designated Router (DR) and Backup Designated Router (BDR) on multi-access Ethernet segments, and what multicast address do non-DR (DROTHER) routers use to transmit LSUs to the DR/BDR?",
+      "correctOption": 2,
+      "lengths": [
+        72,
+        60,
+        99,
+        76
+      ]
+    },
+    {
+      "index": 195,
+      "quizId": "quiz-net-304-single-area-ospf-routing",
+      "concept": "OSPF Reference Bandwidth Scaling",
+      "text": "What is the default reference bandwidth in classic OSPF, what is the cost of a 10 Gbps interface under that default, and how should an engineer configure OSPF to accurately differentiate between 1 Gbps, 10 Gbps, and 100 Gbps links?",
+      "correctOption": 3,
+      "lengths": [
+        77,
+        68,
+        76,
+        166
+      ]
+    },
+    {
+      "index": 196,
+      "quizId": "quiz-net-404-wireshark-packet-capture",
+      "concept": "Wireshark TCP Flag Filtering",
+      "text": "Which Wireshark display filter isolates ONLY the initial TCP connection request (SYN packet) sent by a client, excluding SYN-ACK packets?",
+      "correctOption": 0,
+      "lengths": [
+        40,
+        18,
+        14,
+        13
+      ]
+    },
+    {
+      "index": 197,
+      "quizId": "quiz-net-404-wireshark-packet-capture",
+      "concept": "TCP Fast Retransmit & Duplicate ACKs",
+      "text": "In a Wireshark PCAP trace, an engineer observes 3 identical consecutive TCP ACK packets with `Ack = 45000` returned by the receiver in less than 5 milliseconds. What network event does this \\\"Triple Duplicate ACK\\\" indicate?",
+      "correctOption": 1,
+      "lengths": [
+        67,
+        169,
+        41,
+        35
+      ]
+    },
+    {
+      "index": 198,
+      "quizId": "quiz-net-404-wireshark-packet-capture",
+      "concept": "TCP ZeroWindow Flow Control Analysis",
+      "text": "A Wireshark packet capture displays: `[TCP ZeroWindow]` from server `10.0.0.5` followed immediately by the client pausing all transmission. What does this packet indicate?",
+      "correctOption": 2,
+      "lengths": [
+        50,
+        51,
+        156,
+        39
+      ]
+    },
+    {
+      "index": 199,
+      "quizId": "quiz-net-404-wireshark-packet-capture",
+      "concept": "Wireshark Expert Info Display Filters",
+      "text": "An engineer suspects a slow network is caused by TCP retransmissions. Which Wireshark display filter quickly displays only retransmitted packets and duplicate acknowledgments?",
+      "correctOption": 3,
+      "lengths": [
+        18,
+        32,
+        22,
+        59
+      ]
+    },
+    {
+      "index": 200,
+      "quizId": "quiz-net-404-wireshark-packet-capture",
+      "concept": "DNS Packet Flag & RCODE Analysis",
+      "text": "In Wireshark, an engineer inspects a DNS response frame containing `Flags: 0x8183 (Standard query response, No such name)`. What is the common name and technical meaning of this DNS response code (RCODE 3)?",
+      "correctOption": 0,
+      "lengths": [
+        100,
+        44,
+        53,
+        50
+      ]
+    },
+    {
+      "index": 201,
+      "quizId": "quiz-net-404-wireshark-packet-capture",
+      "concept": "TCP Reset (RST) Flag Analysis & Port Scanning",
+      "text": "A security analyst captures a flood of TCP packets targeted at port 443 with `tcp.flags.reset == 1`. What is the meaning of a TCP RST packet and what does this traffic pattern suggest?",
+      "correctOption": 1,
+      "lengths": [
+        58,
+        203,
+        50,
+        55
+      ]
+    },
+    {
+      "index": 205,
+      "quizId": "quiz-net-304-multi-area-ospf-redistribution",
+      "concept": "Diagnosing Multi-Area Route Flapping & ABR Summarization Remediation",
+      "text": "Troubleshooting: An enterprise network has Area 10 (subnets 10.10.1.0/24 through 10.10.4.0/24) connected to ABR-1. Whenever a link in Area 10 flaps, routers across the entire company in Area 0 and Area 2 suffer high CPU spikes and routing table instability. What architectural optimization solves this issue?",
+      "correctOption": 1,
+      "lengths": [
+        88,
+        135,
+        96,
+        85
+      ]
+    },
+    {
+      "index": 208,
+      "quizId": "quiz-net-403-network-automation-programmability-foundations",
+      "concept": "JSON Network Object Interpretation",
+      "text": "An engineer receives the following JSON payload from a switch REST API:\\n`{\\\"hostname\\\": \\\"core-sw-01\\\", \\\"vlans\\\": [{\\\"id\\\": 10, \\\"name\\\": \\\"Eng\\\"}, {\\\"id\\\": 20, \\\"name\\\": \\\"Sales\\\"}]}`\\nHow should an automation script interpret the `vlans` field?",
+      "correctOption": 0,
+      "lengths": [
+        118,
+        79,
+        73,
+        73
+      ]
+    },
+    {
+      "index": 209,
+      "quizId": "quiz-net-403-network-automation-programmability-foundations",
+      "concept": "Safe Automation Pipelines & Pre-Flight Validation",
+      "text": "Troubleshooting: An enterprise network team experiences an outage when an engineer pushes an untested automation template directly to 200 switches, applying an invalid subnet mask that severed management connectivity. What safe automation pipeline practice would have prevented this outage?",
+      "correctOption": 1,
+      "lengths": [
+        72,
+        121,
+        62,
+        89
+      ]
+    },
+    {
+      "index": 210,
+      "quizId": "quiz-net-403-network-automation-programmability-foundations",
+      "concept": "Declarative vs Imperative Automation Approaches",
+      "text": "What is the primary architectural difference between an imperative automation approach and a declarative automation approach in network engineering?",
+      "correctOption": 2,
+      "lengths": [
+        84,
+        111,
+        166,
+        89
+      ]
+    },
+    {
+      "index": 211,
+      "quizId": "quiz-net-403-network-automation-programmability-foundations",
+      "concept": "Detecting and Remediating Configuration Drift",
+      "text": "An audit reveals that an engineer manually logged into a production core switch via SSH and altered the MTU on an uplink without updating the central Git repository. What problem has been introduced, and what is the risk?",
+      "correctOption": 3,
+      "lengths": [
+        71,
+        77,
+        68,
+        155
+      ]
+    },
+    {
+      "index": 212,
+      "quizId": "quiz-net-403-network-automation-programmability-foundations",
+      "concept": "Identifying Unsafe Automation Practices",
+      "text": "Which of the following describes an UNSAFE network automation practice that violates standard production engineering guidelines?",
+      "correctOption": 0,
+      "lengths": [
+        141,
+        89,
+        81,
+        93
+      ]
+    },
+    {
+      "index": 213,
+      "quizId": "quiz-net-305-standard-extended-ipv4-acls",
+      "concept": "Standard ACL Placement Best Practices",
+      "text": "Where should a Standard IPv4 Access Control List typically be placed according to network engineering best practices, and why?",
+      "correctOption": 1,
+      "lengths": [
+        62,
+        162,
+        81,
+        50
+      ]
+    },
+    {
+      "index": 217,
+      "quizId": "quiz-net-305-stateful-firewalls-connection-tracking",
+      "concept": "Stateful vs Stateless Firewall Operation",
+      "text": "What is the primary operational advantage of a Stateful Packet Inspection (SPI) firewall over a Stateless Access Control List?",
+      "correctOption": 1,
+      "lengths": [
+        70,
+        167,
+        61,
+        78
+      ]
+    },
+    {
+      "index": 218,
+      "quizId": "quiz-net-305-stateful-firewalls-connection-tracking",
+      "concept": "Zone-Based Policy Firewall Defaults",
+      "text": "In a Cisco Zone-Based Policy Firewall (ZFW) deployment, what happens by default to traffic flowing between interface Gi0/0 (assigned to zone INSIDE) and interface Gi0/1 (assigned to zone OUTSIDE)?",
+      "correctOption": 2,
+      "lengths": [
+        68,
+        67,
+        87,
+        51
+      ]
+    },
+    {
+      "index": 219,
+      "quizId": "quiz-net-305-stateful-firewalls-connection-tracking",
+      "concept": "ZFW Action Semantics",
+      "text": "What ZFW policy action should an engineer apply to outbound HTTP/HTTPS client traffic so that return web traffic is automatically allowed back through the firewall?",
+      "correctOption": 3,
+      "lengths": [
+        6,
+        4,
+        4,
+        7
+      ]
+    },
+    {
+      "index": 220,
+      "quizId": "quiz-net-305-stateful-firewalls-connection-tracking",
+      "concept": "Stateful Connection Tracking Validation",
+      "text": "A connection tracking table flags an incoming TCP packet with the RST flag enabled as INVALID. Why does the stateful engine drop this packet?",
+      "correctOption": 0,
+      "lengths": [
+        133,
+        71,
+        66,
+        32
+      ]
+    },
+    {
+      "index": 221,
+      "quizId": "quiz-net-401-ipv4-nat-pat-address-translation",
+      "concept": "Cisco NAT Address Terminology",
+      "text": "In Cisco NAT terminology, what is an \\\"Inside Global\\\" address?",
+      "correctOption": 1,
+      "lengths": [
+        65,
+        97,
+        63,
+        56
+      ]
+    },
+    {
+      "index": 224,
+      "quizId": "quiz-net-401-ipv4-nat-pat-address-translation",
+      "concept": "PAT Port Collision Resolution",
+      "text": "Two internal hosts (192.168.1.10 and 192.168.1.20) simultaneously connect to web server 198.51.100.1:443. Both hosts coincidentally use source port 51234. How does PAT resolve this collision on the single public IP 203.0.113.1?",
+      "correctOption": 0,
+      "lengths": [
+        132,
+        82,
+        69,
+        66
+      ]
+    },
+    {
+      "index": 226,
+      "quizId": "quiz-net-402-ipsec-vpn-cryptographic-tunnels",
+      "concept": "IPsec ESP vs AH Protocol Capabilities",
+      "text": "Why is Encapsulating Security Payload (ESP) preferred over Authentication Header (AH) for securing remote internet communications?",
+      "correctOption": 2,
+      "lengths": [
+        49,
+        57,
+        130,
+        81
+      ]
+    },
+    {
+      "index": 227,
+      "quizId": "quiz-net-402-ipsec-vpn-cryptographic-tunnels",
+      "concept": "Diffie-Hellman Key Exchange Role",
+      "text": "What is the mathematical role of the Diffie-Hellman (DH) key exchange algorithm in IKE Phase 1 negotiation?",
+      "correctOption": 3,
+      "lengths": [
+        52,
+        48,
+        57,
+        150
+      ]
+    },
+    {
+      "index": 228,
+      "quizId": "quiz-net-402-ipsec-vpn-cryptographic-tunnels",
+      "concept": "Crypto ACL Interesting Traffic Definition",
+      "text": "In an IPsec site-to-site VPN, what is the function of \\\"Interesting Traffic\\\" defined in a Crypto Access Control List?",
+      "correctOption": 0,
+      "lengths": [
+        133,
+        68,
+        57,
+        60
+      ]
+    }
+  ]
+}

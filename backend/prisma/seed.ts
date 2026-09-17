@@ -241,6 +241,11 @@ async function main() {
             estimatedMinutes: bDef.lab.estimatedMinutes,
             initialTopologyJson: bDef.lab.initialTopologyJson,
             objectivesJson: bDef.lab.tasks,
+            commandsJson: bDef.lab.commands || [],
+            expectedObservationsJson: bDef.lab.expectedObservations || [],
+            hintsJson: bDef.lab.hints || [],
+            completionCriteria: bDef.lab.completionCriteria || null,
+            solutionJson: bDef.lab.solution || null,
           },
         });
       } else {
@@ -253,6 +258,11 @@ async function main() {
             estimatedMinutes: bDef.lab.estimatedMinutes,
             initialTopologyJson: bDef.lab.initialTopologyJson,
             objectivesJson: bDef.lab.tasks,
+            commandsJson: bDef.lab.commands || [],
+            expectedObservationsJson: bDef.lab.expectedObservations || [],
+            hintsJson: bDef.lab.hints || [],
+            completionCriteria: bDef.lab.completionCriteria || null,
+            solutionJson: bDef.lab.solution || null,
           },
         });
       }

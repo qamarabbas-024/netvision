@@ -20,6 +20,13 @@ export interface BenchmarkLabDef {
   estimatedMinutes: number;
   initialTopologyJson: Record<string, any>;
   tasks: string[];
+  tier?: 'TIER_1_SIMULATION' | 'TIER_2_GUIDED' | 'TIER_3_CONCEPTUAL';
+  commands?: string[];
+  expectedObservations?: string[];
+  hints?: string[];
+  validationRules?: Array<{ rule: string; check: string; expected: any }>;
+  completionCriteria?: string;
+  solution?: { steps: string[] };
 }
 
 export interface BenchmarkLessonFullDefinition {
