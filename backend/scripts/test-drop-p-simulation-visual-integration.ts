@@ -474,6 +474,22 @@ async function runDropPVerificationGate() {
   }
 
   // ---------------------------------------------------------------------------
+  // Test 16: DTO Wire Payload Size & Performance Budget
+  // ---------------------------------------------------------------------------
+  console.log('\n--- Test 16: DTO Wire Payload Size & Performance Budget ---');
+  {
+    const state = await service.getLabSimulationState(learnerA, 'vlan-configuration');
+    const visualBytes = Buffer.byteLength(JSON.stringify(state), 'utf8');
+    const hintsBytes = Buffer.byteLength(JSON.stringify(state.hints || {}), 'utf8');
+
+    console.log(`  📊 VisualSimulationStateDto wire size: ${visualBytes} bytes (${(visualBytes / 1024).toFixed(2)} KB)`);
+    console.log(`  📊 SanitizedDiagnosticHintsDto wire size: ${hintsBytes} bytes (${(hintsBytes / 1024).toFixed(2)} KB)`);
+
+    check(visualBytes < 50 * 1024, 'Visual state payload strictly under 50 KB performance budget', `${visualBytes} B`);
+    check(hintsBytes < 10 * 1024, 'Sanitized hints payload strictly under 10 KB performance budget', `${hintsBytes} B`);
+  }
+
+  // ---------------------------------------------------------------------------
   // Final Results
   // ---------------------------------------------------------------------------
   console.log('\n========================================================================');

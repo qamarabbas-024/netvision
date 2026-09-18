@@ -15,7 +15,8 @@ import { AchievementsService } from '../achievements/achievements.service';
 import { NETWORKING_COMMANDS_CATALOG } from './commands-catalog';
 import {
   LEGACY_SLUG_COMPATIBILITY_MAP,
-  VisualSimulationStateDto,
+} from '@netvision/shared';
+import type {
   VisualPacketEvent,
   CausalVisualExplanation,
 } from '@netvision/shared';
