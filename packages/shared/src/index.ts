@@ -6,6 +6,7 @@ export * from './models/TroubleshootingModel';
 export * from './data/troubleshootingScenarios';
 export * from './curriculum/flagshipCurriculum';
 export * from './curriculum/capstonePublicTypes';
+export * from './models/simulation-visual.model';
 
 export const API_ROUTES = {
   AUTH: {

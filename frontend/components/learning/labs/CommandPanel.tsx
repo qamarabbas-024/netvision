@@ -7,19 +7,33 @@ import { Button } from '@/components/ui/Button';
 import { executeLabCommandApi } from '@/lib/api';
 import { Terminal, CornerDownLeft, ShieldCheck, Copy, Check } from 'lucide-react';
 
+import type { VisualSimulationStateDto, SanitizedDiagnosticHintsDto } from '@netvision/shared';
+
 export interface CommandPanelProps {
   labId: string;
   allowedCommands?: string[];
-  onCommandRun?: (cmd: string, output: string) => void;
+  clientStateVersion?: number;
+  sessionId?: string;
+  onCommandRun?: (
+    cmd: string,
+    output: string,
+    visualState?: VisualSimulationStateDto,
+    hints?: SanitizedDiagnosticHintsDto,
+    newVersion?: number,
+    newSessionId?: string
+  ) => void;
 }
 
 export const CommandPanel: React.FC<CommandPanelProps> = ({
   labId,
   allowedCommands = ['ping 192.168.1.1', 'arp -a', 'nslookup netvision.edu', 'ipconfig /all', 'traceroute 8.8.8.8'],
+  clientStateVersion,
+  sessionId,
   onCommandRun,
 }) => {
   const [command, setCommand] = useState<string>('ping 192.168.1.1');
   const [isExecuting, setIsExecuting] = useState<boolean>(false);
+  const [concurrencyNotice, setConcurrencyNotice] = useState<string | null>(null);
   const [history, setHistory] = useState<Array<{ cmd: string; output: string; time: string }>>([
     {
       cmd: 'ipconfig /all',
@@ -33,16 +47,36 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
     if (!cleanCmd) return;
 
     setIsExecuting(true);
+    setConcurrencyNotice(null);
     try {
-      const res = await executeLabCommandApi(labId, cleanCmd);
+      const res = await executeLabCommandApi(
+        labId,
+        cleanCmd,
+        undefined,
+        clientStateVersion,
+        sessionId
+      );
+      const outText = res.result?.output || (typeof res === 'string' ? res : `Simulated execution of '${cleanCmd}'. Status: OK.`);
       const newEntry = {
         cmd: cleanCmd,
-        output: res.output || `Simulated execution of '${cleanCmd}'. Status: OK.`,
+        output: outText,
         time: new Date().toLocaleTimeString(),
       };
       setHistory((prev) => [...prev, newEntry]);
-      if (onCommandRun) onCommandRun(cleanCmd, newEntry.output);
-    } catch (err) {
+      if (onCommandRun) {
+        onCommandRun(
+          cleanCmd,
+          newEntry.output,
+          res.visualState,
+          res.hints,
+          res.stateVersion,
+          res.sessionId
+        );
+      }
+    } catch (err: any) {
+      if (err?.status === 409 || err?.message?.includes('Stale simulation state')) {
+        setConcurrencyNotice('Concurrency notice: Server state was updated by another command. Interface resynchronized.');
+      }
       // Fallback pattern execution if offline
       const lower = cleanCmd.toLowerCase();
       let output = `Executed simulated command '${cleanCmd}'.`;
@@ -71,6 +105,12 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
           <ShieldCheck className="w-3.5 h-3.5" /> Secure Sandbox Enforced
         </span>
       </div>
+
+      {concurrencyNotice && (
+        <div className="rounded-lg bg-amber-950/40 border border-amber-500/40 p-2.5 text-xs text-amber-300 font-mono flex items-center gap-2">
+          <span>{concurrencyNotice}</span>
+        </div>
+      )}
 
       {/* Allowed Command Presets */}
       <div className="flex flex-wrap gap-2">

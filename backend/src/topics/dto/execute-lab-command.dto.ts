@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsObject, IsNumber } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ExecuteLabCommandDto {
@@ -16,4 +16,14 @@ export class ExecuteLabCommandDto {
   @IsOptional()
   @IsObject()
   currentTopologyState?: Record<string, any>;
+
+  @ApiPropertyOptional({ description: 'Client state version for optimistic concurrency' })
+  @IsOptional()
+  @IsNumber()
+  clientStateVersion?: number;
+
+  @ApiPropertyOptional({ description: 'Active simulation session ID' })
+  @IsOptional()
+  @IsString()
+  sessionId?: string;
 }

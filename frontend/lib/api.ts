@@ -150,10 +150,37 @@ export async function searchApi(query: string) {
   return await fetchApi<{ courses: any[]; lessons: any[]; modules: any[] }>(`/search?q=${encodeURIComponent(query)}`);
 }
 
-export async function executeLabCommandApi(labId: string, command: string, currentTopologyState?: Record<string, any>) {
-  return await fetchApi<any>('/labs/execute', {
+import type { VisualSimulationStateDto, SanitizedDiagnosticHintsDto } from '@netvision/shared';
+
+export async function getLabSimulationStateApi(labId: string, sessionId?: string): Promise<VisualSimulationStateDto> {
+  const query = sessionId ? `?sessionId=${encodeURIComponent(sessionId)}` : '';
+  return await fetchApi<VisualSimulationStateDto>(`/labs/${labId}/state${query}`);
+}
+
+export async function executeLabCommandApi(
+  labId: string,
+  command: string,
+  currentTopologyState?: Record<string, any>,
+  clientStateVersion?: number,
+  sessionId?: string
+) {
+  return await fetchApi<{
+    result: any;
+    visualState: VisualSimulationStateDto;
+    hints: SanitizedDiagnosticHintsDto;
+    stateVersion: number;
+    sessionId: string;
+    isDuplicateRetry?: boolean;
+  }>('/labs/execute', {
     method: 'POST',
-    body: JSON.stringify({ labId, command, currentTopologyState }),
+    body: JSON.stringify({ labId, command, currentTopologyState, clientStateVersion, sessionId }),
+  });
+}
+
+export async function unlockLabHintApi(labId: string, sessionId?: string): Promise<{ visualState: VisualSimulationStateDto; hints: SanitizedDiagnosticHintsDto }> {
+  return await fetchApi<{ visualState: VisualSimulationStateDto; hints: SanitizedDiagnosticHintsDto }>(`/labs/${labId}/hints/unlock`, {
+    method: 'POST',
+    body: JSON.stringify({ sessionId }),
   });
 }
 

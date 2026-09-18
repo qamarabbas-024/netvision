@@ -127,11 +127,38 @@ export class TopicsController {
     return this.topicsService.getLabDetails(id);
   }
 
+  @ApiOperation({ summary: 'Get session-scoped authoritative lab simulation state' })
+  @UseGuards(OptionalJwtAuthGuard)
+  @Get(['labs/:id/state', 'topics/labs/:id/state'])
+  async getLabSimulationState(
+    @LearnerIdentity() identity: LearnerIdentityContext,
+    @Param('id') id: string,
+    @Query('sessionId') sessionId?: string
+  ) {
+    return this.topicsService.getLabSimulationState(identity, id, sessionId);
+  }
+
+  @ApiOperation({ summary: 'Unlock next progressive diagnostic hint level' })
+  @UseGuards(OptionalJwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post(['labs/:id/hints/unlock', 'topics/labs/:id/hints/unlock'])
+  async unlockLabHint(
+    @LearnerIdentity() identity: LearnerIdentityContext,
+    @Param('id') id: string,
+    @Body('sessionId') sessionId?: string
+  ) {
+    return this.topicsService.unlockLabHint(identity, id, sessionId);
+  }
+
   @ApiOperation({ summary: 'Safely execute command in simulated lab environment' })
+  @UseGuards(OptionalJwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('labs/execute')
-  async executeLabCommand(@Body() dto: ExecuteLabCommandDto) {
-    return this.topicsService.executeLabCommand(dto);
+  async executeLabCommand(
+    @LearnerIdentity() identity: LearnerIdentityContext,
+    @Body() dto: ExecuteLabCommandDto
+  ) {
+    return this.topicsService.executeLabCommand(identity, dto);
   }
 
   @ApiOperation({ summary: 'Validate lab attempt and calculate score' })

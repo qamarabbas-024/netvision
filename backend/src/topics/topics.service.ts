@@ -1,15 +1,50 @@
-import { Injectable, NotFoundException, BadRequestException, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  UnauthorizedException,
+  ForbiddenException,
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { CourseLevel } from '@prisma/client';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { AchievementsService } from '../achievements/achievements.service';
 import { NETWORKING_COMMANDS_CATALOG } from './commands-catalog';
-import { LEGACY_SLUG_COMPATIBILITY_MAP } from '@netvision/shared';
-import { NetworkSimulationEngine } from './network-simulation.engine';
+import {
+  LEGACY_SLUG_COMPATIBILITY_MAP,
+  VisualSimulationStateDto,
+  VisualPacketEvent,
+  CausalVisualExplanation,
+} from '@netvision/shared';
+import { NetworkSimulationEngine, NetworkSimulatorState } from './network-simulation.engine';
+
+export interface ActiveLabSession {
+  sessionId: string;
+  labId: string;
+  lessonSlug: string;
+  userId?: string;
+  anonymousId?: string;
+  stateVersion: number;
+  simulatedState: NetworkSimulatorState;
+  commandHistory: Array<{ command: string; output: string; timestamp: string; version: number }>;
+  recentPacketEvents: VisualPacketEvent[];
+  unlockedHintLevel: number;
+  lastActionSummary: string;
+  causalConsequence?: CausalVisualExplanation;
+  lastCommand?: string;
+  lastCommandOutput?: string;
+  lastCommandCategory?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 @Injectable()
 export class TopicsService {
+  private readonly activeLabSessions = new Map<string, ActiveLabSession>();
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly achievementsService: AchievementsService
@@ -534,14 +569,7 @@ export class TopicsService {
     };
   }
 
-  async executeLabCommand(dto: { labId: string; command: string; currentTopologyState?: Record<string, any> }) {
-    const { command, labId, currentTopologyState } = dto;
-    const cleanCmd = (command || '').trim();
-
-    if (!cleanCmd) {
-      throw new BadRequestException('Command cannot be empty.');
-    }
-
+  public async resolveLabSlug(labId: string): Promise<string> {
     let slug = labId;
     if (labId && (labId.startsWith('lab-') || labId.length > 20)) {
       try {
@@ -556,16 +584,231 @@ export class TopicsService {
         // use labId as fallback
       }
     }
+    return slug;
+  }
 
-    const state = currentTopologyState || NetworkSimulationEngine.getInitialStateForLab(slug);
-    const result = NetworkSimulationEngine.executeCommand(cleanCmd, state as any);
+  public async getOrCreateLabSession(
+    identity: { userId?: string; anonymousId?: string },
+    labId: string,
+    requestedSessionId?: string
+  ): Promise<ActiveLabSession> {
+    const userId = identity?.userId;
+    let anonymousId = identity?.anonymousId;
+
+    if (!userId && !anonymousId) {
+      anonymousId = 'anon-default';
+    }
+
+    // If requestedSessionId was provided, look it up across sessions
+    if (requestedSessionId) {
+      const found = Array.from(this.activeLabSessions.values()).find(
+        (s) => s.sessionId === requestedSessionId
+      );
+      if (!found) {
+        throw new NotFoundException(`Simulation session "${requestedSessionId}" not found.`);
+      }
+
+      // Security check: Must belong to this learner!
+      const userMatches = Boolean(userId && found.userId === userId);
+      const anonMatches = Boolean(anonymousId && found.anonymousId === anonymousId);
+      if (!userMatches && !anonMatches) {
+        throw new ForbiddenException('Unauthorized: You do not own this simulation session.');
+      }
+      return found;
+    }
+
+    // Standard session lookup by learner + lab key
+    const sessionKey = `${userId || anonymousId}:${labId}`;
+    let session = this.activeLabSessions.get(sessionKey);
+
+    if (!session) {
+      const slug = await this.resolveLabSlug(labId);
+      const initialState = NetworkSimulationEngine.getInitialStateForLab(slug);
+      const sessionId = `sim-${crypto.randomUUID()}`;
+
+      session = {
+        sessionId,
+        labId,
+        lessonSlug: slug,
+        userId: userId || undefined,
+        anonymousId: anonymousId || undefined,
+        stateVersion: 1,
+        simulatedState: initialState,
+        commandHistory: [],
+        recentPacketEvents: [],
+        unlockedHintLevel: 0,
+        lastActionSummary: 'Simulator session initialized.',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      this.activeLabSessions.set(sessionKey, session);
+    }
+
+    return session;
+  }
+
+  async executeLabCommand(
+    identityOrDto:
+      | { userId?: string; anonymousId?: string }
+      | { labId: string; command: string; currentTopologyState?: Record<string, any>; clientStateVersion?: number; sessionId?: string },
+    maybeDto?: { labId: string; command: string; currentTopologyState?: Record<string, any>; clientStateVersion?: number; sessionId?: string }
+  ) {
+    let identity: { userId?: string; anonymousId?: string } = {};
+    let dto: { labId: string; command: string; currentTopologyState?: Record<string, any>; clientStateVersion?: number; sessionId?: string };
+
+    if (maybeDto) {
+      identity = identityOrDto as { userId?: string; anonymousId?: string };
+      dto = maybeDto;
+    } else {
+      dto = identityOrDto as any;
+      identity = { anonymousId: 'legacy-session' };
+    }
+
+    const { command, labId, currentTopologyState, clientStateVersion, sessionId } = dto;
+    const cleanCmd = (command || '').trim();
+
+    if (!cleanCmd) {
+      throw new BadRequestException('Command cannot be empty.');
+    }
+
+    const session = await this.getOrCreateLabSession(identity, labId, sessionId);
+
+    // If caller provided currentTopologyState (legacy client), update session state
+    if (currentTopologyState && Object.keys(currentTopologyState).length > 0) {
+      session.simulatedState = currentTopologyState as any;
+    }
+
+    // Stale state / concurrency check (Requirement 5 & 10)
+    if (clientStateVersion !== undefined) {
+      // Check for safe duplicate command retry (idempotency)
+      if (cleanCmd === session.lastCommand && (clientStateVersion === session.stateVersion - 1 || clientStateVersion === session.stateVersion)) {
+        const visualState = NetworkSimulationEngine.toVisualState(
+          session.lessonSlug,
+          session.simulatedState,
+          session.stateVersion,
+          session.sessionId,
+          session.labId,
+          session.unlockedHintLevel,
+          session.lastCommand,
+          session.recentPacketEvents,
+          session.causalConsequence,
+          session.lastActionSummary
+        );
+        return {
+          command: cleanCmd,
+          output: session.lastCommandOutput || `Duplicate command retry handled.`,
+          category: session.lastCommandCategory || 'Diagnostic',
+          updatedTopologyState: session.simulatedState,
+          visualState,
+          packetEvents: session.recentPacketEvents,
+          hints: visualState.hints,
+          sessionId: session.sessionId,
+          stateVersion: session.stateVersion,
+          isDuplicateRetry: true,
+          timestamp: new Date().toISOString(),
+        };
+      }
+
+      if (clientStateVersion < session.stateVersion) {
+        throw new ConflictException(
+          `Stale simulation state version. Client sent version ${clientStateVersion}, but authoritative server state is at version ${session.stateVersion}. Please re-sync.`
+        );
+      }
+    }
+
+    // Execute authoritative command mutation
+    const result = NetworkSimulationEngine.executeCommand(cleanCmd, session.simulatedState, session.lessonSlug);
+    session.stateVersion++;
+    session.simulatedState = result.updatedState;
+    session.lastCommand = cleanCmd;
+    session.lastCommandOutput = result.output;
+    session.lastCommandCategory = result.category;
+    session.lastActionSummary = result.lastActionSummary || `Executed command: ${cleanCmd}`;
+    session.causalConsequence = result.causalConsequence;
+    if (result.packetEvents && result.packetEvents.length > 0) {
+      session.recentPacketEvents = result.packetEvents;
+    }
+    session.commandHistory.push({
+      command: cleanCmd,
+      output: result.output,
+      timestamp: new Date().toISOString(),
+      version: session.stateVersion,
+    });
+    session.updatedAt = new Date().toISOString();
+
+    const visualState = NetworkSimulationEngine.toVisualState(
+      session.lessonSlug,
+      session.simulatedState,
+      session.stateVersion,
+      session.sessionId,
+      session.labId,
+      session.unlockedHintLevel,
+      cleanCmd,
+      result.packetEvents || [],
+      result.causalConsequence,
+      result.lastActionSummary
+    );
 
     return {
       command: cleanCmd,
       output: result.output,
       category: result.category,
       updatedTopologyState: result.updatedState,
+      visualState,
+      packetEvents: result.packetEvents || [],
+      hints: visualState.hints,
+      sessionId: session.sessionId,
+      stateVersion: session.stateVersion,
+      isDuplicateRetry: false,
       timestamp: new Date().toISOString(),
+    };
+  }
+
+  async getLabSimulationState(
+    identity: { userId?: string; anonymousId?: string },
+    labId: string,
+    sessionId?: string
+  ) {
+    const session = await this.getOrCreateLabSession(identity, labId, sessionId);
+    const visualState = NetworkSimulationEngine.toVisualState(
+      session.lessonSlug,
+      session.simulatedState,
+      session.stateVersion,
+      session.sessionId,
+      session.labId,
+      session.unlockedHintLevel,
+      session.lastCommand,
+      session.recentPacketEvents,
+      session.causalConsequence,
+      session.lastActionSummary
+    );
+    return visualState;
+  }
+
+  async unlockLabHint(
+    identity: { userId?: string; anonymousId?: string },
+    labId: string,
+    sessionId?: string
+  ) {
+    const session = await this.getOrCreateLabSession(identity, labId, sessionId);
+    session.unlockedHintLevel = Math.min(4, session.unlockedHintLevel + 1);
+    session.updatedAt = new Date().toISOString();
+
+    const visualState = NetworkSimulationEngine.toVisualState(
+      session.lessonSlug,
+      session.simulatedState,
+      session.stateVersion,
+      session.sessionId,
+      session.labId,
+      session.unlockedHintLevel,
+      session.lastCommand,
+      session.recentPacketEvents,
+      session.causalConsequence,
+      session.lastActionSummary
+    );
+    return {
+      visualState,
+      hints: visualState.hints,
     };
   }
 
