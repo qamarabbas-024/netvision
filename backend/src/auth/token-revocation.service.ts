@@ -97,7 +97,16 @@ export class TokenRevocationService implements OnModuleDestroy {
       this.ensureStorageDir();
       const tmpPath = `${filePath}.${crypto.randomBytes(6).toString('hex')}.tmp`;
       fs.writeFileSync(tmpPath, JSON.stringify(data), 'utf8');
-      fs.renameSync(tmpPath, filePath);
+      try {
+        fs.renameSync(tmpPath, filePath);
+      } catch {
+        fs.copyFileSync(tmpPath, filePath);
+        try {
+          fs.unlinkSync(tmpPath);
+        } catch {
+          // ignore cleanup error
+        }
+      }
     } catch (err: any) {
       this.logger.error(`Failed to write atomic file ${filePath}: ${err?.message || err}`);
     }
@@ -129,7 +138,7 @@ export class TokenRevocationService implements OnModuleDestroy {
   public syncFromDisk(): void {
     // 1. Revoked Tokens
     const currentRevMtime = this.getFileMtime(this.revokedTokensFile);
-    if (currentRevMtime > this.revokedTokensMtime) {
+    if (currentRevMtime !== this.revokedTokensMtime && currentRevMtime > 0) {
       const records = this.readJsonSafe<Record<string, RevokedTokenRecord>>(this.revokedTokensFile);
       if (records) {
         this.revokedTokens = new Map(Object.entries(records));
@@ -139,7 +148,7 @@ export class TokenRevocationService implements OnModuleDestroy {
 
     // 2. User Cutoffs
     const currentCutMtime = this.getFileMtime(this.userCutoffsFile);
-    if (currentCutMtime > this.userCutoffsMtime) {
+    if (currentCutMtime !== this.userCutoffsMtime && currentCutMtime > 0) {
       const cutoffs = this.readJsonSafe<Record<string, number>>(this.userCutoffsFile);
       if (cutoffs) {
         this.userRevocationCutoffs = new Map(Object.entries(cutoffs));
@@ -149,7 +158,7 @@ export class TokenRevocationService implements OnModuleDestroy {
 
     // 3. Refresh Sessions
     const currentSessMtime = this.getFileMtime(this.refreshSessionsFile);
-    if (currentSessMtime > this.refreshSessionsMtime) {
+    if (currentSessMtime !== this.refreshSessionsMtime && currentSessMtime > 0) {
       const sessions = this.readJsonSafe<Record<string, RefreshSession>>(this.refreshSessionsFile);
       if (sessions) {
         this.refreshSessions = new Map(Object.entries(sessions));
@@ -159,7 +168,7 @@ export class TokenRevocationService implements OnModuleDestroy {
 
     // 4. Family Tokens
     const currentFamMtime = this.getFileMtime(this.familyTokensFile);
-    if (currentFamMtime > this.familyTokensMtime) {
+    if (currentFamMtime !== this.familyTokensMtime && currentFamMtime > 0) {
       const families = this.readJsonSafe<Record<string, string[]>>(this.familyTokensFile);
       if (families) {
         const famMap = new Map<string, Set<string>>();

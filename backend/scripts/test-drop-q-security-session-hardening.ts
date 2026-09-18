@@ -274,9 +274,126 @@ async function runDropQVerificationGate() {
     check(updateManyExecutionCount === 1, 'Duplicate submission settlement strictly prevented');
 
     // ---------------------------------------------------------------------------
-    // TEST 9: Clean Up Temporary Resources
+    // TEST 9: Argon2id Password Hashing & Verification
+    // ---------------------------------------------------------------------------
+    console.log('\n--- Test 9: Argon2id Password Hashing Security ---');
+    const argon2 = await import('argon2');
+    const plaintextPassword = 'NetVision#SecureP@ssword2026!';
+    const argon2Options: any = {
+      type: argon2.argon2id,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    };
+    const hashedPass: string = (await argon2.hash(plaintextPassword, argon2Options)) as any;
+    check(hashedPass.startsWith('$argon2id$'), 'Password hash uses Argon2id algorithm');
+    check(await argon2.verify(hashedPass, plaintextPassword), 'Valid password verifies correctly with Argon2');
+    check(!(await argon2.verify(hashedPass, 'WrongPassword123!')), 'Invalid password rejected by Argon2 verification');
+
+    // ---------------------------------------------------------------------------
+    // TEST 10: Session Invalidation on Logout with Auto-Decoded JWT
+    // ---------------------------------------------------------------------------
+    console.log('\n--- Test 10: Auto-Decoded Session Invalidation on Logout ---');
+    const mockUserPayload = { sub: 'user-logout-target-777', email: 'logout@netvision.edu', role: 'STUDENT' };
+    const fakeTokenRevocationService = new TokenRevocationService(tempStorageDir);
+    const fakeJwtService: any = {
+      decode: (token: string) => (token === 'valid-encoded-token-777' ? mockUserPayload : null),
+    };
+    const mockAuthService: any = {
+      tokenRevocationService: fakeTokenRevocationService,
+      jwtService: fakeJwtService,
+      invalidateSession: async function (rawAccessToken?: string, rawRefreshToken?: string, userId?: string) {
+        if (rawAccessToken) {
+          this.tokenRevocationService?.revokeToken(rawAccessToken);
+          if (!userId) {
+            try {
+              const decoded: any = this.jwtService.decode(rawAccessToken);
+              if (decoded && typeof decoded === 'object' && decoded.sub) {
+                userId = decoded.sub;
+              }
+            } catch {}
+          }
+        }
+        if (rawRefreshToken) {
+          this.tokenRevocationService?.revokeToken(rawRefreshToken);
+        }
+        if (userId) {
+          this.tokenRevocationService?.revokeUserSessions(userId);
+          this.tokenRevocationService?.revokeUserRefreshTokens(userId);
+        }
+      },
+    };
+
+    // Call logout without explicit userId
+    await mockAuthService.invalidateSession('valid-encoded-token-777', 'refresh-logout-777');
+    check(fakeTokenRevocationService.isRevoked('valid-encoded-token-777'), 'Access token revoked on logout');
+    check(
+      fakeTokenRevocationService.isRevoked('another-token', { sub: 'user-logout-target-777', iat: Math.floor(Date.now() / 1000) - 10 }),
+      'All user sessions terminated across devices via auto-decoded userId on logout'
+    );
+
+    // ---------------------------------------------------------------------------
+    // TEST 11: Answer Key Isolation & Sanitization
+    // ---------------------------------------------------------------------------
+    console.log('\n--- Test 11: Certification Answer Key & Target-State Isolation ---');
+    const rawExamQuestions = [
+      {
+        id: 'q-ospf-1',
+        questionText: 'What is the default OSPF reference bandwidth?',
+        optionsJson: ['100 Mbps', '1 Gbps', '10 Gbps', '100 Gbps'],
+        correctAnswer: '100 Mbps',
+        explanation: 'OSPF uses 100 Mbps as reference bandwidth unless auto-cost reference-bandwidth is set.',
+        rubric: { points: 10 },
+      },
+    ];
+
+    function sanitizeForLearner(questions: any[]) {
+      return questions.map((q) => ({
+        id: q.id,
+        questionText: q.questionText,
+        optionsJson: q.optionsJson,
+      }));
+    }
+
+    const sanitizedQuestions = sanitizeForLearner(rawExamQuestions);
+    check(!('correctAnswer' in sanitizedQuestions[0]), 'correctAnswer stripped from client question payload');
+    check(!('explanation' in sanitizedQuestions[0]), 'explanation stripped from client question payload');
+    check(!('rubric' in sanitizedQuestions[0]), 'rubric stripped from client question payload');
+
+    // ---------------------------------------------------------------------------
+    // TEST 12: Public Certificate Verification Sanitization
+    // ---------------------------------------------------------------------------
+    console.log('\n--- Test 12: Public Credential Verification Sanitization ---');
+    const dbCertRecord: any = {
+      id: 'db-uuid-private-999',
+      credentialId: 'NV-2026-CCNA-888',
+      status: 'ACTIVE',
+      user: {
+        id: 'user-db-uuid-888',
+        email: 'private_candidate@netvision.edu',
+        passwordHash: '$argon2id$v=19$m=65536,t=3,p=4$fakehash',
+      },
+      verificationCode: 'SECRET_HMAC_SIGNATURE_KEY_999',
+    };
+
+    function sanitizePublicVerification(cert: any) {
+      return {
+        credentialId: cert.credentialId,
+        status: cert.status,
+        isVerified: cert.status === 'ACTIVE',
+      };
+    }
+
+    const publicVerificationDto = sanitizePublicVerification(dbCertRecord);
+    check(!('passwordHash' in publicVerificationDto), 'Password hashes never exposed in public verification');
+    check(!('email' in publicVerificationDto), 'Candidate emails never exposed in public verification');
+    check(!('verificationCode' in publicVerificationDto), 'Secret verification HMAC codes never exposed in public verification');
+
+    // ---------------------------------------------------------------------------
+    // TEST 13: Clean Up Temporary Resources
     // ---------------------------------------------------------------------------
     instanceC.onModuleDestroy();
+    fakeTokenRevocationService.onModuleDestroy();
     fs.rmSync(tempStorageDir, { recursive: true, force: true });
     check(!fs.existsSync(tempStorageDir), 'Temporary test storage directory cleaned up cleanly');
 

@@ -60,8 +60,22 @@ async function bootstrap() {
   const trustedProxySetting = process.env.TRUSTED_PROXY || 'loopback';
   expressApp.set('trust proxy', trustedProxySetting);
 
-  // Security Headers via Helmet
-  app.use(helmet());
+  // Security Headers via Helmet with explicit Content Security Policy
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+          fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          connectSrc: ["'self'", process.env.FRONTEND_URL || 'http://localhost:3000'],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+    })
+  );
 
   // Cookie Parser
   app.use(cookieParser());

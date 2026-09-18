@@ -91,7 +91,13 @@ export class AuthService {
       throw new ConflictException('This username is already taken. Please choose another.');
     }
 
-    const passwordHash = await argon2.hash(dto.password);
+    const argon2Options: argon2.Options = {
+      type: argon2.argon2id,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    };
+    const passwordHash = await argon2.hash(dto.password, argon2Options);
     const emailVerificationEnabled = this.isEmailVerificationEnabled();
 
     const user = await this.prisma.user.create({
@@ -422,7 +428,13 @@ export class AuthService {
       throw new UnauthorizedException('Password reset token has expired. Please request a new link.');
     }
 
-    const newPasswordHash = await argon2.hash(dto.newPassword);
+    const argon2Options: argon2.Options = {
+      type: argon2.argon2id,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    };
+    const newPasswordHash = await argon2.hash(dto.newPassword, argon2Options);
 
     const updatedUser = await this.prisma.user.update({
       where: { email: resetRecord.email },
@@ -612,6 +624,16 @@ export class AuthService {
   async invalidateSession(rawAccessToken?: string, rawRefreshToken?: string, userId?: string) {
     if (rawAccessToken) {
       this.tokenRevocationService?.revokeToken(rawAccessToken);
+      if (!userId) {
+        try {
+          const decoded: any = this.jwtService.decode(rawAccessToken);
+          if (decoded && typeof decoded === 'object' && decoded.sub) {
+            userId = decoded.sub;
+          }
+        } catch {
+          // ignore decode errors on malformed tokens
+        }
+      }
     }
     if (rawRefreshToken) {
       this.tokenRevocationService?.revokeToken(rawRefreshToken);
