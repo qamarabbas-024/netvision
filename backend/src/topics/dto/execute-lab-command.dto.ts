@@ -1,15 +1,17 @@
-import { IsString, IsNotEmpty, IsOptional, IsObject, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsObject, IsNumber, MaxLength } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ExecuteLabCommandDto {
   @ApiProperty({ description: 'ID of the LessonLab' })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(100)
   labId: string;
 
   @ApiProperty({ description: 'CLI command entered by user' })
   @IsString()
   @IsNotEmpty()
+  @MaxLength(1000)
   command: string;
 
   @ApiPropertyOptional({ description: 'Current device configuration or topology state' })

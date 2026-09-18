@@ -613,7 +613,7 @@ export class TopicsService {
       const userMatches = Boolean(userId && found.userId === userId);
       const anonMatches = Boolean(anonymousId && found.anonymousId === anonymousId);
       if (!userMatches && !anonMatches) {
-        throw new ForbiddenException('Unauthorized: You do not own this simulation session.');
+        throw new ForbiddenException('Access denied: You do not own this simulation session.');
       }
       return found;
     }
@@ -671,11 +671,19 @@ export class TopicsService {
     if (!cleanCmd) {
       throw new BadRequestException('Command cannot be empty.');
     }
+    if (cleanCmd.length > 1000) {
+      throw new BadRequestException('Command exceeds maximum allowed length of 1000 characters.');
+    }
 
     const session = await this.getOrCreateLabSession(identity, labId, sessionId);
 
-    // If caller provided currentTopologyState (legacy client), update session state
-    if (currentTopologyState && Object.keys(currentTopologyState).length > 0) {
+    // Security Invariant: Server simulation state is strictly authoritative.
+    // Untrusted client payloads cannot tamper with or mutate existing simulation state.
+    if (
+      currentTopologyState &&
+      Object.keys(currentTopologyState).length > 0 &&
+      (!session.simulatedState || Object.keys(session.simulatedState).length === 0)
+    ) {
       session.simulatedState = currentTopologyState as any;
     }
 

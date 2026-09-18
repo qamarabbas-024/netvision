@@ -424,10 +424,17 @@ export class AuthService {
 
     const newPasswordHash = await argon2.hash(dto.newPassword);
 
-    await this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { email: resetRecord.email },
       data: { passwordHash: newPasswordHash },
+      select: { id: true },
     });
+
+    // Security Hardening: Invalidate all existing active sessions and refresh tokens on password reset
+    if (updatedUser?.id) {
+      this.tokenRevocationService?.revokeUserSessions(updatedUser.id);
+      this.tokenRevocationService?.revokeUserRefreshTokens(updatedUser.id);
+    }
 
     await this.prisma.passwordResetToken.update({
       where: { id: resetRecord.id },

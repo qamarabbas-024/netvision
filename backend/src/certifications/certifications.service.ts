@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ConflictException,
   Logger,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
@@ -1770,8 +1771,11 @@ export class CertificationsService {
 
       const status = passed ? ExamAttemptStatus.PASSED : ExamAttemptStatus.FAILED;
 
-      const updated = await this.prisma.examAttempt.update({
-        where: { id: attemptId },
+      const updateResult = await this.prisma.examAttempt.updateMany({
+        where: {
+          id: attemptId,
+          status: ExamAttemptStatus.IN_PROGRESS,
+        },
         data: {
           status,
           score: finalScore,
@@ -1801,6 +1805,35 @@ export class CertificationsService {
           },
         },
       });
+
+      if (updateResult.count === 0) {
+        const finalized = await this.prisma.examAttempt.findUnique({ where: { id: attemptId } });
+        if (finalized && (finalized.status === ExamAttemptStatus.PASSED || finalized.status === ExamAttemptStatus.FAILED)) {
+          const resMeta: any = finalized.resultMetadataJson || {};
+          return {
+            attemptId: finalized.id,
+            certificationCode: finalized.certificationCode,
+            type: finalized.type,
+            status: finalized.status,
+            score: finalized.score,
+            passed: finalized.passed,
+            submittedAt: finalized.submittedAt,
+            baseScore: resMeta.baseScore || practicalBaseScore,
+            hintPenalty: resMeta.hintPenalty || hintPenalty,
+            finalScore: finalized.score,
+            theoryScore: resMeta.theoryScore || theoryScore,
+            practicalScore: resMeta.practicalScore || practicalScore,
+            troubleshootingScore: resMeta.troubleshootingScore || troubleshootingScore,
+            packetAnalysisScore: resMeta.packetAnalysisScore || packetAnalysisScore,
+            allCriticalPassed: resMeta.allCriticalPassed ?? evaluated.allCriticalPassed,
+            objectiveResults: resMeta.objectiveResults || evaluated.objectiveResults,
+            isIdempotent: true,
+          };
+        }
+        throw new ConflictException('Concurrent submission detected. This exam attempt has already been submitted.');
+      }
+
+      const updated = (await this.prisma.examAttempt.findUnique({ where: { id: attemptId } }))!;
 
       this.logger.log(
         `Final Practical Exam Attempt [${attemptId}] submitted by user ${userId}. Score: ${finalScore}% (Theory: ${theoryScore}%, Practical: ${practicalScore}%, Troubleshooting: ${troubleshootingScore}%, Packet: ${packetAnalysisScore}%, Hint Penalty: -${hintPenalty}%, Critical Passed: ${evaluated.allCriticalPassed}). Result: ${status}`
@@ -1881,8 +1914,11 @@ export class CertificationsService {
     const passed = overallScorePercent >= passingScore && troubleshootingScore >= troubleshootingMinimum;
     const status = passed ? ExamAttemptStatus.PASSED : ExamAttemptStatus.FAILED;
 
-    const updated = await this.prisma.examAttempt.update({
-      where: { id: attemptId },
+    const updateResult = await this.prisma.examAttempt.updateMany({
+      where: {
+        id: attemptId,
+        status: ExamAttemptStatus.IN_PROGRESS,
+      },
       data: {
         status,
         score: overallScorePercent,
@@ -1901,6 +1937,30 @@ export class CertificationsService {
         },
       },
     });
+
+    if (updateResult.count === 0) {
+      const finalized = await this.prisma.examAttempt.findUnique({ where: { id: attemptId } });
+      if (finalized && (finalized.status === ExamAttemptStatus.PASSED || finalized.status === ExamAttemptStatus.FAILED)) {
+        const resMeta: any = finalized.resultMetadataJson || {};
+        return {
+          attemptId: finalized.id,
+          certificationCode: finalized.certificationCode,
+          type: finalized.type,
+          status: finalized.status,
+          score: finalized.score,
+          passed: finalized.passed,
+          submittedAt: finalized.submittedAt,
+          domainScores: resMeta.domainScores || domainScores,
+          correctCount: resMeta.correctCount || correctCount,
+          incorrectCount: resMeta.incorrectCount || incorrectCount,
+          totalQuestionsCount: resMeta.totalQuestionsCount || totalQuestionsCount,
+          isIdempotent: true,
+        };
+      }
+      throw new ConflictException('Concurrent submission detected. This exam attempt has already been submitted.');
+    }
+
+    const updated = (await this.prisma.examAttempt.findUnique({ where: { id: attemptId } }))!;
 
     this.logger.log(
       `Final Theory Exam Attempt [${attemptId}] submitted by user ${userId}. Score: ${overallScorePercent}% (Troubleshooting: ${troubleshootingScore}%). Result: ${status}`
