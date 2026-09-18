@@ -178,6 +178,17 @@ export const PacketFlowAnimator: React.FC<PacketFlowAnimatorProps> = ({
                 }`}>
                   {hop.toNodeId}
                 </span>
+                <span className={`text-[8px] font-mono uppercase font-bold tracking-wider px-1 rounded ${
+                  dropped
+                    ? 'text-rose-400 bg-rose-950/60 border border-rose-800/60'
+                    : isCurrent
+                      ? 'text-cyan-300 bg-cyan-950/60 border border-cyan-800/60'
+                      : isCompleted
+                        ? 'text-emerald-400 bg-emerald-950/60'
+                        : 'text-zinc-500'
+                }`}>
+                  {dropped ? 'DROP' : idx === hops.length - 1 && isDelivered ? 'DELIV' : hop.action === 'translate' ? 'NAT' : 'FWD'}
+                </span>
               </button>
             );
           })}

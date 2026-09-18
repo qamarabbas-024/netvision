@@ -24,7 +24,9 @@ export const LabObjectives: React.FC<LabObjectivesProps> = ({ objectives }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {objectives.map((obj, idx) => (
           <div key={idx} className="p-3 rounded-xl bg-white/5 border border-white/10 flex items-start gap-2.5 text-xs text-zinc-200">
-            <CheckCircle2 className="w-4 h-4 text-[#00f0ff] shrink-0 mt-0.5" />
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-cyan-950/80 border border-cyan-800 text-cyan-300 shrink-0 mt-0.5">
+              OBJ {idx + 1}
+            </span>
             <span className="leading-snug">{obj}</span>
           </div>
         ))}

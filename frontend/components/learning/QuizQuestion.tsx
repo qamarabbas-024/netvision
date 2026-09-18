@@ -127,7 +127,7 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
               aria-label={`Option ${String.fromCharCode(65 + idx)}: ${optionText}`}
               disabled={!!resultFeedback || isSubmitting}
               onClick={() => onSelectOption(idx)}
-              className={`w-full p-3 sm:p-3.5 rounded-lg border text-left transition-all flex items-start justify-between gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] ${optionStyle}`}
+              className={`w-full min-h-[44px] p-3 sm:p-3.5 rounded-lg border text-left transition-all flex items-start justify-between gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] ${optionStyle}`}
             >
               <div className="flex items-start gap-3 min-w-0">
                 <span
@@ -143,10 +143,16 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
               </div>
 
               {resultFeedback && idx === resultFeedback.correctOption && (
-                <CheckCircle2 className="w-4 h-4 text-[#10b981] shrink-0 mt-0.5" aria-label="Correct answer" />
+                <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#10b981]/20 border border-[#10b981]/40 text-[#10b981]">CORRECT</span>
+                  <CheckCircle2 className="w-4 h-4 text-[#10b981]" aria-label="Correct answer" />
+                </div>
               )}
               {resultFeedback && isSelected && !resultFeedback.isCorrect && (
-                <XCircle className="w-4 h-4 text-[#ef4444] shrink-0 mt-0.5" aria-label="Incorrect answer" />
+                <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#ef4444]/20 border border-[#ef4444]/40 text-[#ef4444]">YOUR CHOICE</span>
+                  <XCircle className="w-4 h-4 text-[#ef4444]" aria-label="Incorrect answer" />
+                </div>
               )}
             </button>
           );

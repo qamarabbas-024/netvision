@@ -124,7 +124,28 @@ export const NetworkTopologyViewer: React.FC<NetworkTopologyViewerProps> = ({
         </div>
       )}
 
-      {/* 3. Interactive SVG Canvas */}
+      {/* 3. Screen-Reader Accessible Summary (Text Alternative) */}
+      <div className="sr-only" aria-live="polite">
+        <h4>Authoritative Network Topology State</h4>
+        <p>Nodes: {nodes.length}, Links: {links.length}.</p>
+        <ul>
+          {nodes.map((n) => (
+            <li key={n.id}>
+              Node {n.name} ({n.type}), IP: {n.ipAddress || 'None'}, Status: {n.status}{n.isRootBridge ? ', STP Root Bridge' : ''}.
+              Ports: {n.ports.map((p) => `${p.name} (VLAN ${p.vlan || 1}, ${p.mode}, ${p.status})`).join('; ')}
+            </li>
+          ))}
+        </ul>
+        <ul>
+          {links.map((l, idx) => (
+            <li key={idx}>
+              Link between {l.sourceNodeId} ({l.sourcePort}) and {l.targetNodeId} ({l.targetPort}), Type: {l.type}, Status: {l.status}.
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* 4. Interactive SVG Canvas */}
       <div 
         className="relative w-full h-[320px] sm:h-[360px] bg-[#07090e] rounded-2xl border border-[#1e2230] overflow-hidden select-none"
         role="region"
@@ -183,7 +204,31 @@ export const NetworkTopologyViewer: React.FC<NetworkTopologyViewerProps> = ({
                 />
 
                 <g transform={`translate(${midX}, ${midY})`}>
-                  {isTrunk ? (
+                  {isDown ? (
+                    <g>
+                      <rect
+                        x="-36"
+                        y="-10"
+                        width="72"
+                        height="20"
+                        rx="4"
+                        fill="#2a0808"
+                        stroke="#ef4444"
+                        strokeWidth="1"
+                      />
+                      <text
+                        x="0"
+                        y="4"
+                        textAnchor="middle"
+                        fill="#ef4444"
+                        fontSize="9"
+                        fontFamily="monospace"
+                        fontWeight="bold"
+                      >
+                        LINK DOWN
+                      </text>
+                    </g>
+                  ) : isTrunk ? (
                     <g>
                       <rect
                         x="-45"

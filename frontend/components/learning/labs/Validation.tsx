@@ -46,7 +46,13 @@ export const Validation: React.FC<ValidationProps> = ({
         <div className={`p-4 rounded-2xl border flex flex-col gap-3 ${result.passed ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-rose-500/10 border-rose-500/30'}`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-white flex items-center gap-2">
-              {result.passed ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <XCircle className="w-4 h-4 text-rose-400" />}
+              <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
+                result.passed
+                  ? 'bg-emerald-950 border border-emerald-600 text-emerald-300'
+                  : 'bg-rose-950 border border-rose-600 text-rose-300'
+              }`}>
+                {result.passed ? 'PASS' : 'FAIL'}
+              </span>
               {result.completionSummary}
             </span>
             <span className="text-sm font-mono font-bold text-white">{result.score}% Score</span>
@@ -56,7 +62,13 @@ export const Validation: React.FC<ValidationProps> = ({
             {result.checks.map((chk, idx) => (
               <div key={idx} className="flex items-center justify-between text-xs text-zinc-300">
                 <span className="flex items-center gap-2">
-                  {chk.passed ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <XCircle className="w-3.5 h-3.5 text-rose-400" />}
+                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider ${
+                    chk.passed
+                      ? 'bg-emerald-950/80 border border-emerald-700 text-emerald-300'
+                      : 'bg-rose-950/80 border border-rose-700 text-rose-300'
+                  }`}>
+                    {chk.passed ? 'PASS' : 'FAIL'}
+                  </span>
                   {chk.rule}
                 </span>
                 <span className="text-zinc-400 font-mono text-[11px]">{chk.message}</span>

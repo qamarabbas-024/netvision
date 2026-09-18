@@ -42,6 +42,19 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
     },
   ]);
 
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const terminalBottomRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    terminalBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [history]);
+
+  const handleCopy = (text: string, idx: number) => {
+    navigator.clipboard?.writeText(text);
+    setCopiedIdx(idx);
+    setTimeout(() => setCopiedIdx(null), 2000);
+  };
+
   const handleExecute = async (cmdToRun: string) => {
     const cleanCmd = cmdToRun.trim();
     if (!cleanCmd) return;
@@ -107,7 +120,11 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
       </div>
 
       {concurrencyNotice && (
-        <div className="rounded-lg bg-amber-950/40 border border-amber-500/40 p-2.5 text-xs text-amber-300 font-mono flex items-center gap-2">
+        <div 
+          role="alert" 
+          aria-live="polite"
+          className="rounded-lg bg-amber-950/40 border border-amber-500/40 p-2.5 text-xs text-amber-300 font-mono flex items-center gap-2"
+        >
           <span>{concurrencyNotice}</span>
         </div>
       )}
@@ -118,31 +135,49 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
         {allowedCommands.map((c, idx) => (
           <button
             key={idx}
+            type="button"
             onClick={() => {
               setCommand(c);
               handleExecute(c);
             }}
-            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-[#00f0ff] font-mono text-xs border border-[#272732] transition-colors flex items-center gap-1 shrink-0 max-w-full truncate"
+            className="min-h-[36px] px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-[#00f0ff] font-mono text-xs border border-[#272732] transition-colors flex items-center gap-1 shrink-0 max-w-full truncate focus:outline-none focus:ring-1 focus:ring-cyan-400"
+            aria-label={`Execute preset command: ${c}`}
           >
             <span>{c}</span>
           </button>
         ))}
       </div>
 
-      {/* Terminal History */}
-      <div className="p-3 sm:p-4 rounded-2xl bg-[#09090b] border border-[#272732] font-mono text-xs text-zinc-300 flex flex-col gap-3 min-h-[200px] max-h-[300px] overflow-y-auto">
+      {/* Terminal History with Screen Reader Live Updates */}
+      <div 
+        role="log"
+        aria-live="polite"
+        aria-label="Terminal command history and output"
+        className="p-3 sm:p-4 rounded-2xl bg-[#09090b] border border-[#272732] font-mono text-xs text-zinc-300 flex flex-col gap-3 min-h-[200px] max-h-[300px] overflow-y-auto"
+      >
         {history.map((h, idx) => (
-          <div key={idx} className="space-y-1">
-            <div className="flex flex-wrap items-center gap-1.5 text-[#00f0ff]">
-              <span className="text-zinc-500 text-[10px]">[{h.time}]</span>
-              <span className="text-emerald-400">netvision@sandbox:~$</span>
-              <span className="font-bold break-all">{h.cmd}</span>
+          <div key={idx} className="space-y-1 relative group">
+            <div className="flex flex-wrap items-center justify-between gap-1.5 text-[#00f0ff]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-zinc-500 text-[10px]">[{h.time}]</span>
+                <span className="text-emerald-400">netvision@sandbox:~$</span>
+                <span className="font-bold break-all">{h.cmd}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleCopy(h.output, idx)}
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400 hover:text-cyan-300 p-1 rounded"
+                aria-label={`Copy output of command ${h.cmd}`}
+              >
+                {copiedIdx === idx ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
             </div>
             <pre className="text-zinc-400 whitespace-pre-wrap text-[11px] leading-relaxed pl-3 border-l border-zinc-800 break-word-all">
               {h.output}
             </pre>
           </div>
         ))}
+        <div ref={terminalBottomRef} />
       </div>
 
       {/* Input Prompt Form */}
@@ -154,16 +189,25 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
         className="flex items-center gap-2"
       >
         <div className="flex-1 relative flex items-center">
-          <span className="absolute left-3 text-emerald-400 font-mono text-xs">$</span>
+          <label htmlFor="terminal-command-input" className="sr-only">Terminal command input</label>
+          <span className="absolute left-3 text-emerald-400 font-mono text-xs" aria-hidden="true">$</span>
           <input
+            id="terminal-command-input"
             type="text"
             value={command}
             onChange={(e) => setCommand(e.target.value)}
             placeholder="Type terminal command (e.g. ping 192.168.1.1)..."
-            className="w-full bg-[#09090b] border border-[#272732] focus:border-[#00f0ff] rounded-xl pl-8 pr-4 py-2.5 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none transition-colors"
+            className="w-full bg-[#09090b] border border-[#272732] focus:border-[#00f0ff] rounded-xl pl-8 pr-4 py-2.5 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-colors"
           />
         </div>
-        <Button variant="cyan" type="submit" size="sm" disabled={isExecuting} rightIcon={<CornerDownLeft className="w-3.5 h-3.5" />}>
+        <Button 
+          variant="cyan" 
+          type="submit" 
+          size="sm" 
+          disabled={isExecuting} 
+          rightIcon={<CornerDownLeft className="w-3.5 h-3.5" />}
+          className="min-h-[38px]"
+        >
           {isExecuting ? 'Running...' : 'Execute'}
         </Button>
       </form>
