@@ -3,9 +3,27 @@ import Link from 'next/link';
 import { Shield, FileText, AlertTriangle, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
-export const metadata = {
+import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/siteConfig';
+
+export const metadata: Metadata = {
   title: 'Terms of Service | NetVision Platform',
   description: 'Terms of Service, Certification Integrity Standards, and Independent Educational Platform Disclaimers.',
+  alternates: {
+    canonical: '/terms',
+  },
+  openGraph: {
+    title: 'Terms of Service | NetVision Platform',
+    description: 'Terms of Service, Certification Integrity Standards, and Independent Educational Platform Disclaimers.',
+    url: `${SITE_URL}/terms`,
+    siteName: 'NetVision',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Terms of Service | NetVision Platform',
+    description: 'Terms of Service, Certification Integrity Standards, and Independent Educational Platform Disclaimers.',
+  },
 };
 
 export default function TermsOfServicePage() {

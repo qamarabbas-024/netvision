@@ -28,6 +28,8 @@ export default function robots(): MetadataRoute.Robots {
           '/certificates/verify/*',
           '/docs',
           '/docs/*',
+          '/terms',
+          '/privacy',
         ],
         disallow: [
           '/certifications',

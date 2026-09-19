@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Official Certificate Document | NetVision',
-  description: 'Learner certificate document and credential viewer.',
+  title: 'Learner Certificate View | NetVision',
+  description: 'Learner personal credential dashboard and verification details.',
   robots: {
     index: false,
     follow: false,
   },
 };
 
-export default function PrivateCertificateLayout({
+export default function CertificateDetailLayout({
   children,
 }: {
   children: React.ReactNode;

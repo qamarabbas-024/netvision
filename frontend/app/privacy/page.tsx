@@ -2,9 +2,27 @@ import React from 'react';
 import Link from 'next/link';
 import { Lock, Eye, Database, CheckCircle, ArrowLeft } from 'lucide-react';
 
-export const metadata = {
+import type { Metadata } from 'next';
+import { SITE_URL } from '@/lib/siteConfig';
+
+export const metadata: Metadata = {
   title: 'Privacy Policy | NetVision Platform',
   description: 'Privacy Policy, Credential Registry Transparency, and Data Retention Standards.',
+  alternates: {
+    canonical: '/privacy',
+  },
+  openGraph: {
+    title: 'Privacy Policy | NetVision Platform',
+    description: 'Privacy Policy, Credential Registry Transparency, and Data Retention Standards.',
+    url: `${SITE_URL}/privacy`,
+    siteName: 'NetVision',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy | NetVision Platform',
+    description: 'Privacy Policy, Credential Registry Transparency, and Data Retention Standards.',
+  },
 };
 
 export default function PrivacyPolicyPage() {
