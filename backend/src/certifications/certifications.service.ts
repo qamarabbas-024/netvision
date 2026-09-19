@@ -832,6 +832,19 @@ export class CertificationsService {
       where: { code: dto.certificationCode.toUpperCase() },
     });
 
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, isVerified: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Candidate user "${userId}" not found.`);
+    }
+
+    if (!user.isVerified) {
+      throw new ForbiddenException('A verified user account is required to start official certification examinations.');
+    }
+
     if (!cert) {
       throw new NotFoundException(`Certification code "${dto.certificationCode}" not found.`);
     }
@@ -1997,11 +2010,15 @@ export class CertificationsService {
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, username: true, fullName: true },
+      select: { id: true, username: true, fullName: true, isVerified: true },
     });
 
     if (!user) {
       throw new NotFoundException(`User "${userId}" not found.`);
+    }
+
+    if (!user.isVerified) {
+      throw new ForbiddenException('A verified user account is required to claim an official certificate.');
     }
 
     // 1. Check if certificate already exists for user and certificationCode (Idempotent claim)

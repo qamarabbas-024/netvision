@@ -433,7 +433,7 @@ export class TopicsService {
             title: l.title,
             instructions: l.instructions,
             initialTopologyJson: l.initialTopologyJson,
-            targetStateJson: l.targetStateJson,
+            targetStateJson: null,
             order: l.order,
           }))
         : contentObj.practicalActivity
@@ -597,7 +597,7 @@ export class TopicsService {
     let anonymousId = identity?.anonymousId;
 
     if (!userId && !anonymousId) {
-      anonymousId = 'anon-default';
+      anonymousId = `guest-${crypto.randomUUID()}`;
     }
 
     // If requestedSessionId was provided, look it up across sessions
@@ -865,14 +865,20 @@ export class TopicsService {
       throw new NotFoundException(`Lesson lab with ID "${labId}" not found.`);
     }
 
-    // Derive or replay simulated state from userSolution or command history
+    // Derive or replay simulated state: commands are always replayed authoritatively
     let simulatedState = NetworkSimulationEngine.getInitialStateForLab(lab.lesson.slug);
-    if (userSolution && Object.keys(userSolution).length > 0) {
-      simulatedState = userSolution as any;
-    } else {
+    if (commandHistory && commandHistory.length > 0) {
       for (const cmd of commandHistory) {
-        const simRes = NetworkSimulationEngine.executeCommand(cmd, simulatedState);
+        const simRes = NetworkSimulationEngine.executeCommand(cmd, simulatedState, lab.lesson.slug);
         simulatedState = simRes.updatedState;
+      }
+    } else {
+      const sessionKey = `${userId || anonymousId}:${labId}`;
+      const activeSession = this.activeLabSessions.get(sessionKey);
+      if (activeSession && activeSession.simulatedState) {
+        simulatedState = activeSession.simulatedState;
+      } else if (userSolution && Object.keys(userSolution).length > 0) {
+        simulatedState = userSolution as any;
       }
     }
 

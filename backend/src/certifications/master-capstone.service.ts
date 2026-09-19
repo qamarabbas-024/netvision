@@ -105,6 +105,19 @@ export class MasterCapstoneService {
       throw new BadRequestException('Authenticated User ID is required to start Master Capstone attempt.');
     }
 
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, isVerified: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Candidate user "${userId}" not found.`);
+    }
+
+    if (!user.isVerified) {
+      throw new ForbiddenException('A verified user account is required to start the Master Capstone examination.');
+    }
+
     // 1. Verify candidate holds all 5 active course certificates
     const requiredCourseCertCodes = ['NV-NET-C01', 'NV-NET-C02', 'NV-NET-C03', 'NV-NET-C04', 'NV-NET-C05'];
     const activeCerts = await this.prisma.certificate.findMany({
