@@ -31,7 +31,7 @@ export interface NetworkTopologyViewerProps {
   className?: string;
 }
 
-export const NetworkTopologyViewer: React.FC<NetworkTopologyViewerProps> = ({
+const NetworkTopologyViewerComponent: React.FC<NetworkTopologyViewerProps> = ({
   nodes,
   links,
   causalConsequence,
@@ -489,3 +489,5 @@ export const NetworkTopologyViewer: React.FC<NetworkTopologyViewerProps> = ({
     </Card>
   );
 };
+
+export const NetworkTopologyViewer = React.memo(NetworkTopologyViewerComponent);

@@ -2,6 +2,9 @@
 const nextConfig = {
   output: process.env.NEXT_STANDALONE === 'true' || process.platform !== 'win32' ? 'standalone' : undefined,
   reactStrictMode: true,
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'three', 'framer-motion', 'canvas-confetti'],
+  },
   transpilePackages: ['@netvision/ui', '@netvision/shared', '@netvision/simulation-engine'],
   images: {
     remotePatterns: [

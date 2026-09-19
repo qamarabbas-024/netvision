@@ -8,12 +8,14 @@ import { CurriculumSection } from '@/components/landing/CurriculumSection';
 import { CertificationSection } from '@/components/landing/CertificationSection';
 import { FAQSection } from '@/components/landing/FaqSection';
 import { FooterSection } from '@/components/landing/FooterSection';
-import { DeviceDetailsModal } from '@/components/3d/DeviceDetailsModal';
-import { PacketInspectorModal } from '@/components/3d/PacketInspectorModal';
-import { InteractiveTerminalModal } from '@/components/landing/InteractiveTerminalModal';
-import { SignInModal } from '@/components/landing/SignInModal';
-import { RegistryComponentsShowcase } from '@/components/landing/RegistryComponentsShowcase';
+import dynamic from 'next/dynamic';
 import { NetworkDevice, NetworkScenario } from '@/types/network';
+
+const DeviceDetailsModal = dynamic(() => import('@/components/3d/DeviceDetailsModal').then(m => m.DeviceDetailsModal), { ssr: false });
+const PacketInspectorModal = dynamic(() => import('@/components/3d/PacketInspectorModal').then(m => m.PacketInspectorModal), { ssr: false });
+const InteractiveTerminalModal = dynamic(() => import('@/components/landing/InteractiveTerminalModal').then(m => m.InteractiveTerminalModal), { ssr: false });
+const SignInModal = dynamic(() => import('@/components/landing/SignInModal').then(m => m.SignInModal), { ssr: false });
+const RegistryComponentsShowcase = dynamic(() => import('@/components/landing/RegistryComponentsShowcase').then(m => m.RegistryComponentsShowcase), { ssr: false });
 
 export default function Home() {
   const [currentStageId] = useState(1);
