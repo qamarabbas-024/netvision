@@ -4,9 +4,11 @@ import {
   NotFoundException,
   ForbiddenException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { ExamAttemptStatus, ExamType } from '@prisma/client';
+import { MonitoringService } from '../monitoring/monitoring.service';
 import {
   CapstoneScoringWeights,
   CandidateCapstoneSubmission,
@@ -37,7 +39,10 @@ export const CAPSTONE_CONFIG = {
 export class MasterCapstoneService {
   private readonly logger = new Logger(MasterCapstoneService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly monitoringService?: MonitoringService
+  ) {}
 
   /**
    * Returns public-safe Capstone examination blueprint, versioning, and rules.
@@ -296,6 +301,11 @@ export class MasterCapstoneService {
             scoringWeights: CAPSTONE_CONFIG.scoringWeights,
             assessment: getPublicAssessment(assessmentVersion),
           };
+          this.monitoringService?.recordCertificationEvent('EXAM_ATTEMPTED', {
+            userId,
+            courseId: CAPSTONE_CONFIG.certificationCode,
+          });
+          return resultPayload;
         },
         { timeout: 15000 }
       );
@@ -497,6 +507,12 @@ export class MasterCapstoneService {
         this.logger.log(
           `[Master Capstone] Server-graded attempt [${attempt.id}] (v${assessmentVersion}) for user ${userId}: Score=${overallScore}%, Passed=${passed}`
         );
+
+        this.monitoringService?.recordCertificationEvent(passed ? 'CAPSTONE_PASSED' : 'CAPSTONE_FAILED', {
+          userId,
+          courseId: CAPSTONE_CONFIG.certificationCode,
+          score: overallScore,
+        });
 
         return {
           attemptId: attempt.id,

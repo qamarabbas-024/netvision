@@ -5,11 +5,13 @@ import {
   BadRequestException,
   ConflictException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { ExamType, ExamAttemptStatus } from '@prisma/client';
 import { CertificationEligibilityService } from './certification-eligibility.service';
+import { MonitoringService } from '../monitoring/monitoring.service';
 
 export interface StartExamDto {
   certificationCode: string;
@@ -68,6 +70,7 @@ export class CertificationsService {
   constructor(
     private readonly prisma: PrismaService,
     eligibilityService?: CertificationEligibilityService,
+    @Optional() private readonly monitoringService?: MonitoringService,
   ) {
     this.eligibilityService = eligibilityService || new CertificationEligibilityService(prisma);
   }
@@ -1025,6 +1028,10 @@ export class CertificationsService {
     this.logger.log(
       `Started ${dto.type} Exam Attempt [${attempt.id}] for user ${userId} (Attempt #${attemptNumber}, Duration: ${durationSeconds}s, Expires: ${expiresAt.toISOString()})`
     );
+    this.monitoringService?.recordCertificationEvent('EXAM_ATTEMPTED', {
+      userId,
+      courseId: cert.code,
+    });
 
     if (dto.type === ExamType.PRACTICAL) {
       const topologyState = configSnapshotJson.topologyState || {};
@@ -1851,6 +1858,11 @@ export class CertificationsService {
       this.logger.log(
         `Final Practical Exam Attempt [${attemptId}] submitted by user ${userId}. Score: ${finalScore}% (Theory: ${theoryScore}%, Practical: ${practicalScore}%, Troubleshooting: ${troubleshootingScore}%, Packet: ${packetAnalysisScore}%, Hint Penalty: -${hintPenalty}%, Critical Passed: ${evaluated.allCriticalPassed}). Result: ${status}`
       );
+      this.monitoringService?.recordCertificationEvent(passed ? 'EXAM_PASSED' : 'EXAM_FAILED', {
+        userId,
+        courseId: attempt.certificationCode,
+        score: finalScore,
+      });
 
       return {
         attemptId: updated.id,

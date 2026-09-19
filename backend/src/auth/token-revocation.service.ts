@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
+import type { MonitoringService } from '../monitoring/monitoring.service';
 
 export interface RevokedTokenRecord {
   tokenHash: string;
@@ -29,6 +30,7 @@ export interface RotationResult {
 @Injectable()
 export class TokenRevocationService implements OnModuleDestroy {
   private readonly logger = new Logger(TokenRevocationService.name);
+  private monitoringService?: MonitoringService;
 
   // Storage configuration
   private readonly storageDir: string;
@@ -69,6 +71,10 @@ export class TokenRevocationService implements OnModuleDestroy {
     this.ensureStorageDir();
     this.loadAllFromDisk();
     this.startPeriodicCleanup();
+  }
+
+  public setMonitoringService(ms: MonitoringService): void {
+    this.monitoringService = ms;
   }
 
   public getStorageDir(): string {
@@ -346,6 +352,10 @@ export class TokenRevocationService implements OnModuleDestroy {
       this.logger.warn(
         `🚨 REFRESH TOKEN REUSE ATTACK DETECTED for user ${session.userId}, family ${session.familyId}! Invalidating entire family and active sessions across all instances.`
       );
+      this.monitoringService?.recordSecurityEvent('TOKEN_REUSE_DETECTED', {
+        userId: session.userId,
+        details: { familyId: session.familyId },
+      });
       this.revokeFamily(session.familyId);
       this.revokeUserSessions(session.userId);
       return null;

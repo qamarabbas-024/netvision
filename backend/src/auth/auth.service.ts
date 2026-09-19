@@ -52,7 +52,11 @@ export class AuthService {
     @Optional() private readonly rateLimiterService?: RateLimiterService,
     @Optional() private readonly monitoringService?: MonitoringService,
     @Optional() private readonly tokenRevocationService?: TokenRevocationService
-  ) {}
+  ) {
+    if (this.monitoringService && this.tokenRevocationService) {
+      this.tokenRevocationService.setMonitoringService(this.monitoringService);
+    }
+  }
 
   getDevOtpForTest(email: string): string | null {
     const isProd = this.configService.get<string>('NODE_ENV') === 'production';
@@ -589,6 +593,10 @@ export class AuthService {
     );
 
     if (!rotationResult) {
+      this.monitoringService?.recordAuthEvent('REFRESH_FAILED', {
+        ip: 'internal',
+        details: { reason: 'Invalid, expired, or revoked refresh token' },
+      });
       throw new UnauthorizedException('Invalid, expired, or revoked refresh token.');
     }
 
@@ -597,16 +605,30 @@ export class AuthService {
     });
 
     if (!user) {
+      this.monitoringService?.recordAuthEvent('REFRESH_FAILED', {
+        ip: 'internal',
+        details: { reason: 'User session no longer exists' },
+      });
       throw new UnauthorizedException('User session no longer exists.');
     }
 
     if (this.isEmailVerificationEnabled() && !user.isVerified) {
+      this.monitoringService?.recordAuthEvent('REFRESH_FAILED', {
+        ip: 'internal',
+        userIdentifier: user.id,
+        details: { reason: 'User account is unverified' },
+      });
       throw new UnauthorizedException('User account is unverified.');
     }
 
     const payload = { sub: user.id, email: user.email, role: user.role };
     const expiresIn = this.configService.get<string>('JWT_EXPIRATION', '15m');
     const accessToken = await this.jwtService.signAsync(payload, { expiresIn } as any);
+
+    this.monitoringService?.recordAuthEvent('REFRESH_SUCCESS', {
+      ip: 'internal',
+      userIdentifier: user.id,
+    });
 
     return {
       accessToken,
@@ -641,6 +663,10 @@ export class AuthService {
     if (userId) {
       this.tokenRevocationService?.revokeUserSessions(userId);
       this.tokenRevocationService?.revokeUserRefreshTokens(userId);
+      this.monitoringService?.recordAuthEvent('LOGOUT', {
+        ip: 'internal',
+        userIdentifier: userId,
+      });
     }
   }
 }

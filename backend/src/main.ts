@@ -60,6 +60,24 @@ async function bootstrap() {
   const trustedProxySetting = process.env.TRUSTED_PROXY || 'loopback';
   expressApp.set('trust proxy', trustedProxySetting);
 
+  // Support root health & readiness probe paths (/health, /ready, etc.) alongside apiPrefix
+  const configuredApiPrefix = process.env.API_PREFIX || '/api/v1';
+  expressApp.use((req: any, _res: any, next: any) => {
+    const rootProbes = [
+      '/health',
+      '/health/live',
+      '/health/ready',
+      '/ready',
+      '/monitoring/metrics',
+      '/monitoring/alerts',
+      '/monitoring/health',
+    ];
+    if (rootProbes.includes(req.path)) {
+      req.url = `${configuredApiPrefix}${req.url}`;
+    }
+    next();
+  });
+
   // Security Headers via Helmet with explicit Content Security Policy
   app.use(
     helmet({

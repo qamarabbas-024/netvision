@@ -76,4 +76,58 @@ export class HealthController {
   getMetrics() {
     return this.monitoringService.getMetricsSummary();
   }
+
+  /**
+   * Evaluated operational alert conditions.
+   * Path: /api/v1/monitoring/alerts
+   */
+  @Get('monitoring/alerts')
+  getAlerts() {
+    const alerts = this.monitoringService.evaluateAlerts();
+    const activeAlerts = alerts.filter((a) => a.status !== 'OK');
+    return {
+      status: activeAlerts.length === 0 ? 'NOMINAL' : activeAlerts.some((a) => a.status === 'CRITICAL') ? 'CRITICAL' : 'WARNING',
+      activeAlertsCount: activeAlerts.length,
+      alerts,
+      evaluatedAt: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Detailed aggregated subsystem health check.
+   * Path: /api/v1/monitoring/health
+   */
+  @Get('monitoring/health')
+  async getDetailedHealth() {
+    const dbCheck = await this.monitoringService.checkDatabaseHealth();
+    const mailStatus = this.emailService.getProviderStatus();
+    const metrics = this.monitoringService.getMetricsSummary();
+    const alerts = this.monitoringService.evaluateAlerts();
+
+    const overallHealthy = dbCheck.healthy && !alerts.some((a) => a.status === 'CRITICAL');
+
+    return {
+      status: overallHealthy ? 'healthy' : 'degraded',
+      service: 'NetVision API Subsystems',
+      timestamp: new Date().toISOString(),
+      uptimeSeconds: metrics.uptimeSeconds,
+      subsystems: {
+        database: {
+          status: dbCheck.healthy ? 'healthy' : 'unhealthy',
+          latencyMs: dbCheck.latencyMs,
+        },
+        mail: {
+          provider: mailStatus.provider,
+          configured: mailStatus.configured,
+        },
+        metrics: {
+          totalRequests: metrics.totalRequests,
+          errorRatePercent: metrics.errorRatePercent,
+          averageLatencyMs: metrics.latency.avgMs,
+        },
+      },
+      activeAlerts: alerts.filter((a) => a.status !== 'OK'),
+    };
+  }
 }
+

@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module, Global, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { MonitoringService } from './monitoring.service';
 import { HealthController } from './health.controller';
 import { RequestCorrelationMiddleware } from './middleware/request-correlation.middleware';
@@ -7,6 +7,7 @@ import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { DatabaseModule } from '../database/database.module';
 import { MailModule } from '../mail/mail.module';
 
+@Global()
 @Module({
   imports: [DatabaseModule, MailModule],
   controllers: [HealthController],

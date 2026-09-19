@@ -6,12 +6,14 @@ import {
   ForbiddenException,
   ConflictException,
   InternalServerErrorException,
+  Optional,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { CourseLevel } from '@prisma/client';
 import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { AchievementsService } from '../achievements/achievements.service';
+import { MonitoringService } from '../monitoring/monitoring.service';
 import { NETWORKING_COMMANDS_CATALOG } from './commands-catalog';
 import {
   LEGACY_SLUG_COMPATIBILITY_MAP,
@@ -48,7 +50,8 @@ export class TopicsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly achievementsService: AchievementsService
+    private readonly achievementsService: AchievementsService,
+    @Optional() private readonly monitoringService?: MonitoringService
   ) {}
 
   private getLevelWeight(level: string): number {
@@ -1279,6 +1282,12 @@ export class TopicsService {
           weakConceptsJson: weakConcepts,
           attemptNumber,
         },
+      });
+
+      this.monitoringService?.recordQuizEvent('QUIZ_COMPLETED', {
+        quizId,
+        score,
+        userId: userId || anonymousId,
       });
 
       const existingProgress = await this.prisma.userProgress.findFirst({

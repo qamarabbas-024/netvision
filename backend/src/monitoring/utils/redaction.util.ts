@@ -18,6 +18,14 @@ const SENSITIVE_KEY_PATTERNS = [
   /verification_code/i,
   /private_key/i,
   /cert/i,
+  /correct_?answer/i,
+  /answer_?key/i,
+  /rubric/i,
+  /grading_?key/i,
+  /target_?state/i,
+  /solution/i,
+  /seed/i,
+  /email/i,
 ];
 
 const SENSITIVE_STRING_PATTERNS = [
@@ -29,6 +37,7 @@ const SENSITIVE_STRING_PATTERNS = [
   /sqlite:[^\s]+/gi,
   /re_[A-Za-z0-9_-]{20,}/gi, // Resend API keys
   /ey[A-Za-z0-9-_=]+\.ey[A-Za-z0-9-_=]+\.[A-Za-z0-9-_.+/=]+/gi, // JWT tokens
+  /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi, // Email addresses
   /[A-Za-z]:\\[^"'\n\r<>]+/gi, // Windows absolute file paths
   /\/(?:Users|home|var|tmp|etc|app|node_modules)\/[^"'\n\r<>]+/gi, // Unix file paths
   /Invalid\s+`prisma\.[^`]+`\s+invocation/gi, // Prisma invocation leakage
@@ -77,6 +86,43 @@ export function redactSensitiveData<T = any>(input: T, depth = 0): T {
 }
 
 /**
+ * Formats a structured log payload with redaction applied
+ */
+export interface StructuredLogPayload {
+  timestamp: string;
+  level: 'LOG' | 'WARN' | 'ERROR' | 'DEBUG';
+  context: string;
+  message: string;
+  requestId?: string;
+  event?: string;
+  durationMs?: number;
+  metadata?: Record<string, any>;
+}
+
+export function createStructuredLog(
+  level: StructuredLogPayload['level'],
+  context: string,
+  message: string,
+  details?: {
+    requestId?: string;
+    event?: string;
+    durationMs?: number;
+    metadata?: Record<string, any>;
+  }
+): StructuredLogPayload {
+  return {
+    timestamp: new Date().toISOString(),
+    level,
+    context,
+    message: redactSensitiveData(message),
+    requestId: details?.requestId ? sanitizeRequestId(details.requestId) || details.requestId : undefined,
+    event: details?.event,
+    durationMs: details?.durationMs,
+    metadata: details?.metadata ? redactSensitiveData(details.metadata) : undefined,
+  };
+}
+
+/**
  * Validates and sanitizes a Request ID from incoming headers.
  * Must be alphanumeric with hyphens/underscores, between 4 and 64 characters.
  */
@@ -90,3 +136,4 @@ export function sanitizeRequestId(idCandidate?: string | null): string | null {
   }
   return null;
 }
+

@@ -4,10 +4,12 @@ import {
   BadRequestException,
   ForbiddenException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { AchievementsService } from '../achievements/achievements.service';
+import { MonitoringService } from '../monitoring/monitoring.service';
 import { TROUBLESHOOTING_SCENARIOS } from './troubleshooting-scenarios.catalog';
 import {
   TroubleshootingScenario,
@@ -32,6 +34,7 @@ export class TroubleshootingService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly achievementsService: AchievementsService,
+    @Optional() private readonly monitoringService?: MonitoringService,
   ) {}
 
   getAllScenarios() {
@@ -203,6 +206,12 @@ export class TroubleshootingService {
       session.currentStage = 'INVESTIGATION';
     }
 
+    this.monitoringService?.recordLabEvent('COMMAND_EXECUTED', {
+      scenarioId: session.scenarioId,
+      commandSnippet: cleanCmd,
+      userId: identity.userId || identity.anonymousId,
+    });
+
     return {
       session: this.sanitizeSessionResponse(session),
       commandOutput: output,
@@ -348,6 +357,11 @@ export class TroubleshootingService {
     session.passed = allPassed && finalScore >= 70;
     session.currentStage = 'COMPLETED';
     session.completedAt = new Date().toISOString();
+
+    this.monitoringService?.recordLabEvent('LAB_COMPLETED', {
+      scenarioId: session.scenarioId,
+      userId: identity.userId || identity.anonymousId,
+    });
 
     // Persist attempt to database
     await this.persistTroubleshootingResult(identity, scenario, session);

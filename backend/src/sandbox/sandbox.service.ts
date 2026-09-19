@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
   Logger,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { SandboxStatus } from '@prisma/client';
@@ -12,6 +13,7 @@ import { DockerSandboxProvider } from './providers/docker-sandbox.provider';
 import { ISandboxProvider } from './providers/sandbox-provider.interface';
 import { CreateSandboxSessionDto } from './dto/create-sandbox-session.dto';
 import { ExecuteSandboxCommandDto } from './dto/execute-sandbox-command.dto';
+import { MonitoringService } from '../monitoring/monitoring.service';
 
 @Injectable()
 export class SandboxService {
@@ -21,7 +23,8 @@ export class SandboxService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly simulatedProvider: SimulatedSandboxProvider,
-    private readonly dockerProvider: DockerSandboxProvider
+    private readonly dockerProvider: DockerSandboxProvider,
+    @Optional() private readonly monitoringService?: MonitoringService
   ) {
     this.providers = {
       SIMULATED: this.simulatedProvider,
@@ -106,6 +109,12 @@ export class SandboxService {
 
     this.logger.log(`Active Sandbox Session [${session.id}] started for ${userId ? `user ${userId}` : `anonymous ${anonymousId}`} (Expires: ${expiresAt.toISOString()})`);
 
+    this.monitoringService?.recordSandboxEvent('SESSION_CREATED', {
+      sessionId: session.id,
+      provider: session.providerType,
+      userId: userId || anonymousId,
+    });
+
     return {
       sessionId: session.id,
       status: session.status,
@@ -159,6 +168,15 @@ export class SandboxService {
     await this.prisma.sandboxSession.update({
       where: { id: sessionId },
       data: { historyJson: updatedHistory },
+    });
+
+    this.monitoringService?.recordSandboxEvent('COMMAND_EXECUTED', {
+      sessionId: session.id,
+      provider: session.providerType,
+      userId: userId || anonymousId,
+      commandSnippet: dto.command,
+      exitCode: result.exitCode,
+      durationMs: result.executionTimeMs,
     });
 
     return {
