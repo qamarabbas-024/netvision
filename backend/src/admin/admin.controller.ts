@@ -1,15 +1,19 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
+import { DataLifecycleService } from '../database/data-lifecycle.service';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.ADMIN)
 export class AdminController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly dataLifecycleService: DataLifecycleService,
+  ) {}
 
   @Get('dashboard')
   async getAdminStats() {
@@ -40,4 +44,21 @@ export class AdminController {
       },
     });
   }
+
+  @Get('lifecycle/audit')
+  async getLifecycleAudit() {
+    return this.dataLifecycleService.getLifecycleAudit();
+  }
+
+  @Post('lifecycle/prune')
+  async pruneExpiredData(@Query('dryRun') dryRunQuery?: string, @Body('dryRun') dryRunBody?: boolean) {
+    const isDryRun = dryRunQuery === 'true' || dryRunBody === true;
+    return this.dataLifecycleService.executeRetentionCleanup({ dryRun: isDryRun });
+  }
+
+  @Get('dr/status')
+  async getDisasterRecoveryStatus() {
+    return this.dataLifecycleService.getDisasterRecoveryStatus();
+  }
 }
+

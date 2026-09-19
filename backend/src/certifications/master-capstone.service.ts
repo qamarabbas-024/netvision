@@ -286,7 +286,7 @@ export class MasterCapstoneService {
             `[Master Capstone] Started timed attempt [${attempt.id}] for user ${userId} (Attempt #${attemptNumber}, v${assessmentVersion}, 120 mins, Expires: ${expiresAt.toISOString()})`
           );
 
-          return {
+          const resultPayload = {
             attemptId: attempt.id,
             examCode: CAPSTONE_CONFIG.examCode,
             certificationCode: CAPSTONE_CONFIG.certificationCode,

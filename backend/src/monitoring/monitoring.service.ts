@@ -109,6 +109,7 @@ export interface MetricsSummary {
   status5xxCount: number;
   errorRatePercent: number;
   status5xxPercent: number;
+  averageLatencyMs: number;
   latency: {
     minMs: number;
     maxMs: number;
@@ -619,6 +620,7 @@ export class MonitoringService {
       status5xxCount: this.count5xx,
       errorRatePercent,
       status5xxPercent,
+      averageLatencyMs,
       latency: {
         minMs: this.minLatencyMs,
         maxMs: this.maxLatencyMs,

@@ -176,7 +176,7 @@ export class SandboxService {
       userId: userId || anonymousId,
       commandSnippet: dto.command,
       exitCode: result.exitCode,
-      durationMs: result.executionTimeMs,
+      durationMs: result.durationMs,
     });
 
     return {
