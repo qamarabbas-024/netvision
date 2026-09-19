@@ -81,17 +81,75 @@ export default function PrivacyPolicyPage() {
           </div>
         </section>
 
-        {/* Section 3: Data Security & Session Protection */}
+        {/* Section 3: Cookie & Tracking Disclosures */}
+        <section className="space-y-4 bg-[#0b0f17] border border-slate-800 rounded-xl p-6">
+          <h2 className="text-sm font-bold text-white flex items-center gap-2">
+            <Lock className="w-4 h-4 text-purple-400" />
+            <span>3. Cookies, Local Storage & Tracking Disclosures</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            NetVision operates a privacy-first, tracker-free learning environment. We maintain an unequivocal <strong>Zero Third-Party Advertising Trackers</strong> policy:
+          </p>
+          <ul className="space-y-2 text-xs text-slate-400">
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+              <span><strong>Strictly Essential Authentication Cookies:</strong> When you log in, we issue a secure, HTTP-only session cookie or client bearer token exclusively used to authenticate requests to the NetVision API.</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+              <span><strong>Local Storage Preferences:</strong> We use your browser&apos;s localStorage solely to store technical state (e.g., active topology layout, interface theme, and temporary anonymous practice quiz progress before account registration).</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mt-0.5 shrink-0" />
+              <span><strong>No Advertising Trackers or Data Brokers:</strong> NetVision contains zero Google AdSense, Facebook Pixel, cross-site profiling trackers, or third-party behavioral analytics tags.</span>
+            </li>
+          </ul>
+        </section>
+
+        {/* Section 4: Data Retention Schedule */}
+        <section className="space-y-4 bg-[#0b0f17] border border-slate-800 rounded-xl p-6">
+          <h2 className="text-sm font-bold text-white flex items-center gap-2">
+            <Database className="w-4 h-4 text-cyan-400" />
+            <span>4. Authoritative Data Retention Schedule</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            In compliance with data minimization principles (GDPR Art. 5(1)(e)), different categories of data are retained only as long as necessary for platform operation:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
+            <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
+              <div className="font-semibold text-slate-200">Email Verification OTPs</div>
+              <div className="text-[11px] text-zinc-400 mt-0.5">Expires in 15 minutes; hard-deleted within 24 hours.</div>
+            </div>
+            <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
+              <div className="font-semibold text-slate-200">Revoked Sessions & Tokens</div>
+              <div className="text-[11px] text-zinc-400 mt-0.5">Retained in revocation store for 7 days (max token TTL), then purged.</div>
+            </div>
+            <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
+              <div className="font-semibold text-slate-200">Simulation Sandboxes</div>
+              <div className="text-[11px] text-zinc-400 mt-0.5">Active for 1 hour; historical debug telemetry pruned after 30 days.</div>
+            </div>
+            <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800">
+              <div className="font-semibold text-slate-200">Quiz & Lab Attempts</div>
+              <div className="text-[11px] text-zinc-400 mt-0.5">Retained for active learner portfolio; cold-archived after 3 years of inactivity.</div>
+            </div>
+            <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800 sm:col-span-2">
+              <div className="font-semibold text-slate-200">Certificates & Verification Records</div>
+              <div className="text-[11px] text-zinc-400 mt-0.5">Permanently retained with immutable cryptographic hashes to prevent duplicate credential fraud and support employer verification.</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 5: Data Security & Session Protection */}
         <section className="space-y-3 bg-[#0b0f17] border border-slate-800 rounded-xl p-6">
-          <h2 className="text-sm font-bold text-white">3. Cryptographic & Operational Security</h2>
+          <h2 className="text-sm font-bold text-white">5. Cryptographic & Operational Security</h2>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
             All client-server communications occur over Transport Layer Security (TLS 1.3). User authentication utilizes JSON Web Tokens (JWT) with server-side validation. Credential records in PostgreSQL utilize unique immutable identifiers and cryptographic SHA-256 digests to ensure tamper evidence.
           </p>
         </section>
 
-        {/* Section 4: Learner Rights (GDPR & CCPA) */}
+        {/* Section 6: Learner Rights (GDPR & CCPA) */}
         <section className="space-y-4 bg-[#0b0f17] border border-slate-800 rounded-xl p-6">
-          <h2 className="text-sm font-bold text-white">4. Learner Rights & Data Control</h2>
+          <h2 className="text-sm font-bold text-white">6. Learner Rights & Data Control</h2>
           <p className="text-xs text-slate-300 leading-relaxed">
             In compliance with global data privacy frameworks (including GDPR, UK GDPR, and CCPA):
           </p>
@@ -111,11 +169,11 @@ export default function PrivacyPolicyPage() {
           </ul>
         </section>
 
-        {/* Section 5: Contact Information */}
+        {/* Section 7: Contact Information */}
         <section className="space-y-3 bg-[#0b0f17] border border-slate-800 rounded-xl p-6">
-          <h2 className="text-sm font-bold text-white">5. Privacy Officer & Data Requests</h2>
+          <h2 className="text-sm font-bold text-white">7. Privacy Officer & Data Requests</h2>
           <p className="text-xs text-slate-400 leading-relaxed">
-            For privacy inquiries, data subject access requests (DSAR), or certificate privacy toggles, contact our data protection team at <code className="text-emerald-400">privacy@netvision.internal</code>.
+            For privacy inquiries, data subject access requests (DSAR), or certificate privacy toggles, contact our data protection team at <code className="text-emerald-400">privacy@netvision.edu</code>.
           </p>
         </section>
 

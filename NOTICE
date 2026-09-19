@@ -1,0 +1,62 @@
+NetVision Interactive Networking Platform
+Copyright (c) 2026 NetVision Team. All rights reserved.
+
+===============================================================================
+1. TEXTBOOK & CURRICULUM COPYRIGHT NOTICE
+===============================================================================
+The core curriculum, learning objectives, multi-level pedagogical progression,
+and authoritative reference texts embedded within NetVision are derived from:
+
+"CS-221 Computer Networking: Complete Mastery Textbook"
+(2026 Edition — University, CCNA & Packet-Level Engineering)
+Copyright (c) 2026 Qamar Abbas. All rights reserved.
+
+Used under exclusive perpetual educational platform license granted to NetVision.
+Reproduction, redistribution, or automated scraping of textbook content outside
+the NetVision platform is strictly prohibited without written consent from the author.
+
+===============================================================================
+2. OPEN-SOURCE SOFTWARE LICENSES & ATTRIBUTIONS
+===============================================================================
+NetVision incorporates open-source software distributed under permissive licenses:
+
+- Next.js (The MIT License - Copyright (c) 2026 Vercel, Inc.)
+- React & React DOM (The MIT License - Copyright (c) Meta Platforms, Inc.)
+- NestJS (The MIT License - Copyright (c) 2017-2026 Kamil Mysliwiec)
+- Prisma ORM (Apache License 2.0 - Copyright (c) Prisma Data, Inc.)
+- Lucide React (ISC License - Copyright (c) 2023 Lucide Contributors)
+- Tailwind CSS (The MIT License - Copyright (c) Tailwind Labs, Inc.)
+- Three.js (The MIT License - Copyright (c) 2010-2026 Three.js Authors)
+- GSAP (GreenSock Standard Web License - Copyright (c) GreenSock, Inc.)
+- Lenis (The MIT License - Copyright (c) 2023 Studio Freight)
+- Framer Motion (The MIT License - Copyright (c) 2018 Framer B.V.)
+- Argon2 (The MIT License - Copyright (c) 2026 Ran Shaul)
+- RxJS (Apache License 2.0 - Copyright (c) 2015-2026 Netflix, Inc. and RxJS Authors)
+
+Detailed third-party license texts and notices are documented in:
+docs/THIRD_PARTY_LICENSES.md
+
+===============================================================================
+3. FONTS & ICONOGRAPHY
+===============================================================================
+- Inter Font Family: Designed by Rasmus Andersson (SIL Open Font License 1.1)
+- Outfit Font Family: Designed by Outfit.io (SIL Open Font License 1.1)
+- Fira Code: Designed by Nikita Prokopov (SIL Open Font License 1.1)
+- JetBrains Mono: Designed by JetBrains (Apache License 2.0)
+- Lucide Icons: Distributed under ISC License
+
+===============================================================================
+4. NOMINATIVE TRADEMARK DISCLAIMER
+===============================================================================
+All vendor names, product names, logos, and certifications referenced across
+NetVision courses, topologies, command-line interfaces, and diagnostic scenarios
+(including but not limited to Cisco, IOS, CCNA, CompTIA, Network+, Security+,
+Juniper Networks, Junos, Amazon Web Services, Linux, and Wireshark) are the
+trademarks or registered trademarks of their respective owners.
+
+References to third-party vendors, hardware models, operating systems, and
+industry certifications are made strictly for nominative identification,
+pedagogical illustration, and comparative technical instruction under fair use.
+NetVision is an independent educational platform and is not affiliated with,
+sponsored by, authorized by, or endorsed by any commercial equipment vendor or
+certification body.

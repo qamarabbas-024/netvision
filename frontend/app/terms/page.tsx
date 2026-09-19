@@ -91,9 +91,39 @@ export default function TermsOfServicePage() {
           </ul>
         </section>
 
-        {/* Section 3: Acceptable Platform Use */}
+        {/* Section 3: Intellectual Property & Textbook Ownership */}
+        <section className="space-y-4 bg-[#0b0f17] border border-slate-800 rounded-xl p-6">
+          <h2 className="text-sm font-bold text-white flex items-center gap-2">
+            <FileText className="w-4 h-4 text-purple-400" />
+            <span>3. Intellectual Property, Textbook & Credential Ownership</span>
+          </h2>
+          <div className="space-y-3 text-xs text-slate-300 leading-relaxed">
+            <p>
+              <strong>Textbook Copyright:</strong> The foundational curriculum, instructional explanations, and pedagogical progressions in NetVision are derived from <em>&quot;CS-221 Computer Networking: Complete Mastery Textbook&quot;</em> (2026 Edition), Copyright &copy; 2026 Qamar Abbas. All rights in the original literary work are reserved by the author. NetVision operates under an exclusive perpetual license.
+            </p>
+            <p>
+              <strong>Platform Software & Trademarks:</strong> The NetVision name, observatory design, simulation algorithms, and certification marks (including NV-NET-C01 through NV-NET-MASTERY) are the intellectual property of the NetVision Team.
+            </p>
+            <p>
+              <strong>Credential Ownership:</strong> Upon passing required examinations, the candidate is awarded a verifiable digital certificate. Candidates own their personal certificate copy and may display, share, or verify it publicly. NetVision retains all rights to the underlying examination blueprints, scoring rubrics, and registry systems.
+            </p>
+          </div>
+        </section>
+
+        {/* Section 4: Subscription, Access & Refund Policy */}
         <section className="space-y-3 bg-[#0b0f17] border border-slate-800 rounded-xl p-6">
-          <h2 className="text-sm font-bold text-white">3. Acceptable Use of Sandboxes & Simulation Engines</h2>
+          <h2 className="text-sm font-bold text-white">4. Subscription, Pricing & Refund Policy</h2>
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            NetVision is provided as a <strong>free and open educational platform during its public beta and general release</strong>. There are zero recurring subscription fees, zero hidden access charges, and zero credit card requirements for standard learner accounts.
+          </p>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            In the event that optional fee-based enterprise seats, physical proctoring vouchers, or premium credential packages are introduced in the future, candidates will be entitled to a <strong>14-day full refund guarantee</strong>, provided the examination attempt has not been commenced. Once an exam session has been initiated on the server, exam vouchers become non-refundable.
+          </p>
+        </section>
+
+        {/* Section 5: Acceptable Platform Use */}
+        <section className="space-y-3 bg-[#0b0f17] border border-slate-800 rounded-xl p-6">
+          <h2 className="text-sm font-bold text-white">5. Acceptable Use of Sandboxes & Simulation Engines</h2>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
             The NetVision 3D Observatory, Packet Simulator, and WebCLI are provided strictly for educational purposes within browser-isolated and container-isolated environments. Users must not:
           </p>
@@ -104,19 +134,19 @@ export default function TermsOfServicePage() {
           </ul>
         </section>
 
-        {/* Section 4: Limitation of Liability */}
+        {/* Section 6: Limitation of Liability */}
         <section className="space-y-3 bg-[#0b0f17] border border-slate-800 rounded-xl p-6">
-          <h2 className="text-sm font-bold text-white">4. Disclaimer of Warranties & Limitation of Liability</h2>
+          <h2 className="text-sm font-bold text-white">6. Disclaimer of Warranties & Limitation of Liability</h2>
           <p className="text-xs text-slate-400 leading-relaxed">
-            THE NETVISION PLATFORM, SIMULATORS, AND DOCUMENTATION ARE PROVIDED ON AN &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. NETVISION DOES NOT GUARANTEE EMPLOYMENT, COMMERCIAL CERTIFICATION PASSAGE, OR HARDWARE-IDENTICAL CONVERGENCE TIMINGS IN SIMULATED TOPOLOGIES. IN NO EVENT SHALL NETVISION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING FROM THE USE OF THE SERVICE.
+            THE NETVISION PLATFORM, SIMULATORS, AND DOCUMENTATION ARE PROVIDED ON AN &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; BASIS WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED. NETVISION DOES NOT GUARANTEE EMPLOYMENT, COMMERCIAL CERTIFICATION PASSAGE, OR HARDWARE-IDENTICAL CONVERGENCE TIMINGS IN SIMULATED TOPOLOGIES. NETVISION CREDENTIALS DO NOT CONSTITUTE ACCREDITED UNIVERSITY DEGREES OR GOVERNMENT-REGULATED LICENSES. IN NO EVENT SHALL NETVISION OR ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING FROM THE USE OF THE SERVICE.
           </p>
         </section>
 
-        {/* Section 5: Modifications & Contact */}
+        {/* Section 7: Modifications & Contact */}
         <section className="space-y-3 bg-[#0b0f17] border border-slate-800 rounded-xl p-6">
-          <h2 className="text-sm font-bold text-white">5. Governing Terms & Inquiries</h2>
+          <h2 className="text-sm font-bold text-white">7. Governing Terms & Inquiries</h2>
           <p className="text-xs text-slate-400 leading-relaxed">
-            We reserve the right to revise these terms to reflect evolving technical standards, security policies, and regulatory requirements. For inquiries regarding institutional licensing, certification verification, or academic honor code matters, please contact <code className="text-cyan-400">compliance@netvision.internal</code>.
+            We reserve the right to revise these terms to reflect evolving technical standards, security policies, and regulatory requirements. For inquiries regarding institutional licensing, certification verification, or academic honor code matters, please contact <code className="text-cyan-400">compliance@netvision.edu</code>.
           </p>
         </section>
 
