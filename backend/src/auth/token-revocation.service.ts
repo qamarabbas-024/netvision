@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, Optional, Inject } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -56,7 +56,7 @@ export class TokenRevocationService implements OnModuleDestroy {
 
   private cleanupInterval: NodeJS.Timeout | null = null;
 
-  constructor(customStorageDir?: string) {
+  constructor(@Optional() @Inject('TOKEN_STORAGE_DIR') customStorageDir?: string) {
     const baseDir =
       customStorageDir ||
       process.env.TOKEN_REVOCATION_STORAGE_DIR ||

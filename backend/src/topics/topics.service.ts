@@ -7,6 +7,7 @@ import {
   ConflictException,
   InternalServerErrorException,
   Optional,
+  Logger,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
@@ -17,6 +18,7 @@ import { MonitoringService } from '../monitoring/monitoring.service';
 import { NETWORKING_COMMANDS_CATALOG } from './commands-catalog';
 import {
   LEGACY_SLUG_COMPATIBILITY_MAP,
+  FLAGSHIP_5_COURSES,
 } from '@netvision/shared';
 import type {
   VisualPacketEvent,
@@ -46,6 +48,7 @@ export interface ActiveLabSession {
 
 @Injectable()
 export class TopicsService {
+  private readonly logger = new Logger(TopicsService.name);
   private readonly activeLabSessions = new Map<string, ActiveLabSession>();
 
   constructor(
@@ -85,31 +88,52 @@ export class TopicsService {
     const userId = typeof identityInput === 'string' ? identityInput : identityInput?.userId;
     const anonymousId = typeof identityInput === 'object' ? identityInput?.anonymousId : undefined;
 
-    const courses = await this.prisma.course.findMany({
-      where,
-      include: {
-        modules: {
-          orderBy: { order: 'asc' },
-          include: {
-            lessons: {
-              orderBy: { order: 'asc' },
+    let courses: any[] = [];
+    try {
+      courses = await this.prisma.course.findMany({
+        where,
+        include: {
+          modules: {
+            orderBy: { order: 'asc' },
+            include: {
+              lessons: {
+                orderBy: { order: 'asc' },
+              },
             },
           },
         },
-      },
-      orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
-    });
+        orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
+      });
+    } catch (err: any) {
+      this.logger.warn(`Database offline or unreachable in getCourses: ${err?.message || err}. Serving canonical fallback.`);
+      courses = FLAGSHIP_5_COURSES.map((c) => ({
+        id: c.code,
+        code: c.code,
+        title: c.title,
+        slug: c.slug,
+        description: c.description,
+        level: c.level,
+        category: 'Foundational',
+        published: true,
+        order: 1,
+        modules: [],
+      }));
+    }
 
     let userProgressMap: Record<string, { completed: boolean; score: number | null }> = {};
     if (userId || anonymousId) {
-      const progressRecords = await this.prisma.userProgress.findMany({
-        where: userId ? { userId } : { anonymousId: anonymousId! },
-        select: { lessonId: true, completed: true, score: true },
-      });
-      userProgressMap = progressRecords.reduce((acc, p) => {
-        acc[p.lessonId] = { completed: p.completed, score: p.score };
-        return acc;
-      }, {} as Record<string, { completed: boolean; score: number | null }>);
+      try {
+        const progressRecords = await this.prisma.userProgress.findMany({
+          where: userId ? { userId } : { anonymousId: anonymousId! },
+          select: { lessonId: true, completed: true, score: true },
+        });
+        userProgressMap = progressRecords.reduce((acc, p) => {
+          acc[p.lessonId] = { completed: p.completed, score: p.score };
+          return acc;
+        }, {} as Record<string, { completed: boolean; score: number | null }>);
+      } catch {
+        // Safe offline fallback
+      }
     }
 
     const mapped = courses.map((course) => {
@@ -1474,18 +1498,19 @@ export class TopicsService {
   }
 
   async getStudentDashboardMetrics(identity: { userId?: string; anonymousId?: string }) {
-    const { userId, anonymousId } = identity;
-    const where = userId ? { userId } : anonymousId ? { anonymousId } : null;
+    try {
+      const { userId, anonymousId } = identity;
+      const where = userId ? { userId } : anonymousId ? { anonymousId } : null;
 
-    const totalCourses = await this.prisma.course.count({ where: { published: true } });
-    const totalLessons = await this.prisma.lesson.count({
-      where: { module: { course: { published: true } } },
-    });
+      const totalCourses = await this.prisma.course.count({ where: { published: true } });
+      const totalLessons = await this.prisma.lesson.count({
+        where: { module: { course: { published: true } } },
+      });
 
-    const activeAchievements = await this.prisma.achievement.findMany({
-      where: { isActive: true },
-      orderBy: { points: 'asc' },
-    });
+      const activeAchievements = await this.prisma.achievement.findMany({
+        where: { isActive: true },
+        orderBy: { points: 'asc' },
+      });
 
     if (!where) {
       return {
@@ -1765,7 +1790,30 @@ export class TopicsService {
       })),
       recentLessons,
     };
+  } catch (err: any) {
+    this.logger.warn(`Database offline or unreachable in getStudentDashboardMetrics: ${err?.message || err}. Returning fallback metrics.`);
+    return {
+      totalCourses: 5,
+      totalLessons: 46,
+      completedLessons: 0,
+      overallProgressPercent: 0,
+      studyStreak: 0,
+      totalXp: 0,
+      simulationsRun: 0,
+      quizAverageScore: 0,
+      certificatesEarned: 0,
+      completedCoursesCount: 0,
+      currentCourse: null,
+      badges: {
+        earned: 0,
+        total: 0,
+        items: [],
+      },
+      recentAttempts: [],
+      recentLessons: [],
+    };
   }
+}
 
   async getUserProgress(identity: { userId?: string; anonymousId?: string }) {
     return this.getStudentDashboardMetrics(identity);
