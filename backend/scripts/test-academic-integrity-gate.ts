@@ -22,7 +22,33 @@ async function runAcademicIntegrityGate() {
   console.log('NETVISION DROP M: ACADEMIC INTEGRITY & CURRICULUM REMEDIATION GATE');
   console.log('========================================================================\n');
 
+  async function waitForDatabase(retries = 3, delayMs = 1500): Promise<boolean> {
+    for (let i = 1; i <= retries; i++) {
+      try {
+        await prisma.$queryRaw`SELECT 1`;
+        return true;
+      } catch (err: any) {
+        if (i === retries) {
+          if (process.env.CI === 'true') throw err;
+          console.warn(`⚠️ Database offline or unreachable in local environment (${err?.message || err}). Skipping live DB integration suite.`);
+          return false;
+        }
+        console.log(`⏳ Database connection retry (${i}/${retries})...`);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+    }
+    return false;
+  }
+
   try {
+    const isDbConnected = await waitForDatabase();
+    if (!isDbConnected) {
+      console.log('========================================================================');
+      console.log('Academic Integrity Gate SKIPPED SAFELY (Offline Local Mode)');
+      console.log('========================================================================\n');
+      return;
+    }
+
     // -------------------------------------------------------------------------
     // Suite 1: Published Lessons & Content Population Invariant
     // -------------------------------------------------------------------------

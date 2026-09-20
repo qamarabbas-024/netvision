@@ -45,7 +45,7 @@ jobs:
           version: 11.20.0
 
       - name: Install Monorepo Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Build Workspace Packages
         run: pnpm --filter "@netvision/*" build
@@ -63,18 +63,26 @@ jobs:
       - name: Run ESLint Code Quality
         run: pnpm lint
 
+      - name: Run Enterprise Secret & Credential Scan
+        run: node backend/scripts/scan-repository-secrets.js
+
       - name: Run Frontend Regression & Unit Tests
         run: pnpm --filter netvision-frontend test
 
-      - name: Run Backend Certification & Product Correctness Suite
+      - name: Run Backend Certification & Deployment Readiness Suite
         run: |
           cd backend
+          npx ts-node scripts/test-deployment-readiness.ts
+          npx ts-node scripts/test-drop-w-legal-compliance.ts
+          npx ts-node scripts/test-drop-x-high-stakes-architecture.ts
           npx ts-node scripts/test-product-correctness.ts
           npx ts-node scripts/test-curriculum-content-v2.ts
           npx ts-node scripts/test-drop1-curriculum-reconciliation.ts
           npx ts-node scripts/test-drop2-certification-architecture.ts
           npx ts-node scripts/test-drop3-certificate-issuance.ts
           npx ts-node scripts/test-drop4-mastery.ts
+          npx ts-node scripts/test-drop8-standalone.ts
+          npx ts-node scripts/test-drop9-standalone.ts
           npx ts-node scripts/test-drop8-capstone-grading.ts
           npx ts-node scripts/test-drop9-certification-integrity.ts
 

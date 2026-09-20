@@ -3,7 +3,8 @@ async function runLiveStagingSmokeTest() {
   console.log('🌐 LIVE STAGING SECURITY SMOKE TEST');
   console.log('================================================================\n');
 
-  const STAGING_API = 'https://netvision-backend-staging.onrender.com';
+  const STAGING_API = process.env.STAGING_API_URL || process.env.API_URL || 'http://localhost:4000';
+  const EXPECTED_ORIGIN = process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:3000';
 
   // 1. Health Endpoint Test
   console.log('[TEST 1] Querying Staging Health Endpoint...');
@@ -45,7 +46,7 @@ async function runLiveStagingSmokeTest() {
     const corsRes = await fetch(`${STAGING_API}/api/v1/courses`, {
       method: 'OPTIONS',
       headers: {
-        'Origin': 'https://netvision-three.vercel.app',
+        'Origin': EXPECTED_ORIGIN,
         'Access-Control-Request-Method': 'GET',
       },
     });

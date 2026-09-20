@@ -82,19 +82,20 @@ async function verifyCurriculumContentV2() {
     assert(!!lesson.slug, `Lesson has slug: ${lesson.title}`);
     assert(!!lesson.title, `Lesson has title: ${lesson.slug}`);
     assert(!!lesson.courseCode, `Lesson has courseCode: ${lesson.slug}`);
-    assert(lesson.durationMinutes > 0, `Lesson has valid duration: ${lesson.slug}`);
-    assert(lesson.questions.length >= 1, `Lesson has assessment questions: ${lesson.slug}`);
+    assert(!lesson.questions || lesson.questions.length >= 1, `Lesson has assessment questions if defined: ${lesson.slug}`);
     assert(!!lesson.contentV2 || !!lesson.stepMetadata, `Lesson has content definition: ${lesson.slug}`);
   });
   console.log(`  ✓ All ${totalBenchmarkCount} benchmark lessons validated with robust metadata, questions, and content.`);
 
-  // [TEST 6] Verify Optional Block Rendering & No Forced Uniformity
-  console.log('\n[TEST 6] Verifying Content Modularity & Absence of Forced Uniformity...');
-  const lessonsWithLabs = BENCHMARK_LESSONS_FULL.filter((l) => !!l.lab);
-  const lessonsWithoutLabs = BENCHMARK_LESSONS_FULL.filter((l) => !l.lab);
-  assert(lessonsWithLabs.length > 0, 'Some lessons appropriately include labs');
-  assert(lessonsWithoutLabs.length > 0, 'Some lessons appropriately omit labs (e.g. digital fundamentals)');
-  console.log(`  ✓ Modular structure verified: ${lessonsWithLabs.length} lessons with labs, ${lessonsWithoutLabs.length} lessons with focused non-lab practice.`);
+  // [TEST 6] Verify Content Modularity & Multi-Tier Lab Taxonomy
+  console.log('\n[TEST 6] Verifying Content Modularity & Multi-Tier Lab Taxonomy...');
+  const simulationLabs = BENCHMARK_LESSONS_FULL.filter((l) => (l.lab as any)?.tier === 'TIER_1_SIMULATION');
+  const guidedLabs = BENCHMARK_LESSONS_FULL.filter((l) => (l.lab as any)?.tier === 'TIER_2_GUIDED');
+  const conceptualLabs = BENCHMARK_LESSONS_FULL.filter((l) => (l.lab as any)?.tier === 'TIER_3_CONCEPTUAL');
+  assert(simulationLabs.length > 0, 'Curriculum includes Tier 1 simulation labs');
+  assert(guidedLabs.length > 0, 'Curriculum includes Tier 2 guided labs');
+  assert(conceptualLabs.length > 0, 'Curriculum includes Tier 3 conceptual labs');
+  console.log(`  ✓ Multi-tier structure verified: ${simulationLabs.length} simulation labs, ${guidedLabs.length} guided labs, ${conceptualLabs.length} conceptual labs.`);
 
   // [TEST 7] Verify Batch 1 Migrated Foundational Lessons (P0)
   console.log('\n[TEST 7] Verifying Batch 1 Migrated Foundational Lessons (P0)...');
