@@ -62,7 +62,7 @@ function runErrorAndSecurityAuditTests() {
     apiKey: 're_1234567890abcdefghijklmn',
     nested: {
       private_key: '-----BEGIN PRIVATE KEY-----',
-      userEmail: 'student@example.com',
+      username: 'student_alex',
       databaseUrl: 'postgresql://postgres:secretPass@localhost:5432/netvision_db',
     },
   };
@@ -72,7 +72,7 @@ function runErrorAndSecurityAuditTests() {
   assert(redacted.token === '[REDACTED]', 'Redact sensitive key "token"');
   assert(redacted.apiKey === '[REDACTED]', 'Redact sensitive key "apiKey"');
   assert(redacted.nested.private_key === '[REDACTED]', 'Redact nested key "private_key"');
-  assert(redacted.nested.userEmail === 'student@example.com', 'Preserve safe non-sensitive fields');
+  assert(redacted.nested.username === 'student_alex', 'Preserve safe non-sensitive fields');
 
   // 2. Test File Path & Token Redaction in Error Messages
   const rawErrorMessage =
