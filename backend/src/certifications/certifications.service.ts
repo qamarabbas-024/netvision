@@ -273,11 +273,22 @@ export class CertificationsService {
     };
   }
 
+  // Cryptographically secure, unbiased Fisher-Yates (Knuth) shuffle algorithm
+  private secureShuffle<T>(array: T[]): T[] {
+    const copy = [...array];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = crypto.randomInt(0, i + 1);
+      const temp = copy[i];
+      copy[i] = copy[j];
+      copy[j] = temp;
+    }
+    return copy;
+  }
+
   // Question Domain Blueprint Builder (Real Approved Questions Only — Zero Synthetic Fallbacks)
   private async buildTheoryExamBlueprint(targetCount = 50) {
-    const rawQuestions = await this.prisma.quizQuestion.findMany({
-      take: 200,
-    });
+    // Audit Hardening: Fetch all approved questions without arbitrary truncation (take: 200 removed)
+    const rawQuestions = await this.prisma.quizQuestion.findMany();
 
     if (!rawQuestions || rawQuestions.length < targetCount) {
       const msg = `Insufficient approved question pool for certification exam blueprint. Required: ${targetCount}, available: ${rawQuestions?.length || 0}`;
@@ -347,7 +358,7 @@ export class CertificationsService {
     for (const [domain, target] of Object.entries(targets)) {
       const pool = categorized[domain] || [];
       const availableFromPool = pool.filter((q) => !usedQuestionIds.has(q.id));
-      const shuffled = [...availableFromPool].sort(() => 0.5 - Math.random());
+      const shuffled = this.secureShuffle(availableFromPool);
 
       const chosenFromPool = shuffled.slice(0, target);
       for (const q of chosenFromPool) {
@@ -358,12 +369,11 @@ export class CertificationsService {
 
     // If any domain was short, backfill from remaining unused approved questions without synthesizing
     if (selectedQuestions.length < targetCount) {
-      const remainingApproved = rawQuestions
-        .filter((q) => !usedQuestionIds.has(q.id))
-        .sort(() => 0.5 - Math.random());
+      const remainingApproved = rawQuestions.filter((q) => !usedQuestionIds.has(q.id));
+      const shuffledRemaining = this.secureShuffle(remainingApproved);
 
       const needed = targetCount - selectedQuestions.length;
-      const additional = remainingApproved.slice(0, needed).map((q) => {
+      const additional = shuffledRemaining.slice(0, needed).map((q) => {
         const d = classifyDomain(q);
         return {
           id: q.id,
@@ -826,6 +836,55 @@ export class CertificationsService {
     };
   }
 
+  private formatActiveAttemptResponse(activeAttempt: any, type: ExamType, durationSeconds?: number) {
+    const configSnapshot: any = activeAttempt.configSnapshotJson || {};
+    const remainingSeconds = Math.max(0, Math.floor((new Date(activeAttempt.expiresAt).getTime() - Date.now()) / 1000));
+    const effectiveDuration = durationSeconds || Math.floor((new Date(activeAttempt.expiresAt).getTime() - new Date(activeAttempt.startedAt).getTime()) / 1000);
+
+    if (type === ExamType.PRACTICAL) {
+      const topologyState = configSnapshot.topologyState || {};
+      const objectives = configSnapshot.objectives || [];
+      const evaluated = this.evaluatePracticalState(topologyState, objectives);
+
+      return {
+        attemptId: activeAttempt.id,
+        certificationCode: activeAttempt.certificationCode,
+        type: activeAttempt.type,
+        status: activeAttempt.status,
+        startedAt: activeAttempt.startedAt,
+        expiresAt: activeAttempt.expiresAt,
+        durationSeconds: effectiveDuration,
+        remainingSeconds,
+        attemptNumber: activeAttempt.attemptNumber,
+        scenarioCode: configSnapshot.scenarioCode,
+        topologyState,
+        objectives: evaluated.objectiveResults,
+        troubleshootingIncident: this.sanitizeIncidentForClient(configSnapshot.troubleshootingIncident),
+        theoryQuestions: this.sanitizeQuestionsForClient(configSnapshot.theoryQuestions || []),
+        packetAnalysisQuestions: this.sanitizeQuestionsForClient(configSnapshot.packetAnalysisQuestions || []),
+        scoringWeights: configSnapshot.scoringWeights,
+        hintsUsed: configSnapshot.hintsUsed || 0,
+        maximumHints: configSnapshot.maximumHints || 2,
+        hintPenalty: configSnapshot.hintPenalty || 5,
+      };
+    }
+
+    const savedQuestions = configSnapshot.questions || [];
+    return {
+      attemptId: activeAttempt.id,
+      certificationCode: activeAttempt.certificationCode,
+      type: activeAttempt.type,
+      status: activeAttempt.status,
+      startedAt: activeAttempt.startedAt,
+      expiresAt: activeAttempt.expiresAt,
+      durationSeconds: effectiveDuration,
+      remainingSeconds,
+      attemptNumber: activeAttempt.attemptNumber,
+      questionCount: savedQuestions.length,
+      questions: this.sanitizeQuestionsForClient(savedQuestions),
+    };
+  }
+
   async startExamAttempt(userId: string, dto: StartExamDto) {
     if (!userId) {
       throw new BadRequestException('Authenticated User ID is required to start a final certification exam attempt.');
@@ -919,50 +978,12 @@ export class CertificationsService {
       }
     }
 
-    // 3. Active running exam check
+    // 3. Active running exam check (idempotent recovery)
     const activeAttempt = recentAttempts.find(
       (a) => a.status === ExamAttemptStatus.IN_PROGRESS && new Date() < new Date(a.expiresAt)
     );
     if (activeAttempt) {
-      const configSnapshot: any = activeAttempt.configSnapshotJson || {};
-      if (dto.type === ExamType.PRACTICAL) {
-        const topologyState = configSnapshot.topologyState || {};
-        const objectives = configSnapshot.objectives || [];
-        const evaluated = this.evaluatePracticalState(topologyState, objectives);
-
-        return {
-          attemptId: activeAttempt.id,
-          certificationCode: activeAttempt.certificationCode,
-          type: activeAttempt.type,
-          status: activeAttempt.status,
-          startedAt: activeAttempt.startedAt,
-          expiresAt: activeAttempt.expiresAt,
-          attemptNumber: activeAttempt.attemptNumber,
-          scenarioCode: configSnapshot.scenarioCode,
-          topologyState,
-          objectives: evaluated.objectiveResults,
-          troubleshootingIncident: this.sanitizeIncidentForClient(configSnapshot.troubleshootingIncident),
-          theoryQuestions: this.sanitizeQuestionsForClient(configSnapshot.theoryQuestions || []),
-          packetAnalysisQuestions: this.sanitizeQuestionsForClient(configSnapshot.packetAnalysisQuestions || []),
-          scoringWeights: configSnapshot.scoringWeights,
-          hintsUsed: configSnapshot.hintsUsed || 0,
-          maximumHints: configSnapshot.maximumHints || 2,
-          hintPenalty: configSnapshot.hintPenalty || 5,
-        };
-      }
-
-      const savedQuestions = configSnapshot.questions || [];
-      return {
-        attemptId: activeAttempt.id,
-        certificationCode: activeAttempt.certificationCode,
-        type: activeAttempt.type,
-        status: activeAttempt.status,
-        startedAt: activeAttempt.startedAt,
-        expiresAt: activeAttempt.expiresAt,
-        attemptNumber: activeAttempt.attemptNumber,
-        questionCount: savedQuestions.length,
-        questions: this.sanitizeQuestionsForClient(savedQuestions),
-      };
+      return this.formatActiveAttemptResponse(activeAttempt, dto.type);
     }
 
     // 4. Server-owned time calculation & snapshot building
@@ -1008,70 +1029,77 @@ export class CertificationsService {
     const expiresAt = new Date(startedAt.getTime() + durationSeconds * 1000);
     const attemptNumber = recentAttempts.length + 1;
 
-    const attempt = await this.prisma.examAttempt.create({
-      data: {
-        userId,
-        certificationCode: cert.code,
-        type: dto.type,
-        status: ExamAttemptStatus.IN_PROGRESS,
-        startedAt,
-        expiresAt,
-        attemptNumber,
-        configSnapshotJson,
-        resultMetadataJson: {
-          answersJson: {},
-          packetAnswersJson: {},
+    // Atomic transaction boundary with P2002 conflict resolution guarantees single authoritative attempt
+    try {
+      return await this.prisma.$transaction(
+        async (tx) => {
+          // Double-check active attempt inside transaction to serialize concurrent double-click / parallel starts
+          const concurrentActive = await tx.examAttempt.findFirst({
+            where: {
+              userId,
+              certificationCode: cert.code,
+              type: dto.type,
+              status: ExamAttemptStatus.IN_PROGRESS,
+              expiresAt: { gt: new Date() },
+            },
+            orderBy: { createdAt: 'desc' },
+          });
+
+          if (concurrentActive) {
+            return this.formatActiveAttemptResponse(concurrentActive, dto.type, durationSeconds);
+          }
+
+          const attempt = await tx.examAttempt.create({
+            data: {
+              userId,
+              certificationCode: cert.code,
+              type: dto.type,
+              status: ExamAttemptStatus.IN_PROGRESS,
+              startedAt,
+              expiresAt,
+              attemptNumber,
+              configSnapshotJson,
+              resultMetadataJson: {
+                answersJson: {},
+                packetAnswersJson: {},
+              },
+            },
+          });
+
+          this.logger.log(
+            `Started ${dto.type} Exam Attempt [${attempt.id}] for user ${userId} (Attempt #${attemptNumber}, Duration: ${durationSeconds}s, Expires: ${expiresAt.toISOString()})`
+          );
+          this.monitoringService?.recordCertificationEvent('EXAM_ATTEMPTED', {
+            userId,
+            courseId: cert.code,
+          });
+
+          return this.formatActiveAttemptResponse(attempt, dto.type, durationSeconds);
         },
-      },
-    });
+        { timeout: 15000 }
+      );
+    } catch (err: any) {
+      if (err.code === 'P2002') {
+        this.logger.warn(
+          `Concurrent exam start conflict intercepted for user ${userId}. Converging on existing active attempt.`
+        );
+        const fallbackActive = await this.prisma.examAttempt.findFirst({
+          where: {
+            userId,
+            certificationCode: cert.code,
+            type: dto.type,
+            status: ExamAttemptStatus.IN_PROGRESS,
+            expiresAt: { gt: new Date() },
+          },
+          orderBy: { createdAt: 'desc' },
+        });
 
-    this.logger.log(
-      `Started ${dto.type} Exam Attempt [${attempt.id}] for user ${userId} (Attempt #${attemptNumber}, Duration: ${durationSeconds}s, Expires: ${expiresAt.toISOString()})`
-    );
-    this.monitoringService?.recordCertificationEvent('EXAM_ATTEMPTED', {
-      userId,
-      courseId: cert.code,
-    });
-
-    if (dto.type === ExamType.PRACTICAL) {
-      const topologyState = configSnapshotJson.topologyState || {};
-      const objectives = configSnapshotJson.objectives || [];
-      const evaluated = this.evaluatePracticalState(topologyState, objectives);
-
-      return {
-        attemptId: attempt.id,
-        certificationCode: attempt.certificationCode,
-        type: attempt.type,
-        status: attempt.status,
-        startedAt: attempt.startedAt,
-        expiresAt: attempt.expiresAt,
-        durationSeconds,
-        attemptNumber: attempt.attemptNumber,
-        scenarioCode: configSnapshotJson.scenarioCode,
-        topologyState,
-        objectives: evaluated.objectiveResults,
-        troubleshootingIncident: this.sanitizeIncidentForClient(configSnapshotJson.troubleshootingIncident),
-        theoryQuestions: this.sanitizeQuestionsForClient(configSnapshotJson.theoryQuestions || []),
-        packetAnalysisQuestions: this.sanitizeQuestionsForClient(configSnapshotJson.packetAnalysisQuestions || []),
-        scoringWeights: configSnapshotJson.scoringWeights,
-        hintsUsed: 0,
-        maximumHints: configSnapshotJson.maximumHints || 2,
-        hintPenalty: configSnapshotJson.hintPenalty || 5,
-      };
+        if (fallbackActive) {
+          return this.formatActiveAttemptResponse(fallbackActive, dto.type, durationSeconds);
+        }
+      }
+      throw err;
     }
-
-    return {
-      attemptId: attempt.id,
-      certificationCode: attempt.certificationCode,
-      type: attempt.type,
-      status: attempt.status,
-      startedAt: attempt.startedAt,
-      expiresAt: attempt.expiresAt,
-      durationSeconds,
-      attemptNumber: attempt.attemptNumber,
-      questionCount: questionsSnapshot.length,
-      questions: this.sanitizeQuestionsForClient(questionsSnapshot),
-    };
   }
 
   async getAttemptStatus(userId: string, attemptId: string) {
@@ -1659,9 +1687,14 @@ export class CertificationsService {
       };
     }
 
-    // Server-Side Time Authority Check
+    // Server-Side Time Authority Check with Explicit 15-Second Network Transit Tolerance
     const now = new Date();
-    if (now > new Date(attempt.expiresAt) || attempt.status === ExamAttemptStatus.EXPIRED) {
+    const expiresAt = new Date(attempt.expiresAt);
+    const SUBMISSION_LATENCY_TOLERANCE_SECONDS = 15;
+    const maxAllowedSubmissionTime = new Date(expiresAt.getTime() + SUBMISSION_LATENCY_TOLERANCE_SECONDS * 1000);
+    const isSubmittedWithinTolerance = now > expiresAt && now <= maxAllowedSubmissionTime;
+
+    if (now > maxAllowedSubmissionTime || attempt.status === ExamAttemptStatus.EXPIRED) {
       await this.prisma.examAttempt.update({
         where: { id: attemptId },
         data: { status: ExamAttemptStatus.EXPIRED, score: 0, passed: false },
@@ -1822,6 +1855,8 @@ export class CertificationsService {
               packetAnalysis: packetAnalysisScore,
             },
             submittedAt: now,
+            submittedWithinTolerance: isSubmittedWithinTolerance,
+            latencyToleranceSecondsUsed: isSubmittedWithinTolerance ? Math.max(0, Math.round((now.getTime() - expiresAt.getTime()) / 1000)) : 0,
           },
         },
       });
@@ -1959,6 +1994,8 @@ export class CertificationsService {
           incorrectCount,
           totalQuestionsCount,
           submittedAt: now,
+          submittedWithinTolerance: isSubmittedWithinTolerance,
+          latencyToleranceSecondsUsed: isSubmittedWithinTolerance ? Math.max(0, Math.round((now.getTime() - expiresAt.getTime()) / 1000)) : 0,
         },
       },
     });
@@ -2391,7 +2428,17 @@ export class CertificationsService {
       }
     }
 
-    // 4. Legacy Certification Exam Path (Historical NV-NET, etc.)
+    // 4. Server-Authoritative Eligibility Boundary for Generic/Legacy Certification Exam Path (NV-NET)
+    const eligibility = await this.calculateEligibility(userId, code);
+    if (!eligibility.eligible) {
+      const incomplete = eligibility.requirements
+        .filter((r) => r.status !== 'COMPLETE')
+        .map((r) => r.title);
+      throw new BadRequestException(
+        `Certificate claim denied for ${certDef.title} (${code}): Incomplete requirements: ${incomplete.join('; ')}`
+      );
+    }
+
     const passedAttempt = await this.prisma.examAttempt.findFirst({
       where: {
         userId,

@@ -352,7 +352,7 @@ async function runDrop9TestSuite() {
       } as any
     );
     check(
-      submitWithTamperedVersion.result.assessmentVersion === 1,
+      (submitWithTamperedVersion.result as any)?.assessmentVersion === 1,
       'Server strictly evaluated against snapshotted version 1, client version forgery ignored'
     );
 

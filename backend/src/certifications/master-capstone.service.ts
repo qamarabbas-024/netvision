@@ -438,13 +438,32 @@ export class MasterCapstoneService {
       throw new ForbiddenException(`Access denied: You do not own Capstone attempt "${attemptId}".`);
     }
 
+    // Idempotency: Return existing result if already finalized (handles double-clicks, browser refreshes, reconnects)
+    if (attempt.status === ExamAttemptStatus.PASSED || attempt.status === ExamAttemptStatus.FAILED) {
+      return {
+        attemptId: attempt.id,
+        examCode: CAPSTONE_CONFIG.examCode,
+        status: attempt.status,
+        score: attempt.score,
+        passed: attempt.passed,
+        submittedAt: attempt.submittedAt,
+        result: attempt.resultMetadataJson,
+        isIdempotent: true,
+      };
+    }
+
     if (attempt.status !== ExamAttemptStatus.IN_PROGRESS) {
       throw new BadRequestException(`Cannot submit exam attempt with status: ${attempt.status}.`);
     }
 
     const now = new Date();
-    // Server-side timing enforcement: Strict rejection if submitted after expiration
-    if (now > new Date(attempt.expiresAt)) {
+    const expiresAt = new Date(attempt.expiresAt);
+    const SUBMISSION_LATENCY_TOLERANCE_SECONDS = 15;
+    const maxAllowedSubmissionTime = new Date(expiresAt.getTime() + SUBMISSION_LATENCY_TOLERANCE_SECONDS * 1000);
+    const isSubmittedWithinTolerance = now > expiresAt && now <= maxAllowedSubmissionTime;
+
+    // Server-side timing enforcement: Strict rejection if submitted after expiration and latency tolerance
+    if (now > maxAllowedSubmissionTime) {
       await this.prisma.examAttempt.updateMany({
         where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
         data: {
@@ -454,7 +473,7 @@ export class MasterCapstoneService {
           score: 0,
         },
       });
-      throw new BadRequestException('Exam submission rejected: The 120-minute examination duration has expired.');
+      throw new BadRequestException('Exam submission rejected: The 120-minute examination duration and 15-second network transit tolerance have expired.');
     }
 
     // Load snapshotted assessment version for this attempt (reproducible historical grading)
@@ -479,6 +498,8 @@ export class MasterCapstoneService {
       sections: gradingSummary.sections,
       candidateResponsesSnapshot: gradingSummary.candidateResponsesSnapshot,
       submittedAt: now.toISOString(),
+      submittedWithinTolerance: isSubmittedWithinTolerance,
+      latencyToleranceSecondsUsed: isSubmittedWithinTolerance ? Math.max(0, Math.round((now.getTime() - expiresAt.getTime()) / 1000)) : 0,
       durationSecondsUsed: Math.floor((now.getTime() - new Date(attempt.startedAt).getTime()) / 1000),
     };
 
@@ -501,6 +522,19 @@ export class MasterCapstoneService {
         });
 
         if (updateResult.count === 0) {
+          const finalized = await tx.examAttempt.findUnique({ where: { id: attemptId } });
+          if (finalized && (finalized.status === ExamAttemptStatus.PASSED || finalized.status === ExamAttemptStatus.FAILED)) {
+            return {
+              attemptId: finalized.id,
+              examCode: CAPSTONE_CONFIG.examCode,
+              status: finalized.status,
+              score: finalized.score,
+              passed: finalized.passed,
+              submittedAt: finalized.submittedAt,
+              result: finalized.resultMetadataJson,
+              isIdempotent: true,
+            };
+          }
           throw new BadRequestException('Exam attempt has already been submitted or is no longer in progress.');
         }
 
