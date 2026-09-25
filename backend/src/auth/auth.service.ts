@@ -24,6 +24,10 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 
 import { TokenRevocationService } from './token-revocation.service';
 
+// Precomputed valid Argon2id hash for constant-time comparison when user doesn't exist or has null passwordHash (OAuth users)
+const DUMMY_HASH =
+  '$argon2id$v=19$m=65536,t=3,p=4$KCp2rkKo/dBl1FXXvbwYqQ$kdD2aW/c+4nyzEN5PRRqVF+6+bo+r6EJvN5D+X1f1ms';
+
 export interface RegisterResponse {
   message: string;
   email: string;
@@ -188,7 +192,7 @@ export class AuthService {
 
     if (!verificationRecord) {
       this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
-      throw new UnauthorizedException('No active verification process found for this email. Please sign up or request a new code.');
+      throw new UnauthorizedException('Invalid or expired verification OTP code.');
     }
 
     if (new Date() > verificationRecord.expiresAt) {
@@ -204,7 +208,11 @@ export class AuthService {
     }
 
     const incomingOtpHash = this.hashToken(sanitizedOtp);
-    if (incomingOtpHash !== verificationRecord.otpHash) {
+    const inBuf = Buffer.from(incomingOtpHash, 'utf8');
+    const recBuf = Buffer.from(verificationRecord.otpHash, 'utf8');
+    const isOtpValid = inBuf.length === recBuf.length && crypto.timingSafeEqual(inBuf, recBuf);
+
+    if (!isOtpValid) {
       // Increment failed attempt counter and record failed auth
       this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
       await this.prisma.emailVerification.update({
@@ -303,12 +311,15 @@ export class AuthService {
       where: { email: normalizedEmail },
     });
 
-    if (!user) {
+    // Zero-trust security: If user does not exist or has no local password (e.g. OAuth-only account),
+    // perform dummy argon2 verification to equalize timing and prevent account enumeration or crash.
+    if (!user || !user.passwordHash) {
+      await argon2.verify(DUMMY_HASH, dto.password).catch(() => false);
       this.rateLimiterService?.recordFailedAuth(clientIp, normalizedEmail);
       this.monitoringService?.recordAuthEvent('LOGIN_FAILED', {
         ip: clientIp,
         userIdentifier: normalizedEmail,
-        details: { reason: 'UserNotFound' },
+        details: { reason: !user ? 'UserNotFound' : 'NoLocalPassword' },
       });
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -432,6 +443,17 @@ export class AuthService {
       throw new UnauthorizedException('Password reset token has expired. Please request a new link.');
     }
 
+    // Atomic consumption: Mark token as used before updating user to prevent race condition and replay
+    const consumption = await this.prisma.passwordResetToken.updateMany({
+      where: { id: resetRecord.id, used: false },
+      data: { used: true },
+    });
+
+    if (consumption.count === 0) {
+      this.rateLimiterService?.recordFailedAuth(clientIp, resetRecord.email);
+      throw new UnauthorizedException('Password reset token has already been used.');
+    }
+
     const argon2Options: argon2.Options = {
       type: argon2.argon2id,
       memoryCost: 65536,
@@ -442,20 +464,17 @@ export class AuthService {
 
     const updatedUser = await this.prisma.user.update({
       where: { email: resetRecord.email },
-      data: { passwordHash: newPasswordHash },
+      data: {
+        passwordHash: newPasswordHash,
+        updatedAt: new Date(),
+      },
       select: { id: true },
     });
 
-    // Security Hardening: Invalidate all existing active sessions and refresh tokens on password reset
+    // Invalidate all active sessions, tokens, and distributed JWTs on password reset
     if (updatedUser?.id) {
-      this.tokenRevocationService?.revokeUserSessions(updatedUser.id);
-      this.tokenRevocationService?.revokeUserRefreshTokens(updatedUser.id);
+      await this.invalidateSession(undefined, undefined, updatedUser.id);
     }
-
-    await this.prisma.passwordResetToken.update({
-      where: { id: resetRecord.id },
-      data: { used: true },
-    });
 
     this.rateLimiterService?.recordSuccessfulAuth(clientIp, resetRecord.email);
 
@@ -661,6 +680,15 @@ export class AuthService {
       this.tokenRevocationService?.revokeToken(rawRefreshToken);
     }
     if (userId) {
+      // Touch user.updatedAt in PostgreSQL to guarantee instant multi-instance JWT invalidation
+      try {
+        await this.prisma.user.update({
+          where: { id: userId },
+          data: { updatedAt: new Date() },
+        });
+      } catch (err: any) {
+        this.logger.warn(`Failed to touch user.updatedAt for user ${userId}: ${err?.message || err}`);
+      }
       this.tokenRevocationService?.revokeUserSessions(userId);
       this.tokenRevocationService?.revokeUserRefreshTokens(userId);
       this.monitoringService?.recordAuthEvent('LOGOUT', {

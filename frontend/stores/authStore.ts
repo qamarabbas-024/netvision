@@ -145,6 +145,16 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (token && storedUserJson && !isJwtExpired(token)) {
         try {
           const parsedUser = JSON.parse(storedUserJson);
+          // Zero-trust hardening: Never trust role from unverified localStorage JSON string.
+          // Anchor the role strictly to the signed JWT payload.
+          const jwtParts = token.split('.');
+          if (jwtParts.length === 3) {
+            const b64 = jwtParts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const decoded = JSON.parse(decodeURIComponent(atob(b64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            parsedUser.role = decoded.role || 'STUDENT';
+          } else {
+            parsedUser.role = 'STUDENT';
+          }
           set({ user: parsedUser, token, isAuthenticated: true, isLoading: false });
           return;
         } catch (e) {}

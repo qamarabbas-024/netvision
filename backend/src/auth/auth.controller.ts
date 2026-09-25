@@ -143,12 +143,14 @@ export class AuthController {
   }
 
   // Google OAuth Initiate & Callback
+  @AuthRateLimit()
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   async googleAuth() {
     // Initiates Google OAuth redirect
   }
 
+  @AuthRateLimit()
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleAuthCallback(@Req() req: any, @Res() res: Response) {
@@ -181,12 +183,14 @@ export class AuthController {
   }
 
   // GitHub OAuth Initiate & Callback
+  @AuthRateLimit()
   @Get('github')
   @UseGuards(GithubAuthGuard)
   async githubAuth() {
     // Initiates GitHub OAuth redirect
   }
 
+  @AuthRateLimit()
   @Get('github/callback')
   @UseGuards(GithubAuthGuard)
   async githubAuthCallback(@Req() req: any, @Res() res: Response) {
@@ -218,6 +222,7 @@ export class AuthController {
     return res.redirect(`${frontendUrl}/auth/callback`);
   }
 
+  @AuthRateLimit()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(@Req() reqOrRes: any, @Res({ passthrough: true }) maybeRes?: Response) {

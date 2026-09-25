@@ -13,8 +13,21 @@ export interface JwtPayload {
   exp?: number;
 }
 
+interface CachedUser {
+  id: string;
+  email: string;
+  username: string;
+  role: string;
+  isVerified: boolean;
+  updatedAt: Date;
+  cachedAt: number;
+}
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  private readonly userCache = new Map<string, CachedUser>();
+  private readonly CACHE_TTL_MS = 30 * 1000; // 30-second cache to prevent DB query stampede
+
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
@@ -57,6 +70,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  evictUserCache(userId?: string): void {
+    if (userId) {
+      this.userCache.delete(userId);
+    } else {
+      this.userCache.clear();
+    }
+  }
+
+  private pruneCacheIfNeeded(): void {
+    if (this.userCache.size > 10000) {
+      const now = Date.now();
+      for (const [key, value] of this.userCache.entries()) {
+        if (now - value.cachedAt > this.CACHE_TTL_MS) {
+          this.userCache.delete(key);
+        }
+      }
+    }
+  }
+
   async validate(reqOrPayload: any, maybePayload?: any) {
     let req: any;
     let payload: JwtPayload;
@@ -83,13 +115,43 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Token has been revoked or session terminated.');
     }
 
-    // 2. Validate user identity in database
-    const user = await this.prisma.user.findUnique({
-      where: { id: payload.sub },
-    });
+    // 2. Validate user identity with short-lived cache (prevents DB query stampede)
+    let user = this.userCache.get(payload.sub);
+    const now = Date.now();
+    if (!user || now - user.cachedAt > this.CACHE_TTL_MS) {
+      const dbUser = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          role: true,
+          isVerified: true,
+          updatedAt: true,
+        },
+      });
 
-    if (!user) {
-      throw new UnauthorizedException('User not found or token invalid');
+      if (!dbUser) {
+        this.userCache.delete(payload.sub);
+        throw new UnauthorizedException('User not found or token invalid');
+      }
+
+      user = {
+        ...dbUser,
+        cachedAt: now,
+      };
+      this.pruneCacheIfNeeded();
+      this.userCache.set(payload.sub, user);
+    }
+
+    // 3. Multi-instance distributed token invalidation:
+    // Reject tokens issued prior to the user's last session invalidation / password reset / update
+    if (payload.iat && user.updatedAt) {
+      const tokenIatSec = payload.iat;
+      const userUpdatedSec = Math.floor(new Date(user.updatedAt).getTime() / 1000);
+      if (tokenIatSec < userUpdatedSec) {
+        throw new UnauthorizedException('Token has been revoked due to session termination or account update.');
+      }
     }
 
     const emailVerificationEnabled = this.configService.get<string>('EMAIL_VERIFICATION_ENABLED', 'false') === 'true';

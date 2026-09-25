@@ -35,7 +35,14 @@ export class CookieStateStore {
         res.clearCookie(this.cookieName, { path: '/' });
       }
 
-      if (!storedState || !state || storedState !== state) {
+      if (!storedState || !state || typeof storedState !== 'string' || typeof state !== 'string') {
+        return callback(null, false, { message: 'Invalid or missing OAuth state parameter.' });
+      }
+
+      const storedBuf = Buffer.from(storedState, 'utf8');
+      const stateBuf = Buffer.from(state, 'utf8');
+
+      if (storedBuf.length !== stateBuf.length || !crypto.timingSafeEqual(storedBuf, stateBuf)) {
         return callback(null, false, { message: 'Invalid or missing OAuth state parameter.' });
       }
 
