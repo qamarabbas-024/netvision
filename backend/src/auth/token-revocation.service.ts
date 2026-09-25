@@ -3,6 +3,9 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import type { MonitoringService } from '../monitoring/monitoring.service';
+import { RedisService } from '../redis/redis.service';
+import { PrismaService } from '../database/prisma.service';
+import { REDIS_KEYS, DISTRIBUTED_TTL, DistributedRevokedToken, DistributedRefreshSession } from '../redis/distributed-state.interface';
 
 export interface RevokedTokenRecord {
   tokenHash: string;
@@ -32,7 +35,7 @@ export class TokenRevocationService implements OnModuleDestroy {
   private readonly logger = new Logger(TokenRevocationService.name);
   private monitoringService?: MonitoringService;
 
-  // Storage configuration
+  // Storage configuration (Secondary file fallback when Redis is absent)
   private readonly storageDir: string;
   private readonly revokedTokensFile: string;
   private readonly userCutoffsFile: string;
@@ -45,18 +48,22 @@ export class TokenRevocationService implements OnModuleDestroy {
   private refreshSessionsMtime = 0;
   private familyTokensMtime = 0;
 
-  // In-memory synced caches
+  // In-memory synced L1 caches
   private revokedTokens = new Map<string, RevokedTokenRecord>();
   private userRevocationCutoffs = new Map<string, number>();
   private refreshSessions = new Map<string, RefreshSession>();
   private familyTokens = new Map<string, Set<string>>();
 
   // Grace period for concurrent refresh requests (e.g. multi-tab browser refresh)
-  private readonly concurrentGracePeriodMs = 5000;
+  private readonly concurrentGracePeriodMs = 10000;
 
   private cleanupInterval: NodeJS.Timeout | null = null;
 
-  constructor(@Optional() @Inject('TOKEN_STORAGE_DIR') customStorageDir?: string) {
+  constructor(
+    @Optional() @Inject('TOKEN_STORAGE_DIR') customStorageDir?: string,
+    @Optional() private readonly redisService?: RedisService,
+    @Optional() private readonly prisma?: PrismaService
+  ) {
     const baseDir =
       customStorageDir ||
       process.env.TOKEN_REVOCATION_STORAGE_DIR ||
@@ -91,7 +98,7 @@ export class TokenRevocationService implements OnModuleDestroy {
         fs.mkdirSync(this.storageDir, { recursive: true });
       }
     } catch (err: any) {
-      this.logger.error(`Failed to initialize storage directory ${this.storageDir}: ${err?.message || err}`);
+      this.logger.warn(`Storage directory ${this.storageDir} note: ${err?.message || err}`);
     }
   }
 
@@ -114,7 +121,7 @@ export class TokenRevocationService implements OnModuleDestroy {
         }
       }
     } catch (err: any) {
-      this.logger.error(`Failed to write atomic file ${filePath}: ${err?.message || err}`);
+      this.logger.warn(`Failed to write atomic file ${filePath}: ${err?.message || err}`);
     }
   }
 
@@ -220,36 +227,78 @@ export class TokenRevocationService implements OnModuleDestroy {
 
   /**
    * Revokes a specific access token (e.g. upon logout).
-   * Atomically persisted across instances.
+   * Persisted to Redis with exact TTL + L1 cache + disk fallback.
    */
-  public revokeToken(rawToken: string, expirySeconds = 7 * 86400): void {
+  public revokeToken(rawToken: string, expirySeconds: number = DISTRIBUTED_TTL.DEFAULT_ACCESS_TOKEN_REVOCATION_SEC): void {
     if (!rawToken || typeof rawToken !== 'string') return;
     this.syncFromDisk();
     const tokenHash = this.hashToken(rawToken);
     const now = Date.now();
-    this.revokedTokens.set(tokenHash, {
+    const record: RevokedTokenRecord = {
       tokenHash,
       revokedAt: now,
       expiresAt: now + expirySeconds * 1000,
-    });
+    };
+
+    this.revokedTokens.set(tokenHash, record);
     this.persistRevokedTokens();
+
+    // Distributed Redis Persistence
+    if (this.redisService?.isAvailable()) {
+      const distRecord: DistributedRevokedToken = {
+        tokenHash,
+        revokedAt: Math.floor(now / 1000),
+        expiresAt: Math.floor((now + expirySeconds * 1000) / 1000),
+        sourceInstanceId: this.redisService.instanceId,
+      };
+      this.redisService.set(
+        REDIS_KEYS.REVOKED_TOKEN(tokenHash),
+        distRecord,
+        expirySeconds
+      ).catch((err) => {
+        this.logger.warn(`Failed to replicate token revocation to Redis: ${err?.message || err}`);
+      });
+    }
   }
 
   /**
    * Revokes all active sessions for a specific user ID issued before now.
-   * Atomically persisted across instances.
+   * Multi-instance distributed update via Redis + PostgreSQL user.updatedAt.
    */
   public revokeUserSessions(userId: string): void {
     if (!userId) return;
     this.syncFromDisk();
-    this.userRevocationCutoffs.set(userId, Math.floor(Date.now() / 1000));
+    const nowSec = Math.floor(Date.now() / 1000);
+    this.userRevocationCutoffs.set(userId, nowSec);
     this.persistUserCutoffs();
     this.revokeUserRefreshTokens(userId);
+
+    // Distributed Redis Persistence
+    if (this.redisService?.isAvailable()) {
+      this.redisService.set(
+        REDIS_KEYS.USER_REVOCATION_CUTOFF(userId),
+        nowSec,
+        DISTRIBUTED_TTL.USER_REVOCATION_CUTOFF_SEC
+      ).catch((err) => {
+        this.logger.warn(`Failed to replicate user cutoff to Redis: ${err?.message || err}`);
+      });
+    }
+
+    // PostgreSQL Multi-Instance Synchronization:
+    // Updating user.updatedAt ensures ANY instance rejects tokens issued prior to this moment
+    if (this.prisma) {
+      this.prisma.user.updateMany({
+        where: { id: userId },
+        data: { updatedAt: new Date() },
+      }).catch((err) => {
+        this.logger.warn(`Failed to update user.updatedAt for user ${userId}: ${err?.message || err}`);
+      });
+    }
   }
 
   /**
-   * Evaluates if a given token or user session has been revoked.
-   * Pulls latest shared state before decision.
+   * Evaluates if a given token or user session has been revoked synchronously.
+   * Checks L1 memory cache and disk fallback.
    */
   public isRevoked(rawToken?: string, payload?: { sub?: string; iat?: number }): boolean {
     this.syncFromDisk();
@@ -274,14 +323,54 @@ export class TokenRevocationService implements OnModuleDestroy {
   }
 
   /**
+   * Evaluates if a given token or user session has been revoked asynchronously.
+   * Checks L1 memory cache first, then checks Redis cluster across instances.
+   */
+  public async isRevokedAsync(rawToken?: string, payload?: { sub?: string; iat?: number }): Promise<boolean> {
+    // Fast path: L1 cache
+    if (this.isRevoked(rawToken, payload)) {
+      return true;
+    }
+
+    // Distributed path: Query Redis cluster
+    if (this.redisService?.isAvailable()) {
+      if (rawToken && typeof rawToken === 'string') {
+        const tokenHash = this.hashToken(rawToken);
+        const redisRevoked = await this.redisService.get<DistributedRevokedToken>(REDIS_KEYS.REVOKED_TOKEN(tokenHash));
+        if (redisRevoked) {
+          // Populate local L1 cache
+          this.revokedTokens.set(tokenHash, {
+            tokenHash,
+            revokedAt: redisRevoked.revokedAt * 1000,
+            expiresAt: redisRevoked.expiresAt * 1000,
+          });
+          return true;
+        }
+      }
+
+      if (payload?.sub && payload.iat !== undefined) {
+        const redisCutoff = await this.redisService.get<number>(REDIS_KEYS.USER_REVOCATION_CUTOFF(payload.sub));
+        if (redisCutoff) {
+          this.userRevocationCutoffs.set(payload.sub, redisCutoff);
+          if (payload.iat < redisCutoff) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Registers a new refresh token family for a candidate.
-   * Atomically persisted across instances.
+   * Replicated across Redis + L1 cache.
    */
   public registerRefreshToken(
     userId: string,
     rawToken: string,
     familyId: string,
-    ttlMs = 7 * 24 * 60 * 60 * 1000
+    ttlMs = DISTRIBUTED_TTL.REFRESH_TOKEN_REVOCATION_SEC * 1000
   ): RefreshSession {
     this.syncFromDisk();
     const tokenHash = this.hashToken(rawToken);
@@ -304,6 +393,27 @@ export class TokenRevocationService implements OnModuleDestroy {
     this.persistRefreshSessions();
     this.persistFamilyTokens();
 
+    // Distributed Redis Persistence
+    if (this.redisService?.isAvailable()) {
+      const ttlSec = Math.floor(ttlMs / 1000);
+      const distSession: DistributedRefreshSession = {
+        tokenHash,
+        userId,
+        familyId,
+        expiresAt: Math.floor((now + ttlMs) / 1000),
+        isRevoked: false,
+        createdAt: Math.floor(now / 1000),
+        sourceInstanceId: this.redisService.instanceId,
+      };
+
+      this.redisService.set(REDIS_KEYS.REFRESH_SESSION(tokenHash), distSession, ttlSec).catch((err) => {
+        this.logger.warn(`Failed to set refresh session in Redis: ${err?.message || err}`);
+      });
+      this.redisService.sadd(REDIS_KEYS.REFRESH_FAMILY(familyId), tokenHash, ttlSec).catch((err) => {
+        this.logger.warn(`Failed to add token to family in Redis: ${err?.message || err}`);
+      });
+    }
+
     return session;
   }
 
@@ -314,13 +424,13 @@ export class TokenRevocationService implements OnModuleDestroy {
   public rotateRefreshToken(
     rawOldToken: string,
     rawNewToken: string,
-    ttlMs = 7 * 24 * 60 * 60 * 1000
+    ttlMs = DISTRIBUTED_TTL.REFRESH_TOKEN_REVOCATION_SEC * 1000
   ): RotationResult | null {
     if (!rawOldToken || typeof rawOldToken !== 'string') return null;
     this.syncFromDisk();
 
     const oldHash = this.hashToken(rawOldToken);
-    const session = this.refreshSessions.get(oldHash);
+    let session = this.refreshSessions.get(oldHash);
 
     if (!session) {
       return null;
@@ -331,6 +441,9 @@ export class TokenRevocationService implements OnModuleDestroy {
     if (now > session.expiresAt) {
       this.refreshSessions.delete(oldHash);
       this.persistRefreshSessions();
+      if (this.redisService?.isAvailable()) {
+        this.redisService.del(REDIS_KEYS.REFRESH_SESSION(oldHash)).catch(() => {});
+      }
       return null;
     }
 
@@ -388,6 +501,35 @@ export class TokenRevocationService implements OnModuleDestroy {
     this.persistRefreshSessions();
     this.persistFamilyTokens();
 
+    // Distributed Redis Persistence
+    if (this.redisService?.isAvailable()) {
+      const ttlSec = Math.floor(ttlMs / 1000);
+      const distOldSession: DistributedRefreshSession = {
+        tokenHash: oldHash,
+        userId: session.userId,
+        familyId: session.familyId,
+        expiresAt: Math.floor(session.expiresAt / 1000),
+        isRevoked: true,
+        createdAt: Math.floor(session.createdAt / 1000),
+        rotatedAt: Math.floor(now / 1000),
+        replacedByHash: newHash,
+        sourceInstanceId: this.redisService.instanceId,
+      };
+      const distNewSession: DistributedRefreshSession = {
+        tokenHash: newHash,
+        userId: session.userId,
+        familyId: session.familyId,
+        expiresAt: Math.floor((now + ttlMs) / 1000),
+        isRevoked: false,
+        createdAt: Math.floor(now / 1000),
+        sourceInstanceId: this.redisService.instanceId,
+      };
+
+      this.redisService.set(REDIS_KEYS.REFRESH_SESSION(oldHash), distOldSession, ttlSec).catch(() => {});
+      this.redisService.set(REDIS_KEYS.REFRESH_SESSION(newHash), distNewSession, ttlSec).catch(() => {});
+      this.redisService.sadd(REDIS_KEYS.REFRESH_FAMILY(session.familyId), newHash, ttlSec).catch(() => {});
+    }
+
     return { userId: session.userId, familyId: session.familyId };
   }
 
@@ -402,19 +544,37 @@ export class TokenRevocationService implements OnModuleDestroy {
       this.persistRefreshSessions();
       this.persistFamilyTokens();
     }
+
+    // Distributed Redis Invalidation
+    if (this.redisService?.isAvailable()) {
+      this.redisService.smembers(REDIS_KEYS.REFRESH_FAMILY(familyId)).then((tokenHashes) => {
+        if (tokenHashes && tokenHashes.length > 0) {
+          const keysToDelete = tokenHashes.map((h) => REDIS_KEYS.REFRESH_SESSION(h));
+          this.redisService?.del(keysToDelete).catch(() => {});
+        }
+        this.redisService?.del(REDIS_KEYS.REFRESH_FAMILY(familyId)).catch(() => {});
+      }).catch(() => {});
+    }
   }
 
   public revokeUserRefreshTokens(userId: string): void {
     this.syncFromDisk();
     let modified = false;
+    const revokedFamilyIds = new Set<string>();
+
     for (const [hash, session] of this.refreshSessions.entries()) {
       if (session.userId === userId) {
         this.refreshSessions.delete(hash);
+        revokedFamilyIds.add(session.familyId);
         modified = true;
       }
     }
     if (modified) {
       this.persistRefreshSessions();
+    }
+
+    for (const famId of revokedFamilyIds) {
+      this.revokeFamily(famId);
     }
   }
 

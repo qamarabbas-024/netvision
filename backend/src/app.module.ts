@@ -13,6 +13,7 @@ import { RateLimiterModule } from './security/rate-limiter/rate-limiter.module';
 import { AppRateLimitGuard } from './security/rate-limiter/app-rate-limit.guard';
 import { MonitoringModule } from './monitoring/monitoring.module';
 import { LoggingInterceptor } from './monitoring/interceptors/logging.interceptor';
+import { RedisModule } from './redis/redis.module';
 import { AllExceptionsFilter } from './monitoring/filters/all-exceptions.filter';
 
 @Module({
@@ -21,6 +22,7 @@ import { AllExceptionsFilter } from './monitoring/filters/all-exceptions.filter'
       isGlobal: true,
       envFilePath: '.env',
     }),
+    RedisModule,
     MonitoringModule,
     RateLimiterModule,
     DatabaseModule,

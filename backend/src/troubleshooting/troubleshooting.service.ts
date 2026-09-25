@@ -19,6 +19,8 @@ import {
   ApplyRemediationDto,
   RunVerificationDto,
 } from '@netvision/shared';
+import { RedisService } from '../redis/redis.service';
+import { REDIS_KEYS, DISTRIBUTED_TTL } from '../redis/distributed-state.interface';
 
 export interface LearnerIdentityContext {
   userId?: string;
@@ -28,13 +30,14 @@ export interface LearnerIdentityContext {
 @Injectable()
 export class TroubleshootingService {
   private readonly logger = new Logger(TroubleshootingService.name);
-  // In-memory active interactive troubleshooting sessions
+  // In-memory active interactive troubleshooting sessions (L1 cache)
   private readonly activeSessions = new Map<string, TroubleshootingSessionState & { userId?: string; anonymousId?: string }>();
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly achievementsService: AchievementsService,
     @Optional() private readonly monitoringService?: MonitoringService,
+    @Optional() private readonly redisService?: RedisService,
   ) {}
 
   getAllScenarios() {
@@ -140,13 +143,26 @@ export class TroubleshootingService {
     };
 
     this.activeSessions.set(sessionId, sessionState);
+    if (this.redisService?.isAvailable()) {
+      const ownerId = userId || anonymousId || 'anonymous';
+      await this.redisService.set(
+        REDIS_KEYS.TROUBLESHOOT_SESSION(sessionId),
+        sessionState,
+        DISTRIBUTED_TTL.ACTIVE_TROUBLESHOOT_SESSION_SEC
+      );
+      await this.redisService.set(
+        REDIS_KEYS.TROUBLESHOOT_USER_INDEX(ownerId, scenario.slug),
+        sessionId,
+        DISTRIBUTED_TTL.ACTIVE_TROUBLESHOOT_SESSION_SEC
+      );
+    }
     this.logger.log(`Started troubleshooting session ${sessionId} for scenario ${scenario.slug}`);
 
     return this.sanitizeSessionResponse(sessionState);
   }
 
   async getSessionStatus(identity: LearnerIdentityContext, sessionId: string): Promise<TroubleshootingSessionState> {
-    const session = this.findAndValidateSessionOwnership(identity, sessionId);
+    const session = await this.findAndValidateSessionOwnership(identity, sessionId);
     return this.sanitizeSessionResponse(session);
   }
 
@@ -158,7 +174,7 @@ export class TroubleshootingService {
     commandOutput: string;
     newEvidenceUnlocked?: { id: string; title: string; category: string; description: string; data: string };
   }> {
-    const session = this.findAndValidateSessionOwnership(identity, dto.sessionId);
+    const session = await this.findAndValidateSessionOwnership(identity, dto.sessionId);
     const scenario = this.getScenarioBySlugOrId(session.scenarioId, true);
     const cleanCmd = (dto.command || '').trim();
 
@@ -212,6 +228,14 @@ export class TroubleshootingService {
       userId: identity.userId || identity.anonymousId,
     });
 
+    if (this.redisService?.isAvailable()) {
+      await this.redisService.set(
+        REDIS_KEYS.TROUBLESHOOT_SESSION(session.sessionId),
+        session,
+        DISTRIBUTED_TTL.ACTIVE_TROUBLESHOOT_SESSION_SEC
+      );
+    }
+
     return {
       session: this.sanitizeSessionResponse(session),
       commandOutput: output,
@@ -227,7 +251,7 @@ export class TroubleshootingService {
     isCorrect: boolean;
     feedback: string;
   }> {
-    const session = this.findAndValidateSessionOwnership(identity, dto.sessionId);
+    const session = await this.findAndValidateSessionOwnership(identity, dto.sessionId);
     const scenario = this.getScenarioBySlugOrId(session.scenarioId, true);
 
     const selectedOption = scenario.rootCauseOptions.find((r) => r.id === dto.diagnosisId);
@@ -242,6 +266,15 @@ export class TroubleshootingService {
       session.diagnosisSubmitted = true;
       session.diagnosisCorrect = true;
       session.currentStage = 'REMEDIATION';
+
+      if (this.redisService?.isAvailable()) {
+        await this.redisService.set(
+          REDIS_KEYS.TROUBLESHOOT_SESSION(session.sessionId),
+          session,
+          DISTRIBUTED_TTL.ACTIVE_TROUBLESHOOT_SESSION_SEC
+        );
+      }
+
       return {
         session: this.sanitizeSessionResponse(session),
         isCorrect: true,
@@ -250,6 +283,15 @@ export class TroubleshootingService {
     } else {
       session.diagnosisCorrect = false;
       session.scoreBreakdown.penaltyDeductions += 10; // 10 point penalty for guessing wrong root cause
+
+      if (this.redisService?.isAvailable()) {
+        await this.redisService.set(
+          REDIS_KEYS.TROUBLESHOOT_SESSION(session.sessionId),
+          session,
+          DISTRIBUTED_TTL.ACTIVE_TROUBLESHOOT_SESSION_SEC
+        );
+      }
+
       return {
         session: this.sanitizeSessionResponse(session),
         isCorrect: false,
@@ -266,7 +308,7 @@ export class TroubleshootingService {
     isCorrect: boolean;
     feedback: string;
   }> {
-    const session = this.findAndValidateSessionOwnership(identity, dto.sessionId);
+    const session = await this.findAndValidateSessionOwnership(identity, dto.sessionId);
     const scenario = this.getScenarioBySlugOrId(session.scenarioId, true);
 
     if (!session.diagnosisCorrect) {
@@ -284,6 +326,15 @@ export class TroubleshootingService {
       session.remediationApplied = true;
       session.remediationCorrect = true;
       session.currentStage = 'VERIFICATION';
+
+      if (this.redisService?.isAvailable()) {
+        await this.redisService.set(
+          REDIS_KEYS.TROUBLESHOOT_SESSION(session.sessionId),
+          session,
+          DISTRIBUTED_TTL.ACTIVE_TROUBLESHOOT_SESSION_SEC
+        );
+      }
+
       return {
         session: this.sanitizeSessionResponse(session),
         isCorrect: true,
@@ -293,6 +344,15 @@ export class TroubleshootingService {
       session.remediationApplied = false;
       session.remediationCorrect = false;
       session.scoreBreakdown.penaltyDeductions += 10;
+
+      if (this.redisService?.isAvailable()) {
+        await this.redisService.set(
+          REDIS_KEYS.TROUBLESHOOT_SESSION(session.sessionId),
+          session,
+          DISTRIBUTED_TTL.ACTIVE_TROUBLESHOOT_SESSION_SEC
+        );
+      }
+
       return {
         session: this.sanitizeSessionResponse(session),
         isCorrect: false,
@@ -311,7 +371,7 @@ export class TroubleshootingService {
     testResults: Array<{ testId: string; testName: string; passed: boolean; output: string }>;
     postMortemSummary: string;
   }> {
-    const session = this.findAndValidateSessionOwnership(identity, dto.sessionId);
+    const session = await this.findAndValidateSessionOwnership(identity, dto.sessionId);
     const scenario = this.getScenarioBySlugOrId(session.scenarioId, true);
 
     if (!session.remediationApplied || !session.remediationCorrect) {
@@ -358,6 +418,14 @@ export class TroubleshootingService {
     session.currentStage = 'COMPLETED';
     session.completedAt = new Date().toISOString();
 
+    if (this.redisService?.isAvailable()) {
+      await this.redisService.set(
+        REDIS_KEYS.TROUBLESHOOT_SESSION(session.sessionId),
+        session,
+        DISTRIBUTED_TTL.ACTIVE_TROUBLESHOOT_SESSION_SEC
+      );
+    }
+
     this.monitoringService?.recordLabEvent('LAB_COMPLETED', {
       scenarioId: session.scenarioId,
       userId: identity.userId || identity.anonymousId,
@@ -375,11 +443,26 @@ export class TroubleshootingService {
     };
   }
 
-  private findAndValidateSessionOwnership(
+  private async findAndValidateSessionOwnership(
     identity: LearnerIdentityContext,
     sessionId: string
-  ): TroubleshootingSessionState & { userId?: string; anonymousId?: string } {
-    const session = this.activeSessions.get(sessionId);
+  ): Promise<TroubleshootingSessionState & { userId?: string; anonymousId?: string }> {
+    let session = this.activeSessions.get(sessionId);
+
+    // Cross-instance distributed lookup via Redis (authoritative state across instances)
+    if (this.redisService?.isAvailable()) {
+      const redisSession = await this.redisService.get<TroubleshootingSessionState & { userId?: string; anonymousId?: string }>(
+        REDIS_KEYS.TROUBLESHOOT_SESSION(sessionId)
+      );
+      if (redisSession) {
+        if (!session || (redisSession.executedCommands?.length ?? 0) >= (session.executedCommands?.length ?? 0)) {
+          session = redisSession;
+          this.activeSessions.set(sessionId, session);
+          await this.redisService.expire(REDIS_KEYS.TROUBLESHOOT_SESSION(sessionId), DISTRIBUTED_TTL.ACTIVE_TROUBLESHOOT_SESSION_SEC);
+        }
+      }
+    }
+
     if (!session) {
       throw new NotFoundException(`Troubleshooting session "${sessionId}" not found or has expired.`);
     }

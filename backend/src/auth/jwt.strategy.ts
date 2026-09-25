@@ -108,11 +108,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         (r: any) => (r && r.cookies ? r.cookies['netvision_auth_token'] || r.cookies['accessToken'] : null),
       ])(req);
 
-      if (rawToken && this.tokenRevocationService?.isRevoked(rawToken, payload)) {
+      const isRev = (await this.tokenRevocationService?.isRevokedAsync?.(rawToken, payload)) ?? this.tokenRevocationService?.isRevoked(rawToken, payload);
+      if (rawToken && isRev) {
         throw new UnauthorizedException('Token has been revoked or session terminated.');
       }
-    } else if (payload && this.tokenRevocationService?.isRevoked('', payload)) {
-      throw new UnauthorizedException('Token has been revoked or session terminated.');
+    } else if (payload) {
+      const isRev = (await this.tokenRevocationService?.isRevokedAsync?.('', payload)) ?? this.tokenRevocationService?.isRevoked('', payload);
+      if (isRev) {
+        throw new UnauthorizedException('Token has been revoked or session terminated.');
+      }
     }
 
     // 2. Validate user identity with short-lived cache (prevents DB query stampede)

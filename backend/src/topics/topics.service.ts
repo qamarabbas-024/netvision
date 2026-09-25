@@ -25,6 +25,8 @@ import type {
   CausalVisualExplanation,
 } from '@netvision/shared';
 import { NetworkSimulationEngine, NetworkSimulatorState } from './network-simulation.engine';
+import { RedisService } from '../redis/redis.service';
+import { REDIS_KEYS, DISTRIBUTED_TTL } from '../redis/distributed-state.interface';
 
 export interface ActiveLabSession {
   sessionId: string;
@@ -54,7 +56,8 @@ export class TopicsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly achievementsService: AchievementsService,
-    @Optional() private readonly monitoringService?: MonitoringService
+    @Optional() private readonly monitoringService?: MonitoringService,
+    @Optional() private readonly redisService?: RedisService
   ) {}
 
   private getLevelWeight(level: string): number {
@@ -611,11 +614,62 @@ export class TopicsService {
       anonymousId = `guest-${crypto.randomUUID()}`;
     }
 
-    // If requestedSessionId was provided, look it up across sessions
+    const ownerId = (userId || anonymousId)!;
+    const sessionKey = `${ownerId}:${labId}`;
+
+    // 1. If requestedSessionId was provided, look it up across distributed layers
     if (requestedSessionId) {
-      const found = Array.from(this.activeLabSessions.values()).find(
+      // Layer 1: In-memory L1 cache
+      let found = Array.from(this.activeLabSessions.values()).find(
         (s) => s.sessionId === requestedSessionId
       );
+
+      // Layer 2: Redis distributed store (authoritative state across instances)
+      if (this.redisService?.isAvailable()) {
+        const redisSession = await this.redisService.get<ActiveLabSession>(REDIS_KEYS.LAB_SESSION(requestedSessionId));
+        if (redisSession) {
+          if (!found || redisSession.stateVersion >= found.stateVersion) {
+            found = redisSession;
+            this.activeLabSessions.set(sessionKey, found);
+            await this.redisService.expire(REDIS_KEYS.LAB_SESSION(requestedSessionId), DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+          }
+        }
+      }
+
+      // Layer 3: PostgreSQL SandboxSession persistence (instance recovery across pod restarts)
+      if (!found) {
+        const dbSession = await this.prisma.sandboxSession.findUnique({
+          where: { id: requestedSessionId },
+          include: { lab: { include: { lesson: true } } },
+        });
+
+        if (dbSession && (dbSession.status === 'STARTING' || dbSession.status === 'RUNNING') && new Date(dbSession.expiresAt) > new Date()) {
+          const slug = dbSession.lab?.lesson?.slug || (await this.resolveLabSlug(labId));
+          const netState = (dbSession.networkStateJson as any) || NetworkSimulationEngine.getInitialStateForLab(slug);
+          const history = (dbSession.historyJson as any) || [];
+          found = {
+            sessionId: dbSession.id,
+            labId: dbSession.labId || labId,
+            lessonSlug: slug,
+            userId: dbSession.userId || undefined,
+            anonymousId: dbSession.anonymousId || undefined,
+            stateVersion: history.length + 1,
+            simulatedState: netState,
+            commandHistory: history,
+            recentPacketEvents: [],
+            unlockedHintLevel: 0,
+            lastActionSummary: 'Simulator session recovered from PostgreSQL.',
+            createdAt: dbSession.createdAt.toISOString(),
+            updatedAt: dbSession.updatedAt.toISOString(),
+          };
+          this.activeLabSessions.set(sessionKey, found);
+          if (this.redisService?.isAvailable()) {
+            await this.redisService.set(REDIS_KEYS.LAB_SESSION(found.sessionId), found, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+            await this.redisService.set(REDIS_KEYS.LAB_USER_INDEX(ownerId, labId), found.sessionId, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+          }
+        }
+      }
+
       if (!found) {
         throw new NotFoundException(`Simulation session "${requestedSessionId}" not found.`);
       }
@@ -629,10 +683,68 @@ export class TopicsService {
       return found;
     }
 
-    // Standard session lookup by learner + lab key
-    const sessionKey = `${userId || anonymousId}:${labId}`;
+    // 2. Standard session lookup by learner + lab key across distributed layers:
+    // Layer 1: In-memory L1 cache
     let session = this.activeLabSessions.get(sessionKey);
 
+    // Layer 2: Redis distributed store (authoritative state across instances)
+    if (this.redisService?.isAvailable()) {
+      const redisSessionId = await this.redisService.get<string>(REDIS_KEYS.LAB_USER_INDEX(ownerId, labId));
+      if (redisSessionId) {
+        const redisSession = await this.redisService.get<ActiveLabSession>(REDIS_KEYS.LAB_SESSION(redisSessionId));
+        if (redisSession) {
+          if (!session || redisSession.stateVersion >= session.stateVersion) {
+            session = redisSession;
+            this.activeLabSessions.set(sessionKey, session);
+            await this.redisService.expire(REDIS_KEYS.LAB_SESSION(redisSessionId), DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+          }
+        }
+      }
+    }
+
+    // Layer 3: PostgreSQL SandboxSession persistence (instance recovery)
+    if (!session) {
+      const dbSession = await this.prisma.sandboxSession.findFirst({
+        where: {
+          OR: [
+            ...(userId ? [{ userId, labId }] : []),
+            ...(anonymousId ? [{ anonymousId, labId }] : []),
+          ],
+          status: { in: ['STARTING', 'RUNNING'] },
+          expiresAt: { gt: new Date() },
+        },
+        orderBy: { updatedAt: 'desc' },
+        include: { lab: { include: { lesson: true } } },
+      });
+
+      if (dbSession) {
+        const slug = dbSession.lab?.lesson?.slug || (await this.resolveLabSlug(labId));
+        const netState = (dbSession.networkStateJson as any) || NetworkSimulationEngine.getInitialStateForLab(slug);
+        const history = (dbSession.historyJson as any) || [];
+        session = {
+          sessionId: dbSession.id,
+          labId: dbSession.labId || labId,
+          lessonSlug: slug,
+          userId: dbSession.userId || undefined,
+          anonymousId: dbSession.anonymousId || undefined,
+          stateVersion: history.length + 1,
+          simulatedState: netState,
+          commandHistory: history,
+          recentPacketEvents: [],
+          unlockedHintLevel: 0,
+          lastActionSummary: 'Simulator session recovered from PostgreSQL.',
+          createdAt: dbSession.createdAt.toISOString(),
+          updatedAt: dbSession.updatedAt.toISOString(),
+        };
+        this.activeLabSessions.set(sessionKey, session);
+        if (this.redisService?.isAvailable()) {
+          await this.redisService.set(REDIS_KEYS.LAB_SESSION(session.sessionId), session, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+          await this.redisService.set(REDIS_KEYS.LAB_USER_INDEX(ownerId, labId), session.sessionId, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+        }
+      }
+    }
+
+    // Layer 4: Initialize new simulation session if none exists
     if (!session) {
       const slug = await this.resolveLabSlug(labId);
       const initialState = NetworkSimulationEngine.getInitialStateForLab(slug);
@@ -654,6 +766,29 @@ export class TopicsService {
         updatedAt: new Date().toISOString(),
       };
       this.activeLabSessions.set(sessionKey, session);
+
+      // Replicate to Redis
+      if (this.redisService?.isAvailable()) {
+        await this.redisService.set(REDIS_KEYS.LAB_SESSION(sessionId), session, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+        await this.redisService.set(REDIS_KEYS.LAB_USER_INDEX(ownerId, labId), sessionId, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+      }
+
+      // Checkpoint to PostgreSQL SandboxSession
+      this.prisma.sandboxSession.create({
+        data: {
+          id: sessionId,
+          userId: userId || null,
+          anonymousId: anonymousId || null,
+          labId,
+          status: 'RUNNING',
+          providerType: 'SIMULATED',
+          expiresAt: new Date(Date.now() + DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC * 1000),
+          networkStateJson: initialState as any,
+          historyJson: [],
+        },
+      }).catch((err) => {
+        this.logger.warn(`Non-fatal: Failed to checkpoint sandbox session to DB: ${err?.message || err}`);
+      });
     }
 
     return session;
@@ -756,6 +891,25 @@ export class TopicsService {
     });
     session.updatedAt = new Date().toISOString();
 
+    // Replicate to Redis
+    const ownerId = identity.userId || identity.anonymousId || 'anonymous';
+    if (this.redisService?.isAvailable()) {
+      await this.redisService.set(REDIS_KEYS.LAB_SESSION(session.sessionId), session, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+      await this.redisService.set(REDIS_KEYS.LAB_USER_INDEX(ownerId, labId), session.sessionId, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+    }
+
+    // Checkpoint to PostgreSQL SandboxSession
+    this.prisma.sandboxSession.updateMany({
+      where: { id: session.sessionId },
+      data: {
+        networkStateJson: session.simulatedState as any,
+        historyJson: session.commandHistory.slice(-50),
+        expiresAt: new Date(Date.now() + DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC * 1000),
+      },
+    }).catch((err) => {
+      this.logger.warn(`Non-fatal: Failed to checkpoint sandbox session updates to DB: ${err?.message || err}`);
+    });
+
     const visualState = NetworkSimulationEngine.toVisualState(
       session.lessonSlug,
       session.simulatedState,
@@ -813,6 +967,12 @@ export class TopicsService {
     const session = await this.getOrCreateLabSession(identity, labId, sessionId);
     session.unlockedHintLevel = Math.min(4, session.unlockedHintLevel + 1);
     session.updatedAt = new Date().toISOString();
+
+    const ownerId = identity.userId || identity.anonymousId || 'anonymous';
+    if (this.redisService?.isAvailable()) {
+      await this.redisService.set(REDIS_KEYS.LAB_SESSION(session.sessionId), session, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+      await this.redisService.set(REDIS_KEYS.LAB_USER_INDEX(ownerId, labId), session.sessionId, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
+    }
 
     const visualState = NetworkSimulationEngine.toVisualState(
       session.lessonSlug,
@@ -884,7 +1044,18 @@ export class TopicsService {
 
     const safeHintsCount = Math.max(0, Math.floor(Number(dto.hintsUsedCount) || 0));
     const sessionKey = `${userId || anonymousId}:${labId}`;
-    const activeSession = this.activeLabSessions.get(sessionKey);
+    let activeSession = this.activeLabSessions.get(sessionKey);
+    if (!activeSession) {
+      try {
+        activeSession = await this.getOrCreateLabSession(
+          { userId: userId || undefined, anonymousId: anonymousId || undefined },
+          labId,
+          (dto as any)?.sessionId
+        );
+      } catch (err) {
+        // Fall back gracefully if session not found
+      }
+    }
 
     // Derive or replay simulated state: commands are always replayed authoritatively.
     // ZERO TRUST ARCHITECTURE:
