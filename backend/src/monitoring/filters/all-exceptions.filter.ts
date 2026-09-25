@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { redactSensitiveData } from '../utils/redaction.util';
+import { classifyDatabaseError } from '../../database/database-error.util';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -25,11 +26,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let message: string | object = 'Internal server error';
     let errorName = 'InternalServerError';
 
+    const hasPrismaCode = typeof (exception as any)?.code === 'string' && (exception as any).code.startsWith('P');
     const isPrismaError =
-      exception instanceof Error &&
-      (exception.name.includes('Prisma') ||
-        typeof (exception as any).code === 'string' && (exception as any).code.startsWith('P') ||
-        exception.constructor?.name?.includes('Prisma'));
+      hasPrismaCode ||
+      (exception instanceof Error &&
+        (exception.name.includes('Prisma') || exception.constructor?.name?.includes('Prisma')));
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
@@ -43,28 +44,42 @@ export class AllExceptionsFilter implements ExceptionFilter {
         errorName = exception.name;
       }
     } else if (isPrismaError) {
-      const err = exception as any;
-      if (err.code === 'P2002') {
-        status = HttpStatus.CONFLICT;
-        errorName = 'Conflict';
-        message = 'A record with this unique field already exists.';
-      } else if (err.code === 'P2025') {
-        status = HttpStatus.NOT_FOUND;
-        errorName = 'NotFound';
-        message = 'The requested database record was not found.';
-      } else {
-        status = HttpStatus.INTERNAL_SERVER_ERROR;
-        errorName = 'DatabaseError';
-        message = 'A database operation error occurred. Please try again.';
+      const classified = classifyDatabaseError(exception);
+      status = classified.httpStatus;
+      errorName = classified.errorName;
+      message = classified.sanitizedMessage;
+
+      if (classified.retryAfterSeconds && classified.httpStatus === HttpStatus.SERVICE_UNAVAILABLE) {
+        response.setHeader('Retry-After', String(classified.retryAfterSeconds));
       }
-    } else if (exception instanceof Error) {
-      errorName = exception.name;
-      if (!isProd) {
-        message = exception.message;
+    } else if (typeof exception === 'object' && exception !== null) {
+      const rawMsg = ((exception as any).message || '').toLowerCase();
+      const looksLikeDbError =
+        rawMsg.includes('compute time quota') ||
+        rawMsg.includes("can't reach database server") ||
+        rawMsg.includes('database server') ||
+        rawMsg.includes('connection pool') ||
+        rawMsg.includes('econnrefused') ||
+        rawMsg.includes('econnreset');
+
+      if (looksLikeDbError) {
+        const classified = classifyDatabaseError(exception);
+        status = classified.httpStatus;
+        errorName = classified.errorName;
+        message = classified.sanitizedMessage;
+
+        if (classified.retryAfterSeconds && classified.httpStatus === HttpStatus.SERVICE_UNAVAILABLE) {
+          response.setHeader('Retry-After', String(classified.retryAfterSeconds));
+        }
+      } else {
+        errorName = (exception as any).name || 'Error';
+        if (!isProd) {
+          message = (exception as any).message || String(exception);
+        }
       }
     }
 
-    // Never leak raw Prisma class names in client response
+    // Never leak raw Prisma or internal class names in client response
     if (errorName.includes('Prisma')) {
       errorName = status >= 500 ? 'InternalServerError' : 'DatabaseError';
     }
@@ -76,7 +91,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     if (status >= 500) {
       const stack = exception instanceof Error ? exception.stack : undefined;
       this.logger.error(
-        `[${requestId}] 500 Unhandled Exception on ${request.method} ${sanitizedUrl}: ${exception instanceof Error ? exception.message : JSON.stringify(exception)}`,
+        `[${requestId}] ${status} Unhandled Exception on ${request.method} ${sanitizedUrl}: ${exception instanceof Error ? exception.message : JSON.stringify(exception)}`,
         stack
       );
     } else if (status >= 400) {

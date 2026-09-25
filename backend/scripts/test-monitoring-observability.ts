@@ -40,11 +40,11 @@ async function runMonitoringTestSuite() {
 
     assert(liveness.status === 'ok', 'Liveness probe reports status "ok"');
     assert(liveness.service === 'NetVision API', 'Liveness probe identifies service');
-    assert(liveness.database === 'healthy', 'Liveness probe includes database status');
+    assert(liveness.version === '1.0.0', 'Liveness probe includes service version');
     assert(typeof liveness.uptimeSeconds === 'number', 'Liveness probe includes numeric uptime');
     assert(typeof liveness.timestamp === 'string', 'Liveness probe includes ISO timestamp');
 
-    console.log('  ✓ Passed: Liveness probe returns valid status, uptime, and database health.');
+    console.log('  ✓ Passed: Liveness probe returns valid process status and uptime.');
     passedCount++;
   }
 

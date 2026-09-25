@@ -15,20 +15,13 @@ export class HealthController {
   /**
    * Liveness Probe: Returns whether the application process is running and accepting HTTP connections.
    * Path: /api/v1/health & /api/v1/health/live
+   * Note: Liveness strictly monitors process survival and does NOT issue external database queries.
    */
   @Get(['health', 'health/live'])
-  async getLiveness() {
-    let dbStatus = 'healthy';
-    try {
-      await this.prisma.$queryRaw`SELECT 1`;
-    } catch {
-      dbStatus = 'unhealthy';
-    }
-
+  getLiveness() {
     return {
-      status: dbStatus === 'healthy' ? 'ok' : 'degraded',
+      status: 'ok',
       service: 'NetVision API',
-      database: dbStatus,
       uptimeSeconds: this.monitoringService.getMetricsSummary().uptimeSeconds,
       timestamp: new Date().toISOString(),
       version: '1.0.0',
@@ -59,6 +52,9 @@ export class HealthController {
     };
 
     if (!isReady) {
+      if (typeof res.setHeader === 'function') {
+        res.setHeader('Retry-After', '5');
+      }
       return res.status(HttpStatus.SERVICE_UNAVAILABLE).json({
         ...responsePayload,
         error: 'Database connection check failed',
@@ -98,13 +94,22 @@ export class HealthController {
    * Path: /api/v1/monitoring/health
    */
   @Get('monitoring/health')
-  async getDetailedHealth() {
+  async getDetailedHealth(@Res({ passthrough: true }) res: Response) {
     const dbCheck = await this.monitoringService.checkDatabaseHealth();
     const mailStatus = this.emailService.getProviderStatus();
     const metrics = this.monitoringService.getMetricsSummary();
     const alerts = this.monitoringService.evaluateAlerts();
 
     const overallHealthy = dbCheck.healthy && !alerts.some((a) => a.status === 'CRITICAL');
+
+    if (!overallHealthy) {
+      if (typeof res.status === 'function') {
+        res.status(HttpStatus.SERVICE_UNAVAILABLE);
+      }
+      if (typeof res.setHeader === 'function') {
+        res.setHeader('Retry-After', '5');
+      }
+    }
 
     return {
       status: overallHealthy ? 'healthy' : 'degraded',

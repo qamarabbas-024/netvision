@@ -185,6 +185,11 @@ export class MonitoringService {
   // Database metrics
   private dbHealthy = true;
   private lastDbLatencyMs = 0;
+  private lastDbCheckTime = 0;
+  private lastDbError?: string;
+  private inFlightDbCheck: Promise<{ healthy: boolean; latencyMs: number; error?: string }> | null = null;
+  public static readonly DB_PROBE_CACHE_TTL_MS = 2000;
+  public static readonly DB_PROBE_TIMEOUT_MS = 2000;
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -442,23 +447,68 @@ export class MonitoringService {
   }
 
   /**
-   * Check Database connectivity & health
+   * Check Database connectivity & health with query storm debouncing and timeout protection.
+   * Caches results for 2000ms to prevent health probe storms from overloading the database.
    */
-  public async checkDatabaseHealth(): Promise<{ healthy: boolean; latencyMs: number; error?: string }> {
-    const start = Date.now();
-    try {
-      await this.prisma.$queryRaw`SELECT 1`;
-      const latencyMs = Date.now() - start;
-      this.dbHealthy = true;
-      this.lastDbLatencyMs = latencyMs;
-      return { healthy: true, latencyMs };
-    } catch (err: any) {
-      const latencyMs = Date.now() - start;
-      this.dbHealthy = false;
-      this.lastDbLatencyMs = latencyMs;
-      this.logger.error(`Database health check failed: ${err?.message || err}`);
-      return { healthy: false, latencyMs, error: 'Database query failed' };
+  public async checkDatabaseHealth(
+    forceCheck = false
+  ): Promise<{ healthy: boolean; latencyMs: number; error?: string; cached?: boolean }> {
+    const now = Date.now();
+
+    // 1. Serve from short-lived TTL cache unless forced
+    if (!forceCheck && now - this.lastDbCheckTime < MonitoringService.DB_PROBE_CACHE_TTL_MS) {
+      return {
+        healthy: this.dbHealthy,
+        latencyMs: this.lastDbLatencyMs,
+        error: this.lastDbError,
+        cached: true,
+      };
     }
+
+    // 2. Coalesce concurrent requests onto existing in-flight probe
+    if (this.inFlightDbCheck) {
+      return this.inFlightDbCheck;
+    }
+
+    // 3. Launch isolated probe with strict timeout
+    this.inFlightDbCheck = (async () => {
+      const start = Date.now();
+      let timeoutId: NodeJS.Timeout | null = null;
+      try {
+        const queryPromise = this.prisma.$queryRaw`SELECT 1`;
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutId = setTimeout(
+            () => reject(new Error(`Database probe query timed out after ${MonitoringService.DB_PROBE_TIMEOUT_MS}ms`)),
+            MonitoringService.DB_PROBE_TIMEOUT_MS
+          );
+        });
+
+        await Promise.race([queryPromise, timeoutPromise]);
+
+        const latencyMs = Date.now() - start;
+        this.dbHealthy = true;
+        this.lastDbLatencyMs = latencyMs;
+        this.lastDbCheckTime = Date.now();
+        this.lastDbError = undefined;
+        return { healthy: true, latencyMs };
+      } catch (err: any) {
+        const latencyMs = Date.now() - start;
+        const sanitizedErr = redactSensitiveData(err?.message || String(err));
+        this.dbHealthy = false;
+        this.lastDbLatencyMs = latencyMs;
+        this.lastDbCheckTime = Date.now();
+        this.lastDbError = sanitizedErr;
+        this.logger.error(`Database health probe failed (${latencyMs}ms): ${sanitizedErr}`);
+        return { healthy: false, latencyMs, error: sanitizedErr };
+      } finally {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        this.inFlightDbCheck = null;
+      }
+    })();
+
+    return this.inFlightDbCheck;
   }
 
   /**
