@@ -180,22 +180,20 @@ export class NetworkSimulationEngine {
     };
 
     // Lab-Specific State Customizations
-    if (slug.includes('vlan') || slug.includes('switching')) {
+    if (slug.includes('vlan') || slug.includes('switch')) {
       state.hostname = 'SW1';
       state.deviceType = 'SWITCH';
       state.vlans = {
         1: { id: 1, name: 'default', ports: ['FastEthernet0/1', 'FastEthernet0/2', 'FastEthernet0/3', 'GigabitEthernet0/1'], status: 'active' },
         10: { id: 10, name: 'MANAGEMENT', ports: ['FastEthernet0/1'], status: 'active' },
       };
-      state.trunks = {
-        'GigabitEthernet0/1': { interface: 'GigabitEthernet0/1', nativeVlan: 1, allowedVlans: [1, 10], status: 'trunking' },
-      };
+      state.trunks = {};
       state.interfaces = {
         'FastEthernet0/1': { name: 'FastEthernet0/1', status: 'up', mtu: 1500, accessVlan: 10, mode: 'access' },
         'FastEthernet0/2': { name: 'FastEthernet0/2', status: 'up', mtu: 1500, accessVlan: 1, mode: 'access' },
-        'GigabitEthernet0/1': { name: 'GigabitEthernet0/1', status: 'up', mtu: 1500, mode: 'trunk' },
+        'GigabitEthernet0/1': { name: 'GigabitEthernet0/1', status: 'up', mtu: 1500, mode: 'access' },
       };
-    } else if (slug.includes('spanning-tree')) {
+    } else if (slug.includes('spanning-tree') || slug.includes('stp')) {
       state.hostname = 'SW-ACCESS';
       state.deviceType = 'SWITCH';
       state.stp = {
@@ -210,25 +208,19 @@ export class NetworkSimulationEngine {
       state.ospf = {
         processId: 1,
         routerId: '1.1.1.1',
-        networks: [{ network: '10.0.0.0', wildcard: '0.0.0.3', area: 0 }],
-        neighbors: [
-          { routerId: '2.2.2.2', ip: '10.0.0.2', interface: 'GigabitEthernet0/1', state: 'FULL', role: 'BDR' },
-        ],
+        networks: [],
+        neighbors: [],
       };
     } else if (slug.includes('acl') || slug.includes('firewall')) {
       state.hostname = 'EDGE-FW';
       state.deviceType = 'FIREWALL';
-      state.acls = {
-        '101': [
-          { seq: 10, action: 'permit', protocol: 'tcp', source: '192.168.1.0/24', dest: 'any', port: 443 },
-          { seq: 20, action: 'deny', protocol: 'ip', source: '10.50.0.0/16', dest: 'any' },
-        ],
-      };
-    } else if (slug.includes('nat')) {
+      state.acls = {};
+    } else if (slug.includes('nat') || slug.includes('pat')) {
       state.hostname = 'NAT-GW';
       state.interfaces['GigabitEthernet0/0'].isInside = true;
       state.interfaces['GigabitEthernet0/1'].isOutside = true;
       state.natOverloadEnabled = false;
+      state.natTranslations = [];
     } else if (slug.includes('ipsec') || slug.includes('vpn')) {
       state.hostname = 'VPN-GATEWAY';
       state.ipsec = {
@@ -241,10 +233,12 @@ export class NetworkSimulationEngine {
         decPackets: 0,
       };
       state.injectedFault = 'IKE_PRESHARED_KEY_MISMATCH';
-    } else if (slug.includes('troubleshoot')) {
+      state.faultResolved = false;
+    } else if (slug.includes('troubleshoot') || slug.includes('route')) {
       state.hostname = 'T-SHOOT-ROUTER';
       state.injectedFault = 'DEFAULT_GATEWAY_MISSING';
-      // Missing default route
+      state.faultResolved = false;
+      state.routes = state.routes.filter(r => r.prefix !== '0.0.0.0');
     }
 
     return state;
@@ -263,9 +257,6 @@ export class NetworkSimulationEngine {
     const lower = cleanCmd.toLowerCase();
 
     state.diagnosticsCompleted = state.diagnosticsCompleted || [];
-    if (!state.diagnosticsCompleted.includes(cleanCmd)) {
-      state.diagnosticsCompleted.push(cleanCmd);
-    }
 
     let output = '';
     let category = 'Diagnostic';
@@ -453,7 +444,7 @@ export class NetworkSimulationEngine {
     // -------------------------------------------------------------------------
     // 2. LAYER 2 SWITCHING & STP COMMANDS
     // -------------------------------------------------------------------------
-    if (lower.includes('show vlan') || lower.includes('show vlan brief')) {
+    if (/^show\s+vlan(\s+brief)?$/i.test(cleanCmd)) {
       category = 'Layer 2 Switching';
       output = 'VLAN Name                             Status    Ports\n';
       output += '---- -------------------------------- --------- -------------------------------\n';
@@ -472,7 +463,7 @@ export class NetworkSimulationEngine {
       return { output: output.trim(), category, updatedState: state, lastActionSummary, causalConsequence };
     }
 
-    if (lower.includes('show interfaces trunk')) {
+    if (/^show\s+interfaces?\s+trunk$/i.test(cleanCmd)) {
       category = 'Layer 2 Switching';
       output = 'Port        Mode         Encapsulation  Status        Native vlan\n';
       for (const t of Object.values(state.trunks)) {
@@ -490,7 +481,7 @@ export class NetworkSimulationEngine {
       return { output: output.trim(), category, updatedState: state, lastActionSummary, causalConsequence };
     }
 
-    if (lower.includes('show spanning-tree')) {
+    if (/^show\s+spanning-tree/i.test(cleanCmd)) {
       category = 'Spanning Tree Protocol';
       const stp = state.stp;
       const isRoot = stp.mac === stp.rootBridgeMac || stp.bridgePriority < 32768;
@@ -509,8 +500,9 @@ export class NetworkSimulationEngine {
       return { output: output.trim(), category, updatedState: state, lastActionSummary, causalConsequence };
     }
 
-    if (cleanCmd.match(/^spanning-tree vlan\s+(\d+)\s+priority\s+(\d+)$/i)) {
-      const pri = parseInt(cleanCmd.split(/\s+/)[4], 10);
+    const stpPriMatch = cleanCmd.match(/^spanning-tree vlan\s+(\d+)\s+priority\s+(\d+)$/i);
+    if (stpPriMatch) {
+      const pri = parseInt(stpPriMatch[2], 10);
       state.stp.bridgePriority = pri;
       if (pri < 32768) {
         state.stp.rootBridgeMac = state.stp.mac;
@@ -527,10 +519,28 @@ export class NetworkSimulationEngine {
       return { output: `${state.hostname}(config)#`, category: 'Configuration', updatedState: state, lastActionSummary, causalConsequence };
     }
 
+    const stpRootMatch = cleanCmd.match(/^spanning-tree vlan\s+(\d+)\s+root\s+(primary|secondary)$/i);
+    if (stpRootMatch) {
+      const isPrimary = stpRootMatch[2].toLowerCase() === 'primary';
+      const pri = isPrimary ? 4096 : 8192;
+      state.stp.bridgePriority = pri;
+      state.stp.rootBridgeMac = state.stp.mac;
+      state.stp.costToRoot = 0;
+      lastActionSummary = `Configured switch as STP Root ${isPrimary ? 'Primary' : 'Secondary'} (priority ${pri}).`;
+      causalConsequence = {
+        cause: cleanCmd,
+        stateMutation: `stp.bridgePriority = ${pri}`,
+        networkConsequence: 'Switch wins STP election and becomes Root Bridge',
+        packetBehavior: 'Spanning tree topology converges with this switch as root',
+        concept: 'Root Bridge Election Algorithm (IEEE 802.1D)',
+      };
+      return { output: `${state.hostname}(config)#`, category: 'Configuration', updatedState: state, lastActionSummary, causalConsequence };
+    }
+
     // -------------------------------------------------------------------------
     // 3. LAYER 3 ROUTING & CIDR COMMANDS
     // -------------------------------------------------------------------------
-    if (lower.includes('show ip route')) {
+    if (/^show\s+ip\s+route/i.test(cleanCmd)) {
       category = 'Routing Table';
       output = 'Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP\n       O - OSPF, IA - OSPF inter area, E1 - OSPF external type 1\n\n';
       const defaultRoute = state.routes.find(r => r.prefix === '0.0.0.0');
@@ -555,6 +565,33 @@ export class NetworkSimulationEngine {
         concept: 'Routing Table Forwarding Architecture',
       };
       return { output: output.trim(), category, updatedState: state, lastActionSummary, causalConsequence };
+    }
+
+    if (/^show\s+ip\s+int(erface)?\s+brief/i.test(cleanCmd)) {
+      category = 'Layer 3 Interface';
+      output = 'Interface              IP-Address      OK? Method Status                Protocol\n';
+      output += 'GigabitEthernet0/0     192.168.1.1     YES manual up                    up      \n';
+      output += 'GigabitEthernet0/1     10.0.0.1        YES manual up                    up      \n';
+      output += 'Loopback0              1.1.1.1         YES manual up                    up      \n';
+      return { output: output.trim(), category, updatedState: state, lastActionSummary: 'Inspected IP interface brief status.' };
+    }
+
+    if (/^show\s+(running-config|run)/i.test(cleanCmd)) {
+      category = 'Configuration Inspection';
+      output = `Building configuration...\n\nCurrent configuration : 1240 bytes\n!\nversion 15.7\nhostname ${state.hostname}\n!\n`;
+      for (const v of Object.values(state.vlans)) {
+        output += `vlan ${v.id}\n name ${v.name}\n!\n`;
+      }
+      for (const r of state.routes) {
+        output += `ip route ${r.prefix} ${r.mask} ${r.nextHop}\n`;
+      }
+      if (state.ospf && state.ospf.networks.length > 0) {
+        output += `router ospf ${state.ospf.processId || 1}\n`;
+        for (const net of state.ospf.networks) {
+          output += ` network ${net.network} ${net.wildcard} area ${net.area}\n`;
+        }
+      }
+      return { output: output.trim(), category, updatedState: state, lastActionSummary: 'Inspected running configuration.' };
     }
 
     // ip route 0.0.0.0 0.0.0.0 192.168.1.254
@@ -588,7 +625,7 @@ export class NetworkSimulationEngine {
     // -------------------------------------------------------------------------
     // 4. DYNAMIC ROUTING (OSPF) COMMANDS
     // -------------------------------------------------------------------------
-    if (lower.includes('show ip ospf neighbor')) {
+    if (/^show\s+ip\s+ospf(\s+neighbor)?/i.test(cleanCmd)) {
       category = 'OSPF Protocol';
       if (!state.ospf || state.ospf.neighbors.length === 0) {
         output = 'OSPF Process 1: No active neighbors';
@@ -609,28 +646,47 @@ export class NetworkSimulationEngine {
       return { output: output.trim(), category, updatedState: state, lastActionSummary, causalConsequence };
     }
 
-    if (cleanCmd.match(/^network\s+([0-9.]+)\s+([0-9.]+)\s+area\s+(\d+)/i)) {
-      const parts = cleanCmd.split(/\s+/);
+    const ospfRouterMatch = cleanCmd.match(/^router\s+ospf\s+(\d+)$/i);
+    if (ospfRouterMatch) {
+      state.currentConfigMode = 'ROUTER_OSPF';
+      const pId = parseInt(ospfRouterMatch[1], 10);
+      state.ospf = state.ospf || { processId: pId, routerId: '1.1.1.1', networks: [], neighbors: [] };
+      state.ospf.processId = pId;
+      lastActionSummary = `Entered OSPF router configuration mode for process ${pId}.`;
+      causalConsequence = {
+        cause: cleanCmd,
+        stateMutation: `ospf.processId = ${pId}`,
+        networkConsequence: 'OSPF routing process initialized',
+        packetBehavior: 'Prepares OSPF process for network advertisement',
+        concept: 'OSPF Routing Process Initialization',
+      };
+      return { output: `${state.hostname}(config-router)#`, category: 'Configuration', updatedState: state, lastActionSummary, causalConsequence };
+    }
+
+    const ospfNetMatch = cleanCmd.match(/^network\s+([0-9.]+)\s+([0-9.]+)\s+area\s+(\d+)$/i);
+    if (ospfNetMatch) {
+      const [, net, wc, areaStr] = ospfNetMatch;
+      const area = parseInt(areaStr, 10);
       state.ospf = state.ospf || { processId: 1, routerId: '1.1.1.1', networks: [], neighbors: [] };
-      state.ospf.networks.push({ network: parts[1], wildcard: parts[2], area: parseInt(parts[4], 10) });
+      state.ospf.networks.push({ network: net, wildcard: wc, area });
       state.ospf.neighbors = [
         { routerId: '2.2.2.2', ip: '10.0.0.2', interface: 'GigabitEthernet0/1', state: 'FULL', role: 'DR' },
       ];
-      lastActionSummary = `Advertised ${parts[1]}/${parts[2]} into OSPF Area ${parts[4]}; adjacency converged to FULL.`;
+      lastActionSummary = `Advertised ${net}/${wc} into OSPF Area ${area}; adjacency converged to FULL.`;
       causalConsequence = {
         cause: cleanCmd,
-        stateMutation: `ospf.networks.push(area ${parts[4]}); neighbor state = FULL`,
-        networkConsequence: 'Subnet advertised via Type-1 Router LSA into OSPF Area ' + parts[4],
+        stateMutation: `ospf.networks.push(area ${area}); neighbor state = FULL`,
+        networkConsequence: 'Subnet advertised via Type-1 Router LSA into OSPF Area ' + area,
         packetBehavior: 'Dynamic route calculation synchronizes LSDB; routes exchanged with neighbor 2.2.2.2',
         concept: 'OSPF Area Flooding & Adjacency Convergence',
       };
-      return { output: `[OSPF-1]: Interface GigabitEthernet0/1 area ${parts[4]} neighbor 2.2.2.2 state changed to FULL`, category: 'OSPF Protocol', updatedState: state, lastActionSummary, causalConsequence };
+      return { output: `[OSPF-1]: Interface GigabitEthernet0/1 area ${area} neighbor 2.2.2.2 state changed to FULL`, category: 'OSPF Protocol', updatedState: state, lastActionSummary, causalConsequence };
     }
 
     // -------------------------------------------------------------------------
     // 5. SECURITY & ACCESS LIST (ACL) COMMANDS
     // -------------------------------------------------------------------------
-    if (lower.includes('show access-lists') || lower.includes('show ip access-lists')) {
+    if (/^show\s+(ip\s+)?access-lists/i.test(cleanCmd)) {
       category = 'Access Control Lists';
       if (Object.keys(state.acls).length === 0) {
         output = 'No access lists configured';
@@ -683,10 +739,28 @@ export class NetworkSimulationEngine {
       return { output: `${state.hostname}(config)#`, category: 'Configuration', updatedState: state, lastActionSummary, causalConsequence };
     }
 
+    const aclApplyMatch = cleanCmd.match(/^ip\s+access-group\s+(\d+)\s+(in|out)/i);
+    if (aclApplyMatch) {
+      const aclId = aclApplyMatch[1];
+      const dir = aclApplyMatch[2].toLowerCase() as 'in' | 'out';
+      const ifName = state.activeInterface || 'GigabitEthernet0/1';
+      state.appliedAcls[ifName] = state.appliedAcls[ifName] || {};
+      state.appliedAcls[ifName][dir] = aclId;
+      lastActionSummary = `Applied ACL ${aclId} ${dir.toUpperCase()} on interface ${ifName}.`;
+      causalConsequence = {
+        cause: cleanCmd,
+        stateMutation: `appliedAcls[${ifName}].${dir} = ${aclId}`,
+        networkConsequence: `Inbound/outbound traffic on ${ifName} evaluated against ACL ${aclId}`,
+        packetBehavior: 'Packets traversing interface matched against filter rules',
+        concept: 'Interface Access Group Binding',
+      };
+      return { output: `${state.hostname}(config-if)#`, category: 'Configuration', updatedState: state, lastActionSummary, causalConsequence };
+    }
+
     // -------------------------------------------------------------------------
     // 6. NAT / PAT COMMANDS
     // -------------------------------------------------------------------------
-    if (lower.includes('show ip nat translations')) {
+    if (/^show\s+ip\s+nat\s+translations/i.test(cleanCmd)) {
       category = 'NAT/PAT Service';
       if (state.natTranslations.length === 0) {
         output = 'Pro  Inside global         Inside local          Outside local         Outside global\n---  --------------------  --------------------  --------------------  --------------------\ntcp  203.0.113.5:1024      192.168.1.50:49152    198.51.100.1:443      198.51.100.1:443\ntcp  203.0.113.5:1025      192.168.1.51:51200    198.51.100.1:443      198.51.100.1:443';
@@ -707,7 +781,7 @@ export class NetworkSimulationEngine {
       return { output: output.trim(), category, updatedState: state, lastActionSummary, causalConsequence };
     }
 
-    if (lower.includes('ip nat inside source list') && lower.includes('overload')) {
+    if (/^ip\s+nat\s+inside\s+source\s+list\s+\S+\s+interface\s+\S+\s+overload/i.test(cleanCmd) || /^ip\s+nat\s+inside\s+source\s+list\s+.+overload/i.test(cleanCmd)) {
       state.natOverloadEnabled = true;
       state.natTranslations.push({
         protocol: 'tcp',
@@ -727,10 +801,22 @@ export class NetworkSimulationEngine {
       return { output: '[NAT]: Dynamic PAT overload enabled on outside interface GigabitEthernet0/1', category: 'Configuration', updatedState: state, lastActionSummary, causalConsequence };
     }
 
+    if (/^ip\s+nat\s+inside$/i.test(cleanCmd)) {
+      const ifName = state.activeInterface || 'GigabitEthernet0/0';
+      if (state.interfaces[ifName]) state.interfaces[ifName].isInside = true;
+      return { output: `${state.hostname}(config-if)#`, category: 'Configuration', updatedState: state, lastActionSummary: `Designated ${ifName} as NAT inside.` };
+    }
+
+    if (/^ip\s+nat\s+outside$/i.test(cleanCmd)) {
+      const ifName = state.activeInterface || 'GigabitEthernet0/1';
+      if (state.interfaces[ifName]) state.interfaces[ifName].isOutside = true;
+      return { output: `${state.hostname}(config-if)#`, category: 'Configuration', updatedState: state, lastActionSummary: `Designated ${ifName} as NAT outside.` };
+    }
+
     // -------------------------------------------------------------------------
     // 7. IPSEC VPN TUNNEL COMMANDS
     // -------------------------------------------------------------------------
-    if (lower.includes('show crypto isakmp sa') || lower.includes('show crypto ipsec sa')) {
+    if (/^show\s+crypto\s+(isakmp|ipsec)\s+sa/i.test(cleanCmd)) {
       category = 'IPsec VPN';
       const ipsec = state.ipsec || { phase1: 'UP', phase2: 'UP', peerIp: '203.0.113.2', transformSet: 'ESP-AES256-SHA256', dhGroup: 14, encPackets: 120, decPackets: 120 };
       output = `IPv4 Crypto ISAKMP SA\ndst             src             state          conn-id slot status\n${ipsec.peerIp.padEnd(15)} 198.51.100.2    ${ipsec.phase1 === 'UP' ? 'QM_IDLE' : 'MM_NO_STATE'}     1001    0 ${ipsec.phase1 === 'UP' ? 'ACTIVE' : 'FAILED'}\n\n`;
@@ -766,11 +852,13 @@ export class NetworkSimulationEngine {
     }
 
     // -------------------------------------------------------------------------
-    // 8. DIAGNOSTIC TESTS (PING & TRACEROUTE)
+    // 8. DIAGNOSTIC TESTS (PING, TRACEROUTE, TCPDUMP, ARP, IPCONFIG, NSLOOKUP)
     // -------------------------------------------------------------------------
-    if (lower.startsWith('ping')) {
+    const pingMatch = cleanCmd.match(/^ping\s+([0-9a-zA-Z_.-]+)/i);
+    if (pingMatch) {
+      state.diagnosticsCompleted.push(cleanCmd);
       category = 'ICMP Reachability';
-      const target = cleanCmd.split(/\s+/)[1] || '192.168.1.1';
+      const target = pingMatch[1];
       const derivedEvent = NetworkSimulationEngine.derivePacketPathForPing(slug, state, target, cleanCmd);
       packetEvents = [derivedEvent];
 
@@ -793,9 +881,11 @@ export class NetworkSimulationEngine {
       return { output, category, updatedState: state, packetEvents, lastActionSummary, causalConsequence };
     }
 
-    if (lower.startsWith('traceroute') || lower.startsWith('tracert')) {
+    const traceMatch = cleanCmd.match(/^(?:traceroute|tracert)\s+([0-9a-zA-Z_.-]+)/i);
+    if (traceMatch) {
+      state.diagnosticsCompleted.push(cleanCmd);
       category = 'Path Trace';
-      const target = cleanCmd.split(/\s+/)[1] || '8.8.8.8';
+      const target = traceMatch[1];
       const derivedEvent = NetworkSimulationEngine.derivePacketPathForTraceroute(slug, state, target, cleanCmd);
       packetEvents = [derivedEvent];
       output = `traceroute to ${target} (30 hops max):\n 1  192.168.1.1 (192.168.1.1)  1.12 ms\n 2  10.0.0.1 (10.0.0.1)  6.45 ms\n 3  ${target}  14.20 ms`;
@@ -810,7 +900,8 @@ export class NetworkSimulationEngine {
       return { output, category, updatedState: state, packetEvents, lastActionSummary, causalConsequence };
     }
 
-    if (lower.startsWith('tcpdump')) {
+    if (/^tcpdump(\s+.*)?$/i.test(cleanCmd)) {
+      state.diagnosticsCompleted.push(cleanCmd);
       category = 'Packet Capture';
       output = 'listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes\n' +
         '14:22:01.102340 IP 192.168.1.50.49152 > 1.1.1.1.53: 52140+ A? netvision.edu. (31)\n' +
@@ -830,9 +921,39 @@ export class NetworkSimulationEngine {
       return { output, category, updatedState: state, lastActionSummary, causalConsequence };
     }
 
-    // Default Fallback
-    output = `Simulated Environment: Executed '${cleanCmd}'. Status: Command accepted. Device state updated.`;
-    return { output, category, updatedState: state, lastActionSummary, causalConsequence };
+    if (/^arp\s+-a/i.test(cleanCmd)) {
+      state.diagnosticsCompleted.push(cleanCmd);
+      category = 'Diagnostic';
+      output = 'Interface: 192.168.1.50 --- 0x2\n  Internet Address      Physical Address      Type\n  192.168.1.1           00-14-22-01-23-45     dynamic\n  192.168.1.254         00-14-22-fe-dc-ba     dynamic';
+      lastActionSummary = 'Inspected local ARP translation cache.';
+      return { output, category, updatedState: state, lastActionSummary };
+    }
+
+    if (/^(?:ipconfig|ifconfig)(\s+\/all)?$/i.test(cleanCmd)) {
+      state.diagnosticsCompleted.push(cleanCmd);
+      category = 'Diagnostic';
+      output = 'Windows IP Configuration\n\nEthernet adapter Ethernet0:\n   IPv4 Address. . . . . . . . . . . : 192.168.1.50\n   Subnet Mask . . . . . . . . . . . : 255.255.255.0\n   Default Gateway . . . . . . . . . : 192.168.1.1\n   DNS Servers . . . . . . . . . . . : 1.1.1.1';
+      lastActionSummary = 'Inspected host IP adapter configuration.';
+      return { output, category, updatedState: state, lastActionSummary };
+    }
+
+    const nsMatch = cleanCmd.match(/^nslookup\s+([0-9a-zA-Z_.-]+)/i);
+    if (nsMatch) {
+      state.diagnosticsCompleted.push(cleanCmd);
+      category = 'Diagnostic';
+      const target = nsMatch[1];
+      output = `Server:  one.one.one.one\nAddress:  1.1.1.1\n\nNon-authoritative answer:\nName:    ${target}\nAddress:  104.21.48.12`;
+      lastActionSummary = `Queried DNS for domain ${target}.`;
+      return { output, category, updatedState: state, lastActionSummary };
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. UNRECOGNIZED / INVALID COMMAND REJECTION (ZERO TRUST)
+    // -------------------------------------------------------------------------
+    output = "% Invalid input detected at '^' marker.";
+    category = 'Invalid';
+    lastActionSummary = `Command rejected: '${cleanCmd}' is not recognized in current CLI context.`;
+    return { output, category, updatedState: state, lastActionSummary };
   }
 
   /**
@@ -1924,8 +2045,11 @@ export class NetworkSimulationEngine {
   }
 
   /**
-   * Deterministically validates whether a lab attempt has succeeded based on resulting state.
-   * "show" commands alone NEVER satisfy configuration or troubleshooting tasks.
+   * Deterministically validates whether a lab attempt has succeeded based strictly on
+   * authoritative server-replayed simulator state.
+   *
+   * Zero-trust invariant: No client-supplied solution, no keyword substring checks,
+   * no regex-only passes. Stateful labs must validate actual engineering simulator state.
    */
   public static validateAttempt(
     slug: string,
@@ -1937,76 +2061,176 @@ export class NetworkSimulationEngine {
     checks: Array<{ rule: string; passed: boolean; message: string }>;
   } {
     const checks: Array<{ rule: string; passed: boolean; message: string }> = [];
-    const cmds = commandHistory.map(c => c.toLowerCase().trim());
+    const cmds = (commandHistory || []).map((c) => (typeof c === 'string' ? c.trim() : '')).filter(Boolean);
+    const s = slug.toLowerCase();
 
-    // Filter out passive "show" commands to inspect actual student action
-    const configOrDiagnosticActions = cmds.filter(c => !c.startsWith('show ') && !c.startsWith('exit') && !c.startsWith('end'));
+    // -------------------------------------------------------------------------
+    // CHECK 1: PURPOSEFUL LEARNER CONFIGURATION ACTION
+    // -------------------------------------------------------------------------
+    // Learner must execute recognized configuration or targeted diagnostic commands.
+    // Passive inspection (show ...), session navigation (exit, end), and invalid/unrecognized
+    // commands (e.g. "echo permit", "echo area", "irrelevant") do NOT satisfy this criterion.
+    const isPassiveOrNav = (c: string) => {
+      const lower = c.toLowerCase();
+      return (
+        lower.startsWith('show ') ||
+        lower === 'exit' ||
+        lower === 'end' ||
+        lower === 'pwd' ||
+        lower === 'help' ||
+        lower === '?'
+      );
+    };
 
-    // Check 1: Purposeful Action Invariant
-    const hasMeaningfulAction = configOrDiagnosticActions.length >= 1;
+    const isRecognizedConfigOrDiag = (c: string) => {
+      const lower = c.toLowerCase();
+      if (isPassiveOrNav(lower)) return false;
+
+      // Valid configuration commands
+      if (lower === 'configure terminal' || lower === 'conf t') return true;
+      if (lower.startsWith('hostname ')) return true;
+      if (lower.startsWith('interface ') || lower.startsWith('int ')) return true;
+      if (lower.startsWith('vlan ')) return true;
+      if (lower.startsWith('name ')) return true;
+      if (lower.startsWith('switchport ')) return true;
+      if (lower.startsWith('spanning-tree ')) return true;
+      if (lower.startsWith('ip route ')) return true;
+      if (lower.startsWith('router ospf ') || lower.startsWith('network ')) return true;
+      if (lower.startsWith('access-list ') || lower.startsWith('ip access-group ')) return true;
+      if (lower.startsWith('ip nat ')) return true;
+      if (lower.startsWith('crypto ')) return true;
+
+      // Valid diagnostic commands
+      if (/^ping\s+[0-9a-zA-Z_.-]+/i.test(c)) return true;
+      if (/^(?:traceroute|tracert)\s+[0-9a-zA-Z_.-]+/i.test(c)) return true;
+      if (/^tcpdump/i.test(c)) return true;
+      if (/^arp/i.test(c)) return true;
+      if (/^(?:ipconfig|ifconfig)/i.test(c)) return true;
+      if (/^nslookup\s+[0-9a-zA-Z_.-]+/i.test(c)) return true;
+
+      return false;
+    };
+
+    const validActions = cmds.filter(isRecognizedConfigOrDiag);
+    const hasMeaningfulAction = validActions.length >= 1;
+
     checks.push({
       rule: 'Learner Execution Action',
       passed: hasMeaningfulAction,
       message: hasMeaningfulAction
-        ? `Executed ${configOrDiagnosticActions.length} operational/configuration actions.`
-        : 'Only passive inspection commands recorded. Configuration or diagnostic action required.',
+        ? `Executed ${validActions.length} valid configuration/operational action(s).`
+        : cmds.length === 0
+          ? 'No configuration commands submitted. Execute required commands in the terminal.'
+          : 'Only passive inspection or unrecognized commands recorded. Valid configuration action required.',
     });
 
-    // Check 2: Domain State Verification
+    // -------------------------------------------------------------------------
+    // CHECK 2: AUTHORITATIVE STATE-BASED VERIFICATION (ZERO KEYWORD FALLBACK)
+    // -------------------------------------------------------------------------
     let stateVerified = false;
     let stateMessage = '';
 
-    if (slug.includes('vlan') || slug.includes('switching')) {
-      // Must have created or named a non-default VLAN (e.g. VLAN 20) and assigned ports or trunk
-      const hasVlan20 = Boolean(state.vlans[20] || Object.keys(state.vlans).length > 2);
-      const hasTrunkConfigured = Object.keys(state.trunks).length > 0;
-      stateVerified = hasVlan20 || hasTrunkConfigured;
+    if (s.includes('vlan') || s.includes('switch')) {
+      // Must verify actual Layer 2 state:
+      // 1. Non-default VLAN (e.g. VLAN 20 or non-management VLAN) exists and is active in database
+      const hasVlan20 = Boolean(state.vlans && state.vlans[20] && state.vlans[20].status === 'active');
+      const hasCustomVlan = Boolean(
+        state.vlans &&
+          Object.values(state.vlans).some((v) => v.id !== 1 && v.id !== 10 && v.status === 'active')
+      );
+      // 2. Access port or trunk forwarding state
+      const hasPortAssigned = Boolean(
+        state.vlans &&
+          Object.values(state.vlans).some((v) => v.id !== 1 && v.id !== 10 && v.ports && v.ports.length > 0)
+      ) || Object.values(state.interfaces || {}).some((i) => i.mode === 'access' && i.accessVlan && i.accessVlan !== 1 && i.accessVlan !== 10);
+      const hasTrunkConfigured = Object.values(state.trunks || {}).some(
+        (t) => t.status === 'trunking' && t.allowedVlans && t.allowedVlans.length > 0
+      );
+
+      stateVerified = (hasVlan20 || hasCustomVlan) && (hasPortAssigned || hasTrunkConfigured);
       stateMessage = stateVerified
-        ? 'Layer 2 VLAN database and trunk port forwarding state verified.'
-        : 'Target VLAN or 802.1Q trunk state not created. Configure VLAN and assign ports.';
-    } else if (slug.includes('spanning-tree')) {
-      const priorityTuned = state.stp.bridgePriority < 32768 || state.stp.bridgePriority > 32768;
-      stateVerified = priorityTuned || cmds.some(c => c.includes('priority') || c.includes('root primary'));
+        ? 'Layer 2 VLAN database and switchport forwarding state verified (VLAN allocated and port/trunk active).'
+        : 'Target VLAN or switchport configuration missing. Create VLAN (e.g. VLAN 20) and assign access ports or configure trunk.';
+    } else if (s.includes('spanning-tree') || s.includes('stp')) {
+      // Must verify STP bridge priority was actually tuned away from default 32768
+      const priorityTuned = state.stp && (state.stp.bridgePriority < 32768 || state.stp.bridgePriority > 32768);
+      const wonRoot = state.stp && state.stp.rootBridgeMac === state.stp.mac;
+      stateVerified = Boolean(priorityTuned || wonRoot);
       stateMessage = stateVerified
-        ? 'Spanning Tree bridge priority and Root Bridge election criteria satisfied.'
-        : 'Bridge priority unmodified. Configure spanning-tree priority to influence Root Bridge election.';
-    } else if (slug.includes('ospf')) {
-      const ospfConfigured = Boolean(state.ospf && state.ospf.networks.length > 0);
-      stateVerified = ospfConfigured || cmds.some(c => c.startsWith('network ') || c.includes('area'));
+        ? `Spanning Tree bridge priority verified (${state.stp?.bridgePriority || 4096}); Root Bridge election criteria satisfied.`
+        : 'Bridge priority unmodified (remains default 32768). Tune bridge priority (e.g. priority 4096 or root primary).';
+    } else if (s.includes('ospf')) {
+      // Must verify actual OSPF configuration: active network statements and established adjacency
+      const hasNetworks = Boolean(state.ospf && state.ospf.networks && state.ospf.networks.length > 0);
+      const hasAdjacency = Boolean(state.ospf && state.ospf.neighbors && state.ospf.neighbors.some((n) => n.state === 'FULL'));
+      stateVerified = hasNetworks && hasAdjacency;
       stateMessage = stateVerified
-        ? 'OSPF area 0 network statement active; neighbor adjacency established.'
-        : 'OSPF network statement missing. Advertise subnet into OSPF Area 0.';
-    } else if (slug.includes('acl') || slug.includes('firewall')) {
-      const hasRules = Object.values(state.acls).some(r => r.length > 0);
-      stateVerified = hasRules || cmds.some(c => c.startsWith('access-list') || c.includes('permit') || c.includes('deny'));
+        ? `OSPF Area 0 network statements active (${state.ospf?.networks.map((n) => n.network).join(', ')}); neighbor adjacency FULL.`
+        : 'OSPF network statement missing or adjacency not formed. Configure "network <subnet> <wildcard> area 0" under router ospf.';
+    } else if (s.includes('acl') || s.includes('firewall')) {
+      // Must verify actual ACL rule table in state
+      const aclLists = Object.values(state.acls || {});
+      const hasValidRules = aclLists.some(
+        (rules) =>
+          rules.length > 0 &&
+          rules.some(
+            (r) =>
+              (r.action === 'permit' || r.action === 'deny') &&
+              Boolean(r.protocol) &&
+              Boolean(r.source) &&
+              Boolean(r.dest)
+          )
+      );
+      stateVerified = hasValidRules;
       stateMessage = stateVerified
-        ? 'Security access control list rules committed to filter table.'
-        : 'No ACL rules defined. Configure permit/deny statements.';
-    } else if (slug.includes('nat')) {
-      const natActive = Boolean(state.natOverloadEnabled || state.natTranslations.length > 0);
-      stateVerified = natActive || cmds.some(c => c.includes('ip nat inside') || c.includes('overload'));
+        ? 'Security Access Control List rules committed to filter table with active sequence entries.'
+        : 'No ACL rules defined in filter table. Configure "access-list <id> <permit|deny> <protocol> <src> <dest>".';
+    } else if (s.includes('nat') || s.includes('pat')) {
+      // Must verify dynamic PAT overload active in state
+      const natActive = Boolean(state.natOverloadEnabled === true && state.natTranslations && state.natTranslations.length > 0);
+      stateVerified = natActive;
       stateMessage = stateVerified
-        ? 'PAT Overload address translation session mapping active.'
-        : 'NAT/PAT not active. Configure ip nat inside/outside and overload.';
-    } else if (slug.includes('ipsec') || slug.includes('vpn')) {
-      const vpnUp = state.ipsec?.phase1 === 'UP' || state.faultResolved;
-      stateVerified = Boolean(vpnUp || cmds.some(c => c.includes('crypto isakmp key') || c.includes('transform-set')));
+        ? 'Dynamic PAT Overload address translation active with dynamic translation bindings.'
+        : 'NAT/PAT not active. Configure "ip nat inside source list <id> interface <if> overload".';
+    } else if (s.includes('ipsec') || s.includes('vpn')) {
+      // Must verify Phase 1 and Phase 2 Security Associations active
+      const vpnUp = Boolean(
+        state.ipsec &&
+          state.ipsec.phase1 === 'UP' &&
+          state.ipsec.phase2 === 'UP' &&
+          state.faultResolved === true
+      );
+      stateVerified = vpnUp;
       stateMessage = stateVerified
-        ? 'IPsec Security Associations established (Phase 1 & Phase 2 ACTIVE).'
-        : 'IPsec tunnel negotiation failed. Match pre-shared keys and transform set.';
-    } else if (slug.includes('troubleshoot')) {
-      const defaultRouteRestored = state.routes.some(r => r.prefix === '0.0.0.0') || state.faultResolved;
-      stateVerified = Boolean(defaultRouteRestored || cmds.some(c => c.includes('ip route 0.0.0.0') || c.includes('ping')));
+        ? 'IPsec Security Associations established (ISAKMP Phase 1 & IPsec Phase 2 ACTIVE).'
+        : 'IPsec tunnel negotiation failed. Phase 1/Phase 2 remain DOWN. Synchronize pre-shared key with peer.';
+    } else if (s.includes('troubleshoot') || s.includes('default-route') || s.includes('routing')) {
+      // Must verify default route present in routing table
+      const defaultRouteRestored = Boolean(
+        state.routes &&
+          state.routes.some((r) => r.prefix === '0.0.0.0' && Boolean(r.nextHop)) &&
+          state.faultResolved === true
+      );
+      stateVerified = defaultRouteRestored;
       stateMessage = stateVerified
-        ? 'Root cause identified and remediation applied. Full end-to-end IP reachability restored.'
-        : 'Fault remains unresolved. Restore the missing default gateway or route.';
+        ? 'Root cause resolved: Gateway of last resort (0.0.0.0/0) active in routing table.'
+        : 'Fault remains unresolved. Default route (0.0.0.0/0) missing from IP routing table.';
     } else {
-      // General Tier-2 / Tier-3 diagnostic check
-      const executedDiagnostics = cmds.some(c => c.startsWith('ping') || c.startsWith('tcpdump') || c.startsWith('traceroute') || c.startsWith('nslookup') || c.startsWith('ipconfig') || c.startsWith('arp'));
+      // General Tier-2 / Tier-3 diagnostic check: Must have executed valid diagnostic tool
+      const completed = state.diagnosticsCompleted || [];
+      const executedDiagnostics = completed.some(
+        (c) =>
+          /^ping\s+[0-9a-zA-Z_.-]+/i.test(c) ||
+          /^(?:traceroute|tracert)\s+[0-9a-zA-Z_.-]+/i.test(c) ||
+          /^tcpdump/i.test(c) ||
+          /^arp/i.test(c) ||
+          /^(?:ipconfig|ifconfig)/i.test(c) ||
+          /^nslookup\s+[0-9a-zA-Z_.-]+/i.test(c)
+      );
       stateVerified = executedDiagnostics;
       stateMessage = stateVerified
         ? 'Diagnostic telemetry captures and protocol socket parameters verified.'
-        : 'Diagnostic telemetry command not executed. Run ping, traceroute, or tcpdump.';
+        : 'Diagnostic telemetry command not executed. Run ping, traceroute, or tcpdump with valid targets.';
     }
 
     checks.push({
@@ -2015,7 +2239,7 @@ export class NetworkSimulationEngine {
       message: stateMessage,
     });
 
-    const passedCount = checks.filter(c => c.passed).length;
+    const passedCount = checks.filter((c) => c.passed).length;
     const score = Math.round((passedCount / checks.length) * 100);
     const passed = score >= 70;
 

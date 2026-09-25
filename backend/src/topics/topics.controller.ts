@@ -199,7 +199,12 @@ export class TopicsController {
     @LearnerIdentity() identity: LearnerIdentityContext,
     @Body() dto: SubmitLabDto
   ) {
-    return this.topicsService.validateLab(identity, { labId: dto.labId, userSolution: dto.userSolution });
+    return this.topicsService.validateLab(identity, {
+      labId: dto.labId,
+      commandHistory: dto.commandHistory,
+      hintsUsedCount: dto.hintsUsedCount,
+      userSolution: dto.userSolution,
+    });
   }
 
   @ApiOperation({ summary: 'Mark lesson as started for user or anonymous guest' })

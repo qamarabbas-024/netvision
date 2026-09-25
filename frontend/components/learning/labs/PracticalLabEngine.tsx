@@ -111,21 +111,23 @@ export const PracticalLabEngine: React.FC<PracticalLabEngineProps> = ({
         setIsCompleted(true);
         if (onComplete) onComplete(res.score, true);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Lab validation error:', err);
-      const hintsCount = hintsData?.currentLevel || hintsUsedCount;
       const fallbackResult: PracticalLabValidationResult = {
-        passed: true,
-        score: Math.max(0, 100 - hintsCount * 5),
+        passed: false,
+        score: 0,
         checks: [
-          { rule: 'Command Diagnostics', passed: true, message: `Executed ${commandHistory.length} CLI diagnostic commands.` },
-          { rule: 'Target Telemetry State', passed: true, message: 'Target network packet state satisfied.' },
+          {
+            rule: 'Server Authoritative Validation',
+            passed: false,
+            message: err?.message || 'Failed to reach validation service. Lab attempt cannot be verified.',
+          },
         ],
-        completionSummary: `Lab "${lab.title}" completed successfully!`,
+        completionSummary: 'Lab validation could not be completed. Please ensure network connectivity and retry.',
       };
       setValidationResult(fallbackResult);
-      setIsCompleted(true);
-      if (onComplete) onComplete(fallbackResult.score, true);
+      setIsCompleted(false);
+      if (onComplete) onComplete(0, false);
     } finally {
       setIsValidating(false);
     }

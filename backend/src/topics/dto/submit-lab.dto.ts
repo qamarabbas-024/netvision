@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsNumber, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsBoolean, IsNumber, IsOptional, IsObject, IsArray } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SubmitLabDto {
@@ -6,15 +6,27 @@ export class SubmitLabDto {
   @IsString()
   labId: string;
 
-  @ApiProperty({ description: 'Whether the lab attempt passed diagnostic validation' })
+  @ApiPropertyOptional({ description: 'Ignored in zero-trust architecture; score is server-derived' })
+  @IsOptional()
   @IsBoolean()
-  passed: boolean;
+  passed?: boolean;
 
-  @ApiProperty({ description: 'Score achieved in the lab attempt (0-100)' })
+  @ApiPropertyOptional({ description: 'Ignored in zero-trust architecture; score is server-derived' })
+  @IsOptional()
   @IsNumber()
-  score: number;
+  score?: number;
 
-  @ApiPropertyOptional({ description: 'User topology or command solution payload' })
+  @ApiPropertyOptional({ description: 'Array of commands executed during lab session' })
+  @IsOptional()
+  @IsArray()
+  commandHistory?: string[];
+
+  @ApiPropertyOptional({ description: 'Number of hints unlocked' })
+  @IsOptional()
+  @IsNumber()
+  hintsUsedCount?: number;
+
+  @ApiPropertyOptional({ description: 'User topology or command solution payload (audit only)' })
   @IsOptional()
   @IsObject()
   userSolution?: Record<string, any>;

@@ -569,32 +569,16 @@ export class TopicsService {
     };
   }
 
-  async submitLabAttempt(userId: string, labId: string, passed: boolean, score: number, userSolution?: Record<string, any>) {
-    const lab = await this.prisma.lessonLab.findUnique({
-      where: { id: labId },
-    });
-
-    if (!lab) {
-      throw new NotFoundException(`Lesson lab with ID "${labId}" not found.`);
-    }
-
-    const attempt = await this.prisma.labAttempt.create({
-      data: {
-        userId,
-        labId,
-        passed,
-        score,
-        userSolutionJson: userSolution || {},
-      },
-    });
-
-    return {
-      attemptId: attempt.id,
-      labId: attempt.labId,
-      passed: attempt.passed,
-      score: attempt.score,
-      createdAt: attempt.createdAt,
-    };
+  async submitLabAttempt(
+    userId: string,
+    labId: string,
+    passed?: boolean,
+    score?: number,
+    userSolution?: Record<string, any>,
+    commandHistory?: string[],
+    hintsUsedCount?: number
+  ) {
+    return this.validateLab({ userId }, { labId, commandHistory, hintsUsedCount, userSolution });
   }
 
   public async resolveLabSlug(labId: string): Promise<string> {
@@ -881,7 +865,7 @@ export class TopicsService {
     if (anonymousId && !userId) {
       await this.ensureAnonymousLearner(anonymousId);
     }
-    const { labId, commandHistory = [], hintsUsedCount = 0, userSolution } = dto;
+    const { labId, userSolution } = dto;
 
     const lab = await this.prisma.lessonLab.findUnique({
       where: { id: labId },
@@ -892,30 +876,43 @@ export class TopicsService {
       throw new NotFoundException(`Lesson lab with ID "${labId}" not found.`);
     }
 
-    // Derive or replay simulated state: commands are always replayed authoritatively
+    const rawCommands = Array.isArray(dto.commandHistory) ? dto.commandHistory : [];
+    const sanitizedCommands = rawCommands
+      .filter((cmd): cmd is string => typeof cmd === 'string')
+      .map((c) => c.trim())
+      .filter((c) => c.length > 0);
+
+    const safeHintsCount = Math.max(0, Math.floor(Number(dto.hintsUsedCount) || 0));
+    const sessionKey = `${userId || anonymousId}:${labId}`;
+    const activeSession = this.activeLabSessions.get(sessionKey);
+
+    // Derive or replay simulated state: commands are always replayed authoritatively.
+    // ZERO TRUST ARCHITECTURE:
+    // A client-provided userSolution is NEVER used to construct or override simulatedState.
     let simulatedState = NetworkSimulationEngine.getInitialStateForLab(lab.lesson.slug);
-    if (commandHistory && commandHistory.length > 0) {
-      for (const cmd of commandHistory) {
+    let effectiveCommands: string[] = [];
+
+    if (sanitizedCommands.length > 0) {
+      effectiveCommands = sanitizedCommands;
+      for (const cmd of sanitizedCommands) {
         const simRes = NetworkSimulationEngine.executeCommand(cmd, simulatedState, lab.lesson.slug);
         simulatedState = simRes.updatedState;
       }
+    } else if (activeSession && activeSession.simulatedState) {
+      simulatedState = activeSession.simulatedState;
+      effectiveCommands = (activeSession.commandHistory || []).map((h: any) => (typeof h === 'string' ? h : h?.command || '')).filter(Boolean);
     } else {
-      const sessionKey = `${userId || anonymousId}:${labId}`;
-      const activeSession = this.activeLabSessions.get(sessionKey);
-      if (activeSession && activeSession.simulatedState) {
-        simulatedState = activeSession.simulatedState;
-      } else if (userSolution && Object.keys(userSolution).length > 0) {
-        simulatedState = userSolution as any;
-      }
+      // Missing simulator session and empty command history:
+      // State remains pristine unconfigured initial state. No client fallback allowed.
+      effectiveCommands = [];
     }
 
-    // Execute state-based semantic validation
-    const result = NetworkSimulationEngine.validateAttempt(lab.lesson.slug, simulatedState, commandHistory);
+    // Execute state-based semantic validation strictly against authoritative server state
+    const result = NetworkSimulationEngine.validateAttempt(lab.lesson.slug, simulatedState, effectiveCommands);
     const checks = result.checks;
     let score = result.score;
 
     // Deduct 5 points per hint used (sanitized to non-negative integer)
-    const safeHintsCount = Math.max(0, Math.floor(Number(hintsUsedCount) || 0));
     score = Math.max(0, score - safeHintsCount * 5);
     const passed = score >= 70;
 
@@ -931,9 +928,9 @@ export class TopicsService {
         labId,
         passed,
         score,
-        hintsUsedCount,
+        hintsUsedCount: safeHintsCount,
         attemptsCount: currentLabAttemptNumber,
-        commandHistoryJson: commandHistory,
+        commandHistoryJson: effectiveCommands,
         validationResultJson: checks,
         userSolutionJson: userSolution || {},
         status: passed ? 'PASSED' : 'FAILED',
@@ -979,7 +976,7 @@ export class TopicsService {
       passed,
       score,
       attemptsCount: currentLabAttemptNumber,
-      hintsUsedCount,
+      hintsUsedCount: safeHintsCount,
       checks,
       completionSummary: passed
         ? `Lab "${lab.title}" completed successfully with score ${score}%!`
