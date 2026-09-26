@@ -40,6 +40,7 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-netvision}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable is required}@postgres:5432/${POSTGRES_DB:-netvision_db}?schema=public
+      DIRECT_URL: postgresql://${POSTGRES_USER:-netvision}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable is required}@postgres:5432/${POSTGRES_DB:-netvision_db}?schema=public
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,6 +59,7 @@ services:
       PORT: 4000
       API_PREFIX: /api/v1
       DATABASE_URL: postgresql://${POSTGRES_USER:-netvision}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable is required}@postgres:5432/${POSTGRES_DB:-netvision_db}?schema=public
+      DIRECT_URL: postgresql://${POSTGRES_USER:-netvision}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD environment variable is required}@postgres:5432/${POSTGRES_DB:-netvision_db}?schema=public
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET environment variable is required}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}

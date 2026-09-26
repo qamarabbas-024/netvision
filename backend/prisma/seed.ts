@@ -501,19 +501,31 @@ async function main() {
     EXPANDED_ASSESSMENT_QUESTION_BANK.map((q) => `${q.quizId}:::${q.text}`)
   );
 
-  // Clean up legacy placeholder or orphan questions not in authoritative question bank
+  // Safe Archival Semantics: In production or when user attempts exist,
+  // do NOT destructively delete questions. Non-canonical questions are retained as historical archive.
   const orphanQuestions = allExistingQuestions.filter(
     (q) => !authoritativeKeys.has(`${q.quizId}:::${q.questionText}`)
   );
   if (orphanQuestions.length > 0) {
-    const orphanIds = orphanQuestions.map((q) => q.id);
-    for (let i = 0; i < orphanIds.length; i += 50) {
-      const chunk = orphanIds.slice(i, i + 50);
-      await prisma.quizQuestion.deleteMany({
-        where: { id: { in: chunk } },
-      });
+    const shouldPrune = !isProd && process.env.PRUNE_ORPHAN_QUESTIONS === 'true';
+    if (shouldPrune) {
+      // Check if any orphan question is linked to existing student quiz attempts before pruning
+      const attemptsCount = await prisma.quizAttempt.count().catch(() => 1);
+      if (attemptsCount === 0) {
+        const orphanIds = orphanQuestions.map((q) => q.id);
+        for (let i = 0; i < orphanIds.length; i += 50) {
+          const chunk = orphanIds.slice(i, i + 50);
+          await prisma.quizQuestion.deleteMany({
+            where: { id: { in: chunk } },
+          });
+        }
+        console.log(`  🧹 [Dev/Test Only] Purged ${orphanIds.length} legacy/orphan questions with zero user attempts.`);
+      } else {
+        console.log(`  🛡️ Safe Archival: Preserved ${orphanQuestions.length} historical questions because student quiz attempts exist in database.`);
+      }
+    } else {
+      console.log(`  🛡️ Safe Archival: Preserved ${orphanQuestions.length} legacy/historical questions intact to guarantee historical user data integrity.`);
     }
-    console.log(`  🧹 Purged ${orphanIds.length} legacy/orphan questions not in authoritative question bank.`);
   }
 
   const existingMap = new Map<string, string>();
