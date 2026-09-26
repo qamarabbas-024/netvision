@@ -119,6 +119,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }
     }
 
+    // 2. Token expiration verification (defense-in-depth)
+    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
+      throw new UnauthorizedException('Token has expired.');
+    }
+
     // 2. Validate user identity with short-lived cache (prevents DB query stampede)
     let user = this.userCache.get(payload.sub);
     const now = Date.now();

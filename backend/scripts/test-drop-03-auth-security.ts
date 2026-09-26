@@ -574,6 +574,37 @@ async function runDrop03SecurityTests() {
 
     const canActivate = rolesGuard.canActivate(mockAdminContext);
     assert(canActivate === false, 'RolesGuard denies STUDENT access to ADMIN endpoint');
+    assert(canActivate === false, 'RolesGuard denies forged client role payload (STUDENT with claimed ADMIN)');
+
+    // Direct access to admin with missing token / unauthenticated request
+    const mockMissingTokenContext = {
+      getHandler: () => {},
+      getClass: () => {},
+      switchToHttp: () => ({
+        getRequest: () => ({
+          user: null, // No user authenticated
+        }),
+      }),
+    } as unknown as ExecutionContext;
+
+    const canActivateMissingToken = rolesGuard.canActivate(mockMissingTokenContext);
+    assert(canActivateMissingToken === false, 'Direct admin API access with missing token rejected (unauthenticated)');
+
+    // Direct access to admin with expired token
+    const expiredPayload: JwtPayload = {
+      sub: 'hacker-user-1',
+      email: 'hacker@example.com',
+      role: 'ADMIN',
+      iat: nowSec - 7200,
+      exp: nowSec - 3600, // Expired 1 hour ago
+    };
+    let expiredTokenBlocked = false;
+    try {
+      await jwtStrategy.validate(expiredPayload);
+    } catch (err: any) {
+      expiredTokenBlocked = err instanceof UnauthorizedException && err.message.includes('expired');
+    }
+    assert(expiredTokenBlocked === true, 'Direct admin API access with expired token rejected with UnauthorizedException');
 
     // Test with genuine ADMIN user
     const mockGenuineAdminContext = {
