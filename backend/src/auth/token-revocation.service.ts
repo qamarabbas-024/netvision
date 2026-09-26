@@ -533,6 +533,166 @@ export class TokenRevocationService implements OnModuleDestroy {
     return { userId: session.userId, familyId: session.familyId };
   }
 
+  /**
+   * Asynchronously rotates a refresh token with cross-instance Redis lookup,
+   * local memory L1 fallback, multi-tab grace window, and distributed replay reuse invalidation.
+   */
+  public async rotateRefreshTokenAsync(
+    rawOldToken: string,
+    rawNewToken: string,
+    ttlMs = DISTRIBUTED_TTL.REFRESH_TOKEN_REVOCATION_SEC * 1000
+  ): Promise<RotationResult | null> {
+    if (!rawOldToken || typeof rawOldToken !== 'string') return null;
+    this.syncFromDisk();
+
+    const oldHash = this.hashToken(rawOldToken);
+    let session = this.refreshSessions.get(oldHash);
+
+    // Authoritative distributed Redis lookup across instances
+    if (this.redisService?.isAvailable()) {
+      const redisSession = await this.redisService.get<DistributedRefreshSession>(
+        REDIS_KEYS.REFRESH_SESSION(oldHash)
+      );
+      if (redisSession) {
+        session = {
+          tokenHash: redisSession.tokenHash,
+          userId: redisSession.userId,
+          familyId: redisSession.familyId,
+          expiresAt: redisSession.expiresAt * 1000,
+          isRevoked: redisSession.isRevoked,
+          createdAt: redisSession.createdAt * 1000,
+          rotatedAt: redisSession.rotatedAt ? redisSession.rotatedAt * 1000 : undefined,
+          replacedByHash: redisSession.replacedByHash,
+        };
+        this.refreshSessions.set(oldHash, session);
+        if (!this.familyTokens.has(session.familyId)) {
+          this.familyTokens.set(session.familyId, new Set());
+        }
+        this.familyTokens.get(session.familyId)!.add(oldHash);
+      }
+    }
+
+    if (!session) {
+      return null;
+    }
+
+    const now = Date.now();
+
+    if (now > session.expiresAt) {
+      this.refreshSessions.delete(oldHash);
+      this.persistRefreshSessions();
+      if (this.redisService?.isAvailable()) {
+        await this.redisService.del(REDIS_KEYS.REFRESH_SESSION(oldHash)).catch(() => {});
+      }
+      return null;
+    }
+
+    // REUSE DETECTION & CONCURRENT REFRESH TOLERANCE
+    if (session.isRevoked) {
+      // If rotated recently within the grace period (e.g. concurrent browser tabs), return safe rotation
+      if (session.rotatedAt && now - session.rotatedAt <= this.concurrentGracePeriodMs) {
+        this.logger.log(
+          `Concurrent refresh retry handled safely for user ${session.userId}, family ${session.familyId} (within ${this.concurrentGracePeriodMs}ms grace window).`
+        );
+        return {
+          userId: session.userId,
+          familyId: session.familyId,
+          isConcurrentRetry: true,
+        };
+      }
+
+      // Beyond grace window: Stolen token replay attack!
+      this.logger.warn(
+        `🚨 REFRESH TOKEN REUSE ATTACK DETECTED for user ${session.userId}, family ${session.familyId}! Invalidating entire family and active sessions across all instances.`
+      );
+      this.monitoringService?.recordSecurityEvent('TOKEN_REUSE_DETECTED', {
+        userId: session.userId,
+        details: { familyId: session.familyId },
+      });
+      await this.revokeFamilyAsync(session.familyId);
+      this.revokeUserSessions(session.userId);
+      return null;
+    }
+
+    // Mark old token as revoked (used) with rotation timestamp
+    session.isRevoked = true;
+    session.rotatedAt = now;
+    const newHash = this.hashToken(rawNewToken);
+    session.replacedByHash = newHash;
+
+    this.refreshSessions.set(oldHash, session);
+
+    // Register new token in same family
+    const newSession: RefreshSession = {
+      tokenHash: newHash,
+      userId: session.userId,
+      familyId: session.familyId,
+      expiresAt: now + ttlMs,
+      isRevoked: false,
+      createdAt: now,
+    };
+    this.refreshSessions.set(newHash, newSession);
+
+    if (!this.familyTokens.has(session.familyId)) {
+      this.familyTokens.set(session.familyId, new Set());
+    }
+    this.familyTokens.get(session.familyId)!.add(newHash);
+
+    this.persistRefreshSessions();
+    this.persistFamilyTokens();
+
+    // Distributed Redis Persistence
+    if (this.redisService?.isAvailable()) {
+      const ttlSec = Math.floor(ttlMs / 1000);
+      const distOldSession: DistributedRefreshSession = {
+        tokenHash: oldHash,
+        userId: session.userId,
+        familyId: session.familyId,
+        expiresAt: Math.floor(session.expiresAt / 1000),
+        isRevoked: true,
+        createdAt: Math.floor(session.createdAt / 1000),
+        rotatedAt: Math.floor(now / 1000),
+        replacedByHash: newHash,
+        sourceInstanceId: this.redisService.instanceId,
+      };
+      const distNewSession: DistributedRefreshSession = {
+        tokenHash: newHash,
+        userId: session.userId,
+        familyId: session.familyId,
+        expiresAt: Math.floor((now + ttlMs) / 1000),
+        isRevoked: false,
+        createdAt: Math.floor(now / 1000),
+        sourceInstanceId: this.redisService.instanceId,
+      };
+
+      await Promise.all([
+        this.redisService.set(REDIS_KEYS.REFRESH_SESSION(oldHash), distOldSession, ttlSec),
+        this.redisService.set(REDIS_KEYS.REFRESH_SESSION(newHash), distNewSession, ttlSec),
+        this.redisService.sadd(REDIS_KEYS.REFRESH_FAMILY(session.familyId), newHash, ttlSec),
+      ]).catch((err) => {
+        this.logger.warn(`Failed to replicate rotated refresh session to Redis: ${err?.message || err}`);
+      });
+    }
+
+    return { userId: session.userId, familyId: session.familyId };
+  }
+
+  public async revokeFamilyAsync(familyId: string): Promise<void> {
+    this.revokeFamily(familyId);
+    if (this.redisService?.isAvailable()) {
+      try {
+        const tokenHashes = await this.redisService.smembers(REDIS_KEYS.REFRESH_FAMILY(familyId));
+        if (tokenHashes && tokenHashes.length > 0) {
+          const keysToDelete = tokenHashes.map((h) => REDIS_KEYS.REFRESH_SESSION(h));
+          await this.redisService.del(keysToDelete);
+        }
+        await this.redisService.del(REDIS_KEYS.REFRESH_FAMILY(familyId));
+      } catch (err: any) {
+        this.logger.warn(`Failed to invalidate family ${familyId} in Redis: ${err?.message || err}`);
+      }
+    }
+  }
+
   public revokeFamily(familyId: string): void {
     this.syncFromDisk();
     const hashes = this.familyTokens.get(familyId);

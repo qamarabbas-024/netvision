@@ -606,7 +606,10 @@ export class AuthService {
     }
 
     const rawNewRefreshToken = crypto.randomBytes(32).toString('hex');
-    const rotationResult = this.tokenRevocationService?.rotateRefreshToken(
+    const rotationResult = (await this.tokenRevocationService?.rotateRefreshTokenAsync?.(
+      rawRefreshToken,
+      rawNewRefreshToken
+    )) ?? this.tokenRevocationService?.rotateRefreshToken(
       rawRefreshToken,
       rawNewRefreshToken
     );

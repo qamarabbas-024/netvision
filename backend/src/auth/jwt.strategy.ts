@@ -108,8 +108,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         (r: any) => (r && r.cookies ? r.cookies['netvision_auth_token'] || r.cookies['accessToken'] : null),
       ])(req);
 
-      const isRev = (await this.tokenRevocationService?.isRevokedAsync?.(rawToken, payload)) ?? this.tokenRevocationService?.isRevoked(rawToken, payload);
-      if (rawToken && isRev) {
+      const isRev = (await this.tokenRevocationService?.isRevokedAsync?.(rawToken || '', payload)) ?? this.tokenRevocationService?.isRevoked(rawToken || '', payload);
+      if (isRev) {
         throw new UnauthorizedException('Token has been revoked or session terminated.');
       }
     } else if (payload) {

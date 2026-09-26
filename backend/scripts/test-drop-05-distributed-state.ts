@@ -509,9 +509,9 @@ async function runDrop05Tests() {
     // Instance A registers token 1
     tokenRevocationA.registerRefreshToken('user-refresh-1', token1, familyId);
 
-    // Instance A rotates token 1 -> token 2
-    const rotateResA = tokenRevocationA.rotateRefreshToken(token1, token2);
-    assert(Boolean(rotateResA && rotateResA.userId === 'user-refresh-1'), 'Instance A successfully rotated token 1 to token 2');
+    // Cross-Instance Rotation: Instance B (with zero local knowledge) rotates token 1 -> token 2 via Redis
+    const rotateResB = await tokenRevocationB.rotateRefreshTokenAsync(token1, token2);
+    assert(Boolean(rotateResB && rotateResB.userId === 'user-refresh-1'), 'Instance B successfully rotated token 1 to token 2 via distributed Redis');
 
     const token1Hash = tokenRevocationA.hashToken(token1);
     const token2Hash = tokenRevocationA.hashToken(token2);
@@ -520,13 +520,11 @@ async function runDrop05Tests() {
     const session1InRedis = await redisServiceB.get<any>(REDIS_KEYS.REFRESH_SESSION(token1Hash));
     assert(session1InRedis?.replacedByHash === token2Hash, 'Instance B sees token 1 was replaced by token 2 in Redis');
 
-    // Simulate adversary replaying old token1 past grace window
-    const rawSession = (tokenRevocationA as any).refreshSessions.get(token1Hash);
-    if (rawSession) {
-      rawSession.rotatedAt = Date.now() - 20000; // 20s ago (> 10s grace)
-    }
+    // Simulate adversary replaying old token1 past grace window across instances
+    session1InRedis.rotatedAt = Math.floor(Date.now() / 1000) - 20; // 20s ago (> 10s grace)
+    await redisServiceA.set(REDIS_KEYS.REFRESH_SESSION(token1Hash), session1InRedis, 3600);
 
-    const replayRes = tokenRevocationA.rotateRefreshToken(token1, 'adversary-token-3');
+    const replayRes = await tokenRevocationA.rotateRefreshTokenAsync(token1, 'adversary-token-3');
     assert(replayRes === null, 'Replay of rotated refresh token detected and rejected with null');
 
     await tokenRevocationA.onModuleDestroy();
