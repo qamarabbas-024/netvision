@@ -41,6 +41,7 @@ const SENSITIVE_STRING_PATTERNS = [
   /[A-Za-z]:\\[^"'\n\r<>]+/gi, // Windows absolute file paths
   /\/(?:Users|home|var|tmp|etc|app|node_modules)\/[^"'\n\r<>]+/gi, // Unix file paths
   /Invalid\s+`prisma\.[^`]+`\s+invocation/gi, // Prisma invocation leakage
+  /(?:localhost|\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}):\d{2,5}/gi, // Host:port network topology leakage
 ];
 
 /**
