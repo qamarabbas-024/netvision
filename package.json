@@ -4,6 +4,10 @@
   "private": true,
   "description": "NetVision - Learn Networking by Seeing It. Interactive networking learning platform.",
   "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=22.0.0 <25.0.0",
+    "pnpm": ">=10.0.0 <12.0.0"
+  },
   "scripts": {
     "dev": "concurrently \"pnpm --filter netvision-frontend dev\" \"pnpm --filter netvision-backend dev\"",
     "dev:frontend": "pnpm --filter netvision-frontend dev",

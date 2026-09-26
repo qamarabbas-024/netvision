@@ -2,11 +2,13 @@ import os
 import json
 import hashlib
 
-TEXTBOOK_ROOT = r'C:\Users\Qamar Abbas\Downloads\Computer Networking'
+TEXTBOOK_ROOT = os.environ.get('TEXTBOOK_ROOT', os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'docs')))
 MASTER_MD = os.path.join(TEXTBOOK_ROOT, 'CS221-Networking-Complete-Mastery.md')
 
-with open(MASTER_MD, 'r', encoding='utf-8') as f:
-    master_text = f.read()
+master_text = ""
+if os.path.exists(MASTER_MD):
+    with open(MASTER_MD, 'r', encoding='utf-8') as f:
+        master_text = f.read()
 
 def get_chunk_hash(search_text):
     # compute sha256 of the matching module or section

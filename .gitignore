@@ -40,6 +40,18 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.impeccable/
+.gemini/
+.antigravity/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Internal AI Studio Protocols & Artifacts
+.project-ai/
 
 # Archives & Media
 *.zip

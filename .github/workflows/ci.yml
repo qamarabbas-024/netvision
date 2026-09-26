@@ -85,6 +85,11 @@ jobs:
           npx ts-node scripts/test-drop9-standalone.ts
           npx ts-node scripts/test-drop8-capstone-grading.ts
           npx ts-node scripts/test-drop9-certification-integrity.ts
+          npx ts-node scripts/test-drop-03-auth-security.ts
+          npx ts-node scripts/test-drop-05-distributed-state.ts
+          npx ts-node scripts/test-drop-06-prisma-integrity.ts
+          npx ts-node scripts/test-drop-10-performance-scalability.ts
+          npx ts-node scripts/test-drop-11-devops-consistency.ts
 
       - name: Build Production Artifacts
         run: pnpm build

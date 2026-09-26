@@ -1,0 +1,86 @@
+# ==============================================================================
+# NetVision Render Infrastructure-as-Code Blueprint
+# https://render.com/docs/blueprint-spec
+# ==============================================================================
+version: "1"
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. NetVision NestJS Backend Web Service
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: netvision-backend
+    runtime: docker
+    dockerfilePath: Dockerfile.backend
+    plan: starter
+    region: oregon
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /ready
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: API_PREFIX
+        value: /api/v1
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: netvision-redis
+          property: connectionString
+      - key: REDIS_ENABLED
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: 15m
+      - key: TRUSTED_PROXY
+        value: loopback
+      - key: CORS_ORIGIN
+        value: https://netvision.edu
+      - key: API_URL
+        value: https://api.netvision.edu
+      - key: FRONTEND_URL
+        value: https://netvision.edu
+      - key: EMAIL_VERIFICATION_ENABLED
+        value: "false"
+
+  # ----------------------------------------------------------------------------
+  # 2. NetVision Next.js Frontend Web Service (Self-Hosted Docker on Render)
+  # (Note: Vercel is the primary production target; this provides container parity)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: netvision-frontend
+    runtime: docker
+    dockerfilePath: Dockerfile.frontend
+    plan: starter
+    region: oregon
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NEXT_PUBLIC_API_URL
+        value: https://api.netvision.edu/api/v1
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://netvision.edu
+
+  # ----------------------------------------------------------------------------
+  # 3. Distributed Redis Cache (Sessions, Revocations & Stampede Defense)
+  # ----------------------------------------------------------------------------
+  - type: redis
+    name: netvision-redis
+    plan: starter
+    region: oregon
+    ipAllowList: [] # Internal network only
+    maxmemoryPolicy: volatile-lru

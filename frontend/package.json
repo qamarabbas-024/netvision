@@ -2,6 +2,10 @@
   "name": "netvision-frontend",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0 <25.0.0",
+    "pnpm": ">=10.0.0 <12.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

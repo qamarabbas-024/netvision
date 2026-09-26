@@ -3,7 +3,7 @@ import re
 import json
 import hashlib
 
-TEXTBOOK_ROOT = r'C:\Users\Qamar Abbas\Downloads\Computer Networking'
+TEXTBOOK_ROOT = os.environ.get('TEXTBOOK_ROOT', os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'docs')))
 MASTER_MD = os.path.join(TEXTBOOK_ROOT, 'CS221-Networking-Complete-Mastery.md')
 CURRICULUM_MAP_MD = os.path.join(TEXTBOOK_ROOT, '01_Course_Outline', 'Master_Curriculum_Map.md')
 ORIGINAL_MODS_DIR = os.path.join(TEXTBOOK_ROOT, '02_Original_Modules')

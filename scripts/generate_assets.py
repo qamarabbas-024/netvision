@@ -3,7 +3,8 @@ import math
 import shutil
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
-OUTPUT_DIR = r"c:\My works\2026 Work\Netvision\frontend\public"
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+OUTPUT_DIR = os.path.join(BASE_DIR, "frontend", "public")
 os.makedirs(os.path.join(OUTPUT_DIR, "courses"), exist_ok=True)
 os.makedirs(os.path.join(OUTPUT_DIR, "textures"), exist_ok=True)
 
@@ -224,16 +225,16 @@ def generate_textures():
     print(f"Generated {grid_path}")
 
 def copy_ai_generated_assets():
-    # Copy generated NET-101 photo if exists
-    src101 = r"C:\Users\Qamar Abbas\.gemini\antigravity-ide\brain\27464d9c-ec4a-4c69-9016-fcb6185e636b\course_net101_foundations_1788085893864.jpg"
-    src_og = r"C:\Users\Qamar Abbas\.gemini\antigravity-ide\brain\27464d9c-ec4a-4c69-9016-fcb6185e636b\netvision_homepage_mockup_1788080691514.jpg"
+    # Optional copy if environment variables provide paths
+    src101 = os.environ.get("ASSET_SRC_101", "")
+    src_og = os.environ.get("ASSET_SRC_OG", "")
     
-    if os.path.exists(src101):
+    if src101 and os.path.exists(src101):
         dst = os.path.join(OUTPUT_DIR, "courses", "net-101-hero.jpg")
         shutil.copyfile(src101, dst)
         print(f"Copied AI asset to {dst}")
         
-    if os.path.exists(src_og):
+    if src_og and os.path.exists(src_og):
         dst_og = os.path.join(OUTPUT_DIR, "og-image.png")
         shutil.copyfile(src_og, dst_og)
         print(f"Copied OG image to {dst_og}")

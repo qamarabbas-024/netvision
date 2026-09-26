@@ -2,6 +2,10 @@
   "name": "netvision-backend",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0 <25.0.0",
+    "pnpm": ">=10.0.0 <12.0.0"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -51,6 +55,7 @@
     "test:drop05": "ts-node scripts/test-drop-05-distributed-state.ts",
     "test:drop06": "ts-node scripts/test-drop-06-prisma-integrity.ts",
     "test:drop10": "ts-node scripts/test-drop-10-performance-scalability.ts",
+    "test:drop11": "ts-node scripts/test-drop-11-devops-consistency.ts",
     "db:guard": "ts-node scripts/guard-db-command.ts",
     "inspect:curriculum": "ts-node scripts/inspect-curriculum.ts",
     "test:all": "ts-node scripts/test-oauth-otp-security.ts && ts-node scripts/test-anonymous-claim-security.ts && ts-node scripts/test-monitoring-observability.ts && ts-node scripts/test-database-resilience.ts && ts-node scripts/test-email-suite.ts && ts-node scripts/test-deployment-readiness.ts && ts-node scripts/test-network-troubleshooting-engine.ts && ts-node scripts/test-troubleshooting-catalog-flow.ts && ts-node scripts/test-beta-auth.ts && ts-node scripts/test-error-and-empty-states.ts && ts-node scripts/test-product-correctness.ts && ts-node scripts/test-drop1-curriculum-reconciliation.ts && ts-node scripts/test-drop2-certification-architecture.ts && ts-node scripts/test-drop3-certificate-issuance.ts && ts-node scripts/test-drop4-mastery.ts"
