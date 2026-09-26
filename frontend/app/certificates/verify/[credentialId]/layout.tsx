@@ -11,20 +11,20 @@ export async function generateMetadata({
 
   return {
     title: `Verify Credential ${decodedId} | NetVision Public Registry`,
-    description: `Authoritative cryptographic verification record for NetVision credential ${decodedId}. Verify status, track, and cryptographic integrity seal.`,
+    description: `Official public verification record for NetVision credential ${decodedId}. Verify status, track, and credential validity.`,
     alternates: {
       canonical: `/certificates/verify/${encodeURIComponent(decodedId)}`,
     },
     openGraph: {
       title: `Verify Credential ${decodedId} | NetVision Registry`,
-      description: `Authoritative cryptographic verification record for NetVision credential ${decodedId}.`,
+      description: `Official public verification record for NetVision credential ${decodedId}.`,
       url: `${SITE_URL}/certificates/verify/${encodeURIComponent(decodedId)}`,
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
       title: `Verify Credential ${decodedId} | NetVision Registry`,
-      description: `Authoritative cryptographic verification record for NetVision credential ${decodedId}.`,
+      description: `Official public verification record for NetVision credential ${decodedId}.`,
       images: ['/og-image.png'],
     },
     robots: {

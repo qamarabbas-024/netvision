@@ -76,7 +76,7 @@ export default function RegisterPage() {
             </span>
           </Link>
           <h1 className="text-2xl font-bold text-white tracking-tight">Create Free Account</h1>
-          <p className="text-xs text-zinc-400 mt-1">Join 100,000+ computer science & IT learners worldwide</p>
+          <p className="text-xs text-zinc-400 mt-1">Create your account to track course progress & credentials</p>
         </div>
 
         {error ? (

@@ -4,7 +4,7 @@ import { SITE_URL } from '@/lib/siteConfig';
 export const metadata: Metadata = {
   title: 'Public Credential Verification Registry | NetVision',
   description:
-    'Authoritative public verification portal for NetVision computer networking certifications and credentials. Verify official issuance status and cryptographic seals.',
+    'Authoritative public verification portal for NetVision computer networking certifications and credentials. Verify official issuance status and credential records.',
   alternates: {
     canonical: '/certificates/verify',
   },
@@ -29,7 +29,7 @@ const verifyPortalSchema = {
   '@type': 'WebPage',
   name: 'NetVision Public Credential Verification Registry',
   description:
-    'Authoritative public registry for verifying NetVision computer networking certificates and cryptographic seals.',
+    'Authoritative public registry for verifying NetVision computer networking certificates and credential records.',
   url: `${SITE_URL}/certificates/verify`,
   publisher: {
     '@type': 'EducationalOrganization',

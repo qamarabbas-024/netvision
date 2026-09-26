@@ -22,7 +22,7 @@ export const HowItWorksSection: React.FC = () => {
     {
       step: '04',
       title: 'Mastery Verification',
-      desc: 'Solve scenario-based troubleshooting incidents and earn cryptographically verified credentials backed by server validation.',
+      desc: 'Solve scenario-based troubleshooting incidents and earn authoritative verified credentials backed by server validation.',
     },
   ];
 

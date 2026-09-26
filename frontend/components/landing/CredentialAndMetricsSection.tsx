@@ -19,7 +19,7 @@ export const CredentialAndMetricsSection: React.FC = () => {
                 Prove Your Competence
               </h2>
               <p className="text-xs text-[#94a3b8] leading-relaxed mb-6">
-                All certificates are cryptographically verifiable and backed by NetVision&apos;s secure infrastructure.
+                All certificates are authoritative digital credentials backed by NetVision&apos;s official verification registry.
               </p>
 
               {/* Certificate Preview Card Miniature */}
@@ -54,14 +54,14 @@ export const CredentialAndMetricsSection: React.FC = () => {
             </Link>
           </div>
 
-          {/* Card 2: Platform Metrics Grid */}
+          {/* Card 2: Platform Architecture & Specifications Grid */}
           <div className="lg:col-span-4 p-6 sm:p-7 rounded-2xl bg-[#0c1017] border border-[#1e293b] flex flex-col justify-center shadow-sm">
             <div className="grid grid-cols-5 gap-2 text-center">
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 rounded-lg bg-[#0f172a] border border-[#1e293b] flex items-center justify-center text-[#38bdf8] mb-2">
                   <Box className="w-4 h-4" />
                 </div>
-                <strong className="text-sm sm:text-base font-extrabold text-white">16+</strong>
+                <strong className="text-sm sm:text-base font-extrabold text-white">5</strong>
                 <span className="text-[10px] font-mono text-[#64748b]">Courses</span>
               </div>
 
@@ -69,7 +69,7 @@ export const CredentialAndMetricsSection: React.FC = () => {
                 <div className="w-8 h-8 rounded-lg bg-[#0f172a] border border-[#1e293b] flex items-center justify-center text-[#22c55e] mb-2">
                   <Network className="w-4 h-4" />
                 </div>
-                <strong className="text-sm sm:text-base font-extrabold text-white">50+</strong>
+                <strong className="text-sm sm:text-base font-extrabold text-white">15+</strong>
                 <span className="text-[10px] font-mono text-[#64748b]">Simulations</span>
               </div>
 
@@ -77,24 +77,24 @@ export const CredentialAndMetricsSection: React.FC = () => {
                 <div className="w-8 h-8 rounded-lg bg-[#0f172a] border border-[#1e293b] flex items-center justify-center text-[#22c55e] mb-2">
                   <GitBranch className="w-4 h-4" />
                 </div>
-                <strong className="text-sm sm:text-base font-extrabold text-white">100+</strong>
+                <strong className="text-sm sm:text-base font-extrabold text-white">30+</strong>
                 <span className="text-[10px] font-mono text-[#64748b]">Labs</span>
               </div>
 
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 rounded-lg bg-[#0f172a] border border-[#1e293b] flex items-center justify-center text-[#a855f7] mb-2">
-                  <Users className="w-4 h-4" />
+                  <ShieldCheck className="w-4 h-4" />
                 </div>
-                <strong className="text-sm sm:text-base font-extrabold text-white">10K+</strong>
-                <span className="text-[10px] font-mono text-[#64748b]">Learners</span>
+                <strong className="text-sm sm:text-base font-extrabold text-white">1</strong>
+                <span className="text-[10px] font-mono text-[#64748b]">Capstone</span>
               </div>
 
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 rounded-lg bg-[#0f172a] border border-[#1e293b] flex items-center justify-center text-[#22c55e] mb-2">
                   <Clock className="w-4 h-4" />
                 </div>
-                <strong className="text-sm sm:text-base font-extrabold text-white">99.9%</strong>
-                <span className="text-[10px] font-mono text-[#64748b]">Uptime</span>
+                <strong className="text-sm sm:text-base font-extrabold text-white">100%</strong>
+                <span className="text-[10px] font-mono text-[#64748b]">In-Browser</span>
               </div>
             </div>
           </div>

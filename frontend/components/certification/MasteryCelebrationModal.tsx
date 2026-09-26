@@ -205,7 +205,7 @@ export const MasteryCelebrationModal: React.FC<MasteryCelebrationProps> = ({
             <div className="w-full mt-5 p-4 rounded-2xl bg-[#090812] border border-amber-500/30 flex items-center justify-between text-left shadow-inner">
               <div className="min-w-0 pr-3">
                 <span className="text-[10px] font-mono text-amber-400/70 uppercase block font-semibold">
-                  Cryptographic Seal &amp; Master ID
+                  Official Seal &amp; Master ID
                 </span>
                 <span className="text-xs sm:text-sm font-mono font-bold text-amber-200 truncate block">
                   {credentialId || 'NV-NET-MASTERY-VERIFIED'}

@@ -97,7 +97,7 @@ const jsonLdOrg = {
   '@type': 'EducationalOrganization',
   name: 'NetVision',
   url: SITE_URL,
-  logo: `${SITE_URL}/favicon.ico`,
+  logo: `${SITE_URL}/icon.svg`,
   description:
     'Interactive computer networking learning platform featuring packet animations, deterministic CLI simulations, and verifiable certifications.',
   sameAs: ['https://github.com/qamarabbas-024/netvision'],

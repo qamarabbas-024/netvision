@@ -34,7 +34,7 @@ export const FeaturesSection: React.FC = () => {
     {
       icon: <Award className="w-5 h-5 text-[#34d399]" />,
       title: 'Verifiable Certificates',
-      desc: 'Earn shareable cryptographic certificates upon completing course pathways and passing quizzes.',
+      desc: 'Earn shareable verified credentials upon completing course pathways and passing quizzes.',
     },
   ];
 

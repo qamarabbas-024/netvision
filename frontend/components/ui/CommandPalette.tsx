@@ -60,7 +60,7 @@ const STATIC_REGISTRY: SearchItem[] = [
   },
   {
     id: 'tool-certs',
-    title: 'Certifications & Cryptographic Credentials',
+    title: 'Certifications & Verified Credentials',
     subtitle: 'Official NetVision professional certifications & exams',
     category: 'Tool',
     url: '/certificates',

@@ -411,7 +411,7 @@ export default function CertificateDetailPage() {
       </div>
 
       <div className="text-center text-[11px] text-[#646c7d] pt-8">
-        <p>© 2026 NetVision. Cryptographically verifiable learning credential.</p>
+        <p>© 2026 NetVision. Authoritative verifiable learning credential.</p>
       </div>
     </div>
   );

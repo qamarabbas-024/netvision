@@ -87,7 +87,7 @@ export default function Home() {
           onStartLab={() => setIsTerminalOpen(true)}
         />
 
-        {/* Prove Your Competence With Cryptographic Verification */}
+        {/* Prove Your Competence With Verified Digital Credentials */}
         <CertificationSection
           onStartLearning={handleExploreCurriculum}
         />

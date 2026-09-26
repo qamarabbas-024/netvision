@@ -48,7 +48,7 @@ export default function ArchitectureDocPage() {
               Security is enforced at the backend boundary:
             </p>
             <ul className="list-disc list-inside text-xs text-zinc-400 space-y-1">
-              <li><strong>Passowrd Security:</strong> All user passwords are hashed using Argon2id prior to database storage.</li>
+              <li><strong>Password Security:</strong> All user passwords are hashed using Argon2id prior to database storage.</li>
               <li><strong>Email OTP:</strong> 6-digit numeric OTP is generated, hashed, and dispatched via EmailService with a 10-minute expiration.</li>
               <li><strong>Password Reset:</strong> Cryptographically generated single-use tokens hashed with SHA-256 and bound to a 15-minute window.</li>
               <li><strong>Role-Based Access Control (RBAC):</strong> Admin routes are secured with NestJS Guards (`JwtAuthGuard`, `RolesGuard`) checking DB roles directly.</li>

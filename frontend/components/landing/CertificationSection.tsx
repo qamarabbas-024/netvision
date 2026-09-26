@@ -29,10 +29,10 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
             VERIFIED CERTIFICATE // INDUSTRY CREDENTIAL
           </div>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            Prove Your Competence With Cryptographic Verification
+            Prove Your Competence With Verified Digital Credentials
           </h2>
           <p className="text-sm sm:text-base text-slate-400 leading-relaxed font-normal">
-            NetVision certificates come with unique verification identifiers, verifiable configuration telemetry data, and authoritative registry integrity digests.
+            NetVision certificates come with unique verification identifiers, verifiable configuration telemetry data, and authoritative registry records.
           </p>
         </div>
 
@@ -77,7 +77,7 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
                 <div className="text-xs font-mono font-bold text-amber-400">04. Earn</div>
                 <h3 className="text-sm font-bold text-slate-200">Verified Certificate</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Obtain cryptographically verified digital certificate for employers.
+                  Obtain authoritative verifiable digital credentials for employers.
                 </p>
               </div>
 

@@ -20,12 +20,12 @@ export const FAQSection: React.FC = () => {
     {
       question: 'How does NetVision compare to Cisco Packet Tracer?',
       answer:
-        'NetVision runs entirely client-side in standard web browsers with interactive 3D spatial visualization, real-time packet inspection, live loop convergence, and cryptographic competency certification.',
+        'NetVision runs entirely in modern web browsers without installation, featuring real-time packet inspection, interactive 3D topology visualization, live protocol state convergence, and verifiable practical competency certification.',
     },
     {
       question: 'Are certificates cryptographically verifiable?',
       answer:
-        'Yes. Every awarded certificate includes a tamper-proof cryptographic SHA-256 verification hash and public key signature that employers can authenticate directly on LinkedIn or our verification registry.',
+        'Yes. Every awarded credential features a unique verification identifier that employers, recruiters, and institutions can authenticate in real-time through our official public verification registry.',
     },
   ];
 

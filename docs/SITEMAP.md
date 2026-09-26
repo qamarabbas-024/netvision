@@ -2,8 +2,8 @@
 
 > **Version**: 1.0.0-SITEMAP  
 > **Status**: APPROVED  
-> **Target Domain**: `https://netvision-three.vercel.app`  
-> **Framework**: Next.js 14 App Router  
+> **Target Domain**: `https://netvision.edu`  
+> **Framework**: Next.js 15 App Router  
 > **Last Updated**: 2026-09-07
 
 ---
@@ -190,7 +190,7 @@ NetVision embeds dedicated interactive instruments across lessons, simulations, 
 ## 5. SEO, Crawl Directives & Sitemap Directives
 
 ### 5.1. Dynamic Sitemap Generation (`frontend/app/sitemap.ts`)
-- **Base Canonical URL**: `https://netvision-three.vercel.app`
+- **Base Canonical URL**: `https://netvision.edu`
 - **Output Feed**: `/sitemap.xml`
 - **Included URLs**:
   - Landing & Core Navigation (`/`, `/courses`, `/simulations`, `/sandbox`, `/workbench`, `/labs`, `/troubleshooting`)

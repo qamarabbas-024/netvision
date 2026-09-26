@@ -194,7 +194,7 @@ export default function CertificateVerifyPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-lg font-bold text-white">
-                    {isTampered ? 'Cryptographic Verification Failed' : `Credential Record: ${certData.status}`}
+                    {isTampered ? 'Authoritative Verification Failed' : `Credential Record: ${certData.status}`}
                   </h1>
                   <Badge variant="rose" className="text-[10px] uppercase font-mono">
                     {isTampered ? 'INVALID / TAMPERED' : certData.status}

@@ -154,8 +154,8 @@ export const RegistryComponentsShowcase: React.FC = () => {
             </div>
 
             <div className="pt-4 border-t border-slate-800/60 flex items-center justify-between text-[11px] font-mono text-slate-400 relative z-10">
-              <span className="text-emerald-400 font-bold">Cryptographically Verified</span>
-              <span>SHA-256</span>
+              <span className="text-emerald-400 font-bold">Authoritative Registry Verified</span>
+              <span>STATUS: VALID</span>
             </div>
           </div>
 

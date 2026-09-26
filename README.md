@@ -95,10 +95,10 @@ NetVision is built as a TypeScript monorepo with strict layer separation:
 
 | Layer | Technologies |
 |:---|:---|
-| **Frontend Application** | **Next.js 14** (App Router), **React 18**, **TypeScript 5**, **Tailwind CSS 3**, **Framer Motion**, **@xyflow/react**, **Zustand**, **Lucide Icons** |
+| **Frontend Application** | **Next.js 15** (App Router), **React 18**, **TypeScript 5**, **Tailwind CSS 3**, **Three.js 0.185**, **GSAP**, **Framer Motion**, **Zustand**, **Lucide Icons** |
 | **Backend API Gateway** | **NestJS 11**, **TypeScript 5**, **Prisma 5 ORM**, **Argon2id**, **Passport JWT**, **Throttler Rate-Limiting**, **Swagger OpenAPI** |
-| **Persistence** | **PostgreSQL 16** with relational foreign key integrity and ACID transactions |
-| **Monorepo Architecture** | **pnpm Workspaces**, **Turborepo** build orchestration |
+| **Persistence** | **PostgreSQL 16** (relational foreign key integrity and ACID transactions), **Redis 7** (token revocation, session security, query cache) |
+| **Monorepo Architecture** | **pnpm Workspaces** (v11), **Turborepo** build orchestration |
 | **Verification & Testing** | **Jest**, **Playwright** end-to-end testing, custom academic integrity test harnesses |
 
 ---
@@ -107,7 +107,7 @@ NetVision is built as a TypeScript monorepo with strict layer separation:
 
 ```
 netvision/
-├── frontend/                     # Next.js 14 web client & learning interface
+├── frontend/                     # Next.js 15 web client & learning interface
 │   ├── app/                      # App router pages (courses, lessons, capstone, verify)
 │   ├── components/               # React components (simulations, terminals, modals)
 │   └── lib/                      # Client utilities (state stores, audio, particle engines)
@@ -135,7 +135,7 @@ netvision/
 ### Prerequisites
 
 - **Node.js**: `v20.x` or higher
-- **pnpm**: `v9.x` or higher (`corepack enable pnpm`)
+- **pnpm**: `v11.x` or higher (`corepack enable pnpm` or `npm install -g pnpm@11.20.0`)
 - **Docker**: For containerized PostgreSQL database (optional if running local PostgreSQL)
 
 ### 1. Clone & Install Dependencies
@@ -212,7 +212,7 @@ pnpm --filter netvision-backend test:drop9
 
 - **Server-Authoritative Evaluation**: Passing requirements, quiz scoring, and Capstone exams are evaluated strictly server-side. Answer keys and grading rubrics are never embedded in client bundles.
 - **Argon2id Password Hashing**: User credentials use memory-hard Argon2id hashing algorithms.
-- **Cryptographic Credential Verification**: Issued certificates carry unique, tamper-evident identifiers queryable via the public verification portal at `/certificates/verify/:credentialId`.
+- **Authoritative Credential Registry**: Issued certificates carry unique, tamper-evident identifiers queryable via the public verification portal at `/certificates/verify/:credentialId`, authenticated directly against NetVision's PostgreSQL certification registry.
 - **Public Credential Metadata**: Verification pages embed schema.org `EducationalOccupationalCredential` structured data with XSS sanitization for search engine and employer verification.
 
 ---
