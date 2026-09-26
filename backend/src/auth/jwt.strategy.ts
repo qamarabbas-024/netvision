@@ -4,6 +4,8 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../database/prisma.service';
 import { TokenRevocationService } from './token-revocation.service';
+import { RedisService } from '../redis/redis.service';
+import { REDIS_KEYS, DISTRIBUTED_TTL } from '../redis/distributed-state.interface';
 
 export interface JwtPayload {
   sub: string;
@@ -26,12 +28,13 @@ interface CachedUser {
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   private readonly userCache = new Map<string, CachedUser>();
-  private readonly CACHE_TTL_MS = 30 * 1000; // 30-second cache to prevent DB query stampede
+  private readonly CACHE_TTL_MS = DISTRIBUTED_TTL.USER_QUERY_CACHE_MS; // 30-second bounded cache for query stampede defense
 
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
-    @Optional() private readonly tokenRevocationService?: TokenRevocationService
+    @Optional() private readonly tokenRevocationService?: TokenRevocationService,
+    @Optional() private readonly redisService?: RedisService
   ) {
     const isProd = configService.get<string>('NODE_ENV') === 'production';
     const secret = configService.get<string>('JWT_SECRET');
@@ -73,6 +76,20 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   evictUserCache(userId?: string): void {
     if (userId) {
       this.userCache.delete(userId);
+      if (this.redisService?.isAvailable()) {
+        this.redisService.del(REDIS_KEYS.USER_IDENTITY_CACHE(userId)).catch(() => {});
+      }
+    } else {
+      this.userCache.clear();
+    }
+  }
+
+  async evictUserCacheAsync(userId?: string): Promise<void> {
+    if (userId) {
+      this.userCache.delete(userId);
+      if (this.redisService?.isAvailable()) {
+        await this.redisService.del(REDIS_KEYS.USER_IDENTITY_CACHE(userId));
+      }
     } else {
       this.userCache.clear();
     }
@@ -124,9 +141,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Token has expired.');
     }
 
-    // 2. Validate user identity with short-lived cache (prevents DB query stampede)
+    // 3. Validate user identity with short-lived multi-layer cache (L1 Memory + L2 Redis, 30s TTL)
     let user = this.userCache.get(payload.sub);
     const now = Date.now();
+
+    // Check L2 Redis cache if L1 is empty or expired
+    if (!user || now - user.cachedAt > this.CACHE_TTL_MS) {
+      if (this.redisService?.isAvailable()) {
+        try {
+          const redisCached = await this.redisService.get<CachedUser>(REDIS_KEYS.USER_IDENTITY_CACHE(payload.sub));
+          if (redisCached && now - redisCached.cachedAt <= this.CACHE_TTL_MS) {
+            user = redisCached;
+            this.userCache.set(payload.sub, user);
+          }
+        } catch {
+          // Redis read failure fallback to PostgreSQL
+        }
+      }
+    }
+
+    // Query PostgreSQL if not in L1 or L2
     if (!user || now - user.cachedAt > this.CACHE_TTL_MS) {
       const dbUser = await this.prisma.user.findUnique({
         where: { id: payload.sub },
@@ -141,7 +175,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       });
 
       if (!dbUser) {
-        this.userCache.delete(payload.sub);
+        this.evictUserCache(payload.sub);
         throw new UnauthorizedException('User not found or token invalid');
       }
 
@@ -151,6 +185,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       };
       this.pruneCacheIfNeeded();
       this.userCache.set(payload.sub, user);
+
+      // Populate L2 Redis cache with exact 30-second TTL
+      if (this.redisService?.isAvailable()) {
+        this.redisService.set(
+          REDIS_KEYS.USER_IDENTITY_CACHE(payload.sub),
+          user,
+          DISTRIBUTED_TTL.USER_IDENTITY_CACHE_SEC
+        ).catch(() => {});
+      }
     }
 
     // 3. Multi-instance distributed token invalidation:

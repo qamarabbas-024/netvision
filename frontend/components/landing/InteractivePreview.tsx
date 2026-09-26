@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Play, RotateCcw, CheckCircle2, ShieldCheck, Cpu } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -10,15 +10,32 @@ export const InteractivePreview: React.FC = () => {
   const [activeProtocol, setActiveProtocol] = useState<'TCP' | 'DNS' | 'ARP'>('TCP');
   const [packetProgress, setPacketProgress] = useState(0);
   const [isSimulating, setIsSimulating] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
 
   const handleDispatch = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
     setIsSimulating(true);
     setPacketProgress(0);
 
-    const interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       setPacketProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(interval);
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
           setIsSimulating(false);
           return 100;
         }
@@ -28,6 +45,10 @@ export const InteractivePreview: React.FC = () => {
   };
 
   const handleReset = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
     setPacketProgress(0);
     setIsSimulating(false);
   };

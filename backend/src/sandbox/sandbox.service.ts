@@ -265,15 +265,36 @@ export class SandboxService {
     };
   }
 
-  async getUserSessions(identity: { userId?: string; anonymousId?: string }) {
+  async getUserSessions(
+    identity: { userId?: string; anonymousId?: string },
+    limitVal?: number | string,
+    offsetVal?: number | string
+  ) {
     const { userId, anonymousId } = identity;
     const where = userId ? { userId } : anonymousId ? { anonymousId } : null;
     if (!where) return [];
 
+    let limit = 20;
+    if (limitVal !== undefined) {
+      limit = typeof limitVal === 'number' ? limitVal : parseInt(limitVal, 10);
+      if (isNaN(limit) || limit < 1 || limit > 50) {
+        throw new BadRequestException('Query parameter "limit" must be an integer between 1 and 50.');
+      }
+    }
+
+    let offset = 0;
+    if (offsetVal !== undefined) {
+      offset = typeof offsetVal === 'number' ? offsetVal : parseInt(offsetVal, 10);
+      if (isNaN(offset) || offset < 0) {
+        throw new BadRequestException('Query parameter "offset" must be a non-negative integer.');
+      }
+    }
+
     const sessions = await this.prisma.sandboxSession.findMany({
       where,
       orderBy: { createdAt: 'desc' },
-      take: 20,
+      take: limit,
+      skip: offset,
     });
 
     return sessions.map((s) => ({

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, UseGuards, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -32,8 +32,30 @@ export class AdminController {
   }
 
   @Get('users')
-  async getUsers() {
+  async getUsers(
+    @Query('limit') limitStr?: string,
+    @Query('offset') offsetStr?: string,
+  ) {
+    let limit = 50;
+    let offset = 0;
+    if (limitStr !== undefined) {
+      const parsedLimit = parseInt(limitStr, 10);
+      if (isNaN(parsedLimit) || parsedLimit < 1 || parsedLimit > 100) {
+        throw new BadRequestException('Query parameter "limit" must be an integer between 1 and 100.');
+      }
+      limit = parsedLimit;
+    }
+    if (offsetStr !== undefined) {
+      const parsedOffset = parseInt(offsetStr, 10);
+      if (isNaN(parsedOffset) || parsedOffset < 0) {
+        throw new BadRequestException('Query parameter "offset" must be a non-negative integer.');
+      }
+      offset = parsedOffset;
+    }
+
     return this.prisma.user.findMany({
+      take: limit,
+      skip: offset,
       select: {
         id: true,
         email: true,
@@ -42,6 +64,7 @@ export class AdminController {
         role: true,
         createdAt: true,
       },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

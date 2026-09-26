@@ -287,8 +287,20 @@ export class CertificationsService {
 
   // Question Domain Blueprint Builder (Real Approved Questions Only — Zero Synthetic Fallbacks)
   private async buildTheoryExamBlueprint(targetCount = 50) {
-    // Audit Hardening: Fetch all approved questions without arbitrary truncation (take: 200 removed)
-    const rawQuestions = await this.prisma.quizQuestion.findMany();
+    // Audit Hardening: Fetch all approved questions without arbitrary truncation (take: 200 removed), selecting only required fields to avoid payload bloat
+    const rawQuestions = await this.prisma.quizQuestion.findMany({
+      select: {
+        id: true,
+        questionText: true,
+        optionsJson: true,
+        correctOption: true,
+        explanation: true,
+        cognitiveLevel: true,
+        questionType: true,
+        points: true,
+        concept: true,
+      },
+    });
 
     if (!rawQuestions || rawQuestions.length < targetCount) {
       const msg = `Insufficient approved question pool for certification exam blueprint. Required: ${targetCount}, available: ${rawQuestions?.length || 0}`;

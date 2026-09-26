@@ -41,6 +41,10 @@ export const REDIS_KEYS = {
   // Distributed Locks (Concurrency Control)
   LAB_LOCK: (sessionId: string) => `netvision:lock:lab:${sessionId}`,
   REFRESH_LOCK: (familyId: string) => `netvision:lock:refresh:${familyId}`,
+
+  // Safe Ephemeral Cache (Classification A)
+  USER_IDENTITY_CACHE: (userId: string) => `netvision:cache:user:${userId}`,
+  QUESTION_POOL_CACHE: (poolKey: string) => `netvision:cache:questions:${poolKey}`,
 } as const;
 
 /**
@@ -60,8 +64,10 @@ export const DISTRIBUTED_TTL = {
   ACTIVE_TROUBLESHOOT_SESSION_SEC: 2 * 3600,         // 2 hours alias
   DISTRIBUTED_LOCK_SEC: 10,                          // 10 seconds auto-release lock
 
-  // Ephemeral Cache TTLs
-  USER_QUERY_CACHE_MS: 30 * 1000,                    // 30 seconds (stampede defense)
+  // Ephemeral Cache TTLs (Classification A: safe to evict/recompute, stampede protection)
+  USER_QUERY_CACHE_MS: 30 * 1000,                    // 30 seconds (stampede defense in milliseconds)
+  USER_IDENTITY_CACHE_SEC: 30,                       // 30 seconds in seconds for Redis EX
+  QUESTION_POOL_CACHE_SEC: 600,                      // 10 minutes for approved questions blueprint pool
 } as const;
 
 /**

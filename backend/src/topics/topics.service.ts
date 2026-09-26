@@ -98,9 +98,14 @@ export class TopicsService {
         include: {
           modules: {
             orderBy: { order: 'asc' },
-            include: {
+            select: {
+              id: true,
               lessons: {
                 orderBy: { order: 'asc' },
+                select: {
+                  id: true,
+                  durationMinutes: true,
+                },
               },
             },
           },
@@ -193,7 +198,13 @@ export class TopicsService {
           include: {
             lessons: {
               orderBy: { order: 'asc' },
-              include: {
+              select: {
+                id: true,
+                slug: true,
+                title: true,
+                type: true,
+                durationMinutes: true,
+                order: true,
                 quizzes: { select: { id: true } },
               },
             },
@@ -306,7 +317,18 @@ export class TopicsService {
         recaps: { orderBy: { order: 'asc' } },
         quizzes: {
           include: {
-            questions: true,
+            questions: {
+              select: {
+                id: true,
+                questionText: true,
+                optionsJson: true,
+                cognitiveLevel: true,
+                questionType: true,
+                concept: true,
+                difficulty: true,
+                points: true,
+              },
+            },
           },
         },
       },
@@ -1196,7 +1218,23 @@ export class TopicsService {
     };
   }
 
-  async getAllCommands(os?: string, category?: string, q?: string) {
+  async getAllCommands(
+    os?: string,
+    category?: string,
+    q?: string,
+    limitStr?: string,
+    offsetStr?: string
+  ) {
+    const limit = limitStr !== undefined ? parseInt(limitStr, 10) : 50;
+    const offset = offsetStr !== undefined ? parseInt(offsetStr, 10) : 0;
+
+    if (isNaN(limit) || limit < 1 || limit > 100) {
+      throw new BadRequestException('Query parameter "limit" must be an integer between 1 and 100.');
+    }
+    if (isNaN(offset) || offset < 0) {
+      throw new BadRequestException('Query parameter "offset" must be a non-negative integer.');
+    }
+
     try {
       const where: any = {};
 
@@ -1219,6 +1257,8 @@ export class TopicsService {
       const commands = await this.prisma.commandReference.findMany({
         where,
         orderBy: [{ operatingSystem: 'asc' }, { command: 'asc' }],
+        take: limit,
+        skip: offset,
       });
 
       if (commands.length > 0) {
@@ -1236,7 +1276,10 @@ export class TopicsService {
           relatedLessonSlugs: (c.relatedLessonSlugs as string[]) || [],
         }));
       }
-    } catch {
+    } catch (err: any) {
+      if (err instanceof BadRequestException) {
+        throw err;
+      }
       // Fallback to in-memory catalog
     }
 
@@ -1269,7 +1312,7 @@ export class TopicsService {
       );
     }
 
-    return catalog;
+    return catalog.slice(offset, offset + limit);
   }
 
   async getCommandById(idOrCmd: string) {
@@ -2169,15 +2212,17 @@ export class TopicsService {
       }
 
       let claimedProgressCount = 0;
-      for (const p of anonProgress) {
-        const currentAnonProg = await tx.userProgress.findFirst({
-          where: { id: p.id, anonymousId },
-        });
-        if (!currentAnonProg) continue;
+      const lessonIds = anonProgress.map((p) => p.lessonId);
+      const existingUserProgs = await tx.userProgress.findMany({
+        where: {
+          userId,
+          lessonId: { in: lessonIds },
+        },
+      });
+      const existingProgMap = new Map(existingUserProgs.map((e) => [e.lessonId, e]));
 
-        const existingUserProg = await tx.userProgress.findFirst({
-          where: { userId, lessonId: currentAnonProg.lessonId },
-        });
+      for (const currentAnonProg of anonProgress) {
+        const existingUserProg = existingProgMap.get(currentAnonProg.lessonId);
 
         if (existingUserProg) {
           let earliestCompletedAt = existingUserProg.completedAt;

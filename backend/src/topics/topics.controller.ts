@@ -9,6 +9,7 @@ import {
   Req,
   HttpCode,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { TopicsService } from './topics.service';
@@ -35,6 +36,9 @@ export class TopicsController {
   @ApiOperation({ summary: 'Search across courses, lessons, and modules' })
   @Get('search')
   async search(@Query('q') q: string) {
+    if (q && q.length > 100) {
+      throw new BadRequestException('Search query parameter "q" cannot exceed 100 characters.');
+    }
     return this.topicsService.search(q || '');
   }
 
@@ -172,17 +176,21 @@ export class TopicsController {
     return this.topicsService.validateLab(identity, dto);
   }
 
-  @ApiOperation({ summary: 'Get all network commands with OS, category, and search filters' })
+  @ApiOperation({ summary: 'Get all network commands with OS, category, search, and pagination filters' })
   @ApiQuery({ name: 'os', type: String, required: false })
   @ApiQuery({ name: 'category', type: String, required: false })
   @ApiQuery({ name: 'q', type: String, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false, description: 'Number of commands to return (1-100, default 50)' })
+  @ApiQuery({ name: 'offset', type: Number, required: false, description: 'Offset for pagination (default 0)' })
   @Get('commands')
   async getAllCommands(
     @Query('os') os?: string,
     @Query('category') category?: string,
     @Query('q') q?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ) {
-    return this.topicsService.getAllCommands(os, category, q);
+    return this.topicsService.getAllCommands(os, category, q, limit, offset);
   }
 
   @ApiOperation({ summary: 'Get detailed command specification by ID or command string' })

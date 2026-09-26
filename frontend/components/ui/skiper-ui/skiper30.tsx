@@ -37,10 +37,11 @@ const Skiper30 = () => {
 
   useEffect(() => {
     const lenis = new Lenis();
+    let rafId: number;
 
     const raf = (time: number) => {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     };
 
     const resize = () => {
@@ -48,10 +49,12 @@ const Skiper30 = () => {
     };
 
     window.addEventListener("resize", resize);
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
     resize();
 
     return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
       window.removeEventListener("resize", resize);
     };
   }, []);

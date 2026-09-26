@@ -273,7 +273,7 @@ export class TokenRevocationService implements OnModuleDestroy {
     this.persistUserCutoffs();
     this.revokeUserRefreshTokens(userId);
 
-    // Distributed Redis Persistence
+    // Distributed Redis Persistence & Cache Invalidation
     if (this.redisService?.isAvailable()) {
       this.redisService.set(
         REDIS_KEYS.USER_REVOCATION_CUTOFF(userId),
@@ -282,6 +282,8 @@ export class TokenRevocationService implements OnModuleDestroy {
       ).catch((err) => {
         this.logger.warn(`Failed to replicate user cutoff to Redis: ${err?.message || err}`);
       });
+      // Invalidate cached user identity immediately
+      this.redisService.del(REDIS_KEYS.USER_IDENTITY_CACHE(userId)).catch(() => {});
     }
 
     // PostgreSQL Multi-Instance Synchronization:

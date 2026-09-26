@@ -4,11 +4,12 @@ import {
   Post,
   Body,
   Param,
+  Query,
   UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { SandboxService } from './sandbox.service';
 import { CreateSandboxSessionDto } from './dto/create-sandbox-session.dto';
 import { ExecuteSandboxCommandDto } from './dto/execute-sandbox-command.dto';
@@ -20,11 +21,17 @@ import { LearnerIdentity, LearnerIdentityContext } from '../auth/decorators/lear
 export class SandboxController {
   constructor(private readonly sandboxService: SandboxService) {}
 
-  @ApiOperation({ summary: 'List active and past sandbox sessions for current learner' })
+  @ApiOperation({ summary: 'List active and past sandbox sessions for current learner with bounded pagination' })
+  @ApiQuery({ name: 'limit', type: Number, required: false, description: 'Number of sessions to return (1-50, default 20)' })
+  @ApiQuery({ name: 'offset', type: Number, required: false, description: 'Offset for pagination (default 0)' })
   @UseGuards(OptionalJwtAuthGuard)
   @Get('sessions')
-  async getUserSessions(@LearnerIdentity() identity: LearnerIdentityContext) {
-    return this.sandboxService.getUserSessions(identity);
+  async getUserSessions(
+    @LearnerIdentity() identity: LearnerIdentityContext,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.sandboxService.getUserSessions(identity, limit, offset);
   }
 
   @ApiOperation({ summary: 'Initialize new isolated sandbox session for lab execution' })

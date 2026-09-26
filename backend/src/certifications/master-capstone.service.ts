@@ -571,22 +571,16 @@ export class MasterCapstoneService {
       throw new BadRequestException('User ID is required.');
     }
 
-    const latestAttempt = await this.prisma.examAttempt.findFirst({
-      where: {
-        userId,
-        certificationCode: CAPSTONE_CONFIG.certificationCode,
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-
     const recentAttempts = await this.prisma.examAttempt.findMany({
       where: {
         userId,
         certificationCode: CAPSTONE_CONFIG.certificationCode,
       },
       orderBy: { createdAt: 'desc' },
-      take: 10,
+      take: 50,
     });
+
+    const latestAttempt = recentAttempts[0] || null;
 
     let cooldownInfo: {
       inCooldown: boolean;
