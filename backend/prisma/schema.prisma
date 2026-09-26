@@ -347,6 +347,8 @@ model SandboxSession {
   @@index([anonymousId])
   @@index([labId])
   @@index([status])
+  @@index([status, expiresAt])
+  @@index([expiresAt])
   @@map("sandbox_sessions")
 }
 
@@ -448,6 +450,7 @@ model UserProgress {
   @@index([userId, lessonId])
   @@index([anonymousId, lessonId])
   @@index([userId])
+  @@index([userId, completed])
   @@index([anonymousId])
   @@index([lessonId])
   @@map("user_progress")
@@ -536,6 +539,7 @@ model ExamAttempt {
   @@index([userId])
   @@index([certificationCode])
   @@index([status])
+  @@index([userId, certificationCode, status])
   @@map("exam_attempts")
 }
 
@@ -605,6 +609,7 @@ model EmailVerification {
   createdAt DateTime @default(now())
 
   @@index([email])
+  @@index([expiresAt])
   @@map("email_verifications")
 }
 
@@ -617,6 +622,7 @@ model PasswordResetToken {
   createdAt DateTime @default(now())
 
   @@index([email])
+  @@index([expiresAt, used])
   @@map("password_reset_tokens")
 }
 

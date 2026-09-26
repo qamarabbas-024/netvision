@@ -52,6 +52,17 @@ export interface ActiveLabSession {
 export class TopicsService {
   private readonly logger = new Logger(TopicsService.name);
   private readonly activeLabSessions = new Map<string, ActiveLabSession>();
+  private static readonly MAX_ACTIVE_LAB_SESSIONS = 500;
+
+  private setInMemoryLabSession(sessionKey: string, session: ActiveLabSession): void {
+    if (this.activeLabSessions.size >= TopicsService.MAX_ACTIVE_LAB_SESSIONS && !this.activeLabSessions.has(sessionKey)) {
+      const oldestKey = this.activeLabSessions.keys().next().value;
+      if (oldestKey) {
+        this.activeLabSessions.delete(oldestKey);
+      }
+    }
+    this.activeLabSessions.set(sessionKey, session);
+  }
 
   constructor(
     private readonly prisma: PrismaService,
@@ -652,7 +663,7 @@ export class TopicsService {
         if (redisSession) {
           if (!found || redisSession.stateVersion >= found.stateVersion) {
             found = redisSession;
-            this.activeLabSessions.set(sessionKey, found);
+            this.setInMemoryLabSession(sessionKey, found);
             await this.redisService.expire(REDIS_KEYS.LAB_SESSION(requestedSessionId), DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
           }
         }
@@ -684,7 +695,7 @@ export class TopicsService {
             createdAt: dbSession.createdAt.toISOString(),
             updatedAt: dbSession.updatedAt.toISOString(),
           };
-          this.activeLabSessions.set(sessionKey, found);
+          this.setInMemoryLabSession(sessionKey, found);
           if (this.redisService?.isAvailable()) {
             await this.redisService.set(REDIS_KEYS.LAB_SESSION(found.sessionId), found, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
             await this.redisService.set(REDIS_KEYS.LAB_USER_INDEX(ownerId, labId), found.sessionId, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
@@ -717,7 +728,7 @@ export class TopicsService {
         if (redisSession) {
           if (!session || redisSession.stateVersion >= session.stateVersion) {
             session = redisSession;
-            this.activeLabSessions.set(sessionKey, session);
+            this.setInMemoryLabSession(sessionKey, session);
             await this.redisService.expire(REDIS_KEYS.LAB_SESSION(redisSessionId), DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
           }
         }
@@ -758,7 +769,7 @@ export class TopicsService {
           createdAt: dbSession.createdAt.toISOString(),
           updatedAt: dbSession.updatedAt.toISOString(),
         };
-        this.activeLabSessions.set(sessionKey, session);
+        this.setInMemoryLabSession(sessionKey, session);
         if (this.redisService?.isAvailable()) {
           await this.redisService.set(REDIS_KEYS.LAB_SESSION(session.sessionId), session, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
           await this.redisService.set(REDIS_KEYS.LAB_USER_INDEX(ownerId, labId), session.sessionId, DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC);
@@ -787,7 +798,7 @@ export class TopicsService {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      this.activeLabSessions.set(sessionKey, session);
+      this.setInMemoryLabSession(sessionKey, session);
 
       // Replicate to Redis
       if (this.redisService?.isAvailable()) {
@@ -846,6 +857,13 @@ export class TopicsService {
     }
 
     const session = await this.getOrCreateLabSession(identity, labId, sessionId);
+
+    // Resource limits: Guard against runaway command flooding (prevent heap and payload explosion)
+    if (session.commandHistory && session.commandHistory.length >= 500) {
+      throw new BadRequestException(
+        'Session command limit reached (500 commands). Please reset or submit the lab attempt.'
+      );
+    }
 
     // Security Invariant: Server simulation state is strictly authoritative.
     // Untrusted client payloads cannot tamper with or mutate existing simulation state.
@@ -910,6 +928,9 @@ export class TopicsService {
       timestamp: new Date().toISOString(),
       version: session.stateVersion,
     });
+    if (session.commandHistory.length > 100) {
+      session.commandHistory = session.commandHistory.slice(-100);
+    }
     session.updatedAt = new Date().toISOString();
 
     // Replicate to Redis

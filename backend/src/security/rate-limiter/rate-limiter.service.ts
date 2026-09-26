@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
+import { RedisService } from '../../redis/redis.service';
 import { ConfigService } from '@nestjs/config';
 import { RateLimiterConfig, loadRateLimiterConfig } from './rate-limiter.config';
 
@@ -36,7 +37,10 @@ export class RateLimiterService {
   // Cleanup timer interval reference
   private cleanupInterval: NodeJS.Timeout | null = null;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    @Optional() private readonly redisService?: RedisService
+  ) {
     this.config = loadRateLimiterConfig(this.configService);
     this.startPeriodicCleanup();
   }
@@ -127,6 +131,11 @@ export class RateLimiterService {
     const resetMs = Math.max(0, bucket.expiresAt - now);
     const retryAfterSeconds = Math.ceil(resetMs / 1000);
 
+    if (this.redisService?.isAvailable()) {
+      const ttlSec = Math.max(1, Math.ceil(resetMs / 1000));
+      this.redisService.set(`netvision:rl:breach:${key}`, true, ttlSec).catch(() => {});
+    }
+
     if (bucket.count > limit) {
       return {
         allowed: false,
@@ -216,6 +225,20 @@ export class RateLimiterService {
       updateRecord(`backoff:tuple:${ip}:${normalizedEmail}`);
     }
 
+    if (this.redisService?.isAvailable()) {
+      const ttlSec = Math.max(1, Math.ceil(ipResult.cooldownMs / 1000));
+      this.redisService.set(`netvision:rl:backoff:ip:${ip}`, {
+        consecutiveFailures: ipResult.consecutiveFailures,
+        cooldownUntil: now + ipResult.cooldownMs,
+      }, ttlSec).catch(() => {});
+      if (normalizedEmail) {
+        this.redisService.set(`netvision:rl:backoff:tuple:${ip}:${normalizedEmail}`, {
+          consecutiveFailures: ipResult.consecutiveFailures,
+          cooldownUntil: now + ipResult.cooldownMs,
+        }, ttlSec).catch(() => {});
+      }
+    }
+
     return {
       consecutiveFailures: ipResult.consecutiveFailures,
       cooldownMs: ipResult.cooldownMs,
@@ -232,7 +255,15 @@ export class RateLimiterService {
       const normalizedEmail = email.toLowerCase().trim();
       this.backoffRecords.delete(`backoff:tuple:${ip}:${normalizedEmail}`);
     }
-  }
+  
+    if (this.redisService?.isAvailable()) {
+      this.redisService.del(`netvision:rl:backoff:ip:${ip}`).catch(() => {});
+      if (email) {
+        const normalizedEmail = email.toLowerCase().trim();
+        this.redisService.del(`netvision:rl:backoff:tuple:${ip}:${normalizedEmail}`).catch(() => {});
+      }
+    }
+}
 
   /**
    * Rate limit check for Public routes.

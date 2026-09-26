@@ -31,6 +31,10 @@ export function sanitizeDatabaseUrl(url: string | undefined): string | undefined
     if (connectTimeoutMatch && parseInt(connectTimeoutMatch[1], 10) > 10) {
       sanitized = sanitized.replace(/connect_timeout=\d+/, 'connect_timeout=10');
     }
+    const connectionLimitMatch = sanitized.match(/connection_limit=(\d+)/);
+    if (connectionLimitMatch && parseInt(connectionLimitMatch[1], 10) > 20) {
+      sanitized = sanitized.replace(/connection_limit=\d+/, 'connection_limit=20');
+    }
     return sanitized;
   } catch {
     return url;

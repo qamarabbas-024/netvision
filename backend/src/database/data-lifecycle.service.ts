@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 
 export interface EntityLifecyclePolicy {
@@ -160,10 +160,36 @@ export const DATA_LIFECYCLE_POLICIES: EntityLifecyclePolicy[] = [
 ];
 
 @Injectable()
-export class DataLifecycleService {
+export class DataLifecycleService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DataLifecycleService.name);
+  private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor(private readonly prisma: PrismaService) {}
+
+  onModuleInit() {
+    this.startPeriodicRetention();
+  }
+
+  onModuleDestroy() {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+  }
+
+  private startPeriodicRetention() {
+    // Automated background retention cleanup every 6 hours
+    const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
+    this.cleanupInterval = setInterval(() => {
+      this.executeRetentionCleanup({ dryRun: false }).catch((err) => {
+        this.logger.warn(`Automated retention cleanup encountered an error: ${err?.message || err}`);
+      });
+    }, SIX_HOURS_MS);
+
+    if (this.cleanupInterval && typeof this.cleanupInterval.unref === 'function') {
+      this.cleanupInterval.unref();
+    }
+  }
 
   /**
    * Returns complete lifecycle policies and current database record statistics.
