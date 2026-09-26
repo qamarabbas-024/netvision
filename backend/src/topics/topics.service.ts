@@ -1380,19 +1380,8 @@ export class TopicsService {
         const match = q.questionText.match(/^\[(EASY|MEDIUM|HARD)\]/i);
         const tagDifficulty = match ? match[1].toUpperCase() : q.difficulty;
 
-        let cognitiveLevel: string = q.cognitiveLevel;
-        if (!q.cognitiveLevel || q.cognitiveLevel === 'UNDERSTANDING') {
-          const lower = cleanText.toLowerCase();
-          if (lower.includes('troubleshoot') || lower.includes('fail') || lower.includes('cannot ping') || lower.includes('cut')) {
-            cognitiveLevel = 'TROUBLESHOOTING';
-          } else if (lower.includes('what is') || lower.includes('how many') || lower.includes('ieee')) {
-            cognitiveLevel = 'RECALL';
-          } else if (lower.includes('calculate') || lower.includes('subnet') || lower.includes('formula')) {
-            cognitiveLevel = 'APPLICATION';
-          } else if (lower.includes('architect') || lower.includes('design') || lower.includes('why')) {
-            cognitiveLevel = 'EXPERT_REASONING';
-          }
-        }
+        // Authoritative stored Bloom taxonomy metadata (no fragile runtime string inference)
+        const cognitiveLevel: string = q.cognitiveLevel || 'UNDERSTANDING';
 
         const conceptTag = q.concept || quiz.lesson.title || 'Networking Fundamentals';
 

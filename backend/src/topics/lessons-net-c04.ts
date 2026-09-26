@@ -71,6 +71,27 @@ export const LESSONS_NET_C04: BenchmarkLessonFullDefinition[] = [
           remediation: 'Append required permit rule or utilize stateful inspection for return sessions.',
         },
       ],
+      workedExample: {
+        title: 'Calculating Wildcard Mask for a /22 Subnet and Writing an Extended ACL Rule',
+        problemStatement:
+          'Create an extended ACL rule permitting HTTPS traffic (TCP 443) from branch subnet 172.16.16.0/22 to an internal server at 10.0.0.5.',
+        stepByStepSolution: [
+          'Step 1: Calculate the wildcard mask by subtracting 255.255.252.0 (/22) from 255.255.255.255, which yields 0.0.3.255.',
+          'Step 2: Identify transport protocol TCP and destination port 443 (https).',
+          'Step 3: Construct the rule: access-list 101 permit tcp 172.16.16.0 0.0.3.255 host 10.0.0.5 eq 443.',
+          'Step 4: Apply inbound on the interface closest to the traffic source: interface Gi0/0/0, ip access-group 101 in.',
+        ],
+        finalResult:
+          'Extended ACL 101 correctly permits HTTPS traffic for the entire 172.16.16.0/22 subnet while preserving WAN bandwidth.',
+      },
+      practice: [
+        {
+          id: 1,
+          prompt: 'What wildcard mask matches the entire /20 subnet 10.10.16.0/20?',
+          expected: '0.0.15.255 (calculated as 255.255.255.255 minus 255.255.240.0).',
+          hints: 'Subtract the subnet mask bytes from 255.255.255.255.',
+        },
+      ],
     },
     questions: [
       {
@@ -228,6 +249,27 @@ export const LESSONS_NET_C04: BenchmarkLessonFullDefinition[] = [
           command: 'show policy-map type inspect zone-pair sessions',
           description: 'Displays active stateful connection sessions tracked by the firewall engine.',
           expectedOutput: 'Zone-pair: IN_TO_OUT\n  Service-policy inspect : FW_POLICY\n    Class-map: APP_TRAFFIC (match-any)\n      Match: protocol tcp\n        Established Sessions: 18\n        Half-open Sessions: 0',
+        },
+      ],
+      workedExample: {
+        title: 'Configuring Cisco Zone-Based Policy Firewall (ZFW) Inspect Rule for Web Traffic',
+        problemStatement:
+          'Define a zone-pair from INSIDE to OUTSIDE and configure stateful inspection for HTTP/HTTPS so return traffic is dynamically permitted.',
+        stepByStepSolution: [
+          'Step 1: Create class-map matching HTTP and HTTPS: class-map type inspect match-any WEB_CM, match protocol http, match protocol https.',
+          'Step 2: Define policy-map referencing the class-map with inspect action: policy-map type inspect FW_POLICY, class type inspect WEB_CM, inspect.',
+          'Step 3: Create unidirectional zone-pair: zone-pair security IN_TO_OUT source INSIDE destination OUTSIDE.',
+          'Step 4: Attach policy-map to zone-pair: service-policy type inspect FW_POLICY.',
+        ],
+        finalResult:
+          'Outbound web requests generate state table entries that dynamically permit inbound return traffic without opening static inbound ports.',
+      },
+      practice: [
+        {
+          id: 1,
+          prompt: 'What happens to traffic arriving at a ZFW interface if no zone-pair policy is defined between its zone and the destination zone?',
+          expected: 'All inter-zone traffic is dropped by default.',
+          hints: 'ZFW enforces a default-deny policy between distinct security zones.',
         },
       ],
     },
@@ -401,6 +443,27 @@ export const LESSONS_NET_C04: BenchmarkLessonFullDefinition[] = [
           remediation: 'Ensure `ip nat inside` is configured on LAN interfaces, `ip nat outside` on WAN interface, and the ACL permits the client subnet.',
         },
       ],
+      workedExample: {
+        title: 'Configuring Port Address Translation (PAT / NAT Overload) for a Branch Office',
+        problemStatement:
+          'Translate all internal LAN hosts in 192.168.10.0/24 to the router public WAN IP on GigabitEthernet0/0/0 using PAT.',
+        stepByStepSolution: [
+          'Step 1: Mark internal LAN interface: interface Gi0/0/1, ip nat inside.',
+          'Step 2: Mark external WAN interface: interface Gi0/0/0, ip nat outside.',
+          'Step 3: Define standard ACL matching the LAN subnet: access-list 1 permit 192.168.10.0 0.0.0.255.',
+          'Step 4: Enable PAT overload: ip nat inside source list 1 interface GigabitEthernet0/0/0 overload.',
+        ],
+        finalResult:
+          'Hundreds of internal hosts share the single public WAN IP by multiplexing unique Layer 4 source port numbers.',
+      },
+      practice: [
+        {
+          id: 1,
+          prompt: 'Which Cisco NAT term refers to the private IPv4 address assigned to a host inside the local enterprise LAN?',
+          expected: 'Inside Local address.',
+          hints: 'It is local to the inside network before translation.',
+        },
+      ],
     },
     questions: [
       {
@@ -527,13 +590,14 @@ export const LESSONS_NET_C04: BenchmarkLessonFullDefinition[] = [
       whyItMatters:
         'Enterprise branch offices and data centers must exchange confidential proprietary data across untrusted public internet backbones. Without IPsec encryption and authentication, packets are susceptible to eavesdropping, man-in-the-middle data tampering, and replay attacks.',
       explanation:
-        '### 1. The Core IPsec Security Services\nIPsec provides four fundamental cryptographic guarantees:\n1. **Confidentiality (Encryption)**: Ensures unauthorized parties cannot read packet payloads. Uses symmetric ciphers like **AES-128**, **AES-256**, or 3DES.\n2. **Integrity**: Ensures packets arrive without being altered in transit. Uses cryptographic hash algorithms (e.g., **SHA-256**, HMAC).\n3. **Authentication**: Verifies the genuine identity of the remote VPN peer. Achieved via **Pre-Shared Keys (PSK)** or digital certificates (RSA/ECDSA).\n4. **Anti-Replay Protection**: Verifies that duplicate packets captured by an attacker cannot be re-transmitted into the network, utilizing 64-bit sequence numbers in IPsec headers.\n\n### 2. IPsec Protocols: ESP vs. AH\n* **Encapsulating Security Payload (ESP - IP Protocol 50)**: Provides **both encryption and authentication**. It encapsulates the original IP packet inside an encrypted payload and appends an authentication trailer. ESP is the industry standard.\n* **Authentication Header (AH - IP Protocol 51)**: Provides authentication and integrity, but **zero encryption**. Because AH hashes outer IP header fields (including IP addresses), it is incompatible with NAT.\n\n### 3. IKE Phase 1 vs. IKE Phase 2 Negotiation\nSite-to-site IPsec establishes secure communication in two distinct phases:\n\n* **IKE Phase 1 (ISAKMP SA)**: Negotiates a secure management tunnel between the two router peers to safely exchange key material.\n  * Peers negotiate the **HAGLE** parameters: **H**ash (SHA-256), **A**uthentication (Pre-Shared Key), **G**roup (Diffie-Hellman Group 14/19/21), **L**ifetime (86400s), **E**ncryption (AES-256).\n  * **Diffie-Hellman (DH)**: Enables both peers to compute an identical shared secret key across an insecure public channel without transmitting the key itself.\n\n* **IKE Phase 2 (IPsec SA)**: Negotiates the actual data tunnel that encrypts user payload traffic.\n  * Peers agree on a **Transform Set** (e.g., `esp-aes 256 esp-sha256-hmac`).\n  * Peers define **Crypto ACLs** (Proxy IDs) matching interesting traffic (e.g., permit ip 10.1.0.0/24 10.2.0.0/24).\n  * Operates in **Tunnel Mode** (encrypts entire original packet and adds a new outer IP header).',
+        '### 1. The Core IPsec Security Services\nIPsec provides four fundamental cryptographic guarantees:\n1. **Confidentiality (Encryption)**: Ensures unauthorized parties cannot read packet payloads. Uses symmetric ciphers like **AES-128**, **AES-256**, or 3DES.\n2. **Integrity**: Ensures packets arrive without being altered in transit. Uses cryptographic hash algorithms (e.g., **SHA-256**, HMAC).\n3. **Authentication**: Verifies the genuine identity of the remote VPN peer. Achieved via **Pre-Shared Keys (PSK)** or digital certificates (RSA/ECDSA).\n4. **Anti-Replay Protection**: Verifies that duplicate packets captured by an attacker cannot be re-transmitted into the network, utilizing 64-bit sequence numbers in IPsec headers.\n\n### 2. IPsec Protocols: ESP vs. AH\n* **Encapsulating Security Payload (ESP - IP Protocol 50)**: Provides **both encryption and authentication**. It encapsulates the original IP packet inside an encrypted payload and appends an authentication trailer. ESP is the industry standard.\n* **Authentication Header (AH - IP Protocol 51)**: Provides authentication and integrity, but **zero encryption**. Because AH hashes outer IP header fields (including IP addresses), it is incompatible with NAT.\n\n### 3. IKE Phase 1 vs. IKE Phase 2 Negotiation\nSite-to-site IPsec establishes secure communication in two distinct phases:\n\n* **IKE Phase 1 (ISAKMP SA)**: Negotiates a secure management tunnel between the two router peers to safely exchange key material.\n  * Peers negotiate the **HAGLE** parameters: **H**ash (SHA-256), **A**uthentication (Pre-Shared Key), **G**roup (Diffie-Hellman Group 14/19/21), **L**ifetime (86400s), **E**ncryption (AES-256).\n  * **Diffie-Hellman (DH)**: Enables both peers to compute an identical shared secret key across an insecure public channel without transmitting the key itself.\n\n* **IKE Phase 2 (IPsec SA)**: Negotiates the actual data tunnel that encrypts user payload traffic.\n  * Peers agree on a **Transform Set** (e.g., `esp-aes 256 esp-sha256-hmac`).\n  * Peers define **Crypto ACLs** (Proxy IDs) matching interesting traffic (e.g., permit ip 10.1.0.0/24 10.2.0.0/24).\n  * Operates in **Tunnel Mode** (encrypts entire original packet and adds a new outer IP header).\n\n### 4. Modern VPN Alternatives: WireGuard Cryptokey Routing\nWhile enterprise hardware relies heavily on IPsec ASIC acceleration, modern Linux and cloud deployments increasingly favor **WireGuard**:\n* **Codebase & Attack Surface**: IPsec suites (StrongSwan) exceed 100,000 lines of code; WireGuard operates in <4,000 lines within kernel space, eliminating complex IKE multi-roundtrip handshakes and cipher negotiation downgrade attacks.\n* **Cryptokey Routing Principle**: WireGuard associates peer public keys directly with allowed IP address prefixes (`AllowedIPs`), routing packets through virtual tunnel interfaces (`wg0`) as pure Layer 3 routing entries rather than managing stateful Phase 1/2 SAs.\n* **Modern Cryptographic Primitives**: Employs **Curve25519** ECDH key exchange, **ChaCha20-Poly1305** authenticated encryption (AEAD), and **BLAKE2s** hashing using the 1-RTT Noise protocol framework over UDP.',
       recap: [
         'IPsec provides Confidentiality (AES), Integrity (SHA-256), Authentication (PSK/RSA), and Anti-Replay protection.',
         'ESP (IP protocol 50) provides encryption and authentication; AH (protocol 51) provides authentication only.',
         'IKE Phase 1 establishes the management tunnel (ISAKMP SA) using Diffie-Hellman key exchange.',
         'IKE Phase 2 establishes the data tunnel (IPsec SA) using transform sets and crypto ACLs.',
         'Tunnel mode encrypts the entire original packet with a new public outer IP header.',
+        'WireGuard offers an auditable, lightweight kernel alternative using Cryptokey Routing over UDP.',
       ],
       components: [
         {
@@ -547,6 +611,10 @@ export const LESSONS_NET_C04: BenchmarkLessonFullDefinition[] = [
         {
           name: 'Transform Set',
           detail: 'Combination of encryption cipher (AES) and hashing algorithm (SHA) for ESP data encapsulation.',
+        },
+        {
+          name: 'WireGuard Cryptokey Routing',
+          detail: 'Modern lightweight VPN mapping public keys directly to AllowedIPs prefixes in kernel routing space.',
         },
       ],
       cliTooling: [
@@ -577,6 +645,27 @@ export const LESSONS_NET_C04: BenchmarkLessonFullDefinition[] = [
           possibleCauses: ['Mismatched Pre-Shared Key (PSK).', 'Mismatched Phase 1 policy parameters (AES vs 3DES, DH Group 14 vs 2).', 'Firewall blocking UDP port 500 or UDP port 4500.'],
           diagnosticSteps: ['Run `debug crypto isakmp` on both peers.', 'Verify PSK string matches exactly on both endpoints.'],
           remediation: 'Align IKE Phase 1 HAGLE parameters and pre-shared keys, and ensure UDP port 500 is permitted on edge firewalls.',
+        },
+      ],
+      workedExample: {
+        title: 'Verifying IPsec Phase 1 ISAKMP and Phase 2 IPsec Security Associations',
+        problemStatement:
+          'Diagnose an IPsec tunnel between HQ (203.0.113.1) and Branch (203.0.113.2) where users report intermittent VPN connectivity.',
+        stepByStepSolution: [
+          'Step 1: Inspect Phase 1 status: execute `show crypto isakmp sa`. Verify state is `QM_IDLE`. If `MM_NO_STATE`, Phase 1 failed (check PSK/ISAKMP policy).',
+          'Step 2: Inspect Phase 2 status: execute `show crypto ipsec sa`. Verify `#pkts encaps` and `#pkts decaps` are incrementing evenly.',
+          'Step 3: If encaps increments but decaps is 0, remote peer is not receiving or not returning packets (check firewall ACLs blocking UDP 500/ESP 50).',
+          'Step 4: Verify proxy IDs / crypto ACLs match mirrored subnets on both tunnel endpoints.',
+        ],
+        finalResult:
+          'Confirmed bidirectional packet encryption with active Phase 1 QM_IDLE and symmetric Phase 2 SA counters.',
+      },
+      practice: [
+        {
+          id: 1,
+          prompt: 'What IP protocol number is used by IPsec Encapsulating Security Payload (ESP) headers in raw IP packets?',
+          expected: 'IP Protocol 50 (ESP).',
+          hints: 'AH is 51, TCP is 6, UDP is 17, ESP is 50.',
         },
       ],
     },

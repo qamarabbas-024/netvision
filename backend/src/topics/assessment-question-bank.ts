@@ -412,17 +412,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-ip-addresses-logical-location",
     text: "What is the operational behavior of packets transmitted to IP address `127.0.0.1` on a host operating system?",
     options: [
-      "The packets are broadcast to all devices on the local Ethernet switch",
+      "The packets are encapsulated in broadcast frames and forwarded to every switch port on the local subnet",
       "The packets are processed entirely within the local host TCP/IP stack in kernel memory and are never transmitted onto the physical network wire",
-      "The packets are routed to the nearest ISP default gateway",
-      "The packets are discarded as malformed runt frames"
+      "The packets are forwarded out of the default gateway interface to upstream Internet Service Provider core routers",
+      "The packets are dropped immediately by the network interface controller firmware as malformed runt frames"
     ],
     correctOption: 1,
     explanation: "The `127.0.0.0/8` block is reserved for loopback. Traffic sent to 127.0.0.1 loops back internally inside the host OS network stack, verifying software protocol stack integrity without hitting network hardware.",
     explanationsJson: {
-      0: "Loopback traffic is never broadcast onto physical links.",
-      2: "Loopback traffic does not leave the local computer.",
-      3: "Loopback packets are fully valid transport messages processed internally.",
+      0: "Loopback traffic is purely internal to the operating system and is never broadcast onto physical Ethernet links.",
+      2: "Loopback traffic never traverses network interfaces or routes across default gateways to ISP networks.",
+      3: "Loopback packets are fully valid TCP/IP packets processed within kernel socket memory, not malformed runt frames.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -758,16 +758,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What is the operational difference between Transport Layer Multiplexing and Demultiplexing inside an operating system?",
     options: [
       "Multiplexing gathers data from multiple application sockets onto a single physical network interface; Demultiplexing delivers incoming packets from the interface to the correct application socket based on Destination Port",
-      "Multiplexing encrypts packets; Demultiplexing decrypts packets",
-      "Multiplexing converts IPv4 to IPv6; Demultiplexing converts IPv6 to IPv4",
-      "Multiplexing operates on copper cables; Demultiplexing operates on fiber optics"
+      "Multiplexing encrypts application payloads using symmetric TLS session keys; Demultiplexing decrypts incoming payloads using asymmetric RSA public keys",
+      "Multiplexing translates private IPv4 addresses to public addresses using NAT tables; Demultiplexing maps incoming public IP packets back to internal host addresses",
+      "Multiplexing modulates digital bitstreams onto optical fiber carrier signals; Demultiplexing converts optical light pulses back into electrical copper voltages"
     ],
     correctOption: 0,
     explanation: "Multiplexing combines outbound streams from diverse application sockets onto one physical link; Demultiplexing separates inbound packet streams and delivers them to their target application process using port headers.",
     explanationsJson: {
-      1: "Encryption/decryption is handled by TLS/Presentation Layer.",
-      2: "Protocol translation is handled by NAT64/Dual-Stack.",
-      3: "Physical media is handled by Layer 1 transceivers.",
+      1: "Payload encryption and decryption are handled by TLS at the Application/Presentation layer, not transport socket multiplexing.",
+      2: "Network Address Translation (NAT) operates at Layer 3 to modify IP headers, distinct from Layer 4 port multiplexing.",
+      3: "Signal modulation and optical-electrical conversion are Layer 1 physical transceiver operations.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -872,17 +872,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-network-packets-data-framing",
     text: "What is the primary architectural penalty when an IP packet is subjected to Layer 3 fragmentation across a low-MTU WAN link?",
     options: [
-      "The packet payload is permanently encrypted",
+      "Fragmented packets bypass stateful firewall inspection because Layer 3 fragment offset flags disable Layer 4 TCP port filtering rules",
       "If any single fragment is dropped in transit, the entire original packet is lost and must be retransmitted, while intermediate routers suffer CPU overhead buffering fragments",
-      "The destination MAC address is deleted",
-      "The Ethernet cable speed is reduced from 1 Gbps to 10 Mbps"
+      "The receiving destination host drops all fragments arriving out of order because IP headers lack sequence numbers to reconstruct packet boundaries",
+      "Packet fragmentation causes the physical Ethernet interface to renegotiate link speeds from full-duplex gigabit down to half-duplex 10 Mbps"
     ],
     correctOption: 1,
     explanation: "IP fragmentation lacks per-fragment retransmission. If 1 of 5 fragments is dropped, the destination host discards all 4 received fragments, multiplying effective packet loss and wasting network bandwidth.",
     explanationsJson: {
-      0: "Fragmentation splits packets into smaller IP slices; it does not encrypt data.",
-      2: "MAC headers are re-encapsulated normally per fragment.",
-      3: "Physical link negotiation speed is independent of packet fragmentation.",
+      0: "While fragmentation creates inspection challenges, modern firewalls reassemble fragments; it is not the primary performance penalty.",
+      2: "The receiving host reassembles fragments using Identification, Flags, and Fragment Offset fields regardless of arrival order.",
+      3: "Physical autonegotiation occurs at Layer 1 and is unaffected by Layer 3 IP packet fragmentation.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -895,17 +895,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-network-packets-data-framing",
     text: "A network engineer notices that users connecting through a VPN tunnel can send small ping packets and connect via SSH, but large file transfers and web pages freeze indefinitely. What is the root cause of this \"PMTUD Black Hole\"?",
     options: [
-      "The client computer has run out of private IPv4 addresses",
-      "The web server has disabled HTTPS port 443",
+      "The sending client has exhausted its local ephemeral TCP port pool, preventing new socket connections from establishing three-way handshakes",
+      "The destination web server has enabled HTTP keep-alive timeouts that prematurely terminate idle TCP connections before payloads finish transmission",
       "An intermediate firewall is dropping all ICMP messages, preventing the ICMP Type 3 Code 4 \"Packet Too Big\" notifications from reaching the sender when large packets with DF=1 are dropped",
-      "The Ethernet switch has disabled spanning tree protocol"
+      "The Layer 2 switch is dropping oversized 802.1Q tagged frames because spanning tree protocol designated ports entered a discarding blocking state"
     ],
     correctOption: 2,
     explanation: "When firewalls indiscriminately block ICMP, the sender never receives the PMTUD \"Packet Too Big\" alert. The sender keeps retransmitting oversized packets with DF=1, which the router silently drops, creating a black hole.",
     explanationsJson: {
-      0: "The client already has an active IP address.",
-      1: "If port 443 were disabled, initial connection would fail rather than freezing on large data.",
-      3: "STP loops cause broadcast storms, not selective MTU black holes.",
+      0: "Socket port exhaustion prevents initial SYN handshakes from completing, whereas PMTUD black holes permit handshakes but stall on large payloads.",
+      1: "Keep-alive timeouts terminate idle sessions, whereas PMTUD issues occur actively during high-throughput packet transfers.",
+      3: "Spanning tree port states drop all traffic uniformly on that port, not selectively based on packet payload size.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -942,16 +942,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What is the primary role of international standards bodies such as the IETF (Internet Engineering Task Force) and IEEE in networking?",
     options: [
       "Publishing open RFC specifications and IEEE standards ensuring interoperability between different hardware vendors and software operating systems",
-      "Manufacturing all network routers and switches sold worldwide in a single centralized factory",
-      "Charging subscription fees for every data packet transmitted over public fiber optic lines",
-      "Manually approving every individual website domain name before it can launch"
+      "Manufacturing all enterprise routers, multilayer switches, and network cards sold worldwide within a single centralized global facility",
+      "Charging mandatory per-gigabyte telecommunication license royalties for every packet routed through public international fiber links",
+      "Performing manual cryptographic auditing and code signing on all open-source web application software before commercial deployment"
     ],
     correctOption: 0,
     explanation: "Standards bodies create vendor-neutral specifications (such as IETF RFCs for IP/TCP/DNS and IEEE 802.3/802.11 for Ethernet/Wi-Fi) so equipment from Cisco, Juniper, Apple, Microsoft, and Linux interoperate seamlessly.",
     explanationsJson: {
-      1: "Hardware manufacturing is performed by thousands of competitive commercial vendors, not standards bodies.",
-      2: "IETF/IEEE do not levy packet tariffs; Internet protocols are open and non-proprietary.",
-      3: "Domain registration is managed through ICANN and registrars, not IETF protocol engineering workgroups.",
+      1: "Hardware manufacturing is distributed across hundreds of independent commercial hardware manufacturers worldwide.",
+      2: "IETF and IEEE standards are open specifications and do not levy packet transmission tariffs or telecommunication royalties.",
+      3: "Software auditing and code signing are application lifecycle practices, not the standardization mission of IETF/IEEE.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1079,17 +1079,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-dns-internet-phonebook",
     text: "Why does standard DNS primarily use UDP port 53 for queries rather than TCP port 53?",
     options: [
-      "Because UDP automatically encrypts domain names with AES-256",
-      "Because TCP cannot transmit ASCII text domain characters",
+      "Because UDP automatically encrypts DNS query payload strings using AES-GCM without requiring public key certificate handshakes",
+      "Because standard operating system kernels prohibit TCP connection initiation to external well-known port numbers below 1024",
       "Because UDP avoids 3-way connection handshake overhead, enabling single round-trip lookups with minimal latency and reduced server state load",
-      "Because routers drop all TCP packets destined to port 53"
+      "Because intermediate Internet routers and firewalls drop all TCP segments destined to destination port 53 across transit links"
     ],
     correctOption: 2,
     explanation: "UDP is connectionless and fast: a client sends a single request packet and receives a single response packet, avoiding TCP 3-way handshake delay and conserving server memory for millions of concurrent queries.",
     explanationsJson: {
-      0: "Standard UDP DNS is plaintext; encryption requires DoT (port 853) or DoH (port 443).",
-      1: "TCP carries any binary or ASCII payload.",
-      3: "Routers routinely route TCP port 53 for DNS zone transfers and large payloads.",
+      0: "Standard DNS over UDP is unencrypted plaintext; DNS encryption requires DNS over HTTPS (DoH) or DNS over TLS (DoT).",
+      1: "Operating systems freely initiate outbound TCP connections to well-known ports; TCP 53 is fully supported for zone transfers.",
+      3: "Enterprise routers and firewalls permit TCP port 53; DNS routinely uses TCP when responses exceed 512 bytes or for AXFR.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1102,17 +1102,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-dns-internet-phonebook",
     text: "A systems administrator updates the IPv4 address for `api.company.com` from `1.1.1.1` to `2.2.2.2`. However, remote users continue reaching `1.1.1.1` for the next hour. What DNS parameter is responsible for this delay?",
     options: [
-      "The default gateway subnet mask",
-      "The 48-bit MAC address burned-in hardware serial",
-      "The router MTU packet size limit",
-      "Time-To-Live (TTL) caching timeout in upstream recursive resolvers"
+      "The default gateway router ARP cache expiration timer configured on internal Layer 3 interface subnets",
+      "The physical MAC address hardware lease interval negotiated between client network cards and access switch ports",
+      "The Maximum Transmission Unit (MTU) packet size threshold configured across intermediate WAN router interfaces",
+      "Time-To-Live (TTL) caching timeout configured on authoritative records and stored in upstream recursive resolvers"
     ],
     correctOption: 3,
     explanation: "Recursive resolvers and client operating systems cache DNS records according to the record's Time-To-Live (TTL). Upstream caches will not query authoritative servers for the new IP until the old TTL expires.",
     explanationsJson: {
-      0: "Subnet masks define local IP boundaries, not DNS cache timers.",
-      1: "MAC addresses operate at Layer 2 and have no effect on global DNS caching.",
-      2: "MTU limits payload packet size, not domain record expiration.",
+      0: "ARP timers resolve IP addresses to local Layer 2 MAC addresses and have no effect on public DNS domain name lookups.",
+      1: "MAC addresses are permanent physical hardware identifiers and do not have DNS-related lease timers.",
+      2: "MTU governs packet size limits to prevent fragmentation and does not dictate DNS record propagation or caching.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -1148,17 +1148,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-dns-internet-phonebook",
     text: "A user reports that they can successfully ping public IP address `8.8.8.8` from their command prompt, but typing `https://www.google.com` into their web browser results in a \"Server Not Found\" error. What is the most likely root cause?",
     options: [
-      "The physical Ethernet copper cable is unplugged",
+      "The physical twisted-pair Ethernet copper cable connecting the host to the local access switch has been severed",
       "DNS server IP configuration is invalid or the configured DNS resolver is unreachable, preventing domain name translation",
-      "The default gateway router has crashed and dropped all IP routing",
-      "The user's network card MAC address has expired"
+      "The default gateway edge router has suffered a kernel crash and dropped all Layer 3 IP routing table entries",
+      "The host network interface card MAC address has been permanently blacklisted in the switch Content Addressable Memory"
     ],
     correctOption: 1,
     explanation: "Because the host can ping 8.8.8.8, Layers 1, 2, and 3 (cable, MAC, IP, gateway routing) are fully functional. The failure to browse by domain name proves that Application Layer DNS name resolution is failing.",
     explanationsJson: {
-      0: "If the cable were unplugged, pinging 8.8.8.8 would fail immediately.",
-      2: "If the default gateway had crashed, no traffic could reach public IP 8.8.8.8.",
-      3: "MAC addresses are permanently burned-in and do not expire.",
+      0: "If the physical cable were disconnected, pinging the direct public IP address 8.8.8.8 would fail immediately with hardware down.",
+      2: "Because the host successfully pings public IP 8.8.8.8, the default gateway and Layer 3 Internet routing are functioning perfectly.",
+      3: "A blacklisted MAC address would prevent all Layer 2 frame forwarding, blocking direct IP pings as well.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -1240,17 +1240,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-dhcp-automatic-ip-allocation",
     text: "An employee's laptop acquires an 8-hour DHCP lease at 09:00 AM. At what time will the client first attempt to renew its lease (T1 Renewal Timer), and how is the renewal packet transmitted?",
     options: [
-      "At 04:00 PM (87.5% of lease duration) via a Broadcast DHCP Discover",
+      "At 04:00 PM (87.5% of lease duration) via an all-subnets Layer 2 broadcast DHCP Discover frame across the local broadcast domain",
       "At 01:00 PM (50% of lease duration) via a Unicast DHCP Request sent directly to the leasing server",
-      "At 05:00 PM (100% of lease duration) via an ARP Request",
-      "At 09:05 AM via a TCP SYN packet"
+      "At 05:00 PM (100% of lease duration) via an ICMP Echo Request payload validating server connectivity before releasing address",
+      "At 09:05 AM immediately following initial IP binding via a TCP SYN packet establishing a continuous connection keepalive"
     ],
     correctOption: 1,
     explanation: "The T1 Renewal Timer triggers at 50% of the total lease duration ($0.50 \\times 8 \\text{ hours} = 4 \\text{ hours}$, which is 01:00 PM). The client transmits a unicast DHCP Request directly to the server that granted the lease.",
     explanationsJson: {
-      0: "87.5% is the T2 Rebind Timer (04:00 PM), which is broadcast if T1 fails.",
-      2: "100% is lease expiration, not the first renewal attempt.",
-      3: "Lease renewal does not trigger 5 minutes after connection.",
+      0: "87.5% (T2 timer) is the Rebinding phase where the client broadcasts if the leasing server failed to respond to unicast renewals.",
+      2: "Waiting until 100% lease expiration would cause immediate IP loss and disconnection; renewal occurs well before expiration.",
+      3: "DHCP uses connectionless UDP on ports 67/68, not persistent TCP keepalive connections.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -1263,17 +1263,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-dhcp-automatic-ip-allocation",
     text: "Why is the DHCP Relay Agent (`ip helper-address`) feature configured on enterprise router interfaces?",
     options: [
-      "To assign static RFC 1918 addresses to router subinterfaces without requiring dynamic lease tables",
-      "To suppress DHCP Offer packets from rogue DHCP servers across local switch access ports",
+      "To assign static RFC 1918 addresses to router subinterfaces without requiring dynamic lease tables or client request parsing",
+      "To inspect and suppress unauthorized DHCP Offer packets originating from rogue DHCP servers across local switch access ports",
       "Because routers drop Layer 2/3 broadcast packets by default, requiring the router to convert client DHCP Discover broadcasts into unicast packets routed to a central DHCP server",
-      "To translate private IPv4 addresses into public routable IP addresses across external WAN links"
+      "To translate internal private IPv4 client addresses into globally unique public routable IP addresses across external WAN links"
     ],
     correctOption: 2,
     explanation: "Since routers terminate broadcast domains and do not forward `255.255.255.255` broadcasts, a DHCP Relay Agent (`ip helper-address`) intercepts client Discover broadcasts and forwards them as unicast packets to the central DHCP server.",
     explanationsJson: {
-      0: "DHCP Relay enables network connectivity, not application blocking.",
-      1: "DHCP Relay forwards address requests, not wireless encryption.",
-      3: "DHCP Relay is not an IPv4-to-IPv6 transition mechanism.",
+      0: "Subinterfaces are configured manually with static IPs; DHCP relay is specifically for dynamically servicing client workstations.",
+      1: "Suppressing rogue DHCP offers is the role of Layer 2 DHCP Snooping on switches, not ip helper-address on routers.",
+      3: "Translating private IP addresses to public IPs is the function of Network Address Translation (NAT), not DHCP relay.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1286,17 +1286,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-dhcp-automatic-ip-allocation",
     text: "A helpdesk technician notices that a user's computer shows an IPv4 address of `169.254.45.89` with a subnet mask of `255.255.0.0`. The user cannot access internal network shares or the Internet. What does this indicate?",
     options: [
-      "The computer is connected to a Gigabit fiber connection",
-      "The computer has been successfully assigned a public Internet IP address",
-      "The DHCP server assigned a static high-speed VIP address",
+      "The client device successfully established a high-throughput 10GBASE-T fiber optic link with the enterprise aggregation layer",
+      "The client device was assigned a globally unique public Internet IPv4 address directly from the regional Internet registry",
+      "The enterprise DHCP server assigned a reserved high-availability Virtual IP (VIP) address designated for critical infrastructure",
       "The client failed to communicate with a DHCP server and self-assigned an Automatic Private IP Addressing (APIPA) link-local address"
     ],
     correctOption: 3,
     explanation: "The IPv4 block `169.254.0.0/16` is reserved for APIPA (Automatic Private IP Addressing). When a DHCP client receives no response to its Discovers, it self-assigns an address in this range, allowing communication only with other APIPA hosts on the immediate physical wire.",
     explanationsJson: {
-      0: "APIPA address assignment is independent of physical media link speed.",
-      1: "169.254.x.x is link-local and non-routable on the Internet.",
-      2: "169.254.x.x indicates DHCP failure, not a VIP assignment.",
+      0: "Media speed negotiation does not determine Layer 3 IP addressing; a 169.254.x.x address indicates DHCP failure.",
+      1: "169.254.0.0/16 is an RFC 3927 link-local range, not a globally routable public Internet IPv4 block.",
+      2: "DHCP servers assign configured scope ranges; APIPA addresses are generated client-side when no server responds.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -1332,17 +1332,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-routers-inter-subnet-pathfinders",
     text: "What is the purpose of a \"Default Route\" (`0.0.0.0/0` or `::/0`) in a routing table?",
     options: [
-      "It permanently disables all routing interfaces on the router",
+      "It instructs the router operating system to permanently disable all physical and logical routing interfaces upon initialization",
       "It acts as the gateway of last resort, matching all destination IP addresses that do not match any more specific route in the routing table",
-      "It restricts the router to forwarding packets exclusively to local loopback 127.0.0.1",
-      "It forces all incoming packets to be broadcast out every single switch port"
+      "It isolates router packet processing exclusively to internal loopback interface 127.0.0.1 and drops all external transit packets",
+      "It commands the router to forward all arriving packets as Layer 2 broadcast frames across every attached switch trunk port"
     ],
     correctOption: 1,
     explanation: "A Default Route (0.0.0.0 with mask 0.0.0.0, or /0 prefix) has a prefix length of 0 bits, matching any IPv4 address when no more specific subnet route exists, directing outbound Internet traffic to the upstream provider.",
     explanationsJson: {
-      0: "A default route is an active forwarding rule; it does not disable interfaces.",
-      2: "Loopback 127.0.0.1 is local internal host testing, not the destination of a default route.",
-      3: "Routers never broadcast packets out all ports; only Layer 2 hubs/switches flood unknown frames.",
+      0: "A default route enables global packet forwarding; it does not administratively disable router interfaces.",
+      2: "Loopback addresses are host-internal; a default route points outward to upstream transit next-hop routers.",
+      3: "Routers forward packets as unicast frames to specific next-hop MACs; they never broadcast transit IP packets.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1378,17 +1378,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-routers-inter-subnet-pathfinders",
     text: "A host with IP `192.168.1.10/24` has its Default Gateway accidentally configured as `192.168.2.1`. When the host attempts to connect to `8.8.8.8`, why does communication fail immediately?",
     options: [
-      "Routers reject all traffic from hosts with an IP ending in `.10`",
-      "The IP address 8.8.8.8 has been reserved for private LAN use only",
-      "The host network card automatically disables its physical transmitter if gateway ends in `.1`",
+      "Enterprise edge routers reject all transit IP packets originating from client workstations assigned an IP ending in `.10`",
+      "Public DNS resolver IP addresses such as 8.8.8.8 have been officially deprecated and reallocated for internal enterprise LAN use",
+      "The network interface card firmware shuts down physical transceiver hardware if the default gateway IP address ends in `.1`",
       "The host cannot ARP for its default gateway because `192.168.2.1` is on a different logical subnet than `192.168.1.10/24` and cannot be reached locally"
     ],
     correctOption: 3,
     explanation: "A host can only ARP for and communicate directly with devices on its own local subnet. Because 192.168.2.1 is outside 192.168.1.0/24, the host cannot resolve the gateway MAC address and cannot transmit outbound packets.",
     explanationsJson: {
-      0: "Routers do not discriminate against host IP addresses ending in .10.",
-      1: "8.8.8.8 is a public DNS IP, not private RFC 1918 space.",
-      2: "NIC transmitters operate based on physical signals, not gateway IP suffix values.",
+      0: "Routers evaluate destination IP addresses against routing tables; they do not arbitrarily drop packets based on final octet values.",
+      1: "8.8.8.8 is an active, globally accessible Anycast public DNS resolver operated by Google.",
+      2: "Transceiver hardware operates at Layer 1 and has no awareness of Layer 3 IP addressing or gateway octet values.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -1424,17 +1424,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-switches-local-lan-forwarders",
     text: "What action does a Layer 2 switch perform when it receives a unicast frame destined for a MAC address that is NOT currently listed in its MAC address table (an Unknown Unicast)?",
     options: [
-      "It immediately drops the frame and generates an ICMP error packet",
+      "It immediately drops the unmapped frame and generates an ICMP Destination Host Unreachable packet back to the sender",
       "It floods the frame out all active ports in the same VLAN except the port on which it was received",
-      "It forwards the frame to the Default Gateway router for disposal",
-      "It permanently shuts down the incoming switch port"
+      "It encapsulates the frame in a Layer 3 packet and forwards it to the default gateway router for disposal",
+      "It triggers port security err-disable mode and permanently shuts down the physical incoming switch port"
     ],
     correctOption: 1,
     explanation: "When a switch does not know which port owns the destination MAC address, it performs \"Unknown Unicast Flooding\", broadcasting the frame to all ports in that VLAN (except the ingress port) so the target can receive and answer it.",
     explanationsJson: {
-      0: "Switches do not drop unknown unicast frames; they flood them to discover the target.",
-      2: "Layer 2 switches do not route unknown frames to default gateways.",
-      3: "Ports are not shut down for unknown unicasts (that only occurs under port security violation modes).",
+      0: "Layer 2 switches do not generate ICMP error messages; they flood unknown unicast frames to facilitate MAC discovery.",
+      2: "Switches forward frames based on Layer 2 MAC addresses within the broadcast domain; they do not send unknown frames to routers for disposal.",
+      3: "Port security shuts down ports on unauthorized Source MAC violations, not on unknown Destination MAC lookups.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1447,17 +1447,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-switches-local-lan-forwarders",
     text: "What is the primary operational advantage of full-duplex Ethernet switching over legacy half-duplex shared Ethernet?",
     options: [
-      "Full-duplex allows Ethernet cables to reach up to 10,000 miles without repeaters",
-      "Full-duplex eliminates the need for IP addressing and subnet masks",
+      "Full-duplex extends physical twisted-pair copper cable transmission distance up to 10,000 meters without active signal repeaters",
+      "Full-duplex eliminates the requirement for Layer 3 IP addressing, subnet masking, and inter-VLAN routing across the enterprise",
       "Nodes can transmit and receive data simultaneously without collisions, effectively doubling bandwidth and eliminating CSMA/CD backoff delays",
-      "Full-duplex automatically encrypts all traffic with quantum cryptography"
+      "Full-duplex implements mandatory 256-bit asymmetric quantum key encapsulation across every physical Ethernet frame"
     ],
     correctOption: 2,
     explanation: "In full-duplex mode on dedicated switch ports, separate transmit (Tx) and receive (Rx) wire pairs/channels are used simultaneously, eliminating collisions and disabling CSMA/CD collision detection mechanisms.",
     explanationsJson: {
-      0: "Copper Ethernet maximum distance remains 100 meters due to physical signal attenuation.",
-      1: "IP addressing is a Layer 3 requirement unaffected by Layer 2 full-duplex operation.",
-      3: "Full-duplex is a Layer 2 transmission mode, not quantum encryption.",
+      0: "Ethernet copper distance remains constrained by physical attenuation to 100 meters regardless of duplex mode.",
+      1: "Duplex mode is a Layer 1/2 physical signaling capability; Layer 3 IP addressing and routing are still mandatory.",
+      3: "Duplex mode does not encrypt data; frame confidentiality requires Layer 2 MACsec or Layer 3 IPsec.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -1494,16 +1494,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What is the correct sequence of steps in the systematic \"Bottom-Up\" troubleshooting methodology based on the OSI Model?",
     options: [
       "Verify Physical Layer (cables/link lights) → Data Link (link status/MAC) → Network (IP/ping gateway) → Transport (ports/firewall) → Application",
-      "Reinstall Application software → Replace CPU → Replace Wall Jacks → Ping 127.0.0.1",
-      "Reboot all routers on the Internet → Change IP address → Inspect physical cable",
-      "Verify Application layer first → Check Physical layer last"
+      "Inspect Application software logs → Configure dynamic routing protocols → Verify Layer 4 socket ports → Test physical Ethernet patch cables",
+      "Reboot all core switches and edge routers simultaneously → Re-image workstation operating system → Test physical cable continuity with a TDR",
+      "Flush local DNS resolver caches → Assign a new random MAC address to the network interface card → Verify Layer 1 fiber transceivers"
     ],
     correctOption: 0,
     explanation: "Bottom-up troubleshooting starts at Layer 1 (checking cables, LEDs, link pulse), progresses to Layer 2 (MAC tables/VLANs), Layer 3 (IP/ping), Layer 4 (ports), and finally Layers 5-7 (applications).",
     explanationsJson: {
-      1: "Replacing hardware before diagnosing the physical and network stack is inefficient and disruptive.",
-      2: "Rebooting global routers is impossible and illogical for a local connectivity issue.",
-      3: "Checking application first is the \"Top-Down\" methodology, not \"Bottom-Up\".",
+      1: "Top-down starts at the application layer; bottom-up begins strictly at Layer 1 physical infrastructure.",
+      2: "Rebooting infrastructure without diagnostic isolation disrupts production and does not follow systematic layered methodology.",
+      3: "Changing MAC addresses and flushing DNS out of sequence bypasses foundational Layer 1 and Layer 2 verification.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1516,17 +1516,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-basic-network-troubleshooting-workflow",
     text: "When troubleshooting host IP stack functionality, what is the significance of issuing the command `ping 127.0.0.1` (or `ping ::1`)?",
     options: [
-      "It tests physical fiber optic transmission to the Internet Service Provider central office",
+      "It transmits an ICMP Echo Request frame across the local broadcast domain to verify access switch CAM table learning",
       "It tests the internal TCP/IP protocol software stack implementation on the local operating system without transmitting data over the physical network",
-      "It forces the Default Gateway router to reboot and reload its configuration",
-      "It measures the wireless signal strength between the laptop and the closest cell tower"
+      "It establishes an encrypted test session with upstream root DNS servers to validate recursive name resolution latency",
+      "It commands the network interface controller to perform optical time-domain reflectometry to detect physical fiber cable breaks"
     ],
     correctOption: 1,
     explanation: "`127.0.0.1` is the IPv4 loopback address. Pinging it verifies that the local operating system network driver, TCP/IP stack, and kernel sockets are functioning correctly without sending signals onto the physical wire.",
     explanationsJson: {
-      0: "Loopback packets never leave host memory buffers; they do not travel to the ISP.",
-      2: "Pinging loopback does not affect or reboot external gateway routers.",
-      3: "Loopback testing is internal software validation, unrelated to cellular wireless signal.",
+      0: "Loopback pings (127.0.0.1) are handled entirely within kernel memory and never generate physical frames on the switch.",
+      2: "Loopback tests the local software stack; it does not reach external DNS root nameservers.",
+      3: "OTDR cable testing requires dedicated physical hardware testers, not software ping commands to 127.0.0.1.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -1539,17 +1539,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-basic-network-troubleshooting-workflow",
     text: "An engineer executes `traceroute 93.184.216.34` (or `tracert`) from a corporate workstation. How does traceroute discover the IP addresses of intermediate router hops along the path?",
     options: [
-      "By commanding all routers on Earth to broadcast their serial numbers across UDP port 80",
-      "By reading a hidden text file stored on the root DNS server containing all global router IPs",
+      "By establishing simultaneous TCP three-way handshakes with every router interface along the autonomous system transit path",
+      "By injecting high-priority OSPF Link-State Advertisements that command intermediate routers to report their management IP addresses",
       "By sending packets with incrementally increasing Time-to-Live (TTL) values starting at 1, capturing the ICMP \"Time-to-Live Exceeded in Transit\" error messages returned by each router hop",
-      "By opening an SSH terminal session automatically to every router on the path"
+      "By querying the central BGP Looking Glass database via REST APIs to download the complete autonomous system path telemetry"
     ],
     correctOption: 2,
     explanation: "Traceroute sends packets with TTL=1 (causing Hop 1 to return ICMP Type 11 TTL Exceeded), then TTL=2 (Hop 2 returns ICMP Type 11), TTL=3, etc., mapping each sequential Layer 3 router interface until reaching the destination.",
     explanationsJson: {
-      0: "Routers do not broadcast serial numbers over web ports for traceroute.",
-      1: "There is no global central text file of router paths; routes are determined dynamically hop-by-hop.",
-      3: "Traceroute relies on ICMP TTL expiry messages, not automated SSH sessions.",
+      0: "Traceroute does not establish full TCP handshakes with intermediate routers; it sends UDP, ICMP, or TCP probes with low TTL.",
+      1: "Traceroute is a host-level diagnostic tool that has no interaction with internal OSPF link-state databases.",
+      3: "BGP Looking Glass servers provide AS path tables, but traceroute actively probes physical hop-by-hop router interfaces using TTL.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1562,17 +1562,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "level-0-basic-network-troubleshooting-workflow",
     text: "A user cannot connect to an internal server at `10.0.5.20`. The technician performs the following diagnostic tests in order:\n1. `ping 127.0.0.1` -> SUCCESS\n2. `ping 192.168.1.1` (Default Gateway) -> SUCCESS\n3. `ping 10.0.5.1` (Remote Subnet Gateway) -> SUCCESS\n4. `ping 10.0.5.20` (Target Server) -> \"Request Timed Out\"\nWhat is the most likely location of the fault?",
     options: [
-      "The entire core WAN routing infrastructure between subnets is down",
-      "The local workstation physical network card is completely defective",
-      "The local default gateway router `192.168.1.1` has failed completely",
+      "The core routing infrastructure has failed because packet forwarding across internal router hops is completely inoperative",
+      "The client workstation local network card has suffered a catastrophic physical hardware failure and cannot transmit packets",
+      "The local default gateway router interface has been administratively shut down and dropped all connected LAN subnets",
       "The fault is isolated to the target server `10.0.5.20` itself (host powered off, local host firewall dropping ICMP, or server IP misconfigured) or the access switch port connecting it"
     ],
     correctOption: 3,
     explanation: "Because the technician successfully pinged loopback, local gateway, and the remote subnet gateway, all local and intermediate WAN routing hops are 100% operational. The failure only occurs on the last hop to 10.0.5.20, isolating the fault to that specific endpoint or its local switch port.",
     explanationsJson: {
-      0: "The remote subnet gateway 10.0.5.1 responded successfully, proving core WAN routing is working.",
-      1: "If the local NIC were defective, tests 1, 2, and 3 would have failed.",
-      2: "The local gateway responded with 100% success in test 2.",
+      0: "Because the traceroute successfully traversed hops 1 through 4, all core routers and transit links are functioning properly.",
+      1: "The client NIC is fully operational as evidenced by successful communication across the first four hops.",
+      2: "The local default gateway is hop 1, which responded successfully.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -1586,16 +1586,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What is the operational distinction between Throughput and Goodput in network performance analysis?",
     options: [
       "Throughput is the actual rate of total data transmitted (including protocol headers and retransmissions), whereas Goodput is the net rate of usable application payload delivered to the end user",
-      "Throughput applies only to wireless networks while Goodput applies only to optical fiber",
-      "Throughput is measured in Bytes while Goodput is measured in volts",
-      "There is no operational difference between Throughput and Goodput"
+      "Throughput measures the speed of light in optical fiber cables, whereas Goodput measures the propagation velocity of electrical voltages across copper twisted pair",
+      "Throughput reflects the theoretical maximum link rate defined by Ethernet hardware standards, whereas Goodput is the physical clock frequency of the switch ASIC",
+      "Throughput measures outbound data transmitted by the client, whereas Goodput measures incoming acknowledgment segments returned by the destination server"
     ],
     correctOption: 0,
     explanation: "Throughput measures all raw bits delivered across the physical link. Goodput measures only the net application payload delivered after stripping protocol headers and discarding retransmissions.",
     explanationsJson: {
-      1: "Both metrics apply universally to all network media.",
-      2: "Both are data rate metrics measured in bits per second.",
-      3: "They measure fundamentally different data rates.",
+      1: "Signal velocity in physical media is propagation speed ($s \\approx 2 \\times 10^8$ m/s), not data transfer rate.",
+      2: "Theoretical maximum link rate is Bandwidth or Capacity, not Throughput; switch ASIC clock rate is hardware processor frequency.",
+      3: "Both throughput and goodput apply to bidirectional data flows; goodput specifically excludes overhead headers and retransmitted bytes.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1678,16 +1678,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What is the primary cause of Packet Loss in a congested network router?",
     options: [
       "Router queue buffer overflow when incoming packet arrival rate exceeds outgoing link capacity",
-      "Operating system kernel updating firewall rules",
-      "Web browser downloading a large static image file",
-      "High speed of light in fiber optic cables"
+      "The physical Ethernet network interface card intentionally dropping half of all frames to maintain half-duplex timing",
+      "The operating system TCP stack deleting unfragmented packets that contain non-ASCII Unicode payload characters",
+      "Intermediate multilayer switches discarding frames whenever the destination IP address falls in an odd-numbered octet"
     ],
     correctOption: 0,
     explanation: "When network congestion occurs and router egress memory queues fill completely, newly arriving packets are dropped, resulting in packet loss.",
     explanationsJson: {
-      1: "Updating firewall rules does not cause buffer overflows.",
-      2: "Downloading files consumes bandwidth but only causes loss if buffers overflow.",
-      3: "Speed of light affects propagation delay, not packet loss.",
+      1: "Half-duplex uses CSMA/CD to avoid collisions; NICs do not intentionally drop frames to maintain timing.",
+      2: "TCP is payload-agnostic and transports arbitrary binary data; it does not drop packets based on character encoding.",
+      3: "Switches forward frames based on MAC addresses; IP octet parity has no bearing on packet forwarding decisions.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1770,16 +1770,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "Why is optical fiber cable immune to electromagnetic interference (EMI) caused by power lines or heavy machinery?",
     options: [
       "Fiber transmits signals using pulses of light through glass rather than electrical current over copper wire",
-      "Fiber cables are wrapped in thick lead shielding that absorbs all radio signals",
-      "Fiber cables operate at zero electrical resistance",
-      "Fiber switches automatically filter out electrical noise using software"
+      "Fiber cables are shielded with thick grounded lead conduits that absorb high-voltage electromagnetic radiation",
+      "Fiber optics operate exclusively at ultra-high cryogenic temperatures that eliminate electrical resistance",
+      "Fiber transceivers dynamically cancel electrical noise by transmitting inverse alternating current waveforms"
     ],
     correctOption: 0,
     explanation: "Because optical fiber carries data as light through non-conductive glass strands, electromagnetic fields from power lines and motors cannot interfere with the signal.",
     explanationsJson: {
-      1: "Fiber jackets are standard plastic; immunity comes from light transmission in glass.",
-      2: "Fiber does not carry electrical current.",
-      3: "Immunity is a physical property of light in glass, not software filtering.",
+      1: "Lead conduits shield physical cables, but glass optical fiber is inherently immune to EMI because light does not interact with electrical fields.",
+      2: "Fiber optics operate across standard ambient industrial temperature ranges (-40°C to +85°C), not cryogenic temperatures.",
+      3: "Noise cancellation is used in advanced copper DSPs, not optical fiber links.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1792,17 +1792,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "network-devices-overview",
     text: "What is the primary benefit of a modular transceiver such as an SFP or SFP+ module in a network switch?",
     options: [
-      "It provides battery backup power to the switch during electrical outages",
+      "It converts incoming analog voice phone lines into uncompressed high-definition digital video streams",
       "It allows a switch port to be adapted to different cable types (copper or fiber) and transmission speeds",
-      "It converts AC wall power into DC power for the switch motherboard",
-      "It speeds up internet connection speeds by compressing web pages"
+      "It provides redundant battery backup power to the switch chassis in the event of an electrical utility outage",
+      "It performs automated deep packet inspection and cryptographic intrusion prevention on switch access ports"
     ],
     correctOption: 1,
     explanation: "An SFP/SFP+ modular transceiver slots into a switch port cage, giving the flexibility to connect copper cables, multimode fiber, or single-mode fiber as needed.",
     explanationsJson: {
-      0: "Battery backup is provided by a UPS unit.",
-      2: "Power conversion is performed by the power supply unit (PSU).",
-      3: "Transceivers handle physical media conversion, not web compression.",
+      0: "Voice-to-video conversion is handled by media gateways, not modular SFP transceivers.",
+      2: "Chassis battery backup is provided by Uninterruptible Power Supplies (UPS), not SFP transceivers.",
+      3: "Deep packet inspection is executed by security firewalls and IPS appliances, not optical PHY transceivers.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1815,17 +1815,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "network-devices-overview",
     text: "What is the main advantage of Power over Ethernet (PoE) when connecting devices like Wi-Fi access points and IP cameras?",
     options: [
-      "It automatically converts copper signals into optical fiber light",
-      "It doubles the maximum cable distance of copper cables to 200 meters",
+      "It increases physical Ethernet copper cable transmission distance from 100 meters up to 1,000 meters",
+      "It encrypts all Layer 2 Ethernet frames with high-voltage physical hardware scrambling keys",
       "It delivers electrical power and network data over the same Ethernet cable, removing the need for separate electrical power outlets",
-      "It encrypts all network data sent through the cable"
+      "It automatically converts half-duplex access switch ports into full-duplex gigabit aggregation trunks"
     ],
     correctOption: 2,
     explanation: "Power over Ethernet (PoE) sends low-voltage DC power through the copper Ethernet cable alongside data, allowing devices to be installed in ceilings or outdoors without dedicated power outlets.",
     explanationsJson: {
-      0: "PoE delivers power over copper; it does not convert to fiber.",
-      1: "PoE does not change the 100-meter copper distance limit.",
-      3: "PoE provides electrical power, not data encryption.",
+      0: "PoE does not alter the IEEE 802.3 standard 100-meter physical channel reach limit for twisted-pair copper.",
+      1: "PoE delivers 48V DC power; it does not provide cryptographic encryption or security scrambling.",
+      3: "Duplex negotiation and trunking are software and MAC layer configurations, independent of electrical power delivery.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1838,17 +1838,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "network-devices-overview",
     text: "A desktop computer is located 15 meters from an office network switch in a normal room. Which physical medium is the most practical choice?",
     options: [
-      "Shielded coaxial cable with BNC connectors",
-      "Single-Mode optical fiber with long-haul transceivers",
-      "Undersea submarine optical cable",
+      "Single-mode long-haul fiber optic cabling (OS2) terminating with LC duplex connectors",
+      "Coaxial RG-6 cabling terminating with screw-on BNC connectors and passive terminal resistors",
+      "Armored undersea submarine fiber cabling with active optical amplifiers and copper power conductors",
       "Copper twisted-pair cabling (Cat5e or Cat6) with RJ-45 connectors"
     ],
     correctOption: 3,
     explanation: "For short indoor desktop connections under 100 meters, copper twisted-pair (Cat5e or Cat6) with standard RJ-45 plugs is standard, inexpensive, and easy to install.",
     explanationsJson: {
-      0: "Coaxial BNC cabling is legacy and not used for modern desktop Ethernet.",
-      1: "Single-mode fiber is unnecessary and expensive for a 15-meter office desk connection.",
-      2: "Submarine cables are for trans-oceanic backbones.",
+      0: "Single-mode fiber is used for multi-kilometer campus backbones and WAN links, not standard desktop drops under 50 meters.",
+      1: "Coaxial cabling is legacy 10BASE2/10BASE5 infrastructure and is not deployed for modern enterprise access workstations.",
+      2: "Submarine cabling connects continents across ocean floors, not workstations within a commercial office suite.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -1884,17 +1884,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "network-topologies-overview",
     text: "What is the primary difference between a Physical Topology and a Logical Topology?",
     options: [
-      "Physical topology is configured in software, while logical topology is constructed from concrete and steel",
+      "Physical topology defines the Layer 3 IP addressing scheme, while logical topology defines Layer 2 MAC tables",
       "Physical topology describes the actual physical layout and cabling of devices, while logical topology describes the path data takes through the network",
-      "Physical topology only applies to wireless networks, while logical topology only applies to fiber optics",
-      "There is no difference; the two terms are exact synonyms"
+      "Physical topology dictates the software operating system, while logical topology dictates the chassis power supply wattage",
+      "Physical topology is used exclusively in home networks, while logical topology is used exclusively in enterprise data centers"
     ],
     correctOption: 1,
     explanation: "Physical topology refers to the tangible arrangement of cables, patch panels, and switch racks. Logical topology defines how frames/packets actually flow across the medium (e.g. physical star with logical bus in a hub).",
     explanationsJson: {
-      0: "Physical topology is the physical cabling; logical topology is the software/protocol path.",
-      2: "Physical topologies apply to all physical cabling and RF media.",
-      3: "They are fundamentally distinct concepts; a network can have a physical star layout with a logical bus or ring path.",
+      0: "IP addressing and MAC tables are addressing constructs, whereas topology describes physical connections vs signal propagation paths.",
+      2: "Operating systems and power supplies are device attributes, not network topology definitions.",
+      3: "Both physical and logical topologies apply to every network, from simple SOHO setups to massive enterprise data centers.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -1907,17 +1907,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "network-topologies-overview",
     text: "A company with 8 regional offices wants to interconnect all locations over WAN circuits. Full mesh is rejected due to cost. The architect proposes connecting each branch office to the central corporate headquarters only. What topology is this?",
     options: [
-      "Linear Bus Topology",
-      "Dual Ring Token Ring Topology",
-      "Hub-and-Spoke (Partial Mesh / Star WAN) Topology",
-      "Ad-hoc Peer-to-Peer Mesh"
+      "Full Mesh Topology where every branch router maintains dedicated physical circuits to every other branch",
+      "Circular Ring Topology where packets circulate sequentially through every intermediate branch office",
+      "Hub-and-Spoke (Partial Mesh / Star WAN) Topology where remote branches connect to HQ but not directly to each other",
+      "Linear Bus Topology where all branch offices attach to a single continuous transatlantic coaxial cable"
     ],
     correctOption: 2,
     explanation: "A Hub-and-Spoke (star) WAN topology connects all remote spoke offices directly to a central hub site (HQ), minimizing circuit costs to $N-1$ links while centralizing traffic control and internet breakout.",
     explanationsJson: {
-      0: "Linear bus is a shared single-cable topology unsuitable for regional WANs.",
-      1: "Dual Ring requires two continuous counter-rotating fiber loops connecting all sites sequentially.",
-      3: "Ad-hoc peer-to-peer lacks a centralized headquarters hub.",
+      0: "Full mesh requires $N(N-1)/2$ connections (300 circuits for 25 sites), making it far more expensive than hub-and-spoke.",
+      1: "Ring topologies create high latency across multiple hops and risk complete network partition on link cuts without dual rings.",
+      3: "Linear bus is obsolete for LANs and physically impossible across widespread geographic branch office WAN locations.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -1930,17 +1930,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "network-topologies-overview",
     text: "In a legacy physical Star network centered around a single unmanaged Ethernet hub, one workstation transmits a broadcast frame. Which nodes receive the frame?",
     options: [
-      "No devices receive the frame because hubs block broadcast traffic",
-      "Only the central hub receives the frame and stores it in flash memory",
-      "Only the single workstation with the lowest IP address receives the frame",
+      "Only the destination workstation receives the frame because the hub inspects the Layer 2 Destination MAC address",
+      "The frame is stored in hub internal memory and forwarded point-to-point as soon as the destination port becomes idle",
+      "The frame is dropped immediately because star topologies prohibit unicast transmission without a central token",
       "All other workstations connected to the hub receive the frame because the hub operates as a logical bus repeating signals to all ports"
     ],
     correctOption: 3,
     explanation: "A hub creates a physical star topology with a logical bus topology: any electrical signal received on one port is repeated out all other ports, delivering the broadcast to every connected workstation.",
     explanationsJson: {
-      0: "Hubs cannot filter or block broadcasts; they repeat all signals indiscriminately.",
-      1: "Hubs have no flash memory to store frames; they are Layer 1 physical signal repeaters.",
-      2: "Broadcasts are not filtered by IP address ranking in Layer 1 hubs.",
+      0: "Hubs are Layer 1 repeaters; they lack MAC address tables and cannot perform destination-based frame filtering.",
+      1: "Hubs do not buffer or queue frames; they electrically regenerate bits immediately out of all other ports.",
+      2: "Token Ring topologies require tokens; Ethernet star topologies with hubs repeat all signals as a shared bus.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -1954,16 +1954,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "Why was the 7-Layer OSI Reference Model created, and how does it help network engineers?",
     options: [
       "It provides a standard vendor-neutral framework dividing network communication into 7 distinct layers for learning and troubleshooting",
-      "It is a physical piece of hardware installed in all network switches and routers",
-      "It forces every computer in the world to run the exact same operating system",
-      "It replaces the need for physical network cables and wireless antennas"
+      "It mandates a single proprietary hardware operating system that must be installed on all commercial network devices worldwide",
+      "It replaces modern Internet protocol suites (IPv4/IPv6/TCP) with legacy connectionless network protocol packets across routers",
+      "It restricts network communication exclusively to physical copper cabling by preventing wireless signal transmission"
     ],
     correctOption: 0,
     explanation: "The OSI model standardizes network communication into 7 functional layers, allowing different vendors to create compatible products and giving engineers a structured model for learning and troubleshooting.",
     explanationsJson: {
-      1: "OSI is a conceptual reference model, not a physical hardware device.",
-      2: "OSI allows heterogeneous systems running different OSs to interoperate.",
-      3: "Physical media (Layer 1) are still essential for transmission.",
+      1: "The OSI model is an open conceptual framework, not a proprietary commercial operating system.",
+      2: "The OSI model does not replace IP or TCP; the TCP/IP protocol suite remains the operational protocol of the global Internet.",
+      3: "The OSI model applies to all physical media types including copper, optical fiber, wireless RF, and satellite links.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.RECALL,
@@ -2046,16 +2046,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What occurs during data encapsulation as an outgoing message travels down the OSI stack on a sending device?",
     options: [
       "Each layer adds its own specific protocol header information to the data as it moves downward toward Layer 1",
-      "The sending device strips all headers to make the packet as small as possible",
-      "The data is converted directly into a wireless radio wave at Layer 7",
-      "The computer deletes the payload and sends only blank test signals"
+      "Each layer compresses and strips away preceding protocol headers to reduce overall packet size across the wire",
+      "Each layer converts digital binary data into high-voltage alternating current before passing bits to adjacent layers",
+      "Each layer decrypts application payloads using public key certificates to verify sender authenticity at each hop"
     ],
     correctOption: 0,
     explanation: "During encapsulation, each layer on the sender adds its own header (and trailer at Layer 2) containing necessary control information as data travels downward from Layer 7 to Layer 1.",
     explanationsJson: {
-      1: "Stripping headers is decapsulation, which occurs on the receiving device.",
-      2: "Physical signaling occurs at Layer 1, not Layer 7.",
-      3: "Encapsulation preserves and transports the actual application data payload.",
+      1: "Stripping headers is Decapsulation, which occurs on the receiving node as data moves upward from Layer 1 to Layer 7.",
+      2: "Electrical signal conversion occurs exclusively at Layer 1 (Physical layer), not across upper software layers.",
+      3: "Payload decryption is handled at the destination application/presentation layer, not progressively at intermediate layers.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2091,17 +2091,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "tcp-ip-4-layers",
     text: "What is the primary difference between the 4-layer TCP/IP model and the 7-layer OSI model?",
     options: [
-      "TCP/IP replaces IP addresses with physical cable connectors",
-      "TCP/IP is purely theoretical and has never been implemented in real network hardware",
+      "TCP/IP is a theoretical academic framework that was never implemented in real-world commercial operating systems",
+      "TCP/IP is a proprietary protocol suite patented by Cisco Systems requiring commercial licensing for router deployment",
       "TCP/IP is a practical operational model implemented in operating systems, while OSI is a conceptual reference framework",
-      "OSI is a 4-layer model and TCP/IP is a 7-layer model"
+      "TCP/IP operates strictly at the physical layer to modulate radio frequency signals across wireless access points"
     ],
     correctOption: 2,
     explanation: "The TCP/IP model (RFC 1122) represents the practical implementation suite used across the global Internet, whereas the OSI model is a theoretical 7-layer reference framework.",
     explanationsJson: {
-      0: "TCP/IP uses IP addresses at the Internet layer.",
-      1: "TCP/IP is the actual operational suite of the Internet.",
-      3: "OSI has 7 layers and TCP/IP has 4 layers.",
+      0: "TCP/IP is the foundational architecture of the global Internet and is implemented in every major OS kernel.",
+      1: "TCP/IP was developed under DARPA and standardized via open IETF RFCs; it is non-proprietary and free to implement.",
+      3: "TCP/IP encompasses 4 functional layers spanning from physical network access up to user-space application software.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2206,17 +2206,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "tcp-ip-4-layers",
     text: "What is the correct order of data encapsulation terms as an outgoing web request travels down the TCP/IP stack?",
     options: [
-      "Transport Segment → Frame → Packet → Payload",
-      "Frame → Packet → Segment → Application Payload",
-      "Internet Packet → Frame → Segment → Bits",
+      "Network Access Frame → Internet Packet → Transport Segment → Application Data Payload",
+      "Internet Packet → Network Access Frame → Transport Segment → Application Data Payload",
+      "Transport Segment → Application Data Payload → Network Access Frame → Internet Packet",
       "Application Data Payload → Transport Segment → Internet Packet → Network Access Frame"
     ],
     correctOption: 3,
     explanation: "As data descends the stack, the Application Payload is wrapped in a Transport Segment (TCP header), an Internet Packet (IP header), and a Network Access Frame (Ethernet header/trailer).",
     explanationsJson: {
-      0: "Segment precedes Packet, which precedes Frame.",
-      1: "This is the decapsulation order (bottom-up).",
-      2: "Application payload comes first at the top of the stack.",
+      0: "This describes the bottom-up decapsulation sequence on the receiver, not top-down encapsulation on the sender.",
+      1: "This is an invalid mixed order; transport encapsulation precedes internetwork packet creation.",
+      2: "Application data is generated first; transport headers cannot encapsulate before application data exists.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2275,17 +2275,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ip-addressing-ipv4-overview",
     text: "An enterprise in 1991 required 300 IPv4 addresses for its campus. Under historical classful rules, why did this allocation cause 99.5% address waste?",
     options: [
-      "Because routers were unable to process more than 10 packets per second",
-      "Because Class A provided only 126 addresses",
+      "Because Class B networks were limited to a maximum of 128 physical workstations across an entire enterprise",
+      "Because allocating a Class A network required payment of multimillion-dollar licensing fees to the United Nations",
       "Because Class C (/24) provided only 254 hosts, forcing the organization to receive a full Class B (/16 = 65,534 hosts), leaving 65,234 addresses unused",
-      "Because the enterprise was required to discard all odd-numbered IP addresses"
+      "Because routers were technically incapable of forwarding packets to destinations with subnet masks shorter than /24"
     ],
     correctOption: 2,
     explanation: "With Class C capped at 254 usable hosts, any requirement between 255 and 65,534 hosts forced the allocation of a full Class B (/16), locking 65,000+ unused addresses away from the global pool.",
     explanationsJson: {
-      0: "Router forwarding speed is independent of classful allocation sizes.",
-      1: "Class A provides 16.7 million hosts.",
-      3: "All usable IP addresses in a subnet are valid.",
+      0: "Class B networks provided 65,534 host addresses (/16), not 128 hosts.",
+      1: "Address blocks were allocated through registries without UN fees; inefficiency was caused by rigid fixed mask boundaries.",
+      3: "Classful routers supported fixed default masks (/8, /16, /24); the inefficiency was address waste, not forwarding inability.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -2298,17 +2298,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ip-addressing-ipv4-overview",
     text: "What is the architectural purpose of Class D and Class E IPv4 address blocks?",
     options: [
-      "Class D is for IPv6 translation; Class E is for DNS root servers",
-      "Class D is for public web servers; Class E is for private home routers",
-      "Class D is for fiber optic networks; Class E is for wireless networks",
+      "Class D is reserved for private internal LAN addressing; Class E is reserved for public Internet DNS root nameservers",
+      "Class D is used exclusively for military encrypted satellites; Class E is used for commercial point-of-sale terminals",
+      "Class D is reserved for automated router loopback testing; Class E is reserved for high-speed fiber aggregation backbones",
       "Class D (224.0.0.0 – 239.255.255.255) is reserved for Multicast; Class E (240.0.0.0 – 255.255.255.255) is reserved for Experimental use"
     ],
     correctOption: 3,
     explanation: "Class D (224.0.0.0/4) is designated for multicast group addressing. Class E (240.0.0.0/4) was set aside by the IETF for experimental and research use.",
     explanationsJson: {
-      0: "Class D and E are not protocol translation mechanisms.",
-      1: "Public web servers use unicast Class A/B/C addresses.",
-      2: "Physical media types are Layer 1/2 concerns.",
+      0: "Private LAN addressing is defined by RFC 1918 (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16), not Class D/E.",
+      1: "Class D multicast is standard IETF infrastructure (e.g. OSPF 224.0.0.5), not military satellite proprietary space.",
+      2: "Loopback testing uses 127.0.0.0/8; fiber backbones use routable public or private unicast IP addressing.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.RECALL,
@@ -2344,17 +2344,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ip-addressing-ipv4-overview",
     text: "A network technician encounters a legacy configuration using `192.168.1.0/28`. A colleague claims this is invalid because \"192.168.x.x is Class C and must use /24\". How should the technician explain the colleague's misconception?",
     options: [
-      "The colleague is correct; subnets other than /24 will damage the network interface card",
+      "Any IP address beginning with 10 MUST use a /8 subnet mask; using /24 is an illegal violation of RFC standards",
       "Under modern Classless Inter-Domain Routing (CIDR), fixed classes are obsolete; any IP address can use any valid subnet prefix length",
-      "A /28 mask only works on token ring networks",
-      "The IP address must be converted to hexadecimal before applying a /28 mask"
+      "Subnet masks longer than /24 can only be applied to loopback interfaces and are rejected on physical switch interfaces",
+      "CIDR notation is valid only for IPv6 addresses; IPv4 networks remain strictly constrained to Class A, B, and C rules"
     ],
     correctOption: 1,
     explanation: "CIDR decoupled IP addresses from fixed classful byte boundaries. Any IPv4 address can be subnetted using any prefix length from /1 to /32.",
     explanationsJson: {
-      0: "Subnet masks are mathematical bit filters and do not damage hardware.",
-      2: "CIDR works uniformly across all modern Ethernet and IP media.",
-      3: "Binary bitmasking is performed automatically by the OS kernel.",
+      0: "RFC 1519 (CIDR) and RFC 1918 permit sub-dividing 10.0.0.0/8 into /24, /27, or any valid prefix length via VLSM.",
+      2: "Subnet masks from /8 to /30 are routinely configured on physical router and switch interfaces throughout enterprise networks.",
+      3: "CIDR was introduced in 1993 specifically for IPv4 to prevent routing table explosion and address exhaustion.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -2367,17 +2367,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "subnetting-cidr-overview",
     text: "When designing a Variable Length Subnet Masking (VLSM) address plan for multiple departments of different sizes, what is the fundamental \"Golden Rule\" of allocation order?",
     options: [
-      "Always assign odd-numbered subnets to sales and even-numbered subnets to engineering",
-      "Always allocate the smallest /30 WAN links first to lock in the beginning of the address space",
+      "Allocate point-to-point /30 WAN links first, then allocate large user subnets into the remaining high-order address space",
+      "Allocate subnets in completely random order to prevent neighboring subnets from experiencing cross-talk interference",
       "Always sort requirements and allocate subnets starting with the LARGEST host requirement first, proceeding in descending order down to the smallest",
-      "Always use the exact same /24 subnet mask for all departments regardless of host count"
+      "Assign equal /24 subnet blocks to all locations regardless of whether they have 2 hosts or 500 hosts to simplify routing"
     ],
     correctOption: 2,
     explanation: "The fundamental rule of VLSM is to allocate from Largest to Smallest. Subnets can only start on boundaries that are multiples of their block size. Allocating small subnets first fragments the address space and makes it impossible to align larger blocks.",
     explanationsJson: {
-      0: "Department function does not dictate mathematical parity.",
-      1: "Allocating small subnets first causes address fragmentation and overlap errors.",
-      3: "Using the same mask for all departments is FLSM, not VLSM.",
+      0: "Allocating small subnets first fragments the address space, making it impossible to find contiguous power-of-two blocks for large subnets.",
+      1: "Logical IP addressing does not cause physical cable cross-talk; structured contiguous allocation is essential for summarization.",
+      3: "Fixed-size /24 allocation wastes massive address space on small sites, defeating the core objective of VLSM.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2459,17 +2459,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "subnetting-cidr-overview",
     text: "Why does attempting to allocate a `/26` subnet starting at IP address `192.168.1.32` result in a configuration error on an enterprise router?",
     options: [
-      "Because routers only support even-numbered host bits",
-      "Because .32 is a reserved loopback address",
+      "Because routers reject any subnet configuration where the network address ends in an even number in the fourth octet",
+      "Because a /26 has a block size of 32 and can only begin on odd multiples of 32 across consecutive octet boundaries",
       "Because a /26 has a block size of 64 and can only legally begin on boundaries that are exact multiples of 64",
-      "Because /26 masks can only be applied to fiber optic switchports"
+      "Because the fourth octet must always match the VLAN identification number assigned on the upstream access switch"
     ],
     correctOption: 2,
     explanation: "Subnet Network IDs must align on mathematical multiples of the block size. A `/26` has block size 64, meaning valid Network IDs are exclusively `.0`, `.64`, `.128`, and `.192`. Starting at `.32` violates boundary alignment.",
     explanationsJson: {
-      0: "Routers support all host bit counts from 0 to 32.",
-      1: "127.0.0.0/8 is loopback, not 192.168.1.32.",
-      3: "Subnet masks apply to all network interface types.",
+      0: "Multiples of 64 (0, 64, 128, 192) are all even numbers; network boundaries are determined by binary host bit masking.",
+      1: "A /26 has 6 host bits ($2^6 = 64$), giving a block size of 64, not 32 (which is /27).",
+      3: "VLAN IDs (1-4094) are Layer 2 tags and have no mathematical correlation to Layer 3 IP subnet boundary alignment.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2482,17 +2482,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "subnetting-cidr-overview",
     text: "A network administrator attempts to assign `192.168.1.64/26` to Router Interface GigabitEthernet0/1 while `192.168.1.32/27` is already assigned to GigabitEthernet0/0. The router rejects the command. What is the root cause?",
     options: [
-      "The router memory is completely full",
-      "The router interface speed is set to 10 Mbps",
-      "The subnet mask length exceeds 32 bits",
+      "The router operating system memory is completely full and cannot allocate internal data structures for new routing entries",
+      "The physical router interface link speed has been throttled to 10 Mbps due to excessive electrical line noise on copper cables",
+      "The subnet mask length configured on the router exceeds the maximum 32-bit architectural limit defined in RFC 791",
       "Overlapping Subnet Error: The range of the /26 (.0 to .63 is taken, so .64 to .127) overlaps with the /27 (.32 to .63), causing routing ambiguity"
     ],
     correctOption: 3,
     explanation: "Because the subnets overlap, the router cannot determine which interface to forward traffic to for overlapping addresses, triggering an overlapping subnet rejection error.",
     explanationsJson: {
-      0: "This is a logical routing topology error, not an out-of-memory condition.",
-      1: "Interface link speed does not trigger IP subnet overlap errors.",
-      2: "Both /26 and /27 are standard sub-32-bit masks.",
+      0: "The error message 'overlaps with' indicates an addressing conflict, not a hardware RAM exhaustion failure.",
+      1: "Interface physical link speed has no bearing on Layer 3 IP address assignment syntax or subnet overlap validation.",
+      2: "Both /26 and /27 are standard, valid IPv4 prefix lengths well within the 32-bit limit.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -2506,16 +2506,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What are the two official abbreviation rules used to compress long IPv6 addresses according to RFC 5952?",
     options: [
       "1. Omit leading zeros in any 16-bit hextet; 2. Replace a single contiguous sequence of all-zero hextets with a double colon (::) exactly once in an address",
-      "1. Delete all odd-numbered hextets; 2. Replace the first 64 bits with the letter X",
-      "1. Convert hexadecimal characters A-F to numbers 1-6; 2. Remove all colons",
-      "1. Convert IPv6 into IPv4 dotted-decimal format; 2. Append .0 at the end"
+      "1. Replace all zero digits with the letter Z; 2. Truncate the address to 32 bits by discarding the rightmost 96 interface identifier bits",
+      "1. Remove all colons separating hextets; 2. Encrypt the remaining hexadecimal characters using a symmetric 128-bit AES hash",
+      "1. Convert hexadecimal characters into decimal notation; 2. Append a /64 subnet mask to the beginning of the network prefix"
     ],
     correctOption: 0,
     explanation: "RFC 5952 rules: 1. Leading zeros in any 4-digit hextet must be suppressed (e.g. `:0042:` -> `:42:`). 2. A single contiguous string of one or more all-zero hextets can be replaced by `::` (allowed only once to avoid ambiguity).",
     explanationsJson: {
-      1: "Deleting hextets corrupts the 128-bit address structure.",
-      2: "Hex characters A-F are valid Base-16 numerals (10-15) and cannot be replaced with 1-6.",
-      3: "IPv6 is a 128-bit protocol and cannot be compressed into 32-bit IPv4 notation.",
+      1: "RFC 5952 prohibits arbitrary letter substitutions; IPv6 addresses are strictly 128 bits and cannot be truncated to 32 bits.",
+      2: "Removing colons creates an unparseable 32-character string; compression preserves standard hextet boundaries.",
+      3: "IPv6 is written in hexadecimal; converting to decimal would produce confusing, non-standard address strings.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2551,17 +2551,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ipv6-foundations-overview",
     text: "What is the prefix and scope of an IPv6 Link-Local address automatically configured on every enabled interface?",
     options: [
-      "`ff00::/8`; reserved for IPv6 broadcast traffic",
-      "`2000::/3`; globally routable across the public Internet",
+      "2000::/3 (2000 to 3FFF); globally unique and routable across the public Internet backbone",
+      "fc00::/7 (FC00 to FDFF); used exclusively for private enterprise intranets and routed across site-to-site VPNs",
       "`fe80::/10` (FE80 to FEBF); valid and routable only on the local physical link/broadcast domain",
-      "`::1/128`; reserved for external DNS root resolution"
+      "ff00::/8 (FF00 to FFFF); delivered to all nodes subscribed to a specific multicast distribution group"
     ],
     correctOption: 2,
     explanation: "IPv6 Link-Local addresses start with `fe80::/10` (typically `fe80::/64`). They are non-routable beyond the local link and are used for neighbor discovery (NDP), router advertisements, and local communication.",
     explanationsJson: {
-      0: "ff00::/8 is the IPv6 Multicast range (IPv6 eliminated broadcast entirely).",
-      1: "2000::/3 is the Global Unicast Address (GUA) range routable across the Internet.",
-      3: "::1/128 is the IPv6 Loopback address (equivalent to 127.0.0.1).",
+      0: "2000::/3 represents Global Unicast Addresses (GUA), not link-local addresses.",
+      1: "fc00::/7 represents Unique Local Addresses (ULA), the IPv6 equivalent of RFC 1918 private space.",
+      3: "ff00::/8 defines Multicast addresses, replacing legacy IPv4 broadcast mechanisms.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.RECALL,
@@ -2574,17 +2574,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ipv6-foundations-overview",
     text: "How does IPv6 eliminate the need for Layer 2 Broadcast frames and the legacy ARP broadcast protocol?",
     options: [
-      "IPv6 devices physically connect their cables directly to every other computer in the building",
-      "IPv6 forces all switches to flood all frames out all ports permanently",
-      "IPv6 embeds the full MAC address inside the domain name DNS record",
+      "IPv6 utilizes high-speed physical Token Ring circulation frames to discover neighbor MAC addresses without broadcasting",
+      "IPv6 broadcasts an all-nodes ARP Request frame out of every switch port, requiring every connected node to process the interrupt",
+      "IPv6 mandates that all hosts hardcode neighbor MAC addresses manually in static configuration files before sending packets",
       "IPv6 replaces broadcast with ICMPv6 Neighbor Discovery Protocol (NDP) utilizing targeted Solicited-Node Multicast addresses"
     ],
     correctOption: 3,
     explanation: "IPv6 completely eliminated broadcast. Address resolution is performed via ICMPv6 Neighbor Solicitation (NS) sent to the targeted Solicited-Node Multicast group, allowing NICs that are not the target to ignore the frame at the hardware level.",
     explanationsJson: {
-      0: "IPv6 operates on standard star-wired switched Ethernet and Wi-Fi networks.",
-      1: "Flooding all frames is broadcast behavior, which IPv6 explicitly eliminates.",
-      2: "DNS maps names to IPs; it does not replace local Layer 2 frame resolution.",
+      0: "IPv6 operates across standard Ethernet and Wi-Fi networks; it does not resurrect legacy Token Ring protocols.",
+      1: "IPv6 completely eliminates broadcast addressing; there are no broadcast frames or broadcast MAC addresses in IPv6.",
+      2: "NDP provides dynamic automated resolution via Neighbor Solicitations (NS) and Neighbor Advertisements (NA).",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2620,17 +2620,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ethernet-mac-addresses-overview",
     text: "What is the minimum valid Ethernet II frame size on the wire (excluding the 8-byte Preamble/SFD) and why was this minimum established?",
     options: [
-      "32 bytes; to match the 32-bit IPv4 address space",
+      "1518 bytes; to prevent jumbo frame buffer exhaustion on upstream enterprise core aggregation switches",
       "64 bytes; to guarantee that in shared CSMA/CD half-duplex networks, collisions would be detected before transmission finished",
-      "128 bytes; to fit encrypted TLS cryptographic keys",
-      "1500 bytes; to equal the Maximum Transmission Unit (MTU)"
+      "32 bytes; to ensure that CRC-32 Frame Check Sequence polynomial calculations complete within one CPU clock cycle",
+      "128 bytes; to accommodate dual IPv4 and IPv6 network layer protocol headers within a single physical frame"
     ],
     correctOption: 1,
     explanation: "The 64-byte minimum frame size ($6+6+2+46+4=64$) ensured slot time exceeded maximum round-trip propagation delay in CSMA/CD segments, enabling reliable collision detection.",
     explanationsJson: {
-      0: "Frame length is independent of IP address bit length.",
-      2: "TLS keys operate at Layer 6/7, not Layer 2 framing minimums.",
-      3: "1500 bytes is the maximum payload MTU, not the minimum frame floor.",
+      0: "1518 bytes is the standard MAXIMUM transmission unit for standard untagged Ethernet frames, not the minimum.",
+      2: "CRC-32 hardware registers calculate checksums continuously in streaming ASICs regardless of frame size.",
+      3: "Ethernet frames encapsulate either IPv4 or IPv6 via the EtherType field; dual headers are not combined into one frame.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2690,16 +2690,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "When IEEE 802.1Q VLAN encapsulation is active on an Ethernet trunk link, where is the 4-byte VLAN tag inserted and what is the new maximum standard frame size?",
     options: [
       "Inserted between Source MAC and EtherType; increases maximum standard frame size from 1518 to 1522 bytes",
-      "Appended to the end of the FCS trailer; maximum size remains 1500 bytes",
-      "Inserted at the beginning of the Preamble; increases size to 2000 bytes",
-      "Placed inside the IP header options field; size is unchanged"
+      "Appended to the end of the Frame Check Sequence; replaces physical preamble bits with a 16-bit cryptographic token",
+      "Prepended before the Destination MAC address; replaces standard Ethernet framing with proprietary Cisco ISL encapsulation",
+      "Inserted into the IP header options field; increments the Layer 3 Time-to-Live counter by 4 for every trunk traversed"
     ],
     correctOption: 0,
     explanation: "The 802.1Q tag (4 bytes: TPID 0x8100 + TCI with Priority, DEI, and 12-bit VLAN ID) is inserted between the Source MAC and original EtherType, raising the standard maximum frame size to 1522 bytes.",
     explanationsJson: {
-      1: "FCS must always be the final trailer of the frame.",
-      2: "Preamble is physical layer timing and cannot carry VLAN tags.",
-      3: "802.1Q is a Layer 2 Ethernet tag, not an IP Layer 3 header option.",
+      1: "The 802.1Q tag is inserted into the Ethernet header, not appended after the FCS trailer.",
+      2: "802.1Q is an open IEEE standard inserted internally after Source MAC; ISL is obsolete proprietary external encapsulation.",
+      3: "VLAN tags operate strictly at Layer 2 (Data Link); they do not modify Layer 3 IP headers or TTL counters.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2712,17 +2712,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "ethernet-mac-addresses-overview",
     text: "A network administrator notices thousands of \"Runt frame\" errors logged on switch interface GigabitEthernet0/1. What does this mean, and what is the most likely physical root cause?",
     options: [
-      "Frames received exceed maximum transmission unit limits due to misconfigured jumbo frame settings",
+      "Frames received exceeding 9000 bytes; typically caused by an misconfigured MTU setting on an iSCSI storage array",
       "Frames received are smaller than 64 bytes; typically caused by a faulty copper cable, bad connector, or duplex mismatch causing collisions",
-      "The switch supervisor engine has exhausted packet buffer memory on the ingress ASIC queue",
-      "The local DNS recursive resolver is unreachable over Layer 2 broadcast domains"
+      "Frames received with an invalid IPv4 checksum; typically caused by a malfunctioning DNS recursive caching resolver",
+      "Frames received on an access switch port that contain an unauthorized 802.1Q tag from an unmanaged desktop VoIP phone"
     ],
     correctOption: 1,
     explanation: "Runt frames are frames smaller than 64 bytes. In modern full-duplex switches, runts are almost always caused by physical cable damage, electrical noise truncating signals, or half/full duplex mismatch collision fragments.",
     explanationsJson: {
-      0: "Frames exceeding maximum size are Giant frames, not Runt frames.",
-      2: "Runt errors reflect frame size violations on the wire, not switch memory exhaustion.",
-      3: "DNS operates at Layer 7 and does not cause Layer 2 runt frames.",
+      0: "Frames exceeding standard MTU (> 1518 bytes) are Giant or Baby Giant frames, not Runt frames.",
+      2: "IP checksum errors are detected at Layer 3 by routers; Runts are Layer 2 frames smaller than the 64-byte minimum.",
+      3: "Tagged frames on untagged access ports are dropped as native VLAN or tag errors, not counted as Runts.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -2735,17 +2735,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "arp-protocol-overview",
     text: "What specific problem does the Address Resolution Protocol (ARP) solve on an IPv4 local Ethernet network?",
     options: [
-      "Encrypting web traffic between clients and online banking servers",
-      "Resolving domain names like google.com into IP addresses",
+      "Translating human-readable domain names (e.g. www.google.com) into globally routable public IPv4 addresses",
+      "Assigning dynamic IP addresses, subnet masks, and default gateways to client workstations upon network boot",
       "Resolving a known IPv4 address into its corresponding 48-bit physical MAC address on the local network link",
-      "Assigning default gateway IP addresses to mobile smartphones"
+      "Routing packets across multiple autonomous system boundaries using inter-domain path vector algorithms"
     ],
     correctOption: 2,
     explanation: "When a host knows the target IPv4 address on the local subnet but lacks the destination MAC address to build the Layer 2 Ethernet frame, ARP broadcasts an ARP Request to discover the target MAC address.",
     explanationsJson: {
-      0: "Encrypting web traffic is handled by TLS/SSL at Layer 6/7.",
-      1: "Resolving domain names into IP addresses is performed by DNS.",
-      3: "Assigning IP settings dynamically is handled by DHCP.",
+      0: "Translating domain names into IP addresses is the function of Domain Name System (DNS), not ARP.",
+      1: "Dynamic lease allocation is performed by Dynamic Host Configuration Protocol (DHCP), not ARP.",
+      3: "Inter-domain routing across autonomous systems is performed by Border Gateway Protocol (BGP), not ARP.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2782,16 +2782,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "When a host on subnet `192.168.1.0/24` needs to send an IP packet to remote public web server `93.184.216.34`, which device address does the host query in its ARP Request?",
     options: [
       "The IP address of its local Default Gateway (e.g. 192.168.1.1), because ARP broadcasts cannot cross a router boundary",
-      "The public IP address 93.184.216.34 across the global Internet",
-      "The MAC address of the root DNS server",
-      "The broadcast address 255.255.255.255"
+      "The destination public IP address directly (e.g. 8.8.8.8), broadcasting an ARP request across all Internet fiber links",
+      "The loopback IP address 127.0.0.1, commanding the local operating system kernel to generate a virtual next-hop MAC",
+      "The broadcast IP address 255.255.255.255, requesting the nearest authoritative DNS nameserver to reply with its MAC"
     ],
     correctOption: 0,
     explanation: "Because 93.184.216.34 is on a remote subnet, the host knows it must route traffic through its Default Gateway. Since ARP broadcasts are confined to the local Layer 2 broadcast domain, the host ARPs for the Gateway's MAC address.",
     explanationsJson: {
-      1: "ARP broadcasts cannot cross routers.",
-      2: "DNS servers do not handle Layer 2 framing.",
-      3: "Broadcast IP is not an ARP target.",
+      1: "ARP requests are Layer 2 broadcast frames; routers drop broadcasts, preventing ARP from leaving the local subnet.",
+      2: "Pinging an external IP requires sending traffic to the default gateway router, not the internal software loopback.",
+      3: "DNS servers operate at Layer 7 and resolve domain names, not Layer 2 Ethernet MAC address resolution.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -2804,17 +2804,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "arp-protocol-overview",
     text: "Why do operating systems maintain a temporary \"ARP Cache\" (ARP Table) in memory buffers?",
     options: [
-      "To permanently store credit card transactions on the network switch",
+      "To store encrypted copies of user web passwords to accelerate HTTPS connection establishment across proxy firewalls",
       "To avoid broadcasting an ARP Request for every individual IP packet sent to the same destination host, significantly reducing network broadcast overhead",
-      "To speed up CPU clock speed during video rendering",
-      "To prevent the computer from needing an IP address"
+      "To permanently record every MAC address that has ever connected to the local switch to prevent IP spoofing attacks",
+      "To calculate the shortest path tree across redundant Ethernet switch links using Spanning Tree Protocol algorithms"
     ],
     correctOption: 1,
     explanation: "The ARP cache stores recent IP-to-MAC bindings for a few minutes. Subsequent packets to the same destination immediately use the cached MAC address, avoiding constant broadcast flooding across the LAN.",
     explanationsJson: {
-      0: "ARP caches store network Layer 2/3 address bindings, not financial transactions.",
-      2: "ARP caching is a networking optimization, unrelated to CPU video rendering.",
-      3: "Devices still require valid IP addresses to communicate on an IP network.",
+      0: "ARP operates at Layer 2 and deals strictly with hardware addressing; it has no access to user passwords or application encryption.",
+      2: "ARP tables are dynamic and age out entries (typically after 2-4 hours on routers, 5 minutes on PCs) to reflect topology changes.",
+      3: "Shortest path tree calculations are executed by Spanning Tree Protocol (STP) using Bridge Protocol Data Units (BPDUs).",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2827,17 +2827,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "arp-protocol-overview",
     text: "What happens when Host C (192.168.1.30) receives an ARP Request broadcast asking \"Who has 192.168.1.50?\"",
     options: [
-      "Host C sends an ARP Error reply back to the sender",
-      "Host C forwards the ARP Request to the Default Gateway",
+      "Host C generates a Layer 2 error frame and sends an ARP Reject broadcast back to the initiating sender",
+      "Host C rewrites its own IP address to 192.168.1.50 and updates the local switch CAM table with its own port number",
       "Host C inspects the Target Protocol Address, sees 192.168.1.50 does not match its own IP, and silently discards the frame without replying",
-      "Host C crashes because it received broadcast traffic"
+      "Host C forward-floods the ARP Request out of its secondary network interface card to adjacent workstation subnets"
     ],
     correctOption: 2,
     explanation: "Non-target hosts on a broadcast segment process the incoming broadcast frame up to the ARP header, verify that the requested Target Protocol Address does not match their own IP, and discard the frame with zero reply.",
     explanationsJson: {
-      0: "ARP does not define an error reply message for non-matching hosts.",
-      1: "Hosts do not route or forward ARP broadcast frames.",
-      3: "Network stacks are designed to discard non-matching broadcasts routinely.",
+      0: "ARP has no reject or negative acknowledgment mechanism; non-target hosts simply drop the frame.",
+      1: "Workstations do not arbitrarily reconfigure their IP addresses upon receiving ARP traffic.",
+      3: "Standard workstations operate as end nodes and do not forward or bridge broadcast frames between interfaces.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2850,17 +2850,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "arp-protocol-overview",
     text: "An attacker transmits unsolicited ARP replies associating the Default Gateway IP address with the attacker's own MAC address. What attack is taking place, and what is the standard switch mitigation?",
     options: [
-      "Buffer Overflow attack; mitigated by compiling with Address Space Layout Randomization (ASLR)",
-      "DNS Amplification DDoS; mitigated by blocking UDP port 53",
-      "SYN Flood attack; mitigated by enabling TCP SYN Cookies",
+      "DDoS SYN Flood attack; mitigated on routers by enabling TCP SYN Cookies and adjusting half-open connection timeouts",
+      "VLAN Hopping double-tagging attack; mitigated on switches by changing the native VLAN to an unused VLAN ID",
+      "DNS Cache Poisoning attack; mitigated by deploying DNSSEC with cryptographic Resource Record Signatures (RRSIG)",
       "ARP Cache Poisoning / Spoofing (Man-in-the-Middle); mitigated on switches using Dynamic ARP Inspection (DAI) coupled with DHCP Snooping"
     ],
     correctOption: 3,
     explanation: "ARP Spoofing tricks hosts into sending outbound traffic to the attacker MAC. Managed switches mitigate this using Dynamic ARP Inspection (DAI), which validates ARP packets against the trusted DHCP Snooping binding database.",
     explanationsJson: {
-      0: "ASLR protects OS application memory against code injection, not network ARP poisoning.",
-      1: "DNS amplification attacks public DNS resolvers via UDP reflection, not local LAN ARP tables.",
-      2: "SYN floods target TCP transport buffers, not Layer 2 ARP caches.",
+      0: "SYN Floods attack Layer 4 TCP connection state buffers, not Layer 2 ARP IP-to-MAC hardware bindings.",
+      1: "VLAN hopping exploits 802.1Q trunk tag processing on switches, not spoofed ARP reply packets.",
+      2: "DNS poisoning targets nameserver domain caches, whereas ARP poisoning targets local subnet host IP-to-MAC tables.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -2874,16 +2874,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What is the correct chronological sequence of protocol events that must execute when an unconfigured computer boots up, connects to Ethernet, and sends its first HTTPS web request?",
     options: [
       "Physical Link Up -> DHCP Lease Acquisition -> Gratuitous ARP (DAD) -> Default Gateway ARP Resolution -> DNS Name Resolution -> Outbound TCP 3-Way Handshake & HTTPS GET",
-      "HTTPS GET -> DNS Resolution -> TCP Handshake -> DHCP Lease -> Physical Link Up",
-      "DNS Resolution -> Default Gateway ARP -> DHCP Lease -> Physical Link Up -> TCP Handshake",
-      "Default Gateway ARP -> DNS Resolution -> Physical Link Up -> DHCP Lease -> HTTPS GET"
+      "DNS Name Resolution -> Outbound TCP Handshake -> DHCP Lease Acquisition -> Physical Link Up -> Gratuitous ARP -> Default Gateway ARP Resolution",
+      "Gratuitous ARP -> Default Gateway ARP Resolution -> Physical Link Up -> DNS Name Resolution -> DHCP Lease Acquisition -> Outbound TCP Handshake",
+      "Outbound TCP Handshake -> Default Gateway ARP Resolution -> DNS Name Resolution -> Physical Link Up -> DHCP Lease Acquisition -> Gratuitous ARP"
     ],
     correctOption: 0,
     explanation: "A host must first establish Physical Link Up, acquire its IP/gateway/DNS configuration via DHCP, verify IP uniqueness via Gratuitous ARP, resolve the Gateway MAC via ARP, resolve the domain name via DNS, and finally initiate the TCP handshake and HTTPS GET request.",
     explanationsJson: {
-      1: "Reversed order.",
-      2: "DNS requires an IP address first.",
-      3: "Physical link must precede all packets.",
+      1: "A host cannot resolve DNS names or initiate TCP handshakes before the physical link is up and an IP address is leased.",
+      2: "ARP packets cannot be generated before physical link negotiation and IP address assignment take place.",
+      3: "TCP handshakes require a routable IP address and default gateway MAC, which are established during earlier boot stages.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2919,17 +2919,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "dhcp-dns-overview",
     text: "What is the primary function of transmitting a Gratuitous ARP (GARP) broadcast immediately following DHCP lease acquisition (Phase 3)?",
     options: [
-      "To encrypt the client's wireless credentials",
-      "To download the host's operating system updates from the gateway",
+      "To test whether intermediate WAN routers support BGP route redistribution before initiating outbound user sessions",
+      "To negotiate link speed and duplex settings with the connected switch port using physical layer autonegotiation pulses",
       "Duplicate Address Detection (DAD): To verify that no other active host on the local broadcast domain is already using the newly leased IP address",
-      "To synchronize the computer's real-time clock with NTP"
+      "To instruct upstream recursive DNS resolvers to clear all cached domain name entries associated with the workstation"
     ],
     correctOption: 2,
     explanation: "Gratuitous ARP broadcasts an ARP Request for the host's own new IP. If another host replies, an IP conflict is detected, allowing the client to reject the lease and request a new IP.",
     explanationsJson: {
-      0: "Wireless encryption is negotiated via 802.11 4-way handshakes.",
-      1: "OS updates use HTTPS/TCP, not GARP.",
-      3: "Clock synchronization is performed by NTP (UDP 123).",
+      0: "Workstations do not interact with BGP routing protocols; Gratuitous ARP is purely local to the broadcast domain.",
+      1: "Speed and duplex autonegotiation occurs at Layer 1 prior to Layer 2 and Layer 3 packet processing.",
+      3: "DNS resolvers cache domain-to-IP mappings; they do not monitor local broadcast domain Gratuitous ARP announcements.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -2942,17 +2942,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "dhcp-dns-overview",
     text: "A technician observes that a client computer can successfully ping external IP address `8.8.8.8`, but entering `https://www.example.com` into a web browser results in a timeout error. Which lifecycle phase has failed?",
     options: [
-      "Phase 4: Default Gateway ARP resolution failed",
-      "Phase 1: Physical Link is disconnected",
-      "Phase 2: DHCP server failed to allocate an IP address",
+      "Phase 1: Physical Layer link failure (the Ethernet network patch cable connecting the PC to the switch is disconnected)",
+      "Phase 2: DHCP Lease Acquisition failed (the workstation did not receive an IP address and assigned an APIPA 169.254.x.x address)",
+      "Phase 4: Default Gateway ARP Resolution failed (the router interface is down and the workstation cannot resolve the gateway MAC)",
       "Phase 5: DNS Name Resolution failed to translate `www.example.com` into an IP address"
     ],
     correctOption: 3,
     explanation: "Because pinging `8.8.8.8` succeeds, Physical Link (Phase 1), IP leasing (Phase 2), Gateway ARP (Phase 4), and Layer 3 routing are all fully operational. Failure to load domain names isolates the problem directly to DNS resolution (Phase 5).",
     explanationsJson: {
-      0: "If Gateway ARP had failed, packets could not leave the local LAN to reach 8.8.8.8.",
-      1: "If the physical link were disconnected, pinging 8.8.8.8 would fail.",
-      2: "If DHCP had failed, the host would have no IP to ping 8.8.8.8.",
+      0: "Because the host can successfully ping the external public IP 8.8.8.8, physical Layer 1 cabling is fully functional.",
+      1: "The host has a valid working IP address that successfully routes traffic out to the Internet.",
+      2: "Traffic reaches 8.8.8.8, confirming the default gateway MAC was resolved and the router forwarded the packet.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -2966,16 +2966,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "Why does an operating system execute an ARP request for the Default Gateway IP address before it can transmit a DNS query to recursive resolver `8.8.8.8`?",
     options: [
       "Because 8.8.8.8 is on a remote subnet, the host must encapsulate the IP packet in a Layer 2 Ethernet frame addressed to the local Default Gateway router's MAC address",
-      "Because DNS queries must be converted into broadcast frames",
-      "Because the DNS server MAC address is always identical to the client MAC address",
-      "Because the router disables DNS until ARP is executed"
+      "Because Ethernet switches discard any frame that contains a destination IP address starting with an even number like 8",
+      "Because the client workstation operating system must establish an encrypted TLS tunnel with the router before generating IP packets",
+      "Because ARP broadcasts are forwarded across all Internet routers until reaching the authoritative root nameserver"
     ],
     correctOption: 0,
     explanation: "When the destination IP (`8.8.8.8`) is outside the local subnet, the host knows it cannot reach it directly at Layer 2. It must forward the packet to its Default Gateway, requiring the Gateway's MAC address in the frame header.",
     explanationsJson: {
-      1: "DNS queries are unicast UDP packets, not broadcasts.",
-      2: "MAC addresses are unique physical hardware identifiers.",
-      3: "ARP is triggered naturally by the host TCP/IP stack whenever an IP route requires Layer 2 framing.",
+      1: "Switches forward frames based on destination MAC addresses and VLAN tags; they do not filter on IP address octet values.",
+      2: "Standard IP communication does not require an encrypted TLS tunnel between workstation and router.",
+      3: "Routers drop Layer 2 broadcasts; ARP broadcasts never leave the local LAN broadcast domain.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3011,17 +3011,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "tcp-udp-transport-overview",
     text: "What are the exact control flags and sequence of the TCP 3-Way Handshake used to establish a reliable connection?",
     options: [
-      "1. Client sends PSH → 2. Server sends URG → 3. Client sends RST",
-      "1. Client sends ACK → 2. Server sends SYN → 3. Client sends FIN",
+      "1. Client sends FIN → 2. Server responds with ACK → 3. Client sends RST",
+      "1. Client sends UDP Datagram → 2. Server responds with ICMP Echo Reply → 3. Connection is established",
       "1. Client sends SYN (Synchronize) → 2. Server responds with SYN-ACK (Synchronize-Acknowledgment) → 3. Client sends ACK",
-      "1. Client sends HELLO → 2. Server sends WELCOME → 3. Client sends READY"
+      "1. Client sends DHCP Discover → 2. Server responds with DHCP Offer → 3. Client sends DHCP Request"
     ],
     correctOption: 2,
     explanation: "TCP connection establishment uses the 3-way handshake: 1. Host A sends SYN with Initial Sequence Number (ISN); 2. Host B responds with SYN-ACK (acknowledging A's ISN and sending its own ISN); 3. Host A replies with ACK. The connection is now ESTABLISHED.",
     explanationsJson: {
-      0: "PSH and URG are data-handling flags, not connection establishment flags.",
-      1: "A connection cannot begin with ACK before sequence numbers are synchronized with SYN.",
-      3: "HELLO/WELCOME/READY are informal terms, not TCP header control flags.",
+      0: "FIN packets are used to terminate an existing connection, not establish a new three-way handshake.",
+      1: "UDP is connectionless and has no handshake; ICMP Echo is used by ping, not TCP connection establishment.",
+      3: "DHCP Discover/Offer/Request/Ack is a Layer 7 IP configuration exchange, not a Layer 4 TCP connection handshake.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.RECALL,
@@ -3034,17 +3034,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "tcp-udp-transport-overview",
     text: "How does TCP implement Flow Control to prevent a high-speed transmitting host from overwhelming a slower receiving host memory buffer?",
     options: [
-      "By converting all TCP packets into UDP datagrams",
-      "By dropping 50% of all packets at the default gateway router",
-      "By forcing the transmitting computer to shut down for 10 seconds after every 1 megabyte sent",
+      "By having the sender discard 50% of all outgoing packets whenever network latency exceeds 100 milliseconds",
+      "By forcing the sending host to pause transmission for 30 seconds after sending every individual packet",
+      "By dynamically rewriting the IP header Time-to-Live field to decrease the physical speed of packets in fiber cables",
       "Using a dynamic Sliding Window mechanism where the receiver advertises its available buffer capacity in the TCP \"Window Size\" header field"
     ],
     correctOption: 3,
     explanation: "TCP flow control uses the 16-bit Window Size field (and window scaling). The receiver continuously advertises how many bytes of data it can currently accept in its buffer. If the buffer fills, it sends Window Size = 0 (Zero Window), pausing sender transmission.",
     explanationsJson: {
-      0: "TCP and UDP are distinct protocols; TCP does not convert itself into UDP.",
-      1: "Dropping 50% of packets causes severe retransmission churn, not controlled flow regulation.",
-      2: "TCP regulates packet flow smoothly in millisecond sliding window intervals without OS shutdown.",
+      0: "TCP flow control is controlled by receiver buffer capacity, not arbitrary sender packet discarding.",
+      1: "Lockstep stop-and-wait produces abysmal throughput; sliding windows allow continuous streaming up to the window limit.",
+      2: "TTL tracks hop counts to prevent routing loops; it has no physical effect on transmission speed or buffer flow control.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3058,16 +3058,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "Why do real-time applications such as Voice over IP (VoIP), live video streaming, and online multiplayer gaming prefer UDP over TCP?",
     options: [
       "UDP has minimal header overhead (8 bytes vs 20+ bytes) and no retransmission delays, prioritizing low latency and timing over retransmitting lost stale packets",
-      "UDP provides 100% guaranteed delivery of every single audio byte",
-      "UDP automatically encrypts audio using military-grade encryption",
-      "UDP does not require IP addresses to traverse the Internet"
+      "UDP utilizes advanced quantum encryption algorithms that accelerate packet forwarding across intermediate core routers",
+      "UDP automatically increases physical bandwidth on copper twisted-pair cables by negotiating higher electrical frequencies",
+      "UDP eliminates the requirement for Layer 3 IP addressing, allowing packets to travel directly over physical fiber links"
     ],
     correctOption: 0,
     explanation: "UDP is connectionless and lightweight (8-byte header). In real-time audio/video, a retransmitted audio packet arriving 300ms late is useless and causes stuttering. Low latency and predictable jitter take precedence over perfect reliability.",
     explanationsJson: {
-      1: "UDP provides no delivery guarantees; TCP provides guaranteed delivery.",
-      2: "UDP provides no built-in encryption; security must be provided by application layers (e.g. SRTP/DTLS).",
-      3: "UDP datagrams are encapsulated inside standard Layer 3 IP packets requiring source and destination IP addresses.",
+      1: "UDP does not provide cryptographic encryption; it is a simple, lightweight connectionless transport protocol.",
+      2: "Physical media bandwidth is dictated by Layer 1 transceivers and cable categories, independent of Layer 4 transport protocols.",
+      3: "All UDP packets are encapsulated within Layer 3 IP packets; IP addressing is mandatory for inter-network routing.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3103,17 +3103,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "tcp-udp-transport-overview",
     text: "What are the correct sequence of messages exchanged during a standard graceful TCP 4-Way connection teardown?",
     options: [
-      "DISCONNECT -> OK -> GOODBYE -> DONE",
-      "RST -> RST-ACK -> FIN -> CLOSE",
+      "RST sent by client -> RST received by server -> connection closed immediately without acknowledgments",
+      "SYN sent by client -> SYN-ACK sent by server -> ACK sent by client -> connection terminated",
       "FIN -> ACK from remote -> FIN from remote -> final ACK from initiator",
-      "SYN -> FIN -> ACK -> RST"
+      "DHCP Release -> ARP Announcement -> ICMP Time Exceeded -> interface shutdown"
     ],
     correctOption: 2,
     explanation: "A graceful TCP teardown closes each unidirectional data stream separately: 1. Initiator sends FIN, 2. Remote sends ACK, 3. Remote sends its own FIN when finished transmitting data, 4. Initiator sends final ACK and enters TIME_WAIT.",
     explanationsJson: {
-      0: "Generic informal terms are not TCP control flags.",
-      1: "RST immediately aborts a connection abruptly rather than performing a graceful 4-way teardown.",
-      3: "SYN is used for connection establishment, not teardown.",
+      0: "TCP RST is an abnormal abortive reset, not the graceful 4-step teardown handshake.",
+      1: "SYN/SYN-ACK/ACK is the three-way connection establishment handshake, not termination.",
+      3: "DHCP and ICMP operate independently of Layer 4 TCP connection state teardown.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3126,17 +3126,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "tcp-udp-transport-overview",
     text: "A web server receives a massive flood of TCP SYN packets with forged source IP addresses, causing its half-open connection table to fill and reject legitimate users. What attack is this, and what is the primary server mitigation?",
     options: [
-      "BGP Hijacking; mitigated by upgrading RAM on client workstations",
-      "ARP Poisoning; mitigated by installing fiber optic cables",
-      "DNS Amplification; mitigated by changing browser cookies",
+      "Smurf ICMP amplification attack; mitigated by disabling IP directed broadcasts on perimeter router interfaces",
+      "DNS Amplification attack; mitigated by restricting recursive resolver access to authorized internal subnets",
+      "ARP Cache Poisoning attack; mitigated by enabling Dynamic ARP Inspection and DHCP Snooping on access switches",
       "TCP SYN Flood Denial of Service; mitigated by enabling SYN Cookies which encode connection state into the Initial Sequence Number without allocating memory until the handshake completes"
     ],
     correctOption: 3,
     explanation: "A SYN Flood exhausts the server's half-open TCP connection table (backlog queue). Enabling SYN Cookies defers server memory allocation by encoding state cryptographically into the server's Initial Sequence Number (ISN) in the SYN-ACK.",
     explanationsJson: {
-      0: "BGP hijacking affects inter-domain routing tables, not transport layer SYN state tables.",
-      1: "ARP operates at Layer 2 within a broadcast domain, not over TCP handshakes.",
-      2: "DNS amplification attacks UDP port 53, not TCP SYN buffers.",
+      0: "Smurf attacks flood targets with ICMP Echo replies via broadcast amplification, not half-open TCP SYN connections.",
+      1: "DNS amplification uses open UDP resolvers to reflect large DNS responses, distinct from TCP handshake table exhaustion.",
+      2: "ARP spoofing corrupts Layer 2 MAC tables, whereas SYN floods exhaust Layer 4 kernel connection state tables.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -3150,16 +3150,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What is the role of Administrative Distance (AD) in a router routing table selection process?",
     options: [
       "It measures the trustworthiness / believability of different routing sources (e.g. Directly Connected = 0, Static = 1, OSPF = 110, RIP = 120), selecting the lowest AD when routes to the exact same prefix exist",
-      "It measures the physical length of the fiber optic cable in miles",
-      "It calculates the number of Ethernet switch ports on the network",
-      "It defines the maximum number of users allowed to connect to a Wi-Fi router"
+      "It measures the physical length of the fiber optic cable connecting adjacent routers in meters, choosing the shortest physical cable path",
+      "It defines the maximum number of simultaneous TCP socket connections that a router can track in its stateful translation memory table",
+      "It specifies the 802.1Q priority tag value assigned to voice packets traversing inter-switch trunk links across the campus LAN"
     ],
     correctOption: 0,
     explanation: "Administrative Distance (AD) ranks the trustworthiness of routing sources (0 to 255). If a router learns the identical subnet via both OSPF (AD 110) and a Static Route (AD 1), it installs the Static Route into the routing table because lower AD is preferred.",
     explanationsJson: {
-      1: "AD is an administrative preference integer, not a physical distance measurement.",
-      2: "AD has no relation to switch port density.",
-      3: "AD does not regulate Wi-Fi user capacity.",
+      1: "Physical cable length is not measured by routing protocols; link metrics are based on bandwidth, delay, or hop counts.",
+      2: "Socket connection tracking capacity is a firewall/NAT state table metric, not Administrative Distance.",
+      3: "802.1Q priority (CoS) operates at Layer 2 for Quality of Service, unrelated to Layer 3 routing route believability.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3195,17 +3195,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "routing-fundamentals-overview",
     text: "What is a \"Floating Static Route\", and how is it configured in enterprise networks?",
     options: [
-      "A route that has no destination IP address configured",
-      "A route that moves dynamically between clouds using wireless satellite tracking",
+      "A primary static route configured with Administrative Distance 1 that load-balances traffic evenly across two unequal bandwidth links",
+      "A multicast routing table entry that dynamically circulates between multiple core routers using the Spanning Tree Protocol",
       "A backup static route configured with a higher Administrative Distance (e.g. AD 150) than the primary dynamic routing protocol (e.g. OSPF AD 110), remaining inactive until the primary route fails",
-      "A route that broadcasts all packets out every port on the router"
+      "A temporary routing policy that drops all transit traffic originating from unauthorized DHCP client subnets during maintenance windows"
     ],
     correctOption: 2,
     explanation: "A floating static route is an administrative backup route. By assigning it an AD higher than the primary route (e.g. `ip route 0.0.0.0 0.0.0.0 192.0.2.1 150`), it stays out of the routing table until the primary dynamic OSPF route goes down.",
     explanationsJson: {
-      0: "All valid routes require a destination network prefix.",
-      1: "\"Floating\" refers to floating above the routing table in standby, not satellite movement.",
-      3: "Floating static routes are unicast next-hop routes, not broadcast flooding.",
+      0: "Equal-cost multipath (ECMP) requires equal administrative distance and metric; a floating static route is strictly a backup.",
+      1: "Spanning Tree operates at Layer 2 to prevent switching loops; it does not circulate Layer 3 multicast routing tables.",
+      3: "A floating static route provides automated failover to an alternate path, not a traffic filtering or ACL policy.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -3218,17 +3218,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "routing-fundamentals-overview",
     text: "A router console displays: `ip route 10.10.0.0 255.255.0.0 192.168.1.254`. When testing, packets destined for `10.10.5.1` fail to forward and the route does NOT appear in `show ip route`. What is the most common reason?",
     options: [
-      "Subnet mask 255.255.0.0 cannot be used with Class A IP addresses",
-      "Static routes cannot be used for IP addresses starting with 10",
-      "The router requires a reboot after every static route command",
-      "The next-hop IP address `192.168.1.254` is not reachable via any active up/up interface on the router, preventing the route from being installed in the routing table"
+      "The router operating system automatically deletes the static route configuration string from NVRAM memory",
+      "The router floods an ICMP redirect broadcast frame out of all access ports across the local broadcast domain",
+      "The router downgrades physical link autonegotiation from full-duplex gigabit down to half-duplex 10 Mbps",
+      "The static route remains installed in the running configuration, but is omitted from the active forwarding table (RIB) until the next-hop becomes reachable"
     ],
     correctOption: 3,
     explanation: "A static route is only installed into the active routing table if the next-hop IP address is resolvable and reachable via an interface that is in an \"up/up\" operational state. If the next-hop is unreachable, the router ignores the route.",
     explanationsJson: {
-      0: "Classless routing (CIDR) allows any valid subnet mask with any IP address.",
-      1: "Static routes support any valid IPv4 prefix, including 10.0.0.0/8 private space.",
-      2: "Static route changes take effect immediately in running memory without rebooting.",
+      0: "Static routes persist in the configuration; Cisco IOS does not delete configuration statements when links go down.",
+      1: "ICMP redirects inform hosts of better first-hop routers on local multi-access links, not static route unreachable next-hops.",
+      2: "Layer 3 routing reachability has no effect on Layer 1 physical link duplex autonegotiation.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -3242,15 +3242,15 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What fundamental network problem do Virtual Local Area Networks (VLANs) solve in enterprise switching design?",
     options: [
       "They partition a single physical switch into multiple isolated logical Broadcast Domains at Layer 2, containing broadcast traffic and enforcing security segmentation",
-      "They allow switches to replace physical electrical cables with wireless radio signals",
-      "They automatically increase internet download speeds by 500%",
-      "They eliminate the need for Layer 3 routers when routing between subnets"
+      "They allow switches to replace physical electrical cables with wireless radio signals across access points",
+      "They automatically increase internet download speeds by allocating higher hardware clock frequencies to switch ASICs",
+      "They eliminate the need for Layer 3 routers when routing between subnets across the enterprise autonomous system"
     ],
     correctOption: 0,
     explanation: "Without VLANs, all switch ports belong to one large broadcast domain, allowing broadcast storms and security snooping. VLANs logically segment the switch at Layer 2 into separate broadcast domains, requiring a router/L3 switch to route between them.",
     explanationsJson: {
       1: "VLANs are Layer 2 logical partitions over wired switch hardware, not wireless conversions.",
-      2: "VLANs segment network traffic; they do not increase ISP WAN pipe speeds.",
+      2: "VLANs segment network traffic; they do not alter switch silicon clock speeds or ISP WAN bandwidth.",
       3: "Inter-VLAN communication strictly requires a Layer 3 device (router or multilayer switch).",
     },
     difficulty: CourseLevel.INTERMEDIATE,
@@ -3287,17 +3287,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "switching-vlans-overview",
     text: "What is the \"Native VLAN\" on an IEEE 802.1Q trunk port, and what happens to frames arriving on a trunk without an 802.1Q tag?",
     options: [
-      "The Native VLAN is used exclusively for encrypted VoIP telephone traffic",
-      "The Native VLAN is a reserved VLAN where all packets are immediately discarded",
-      "The Native VLAN (default VLAN 1) handles all untagged traffic traversing the trunk",
-      "The Native VLAN requires all connected hosts to disable their network cards"
+      "The Native VLAN is used exclusively for encrypted VoIP telephone traffic across dedicated voice trunks",
+      "The Native VLAN is a reserved quarantine VLAN where all incoming packets are immediately dropped by the ASIC",
+      "The Native VLAN (default VLAN 1) handles all untagged traffic traversing the 802.1Q trunk link without adding headers",
+      "The Native VLAN requires all connected client workstations to disable their physical network interface cards"
     ],
     correctOption: 2,
     explanation: "By 802.1Q definition, the Native VLAN carries untagged traffic across a trunk. When a switch receives an untagged frame on a trunk interface, it places it into the configured Native VLAN (VLAN 1 by default).",
     explanationsJson: {
       0: "VoIP typically uses a dedicated Voice VLAN with 802.1p CoS priority tagging, not untagged Native VLAN.",
       1: "Native VLAN traffic is actively switched and forwarded, not dropped.",
-      3: "Native VLAN operates transparently without host reconfiguration.",
+      3: "Native VLAN operates transparently without host reconfiguration or NIC shutdown.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3333,17 +3333,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "network-security-basics-overview",
     text: "What are the three pillars of the foundational \"CIA Triad\" in information and network security?",
     options: [
-      "Confidentiality (privacy/encryption), Integrity (data accuracy/hashing), Availability (reliable uptime/redundancy)",
-      "Authentication (identity verification), Authorization (access control), Accounting (audit logging)",
-      "Segmentation (VLAN isolation), Inspection (deep packet analysis), Redundancy (failover switching)",
-      "Containment (firewall filtering), Detection (intrusion analysis), Mitigation (rate limiting)"
+      "Confidentiality (privacy/encryption), Integrity (data accuracy/tamper-detection), and Availability (reliable access to authorized users)",
+      "Centralization (managing all routers from one server), Interoperability (multi-vendor compatibility), and Automation (scripting CLI tasks)",
+      "Classification (organizing subnets by classful boundaries), Isolation (firewall rules), and Authentication (RADIUS password validation)",
+      "Connectivity (maintaining physical link status UP/UP), Inspection (monitoring packet headers), and Allocation (leasing DHCP IPs)"
     ],
     correctOption: 0,
     explanation: "The CIA Triad is the cornerstone of information security: Confidentiality ensures only authorized entities view data; Integrity ensures data is not altered in transit; Availability ensures resources are accessible when needed.",
     explanationsJson: {
-      1: "Centralization/Internet/Authentication are security concepts, but not the CIA Triad.",
-      2: "Cabling/Inspection/Antivirus are tactical tools, not the foundational security triad.",
-      3: "Control/Isolation/Automation are operational principles, not the CIA triad.",
+      1: "Centralization, interoperability, and automation are network operational goals, not the foundational information security CIA triad.",
+      2: "Classification, isolation, and authentication are security implementation controls, not the core CIA triad principles.",
+      3: "Connectivity, inspection, and allocation are routine network management functions.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.RECALL,
@@ -3379,17 +3379,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "network-security-basics-overview",
     text: "What security principle dictates that network users and administrators should be granted only the absolute minimum permissions and access levels necessary to complete their specific job functions?",
     options: [
-      "Defense in Depth",
-      "Principle of Least Privilege",
-      "Principle of Open Access",
-      "Non-Repudiation Architecture"
+      "Principle of Open Access granting full administrative permissions to all staff members",
+      "Defense in Depth deploying multiple redundant hardware firewalls from identical vendors",
+      "Principle of Least Privilege granting users only the minimum access rights required for their job functions",
+      "Zero Trust Architecture requiring biometric fingerprint scanning for every individual DNS query"
     ],
     correctOption: 2,
     explanation: "The Principle of Least Privilege limits user and system access rights to the bare minimum needed for legitimate operational duties, minimizing attack surfaces and containing the damage of compromised credentials.",
     explanationsJson: {
-      0: "Defense in Depth employs layered security controls, not specifically individual permission scoping.",
-      1: "Open access violates security best practices by granting unrestricted permissions.",
-      3: "Non-repudiation guarantees that an author cannot deny the authenticity of their signature or message.",
+      0: "Open access violates security fundamentals by expanding the attack surface and enabling privilege escalation.",
+      1: "Defense in Depth layers complementary security controls, not granting excessive user permissions.",
+      3: "Zero Trust validates identity continuously, but does not mandate biometric verification on automated DNS packet queries.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3433,9 +3433,9 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     correctOption: 0,
     explanation: "Standard ACLs (1-99 / 1300-1999) only evaluate source IP addresses (placed near destination to avoid blocking valid paths). Extended ACLs (100-199 / 2000-2699) evaluate source IP, destination IP, protocol (TCP/UDP/ICMP), and port numbers (placed near source).",
     explanationsJson: {
-      1: "ACLs operate continuously unless time-based ACL schedules are specifically configured.",
-      2: "ACLs are packet-filtering match/drop rules; they do not perform encryption or compression.",
-      3: "Standard and Extended ACLs operate at Layers 3 and 4.",
+      1: "Standard ACLs evaluate only source IP addresses; they cannot inspect destination IP or Layer 4 ports.",
+      2: "Both standard and extended ACLs are stateless packet filters; stateful inspection requires firewalls or reflexive ACLs.",
+      3: "Standard ACLs lack destination filtering, so placing them near the source blocks traffic to all other destinations.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3471,10 +3471,10 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "firewalls-acls-overview",
     text: "What invisible rule is automatically appended by default to the very bottom of every Cisco Access Control List (ACL)?",
     options: [
-      "An automatic command to reboot the router every midnight",
-      "An Implicit Permit All allowing all remaining traffic to pass through",
+      "An automatic command to reboot the router every midnight to clear dynamic memory buffers",
+      "An Implicit Permit All allowing all remaining unmatched transit traffic to pass through",
       "An Implicit Deny All (`deny ip any any`) dropping all traffic that did not match an earlier permit statement",
-      "An automatic email alert sent to the network administrator"
+      "An automatic email alert sent to the network administrator notifying them of unmatched packets"
     ],
     correctOption: 2,
     explanation: "Every ACL terminates with an invisible \"Implicit Deny All\" (`deny ip any any`). If a packet does not explicitly match any configured `permit` rule as the ACL is evaluated top-down, it is dropped silently at the end.",
@@ -3494,17 +3494,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "firewalls-acls-overview",
     text: "Why does a Stateful Inspection Firewall provide significantly superior security compared to a Stateless Packet-Filtering Router ACL?",
     options: [
-      "A stateful firewall automatically deletes all incoming emails",
-      "A stateful firewall does not require an electrical power source to operate",
-      "A stateless router ACL can only inspect traffic written in the French language",
+      "A stateful firewall automatically encrypts all incoming email payloads with asymmetric RSA keys",
+      "A stateful firewall operates exclusively at Layer 1 to amplify physical electrical voltages across copper cabling",
+      "A stateless router ACL can inspect only traffic that has been previously encrypted by a VPN tunnel",
       "A stateful firewall tracks active TCP connection states (SYN, ESTABLISHED) and dynamic port mappings in a State Table, automatically permitting return traffic without opening broad inbound ports"
     ],
     correctOption: 3,
     explanation: "Stateless ACLs evaluate packets in isolation without context. Stateful firewalls maintain a dynamic State Table tracking established bidirectional sessions; when an internal host makes an outbound web request, the firewall dynamically permits the inbound return traffic only for that specific active session.",
     explanationsJson: {
-      0: "Firewalls inspect and filter traffic based on security policies, not indiscriminately deleting valid emails.",
-      1: "Stateful firewalls are active hardware/software appliances requiring electrical power.",
-      2: "Stateless ACLs evaluate IP headers and port numbers regardless of natural languages.",
+      0: "Firewalls inspect and filter traffic based on security policies, not encrypting email payloads.",
+      1: "Stateful firewalls operate across Layers 3, 4, and 7; they do not function as physical layer repeaters.",
+      2: "Stateless ACLs evaluate unencrypted packet headers (IP, ports) directly without requiring VPN tunnels.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3517,17 +3517,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "nat-pat-overview",
     text: "In Cisco NAT terminology, what are the exact definitions of \"Inside Local\" and \"Inside Global\" addresses?",
     options: [
-      "Inside Local: The private IPv4 address assigned to a host on the internal private network (e.g. 192.168.1.10); Inside Global: The globally routable public IPv4 address assigned by the ISP representing the internal host to the outside Internet",
-      "Inside Local: The public web server IP; Inside Global: The internal switch MAC address",
-      "Inside Local: The default gateway IP address; Inside Global: The client RAM memory address",
-      "Inside Local and Inside Global are exact synonyms with identical meanings"
+      "Inside Local is the private IP on the LAN; Inside Global is the public routable IP representing that host to the external Internet",
+      "Inside Local is the MAC address of the workstation; Inside Global is the IP address of the ISP recursive DNS nameserver",
+      "Inside Local is the loopback address 127.0.0.1; Inside Global is the IPv6 link-local address assigned by SLAAC autoconfiguration",
+      "Inside Local is the default gateway IP; Inside Global is the broadcast address 255.255.255.255 across all subnets"
     ],
     correctOption: 0,
     explanation: "Inside Local is the private RFC 1918 address inside the enterprise. Inside Global is the public routable address (owned by the enterprise/ISP) that appears in the source IP field of packets after NAT translation on the WAN.",
     explanationsJson: {
-      1: "Inside Local represents the internal private client, not the public web server.",
-      2: "Inside Global is an IPv4 address, not a RAM memory pointer.",
-      3: "Inside Local and Inside Global represent two distinct perspectives (private inside vs public outside).",
+      1: "Inside Local and Inside Global are both Layer 3 IPv4 addresses, not Layer 2 MAC addresses or DNS nameservers.",
+      2: "Inside Local is the host's actual RFC 1918 private address (e.g. 192.168.1.50), not internal loopback 127.0.0.1.",
+      3: "The default gateway is the router interface IP; Inside Global is the translated public address assigned during NAT.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.RECALL,
@@ -3540,17 +3540,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "nat-pat-overview",
     text: "How does Port Address Translation (PAT / NAT Overload) enable hundreds of internal private LAN workstations to concurrently access the public Internet using a single shared public IPv4 address?",
     options: [
-      "By dividing the public IP address into fractional decimal numbers",
+      "By dynamically segmenting the public IP address into variable fractional decimal sub-addresses",
       "By multiplexing connections using unique source Layer 4 TCP/UDP Port numbers in the NAT translation state table",
-      "By converting all web traffic into analog radio broadcasts",
-      "By assigning each user a different color Ethernet cable"
+      "By stripping Layer 3 IP headers and forwarding raw Layer 2 Ethernet frames across the public WAN link",
+      "By negotiating separate physical optical fiber channels for each internal client workstation"
     ],
     correctOption: 1,
     explanation: "PAT (NAT Overload) tracks outbound flows by assigning a unique Layer 4 source port (e.g. `203.0.113.5:52001` for PC 1, `203.0.113.5:52002` for PC 2). When return traffic arrives, the router inspects the destination port to demultiplex the packet back to the correct private IP.",
     explanationsJson: {
       0: "IPv4 addresses are 32-bit discrete integers and cannot be divided into fractional decimal values.",
-      2: "PAT is a software translation engine running inside router/firewall ASICs, not radio broadcast.",
-      3: "Cable coloring has no impact on transport layer port multiplexing.",
+      2: "Packets traversing the Internet require full Layer 3 IP headers with globally routable source and destination addresses.",
+      3: "PAT is a software translation engine running inside router/firewall ASICs, not multiple physical fiber channels.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3563,17 +3563,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "nat-pat-overview",
     text: "What type of NAT is required when an internal private web server (`192.168.1.100`) must be permanently accessible from the public Internet via a dedicated public IP (`203.0.113.25`)?",
     options: [
-      "PAT Overload with random port selection",
-      "Dynamic NAT pool with random ephemeral assignments",
-      "Static NAT",
-      "NAT64 protocol translation"
+      "Dynamic NAT Pool with overload disabled",
+      "Port Address Translation with PAT port overloading",
+      "Static NAT mapping one private IP permanently to one public IP",
+      "Carrier-Grade NAT using large-scale shared address space"
     ],
     correctOption: 2,
     explanation: "Static NAT creates a fixed, permanent 1-to-1 mapping between a specific internal private IP and a specific external public IP, allowing external inbound connections to initiate reachability to the internal server.",
     explanationsJson: {
-      0: "PAT overload multiplexes outbound connections and does not provide an open static 1-to-1 public IP.",
-      1: "Dynamic NAT maps from a temporary pool on a first-come, first-served basis; incoming external connections cannot predict the server temporary IP.",
-      3: "NAT64 translates IPv6 to IPv4, not static IPv4 to IPv4.",
+      0: "Dynamic NAT without overload assigns public IPs from a pool on-demand, which can change over time.",
+      1: "PAT is designed for outbound client sessions sharing ports, not predictable inbound mapping for dedicated servers.",
+      3: "CGNAT (RFC 6598) is deployed by ISPs for mass subscriber multiplexing, not individual DMZ server hosting.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -3632,17 +3632,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "vpn-cryptography-overview",
     text: "What are the roles of IKE (Internet Key Exchange) Phase 1 and Phase 2 during the establishment of a site-to-site IPsec VPN tunnel?",
     options: [
-      "Phase 1 routes the data packets and Phase 2 uninstalls the operating system",
-      "IKE Phase 1 authenticates the two VPN gateway peers and establishes a secure control channel (ISAKMP SA)",
-      "Phase 1 creates the Ethernet cabling and Phase 2 converts digital signals to analog",
-      "Phase 1 is only for wireless laptops and Phase 2 is only for wired desktops"
+      "IKE Phase 1 encrypts physical fiber optic light pulses; IKE Phase 2 allocates dynamic IP addresses via DHCPv6",
+      "IKE Phase 1 authenticates the two VPN gateway peers and creates a secure ISAKMP bidirectional management tunnel; IKE Phase 2 negotiates the IPsec Security Associations (SAs) that encrypt the actual user data traffic",
+      "IKE Phase 1 routes packets using OSPF; IKE Phase 2 translates private IPv4 addresses to public IPs using NAT overload",
+      "IKE Phase 1 checks physical cable continuity; IKE Phase 2 verifies client user passwords against an Active Directory server"
     ],
     correctOption: 1,
     explanation: "IKE Phase 1 (Main/Aggressive mode) negotiates encryption/hash/DH group to create the secure management tunnel (ISAKMP SA). IKE Phase 2 (Quick mode) uses that secure tunnel to negotiate data encryption keys and create the IPsec SAs that protect user traffic.",
     explanationsJson: {
-      0: "IKE is a key exchange security protocol, not an OS uninstaller.",
-      2: "IKE operates at Layer 5/7 over UDP port 500/4500, not physical cabling.",
-      3: "IKE Phase 1 and 2 apply universally to all IPsec VPN endpoints.",
+      0: "IPsec operates at Layer 3 to secure IP packets; it does not assign DHCP leases or alter optical physical properties.",
+      2: "Routing and NAT are independent network functions; IKE Phase 1 and 2 specifically manage cryptographic security associations.",
+      3: "Physical testing and user authentication are handled by cabling tools and 802.1X/RADIUS, not the IKE tunnel negotiation phases.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3724,17 +3724,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "wireless-networking-overview",
     text: "What are the three non-overlapping 20 MHz channels available in the standard 2.4 GHz ISM wireless band in North America?",
     options: [
-      "Channels 1, 2, and 3",
-      "Channels 1, 6, and 11",
-      "Channels 36, 40, and 44",
-      "Channels 12, 13, and 14"
+      "Channels 1, 2, 3, and 4 (spaced by 5 MHz without overlapping bandwidth)",
+      "Channels 1, 6, and 11 (spaced by 25 MHz to provide 20 MHz clean channel separation without co-channel interference)",
+      "Channels 36, 40, 44, and 48 (the standard UNII-1 lower enterprise band)",
+      "Channels 149, 153, 157, and 161 (the upper UNII-3 high-power enterprise band)"
     ],
     correctOption: 1,
     explanation: "In the 2.4 GHz spectrum, channels are spaced 5 MHz apart but require 20 MHz channel width. Only channels 1, 6, and 11 have zero spectral overlap, allowing adjacent access points to operate without co-channel interference.",
     explanationsJson: {
-      0: "Channels 1, 2, and 3 heavily overlap each other, causing severe co-channel interference and packet loss.",
-      2: "Channels 36, 40, and 44 are in the 5 GHz UNII-1 band, not the 2.4 GHz ISM band.",
-      3: "Channels 12, 13, and 14 are restricted or prohibited in North American regulatory domains.",
+      0: "Adjacent channels in 2.4 GHz are separated by only 5 MHz, while Wi-Fi channels require 20-22 MHz bandwidth, causing severe overlap.",
+      2: "Channels 36-48 belong to the 5 GHz band (UNII-1), not the 2.4 GHz ISM band.",
+      3: "Channels 149-161 belong to the 5 GHz band (UNII-3), not the 2.4 GHz ISM band.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.RECALL,
@@ -3770,17 +3770,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "wireless-networking-overview",
     text: "Why is WPA3-Personal (SAE) significantly more secure than legacy WPA2-Personal (PSK)?",
     options: [
-      "WPA3 restricts Wi-Fi connections to a maximum of 1 meter distance",
-      "WPA3 eliminates the need for passwords completely by reading user brainwaves",
-      "WPA3 forces all wireless transmissions to be converted into wired copper cables",
+      "WPA3 mandates a 4096-bit pre-installed hardware certificate on client devices and eliminates pre-shared keys across all access points",
+      "WPA3 encrypts the pre-shared key inside a Diffie-Hellman Key Exchange without altering the vulnerable 4-way handshake message flow",
+      "WPA3 enforces strict MAC address filtering on all wireless beacons and drops probe requests from unauthorized client network cards",
       "WPA3 replaces the vulnerable 4-way PSK handshake with Simultaneous Authentication of Equals (SAE / Dragonfly handshake), providing forward secrecy and rendering offline dictionary / brute-force password cracking attacks impossible"
     ],
     correctOption: 3,
     explanation: "In WPA2-PSK, an attacker capturing the 4-way handshake can perform offline brute-force dictionary attacks. WPA3 uses SAE (Simultaneous Authentication of Equals), which uses zero-knowledge proofs where passive eavesdroppers gain zero data to perform offline dictionary attacks.",
     explanationsJson: {
-      0: "WPA3 operates across standard wireless ranges (tens of meters).",
-      1: "WPA3 uses standard alphanumeric pre-shared passwords with modern cryptographic handshakes.",
-      2: "WPA3 is a wireless RF protocol; it does not convert wireless into copper.",
+      0: "WPA3-Personal uses standard alphanumeric passwords via SAE; pre-installed client certificates are used in WPA3-Enterprise (802.1X).",
+      1: "WPA3 replaces the 4-way handshake completely with SAE zero-knowledge proofs, rather than wrapping the legacy handshake.",
+      2: "MAC filtering is easily bypassed by spoofing MAC addresses and does not provide cryptographic password protection.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3794,16 +3794,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "When executing a ping diagnostic, what is the critical technical distinction between receiving \"Destination Host Unreachable\" versus \"Request Timed Out\"?",
     options: [
       "\"Destination Host Unreachable\" means an intermediate router on the path actively responded with an ICMP Type 3 error indicating it has no route or ARP failed; \"Request Timed Out\" means the packet was forwarded but no response was received before the timer expired",
-      "\"Destination Host Unreachable\" means the computer has no power; \"Request Timed Out\" means the hard drive is full",
-      "\"Destination Host Unreachable\" indicates a successful connection; \"Request Timed Out\" indicates an invalid password",
-      "There is no difference; both messages are generated randomly by Windows"
+      "\"Destination Host Unreachable\" means the workstation network card is unplugged; \"Request Timed Out\" means the hard drive is full",
+      "\"Destination Host Unreachable\" indicates a successful connection; \"Request Timed Out\" indicates an invalid user password",
+      "\"Destination Host Unreachable\" means DNS resolution succeeded; \"Request Timed Out\" means the default gateway crashed"
     ],
     correctOption: 0,
     explanation: "\"Destination Host Unreachable\" is an active ICMP error message generated by a gateway router when it cannot route the packet or cannot resolve the target via ARP. \"Request Timed Out\" is a silent timeout where the sender received zero response (target host offline or dropping ICMP).",
     explanationsJson: {
-      1: "Unreachable and timeout are network layer diagnostic telemetry, not power/disk errors.",
-      2: "Neither message indicates success; both describe distinct network failure modes.",
-      3: "ICMP error messages are deterministic RFC standards, not random strings.",
+      1: "Unreachable and timeout are network layer diagnostic telemetry, not local hardware power or disk capacity errors.",
+      2: "Neither message indicates a successful connection; both indicate packet delivery failure at different stages.",
+      3: "Unreachable is an active router ICMP response; timeout is a silent drop where no device returned an error.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -3862,17 +3862,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "network-troubleshooting-overview",
     text: "A user connects over an IPsec VPN. Small web pages and ping tests work perfectly, but transferring large files or opening heavy HTTPS portals freezes and hangs indefinitely. What issue is causing this symptom?",
     options: [
-      "The VPN server requires an immediate operating system reinstallation",
-      "The client computer does not have enough disk space to open HTTPS pages",
-      "The Ethernet switch is converting TCP packets into analog audio signals",
+      "The TCP window size is set to zero by the receiving host, causing transmit buffers to stall without sending TCP reset segments",
+      "The local default gateway has ARP cache poisoning where two routers advertise conflicting MAC addresses for the next hop",
+      "DNS resolution timeout: the recursive resolver drops UDP port 53 packets exceeding 512 bytes due to missing EDNS0 extension support",
       "Path MTU Discovery (PMTUD) failure / MTU Black Hole: IPsec header encapsulation overhead causes packets to exceed physical MTU (1500 bytes), and an intermediate router is silently dropping packets with DF=1 without returning ICMP Fragmentation Needed messages"
     ],
     correctOption: 3,
     explanation: "VPN encapsulation adds ESP/IP headers (up to 50+ bytes). When large packets hit 1500 bytes MTU with the Don’t Fragment (DF) flag set, routers drop them. If ICMP Type 3 Code 4 is blocked by firewalls, an \"MTU Black Hole\" occurs; resolved by lowering MSS (`ip tcp adjust-mss 1360`).",
     explanationsJson: {
-      0: "MTU black holes are network layer MTU/MSS configuration issues, not OS corruption.",
-      1: "Disk space has no bearing on network socket packet transmission.",
-      2: "Switches do not convert packets to audio.",
+      0: "TCP ZeroWindow occurs during application buffer exhaustion, not specifically triggered by VPN tunneling of large packets.",
+      1: "ARP cache poisoning causes intermittent or complete connectivity loss across all packet sizes, not selective large packet stalls.",
+      2: "DNS resolution fails on domain queries, whereas MTU black holes allow handshakes to complete but stall during file transfers.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -3886,16 +3886,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What fundamental architectural separation defines Software-Defined Networking (SDN)?",
     options: [
       "The decoupling of the Control Plane (routing decision logic and policy) from the Data/Forwarding Plane (high-speed hardware packet switching ASICs), centralizing control in a programmable SDN controller",
-      "The separation of the Management Plane from the Physical Layer, replacing hardware transceivers with virtual container network interfaces",
-      "The migration of the Application Layer into the Transport Layer, eliminating TCP windowing in favor of direct ASIC memory addressing",
-      "The decoupling of the Ingress Queuing Engine from the Egress Buffer Pool, delegating packet serialization to host hypervisors"
+      "The replacement of all physical fiber optic cabling with wireless radio frequency links connecting cloud data centers",
+      "The elimination of Layer 3 IP addresses by hardcoding physical MAC addresses directly into public cloud web servers",
+      "The separation of electrical AC utility power from DC server battery backup systems in enterprise data center facilities"
     ],
     correctOption: 0,
     explanation: "SDN separates the Control Plane (which decides how packets should flow, centralized in an SDN controller) from the Data Plane (switches and routers that simply execute hardware forwarding instructions via OpenFlow/P4).",
     explanationsJson: {
-      1: "SDN is digital software-driven network automation, not paper documentation.",
-      2: "SDN networks operate on standard Layer 2/3 IP and overlay architectures.",
-      3: "SDN controllers and hardware switches run on standard enterprise power infrastructure.",
+      1: "Cloud data centers rely heavily on dense optical fiber inter-datacenter backbones; SDN does not replace fiber with wireless.",
+      2: "Cloud networking depends extensively on Layer 3 IP routing and overlay encapsulation (e.g. VXLAN, Geneve).",
+      3: "Power distribution is facilities infrastructure, completely distinct from network control and data plane architecture.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -3954,17 +3954,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "sdn-cloud-networking-overview",
     text: "In a public cloud provider (such as AWS VPC or Azure VNet), how do Cloud Security Groups differ from Cloud Network Access Control Lists (NACLs)?",
     options: [
-      "There is no difference; they are exact identical duplicates",
-      "Security Groups only block DNS traffic, while NACLs block all electricity",
-      "Security Groups operate at Layer 1, while NACLs operate at Layer 7",
+      "Security Groups inspect physical fiber optic light pulses; NACLs inspect copper electrical voltages across server backplanes",
+      "Security Groups are deployed on external internet service provider routers; NACLs are deployed on client desktop operating systems",
+      "Security Groups encrypt all database payloads with RSA keys; NACLs compress web traffic using gzip compression algorithms",
       "Security Groups are Stateful firewalls applied at the virtual network interface (ENI/VM) level; NACLs are Stateless firewalls applied at the Subnet boundary level"
     ],
     correctOption: 3,
     explanation: "In cloud architectures: Security Groups operate at the virtual instance/NIC level and are stateful (return traffic automatically permitted). NACLs operate at the subnet boundary and are stateless (inbound and outbound rules must be explicitly defined).",
     explanationsJson: {
-      0: "They are fundamentally different in statefulness (stateful vs stateless) and scope (instance vs subnet).",
-      1: "Security Groups and NACLs filter Layer 3/4 network traffic, not electrical utility power.",
-      2: "Both Security Groups and NACLs operate at Layers 3 and 4.",
+      0: "Cloud security constructs operate on virtual network interfaces and VPC subnets, not physical layer PHY signaling.",
+      1: "Both Security Groups and NACLs are managed within the cloud customer's Virtual Private Cloud (VPC), not on external ISP routers.",
+      2: "Security Groups and NACLs are network traffic packet filters; they do not perform payload encryption or gzip compression.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -4092,17 +4092,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-101-bits-bytes-binary-hex",
     text: "Why does computer networking commonly use hexadecimal notation for MAC addresses and IPv6 addresses?",
     options: [
-      "Hexadecimal is an analog electrical format used on physical cables",
+      "Because computer processors can execute instructions only when memory addresses are written in base-10 decimal format",
       "It provides a compact, human-readable shorthand where each hex digit directly represents 4 binary bits",
-      "Hexadecimal allows network switches to forward packets twice as fast as binary",
-      "Network hardware can only process numbers between 0 and 15"
+      "Because hexadecimal characters automatically encrypt MAC and IPv6 addresses against unauthorized packet sniffers",
+      "Because Ethernet transceivers transmit optical pulses exclusively in base-16 frequencies across fiber cables"
     ],
     correctOption: 1,
     explanation: "Hexadecimal is used because it compactly represents 4 binary bits per symbol. A 48-bit MAC address in binary is 48 ones and zeros, but in hex it is written concisely with 12 characters (e.g., 00:1A:2B:3C:4D:5E).",
     explanationsJson: {
-      0: "Hexadecimal is a digital numerical representation, not an analog cable format.",
-      2: "Hardware processes physical binary voltage states regardless of the notation humans use.",
-      3: "Network hardware processes full binary words and packets, not just 0-15.",
+      0: "Processors execute pure binary (base-2) machine code at the silicon level, not base-10 decimal.",
+      2: "Hexadecimal is a human-readable numeral system; it does not provide encryption or confidentiality.",
+      3: "Physical transceivers transmit binary optical pulses or electrical voltages; base-16 is a representational notation.",
     },
     difficulty: CourseLevel.FOUNDATIONAL,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -4115,17 +4115,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-202-ipv4-addressing-cidr",
     text: "An IPv4 address is composed of how many total bits, and how are these bits partitioned?",
     options: [
-      "128 bits, divided into eight 16-bit hexadecimal blocks",
-      "48 bits, divided into an Organizationally Unique Identifier (OUI) and a Device serial",
+      "128 bits, divided into 8 hexadecimal hextets representing globally routable unicast and link-local address scopes",
+      "48 bits, divided into a 24-bit Organizationally Unique Identifier (OUI) and a 24-bit Network Interface Controller serial",
       "32 bits, divided into a Network portion (identifying the subnet) and a Host portion (identifying the specific device)",
-      "64 bits, divided into four 16-bit binary words"
+      "64 bits, divided into a 32-bit timestamp counter and a 32-bit cyclic redundancy check polynomial value"
     ],
     correctOption: 2,
     explanation: "An IPv4 address is a 32-bit binary number represented as four 8-bit octets. A subnet mask divides these 32 bits into a Network portion (identifying the subnet) and a Host portion (identifying the specific device on that subnet).",
     explanationsJson: {
-      0: "128 bits describes an IPv6 address.",
-      1: "48 bits describes an Ethernet MAC address.",
-      3: "64 bits is not a standard IP addressing architecture.",
+      0: "128 bits divided into 8 hextets is the structure of an IPv6 address, not an IPv4 address.",
+      1: "48 bits divided into OUI and NIC serial is the physical structure of an Ethernet MAC address.",
+      3: "64-bit timestamp and CRC fields are telemetry header components, not IPv4 network addressing architecture.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.RECALL,
@@ -4230,17 +4230,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-202-ipv4-addressing-cidr",
     text: "Why does a standard `/30` prefix provide exactly 2 usable host IP addresses, and how do point-to-point links treat host bit reservations?",
     options: [
-      "A /30 has only 1 host bit (2^1 = 2 total addresses), allowing zero usable host endpoints",
-      "A /30 has 30 host bits, providing over 1 billion usable host addresses",
-      "A /30 reserves all 4 addresses for routing protocol discovery",
+      "A /30 provides 30 usable host IP addresses, reserving the remaining 2 for the default gateway and DHCP server",
+      "A /30 provides 6 usable host IP addresses with a block size of 8, wasting 2 addresses on every point-to-point circuit",
+      "A /30 allocates 1 usable host IP address and 1 broadcast address, requiring NAT to communicate across the link",
       "A /30 has 2 host bits (2^2 = 4 total addresses), reserving 1 for the Network Address and 1 for the Broadcast Address, leaving 2 usable addresses"
     ],
     correctOption: 3,
     explanation: "With a /30 prefix, there are 32 - 30 = 2 host bits (2^2 = 4 total addresses). In standard IPv4 subnetting, subtracting the Network Address (all 0s) and Broadcast Address (all 1s) leaves 4 - 2 = 2 usable host addresses, making /30 ideal for point-to-point router links (note: RFC 3021 defines /31 for point-to-point links without broadcast, utilizing both addresses).",
     explanationsJson: {
-      0: "A /30 has 2 host bits (4 total addresses), not 1 host bit.",
-      1: "A /30 has 30 network bits and only 2 host bits.",
-      2: "Addresses in a /30 are not reserved for routing protocols; 2 are usable for host endpoints.",
+      0: "The number 30 in /30 is the prefix length (network bits), leaving only 2 host bits ($2^2 = 4$ total addresses).",
+      1: "6 usable host addresses ($2^3 - 2 = 6$) is provided by a /29 subnet mask (255.255.255.248), not a /30.",
+      2: "A /30 provides exactly 2 usable host addresses, making it perfect for point-to-point links connecting two router interfaces.",
     },
     difficulty: CourseLevel.BEGINNER,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -4299,17 +4299,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-302-spanning-tree-protocol-loop-prevention",
     text: "What is the role of a \"Root Port\" on a non-root switch in Spanning Tree topology?",
     options: [
-      "The port that blocks all user data frames to prevent loops",
-      "The port that connects directly to the Internet service provider",
+      "The port that has the highest physical link speed and the largest configured maximum transmission unit (MTU)",
+      "The port that connects directly to the Internet service provider edge router via an 802.1Q trunk connection",
       "The single port on that non-root switch that has the lowest cumulative path cost to reach the Root Bridge",
-      "A port that forwards only broadcast frames"
+      "A designated port that blocks all user data frames while allowing broadcast traffic to flood across the VLAN"
     ],
     correctOption: 2,
     explanation: "Every non-root switch must select exactly one Root Port—the port with the lowest cumulative Spanning Tree path cost to the Root Bridge. Root Ports forward traffic.",
     explanationsJson: {
-      0: "Ports that block traffic are Alternate/Backup (Blocking) ports, not Root Ports.",
-      1: "Root Ports lead to the internal Root Bridge, not external ISPs.",
-      3: "Root Ports forward all valid unicast, multicast, and broadcast data frames.",
+      0: "Speed influences path cost, but the selection criteria is the lowest cumulative path cost to the Root Bridge, not raw port MTU.",
+      1: "Root Ports point toward the internal STP Root Bridge switch, which is typically the core campus switch, not an ISP router.",
+      3: "Root Ports actively forward user data frames; blocking ports are alternate/backup ports.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -4346,16 +4346,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What are the port states in classic IEEE 802.1D STP, and what is the total default convergence time from Blocking to Forwarding?",
     options: [
       "Blocking -> Listening (15s) -> Learning (15s) -> Forwarding; Total convergence time = 30 to 50 seconds",
-      "Discarding -> Forwarding; Total convergence time = 1 second",
-      "Listening -> Forwarding; Total convergence time = 5 seconds",
-      "Disabled -> Forwarding; Total convergence time = 0 seconds"
+      "Forwarding -> Filtering (5s) -> Flooding (10s) -> Disabled; Total convergence time = 15 seconds",
+      "Listening (1s) -> Forwarding (1s); Total convergence time = 2 seconds via rapid link negotiation pulses",
+      "Standby -> Negotiating (60s) -> Active (60s); Total convergence time = 120 seconds across all access ports"
     ],
     correctOption: 0,
     explanation: "Classic 802.1D transitions through: Blocking (Max Age 20s if link fails) -> Listening (15s Forward Delay) -> Learning (15s Forward Delay) -> Forwarding, totaling 30 to 50 seconds to converge.",
     explanationsJson: {
-      1: "Discarding -> Learning -> Forwarding describes Rapid STP (802.1w), which converges in sub-seconds.",
-      2: "Classic 802.1D requires both Listening and Learning states (15s each = 30s min).",
-      3: "0 seconds transition without PortFast causes immediate temporary Layer 2 loops.",
+      1: "This is an inaccurate state progression; standard 802.1D progresses through Blocking, Listening, Learning, and Forwarding.",
+      2: "Sub-second or 2-second convergence is achieved by 802.1w Rapid STP (RSTP), not legacy 802.1D Spanning Tree.",
+      3: "802.1D uses standard forward delay timers (15 seconds each for Listening and Learning), totaling 30-50s including Max Age.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.RECALL,
@@ -4438,16 +4438,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "What parameters MUST match identically between two neighboring routers for an OSPF adjacency to successfully reach the FULL state?",
     options: [
       "Area ID, Subnet Mask, Hello Interval, Dead Interval, and Authentication Password",
-      "Router ID and Hostname",
-      "Loopback IP address and Switch port number",
-      "Administrative Distance and Bandwidth"
+      "Router Hostname, Chassis Serial Number, Physical MAC Address, and Power Supply Wattage",
+      "Default Gateway IP, DNS Domain Name, NTP Stratum Level, and Web Management Port",
+      "BGP Autonomous System Number, VLAN Identification Tag, and Spanning Tree Priority"
     ],
     correctOption: 0,
     explanation: "OSPF neighbor formation requires matching: 1. Area ID; 2. Subnet and Mask on the link; 3. Hello Interval (default 10s) and Dead Interval (default 40s); 4. Authentication credentials; 5. Area type flags (stub/NSSA).",
     explanationsJson: {
-      1: "Router IDs MUST BE UNIQUE; identical RIDs cause severe routing conflicts and duplicate RID rejection.",
-      2: "Loopback IPs are unique to each router; switch ports do not affect OSPF adjacency.",
-      3: "Administrative distance is local to each router; bandwidth can differ across interface types.",
+      1: "Hostnames, serial numbers, MAC addresses, and power specifications are device attributes not evaluated in OSPF Hello packets.",
+      2: "Default gateway and DNS settings are client configurations; OSPF routers establish adjacencies based on link-level parameters.",
+      3: "BGP AS numbers and STP priorities belong to different protocols and are not checked during OSPF neighbor formation.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -4460,17 +4460,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-304-single-area-ospf-routing",
     text: "Two OSPF routers connected via a gigabit Ethernet link are stuck in the EXSTART / EXCHANGE state and fail to reach FULL. What is the most common cause?",
     options: [
-      "The routers have different hostnames",
+      "A mismatch in the configured OSPF Process ID number between the two communicating router instances",
       "An MTU (Maximum Transmission Unit) mismatch between the two connected interfaces, causing the larger DBD packet to be dropped",
-      "The physical Ethernet cable is single-mode fiber",
-      "The routers have different clock timezones"
+      "A collision between identical OSPF Router IDs configured on both ends of the point-to-point link",
+      "The physical Ethernet cable exceeding the 100-meter physical channel limit causing excessive signal latency"
     ],
     correctOption: 1,
     explanation: "During EXSTART and EXCHANGE states, routers negotiate Master/Slave roles and exchange Database Description (DBD) packets. If interface MTUs do not match, the router receiving a DBD packet larger than its MTU drops it, hanging forever in EXSTART.",
     explanationsJson: {
-      0: "Hostnames are arbitrary administrative labels and do not affect OSPF state machine convergence.",
-      2: "Physical fiber type does not cause EXSTART hangs if link-layer frames are delivering data.",
-      3: "Timezone discrepancies do not break OSPF packet exchange.",
+      0: "OSPF Process IDs are locally significant to the router operating system and do not need to match between neighbors.",
+      2: "Duplicate Router IDs cause neighbor flapping or reject Init states, but EXSTART/EXCHANGE hang is the classic MTU mismatch symptom.",
+      3: "Cable length issues cause physical link flaps (UP/DOWN) or CRC errors, not a stuck protocol state machine during DBD exchange.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -4506,17 +4506,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-304-single-area-ospf-routing",
     text: "What is the default reference bandwidth in classic OSPF, what is the cost of a 10 Gbps interface under that default, and how should an engineer configure OSPF to accurately differentiate between 1 Gbps, 10 Gbps, and 100 Gbps links?",
     options: [
-      "Reference bandwidth is permanently fixed in router ROM and cannot be adjusted",
-      "Default reference bandwidth is 10 Tbps; no adjustment is ever needed",
-      "Default cost is determined strictly by ping response latency in milliseconds",
+      "OSPF cost automatically scales based on real-time interface CPU utilization and packet error rate counters",
+      "OSPF cost is permanently fixed at 10 for all Ethernet interfaces regardless of whether they operate at 10M, 1G, or 100G",
+      "OSPF metric is determined by counting the total number of router hops between source and destination networks",
       "Default reference bandwidth is 100 Mbps (cost = 1 for 100M, 1G, 10G); engineer must execute auto-cost reference-bandwidth 100000 (or higher) to accurately scale costs"
     ],
     correctOption: 3,
     explanation: "OSPF calculates Cost = Reference Bandwidth / Interface Bandwidth. Classic default reference bandwidth is 100 Mbps (10^8 bps). Therefore, 100 Mbps, 1 Gbps, 10 Gbps all evaluate to Cost = 1 (integer minimum). Setting auto-cost reference-bandwidth 100000 (or 1,000,000) restores proportional metric costs for modern high-speed links.",
     explanationsJson: {
-      0: "Reference bandwidth is configurable via the auto-cost reference-bandwidth command.",
-      1: "Default is 100 Mbps, not 10 Tbps.",
-      2: "OSPF uses static bandwidth cost formulas, not dynamic ping latency.",
+      0: "OSPF cost is a static formula based on configured interface bandwidth, not dynamic real-time CPU or error metrics (like EIGRP).",
+      1: "Cost is calculated as Reference Bandwidth / Interface Bandwidth; with default 100M reference, 100M and faster all equal cost 1.",
+      2: "Hop count is the metric for distance-vector protocols like RIP; OSPF is a link-state protocol using cumulative bandwidth cost.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.EXPERT_REASONING,
@@ -4530,16 +4530,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "Which Wireshark display filter isolates ONLY the initial TCP connection request (SYN packet) sent by a client, excluding SYN-ACK packets?",
     options: [
       "tcp.flags.syn == 1 && tcp.flags.ack == 0",
-      "tcp.flags.syn == 1",
-      "tcp.port == 80",
-      "ip.proto == 6"
+      "ip.addr == 192.168.1.1 && eth.type == 0x0800",
+      "tcp.port == 80 || tcp.port == 443",
+      "frame.len > 1500 && icmp.type == 8"
     ],
     correctOption: 0,
     explanation: "The initial connection request has the SYN bit set to 1 and the ACK bit set to 0 (`tcp.flags.syn == 1 && tcp.flags.ack == 0`). SYN-ACK packets sent by the server have both SYN=1 and ACK=1.",
     explanationsJson: {
-      1: "`tcp.flags.syn == 1` matches BOTH SYN (client) and SYN-ACK (server) packets.",
-      2: "`tcp.port == 80` filters all HTTP traffic regardless of flags.",
-      3: "`ip.proto == 6` filters all TCP traffic in the capture.",
+      1: "Filters on IP address and IPv4 EtherType, not TCP SYN connection establishment flags.",
+      2: "Filters on HTTP and HTTPS port numbers regardless of TCP flag states.",
+      3: "Filters on oversized ICMP echo request packets, not TCP handshake packets.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -4552,17 +4552,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-404-wireshark-packet-capture",
     text: "In a Wireshark PCAP trace, an engineer observes 3 identical consecutive TCP ACK packets with `Ack = 45000` returned by the receiver in less than 5 milliseconds. What network event does this \"Triple Duplicate ACK\" indicate?",
     options: [
-      "The TCP connection has gracefully terminated with an active four-way handshake sequence",
+      "Normal connection closure: The server sent a TCP FIN and the client is acknowledging graceful connection termination",
       "Fast Retransmit trigger: A packet was lost in transit, causing the receiver to repeatedly acknowledge the last contiguous byte received while out-of-order packets arrive",
-      "The host network stack has negotiated selective acknowledgment (SACK) with zero window buffer space",
-      "The client has initiated Path MTU discovery by transmitting oversized frames with the DF bit disabled"
+      "SYN Flood attack detection: A remote host is rapidly generating TCP connection attempts without sending acknowledgments",
+      "Path MTU Discovery failure: An intermediate router dropped a packet with DF=1 and generated an ICMP Type 3 Code 4 error"
     ],
     correctOption: 1,
     explanation: "When a receiver gets an out-of-order segment (because an earlier segment was dropped), it immediately sends a duplicate ACK for the last in-order byte. Receiving 3 duplicate ACKs triggers the Fast Retransmit algorithm, retransmitting the lost segment without waiting for RTO timer expiry.",
     explanationsJson: {
-      0: "Connection termination utilizes FIN and FIN-ACK packets, not rapid duplicate ACKs.",
-      2: "IP version upgrades do not generate duplicate TCP acknowledgments.",
-      3: "Jumbo frames are Layer 2 MTU configurations, not duplicate ACK indicators.",
+      0: "Duplicate ACKs indicate missing data segments during an active transfer, not a graceful 4-way FIN teardown.",
+      2: "SYN floods generate incoming SYN packets to the server, whereas duplicate ACKs are generated by a receiver waiting for missing sequence bytes.",
+      3: "PMTUD failure results in ICMP 'Packet Too Big' notifications or silent timeouts, not three consecutive duplicate TCP ACKs.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -4575,17 +4575,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-404-wireshark-packet-capture",
     text: "A Wireshark packet capture displays: `[TCP ZeroWindow]` from server `10.0.0.5` followed immediately by the client pausing all transmission. What does this packet indicate?",
     options: [
-      "The physical Ethernet interface link pulse has dropped due to cable disconnection",
-      "The upstream gateway router has suppressed packet forwarding due to ingress rate limiting",
+      "The client network interface card has lost physical link and autonegotiated down to half-duplex 10BASE-T",
+      "The default gateway router has crashed and dropped all Layer 3 IP routing table entries across the subnet",
       "The receiving server application buffer is completely full, advertising Window Size = 0 to command the client to stop sending data until buffer space clears",
-      "The client application has transmitted an invalid cryptographic handshake token to the server"
+      "The web server has successfully completed SSL/TLS key exchange and closed the underlying TCP transport connection"
     ],
     correctOption: 2,
     explanation: "A `[TCP ZeroWindow]` packet is flow control in action. The receiver buffer is saturated, so it advertises `win=0`. The sender stops transmitting data and sends periodic 1-byte \"ZeroWindowProbe\" packets until the receiver responds with a non-zero window update.",
     explanationsJson: {
-      0: "A disconnected cable results in silent timeouts, not TCP header window updates.",
-      1: "If the server crashed, it would send a TCP RST or timeout, not an active ZeroWindow flow control advertisement.",
-      3: "ZeroWindow is transport layer flow control, unrelated to application authentication.",
+      0: "ZeroWindow is an explicit Layer 4 TCP flow control advertisement, independent of Layer 1 physical link status.",
+      1: "If the default gateway had crashed, no TCP packets would traverse the link to deliver the ZeroWindow notification.",
+      3: "A completed TLS handshake leads to application data exchange, not an immediate flow control transmission freeze.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -4598,17 +4598,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-404-wireshark-packet-capture",
     text: "An engineer suspects a slow network is caused by TCP retransmissions. Which Wireshark display filter quickly displays only retransmitted packets and duplicate acknowledgments?",
     options: [
-      "`frame.len > 1518`",
-      "`http.request.method == \"GET\"`",
-      "`ip.addr == 127.0.0.1`",
+      "`http.request.method == \"GET\" || dns.flags.response == 1`",
+      "`ip.src == 10.0.0.1 && ip.dst == 10.0.0.2`",
+      "`frame.len <= 64 && eth.dst == ff:ff:ff:ff:ff:ff`",
       "`tcp.analysis.retransmission || tcp.analysis.duplicate_ack`"
     ],
     correctOption: 3,
     explanation: "Wireshark built-in TCP analysis engine flags retransmissions and duplicate ACKs with `tcp.analysis.retransmission` and `tcp.analysis.duplicate_ack`, allowing rapid diagnosis of packet loss and latency.",
     explanationsJson: {
-      0: "`frame.len > 1518` filters oversized/jumbo frames.",
-      1: "`http.request.method == \"GET\"` filters HTTP GET requests, not TCP loss analytics.",
-      2: "`ip.addr == 127.0.0.1` filters local loopback traffic.",
+      0: "Filters standard HTTP GET requests and DNS responses, which are routine application messages rather than network anomalies.",
+      1: "Filters on source and destination IP addresses, displaying all conversational traffic without diagnosing packet loss.",
+      2: "Filters broadcast frames and runt candidates, but does not identify TCP transport retransmissions.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -4622,16 +4622,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "In Wireshark, an engineer inspects a DNS response frame containing `Flags: 0x8183 (Standard query response, No such name)`. What is the common name and technical meaning of this DNS response code (RCODE 3)?",
     options: [
       "NXDOMAIN (Non-Existent Domain): The queried domain name does not exist in the authoritative DNS zone",
-      "SERVFAIL: The DNS server hardware has failed",
-      "REFUSED: The DNS server refuses to talk to the client",
-      "NOERROR: The domain name was resolved successfully"
+      "SERVFAIL (Server Failure): The authoritative DNS nameserver experienced an internal operating system crash",
+      "NOERROR (Success): The domain name was resolved successfully and IPv4 address records are attached in the answer section",
+      "REFUSED (Query Refused): The DNS resolver rejected the query because the client IP is not on the authorized subnet access list"
     ],
     correctOption: 0,
     explanation: "RCODE 3 is `NXDOMAIN` (Non-Existent Domain). The authoritative name server confirmed that the requested domain name is not registered or has no record in the zone file.",
     explanationsJson: {
-      1: "SERVFAIL is RCODE 2 (server failure).",
-      2: "REFUSED is RCODE 5 (policy refusal).",
-      3: "NOERROR is RCODE 0 (successful query resolution).",
+      1: "RCODE 2 is SERVFAIL, indicating the name server was unable to process the query due to a problem with the server.",
+      2: "RCODE 0 is NOERROR, indicating successful name resolution.",
+      3: "RCODE 5 is REFUSED, indicating policy rejection by the nameserver.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -4644,17 +4644,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-404-wireshark-packet-capture",
     text: "A security analyst captures a flood of TCP packets targeted at port 443 with `tcp.flags.reset == 1`. What is the meaning of a TCP RST packet and what does this traffic pattern suggest?",
     options: [
-      "TCP RST indicates a successful file download has completed",
-      "TCP RST (Reset) abruptly tears down a connection without a graceful 4-way FIN handshake",
-      "TCP RST means the router has upgraded its firmware",
-      "TCP RST is used exclusively to calibrate Wi-Fi antennas"
+      "The destination host is actively acknowledging receipt of data and requesting the next sequence byte in the stream",
+      "TCP RST (Reset) abruptly tears down a connection without a graceful 4-way FIN handshake; sent when a connection arrives on a closed port or is terminated by a firewall",
+      "The destination host is negotiating TCP maximum segment size and window scale factors during the three-way handshake",
+      "The sender is commanding intermediate routers to prioritize the packet using Expedited Forwarding Quality of Service"
     ],
     correctOption: 1,
     explanation: "The RST (Reset) flag indicates an immediate, ungraceful connection termination (sent when a packet arrives for a closed port or when a connection has crashed). Excessive RST packets indicate port scanning or malicious session termination.",
     explanationsJson: {
-      0: "Successful completion uses FIN and ACK flags for graceful termination.",
-      2: "Firmware upgrades are system management events, not TCP packet flags.",
-      3: "TCP RST is a transport layer flag, unrelated to physical antenna calibration.",
+      0: "Normal data acknowledgment uses the ACK flag with the next expected sequence number, not the RST flag.",
+      2: "TCP options like MSS and Window Scale are negotiated using SYN packets during initial connection setup, not RST.",
+      3: "QoS prioritization is configured in the IP header DSCP field, completely separate from Layer 4 TCP control flags.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.EXPERT_REASONING,
@@ -4736,17 +4736,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-304-multi-area-ospf-redistribution",
     text: "Troubleshooting: An enterprise network has Area 10 (subnets 10.10.1.0/24 through 10.10.4.0/24) connected to ABR-1. Whenever a link in Area 10 flaps, routers across the entire company in Area 0 and Area 2 suffer high CPU spikes and routing table instability. What architectural optimization solves this issue?",
     options: [
-      "Change the OSPF process ID on all Area 10 routers to match the STP root bridge priority.",
-      "Configure inter-area route summarization on ABR-1 using `area 10 range 10.10.0.0 255.255.252.0` to suppress individual /24 Type 3 LSAs.",
-      "Disable OSPF on ABR-1 and replace it with static default routes on every router in the building.",
-      "Convert Area 10 into Area 0 so all routers share a single global Link-State Database."
+      "Reconfigure Area 10 as an OSPF Totally Stubby Area to block all external Type 5 Link-State Advertisements",
+      "Configure inter-area route summarization on ABR-1 using `area 10 range 10.10.0.0 255.255.252.0` to suppress individual /24 Type 3 LSAs",
+      "Increase the OSPF Hello timer to 60 seconds and the Dead timer to 240 seconds on all Area 0 core interfaces",
+      "Manually modify the administrative distance of all OSPF inter-area routes from 110 down to 90 on core routers"
     ],
     correctOption: 1,
     explanation: "Configuring route summarization on the ABR aggregates specific subnets into a single Type 3 Summary LSA. When an individual /24 subnet flaps inside Area 10, the summary route remains stable in Area 0, shielding the rest of the network from LSA updates and SPF recalculations.",
     explanationsJson: {
-      0: "Incorrect: OSPF process IDs are locally significant and have no relationship to STP priorities.",
-      2: "Incorrect: Disabling OSPF eliminates dynamic routing and redundancy.",
-      3: "Incorrect: Merging Area 10 into Area 0 would worsen the problem by forcing full SPF recalculations company-wide on every flap.",
+      0: "Totally Stubby areas block Type 3/4/5 LSAs within that area, but do not prevent unstable internal subnets from flapping into Area 0.",
+      2: "Increasing Hello timers delays adjacency detection across Area 0, but does not shield the backbone from SPF churn caused by flapping subnets.",
+      3: "Changing administrative distance alters route preference against other protocols, but does not stop SPF tree recalculation.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -4805,17 +4805,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-403-network-automation-programmability-foundations",
     text: "An engineer receives the following JSON payload from a switch REST API:\n`{\"hostname\": \"core-sw-01\", \"vlans\": [{\"id\": 10, \"name\": \"Eng\"}, {\"id\": 20, \"name\": \"Sales\"}]}`\nHow should an automation script interpret the `vlans` field?",
     options: [
-      "As a list (array) of JSON objects (dictionaries), where each object represents a VLAN with `id` and `name` attributes.",
-      "As a raw unformatted text string that must be parsed using regular expressions.",
-      "As a binary byte stream containing encrypted Layer 2 Spanning Tree BPDUs.",
-      "As an imperative sequence of CLI commands waiting for terminal execution."
+      "As a list (array) of JSON objects (dictionaries), where each object represents a VLAN with `id` and `name` attributes",
+      "As a flat comma-delimited ASCII string that must be parsed using regular expression line-by-line screen scraping",
+      "As a binary compiled machine language bytecode payload meant exclusively for execution on router hardware ASICs",
+      "As an XML soap envelope requiring an external document type definition schema before attributes can be inspected"
     ],
     correctOption: 0,
     explanation: "In JSON, square brackets `[...]` denote an ordered array (list) and curly braces `{...}` denote an object (dictionary). `vlans` is a list containing two VLAN objects.",
     explanationsJson: {
-      1: "Incorrect: JSON is structured data and does not require screen-scraping regexes.",
-      2: "Incorrect: JSON is structured text, not binary BPDUs.",
-      3: "Incorrect: JSON represents declarative data models, not CLI command strings.",
+      1: "JSON is structured hierarchical key-value data; treating it as flat text defeats the purpose of programmatic APIs.",
+      2: "JSON is a lightweight, human-readable data interchange format, not compiled binary ASIC firmware.",
+      3: "XML/SOAP is a separate schema-based format; JSON uses native object and array notation without XML wrappers.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -4828,17 +4828,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-403-network-automation-programmability-foundations",
     text: "Troubleshooting: An enterprise network team experiences an outage when an engineer pushes an untested automation template directly to 200 switches, applying an invalid subnet mask that severed management connectivity. What safe automation pipeline practice would have prevented this outage?",
     options: [
-      "Converting all switch interfaces from routed mode to unmanaged hub mode.",
-      "Executing pre-deployment schema validation and a dry-run diff preview against a single canary device before wide rollout.",
-      "Increasing the SSH session timeout on all devices to 24 hours.",
-      "Manually typing the configuration into every switch simultaneously using keyboard macros."
+      "Pushing raw configuration script updates directly to all production core routers during peak business traffic hours",
+      "Executing pre-deployment schema validation and a dry-run diff preview against a single canary device before wide rollout",
+      "Disabling all syslogging and telemetry alerts to prevent network monitoring servers from generating false positive tickets",
+      "Hardcoding root administrative passwords directly into public GitHub repositories to simplify automated CI/CD pipeline triggers"
     ],
     correctOption: 1,
     explanation: "A robust automation pipeline enforces pre-deployment schema validation to catch syntax errors (such as invalid subnet masks) and executes dry-run previews on canary devices to verify non-disruptive behavior before wide-scale production deployment.",
     explanationsJson: {
-      0: "Incorrect: Hubs lack switching intelligence and worsen broadcast storms.",
-      2: "Incorrect: SSH timeout does not catch invalid configuration parameters.",
-      3: "Incorrect: Unvalidated manual macros propagate human errors rapidly without validation.",
+      0: "Pushing unvalidated changes directly across production core networks causes catastrophic outages when syntax errors occur.",
+      2: "Disabling logging eliminates visibility and audit trails, preventing post-change verification and incident diagnosis.",
+      3: "Hardcoding credentials into public repositories creates catastrophic security vulnerabilities.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -4851,17 +4851,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-403-network-automation-programmability-foundations",
     text: "What is the primary architectural difference between an imperative automation approach and a declarative automation approach in network engineering?",
     options: [
-      "Declarative requires manual password entry for every single interface configuration.",
-      "Imperative is only used for optical fiber transceivers, whereas declarative is used for wireless access points.",
-      "Imperative defines the exact step-by-step commands to execute, whereas declarative defines the desired target end-state and lets the system compute necessary actions.",
-      "Imperative uses JSON data, whereas declarative only supports unencrypted Telnet sessions."
+      "Imperative is used exclusively in Python scripts, whereas declarative is used exclusively in Bash shell scripts",
+      "Imperative operates strictly at Layer 2, whereas declarative operates strictly at Layer 3 and Layer 4",
+      "Imperative defines the exact step-by-step commands to execute, whereas declarative defines the desired target end-state and lets the system compute necessary actions",
+      "Imperative encrypts configuration payloads with AES-256, whereas declarative transmits configurations in plaintext"
     ],
     correctOption: 2,
     explanation: "Imperative automation specifies the exact sequence of procedural steps (\"how\"), while declarative automation specifies the intended end-state (\"what\"), enabling idempotent reconciliation.",
     explanationsJson: {
-      0: "Incorrect: Declarative models use programmatic tokens and automated authentication.",
-      1: "Incorrect: Automation paradigms are media-independent.",
-      3: "Incorrect: Declarative models utilize structured data formats like JSON/YAML.",
+      0: "Both programming paradigms exist independently of specific languages; Ansible and Terraform use declarative models.",
+      1: "Declarative and imperative paradigms apply across all network layers and infrastructure domains.",
+      3: "Data transport security is handled by SSH, TLS, or HTTPS, completely independent of automation modeling paradigms.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -4874,17 +4874,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-403-network-automation-programmability-foundations",
     text: "An audit reveals that an engineer manually logged into a production core switch via SSH and altered the MTU on an uplink without updating the central Git repository. What problem has been introduced, and what is the risk?",
     options: [
-      "REST API exhaustion; manual SSH disables HTTP GET requests permanently.",
-      "Idempotency failure; the switch will automatically power down after 24 hours.",
-      "Broadcast storm; changing MTU causes Layer 2 loops across all VLANs.",
-      "Configuration drift; the live device state no longer matches the source of truth, risking unexpected overwrite or failure on the next automated deployment."
+      "Network segmentation; the device has dynamically created isolated VLANs to improve security across campus access switches",
+      "Software routing optimization; the operating system kernel has rewritten its configuration to increase packet forwarding throughput",
+      "Hardware transceiver degradation; physical copper cable attenuation has altered the saved startup configuration stored in NVRAM",
+      "Configuration drift; the live device state no longer matches the source of truth, risking unexpected overwrite or failure on the next automated deployment"
     ],
     correctOption: 3,
     explanation: "Manual out-of-band changes introduce configuration drift, causing physical devices to diverge from the central repository and leading to unpredictable behavior during automated rollouts.",
     explanationsJson: {
-      0: "Incorrect: SSH sessions do not disable device REST APIs.",
-      1: "Incorrect: Configuration drift does not trigger hardware power downs.",
-      2: "Incorrect: MTU mismatch causes packet drops/blackholes, not switching loops.",
+      0: "VLAN creation is deliberate; discrepancies between source of truth and running state represent configuration drift.",
+      1: "Operating systems do not arbitrarily modify persistent configuration files to optimize routing throughput.",
+      2: "Physical layer cable attenuation causes CRC errors and packet drops; it cannot rewrite software configuration syntax.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -4897,17 +4897,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-403-network-automation-programmability-foundations",
     text: "Which of the following describes an UNSAFE network automation practice that violates standard production engineering guidelines?",
     options: [
-      "Pushing configuration changes simultaneously to 1,000 production switches without dry-run diff validation or an automated rollback mechanism.",
-      "Executing pre-flight schema validation on JSON payloads before sending REST API requests.",
-      "Using Bearer tokens with least-privilege permissions instead of root credentials.",
-      "Logging every automation execution with timestamps and user identities to a centralized SIEM."
+      "Pushing configuration changes simultaneously to 1,000 production switches without dry-run diff validation or an automated rollback mechanism",
+      "Validating JSON configuration payloads against formal schema definitions before sending API requests to network devices",
+      "Executing automated configuration audits in a staging lab environment before committing changes to production devices",
+      "Storing network automation playbooks and templates in a centralized version control repository with peer review requirements"
     ],
     correctOption: 0,
     explanation: "Deploying unvalidated changes at scale without dry-run previews or rollback strategies is extremely hazardous and violates safe automation practices.",
     explanationsJson: {
-      1: "Incorrect: Pre-flight schema validation is a recommended safety practice.",
-      2: "Incorrect: Token authentication with least-privilege is a security best practice.",
-      3: "Incorrect: Centralized audit logging is required for compliance and troubleshooting.",
+      1: "Pre-deployment schema validation is a foundational best practice that prevents syntax and type errors on devices.",
+      2: "Testing in staging environments validates automation workflows safely without risking production service disruption.",
+      3: "Version control with peer review provides change tracking, auditability, and safety against human configuration errors.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.TROUBLESHOOTING,
@@ -4920,17 +4920,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-305-standard-extended-ipv4-acls",
     text: "Where should a Standard IPv4 Access Control List typically be placed according to network engineering best practices, and why?",
     options: [
-      "As close to the source as possible, to save WAN link bandwidth",
+      "As close to the source as possible, to conserve internal LAN bandwidth by discarding packets before they reach access switches",
       "As close to the destination as possible, because standard ACLs only filter by source IP and placing them near the source would block traffic to other destinations",
-      "Only on switch trunk ports, because standard ACLs cannot run on routed interfaces",
-      "Directly on the default gateway loopback interface"
+      "Only on switch trunk ports, because standard ACLs cannot be parsed by Layer 3 hardware routing engines",
+      "Directly on the default gateway loopback interface to prevent packet headers from exhausting router memory buffers"
     ],
     correctOption: 1,
     explanation: "Because Standard ACLs evaluate only the source IP address without knowing the destination, placing a standard ACL near the source would filter that host's traffic to all destinations. Placing it near the destination ensures only access to that specific network is restricted.",
     explanationsJson: {
-      0: "Placing near the source is the rule for Extended ACLs, not Standard ACLs.",
-      2: "Standard ACLs run on routed interfaces, not switch trunk ports.",
-      3: "Loopback interfaces do not filter transit user traffic.",
+      0: "Placing near the source is the rule for Extended ACLs; standard ACLs lack destination filtering and would block valid traffic to other destinations.",
+      2: "Standard ACLs are applied to routed interfaces (physical interfaces, SVIs, subinterfaces), not Layer 2 switch trunk ports.",
+      3: "Loopback interfaces do not filter transit network traffic; ACLs must be bound to transit data-plane interfaces.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -4943,16 +4943,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-305-standard-extended-ipv4-acls",
     text: "Which wildcard mask correctly matches all IPv4 hosts in the subnet 172.16.16.0/22?",
     options: [
-      "0.0.7.255",
-      "0.0.0.255",
-      "0.0.3.255",
-      "255.255.252.0"
+      "0.0.3.255 (calculated by subtracting 255.255.252.0 from 255.255.255.255)",
+      "0.0.0.255 (matches only a /24 single subnet with up to 254 hosts)",
+      "0.0.7.255 (matches a /21 block spanning 2,048 contiguous host addresses)",
+      "255.255.252.0 (the subnet mask itself rather than its bitwise inverse)"
     ],
-    correctOption: 2,
+    correctOption: 0,
     explanation: "A /22 subnet mask is 255.255.252.0. Subtracting 255.255.252.0 from 255.255.255.255 yields the wildcard mask: 255-255=0, 255-255=0, 255-252=3, 255-0=255 -> 0.0.3.255.",
     explanationsJson: {
-      0: "0.0.7.255 matches a /21 subnet (2048 addresses).",
       1: "0.0.0.255 matches a /24 subnet (256 addresses), not a /22.",
+      2: "0.0.7.255 matches a /21 subnet (2048 addresses).",
       3: "255.255.252.0 is the subnet mask itself, not the wildcard mask.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
@@ -5012,17 +5012,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-305-stateful-firewalls-connection-tracking",
     text: "What is the primary operational advantage of a Stateful Packet Inspection (SPI) firewall over a Stateless Access Control List?",
     options: [
-      "Stateful firewalls encrypt all payload data passing through the router",
+      "Stateful firewalls encrypt all payload data passing through the router using symmetric session keys negotiated via Diffie-Hellman",
       "Stateful firewalls dynamically track outbound session requests and automatically permit the corresponding return traffic without opening permanent static inbound ports",
-      "Stateful firewalls eliminate the need for IPv4 routing tables",
-      "Stateful firewalls operate at the physical layer to amplify electrical signals"
+      "Stateful firewalls eliminate the requirement for Layer 3 IP routing tables by forwarding packets strictly based on application URLs",
+      "Stateful firewalls operate exclusively at the physical layer to amplify optical laser signals across single-mode fiber links"
     ],
     correctOption: 1,
     explanation: "SPI firewalls maintain an internal connection state table. When an internal client initiates an outbound connection, the firewall records the session and dynamically allows return traffic from that specific remote server, eliminating the need to leave vulnerable inbound ports statically open.",
     explanationsJson: {
-      0: "Encryption is performed by VPN protocols (like IPsec or TLS), not by basic stateful packet inspection.",
-      2: "Firewalls still require Layer 3 routing tables to determine packet egress interfaces.",
-      3: "Firewalls operate at Layers 3, 4, and 7, not as Layer 1 repeaters.",
+      0: "Payload encryption is provided by VPN protocols like IPsec and TLS, not by stateful packet filtering engines.",
+      2: "Firewalls must route packets between interfaces using Layer 3 routing tables; statefulness evaluates session validity, not path routing.",
+      3: "Firewalls inspect Layer 3, Layer 4, and Layer 7 protocol headers; they do not function as physical layer repeaters.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -5082,16 +5082,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "A connection tracking table flags an incoming TCP packet with the RST flag enabled as INVALID. Why does the stateful engine drop this packet?",
     options: [
       "The packet does not correspond to an established session or its sequence number falls outside the valid TCP window in the state table",
-      "Stateful firewalls never permit TCP RST packets under any circumstances",
-      "The packet must be converted to UDP before traversing the firewall",
-      "The firewall buffer is 100% full"
+      "The packet destination port is lower than 1024, which is prohibited on all enterprise router perimeter firewall interfaces",
+      "The packet payload contains binary data rather than human-readable ASCII text strings",
+      "The packet source IP address does not match the public IP address configured on the firewall external WAN interface"
     ],
     correctOption: 0,
     explanation: "Stateful firewalls validate TCP sequence and acknowledgment numbers against expected window thresholds. If an unsolicited RST packet arrives that does not match an existing tracked connection, it is classified as INVALID (often a blind TCP reset attack) and dropped.",
     explanationsJson: {
-      1: "Valid RST packets that match active connections in the state table are permitted to terminate the session cleanly.",
-      2: "TCP packets cannot and should not be converted to UDP.",
-      3: "The INVALID classification is a security decision based on state tracking, not queue buffer exhaustion.",
+      1: "Well-known ports below 1024 (e.g. 80, 443, 53) are standard server ports routinely permitted by stateful firewalls.",
+      2: "Stateful firewalls inspect protocol headers and session state regardless of whether payloads contain binary or text data.",
+      3: "Inbound traffic from external Internet hosts naturally has external public IPs, not the firewall's own interface IP.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -5174,16 +5174,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "Two internal hosts (192.168.1.10 and 192.168.1.20) simultaneously connect to web server 198.51.100.1:443. Both hosts coincidentally use source port 51234. How does PAT resolve this collision on the single public IP 203.0.113.1?",
     options: [
       "PAT assigns a different unique translated source port number (e.g. 51234 to host 1 and 51235 to host 2) on the public IP 203.0.113.1",
-      "PAT drops the second host's connection attempt with an ICMP Port Unreachable error",
-      "PAT queues the second host's packets until the first host disconnects",
-      "PAT changes the destination port on the web server from 443 to 444"
+      "PAT drops the second host packet and forces the workstation to wait 5 minutes before attempting another connection",
+      "PAT rewrites the destination IP address to 127.0.0.1 and routes the packet back to the internal workstation loopback",
+      "PAT converts the second host connection into an unencrypted UDP datagram transmitted without port numbers"
     ],
     correctOption: 0,
     explanation: "PAT avoids collisions by rewriting the source port on the public interface. If host 1 uses translated port 51234, the router translates host 2 to another available port (e.g. 51235), keeping track of the mappings in the translation table.",
     explanationsJson: {
-      1: "PAT does not drop concurrent sessions with identical private source ports; it translates the port number.",
-      2: "Routers do not buffer TCP sessions waiting for port availability.",
-      3: "The destination port (443) belongs to the remote server service and must never be altered.",
+      1: "PAT dynamically manages port tables to prevent drops; it allocates an alternate available port from its pool (~65,000 ports).",
+      2: "Rewriting the destination to 127.0.0.1 would route packets to the router's own loopback rather than the Internet destination.",
+      3: "PAT preserves the Layer 4 transport protocol (TCP remains TCP) and allocates a unique translated TCP port number.",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.APPLICATION,
@@ -5219,17 +5219,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-402-ipsec-vpn-cryptographic-tunnels",
     text: "Why is Encapsulating Security Payload (ESP) preferred over Authentication Header (AH) for securing remote internet communications?",
     options: [
-      "ESP is completely free of mathematical algorithms",
-      "ESP operates at Layer 7 while AH is restricted to Layer 2",
+      "AH provides payload encryption and confidentiality, whereas ESP provides only digital signatures and authentication",
+      "AH operates at Layer 4 to establish TCP connections, whereas ESP operates at Layer 2 to encapsulate Ethernet frames",
       "ESP provides payload encryption for confidentiality in addition to integrity and authentication, whereas AH provides no encryption",
-      "AH requires dedicated hardware accelerator cards while ESP runs in browser memory"
+      "ESP is used exclusively on dial-up analog modem lines, whereas AH is used on high-speed multi-gigabit fiber connections"
     ],
     correctOption: 2,
     explanation: "ESP (IP protocol 50) encrypts user data to provide confidentiality, in addition to integrity, authentication, and anti-replay. AH (protocol 51) provides data integrity and authentication, but zero confidentiality/encryption.",
     explanationsJson: {
-      0: "ESP relies heavily on advanced cryptography (AES, 3DES, HMAC).",
-      1: "Both ESP and AH operate at Layer 3 (Network Layer) as IP protocols 50 and 51.",
-      3: "Both protocols can run in software or with hardware acceleration; neither runs in browser memory.",
+      0: "This reverses the protocols: ESP (Encapsulating Security Payload) provides encryption; AH (Authentication Header) provides NO encryption.",
+      1: "Both AH (IP protocol 51) and ESP (IP protocol 50) operate directly on top of Layer 3 IP, not as Layer 4 TCP or Layer 2 Ethernet.",
+      3: "Both protocols are deployed on modern IP infrastructure; ESP is universally preferred because it provides payload confidentiality.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -5242,17 +5242,17 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     lessonSlug: "net-402-ipsec-vpn-cryptographic-tunnels",
     text: "What is the mathematical role of the Diffie-Hellman (DH) key exchange algorithm in IKE Phase 1 negotiation?",
     options: [
-      "It signs digital certificates using a public root CA",
-      "It permanently compresses packet payloads by 90%",
-      "It calculates the shortest path through the WAN like OSPF",
+      "It permanently assigns a static public IP address to the VPN client from the ISP broadband pool",
+      "It compresses the IP packet payload using Lempel-Ziv algorithms to reduce WAN transmission bandwidth",
+      "It converts incoming Ethernet frames into optical pulses before passing data to physical transceivers",
       "It enables two peers to calculate a shared symmetric encryption secret over an insecure public channel without ever transmitting the secret key itself"
     ],
     correctOption: 3,
     explanation: "Diffie-Hellman is an asymmetric mathematical protocol that allows two communication parties to establish a shared symmetric secret over an unencrypted network without transmitting the secret across the wire.",
     explanationsJson: {
-      0: "Certificate signing is performed by asymmetric public key algorithms (RSA/ECDSA), not DH.",
-      1: "Compression is handled by LZS or Deflate, not Diffie-Hellman.",
-      2: "Shortest path calculation is done by routing protocols (OSPF, IS-IS), not cryptographic key exchanges.",
+      0: "IP address assignment across VPNs is handled by IPCP, IKE Mode-Config, or DHCP, not the Diffie-Hellman algorithm.",
+      1: "Packet compression is performed by IPComp (IP Compression Protocol), not Diffie-Hellman key exchange.",
+      2: "Electrical-to-optical signal conversion is executed by Layer 1 optical transceivers (SFPs).",
     },
     difficulty: CourseLevel.ADVANCED,
     cognitiveLevel: CognitiveLevel.UNDERSTANDING,
@@ -5266,16 +5266,16 @@ export const EXPANDED_ASSESSMENT_QUESTION_BANK: AssessmentQuestionDef[] = [
     text: "In an IPsec site-to-site VPN, what is the function of \"Interesting Traffic\" defined in a Crypto Access Control List?",
     options: [
       "It defines the source and destination subnets that trigger tunnel activation and must be encrypted before transmission across the WAN",
-      "It marks all video streaming traffic for high priority QoS treatment",
-      "It logs web browsing history to an external syslog server",
-      "It filters out spam emails before they reach the mail server"
+      "It permanently blocks all outgoing web browsing traffic on TCP port 80 to force users onto encrypted HTTPS port 443",
+      "It lists the MAC addresses of unauthorized wireless access points that must be suppressed by the switch access layer",
+      "It specifies the OSPF area numbers that are permitted to redistribute external routes into the backbone Area 0"
     ],
     correctOption: 0,
     explanation: "A Crypto ACL defines \"interesting traffic\" (Proxy ID). When a packet matches this ACL, the router initiates the IPsec tunnel (if not already active) and encrypts the packet before routing it over the public interface.",
     explanationsJson: {
-      1: "QoS traffic classification uses class maps, not crypto ACLs.",
-      2: "Logging is handled by syslog and NetFlow, not crypto maps.",
-      3: "Email spam filtering is performed by application-layer secure email gateways.",
+      1: "Crypto ACLs identify interesting traffic for IPsec tunnel encryption; they do not enforce HTTP-to-HTTPS web redirects.",
+      2: "Wireless rogue AP suppression is executed by Wireless Intrusion Prevention Systems (WIPS), not IPsec crypto ACLs.",
+      3: "OSPF route redistribution filtering is configured via route-maps and distribute-lists, not IPsec crypto ACLs.",
     },
     difficulty: CourseLevel.INTERMEDIATE,
     cognitiveLevel: CognitiveLevel.APPLICATION,

@@ -1247,6 +1247,14 @@ export const LESSONS_NET203_204: BenchmarkLessonFullDefinition[] = [
         ],
         finalResult: '`2001:db8::1` is the official canonical compressed format.',
       },
+      practice: [
+        {
+          id: 1,
+          prompt: 'Which IPv6 address scope is automatically configured on all IPv6 interfaces with prefix fe80::/10?',
+          expected: 'Link-Local Address (LLA).',
+          hints: 'It is restricted to the local link and dropped at router boundaries.',
+        },
+      ],
       recap: [
         'IPv6 provides 128-bit addresses (3.4 × 10³⁸) to overcome IPv4 exhaustion.',
         'RFC 5952 defines canonical compression: drop leading zeros and use a single :: for the longest contiguous zero run.',

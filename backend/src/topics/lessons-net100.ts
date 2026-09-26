@@ -1233,6 +1233,10 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     introduction:
       'Master fundamental network performance metrics: Latency (Transmission vs Propagation delay), Throughput vs Goodput, Packet Loss, and Jitter with simple formulas and real-world scenarios.',
     contentV2: {
+      prerequisites: [
+        'net-101-bits-bytes-binary-hex: Bit and Byte fundamentals',
+        'level-0-what-is-a-computer-network: Core network terminology',
+      ],
       objective:
         'Understand key network performance metrics—Latency, Transmission Delay, Propagation Delay, Throughput, Goodput, Packet Loss, and Jitter—and reason about performance in real-world scenarios using simple calculations.',
       explanation:
@@ -1847,6 +1851,10 @@ export const LESSONS_NET100: BenchmarkLessonFullDefinition[] = [
     introduction:
       'Master the pragmatic implementation architecture of the global Internet: The TCP/IP 4-Layer Model (RFC 1122), its functional layers, real-world protocol examples, conceptual mapping to the 7-layer OSI model, and data encapsulation flow.',
     contentV2: {
+      prerequisites: [
+        'level-0-what-is-a-computer-network: Network fundamentals',
+        'level-0-how-data-moves-across-the-internet: Packet encapsulation flow',
+      ],
       objective:
         'Understand the 4 layers of the TCP/IP suite (Application, Transport, Internet, Network Access), learn common protocol examples for each layer, master the conceptual mapping to the 7-layer OSI model, and trace top-down data encapsulation.',
       explanation:
