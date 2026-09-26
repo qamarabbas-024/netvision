@@ -11,6 +11,7 @@
  */
 
 import { NetworkSimulationEngine, NetworkSimulatorState } from '../src/topics/network-simulation.engine';
+import { TopicsService } from '../src/topics/topics.service';
 
 function assert(condition: boolean, message: string) {
   if (!condition) {
@@ -385,6 +386,62 @@ async function runZeroTrustValidationTests() {
 
   assert(serverPassed === false, 'Client-controlled passed=true ignored; server derives passed=false');
   assert(serverScore <= 50, `Client-controlled score=100 ignored; server derives score=${serverScore}`);
+
+  // 4. End-to-end TopicsService authoritative validation check
+  const mockPrisma: any = {
+    lessonLab: {
+      findUnique: async () => ({
+        id: 'lab-acl-101',
+        lessonId: 'lesson-acl',
+        lesson: { slug: 'acl-rules-standard-extended' },
+      }),
+    },
+    labAttempt: {
+      count: async () => 0,
+      create: async (args: any) => args.data,
+    },
+    userProgress: {
+      findFirst: async () => null,
+      create: async () => ({}),
+      update: async () => ({}),
+    },
+  };
+  const topicsService = new TopicsService(mockPrisma, {} as any);
+
+  // Client attempts to pass lab by supplying fake userSolution and commandHistory: ['echo permit']
+  const serviceResult = await topicsService.validateLab(
+    { userId: 'test-user-1' },
+    {
+      labId: 'lab-acl-101',
+      commandHistory: ['echo permit'],
+      hintsUsedCount: 0,
+      userSolution: {
+        acls: {
+          '101': [{ seq: 10, action: 'permit', protocol: 'ip', source: 'any', dest: 'any' }],
+        },
+      },
+    }
+  );
+  assert(serviceResult.passed === false, 'TopicsService: Fabricated userSolution does NOT pass lab (passed=false)');
+  assert(serviceResult.score === 0, `TopicsService: Score is strictly 0% (score=${serviceResult.score})`);
+
+  // Client attempts to seed session with tampered currentTopologyState
+  const executeResult = await topicsService.executeLabCommand(
+    { userId: 'test-user-2' },
+    {
+      labId: 'lab-acl-101',
+      command: 'show vlan brief',
+      currentTopologyState: {
+        acls: {
+          '101': [{ seq: 10, action: 'permit', protocol: 'ip', source: 'any', dest: 'any' }],
+        },
+        hacked: true,
+      },
+    }
+  );
+  const internalSessionState = executeResult.updatedTopologyState;
+  assert(!(internalSessionState as any).hacked, 'TopicsService: Client currentTopologyState cannot tamper with or seed session state');
+  assert(Object.keys(internalSessionState.acls || {}).length === 0, 'TopicsService: Client ACLs in currentTopologyState ignored');
 
   console.log('Scoring integrity verified: 100% server-authoritative.\n');
 

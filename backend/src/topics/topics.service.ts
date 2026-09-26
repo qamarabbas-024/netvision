@@ -637,7 +637,7 @@ export class TopicsService {
       }
 
       // Layer 3: PostgreSQL SandboxSession persistence (instance recovery across pod restarts)
-      if (!found) {
+      if (!found && this.prisma?.sandboxSession) {
         const dbSession = await this.prisma.sandboxSession.findUnique({
           where: { id: requestedSessionId },
           include: { lab: { include: { lesson: true } } },
@@ -703,7 +703,7 @@ export class TopicsService {
     }
 
     // Layer 3: PostgreSQL SandboxSession persistence (instance recovery)
-    if (!session) {
+    if (!session && this.prisma?.sandboxSession) {
       const dbSession = await this.prisma.sandboxSession.findFirst({
         where: {
           OR: [
@@ -774,21 +774,23 @@ export class TopicsService {
       }
 
       // Checkpoint to PostgreSQL SandboxSession
-      this.prisma.sandboxSession.create({
-        data: {
-          id: sessionId,
-          userId: userId || null,
-          anonymousId: anonymousId || null,
-          labId,
-          status: 'RUNNING',
-          providerType: 'SIMULATED',
-          expiresAt: new Date(Date.now() + DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC * 1000),
-          networkStateJson: initialState as any,
-          historyJson: [],
-        },
-      }).catch((err) => {
-        this.logger.warn(`Non-fatal: Failed to checkpoint sandbox session to DB: ${err?.message || err}`);
-      });
+      if (this.prisma?.sandboxSession) {
+        this.prisma.sandboxSession.create({
+          data: {
+            id: sessionId,
+            userId: userId || null,
+            anonymousId: anonymousId || null,
+            labId,
+            status: 'RUNNING',
+            providerType: 'SIMULATED',
+            expiresAt: new Date(Date.now() + DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC * 1000),
+            networkStateJson: initialState as any,
+            historyJson: [],
+          },
+        }).catch((err) => {
+          this.logger.warn(`Non-fatal: Failed to checkpoint sandbox session to DB: ${err?.message || err}`);
+        });
+      }
     }
 
     return session;
@@ -825,12 +827,9 @@ export class TopicsService {
 
     // Security Invariant: Server simulation state is strictly authoritative.
     // Untrusted client payloads cannot tamper with or mutate existing simulation state.
-    if (
-      currentTopologyState &&
-      Object.keys(currentTopologyState).length > 0 &&
-      (!session.simulatedState || Object.keys(session.simulatedState).length === 0)
-    ) {
-      session.simulatedState = currentTopologyState as any;
+    // Client-provided topology/state payloads are NEVER trusted or assigned to session state.
+    if (!session.simulatedState || Object.keys(session.simulatedState).length === 0) {
+      session.simulatedState = NetworkSimulationEngine.getInitialStateForLab(session.lessonSlug);
     }
 
     // Stale state / concurrency check (Requirement 5 & 10)
@@ -899,16 +898,18 @@ export class TopicsService {
     }
 
     // Checkpoint to PostgreSQL SandboxSession
-    this.prisma.sandboxSession.updateMany({
-      where: { id: session.sessionId },
-      data: {
-        networkStateJson: session.simulatedState as any,
-        historyJson: session.commandHistory.slice(-50),
-        expiresAt: new Date(Date.now() + DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC * 1000),
-      },
-    }).catch((err) => {
-      this.logger.warn(`Non-fatal: Failed to checkpoint sandbox session updates to DB: ${err?.message || err}`);
-    });
+    if (this.prisma?.sandboxSession) {
+      this.prisma.sandboxSession.updateMany({
+        where: { id: session.sessionId },
+        data: {
+          networkStateJson: session.simulatedState as any,
+          historyJson: session.commandHistory.slice(-50),
+          expiresAt: new Date(Date.now() + DISTRIBUTED_TTL.ACTIVE_LAB_SESSION_SEC * 1000),
+        },
+      }).catch((err) => {
+        this.logger.warn(`Non-fatal: Failed to checkpoint sandbox session updates to DB: ${err?.message || err}`);
+      });
+    }
 
     const visualState = NetworkSimulationEngine.toVisualState(
       session.lessonSlug,
