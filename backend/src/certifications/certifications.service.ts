@@ -1117,8 +1117,8 @@ export class CertificationsService {
 
     const now = new Date();
     if (attempt.status === ExamAttemptStatus.IN_PROGRESS && now > new Date(attempt.expiresAt)) {
-      await this.prisma.examAttempt.update({
-        where: { id: attemptId },
+      await this.prisma.examAttempt.updateMany({
+        where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
         data: { status: ExamAttemptStatus.EXPIRED },
       });
       attempt.status = ExamAttemptStatus.EXPIRED;
@@ -1199,8 +1199,8 @@ export class CertificationsService {
 
     const now = new Date();
     if (now > new Date(attempt.expiresAt) || attempt.status === ExamAttemptStatus.EXPIRED) {
-      await this.prisma.examAttempt.update({
-        where: { id: attemptId },
+      await this.prisma.examAttempt.updateMany({
+        where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
         data: { status: ExamAttemptStatus.EXPIRED },
       });
       throw new BadRequestException(`Exam attempt "${attemptId}" has expired. Answer submission blocked.`);
@@ -1215,8 +1215,8 @@ export class CertificationsService {
 
     answersJson[dto.questionId] = dto.selectedOption;
 
-    const updated = await this.prisma.examAttempt.update({
-      where: { id: attemptId },
+    const updateResult = await this.prisma.examAttempt.updateMany({
+      where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
       data: {
         resultMetadataJson: {
           ...resultMeta,
@@ -1225,8 +1225,12 @@ export class CertificationsService {
       },
     });
 
+    if (updateResult.count === 0) {
+      throw new BadRequestException(`Exam attempt "${attemptId}" is no longer in progress. Answers cannot be modified.`);
+    }
+
     return {
-      attemptId: updated.id,
+      attemptId,
       questionId: dto.questionId,
       selectedOption: dto.selectedOption,
       saved: true,
@@ -1257,8 +1261,8 @@ export class CertificationsService {
 
     const now = new Date();
     if (now > new Date(attempt.expiresAt) || attempt.status === ExamAttemptStatus.EXPIRED) {
-      await this.prisma.examAttempt.update({
-        where: { id: attemptId },
+      await this.prisma.examAttempt.updateMany({
+        where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
         data: { status: ExamAttemptStatus.EXPIRED },
       });
       throw new BadRequestException(`Exam attempt "${attemptId}" has expired. Configuration actions locked.`);
@@ -1364,8 +1368,8 @@ export class CertificationsService {
     actionLog.push({ timestamp: now.toISOString(), action: actionType, nodeId, payload, output: commandOutput });
     configSnapshot.actionLog = actionLog;
 
-    const updated = await this.prisma.examAttempt.update({
-      where: { id: attemptId },
+    const updateResult = await this.prisma.examAttempt.updateMany({
+      where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
       data: {
         configSnapshotJson: {
           ...configSnapshot,
@@ -1374,10 +1378,14 @@ export class CertificationsService {
       },
     });
 
+    if (updateResult.count === 0) {
+      throw new BadRequestException(`Practical exam attempt "${attemptId}" is no longer in progress. Configuration actions locked.`);
+    }
+
     const evaluated = this.evaluatePracticalState(topologyState, configSnapshot.objectives || []);
 
     return {
-      attemptId: updated.id,
+      attemptId,
       action: actionType,
       commandOutput,
       topologyState,
@@ -1410,8 +1418,8 @@ export class CertificationsService {
 
     const now = new Date();
     if (now > new Date(attempt.expiresAt) || attempt.status === ExamAttemptStatus.EXPIRED) {
-      await this.prisma.examAttempt.update({
-        where: { id: attemptId },
+      await this.prisma.examAttempt.updateMany({
+        where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
         data: { status: ExamAttemptStatus.EXPIRED },
       });
       throw new BadRequestException(`Exam attempt "${attemptId}" has expired. Hints locked.`);
@@ -1449,12 +1457,16 @@ export class CertificationsService {
     configSnapshot.hintsUsed = hintsUsed;
     configSnapshot.usedHintIds = usedHintIds;
 
-    await this.prisma.examAttempt.update({
-      where: { id: attemptId },
+    const updateResult = await this.prisma.examAttempt.updateMany({
+      where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
       data: {
         configSnapshotJson: configSnapshot,
       },
     });
+
+    if (updateResult.count === 0) {
+      throw new BadRequestException(`Practical exam attempt "${attemptId}" is no longer in progress. Hints locked.`);
+    }
 
     return {
       attemptId: attempt.id,
@@ -1489,8 +1501,8 @@ export class CertificationsService {
 
     const now = new Date();
     if (now > new Date(attempt.expiresAt) || attempt.status === ExamAttemptStatus.EXPIRED) {
-      await this.prisma.examAttempt.update({
-        where: { id: attemptId },
+      await this.prisma.examAttempt.updateMany({
+        where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
         data: { status: ExamAttemptStatus.EXPIRED },
       });
       throw new BadRequestException(`Exam attempt "${attemptId}" has expired. Actions locked.`);
@@ -1571,10 +1583,14 @@ export class CertificationsService {
     }
 
     configSnapshot.troubleshootingIncident = incident;
-    await this.prisma.examAttempt.update({
-      where: { id: attemptId },
+    const updateResult = await this.prisma.examAttempt.updateMany({
+      where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
       data: { configSnapshotJson: configSnapshot },
     });
+
+    if (updateResult.count === 0) {
+      throw new BadRequestException(`Practical exam attempt "${attemptId}" is no longer in progress. Troubleshooting actions locked.`);
+    }
 
     return {
       attemptId,
@@ -1607,8 +1623,8 @@ export class CertificationsService {
 
     const now = new Date();
     if (now > new Date(attempt.expiresAt) || attempt.status === ExamAttemptStatus.EXPIRED) {
-      await this.prisma.examAttempt.update({
-        where: { id: attemptId },
+      await this.prisma.examAttempt.updateMany({
+        where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
         data: { status: ExamAttemptStatus.EXPIRED },
       });
       throw new BadRequestException(`Exam attempt "${attemptId}" has expired. Answer submission blocked.`);
@@ -1625,8 +1641,8 @@ export class CertificationsService {
     packetAnswersJson[dto.questionId] = dto.selectedOption;
     answersJson[dto.questionId] = dto.selectedOption;
 
-    await this.prisma.examAttempt.update({
-      where: { id: attemptId },
+    const updateResult = await this.prisma.examAttempt.updateMany({
+      where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
       data: {
         resultMetadataJson: {
           ...resultMeta,
@@ -1635,6 +1651,10 @@ export class CertificationsService {
         },
       },
     });
+
+    if (updateResult.count === 0) {
+      throw new BadRequestException(`Exam attempt "${attemptId}" is no longer in progress. Answers cannot be modified.`);
+    }
 
     return {
       attemptId,
@@ -1695,9 +1715,9 @@ export class CertificationsService {
     const isSubmittedWithinTolerance = now > expiresAt && now <= maxAllowedSubmissionTime;
 
     if (now > maxAllowedSubmissionTime || attempt.status === ExamAttemptStatus.EXPIRED) {
-      await this.prisma.examAttempt.update({
-        where: { id: attemptId },
-        data: { status: ExamAttemptStatus.EXPIRED, score: 0, passed: false },
+      await this.prisma.examAttempt.updateMany({
+        where: { id: attemptId, status: ExamAttemptStatus.IN_PROGRESS },
+        data: { status: ExamAttemptStatus.EXPIRED, score: 0, passed: false, submittedAt: now },
       });
       return {
         attemptId: attempt.id,

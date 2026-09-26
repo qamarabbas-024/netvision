@@ -2525,20 +2525,64 @@ export class TopicsService {
         ],
       };
 
-      certificate = await this.prisma.certificate.create({
-        data: {
-          userId,
-          courseId: course.id,
-          credentialId,
-          verificationCode,
-          certificationCode: course.code || 'NV-NET',
-          certificationTitle: course.title,
-          recipientName: user?.fullName || user?.username || 'Candidate',
-          status: 'ACTIVE',
-          metadataJson,
-        },
-        include: { user: { select: { id: true, username: true, fullName: true } }, course: true },
-      });
+      try {
+        certificate = await this.prisma.$transaction(
+          async (tx) => {
+            const doubleCheck = await tx.certificate.findFirst({
+              where: {
+                userId,
+                OR: [
+                  { courseId: course.id },
+                  { certificationCode: course.code || 'NV-NET' },
+                ],
+                status: 'ACTIVE',
+              },
+              include: { user: { select: { id: true, username: true, fullName: true } }, course: true },
+            });
+
+            if (doubleCheck) {
+              return doubleCheck;
+            }
+
+            return await tx.certificate.create({
+              data: {
+                userId,
+                courseId: course.id,
+                credentialId,
+                verificationCode,
+                certificationCode: course.code || 'NV-NET',
+                certificationTitle: course.title,
+                recipientName: user?.fullName || user?.username || 'Candidate',
+                status: 'ACTIVE',
+                metadataJson,
+              },
+              include: { user: { select: { id: true, username: true, fullName: true } }, course: true },
+            });
+          },
+          { timeout: 15000 }
+        );
+      } catch (err: any) {
+        if (err.code === 'P2002') {
+          const fallbackCert = await this.prisma.certificate.findFirst({
+            where: {
+              userId,
+              OR: [
+                { courseId: course.id },
+                { certificationCode: course.code || 'NV-NET' },
+              ],
+              status: 'ACTIVE',
+            },
+            include: { user: { select: { id: true, username: true, fullName: true } }, course: true },
+          });
+          if (fallbackCert) {
+            certificate = fallbackCert;
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+      }
 
       // Safely award COURSE_COMPLETE achievement upon verified course completion & 80%+ assessment pass
       await this.achievementsService.awardAchievement({ userId }, 'COURSE_COMPLETE').catch(() => null);

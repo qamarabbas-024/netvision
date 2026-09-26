@@ -360,6 +360,11 @@ async function runDrop04Tests() {
           updatedScore = data.score;
           return { id: attemptId, ...data };
         },
+        updateMany: async ({ data }: any) => {
+          updatedStatus = data.status;
+          updatedScore = data.score;
+          return { count: 1 };
+        },
       },
     };
 
@@ -477,13 +482,16 @@ async function runDrop04Tests() {
 
     const certsService = new CertificationsService(mockPrisma, {} as any);
 
-    // Adversarial client sends forged score: 100, percentage: 100, passed: true in payload
+    // Adversarial client sends forged score: 100, percentage: 100, passed: true, remainingSeconds: 9999 in payload
     const maliciousPayload: any = {
       answersJson,
       score: 100,
       percentage: 100,
       passed: true,
       status: 'PASSED',
+      remainingSeconds: 99999,
+      timeRemaining: 99999,
+      durationSeconds: 1,
     };
 
     const tamperResult = await certsService.submitExamAttempt(userId, attemptId, maliciousPayload);
@@ -492,6 +500,16 @@ async function runDrop04Tests() {
     assert(tamperResult.passed === false, 'Server independently evaluated passed to false (forged true ignored)');
     assert(tamperResult.status === ExamAttemptStatus.FAILED, 'Status is strictly FAILED');
     assert(persistedScore === 40 && persistedPassed === false, 'Database persistence enforced server-computed score 40% and passed: false');
+
+    // Verify post-submission attempt to modify answers via stale browser tab is rejected
+    let postSubmissionAnswerBlocked = false;
+    try {
+      await certsService.answerQuestion(userId, attemptId, { questionId: questions[0].id, selectedOption: 3 });
+    } catch (err: any) {
+      postSubmissionAnswerBlocked = err instanceof BadRequestException;
+    }
+    assert(postSubmissionAnswerBlocked, 'Post-submission answer modification from stale browser was blocked with BadRequestException');
+
     passedTests++;
   }
 
