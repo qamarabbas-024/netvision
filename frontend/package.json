@@ -8,7 +8,7 @@
     "start": "next start -p 3000",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "ts-node --project tsconfig.test.json __tests__/runAllTests.ts"
+    "test": "ts-node -r tsconfig-paths/register --project tsconfig.test.json __tests__/runAllTests.ts"
   },
   "dependencies": {
     "@netvision/shared": "workspace:*",

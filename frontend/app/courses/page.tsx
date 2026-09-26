@@ -28,24 +28,40 @@ const INITIAL_TOPICS = FLAGSHIP_5_COURSES.map((course) => ({
 
 export default function CourseCatalogPage() {
   const [topics, setTopics] = useState<any[]>(INITIAL_TOPICS);
-  const [_isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isBackendUnavailable, setIsBackendUnavailable] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const loadTopics = async () => {
+  const loadTopics = async (signal?: AbortSignal) => {
+    setIsLoading(true);
+    setIsBackendUnavailable(false);
+    setErrorMessage(null);
     try {
-      const data = await getTopicsApi();
-      if (data && Array.isArray(data) && data.length > 0) {
+      const data = await getTopicsApi(undefined, undefined, { signal });
+      if (signal?.aborted) return;
+      if (Array.isArray(data)) {
         setTopics(data);
       }
     } catch (err: any) {
-      // Retain instant canonical flagship curriculum fallback
+      if (signal?.aborted || err?.isAborted) return;
       console.warn('Live topics sync fallback to canonical flagship dataset:', err?.message);
+      if (err?.isBackendUnavailable) {
+        setIsBackendUnavailable(true);
+        setErrorMessage(err.message || 'Service temporarily unavailable. Retaining offline curriculum.');
+      }
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadTopics();
+    const controller = new AbortController();
+    loadTopics(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   // Schema.org Course Catalog ItemList Structured Data
@@ -85,7 +101,13 @@ export default function CourseCatalogPage() {
 
         <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
           <div className="max-w-7xl mx-auto flex flex-col gap-8">
-            <CurriculumSection topics={topics} />
+            <CurriculumSection
+              topics={topics}
+              isLoading={isLoading}
+              isBackendUnavailable={isBackendUnavailable}
+              errorMessage={errorMessage}
+              onRetry={() => loadTopics()}
+            />
           </div>
         </main>
       </div>

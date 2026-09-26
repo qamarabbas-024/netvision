@@ -38,25 +38,50 @@ export default function CourseDetailPage() {
   const [topic, setTopic] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isNotFound, setIsNotFound] = useState(false);
+  const [isBackendUnavailable, setIsBackendUnavailable] = useState(false);
   const [showPrereqModal, setShowPrereqModal] = useState(false);
 
-  const loadTopicDetail = async () => {
+  const loadTopicDetail = async (signal?: AbortSignal) => {
     if (!slug) return;
     setIsLoading(true);
     setError(null);
+    setIsNotFound(false);
+    setIsBackendUnavailable(false);
     try {
-      const data = await getTopicDetailApi(slug);
-      setTopic(data);
+      const data = await getTopicDetailApi(slug, { signal });
+      if (signal?.aborted) return;
+      if (!data) {
+        setIsNotFound(true);
+        setError(`Course "${slug}" not found.`);
+      } else {
+        setTopic(data);
+      }
     } catch (err: any) {
+      if (signal?.aborted || err?.isAborted) return;
       console.error('Error fetching course detail:', err);
-      setError(err?.message || `Course "${slug}" could not be loaded.`);
+      if (err?.status === 404 || err?.isNotFound) {
+        setIsNotFound(true);
+        setError(`The requested course "${slug}" does not exist in the curriculum.`);
+      } else if (err?.isBackendUnavailable || err?.status >= 500) {
+        setIsBackendUnavailable(true);
+        setError('Service temporarily unavailable. Please verify your connection.');
+      } else {
+        setError(err?.message || `Course "${slug}" could not be loaded.`);
+      }
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadTopicDetail();
+    const controller = new AbortController();
+    loadTopicDetail(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, [slug]);
 
   if (isLoading) {
@@ -73,8 +98,7 @@ export default function CourseDetailPage() {
     );
   }
 
-  if (error || !topic) {
-    const isNotFound = error?.toLowerCase().includes('not found') || !error;
+  if (isNotFound || error || !topic) {
     return (
       <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex">
         <AppSidebar />
@@ -82,16 +106,22 @@ export default function CourseDetailPage() {
           <AppTopbar />
           <main className="p-8 flex-1 flex flex-col justify-center items-center text-center max-w-md mx-auto my-auto">
             <h2 className="text-2xl font-bold text-white mb-2">
-              {isNotFound ? 'Course Not Found' : 'Failed to Load Course Syllabus'}
+              {isNotFound
+                ? 'Course Not Found'
+                : isBackendUnavailable
+                ? 'Service Temporarily Unavailable'
+                : 'Failed to Load Course Syllabus'}
             </h2>
             <p className="text-sm text-zinc-400 mb-6 leading-relaxed">
               {isNotFound
                 ? `The course slug "${slug}" could not be located in the curriculum catalog.`
-                : error || 'An unexpected connection error occurred while retrieving course details.'}
+                : isBackendUnavailable
+                ? `Unable to connect to the learning server to retrieve syllabus for "${slug}". Please check your network and retry.`
+                : error || 'An unexpected error occurred while retrieving course details.'}
             </p>
             <div className="flex items-center gap-3">
               {!isNotFound && (
-                <Button variant="cyan" onClick={loadTopicDetail}>
+                <Button id="course-retry-btn" variant="cyan" onClick={() => loadTopicDetail()}>
                   Retry Loading
                 </Button>
               )}

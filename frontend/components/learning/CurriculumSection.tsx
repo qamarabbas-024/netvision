@@ -18,6 +18,8 @@ import {
   Sparkles,
   Clock,
   CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 
 export interface CurriculumSectionProps {
@@ -39,9 +41,19 @@ export interface CurriculumSectionProps {
     prerequisites?: string[];
     isLocked?: boolean;
   }>;
+  isLoading?: boolean;
+  isBackendUnavailable?: boolean;
+  errorMessage?: string | null;
+  onRetry?: () => void;
 }
 
-export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ topics }) => {
+export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
+  topics,
+  isLoading = false,
+  isBackendUnavailable = false,
+  errorMessage = null,
+  onRetry,
+}) => {
   const [activeTier, setActiveTier] = useState<
     'ALL' | 'FOUNDATIONAL' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
   >('ALL');
@@ -298,8 +310,36 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ topics }) 
         </div>
       </div>
 
-      {/* Course Grid */}
-      {filteredTopics.length > 0 ? (
+      {/* Course Grid & Differentiated States */}
+      {isBackendUnavailable && topics.length === 0 ? (
+        <div id="curriculum-service-unavailable" className="surface-2 p-8 sm:p-10 rounded-2xl border border-rose-500/30 text-center max-w-lg mx-auto my-8 flex flex-col items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
+            <AlertTriangle className="w-7 h-7" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-white">Service Temporarily Unavailable</h3>
+            <p className="text-xs sm:text-sm text-[#8e95a5] mt-2 leading-relaxed">
+              {errorMessage || 'Unable to connect to the NetVision learning server. Please check your network connection.'}
+            </p>
+          </div>
+          {onRetry && (
+            <Button
+              id="curriculum-retry-btn"
+              variant="primary"
+              size="sm"
+              onClick={onRetry}
+              leftIcon={<RefreshCw className="w-4 h-4" />}
+            >
+              Retry Connection
+            </Button>
+          )}
+        </div>
+      ) : topics.length === 0 ? (
+        <EmptyState
+          title="No Curriculum Available"
+          description="The learning course catalog currently contains no active courses. Check back shortly."
+        />
+      ) : filteredTopics.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTopics.map((topic) => (
             <CourseCard
@@ -313,7 +353,11 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({ topics }) 
       ) : (
         <EmptyState
           title="No Courses Match Your Criteria"
-          description="Try switching the difficulty level tab or resetting your search and status filters."
+          description={
+            searchQuery
+              ? `No courses matched your query "${searchQuery}". Try adjusting your search or clearing difficulty filters.`
+              : 'Try switching the difficulty level tab or resetting your search and status filters.'
+          }
           actionLabel="Reset Filters"
           onAction={() => {
             setActiveTier('ALL');

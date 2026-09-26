@@ -21,38 +21,68 @@ export default function LessonPage() {
   const [lesson, setLesson] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isNotFound, setIsNotFound] = useState(false);
+  const [isBackendUnavailable, setIsBackendUnavailable] = useState(false);
 
-  const loadLessonAndCourse = async () => {
+  const loadLessonAndCourse = async (signal?: AbortSignal) => {
     if (!lessonSlug) return;
     setIsLoading(true);
     setError(null);
+    setIsNotFound(false);
+    setIsBackendUnavailable(false);
     try {
-      const lessonData = await getLessonDetailApi(lessonSlug || slug);
+      const lessonData = await getLessonDetailApi(lessonSlug || slug, { signal });
+      if (signal?.aborted) return;
+
+      if (!lessonData) {
+        setIsNotFound(true);
+        setError(`Lesson "${lessonSlug}" not found.`);
+        return;
+      }
+
       const courseSlug = lessonData?.course?.slug || slug;
 
       // Fetch course detail for full sidebar modules if needed
       if (courseSlug && (!lessonData?.course?.modules || lessonData.course.modules.length === 0)) {
         try {
-          const courseDetail = await getTopicDetailApi(courseSlug);
-          if (courseDetail?.modules) {
+          const courseDetail = await getTopicDetailApi(courseSlug, { signal });
+          if (courseDetail?.modules && !signal?.aborted) {
             lessonData.course.modules = courseDetail.modules;
           }
-        } catch (e) {
+        } catch (e: any) {
+          if (e?.isAborted || signal?.aborted) return;
           console.warn('Could not fetch additional course modules for sidebar:', e);
         }
       }
 
-      setLesson(lessonData);
+      if (!signal?.aborted) {
+        setLesson(lessonData);
+      }
     } catch (err: any) {
+      if (signal?.aborted || err?.isAborted) return;
       console.error('Error fetching lesson data:', err);
-      setError(err?.message || `Failed to load lesson "${lessonSlug}".`);
+      if (err?.status === 404 || err?.isNotFound) {
+        setIsNotFound(true);
+        setError(`Could not locate lesson "${lessonSlug}" in this course.`);
+      } else if (err?.isBackendUnavailable || err?.status >= 500) {
+        setIsBackendUnavailable(true);
+        setError('Service temporarily unavailable. Please check your network connection.');
+      } else {
+        setError(err?.message || `Failed to load lesson "${lessonSlug}".`);
+      }
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadLessonAndCourse();
+    const controller = new AbortController();
+    loadLessonAndCourse(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, [slug, lessonSlug]);
 
   if (isLoading) {
@@ -65,8 +95,7 @@ export default function LessonPage() {
     );
   }
 
-  if (error || !lesson) {
-    const isNotFound = error?.toLowerCase().includes('not found') || !error;
+  if (isNotFound || error || !lesson) {
     return (
       <ProtectedRoute>
         <div className="min-h-screen surface-0 text-[#f4f5f7] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto font-sans">
@@ -74,16 +103,27 @@ export default function LessonPage() {
             <AlertTriangle className="w-6 h-6" />
           </div>
           <h2 className="text-xl sm:text-2xl font-bold text-[#f4f5f7] mb-2">
-            {isNotFound ? 'Lesson Not Found' : 'Failed to Load Lesson'}
+            {isNotFound
+              ? 'Lesson Not Found'
+              : isBackendUnavailable
+              ? 'Service Temporarily Unavailable'
+              : 'Failed to Load Lesson'}
           </h2>
           <p className="text-xs sm:text-sm text-[#8e95a5] mb-6 leading-relaxed">
             {isNotFound
               ? `Could not locate lesson "${lessonSlug}" in this course.`
+              : isBackendUnavailable
+              ? `Unable to connect to the learning server to load "${lessonSlug}". Please verify your network and retry.`
               : error || 'An unexpected connection error occurred.'}
           </p>
           <div className="flex items-center gap-3">
             {!isNotFound && (
-              <Button variant="primary" onClick={loadLessonAndCourse} leftIcon={<RefreshCw className="w-3.5 h-3.5" />}>
+              <Button
+                id="lesson-retry-btn"
+                variant="primary"
+                onClick={() => loadLessonAndCourse()}
+                leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+              >
                 Retry Loading
               </Button>
             )}

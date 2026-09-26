@@ -103,7 +103,7 @@ export const FALLBACK_COURSES: FallbackCourse[] = FLAGSHIP_5_COURSES.map((fDef: 
   };
 });
 
-export function getFallbackTopicDetail(slug: string): FallbackCourse {
+export function getFallbackTopicDetail(slug: string): FallbackCourse | null {
   const clean = slug.toLowerCase().trim();
   const found = FALLBACK_COURSES.find(
     (c) =>
@@ -112,15 +112,15 @@ export function getFallbackTopicDetail(slug: string): FallbackCourse {
       (c.credentialCode && c.credentialCode.toLowerCase() === clean) ||
       clean.includes(c.code.toLowerCase())
   );
-  return found || FALLBACK_COURSES[0];
+  return found || null;
 }
 
-export function getFallbackLessonDetail(lessonSlug: string): FallbackLesson {
+export function getFallbackLessonDetail(lessonSlug: string): FallbackLesson | null {
   for (const course of FALLBACK_COURSES) {
     for (const mod of course.modules) {
       const lesson = mod.lessons.find((l) => l.slug === lessonSlug);
       if (lesson) return lesson;
     }
   }
-  return FALLBACK_COURSES[0].modules[0].lessons[0];
+  return null;
 }

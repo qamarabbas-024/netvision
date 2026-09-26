@@ -38,11 +38,12 @@ export default function TroubleshootingCatalogPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('ALL');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
-  const loadScenarios = async () => {
+  const loadScenarios = async (signal?: AbortSignal) => {
     setIsLoading(true);
     setLoadError(null);
     try {
-      const data = await getTroubleshootingScenariosApi();
+      const data = await getTroubleshootingScenariosApi({ signal });
+      if (signal?.aborted) return;
       if (Array.isArray(data) && data.length > 0) {
         setScenarios(data);
         setIsUsingFallback(false);
@@ -51,16 +52,23 @@ export default function TroubleshootingCatalogPage() {
         setIsUsingFallback(true);
       }
     } catch (err: any) {
+      if (signal?.aborted || err?.isAborted) return;
       console.warn('Network issue fetching scenarios, falling back to local dataset:', err);
       setScenarios(FALLBACK_TROUBLESHOOTING_SCENARIOS);
       setIsUsingFallback(true);
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadScenarios();
+    const controller = new AbortController();
+    loadScenarios(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const resetFilters = () => {
@@ -296,7 +304,7 @@ export default function TroubleshootingCatalogPage() {
                         <h3 className="text-base font-bold text-white mb-1">Unable to Load Incidents</h3>
                         <p className="text-xs text-zinc-400">{loadError}</p>
                       </div>
-                      <Button variant="cyan" size="sm" onClick={loadScenarios}>
+                      <Button variant="cyan" size="sm" onClick={() => loadScenarios()}>
                         Retry Connection
                       </Button>
                     </div>

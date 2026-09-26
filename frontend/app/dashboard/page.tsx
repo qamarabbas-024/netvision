@@ -37,35 +37,45 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (signal?: AbortSignal) => {
     setIsLoading(true);
     setLoadError(null);
     try {
       const [progressData, catalogData] = await Promise.all([
-        getUserProgressApi().catch((err) => {
+        getUserProgressApi({ signal }).catch((err) => {
+          if (signal?.aborted || err?.isAborted) return null;
           console.warn('Could not fetch user progress:', err);
           return null;
         }),
-        getTopicsApi().catch((err) => {
+        getTopicsApi(undefined, undefined, { signal }).catch((err) => {
+          if (signal?.aborted || err?.isAborted) return [];
           console.warn('Could not fetch topics catalog:', err);
           return [];
         }),
       ]);
+      if (signal?.aborted) return;
       if (progressData) setUserProgress(progressData);
       if (catalogData) setTopicsCatalog(catalogData);
       if (!progressData && (!catalogData || catalogData.length === 0)) {
-        setLoadError('Unable to connect to learning server. Please check your connection.');
+        setLoadError('Service temporarily unavailable. Unable to connect to learning server.');
       }
     } catch (err: any) {
+      if (signal?.aborted || err?.isAborted) return;
       console.error('Error fetching dashboard data:', err);
       setLoadError(err?.message || 'Failed to load dashboard data.');
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadDashboardData();
+    const controller = new AbortController();
+    loadDashboardData(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const progress = userProgress || {

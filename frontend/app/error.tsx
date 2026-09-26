@@ -27,12 +27,29 @@ export default function GlobalError({
             An unexpected error occurred during page rendering. Your session state remains secure.
           </p>
         </div>
-        <button
-          onClick={() => reset()}
-          className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-orange-600 text-white font-medium text-sm hover:from-red-400 hover:to-orange-500 transition-all shadow-lg shadow-red-500/20"
-        >
-          Try Again
-        </button>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <button
+            id="error-reset-btn"
+            onClick={() => reset()}
+            className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-orange-600 text-white font-semibold text-xs hover:from-red-400 hover:to-orange-500 transition-all shadow-lg shadow-red-500/20 cursor-pointer"
+          >
+            Try Again
+          </button>
+          <a
+            id="error-dashboard-btn"
+            href="/dashboard"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-zinc-800/80 border border-zinc-700/80 text-zinc-200 hover:text-white hover:bg-zinc-700 text-xs font-semibold transition-all"
+          >
+            Dashboard
+          </a>
+          <a
+            id="error-home-btn"
+            href="/"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-zinc-800/80 border border-zinc-700/80 text-zinc-200 hover:text-white hover:bg-zinc-700 text-xs font-semibold transition-all"
+          >
+            Home
+          </a>
+        </div>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { NETWORK_DEVICES, NETWORK_LINKS, EDUCATIONAL_PACKETS, STORY_STAGES } fro
 import { NetworkDevice, NetworkScenario } from '@/types/network';
 import { Vector3Spring, ScalarSpring, SPRING_PRESETS } from '@/lib/springPhysics';
 import { useScrollSync } from '@/hooks/useScrollSync';
+import { disposeThreeScene } from '@/lib/threeDisposal';
 
 interface NetworkCanvasProps {
   currentStageId?: number;
@@ -46,6 +47,30 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
   const [projectedHudPositions, setProjectedHudPositions] = useState<{
     [key: string]: ProjectedHudData;
   }>({});
+
+  const isMountedRef = useRef<boolean>(true);
+  const isPausedRef = useRef<boolean>(isPaused);
+  const scenarioRef = useRef<NetworkScenario>(scenario);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+
+  useEffect(() => {
+    scenarioRef.current = scenario;
+  }, [scenario]);
+
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (sceneStateRef.current) {
+        sceneStateRef.current.isDragging = false;
+      }
+    };
+    window.addEventListener('mouseup', handleGlobalMouseUp);
+    return () => {
+      window.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, []);
 
   // Three.js instances ref
   const sceneStateRef = useRef<{
@@ -710,6 +735,7 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
 
     // Animation Loop
     const animate = () => {
+      if (!isMountedRef.current) return;
       const state = sceneStateRef.current;
       if (!state) return;
 
@@ -745,7 +771,7 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
         const offsets = pMesh.userData.offsets as number[];
         const posAttr = pMesh.geometry.attributes.position as THREE.BufferAttribute;
 
-        if (!isPaused) {
+        if (!isPausedRef.current) {
           for (let i = 0; i < offsets.length; i++) {
             offsets[i] = (offsets[i] + delta * 0.25) % 1;
             const pt = curve.getPoint(offsets[i]);
@@ -756,7 +782,7 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
       });
 
       // Animate Educational Packet through network path
-      if (!isPaused && state.linkCurves.length > 0) {
+      if (!isPausedRef.current && state.linkCurves.length > 0) {
         state.packetProgress = (state.packetProgress + delta * state.packetSpeed) % 1;
 
         // Path across the 4 links in sequence
@@ -786,6 +812,7 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
       state.renderer.render(state.scene, state.camera);
 
       // Project 3D HUD tag positions to 2D screen coordinates
+      if (!isMountedRef.current) return;
       const currentWidth = containerRef.current?.clientWidth || width;
       const currentHeight = containerRef.current?.clientHeight || height;
       const newHudPositions: { [key: string]: ProjectedHudData } = {};
@@ -809,24 +836,28 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
           details: pkt.details,
         };
       });
-      setProjectedHudPositions(newHudPositions);
 
-      state.animFrameId = requestAnimationFrame(animate);
+      if (isMountedRef.current) {
+        setProjectedHudPositions(newHudPositions);
+        state.animFrameId = requestAnimationFrame(animate);
+      }
     };
 
-    if (sceneStateRef.current) {
+    if (sceneStateRef.current && isMountedRef.current) {
       sceneStateRef.current.animFrameId = requestAnimationFrame(animate);
     }
 
-    // Cleanup
+    // Cleanup: aggressive WebGL context and geometry/material/texture disposal
     return () => {
+      isMountedRef.current = false;
       resizeObserver.disconnect();
       if (sceneStateRef.current) {
         cancelAnimationFrame(sceneStateRef.current.animFrameId);
-        sceneStateRef.current.renderer.dispose();
+        disposeThreeScene(sceneStateRef.current.scene, sceneStateRef.current.renderer);
+        sceneStateRef.current = null;
       }
     };
-  }, [isPaused, scenario]);
+  }, []);
 
   // Update Camera Target / Choreography with spring physics when stage, scroll, or overrides change
   useEffect(() => {

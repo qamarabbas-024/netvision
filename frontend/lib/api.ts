@@ -18,6 +18,24 @@ function getAuthHeaders(): HeadersInit {
   return headers;
 }
 
+export class ApiError extends Error {
+  status: number;
+  isBackendUnavailable: boolean;
+  isNotFound: boolean;
+  isAborted: boolean;
+  requestId?: string;
+
+  constructor(message: string, status: number, requestId?: string, isAborted = false) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.isBackendUnavailable = status >= 500 || status === 0 || status === 503;
+    this.isNotFound = status === 404;
+    this.isAborted = isAborted;
+    this.requestId = requestId;
+  }
+}
+
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   try {
@@ -52,51 +70,94 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
       } else if (res.status === 403) {
         errorMsg = 'You do not have permission to access this resource.';
       } else if (res.status >= 500) {
-        errorMsg = 'Server temporarily unavailable. Please try again.';
+        errorMsg = 'Service temporarily unavailable. Please try again.';
       }
       telemetry.captureApiError(endpoint, res.status, errorMsg, requestId);
-      throw new Error(errorMsg);
+      throw new ApiError(errorMsg, res.status, requestId);
     }
 
     return await res.json();
   } catch (err: any) {
+    if (
+      err?.name === 'AbortError' ||
+      (typeof DOMException !== 'undefined' && err instanceof DOMException && err.name === 'AbortError')
+    ) {
+      throw new ApiError('Request aborted due to navigation.', 0, undefined, true);
+    }
+    if (err instanceof ApiError) {
+      throw err;
+    }
+    const isNetworkErr = err?.message?.includes('fetch') || err?.name === 'TypeError';
+    const status = isNetworkErr ? 503 : 500;
+    const msg = isNetworkErr
+      ? 'Service temporarily unavailable. Please check your connection.'
+      : err?.message || 'Server error.';
     console.warn(`[NetVision API] Fetch failed for ${url}: ${err?.message || 'Network error'}.`);
-    throw err;
+    throw new ApiError(msg, status);
   }
 }
 
 import { FALLBACK_COURSES, getFallbackTopicDetail, getFallbackLessonDetail } from './courseCatalogData';
 
-export async function getTopicsApi(level?: string, category?: string) {
+export async function getTopicsApi(
+  level?: string,
+  category?: string,
+  options?: { signal?: AbortSignal; allowFallback?: boolean }
+) {
+  const params = new URLSearchParams();
+  if (level) params.append('level', level);
+  if (category) params.append('category', category);
+  const queryStr = params.toString() ? `?${params.toString()}` : '';
+
   try {
-    const params = new URLSearchParams();
-    if (level) params.append('level', level);
-    if (category) params.append('category', category);
-    const queryStr = params.toString() ? `?${params.toString()}` : '';
-    const res = await fetchApi<any[]>(`/courses${queryStr}`);
-    if (Array.isArray(res) && res.length > 0) return res;
-    return FALLBACK_COURSES;
-  } catch (err) {
-    console.warn('[NetVision API] Using local course catalog data fallback.');
+    const res = await fetchApi<any[]>(`/courses${queryStr}`, { signal: options?.signal });
+    if (Array.isArray(res)) return res;
+    return options?.allowFallback !== false ? FALLBACK_COURSES : [];
+  } catch (err: any) {
+    if (err?.isAborted) throw err;
+    if (options?.allowFallback === false) {
+      throw err;
+    }
+    console.warn('[NetVision API] Learning server offline, using local course catalog fallback.');
     return FALLBACK_COURSES;
   }
 }
 
-export async function getTopicDetailApi(slug: string) {
+export async function getTopicDetailApi(slug: string, options?: { signal?: AbortSignal; allowFallback?: boolean }) {
   try {
-    return await fetchApi<any>(`/courses/${slug}`);
-  } catch (err) {
-    console.warn(`[NetVision API] Using local course detail fallback for: ${slug}`);
-    return getFallbackTopicDetail(slug);
+    return await fetchApi<any>(`/courses/${slug}`, { signal: options?.signal });
+  } catch (err: any) {
+    if (err?.isAborted) throw err;
+    if (err?.status === 404) {
+      throw err;
+    }
+    if (options?.allowFallback !== false) {
+      const fallback = getFallbackTopicDetail(slug);
+      if (fallback) {
+        console.warn(`[NetVision API] Using local course detail fallback for: ${slug}`);
+        return fallback;
+      }
+    }
+    throw err;
   }
 }
 
-export async function getLessonDetailApi(slug: string) {
+export async function getLessonDetailApi(slug: string, options?: { signal?: AbortSignal; allowFallback?: boolean }) {
   try {
-    return await fetchApi<any>(`/lessons/${slug}`);
-  } catch (err) {
-    console.warn(`[NetVision API] Using local lesson detail fallback for: ${slug}`);
-    return getFallbackLessonDetail(slug);
+    return await fetchApi<any>(`/lessons/${slug}`, { signal: options?.signal });
+  } catch (err: any) {
+    if (err?.isAborted) throw err;
+    if (err?.status === 404) {
+      throw err;
+    }
+    if (options?.allowFallback !== false) {
+      const fallback = getFallbackLessonDetail(slug);
+      if (fallback) {
+        console.warn(`[NetVision API] Using local lesson detail fallback for: ${slug}`);
+        return fallback;
+      }
+    }
+    throw err;
   }
 }
 
@@ -142,8 +203,8 @@ export interface StudentDashboardMetrics {
   recentLessons: any[];
 }
 
-export async function getUserProgressApi(): Promise<StudentDashboardMetrics> {
-  return await fetchApi<StudentDashboardMetrics>('/progress/dashboard');
+export async function getUserProgressApi(options?: { signal?: AbortSignal }): Promise<StudentDashboardMetrics> {
+  return await fetchApi<StudentDashboardMetrics>('/progress/dashboard', { signal: options?.signal });
 }
 
 export async function searchApi(query: string) {
@@ -625,21 +686,23 @@ import {
 
 // Troubleshooting Engine API Client Methods with Robust Offline Fallback
 
-export async function getTroubleshootingScenariosApi(): Promise<any[]> {
+export async function getTroubleshootingScenariosApi(options?: { signal?: AbortSignal }): Promise<any[]> {
   try {
-    const data = await fetchApi<any[]>('/troubleshooting/scenarios');
+    const data = await fetchApi<any[]>('/troubleshooting/scenarios', { signal: options?.signal });
     if (Array.isArray(data) && data.length > 0) return data;
     return FALLBACK_TROUBLESHOOTING_SCENARIOS;
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.isAborted) throw err;
     console.info('[NetVision API] Troubleshooting scenarios endpoint unreachable, using built-in catalog.');
     return FALLBACK_TROUBLESHOOTING_SCENARIOS;
   }
 }
 
-export async function getTroubleshootingScenarioDetailApi(idOrSlug: string): Promise<any> {
+export async function getTroubleshootingScenarioDetailApi(idOrSlug: string, options?: { signal?: AbortSignal }): Promise<any> {
   try {
-    return await fetchApi<any>(`/troubleshooting/scenarios/${idOrSlug}`);
-  } catch (err) {
+    return await fetchApi<any>(`/troubleshooting/scenarios/${idOrSlug}`, { signal: options?.signal });
+  } catch (err: any) {
+    if (err?.isAborted) throw err;
     console.info(`[NetVision API] Scenario ${idOrSlug} endpoint unreachable, using built-in detail.`);
     const fallback = getFallbackScenarioBySlug(idOrSlug);
     if (fallback) return fallback;

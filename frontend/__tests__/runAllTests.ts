@@ -9,6 +9,7 @@ import { runDropIAccessibilityAndContrastTests } from './dropIAccessibilityAndCo
 import { runDropJMobileResponsivenessTests } from './dropJMobileResponsiveness.test';
 import { runDropKTests } from './dropKPerformanceAndPdf.test';
 import { runDropHSeoAndDiscoverabilityTests } from './dropHSeoAndDiscoverability.test';
+import { runDrop07FrontendRuntimeReliabilityTests } from './drop07FrontendRuntimeReliability.test';
 
 async function main() {
   console.log('================================================================');
@@ -56,12 +57,16 @@ async function main() {
     await runDropKTests();
     console.log('  ✓ Passed: Lazy 3D canvas, dynamic modal code-splitting, PDF anchor cleanup, and font fallbacks verified.\n');
 
-    console.log('[TEST 11/11] Running Drop H SEO & Public Discoverability Tests...');
+    console.log('[TEST 11/12] Running Drop H SEO & Public Discoverability Tests...');
     runDropHSeoAndDiscoverabilityTests();
     console.log('  ✓ Passed: Titles, meta descriptions, canonical URLs, robots, sitemap, Schema.org Course/Credential, and public verification verified.\n');
 
+    console.log('[TEST 12/12] Running Drop 07 Frontend Runtime Reliability & WebGL Tests...');
+    await runDrop07FrontendRuntimeReliabilityTests();
+    console.log('  ✓ Passed: WebGL zero-leak disposal, 25x navigation cycles, request aborts, and error model verified.\n');
+
     console.log('================================================================');
-    console.log('🎉 ALL FRONTEND TESTS PASSED SUCCESSFULLY (11/11 suites)');
+    console.log('🎉 ALL FRONTEND TESTS PASSED SUCCESSFULLY (12/12 suites)');
     console.log('================================================================');
     process.exit(0);
   } catch (error) {
