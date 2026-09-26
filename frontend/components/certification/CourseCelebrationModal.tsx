@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useModalA11y } from '@/hooks/useModalA11y';
 import {
   playCourseCelebrationSound,
   isAudioMuted,
@@ -71,16 +72,7 @@ export const CourseCelebrationModal: React.FC<CourseCelebrationProps> = ({
     }
   }, [isOpen, triggerCelebration]);
 
-  // Keyboard accessibility: ESC closes modal
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  const modalRef = useModalA11y({ isOpen, onClose });
 
   const toggleMute = () => {
     const nextMuted = !muted;
@@ -98,6 +90,7 @@ export const CourseCelebrationModal: React.FC<CourseCelebrationProps> = ({
 
   return (
     <div
+      ref={modalRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="course-celebration-title"

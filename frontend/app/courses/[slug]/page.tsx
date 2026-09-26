@@ -308,9 +308,9 @@ export default function CourseDetailPage() {
                       <Lock className="w-4 h-4" />
                     </div>
                     <div>
-                      <h4 className="text-xs font-mono font-bold text-[#8e95a5] uppercase">
+                      <h3 className="text-xs font-mono font-bold text-[#8e95a5] uppercase">
                         Course Prerequisites
-                      </h4>
+                      </h3>
                       <p className="text-xs text-[#c4c9d4]">
                         Required background: {topic.prerequisites.join(', ')}
                       </p>

@@ -69,9 +69,9 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
             
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
                   Interactive Live Network Observatory
-                </h3>
+                </h2>
               </div>
 
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed font-normal">
@@ -206,9 +206,9 @@ export const LiveObservatorySection: React.FC<LiveObservatorySectionProps> = ({
                   </div>
 
                   {/* Title */}
-                  <h4 className="text-sm font-bold text-slate-100 group-hover:text-white leading-snug mb-2">
+                  <h3 className="text-sm font-bold text-slate-100 group-hover:text-white leading-snug mb-2">
                     {card.title}
-                  </h4>
+                  </h3>
 
                   {/* Description */}
                   <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">

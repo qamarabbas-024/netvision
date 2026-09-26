@@ -47,23 +47,35 @@ export const FAQSection: React.FC = () => {
         <div className="space-y-3 pt-2">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
+            const questionId = `faq-question-${index}`;
+            const answerId = `faq-answer-${index}`;
+
             return (
               <div
                 key={index}
                 className="rounded-2xl bg-[#0f172a]/80 border border-slate-800 overflow-hidden transition-all duration-200"
               >
                 <button
+                  type="button"
+                  id={questionId}
+                  aria-expanded={isOpen}
+                  aria-controls={answerId}
                   onClick={() => setOpenIndex(isOpen ? null : index)}
-                  className="w-full px-6 py-4 flex items-center justify-between text-left font-sans font-semibold text-sm sm:text-base text-slate-200 hover:text-white transition-colors"
+                  className="w-full px-6 py-4 flex items-center justify-between text-left font-sans font-semibold text-sm sm:text-base text-slate-200 hover:text-white transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                 >
                   <span>{faq.question}</span>
                   <span className="p-1 rounded-lg bg-[#0b101c] text-slate-400">
-                    {isOpen ? <ChevronUp className="w-4 h-4 text-[#38bdf8]" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                    {isOpen ? <ChevronUp className="w-4 h-4 text-[#38bdf8]" aria-hidden="true" /> : <ChevronDown className="w-4 h-4 text-slate-400" aria-hidden="true" />}
                   </span>
                 </button>
 
                 {isOpen && (
-                  <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-slate-400 leading-relaxed font-sans border-t border-slate-800/60 animate-fadeIn">
+                  <div
+                    id={answerId}
+                    role="region"
+                    aria-labelledby={questionId}
+                    className="px-6 pb-5 pt-1 text-xs sm:text-sm text-slate-300 leading-relaxed font-sans border-t border-slate-800/60 animate-fadeIn"
+                  >
                     {faq.answer}
                   </div>
                 )}

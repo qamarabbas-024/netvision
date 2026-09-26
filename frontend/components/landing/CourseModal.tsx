@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { CurriculumStep } from '@/data/curriculumData';
 import { FLAGSHIP_5_COURSES } from '@netvision/shared';
 import { X, BookOpen, Clock, CheckCircle2, Play, ExternalLink } from 'lucide-react';
+import { useModalA11y } from '@/hooks/useModalA11y';
 
 interface CourseModalProps {
   step: CurriculumStep | null;
@@ -12,7 +13,9 @@ interface CourseModalProps {
   onStartLab: () => void;
 }
 
-export const CourseModal: React.FC<CourseModalProps> = ({ step, onClose, onStartLab }) => {
+export const CourseModal: React.FC<CourseModalProps> = ({ step, onClose, onStartLab: _onStartLab }) => {
+  const modalRef = useModalA11y({ isOpen: !!step, onClose });
+
   if (!step) return null;
 
   const getCourseSlug = (code: string): string => {
@@ -30,9 +33,11 @@ export const CourseModal: React.FC<CourseModalProps> = ({ step, onClose, onStart
       onClick={onClose}
       role="dialog"
       aria-modal="true"
+      aria-labelledby="course-modal-title"
     >
       <div
-        className="relative w-full max-w-xl bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-2xl overflow-hidden font-sans"
+        ref={modalRef}
+        className="relative w-full max-w-xl bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-2xl overflow-hidden font-sans focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -44,15 +49,16 @@ export const CourseModal: React.FC<CourseModalProps> = ({ step, onClose, onStart
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono text-[#22d3ee] font-semibold">{step.code}</span>
-                <h3 className="text-base font-bold text-white">{step.title}</h3>
+                <h2 id="course-modal-title" className="text-base font-bold text-white">{step.title}</h2>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">{step.summary}</p>
+              <p className="text-xs text-slate-300 mt-0.5">{step.summary}</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             aria-label="Close course details"
-            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer"
+            className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
             <X className="w-5 h-5" />
           </button>

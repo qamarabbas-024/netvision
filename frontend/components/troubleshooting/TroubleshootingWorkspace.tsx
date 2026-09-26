@@ -41,6 +41,7 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [cliInput, setCliInput] = useState<string>('');
   const [commandHistory, setCommandHistory] = useState<Array<{ command: string; output: string; timestamp: string }>>([]);
+  const [historyIndex, setHistoryIndex] = useState<number>(-1);
   const [isExecutingCmd, setIsExecutingCmd] = useState<boolean>(false);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState<string>('');
   const [diagnosisFeedback, setDiagnosisFeedback] = useState<{ isCorrect?: boolean; feedback?: string } | null>(null);
@@ -124,6 +125,33 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
       setCliInput('');
     } finally {
       setIsExecutingCmd(false);
+      setHistoryIndex(-1);
+    }
+  };
+
+  const handleTabCompleteCli = () => {
+    const trimmed = cliInput.trim();
+    if (!trimmed) {
+      if (scenario.allowedCommands && scenario.allowedCommands.length > 0) {
+        setCliInput(scenario.allowedCommands[0].command);
+      }
+      return;
+    }
+    const match = scenario.allowedCommands?.find((c: any) =>
+      c.command.toLowerCase().startsWith(trimmed.toLowerCase())
+    );
+    if (match) {
+      setCliInput(match.command);
+    }
+  };
+
+  const handleInterruptCli = () => {
+    if (cliInput) {
+      setCommandHistory((prev) => [
+        ...prev,
+        { command: cliInput + ' ^C', output: '[Command cancelled by user interrupt]', timestamp: new Date().toLocaleTimeString() },
+      ]);
+      setCliInput('');
     }
   };
 
@@ -433,7 +461,7 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
         {/* Right Column: Interactive Diagnostic Console & Stages (7 cols) */}
         <div className="lg:col-span-7 flex flex-col gap-6">
           {/* Diagnostic CLI Terminal */}
-          <Card className="p-5 flex flex-col gap-4 border border-[#2a2e39] surface-3 rounded-xl shadow-instrument">
+          <Card role="region" aria-label="Diagnostic Terminal Environment" className="p-5 flex flex-col gap-4 border border-[#2a2e39] surface-3 rounded-xl shadow-instrument">
             <div className="flex items-center justify-between border-b border-[#242731] pb-3">
               <div className="flex items-center gap-2">
                 <Terminal className="w-4 h-4 text-[#38bdf8]" />
@@ -464,7 +492,7 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
 
             {/* Terminal Output Screen */}
             <div
-              role="region"
+              role="log"
               aria-label="Diagnostic Terminal Output"
               aria-live="polite"
               tabIndex={0}
@@ -490,6 +518,68 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
               ))}
             </div>
 
+            {/* Mobile / Quick Command Helper Controls */}
+            <div className="flex items-center gap-1.5 flex-wrap text-[11px] font-mono text-zinc-400">
+              <span className="text-[10px] text-zinc-400 mr-1 font-semibold">Touch Helpers:</span>
+              <button
+                type="button"
+                onClick={handleTabCompleteCli}
+                className="px-2.5 py-1 rounded bg-[#16181f] hover:bg-[#2563eb]/20 hover:text-[#38bdf8] border border-[#2a2e39] text-zinc-300 min-h-[36px] min-w-[44px] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                aria-label="Tab autocomplete"
+              >
+                Tab ⇥
+              </button>
+              <button
+                type="button"
+                onClick={handleInterruptCli}
+                className="px-2.5 py-1 rounded bg-[#16181f] hover:bg-rose-500/20 hover:text-rose-300 border border-[#2a2e39] text-zinc-300 min-h-[36px] min-w-[44px] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+                aria-label="Interrupt command (Ctrl+C)"
+              >
+                Ctrl+C
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (commandHistory.length > 0) {
+                    const nextIdx = historyIndex + 1 < commandHistory.length ? historyIndex + 1 : historyIndex;
+                    setHistoryIndex(nextIdx);
+                    const targetCmd = commandHistory[commandHistory.length - 1 - nextIdx]?.command;
+                    if (targetCmd) setCliInput(targetCmd);
+                  }
+                }}
+                className="px-2.5 py-1 rounded bg-[#16181f] hover:bg-[#2563eb]/20 hover:text-[#38bdf8] border border-[#2a2e39] text-zinc-300 min-h-[36px] min-w-[44px] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                aria-label="Previous command in history"
+              >
+                ▲
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (historyIndex > 0) {
+                    const nextIdx = historyIndex - 1;
+                    setHistoryIndex(nextIdx);
+                    const targetCmd = commandHistory[commandHistory.length - 1 - nextIdx]?.command;
+                    if (targetCmd) setCliInput(targetCmd);
+                  } else if (historyIndex === 0) {
+                    setHistoryIndex(-1);
+                    setCliInput('');
+                  }
+                }}
+                className="px-2.5 py-1 rounded bg-[#16181f] hover:bg-[#2563eb]/20 hover:text-[#38bdf8] border border-[#2a2e39] text-zinc-300 min-h-[36px] min-w-[44px] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                aria-label="Next command in history"
+              >
+                ▼
+              </button>
+              <button
+                type="button"
+                onClick={() => setCommandHistory([])}
+                className="px-2.5 py-1 rounded bg-[#16181f] hover:bg-[#2563eb]/20 hover:text-[#38bdf8] border border-[#2a2e39] text-zinc-300 min-h-[36px] min-w-[44px] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8]"
+                aria-label="Clear terminal output"
+              >
+                Clear
+              </button>
+            </div>
+
             {/* CLI Input Bar */}
             <div className="flex items-center gap-2">
               <input
@@ -499,10 +589,37 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
                 value={cliInput}
                 onChange={(e) => setCliInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleRunCommand();
+                  if (e.key === 'Enter') {
+                    handleRunCommand();
+                  } else if (e.key === 'Tab') {
+                    e.preventDefault();
+                    handleTabCompleteCli();
+                  } else if (e.key === 'c' && (e.ctrlKey || e.metaKey)) {
+                    e.preventDefault();
+                    handleInterruptCli();
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (commandHistory.length > 0) {
+                      const nextIdx = historyIndex + 1 < commandHistory.length ? historyIndex + 1 : historyIndex;
+                      setHistoryIndex(nextIdx);
+                      const targetCmd = commandHistory[commandHistory.length - 1 - nextIdx]?.command;
+                      if (targetCmd) setCliInput(targetCmd);
+                    }
+                  } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (historyIndex > 0) {
+                      const nextIdx = historyIndex - 1;
+                      setHistoryIndex(nextIdx);
+                      const targetCmd = commandHistory[commandHistory.length - 1 - nextIdx]?.command;
+                      if (targetCmd) setCliInput(targetCmd);
+                    } else if (historyIndex === 0) {
+                      setHistoryIndex(-1);
+                      setCliInput('');
+                    }
+                  }
                 }}
                 placeholder="Type diagnostic command (e.g. ping, nslookup, ipconfig, show...)"
-                className="flex-1 bg-[#101115] border border-[#242731] rounded-lg px-3.5 py-2 text-xs font-mono text-[#f4f5f7] focus:outline-none focus:border-[#38bdf8] focus-visible:ring-2 focus-visible:ring-[#38bdf8]/50"
+                className="flex-1 bg-[#101115] border border-[#242731] rounded-lg px-3.5 py-2.5 text-xs font-mono text-[#f4f5f7] focus:outline-none focus:border-[#38bdf8] focus-visible:ring-2 focus-visible:ring-[#38bdf8]/50 min-h-[44px]"
               />
               <Button
                 variant="primary"
@@ -511,6 +628,7 @@ export const TroubleshootingWorkspace: React.FC<TroubleshootingWorkspaceProps> =
                 disabled={isExecutingCmd || !cliInput.trim()}
                 aria-label="Execute diagnostic command"
                 leftIcon={<Play className="w-3.5 h-3.5" aria-hidden="true" />}
+                className="min-h-[44px] px-4"
               >
                 Execute
               </Button>

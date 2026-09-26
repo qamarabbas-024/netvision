@@ -3,6 +3,7 @@
 import React from 'react';
 import { EDUCATIONAL_PACKETS } from '@/data/networkTopologyData';
 import { X, Layers, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useModalA11y } from '@/hooks/useModalA11y';
 
 interface PacketInspectorModalProps {
   packetId: string | null;
@@ -10,6 +11,8 @@ interface PacketInspectorModalProps {
 }
 
 export const PacketInspectorModal: React.FC<PacketInspectorModalProps> = ({ packetId, onClose }) => {
+  const modalRef = useModalA11y({ isOpen: !!packetId, onClose });
+
   if (!packetId) return null;
   const packet = EDUCATIONAL_PACKETS.find((p) => p.id === packetId) || EDUCATIONAL_PACKETS[0];
 
@@ -22,7 +25,8 @@ export const PacketInspectorModal: React.FC<PacketInspectorModalProps> = ({ pack
       aria-labelledby="packet-inspector-title"
     >
       <div
-        className="relative w-full max-w-xl bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-2xl overflow-hidden font-sans"
+        ref={modalRef}
+        className="relative w-full max-w-xl bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-2xl overflow-hidden font-sans focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

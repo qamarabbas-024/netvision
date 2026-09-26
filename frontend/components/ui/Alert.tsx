@@ -30,6 +30,8 @@ export const Alert: React.FC<AlertProps> = ({
 
   return (
     <div
+      role={variant === 'error' ? 'alert' : 'status'}
+      aria-live={variant === 'error' ? 'assertive' : 'polite'}
       className={cn(
         'w-full p-4 rounded-xl border flex items-start gap-3 glass-panel text-sm leading-relaxed',
         variants[variant],
@@ -37,7 +39,7 @@ export const Alert: React.FC<AlertProps> = ({
       )}
       {...props}
     >
-      <div className="mt-0.5 shrink-0">{icons[variant]}</div>
+      <div className="mt-0.5 shrink-0" aria-hidden="true">{icons[variant]}</div>
       <div className="flex-1">
         {title ? <h4 className="font-bold text-white mb-1">{title}</h4> : null}
         <div>{children}</div>

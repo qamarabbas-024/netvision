@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { X, ShieldCheck, KeyRound, Sparkles } from 'lucide-react';
+import { useModalA11y } from '@/hooks/useModalA11y';
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -12,6 +13,8 @@ interface SignInModalProps {
 export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onContinueAsGuest }) => {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useModalA11y({ isOpen, onClose, initialFocusRef: inputRef });
 
   if (!isOpen) return null;
 
@@ -30,24 +33,28 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onCon
       onClick={onClose}
       role="dialog"
       aria-modal="true"
+      aria-labelledby="signin-modal-title"
     >
       <div
-        className="relative w-full max-w-md bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-2xl overflow-hidden p-6 font-sans"
+        ref={modalRef}
+        className="relative w-full max-w-md bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-2xl overflow-hidden p-6 font-sans focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50"
         onClick={(e) => e.stopPropagation()}
       >
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+          aria-label="Close dialog"
+          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="text-center mb-6">
           <div className="w-12 h-12 rounded-xl bg-[#10b981]/15 border border-[#10b981]/40 flex items-center justify-center mx-auto mb-3 text-[#34d399]">
-            <KeyRound className="w-6 h-6" />
+            <KeyRound className="w-6 h-6" aria-hidden="true" />
           </div>
-          <h3 className="text-xl font-bold text-slate-100">Access NetVision</h3>
-          <p className="text-xs text-slate-400 mt-1">Start learning interactive networking immediately.</p>
+          <h2 id="signin-modal-title" className="text-xl font-bold text-slate-100">Access NetVision</h2>
+          <p className="text-xs text-slate-300 mt-1">Start learning interactive networking immediately.</p>
         </div>
 
         {isSubmitted ? (
@@ -76,14 +83,18 @@ export const SignInModal: React.FC<SignInModalProps> = ({ isOpen, onClose, onCon
 
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Work or Student Email</label>
+                <label htmlFor="signin-email-input" className="block text-xs font-medium text-slate-300 mb-1">
+                  Work or Student Email
+                </label>
                 <input
+                  ref={inputRef}
+                  id="signin-email-input"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="engineer@domain.com"
-                  className="w-full px-3.5 py-2.5 bg-[#0b1120] border border-slate-800 rounded-xl text-slate-100 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none font-mono"
+                  className="w-full px-3.5 py-2.5 bg-[#0b1120] border border-slate-800 rounded-xl text-slate-100 text-sm focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] outline-none font-mono placeholder:text-slate-500"
                 />
               </div>
               <button

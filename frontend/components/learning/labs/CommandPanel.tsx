@@ -106,16 +106,75 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
     }
   };
 
+  const [historyIndex, setHistoryIndex] = useState<number>(-1);
+
+  const handleKeyDownInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (history.length > 0) {
+        const nextIdx = historyIndex === -1 ? history.length - 1 : Math.max(0, historyIndex - 1);
+        setHistoryIndex(nextIdx);
+        setCommand(history[nextIdx].cmd);
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex !== -1) {
+        const nextIdx = historyIndex + 1;
+        if (nextIdx >= history.length) {
+          setHistoryIndex(-1);
+          setCommand('');
+        } else {
+          setHistoryIndex(nextIdx);
+          setCommand(history[nextIdx].cmd);
+        }
+      }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      handleTabComplete();
+    } else if (e.ctrlKey && e.key === 'c') {
+      e.preventDefault();
+      handleInterrupt();
+    }
+  };
+
+  const handleTabComplete = () => {
+    const trimmed = command.trim();
+    if (!trimmed) {
+      if (allowedCommands.length > 0) setCommand(allowedCommands[0]);
+      return;
+    }
+    const match = allowedCommands.find((c) => c.toLowerCase().startsWith(trimmed.toLowerCase()));
+    if (match) {
+      setCommand(match);
+    }
+  };
+
+  const handleInterrupt = () => {
+    if (command) {
+      setHistory((prev) => [
+        ...prev,
+        { cmd: command + ' ^C', output: '[Command cancelled by user interrupt]', time: new Date().toLocaleTimeString() },
+      ]);
+      setCommand('');
+      setHistoryIndex(-1);
+    }
+  };
+
+  const handleClearScreen = () => {
+    setHistory([]);
+    setHistoryIndex(-1);
+  };
+
   return (
-    <Card className="p-4 sm:p-5 glass-panel-glow border-[#00f0ff]/30 flex flex-col gap-4">
+    <Card className="p-4 sm:p-5 glass-panel-glow border-[#00f0ff]/30 flex flex-col gap-4 font-sans">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#272732] pb-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="cyan">CLI TERMINAL</Badge>
-          <span className="text-xs font-mono text-zinc-400">Simulated Network Socket Sandbox</span>
+          <span className="text-xs font-mono text-zinc-300">Simulated Network Socket Sandbox</span>
         </div>
 
         <span className="text-[10px] font-mono text-emerald-400 flex items-center gap-1 shrink-0">
-          <ShieldCheck className="w-3.5 h-3.5" /> Secure Sandbox Enforced
+          <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" /> Secure Sandbox Enforced
         </span>
       </div>
 
@@ -131,7 +190,7 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
 
       {/* Allowed Command Presets */}
       <div className="flex flex-wrap gap-2">
-        <span className="text-[11px] font-mono text-zinc-500 self-center">Allowed Commands:</span>
+        <span className="text-[11px] font-mono text-zinc-400 self-center">Allowed Commands:</span>
         {allowedCommands.map((c, idx) => (
           <button
             key={idx}
@@ -140,7 +199,7 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
               setCommand(c);
               handleExecute(c);
             }}
-            className="min-h-[36px] px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-[#00f0ff] font-mono text-xs border border-[#272732] transition-colors flex items-center gap-1 shrink-0 max-w-full truncate focus:outline-none focus:ring-1 focus:ring-cyan-400"
+            className="min-h-[36px] px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-zinc-200 hover:text-[#00f0ff] font-mono text-xs border border-[#272732] transition-colors flex items-center gap-1 shrink-0 max-w-full truncate focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 cursor-pointer"
             aria-label={`Execute preset command: ${c}`}
           >
             <span>{c}</span>
@@ -153,31 +212,96 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
         role="log"
         aria-live="polite"
         aria-label="Terminal command history and output"
-        className="p-3 sm:p-4 rounded-2xl bg-[#09090b] border border-[#272732] font-mono text-xs text-zinc-300 flex flex-col gap-3 min-h-[200px] max-h-[300px] overflow-y-auto"
+        tabIndex={0}
+        className="p-3 sm:p-4 rounded-2xl bg-[#09090b] border border-[#272732] font-mono text-xs text-zinc-200 flex flex-col gap-3 min-h-[200px] max-h-[300px] overflow-y-auto focus:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/50"
       >
         {history.map((h, idx) => (
           <div key={idx} className="space-y-1 relative group">
             <div className="flex flex-wrap items-center justify-between gap-1.5 text-[#00f0ff]">
               <div className="flex items-center gap-1.5">
-                <span className="text-zinc-500 text-[10px]">[{h.time}]</span>
-                <span className="text-emerald-400">netvision@sandbox:~$</span>
-                <span className="font-bold break-all">{h.cmd}</span>
+                <span className="text-zinc-400 text-[10px]">[{h.time}]</span>
+                <span className="text-emerald-400 font-semibold">netvision@sandbox:~$</span>
+                <span className="font-bold break-all text-white">{h.cmd}</span>
               </div>
               <button
                 type="button"
                 onClick={() => handleCopy(h.output, idx)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400 hover:text-cyan-300 p-1 rounded"
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400 hover:text-cyan-300 p-1 rounded cursor-pointer"
                 aria-label={`Copy output of command ${h.cmd}`}
               >
                 {copiedIdx === idx ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               </button>
             </div>
-            <pre className="text-zinc-400 whitespace-pre-wrap text-[11px] leading-relaxed pl-3 border-l border-zinc-800 break-word-all">
+            <pre className="text-zinc-300 whitespace-pre-wrap text-[11px] leading-relaxed pl-3 border-l border-zinc-800 break-word-all">
               {h.output}
             </pre>
           </div>
         ))}
         <div ref={terminalBottomRef} />
+      </div>
+
+      {/* Mobile Terminal Helper Controls (Tab, Ctrl+C, History Arrows, Clear) */}
+      <div className="flex items-center justify-between gap-1.5 py-1 px-1.5 rounded-lg bg-[#0e1017] border border-[#272732] text-xs font-mono">
+        <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold pl-1">Mobile Helper:</span>
+        <div className="flex items-center gap-1 overflow-x-auto">
+          <button
+            type="button"
+            onClick={handleTabComplete}
+            aria-label="Tab autocomplete command"
+            className="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-cyan-300 font-bold text-xs border border-zinc-700 transition-colors cursor-pointer"
+          >
+            Tab ⇥
+          </button>
+          <button
+            type="button"
+            onClick={handleInterrupt}
+            aria-label="Send user interrupt signal Ctrl+C"
+            className="px-2.5 py-1 rounded bg-zinc-800 hover:bg-rose-950/60 text-rose-400 font-bold text-xs border border-zinc-700 hover:border-rose-500/50 transition-colors cursor-pointer"
+          >
+            Ctrl+C
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (history.length > 0) {
+                const nextIdx = historyIndex === -1 ? history.length - 1 : Math.max(0, historyIndex - 1);
+                setHistoryIndex(nextIdx);
+                setCommand(history[nextIdx].cmd);
+              }
+            }}
+            aria-label="Previous command in history"
+            className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs border border-zinc-700 transition-colors cursor-pointer"
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (historyIndex !== -1) {
+                const nextIdx = historyIndex + 1;
+                if (nextIdx >= history.length) {
+                  setHistoryIndex(-1);
+                  setCommand('');
+                } else {
+                  setHistoryIndex(nextIdx);
+                  setCommand(history[nextIdx].cmd);
+                }
+              }
+            }}
+            aria-label="Next command in history"
+            className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs border border-zinc-700 transition-colors cursor-pointer"
+          >
+            ▼
+          </button>
+          <button
+            type="button"
+            onClick={handleClearScreen}
+            aria-label="Clear terminal output"
+            className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white text-xs border border-zinc-700 transition-colors cursor-pointer"
+          >
+            Clear
+          </button>
+        </div>
       </div>
 
       {/* Input Prompt Form */}
@@ -194,10 +318,14 @@ export const CommandPanel: React.FC<CommandPanelProps> = ({
           <input
             id="terminal-command-input"
             type="text"
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck="false"
             value={command}
             onChange={(e) => setCommand(e.target.value)}
+            onKeyDown={handleKeyDownInput}
             placeholder="Type terminal command (e.g. ping 192.168.1.1)..."
-            className="w-full bg-[#09090b] border border-[#272732] focus:border-[#00f0ff] rounded-xl pl-8 pr-4 py-2.5 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-colors"
+            className="w-full bg-[#09090b] border border-[#272732] focus:border-[#00f0ff] rounded-xl pl-8 pr-4 py-2.5 text-xs font-mono text-white placeholder-zinc-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-colors"
           />
         </div>
         <Button 

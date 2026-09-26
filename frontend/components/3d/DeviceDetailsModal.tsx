@@ -3,6 +3,7 @@
 import React from 'react';
 import { NetworkDevice } from '@/types/network';
 import { X, Activity, Server, Cpu, HardDrive, Radio } from 'lucide-react';
+import { useModalA11y } from '@/hooks/useModalA11y';
 
 interface DeviceDetailsModalProps {
   device: NetworkDevice | null;
@@ -10,6 +11,8 @@ interface DeviceDetailsModalProps {
 }
 
 export const DeviceDetailsModal: React.FC<DeviceDetailsModalProps> = ({ device, onClose }) => {
+  const modalRef = useModalA11y({ isOpen: !!device, onClose });
+
   if (!device) return null;
 
   return (
@@ -21,7 +24,8 @@ export const DeviceDetailsModal: React.FC<DeviceDetailsModalProps> = ({ device, 
       aria-labelledby="device-details-title"
     >
       <div 
-        className="relative w-full max-w-2xl bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-2xl overflow-hidden"
+        ref={modalRef}
+        className="relative w-full max-w-2xl bg-[#0f172a] border border-[#1e293b] rounded-2xl shadow-2xl overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

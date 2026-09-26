@@ -24,7 +24,7 @@
   --accent-emerald: #10b981;
   --accent-amber: #f59e0b;
   --accent-rose: #ef4444;
-  --text-muted: #8e95a5;
+  --text-muted: #9da4b5;
   --glow-accent: rgba(0, 240, 255, 0.25);
   color-scheme: dark;
 }
@@ -84,7 +84,7 @@
   --accent-emerald: #3fb950;
   --accent-amber: #d29922;
   --accent-rose: #f85149;
-  --text-muted: #8b949e;
+  --text-muted: #9aa5b1;
   --glow-accent: rgba(63, 185, 80, 0.25);
   color-scheme: dark;
 }
@@ -105,7 +105,7 @@
   --accent-emerald: #16a34a;
   --accent-amber: #d97706;
   --accent-rose: #dc2626;
-  --text-muted: #64748b;
+  --text-muted: #475569;
   --glow-accent: rgba(2, 132, 199, 0.2);
   color-scheme: light;
 }
@@ -114,6 +114,21 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Universal Accessible Focus Indicator (WCAG 2.4.7 Focus Visible & 2.4.11 Focus Appearance) */
+:focus-visible {
+  outline: 2px solid var(--accent-cyan, #00f0ff);
+  outline-offset: 2px;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent-cyan, #00f0ff);
+  outline-offset: 2px;
 }
 
 html,

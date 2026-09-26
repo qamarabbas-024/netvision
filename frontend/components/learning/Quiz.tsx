@@ -115,16 +115,20 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete, onContinueLesson }
             <button
               key={q.id || idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`w-2.5 h-2.5 rounded-full transition-all ${
-                currentIndex === idx
-                  ? 'bg-[#38bdf8] ring-4 ring-[#38bdf8]/20'
-                  : selectedAnswers[q.id] !== undefined
-                  ? 'bg-[#10b981]'
-                  : 'bg-[#2a2e39]'
-              }`}
+              className="p-2 -m-1 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#38bdf8] flex items-center justify-center cursor-pointer min-w-[32px] min-h-[32px]"
               title={`Question ${idx + 1}`}
               aria-label={`Jump to Question ${idx + 1}`}
-            />
+            >
+              <span
+                className={`w-2.5 h-2.5 rounded-full transition-all ${
+                  currentIndex === idx
+                    ? 'bg-[#38bdf8] ring-4 ring-[#38bdf8]/20'
+                    : selectedAnswers[q.id] !== undefined
+                    ? 'bg-[#10b981]'
+                    : 'bg-[#2a2e39]'
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>

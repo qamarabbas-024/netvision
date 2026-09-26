@@ -48,7 +48,7 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
               {/* 01. Learn */}
               <div className="p-4 rounded-xl bg-[#0b0f17] border border-slate-800 space-y-1.5">
                 <div className="text-xs font-mono font-bold text-[#34d399]">01. Learn</div>
-                <h4 className="text-sm font-bold text-slate-200">Interactive 3D Study</h4>
+                <h3 className="text-sm font-bold text-slate-200">Interactive 3D Study</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   Broaden intuition with interactive 3D simulations and active packet flows.
                 </p>
@@ -57,7 +57,7 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
               {/* 02. Practice */}
               <div className="p-4 rounded-xl bg-[#0b0f17] border border-slate-800 space-y-1.5">
                 <div className="text-xs font-mono font-bold text-[#38bdf8]">02. Practice</div>
-                <h4 className="text-sm font-bold text-slate-200">Hands-on Scenarios</h4>
+                <h3 className="text-sm font-bold text-slate-200">Hands-on Scenarios</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   Hands-on network scenarios and stress scenarios inside sandbox CLI.
                 </p>
@@ -66,7 +66,7 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
               {/* 03. Prove */}
               <div className="p-4 rounded-xl bg-[#0b0f17] border border-slate-800 space-y-1.5">
                 <div className="text-xs font-mono font-bold text-purple-400">03. Prove</div>
-                <h4 className="text-sm font-bold text-slate-200">Real-Time Exam</h4>
+                <h3 className="text-sm font-bold text-slate-200">Real-Time Exam</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   Pass real-time stress testing without accidental network failure.
                 </p>
@@ -75,7 +75,7 @@ export const CertificationSection: React.FC<CertificationSectionProps> = () => {
               {/* 04. Earn */}
               <div className="p-4 rounded-xl bg-[#0b0f17] border border-slate-800 space-y-1.5">
                 <div className="text-xs font-mono font-bold text-amber-400">04. Earn</div>
-                <h4 className="text-sm font-bold text-slate-200">Verified Certificate</h4>
+                <h3 className="text-sm font-bold text-slate-200">Verified Certificate</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
                   Obtain cryptographically verified digital certificate for employers.
                 </p>

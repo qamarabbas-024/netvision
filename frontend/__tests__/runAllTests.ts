@@ -10,6 +10,7 @@ import { runDropJMobileResponsivenessTests } from './dropJMobileResponsiveness.t
 import { runDropKTests } from './dropKPerformanceAndPdf.test';
 import { runDropHSeoAndDiscoverabilityTests } from './dropHSeoAndDiscoverability.test';
 import { runDrop07FrontendRuntimeReliabilityTests } from './drop07FrontendRuntimeReliability.test';
+import { runDrop08UxAccessibilityMobileTests } from './drop08UxAccessibilityMobile.test';
 
 async function main() {
   console.log('================================================================');
@@ -61,12 +62,16 @@ async function main() {
     runDropHSeoAndDiscoverabilityTests();
     console.log('  ✓ Passed: Titles, meta descriptions, canonical URLs, robots, sitemap, Schema.org Course/Credential, and public verification verified.\n');
 
-    console.log('[TEST 12/12] Running Drop 07 Frontend Runtime Reliability & WebGL Tests...');
+    console.log('[TEST 12/13] Running Drop 07 Frontend Runtime Reliability & WebGL Tests...');
     await runDrop07FrontendRuntimeReliabilityTests();
     console.log('  ✓ Passed: WebGL zero-leak disposal, 25x navigation cycles, request aborts, and error model verified.\n');
 
+    console.log('[TEST 13/13] Running Drop 08 Industry UX, Accessibility & Mobile Hardening Tests...');
+    runDrop08UxAccessibilityMobileTests();
+    console.log('  ✓ Passed: Semantic headings, 3D accessible matrix, terminal a11y, mobile helpers, focus visible, and touch targets verified.\n');
+
     console.log('================================================================');
-    console.log('🎉 ALL FRONTEND TESTS PASSED SUCCESSFULLY (12/12 suites)');
+    console.log('🎉 ALL FRONTEND TESTS PASSED SUCCESSFULLY (13/13 suites)');
     console.log('================================================================');
     process.exit(0);
   } catch (error) {

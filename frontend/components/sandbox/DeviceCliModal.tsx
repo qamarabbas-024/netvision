@@ -89,18 +89,90 @@ export const DeviceCliModal: React.FC<DeviceCliModalProps> = ({
     setCommandInput('');
   };
 
+  const [historyList, setHistoryList] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState<number>(-1);
+
+  const commandPresets = [
+    'help',
+    'ping 192.168.1.1',
+    'ipconfig',
+    'arp -a',
+    'route print',
+    'show mac-address-table',
+    'clear',
+  ];
+
+  const handleTabComplete = () => {
+    const trimmed = commandInput.trim();
+    if (!trimmed) {
+      setCommandInput(commandPresets[1]); // default ping
+      return;
+    }
+    const match = commandPresets.find((cmd) => cmd.toLowerCase().startsWith(trimmed.toLowerCase()));
+    if (match) {
+      setCommandInput(match);
+    }
+  };
+
+  const handleInterrupt = () => {
+    if (commandInput) {
+      setTerminalHistory((prev) => [
+        ...prev,
+        { type: 'input' as const, text: `${node.name}> ${commandInput} ^C` },
+        { type: 'output' as const, text: '[Process interrupted]' },
+      ]);
+      setCommandInput('');
+      setHistoryIndex(-1);
+    }
+  };
+
+  const handleClearScreen = () => {
+    setTerminalHistory([]);
+    setCommandInput('');
+    setHistoryIndex(-1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (historyList.length > 0) {
+        const nextIdx = historyIndex === -1 ? historyList.length - 1 : Math.max(0, historyIndex - 1);
+        setHistoryIndex(nextIdx);
+        setCommandInput(historyList[nextIdx]);
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex !== -1) {
+        const nextIdx = historyIndex + 1;
+        if (nextIdx >= historyList.length) {
+          setHistoryIndex(-1);
+          setCommandInput('');
+        } else {
+          setHistoryIndex(nextIdx);
+          setCommandInput(historyList[nextIdx]);
+        }
+      }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      handleTabComplete();
+    } else if (e.ctrlKey && e.key === 'c') {
+      e.preventDefault();
+      handleInterrupt();
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={`Interactive CLI Terminal • ${node.name}`}
       description={`Device IP: ${node.ipAddress} • MAC: ${node.macAddress}`}
-      className="max-w-2xl"
+      className="max-w-2xl font-sans"
     >
-      <div className="flex flex-col gap-3 font-mono text-xs">
+      <div role="region" aria-label="Simulated Terminal Environment" className="flex flex-col gap-3 font-mono text-xs">
         {/* Terminal Screen Window */}
         <div
-          role="region"
+          role="log"
           aria-label="Simulated Terminal Output"
           aria-live="polite"
           tabIndex={0}
@@ -114,24 +186,101 @@ export const DeviceCliModal: React.FC<DeviceCliModalProps> = ({
           <div ref={bottomRef} />
         </div>
 
+        {/* Mobile Terminal Helper Controls */}
+        <div className="flex items-center justify-between gap-1.5 py-1 px-1.5 rounded-lg bg-[#0e1017] border border-[#272732] text-xs font-mono">
+          <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold pl-1">Mobile Helper:</span>
+          <div className="flex items-center gap-1 overflow-x-auto">
+            <button
+              type="button"
+              onClick={handleTabComplete}
+              aria-label="Tab autocomplete command"
+              className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-cyan-300 font-bold text-xs border border-zinc-700 cursor-pointer"
+            >
+              Tab ⇥
+            </button>
+            <button
+              type="button"
+              onClick={handleInterrupt}
+              aria-label="Send user interrupt signal Ctrl+C"
+              className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-rose-950/60 text-rose-400 font-bold text-xs border border-zinc-700 cursor-pointer"
+            >
+              Ctrl+C
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (historyList.length > 0) {
+                  const nextIdx = historyIndex === -1 ? historyList.length - 1 : Math.max(0, historyIndex - 1);
+                  setHistoryIndex(nextIdx);
+                  setCommandInput(historyList[nextIdx]);
+                }
+              }}
+              aria-label="Previous command in history"
+              className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs border border-zinc-700 cursor-pointer"
+            >
+              ▲
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (historyIndex !== -1) {
+                  const nextIdx = historyIndex + 1;
+                  if (nextIdx >= historyList.length) {
+                    setHistoryIndex(-1);
+                    setCommandInput('');
+                  } else {
+                    setHistoryIndex(nextIdx);
+                    setCommandInput(historyList[nextIdx]);
+                  }
+                }
+              }}
+              aria-label="Next command in history"
+              className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs border border-zinc-700 cursor-pointer"
+            >
+              ▼
+            </button>
+            <button
+              type="button"
+              onClick={handleClearScreen}
+              aria-label="Clear terminal output screen"
+              className="px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white text-xs border border-zinc-700 cursor-pointer"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
         {/* Command Form */}
-        <form onSubmit={handleExecuteCommand} className="flex items-center gap-2">
+        <form
+          onSubmit={(e) => {
+            if (commandInput.trim()) {
+              setHistoryList((prev) => [...prev, commandInput.trim()]);
+              setHistoryIndex(-1);
+            }
+            handleExecuteCommand(e);
+          }}
+          className="flex items-center gap-2"
+        >
           <div className="flex-1 px-3 py-2 rounded-xl bg-[#121217] border border-[#272732] flex items-center gap-2 focus-within:border-[#00f0ff]/80 transition-colors">
             <Terminal className="w-4 h-4 text-[#00f0ff]" aria-hidden="true" />
             <input
               type="text"
               id="device-cli-command-input"
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck="false"
               aria-label="CLI Command Input"
               value={commandInput}
               onChange={(e) => setCommandInput(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Type CLI command e.g. 'ping 192.168.1.1' or 'ipconfig'..."
-              className="w-full bg-transparent text-white focus:outline-none text-xs font-mono"
+              className="w-full bg-transparent text-white placeholder-zinc-500 focus:outline-none text-xs font-mono"
             />
           </div>
           <button
             type="submit"
             aria-label="Execute CLI Command"
-            className="px-4 py-2 rounded-xl bg-[#00f0ff] text-black font-bold hover:bg-[#00f0ff]/80 transition-colors shrink-0 flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[#00f0ff]"
+            className="px-4 py-2 rounded-xl bg-[#00f0ff] text-black font-bold hover:bg-[#00f0ff]/80 transition-colors shrink-0 flex items-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-[#00f0ff] cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" aria-hidden="true" /> Execute
           </button>

@@ -18,6 +18,7 @@ import {
   Flame,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { useModalA11y } from '@/hooks/useModalA11y';
 import {
   playMasteryCelebrationFanfare,
   isAudioMuted,
@@ -91,16 +92,7 @@ export const MasteryCelebrationModal: React.FC<MasteryCelebrationProps> = ({
     }
   }, [isOpen, triggerCelebrationSequence]);
 
-  // Keyboard accessibility: ESC closes modal
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
-        onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  const modalRef = useModalA11y({ isOpen, onClose });
 
   const toggleMute = () => {
     const nextMuted = !muted;
@@ -118,6 +110,7 @@ export const MasteryCelebrationModal: React.FC<MasteryCelebrationProps> = ({
 
   return (
     <div
+      ref={modalRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="mastery-celebration-title"

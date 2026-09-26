@@ -139,29 +139,37 @@ export const ProctoredExamStudio: React.FC = () => {
                   <span className="text-xs font-bold text-white block">
                     Question {idx + 1}: {q.question}
                   </span>
-                  <div className="space-y-2">
-                    {q.options.map((opt, oIdx) => (
-                      <button
-                        key={oIdx}
-                        onClick={() => {
-                          SoundFx.playTerminalKeyPress();
-                          setSelectedAnswers({ ...selectedAnswers, [q.id]: oIdx });
-                        }}
-                        className={`w-full p-2.5 rounded-xl border text-left text-xs font-mono transition-all ${
-                          selectedAnswers[q.id] === oIdx
-                            ? 'border-[#00f0ff] bg-cyan-950/30 text-white font-bold'
-                            : 'border-[#262c42] bg-[#0f111a] text-zinc-300 hover:border-zinc-600'
-                        }`}
-                      >
-                        {String.fromCharCode(65 + oIdx)}. {opt}
-                      </button>
-                    ))}
+                  <div className="space-y-2" role="radiogroup" aria-label={`Question ${idx + 1}: ${q.question}`}>
+                    {q.options.map((opt, oIdx) => {
+                      const isSelected = selectedAnswers[q.id] === oIdx;
+                      return (
+                        <button
+                          key={oIdx}
+                          type="button"
+                          role="radio"
+                          aria-checked={isSelected}
+                          aria-label={`Option ${String.fromCharCode(65 + oIdx)}: ${opt}`}
+                          onClick={() => {
+                            SoundFx.playTerminalKeyPress();
+                            setSelectedAnswers({ ...selectedAnswers, [q.id]: oIdx });
+                          }}
+                          className={`w-full min-h-[44px] p-3 rounded-xl border text-left text-xs font-mono transition-all flex items-center gap-2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00f0ff] ${
+                            isSelected
+                              ? 'border-[#00f0ff] bg-cyan-950/30 text-white font-bold'
+                              : 'border-[#262c42] bg-[#0f111a] text-zinc-300 hover:border-zinc-600'
+                          }`}
+                        >
+                          <span className="font-bold text-[#00f0ff] shrink-0">{String.fromCharCode(65 + oIdx)}.</span>
+                          <span>{opt}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="p-6 rounded-2xl bg-emerald-950/20 border border-emerald-500/40 flex flex-col items-center text-center gap-3 animate-in fade-in">
+            <div className="p-6 rounded-2xl bg-emerald-950/20 border border-emerald-500/40 flex flex-col items-center text-center gap-3 animate-in fade-in" role="status">
               <CheckCircle2 className="w-12 h-12 text-emerald-400" />
               <h3 className="text-lg font-bold text-white">Certification Assessment Passed (Score: 92%)</h3>
               <p className="text-xs text-zinc-300">
@@ -212,7 +220,12 @@ export const ProctoredExamStudio: React.FC = () => {
           </div>
 
           {/* Violation Stream */}
-          <div className="space-y-1.5 max-h-[140px] overflow-y-auto">
+          <div
+            role="log"
+            aria-label="Audit Event Log"
+            aria-live="polite"
+            className="space-y-1.5 max-h-[140px] overflow-y-auto"
+          >
             <span className="text-[10px] font-mono text-zinc-500 uppercase font-bold block">
               Audit Event Log
             </span>

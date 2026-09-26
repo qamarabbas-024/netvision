@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Terminal as TerminalIcon, CornerDownLeft, Sparkles } from 'lucide-react';
+import { useModalA11y } from '@/hooks/useModalA11y';
 
 interface InteractiveTerminalModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export const InteractiveTerminalModal: React.FC<InteractiveTerminalModalProps> =
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useModalA11y({ isOpen, onClose, initialFocusRef: inputRef });
 
   const quickSuggestions = [
     'ping 142.250.72.14',
@@ -182,6 +184,34 @@ export const InteractiveTerminalModal: React.FC<InteractiveTerminalModalProps> =
     setCommand('');
   };
 
+  const handleTabComplete = () => {
+    const trimmed = command.trim();
+    if (!trimmed) {
+      if (quickSuggestions.length > 0) setCommand(quickSuggestions[0]);
+      return;
+    }
+    const match = quickSuggestions.find((c) => c.toLowerCase().startsWith(trimmed.toLowerCase()));
+    if (match) {
+      setCommand(match);
+    }
+  };
+
+  const handleInterrupt = () => {
+    if (command) {
+      setHistory((prev) => [
+        ...prev,
+        { cmd: command + ' ^C', output: <span className="text-rose-400 font-mono">[Command interrupted by user]</span> },
+      ]);
+      setCommand('');
+      setHistoryIndex(-1);
+    }
+  };
+
+  const handleClearScreen = () => {
+    setHistory([]);
+    setHistoryIndex(-1);
+  };
+
   const handleKeyDownInput = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowUp') {
       e.preventDefault();
@@ -202,19 +232,26 @@ export const InteractiveTerminalModal: React.FC<InteractiveTerminalModalProps> =
           setCommand(cmdList[nextIdx]);
         }
       }
+    } else if (e.key === 'Tab') {
+      e.preventDefault();
+      handleTabComplete();
+    } else if (e.ctrlKey && e.key === 'c') {
+      e.preventDefault();
+      handleInterrupt();
     }
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-md animate-fadeIn"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="terminal-modal-title"
     >
       <div
-        className="relative w-full max-w-2xl bg-[#090d16] border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden font-mono flex flex-col h-[520px]"
+        ref={modalRef}
+        className="relative w-full max-w-2xl bg-[#090d16] border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden font-mono flex flex-col h-[520px] max-h-[85dvh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Terminal Header */}
@@ -233,14 +270,20 @@ export const InteractiveTerminalModal: React.FC<InteractiveTerminalModalProps> =
           <button
             onClick={onClose}
             aria-label="Close interactive terminal"
-            className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Terminal Screen Body */}
-        <div className="flex-1 p-4 overflow-y-auto space-y-3 text-xs text-slate-300">
+        {/* Terminal Screen Body with Screen Reader Live Updates */}
+        <div
+          role="log"
+          aria-live="polite"
+          aria-label="Interactive terminal output"
+          tabIndex={0}
+          className="flex-1 p-4 overflow-y-auto space-y-3 text-xs text-slate-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/40"
+        >
           {history.map((item, idx) => (
             <div key={idx} className="space-y-1">
               {item.cmd && (
@@ -258,7 +301,7 @@ export const InteractiveTerminalModal: React.FC<InteractiveTerminalModalProps> =
 
         {/* Quick Suggestion Chips */}
         <div className="px-4 py-2 bg-[#060a12] border-t border-slate-800/80 flex flex-wrap items-center gap-1.5 text-[10px]">
-          <span className="text-slate-500 flex items-center gap-1 font-sans">
+          <span className="text-slate-400 flex items-center gap-1 font-sans">
             <Sparkles className="w-3 h-3 text-emerald-400" /> Quick:
           </span>
           {quickSuggestions.map((cmdText) => (
@@ -266,11 +309,75 @@ export const InteractiveTerminalModal: React.FC<InteractiveTerminalModalProps> =
               key={cmdText}
               type="button"
               onClick={() => runCommandDirect(cmdText)}
-              className="px-2 py-0.5 rounded-md bg-[#0f172a] hover:bg-emerald-950/40 border border-slate-700/60 hover:border-emerald-500/40 text-slate-300 hover:text-emerald-300 transition-all cursor-pointer font-mono"
+              className="px-2 py-0.5 rounded-md bg-[#0f172a] hover:bg-emerald-950/40 border border-slate-700/60 hover:border-emerald-500/40 text-slate-300 hover:text-emerald-300 transition-all cursor-pointer font-mono focus:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400"
             >
               {cmdText}
             </button>
           ))}
+        </div>
+
+        {/* Mobile Helper Controls (Tab, Ctrl+C, Up/Down History, Clear) */}
+        <div className="px-4 py-1.5 bg-[#0b101c] border-t border-slate-800/80 flex items-center justify-between gap-1 text-xs">
+          <span className="text-[10px] text-slate-400 uppercase font-sans font-semibold">Mobile Helper:</span>
+          <div className="flex items-center gap-1 overflow-x-auto">
+            <button
+              type="button"
+              onClick={handleTabComplete}
+              aria-label="Tab autocomplete command"
+              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs border border-slate-700 cursor-pointer"
+            >
+              Tab ⇥
+            </button>
+            <button
+              type="button"
+              onClick={handleInterrupt}
+              aria-label="Send user interrupt signal Ctrl+C"
+              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-rose-950/60 text-rose-400 font-bold text-xs border border-slate-700 cursor-pointer"
+            >
+              Ctrl+C
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (cmdList.length > 0) {
+                  const nextIdx = historyIndex === -1 ? cmdList.length - 1 : Math.max(0, historyIndex - 1);
+                  setHistoryIndex(nextIdx);
+                  setCommand(cmdList[nextIdx]);
+                }
+              }}
+              aria-label="Previous command in history"
+              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 cursor-pointer"
+            >
+              ▲
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (historyIndex !== -1) {
+                  const nextIdx = historyIndex + 1;
+                  if (nextIdx >= cmdList.length) {
+                    setHistoryIndex(-1);
+                    setCommand('');
+                  } else {
+                    setHistoryIndex(nextIdx);
+                    setCommand(cmdList[nextIdx]);
+                  }
+                }
+              }}
+              aria-label="Next command in history"
+              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 cursor-pointer"
+            >
+              ▼
+            </button>
+            <button
+              type="button"
+              onClick={handleClearScreen}
+              aria-label="Clear terminal output screen"
+              className="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs border border-slate-700 cursor-pointer"
+            >
+              Clear
+            </button>
+          </div>
         </div>
 
         {/* Command Input Prompt */}
@@ -286,16 +393,20 @@ export const InteractiveTerminalModal: React.FC<InteractiveTerminalModalProps> =
           <input
             ref={inputRef}
             type="text"
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck="false"
+            aria-label="Terminal command prompt"
             value={command}
             onChange={(e) => setCommand(e.target.value)}
             onKeyDown={handleKeyDownInput}
             placeholder="Type network command (e.g. ping, traceroute, help)..."
-            className="flex-1 bg-transparent border-none text-xs text-white placeholder-slate-500 focus:outline-none font-mono"
+            className="flex-1 bg-transparent border-none text-xs text-white placeholder-slate-400 focus:outline-none font-mono"
           />
           <button
             type="submit"
             aria-label="Execute command"
-            className="p-1.5 rounded-lg bg-[#10b981]/20 hover:bg-[#10b981]/30 text-[#34d399] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg bg-[#10b981]/20 hover:bg-[#10b981]/30 text-[#34d399] transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             <CornerDownLeft className="w-3.5 h-3.5" />
           </button>
