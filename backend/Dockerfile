@@ -1,57 +1,51 @@
-# Backend NestJS Production Dockerfile
-# Node version must match CI (.github/workflows/ci.yml uses node: 24)
-FROM node:24-alpine AS base
+# NetVision Backend Multi-Stage Production Dockerfile
+FROM node:22-alpine AS builder
+RUN apk add --no-cache python3 make g++ openssl
+RUN npm install -g pnpm@11.20.0
 
-# ── deps stage: install dependencies using pnpm (project package manager) ────
-FROM base AS deps
 WORKDIR /app
 
-# Enable corepack so pnpm is available at the pinned version
-RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
+# Copy workspace manifests
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
+COPY packages/shared ./packages/shared
+COPY packages/ui ./packages/ui
+COPY packages/simulation-engine ./packages/simulation-engine
+COPY backend ./backend
 
-# Copy workspace manifests and lockfile first (layer cache)
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY packages/shared/package.json ./packages/shared/
-COPY backend/package.json ./backend/
-
-# Install ALL workspace dependencies with frozen lockfile (no silent updates)
+# Install dependencies and build shared packages + backend (fail-closed on error)
 RUN pnpm install --frozen-lockfile
+RUN pnpm --filter netvision-backend prisma:generate
+RUN pnpm --filter @netvision/shared build
+RUN pnpm --filter @netvision/simulation-engine build
+RUN pnpm --filter netvision-backend build
 
-# ── builder stage: generate Prisma client and compile NestJS ──────────────────
-FROM base AS builder
+# Production Runner Stage
+FROM node:22-alpine AS runner
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@11.20.0 --activate
+ENV NODE_ENV=production
+ENV PORT=4000
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# Install OpenSSL for Prisma engine compatibility on Alpine Linux
+RUN apk add --no-cache openssl
+
+# Copy workspace structure and compiled production artifacts
+COPY --from=builder /app/package.json /app/pnpm-workspace.yaml ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/shared ./packages/shared
+COPY --from=builder /app/packages/simulation-engine ./packages/simulation-engine
+COPY --from=builder /app/backend/package.json ./backend/package.json
+COPY --from=builder /app/backend/prisma ./backend/prisma
+COPY --from=builder /app/backend/node_modules ./backend/node_modules
+COPY --from=builder /app/backend/dist ./backend/dist
 
 WORKDIR /app/backend
 
-# Generate Prisma client using backend's installed prisma package
-RUN pnpm prisma generate
+USER node
 
-# Compile TypeScript → dist/
-RUN pnpm build
-
-# ── runner stage: minimal production image ────────────────────────────────────
-FROM base AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nestjs
-
-# Copy only what is needed at runtime
-COPY --from=builder /app/backend/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/backend/package.json ./package.json
-
-# Copy Prisma schema so `prisma migrate deploy` can run at startup
-COPY --from=builder /app/backend/prisma ./prisma
-
-USER nestjs
 EXPOSE 4000
-ENV PORT=4000
 
-CMD ["node", "dist/main.js"]
+HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:4000/ready || exit 1
+
+CMD ["node", "dist/backend/src/main.js"]

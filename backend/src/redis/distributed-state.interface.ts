@@ -56,7 +56,7 @@ export const DISTRIBUTED_TTL = {
   REFRESH_TOKEN_REVOCATION_SEC: 7 * 86400,           // 7 days (covers refresh token window)
   USER_REVOCATION_CUTOFF_SEC: 30 * 86400,            // 30 days (covers long-lived device cutoffs)
   REFRESH_FAMILY_TTL_SEC: 7 * 86400,                 // 7 days
-  CONCURRENT_REFRESH_GRACE_SEC: 10,                  // 10 seconds grace for rapid multi-tab refresh
+  CONCURRENT_REFRESH_GRACE_SEC: 5,                   // 5 seconds grace for rapid multi-tab refresh
 
   // User State TTLs
   ACTIVE_LAB_SESSION_SEC: 2 * 3600,                  // 2 hours (sliding TTL on each interaction)

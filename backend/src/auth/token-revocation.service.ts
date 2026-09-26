@@ -55,7 +55,7 @@ export class TokenRevocationService implements OnModuleDestroy {
   private familyTokens = new Map<string, Set<string>>();
 
   // Grace period for concurrent refresh requests (e.g. multi-tab browser refresh)
-  private readonly concurrentGracePeriodMs = 10000;
+  private readonly concurrentGracePeriodMs = DISTRIBUTED_TTL.CONCURRENT_REFRESH_GRACE_SEC * 1000;
 
   private cleanupInterval: NodeJS.Timeout | null = null;
 

@@ -90,6 +90,10 @@ jobs:
           npx ts-node scripts/test-drop-06-prisma-integrity.ts
           npx ts-node scripts/test-drop-10-performance-scalability.ts
           npx ts-node scripts/test-drop-11-devops-consistency.ts
+          npx ts-node scripts/test-drop-12-observability-dr.ts
+          npx ts-node scripts/test-drop-13-academic-quality.ts
+          npx ts-node scripts/test-drop-14-architecture-hardening.ts
+          npx ts-node scripts/test-drop-z-e2e-adversarial.ts
 
       - name: Build Production Artifacts
         run: pnpm build

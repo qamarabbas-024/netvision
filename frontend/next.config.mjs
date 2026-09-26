@@ -43,6 +43,10 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://avatars.githubusercontent.com https://lh3.googleusercontent.com https://images.unsplash.com; font-src 'self' data:; connect-src 'self' http://localhost:* https://*.netvision.edu; frame-ancestors 'self';",
+          },
         ],
       },
     ];
