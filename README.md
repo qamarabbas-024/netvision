@@ -134,8 +134,8 @@ netvision/
 
 ### Prerequisites
 
-- **Node.js**: `v20.x` or higher
-- **pnpm**: `v11.x` or higher (`corepack enable pnpm` or `npm install -g pnpm@11.20.0`)
+- **Node.js**: `v22.x` LTS (`>=22.0.0 <25.0.0`)
+- **pnpm**: `v11.x` (`corepack enable pnpm` or `npm install -g pnpm@11.20.0`)
 - **Docker**: For containerized PostgreSQL database (optional if running local PostgreSQL)
 
 ### 1. Clone & Install Dependencies
