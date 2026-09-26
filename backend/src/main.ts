@@ -67,6 +67,7 @@ async function bootstrap() {
       '/health',
       '/health/live',
       '/health/ready',
+      '/live',
       '/ready',
       '/monitoring/metrics',
       '/monitoring/alerts',

@@ -33,7 +33,7 @@ The backend container compiles TypeScript source, Prisma client models, and work
 - **Healthcheck Probe**:
   ```dockerfile
   HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:4000/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:4000/ready || exit 1
   ```
 - **Entrypoint**: `CMD ["node", "dist/backend/src/main.js"]`
 
@@ -146,7 +146,7 @@ services:
       migration:
         condition: service_completed_successfully
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:4000/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:4000/ready || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -311,16 +311,37 @@ In `backend/src/main.ts`:
 - `PrismaService.onModuleDestroy()`:
   - Invokes `await this.$disconnect()` to gracefully drain and close PostgreSQL connection pool.
 
-### 7.3 Transient Database Failure Resilience
+### 7.3 Bounded Database Resilience & Fail-Fast Classification
 
-In `backend/src/database/prisma.service.ts`:
-- Prisma query middleware intercepts transient network disruptions (`P1001`, `P1017`, `ETIMEDOUT`, `ECONNRESET`, server closed connection).
-- Executes up to 6 retry attempts with exponential backoff (`1000ms`, `2000ms`, `4000ms`...) before surfacing failure.
-- Startup connection failure is logged as a warning, enabling containers to boot while database instances warm up.
+In `backend/src/database/prisma.service.ts` and `backend/src/database/database-error.util.ts`:
+- **Authoritative Error Classification**:
+  - `PROVIDER_QUOTA` (Neon compute quota exceeded, rate limits): Fails fast immediately (0 retries), maps to HTTP 503 with `Retry-After: 30`.
+  - `AUTHENTICATION` (`P1000`, `P1010`, access denied): Fails fast immediately (0 retries), maps to HTTP 503.
+  - `SCHEMA_MIGRATION` (`P1003`, `P2021`, missing tables/columns): Fails fast immediately (0 retries), maps to HTTP 503.
+  - `VALIDATION_CONSTRAINT` (`P2002`, `P2025`, `P2003`, invalid input): Client faults fail immediately (0 retries), mapping to HTTP 409, 404, or 400.
+  - `CONNECTION_EXHAUSTED` (`P1001`, `P1002`, `P2024`, host unreachable): Fails fast (0 retries), avoiding multi-second retry storms on dead or saturated instances.
+  - `TRANSIENT_CONNECTION` (`P1017`, `P2034`, socket reset): Bounded retry only (max 2 retries, initial delay 100ms + jitter, total budget <= 500ms). Eliminates 31-second request storms.
+- **Probe Isolation**: Raw queries (`queryRaw`, `executeRaw`) completely bypass retries.
+- **Connection Pool Bounding**: `sanitizeDatabaseUrl()` clamps `pool_timeout` and `connect_timeout` <= 10s to prevent prolonged request starvation in connection pool queues.
+- **Health Probe Protection**: In `MonitoringService`, database probes implement 2000ms TTL caching, in-flight coalescing (thundering herd protection), and strict 2000ms query timeouts.
 
-### 7.4 Health Check Endpoints Summary
+### 7.4 Liveness vs Readiness Probe Architecture (Docker & Render)
 
-- **Backend Liveness**: `GET /health` or `GET /api/v1/health` &rarr; Returns `{ status: "ok", database: "healthy" }`.
-- **Backend Readiness**: `GET /ready` or `GET /api/v1/ready` &rarr; Returns `200 OK` when DB latency is healthy; returns `503 Service Unavailable` if database disconnected.
+- **Liveness Probe** (`/health`, `/health/live`, `/live`):
+  - Purpose: Determines whether the Node.js application process is alive and accepting HTTP traffic.
+  - Behavior: Strictly checks process health and uptime; does **NOT** issue external database queries.
+  - Status: Always returns HTTP 200 OK while the event loop and HTTP server are responsive.
+- **Readiness Probe** (`/ready`, `/health/ready`):
+  - Purpose: Verifies required downstream dependencies (PostgreSQL database) before routing traffic.
+  - Behavior: Runs cached, debounced database probe query.
+  - Status: Returns HTTP 200 `ready` when dependencies are operational; returns HTTP 503 `unhealthy` with `Retry-After: 5` when PostgreSQL is unavailable or restarting.
+- **Container & Cloud Orchestration**:
+  - `Dockerfile.backend` and `docker-compose.yml` configure `HEALTHCHECK` against `http://localhost:4000/ready` so dependent services (frontend reverse proxy) wait for verified database readiness.
+  - On **Render**, the service "Health Check Path" must be configured to `/ready` (or `/api/v1/ready`) so zero-downtime deploys and rollouts verify database availability before shifting production traffic.
+
+### 7.5 Health Check Endpoints Summary
+
+- **Backend Liveness**: `GET /health`, `GET /health/live`, `GET /live` or `GET /api/v1/health` &rarr; Returns process status `{ status: "ok", service: "NetVision API" }` without issuing database queries.
+- **Backend Readiness**: `GET /ready` or `GET /api/v1/ready` &rarr; Returns `200 OK` when PostgreSQL is connected; returns `503 Service Unavailable` with `Retry-After: 5` if database is disconnected or unreachable.
 - **Backend Telemetry**: `GET /api/v1/monitoring/health` &rarr; Aggregated database, mail provider, and alert conditions.
 - **Frontend Health**: `GET /api/health` &rarr; Returns lightweight 200 JSON `{ status: "ok", service: "NetVision Frontend" }`.

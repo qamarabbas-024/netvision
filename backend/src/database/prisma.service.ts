@@ -15,13 +15,48 @@ export const DEFAULT_RETRY_CONFIG: PrismaRetryConfig = {
   maxTotalBudgetMs: 500,
 };
 
+/**
+ * Ensures Prisma connection parameters do not permit excessive pool queue starvation.
+ * Clamps pool_timeout and connect_timeout to safe bounds (<= 10s).
+ */
+export function sanitizeDatabaseUrl(url: string | undefined): string | undefined {
+  if (!url || typeof url !== 'string') return url;
+  try {
+    let sanitized = url;
+    const poolTimeoutMatch = sanitized.match(/pool_timeout=(\d+)/);
+    if (poolTimeoutMatch && parseInt(poolTimeoutMatch[1], 10) > 10) {
+      sanitized = sanitized.replace(/pool_timeout=\d+/, 'pool_timeout=10');
+    }
+    const connectTimeoutMatch = sanitized.match(/connect_timeout=(\d+)/);
+    if (connectTimeoutMatch && parseInt(connectTimeoutMatch[1], 10) > 10) {
+      sanitized = sanitized.replace(/connect_timeout=\d+/, 'connect_timeout=10');
+    }
+    return sanitized;
+  } catch {
+    return url;
+  }
+}
+
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PrismaService.name);
   private retryConfig: PrismaRetryConfig = { ...DEFAULT_RETRY_CONFIG };
 
   constructor() {
-    super();
+    const rawDbUrl = process.env.DATABASE_URL;
+    const sanitizedDbUrl = sanitizeDatabaseUrl(rawDbUrl);
+
+    super(
+      sanitizedDbUrl
+        ? {
+            datasources: {
+              db: {
+                url: sanitizedDbUrl,
+              },
+            },
+          }
+        : undefined
+    );
 
     // Bounded Request Resilience Middleware
     this.$use(async (params, next) => {

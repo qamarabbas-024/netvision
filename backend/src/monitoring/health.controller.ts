@@ -14,10 +14,10 @@ export class HealthController {
 
   /**
    * Liveness Probe: Returns whether the application process is running and accepting HTTP connections.
-   * Path: /api/v1/health & /api/v1/health/live
+   * Path: /api/v1/health, /api/v1/health/live & /api/v1/live
    * Note: Liveness strictly monitors process survival and does NOT issue external database queries.
    */
-  @Get(['health', 'health/live'])
+  @Get(['health', 'health/live', 'live'])
   getLiveness() {
     return {
       status: 'ok',

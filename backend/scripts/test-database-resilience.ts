@@ -17,7 +17,7 @@ import {
   isRetryableDatabaseError,
   DatabaseErrorCategory,
 } from '../src/database/database-error.util';
-import { PrismaService, DEFAULT_RETRY_CONFIG } from '../src/database/prisma.service';
+import { PrismaService, DEFAULT_RETRY_CONFIG, sanitizeDatabaseUrl } from '../src/database/prisma.service';
 import { MonitoringService } from '../src/monitoring/monitoring.service';
 import { HealthController } from '../src/monitoring/health.controller';
 import { AllExceptionsFilter } from '../src/monitoring/filters/all-exceptions.filter';
@@ -130,6 +130,17 @@ async function runDatabaseResilienceTestSuite() {
   assert(!classifiedP1001.isRetryable, 'P1001 unreachable server must NOT enter retry loops (fail-fast)');
   assert(classifiedP1001.httpStatus === HttpStatus.SERVICE_UNAVAILABLE, 'P1001 maps to HTTP 503');
 
+  // 1.7 Connection Pool & URL Timeout Sanitization
+  const excessivePoolUrl = 'postgresql://usr:pwd@host:5432/db?pool_timeout=30&connect_timeout=25&connection_limit=10';
+  const sanitizedExcessive = sanitizeDatabaseUrl(excessivePoolUrl);
+  assert(sanitizedExcessive?.includes('pool_timeout=10'), 'sanitizeDatabaseUrl clamps pool_timeout=30 to safe pool_timeout=10');
+  assert(sanitizedExcessive?.includes('connect_timeout=10'), 'sanitizeDatabaseUrl clamps connect_timeout=25 to safe connect_timeout=10');
+
+  const safePoolUrl = 'postgresql://usr:pwd@host:5432/db?pool_timeout=5&connect_timeout=5';
+  const sanitizedSafe = sanitizeDatabaseUrl(safePoolUrl);
+  assert(sanitizedSafe?.includes('pool_timeout=5'), 'sanitizeDatabaseUrl preserves bounded pool_timeout=5');
+  assert(sanitizeDatabaseUrl(undefined) === undefined, 'sanitizeDatabaseUrl handles undefined gracefully');
+
   // =========================================================================
   // TEST GROUP 2: Fail-Fast & Bounded Retry Middleware Invariants
   // =========================================================================
@@ -221,6 +232,61 @@ async function runDatabaseResilienceTestSuite() {
   });
   assert(probeOutcome.attempts === 1, 'Raw health probe query skips retry loop completely (0 retries)');
 
+  // 2.6 Repeated Simultaneous Requests on Permanent Failure: Zero Retry Amplification
+  const CONCURRENT_CLIENTS = 20;
+  let totalPermanentAttempts = 0;
+  const startSimultaneous = Date.now();
+
+  const simultaneousPermanent = await Promise.all(
+    Array.from({ length: CONCURRENT_CLIENTS }).map(async () => {
+      return simulateMiddlewareExecution('findMany', async () => {
+        totalPermanentAttempts++;
+        throw quotaErr;
+      });
+    })
+  );
+  const simultaneousElapsedMs = Date.now() - startSimultaneous;
+
+  assert(
+    simultaneousPermanent.every((res) => res.attempts === 1),
+    `All ${CONCURRENT_CLIENTS} simultaneous failing requests made exactly 1 attempt (0 retries each)`
+  );
+  assert(
+    totalPermanentAttempts === CONCURRENT_CLIENTS,
+    `Zero retry amplification: ${CONCURRENT_CLIENTS} requests generated exactly ${CONCURRENT_CLIENTS} attempts (NOT ${CONCURRENT_CLIENTS * 6})`
+  );
+  assert(
+    simultaneousElapsedMs < 100,
+    `Concurrent permanent failures terminate instantly (${simultaneousElapsedMs}ms < 100ms)`
+  );
+
+  // 2.7 Repeated Simultaneous Requests on Transient Failure: Bounded Total Budget
+  let totalTransientAttempts = 0;
+  const startTransient = Date.now();
+
+  const simultaneousTransient = await Promise.all(
+    Array.from({ length: 10 }).map(async () => {
+      return simulateMiddlewareExecution('findFirst', async () => {
+        totalTransientAttempts++;
+        throw p1017;
+      });
+    })
+  );
+  const simultaneousTransientElapsedMs = Date.now() - startTransient;
+
+  assert(
+    simultaneousTransient.every((res) => res.attempts === 3),
+    '10 concurrent transient failing requests bounded to max 2 retries (3 attempts each)'
+  );
+  assert(
+    simultaneousTransientElapsedMs < 500,
+    `All 10 concurrent transient requests completed within 500ms budget (${simultaneousTransientElapsedMs}ms)`
+  );
+  assert(
+    simultaneousTransientElapsedMs < 30000,
+    'Eliminated 31-second request starvation across concurrent requests'
+  );
+
   // =========================================================================
   // TEST GROUP 3: Health Probe Debouncing, TTL Caching & Query Storms
   // =========================================================================
@@ -281,6 +347,52 @@ async function runDatabaseResilienceTestSuite() {
   assert(timeoutProbe.error?.includes('timed out'), 'Probe error identifies query timeout');
 
   (MonitoringService as any).DB_PROBE_TIMEOUT_MS = origTimeout;
+
+  // 3.4 Repeated Simultaneous Requests During DB Failure (Storm Protection on Outage)
+  actualDbQueriesCount = 0;
+  mockProbeDelayMs = 40;
+  mockProbeShouldFail = true;
+  mockProbeFailureError = new Error('Connection refused: PostgreSQL daemon is offline');
+  mockPrisma.$queryRaw = async () => {
+    actualDbQueriesCount++;
+    await new Promise((resolve) => setTimeout(resolve, mockProbeDelayMs));
+    throw mockProbeFailureError;
+  };
+
+  const simultaneousFailingProbes = await Promise.all([
+    monitoringService.checkDatabaseHealth(true),
+    monitoringService.checkDatabaseHealth(true),
+    monitoringService.checkDatabaseHealth(true),
+    monitoringService.checkDatabaseHealth(true),
+    monitoringService.checkDatabaseHealth(true),
+    monitoringService.checkDatabaseHealth(true),
+    monitoringService.checkDatabaseHealth(true),
+    monitoringService.checkDatabaseHealth(true),
+    monitoringService.checkDatabaseHealth(true),
+    monitoringService.checkDatabaseHealth(true),
+  ]);
+
+  assert(
+    actualDbQueriesCount === 1,
+    `10 simultaneous probes during DB outage coalesced into 1 query (actual: ${actualDbQueriesCount})`
+  );
+  assert(
+    simultaneousFailingProbes.every((r) => r.healthy === false),
+    'All concurrent callers truthfully received unhealthy status during DB failure'
+  );
+  assert(
+    simultaneousFailingProbes.every((r) => r.error?.includes('PostgreSQL daemon is offline')),
+    'All concurrent callers received sanitized error diagnostics'
+  );
+
+  // Subsequent probe call during outage served from TTL cache without hitting dead DB
+  const cachedFailingProbe = await monitoringService.checkDatabaseHealth();
+  assert(
+    actualDbQueriesCount === 1,
+    'Subsequent probe during outage served from TTL cache without re-querying dead DB'
+  );
+  assert(cachedFailingProbe.healthy === false, 'Cached probe preserves truthful unhealthy status');
+  assert(cachedFailingProbe.cached === true, 'Response confirms cached result');
 
   // =========================================================================
   // TEST GROUP 4: Liveness vs Readiness Separation

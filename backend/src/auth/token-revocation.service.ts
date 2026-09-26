@@ -430,7 +430,7 @@ export class TokenRevocationService implements OnModuleDestroy {
     this.syncFromDisk();
 
     const oldHash = this.hashToken(rawOldToken);
-    let session = this.refreshSessions.get(oldHash);
+    const session = this.refreshSessions.get(oldHash);
 
     if (!session) {
       return null;
