@@ -109,6 +109,7 @@ jobs:
           npx ts-node scripts/test-drop-25-security-failure-semantics.ts
           npx ts-node scripts/test-drop-26-database-governance.ts
           npx ts-node scripts/test-drop-27-external-monitoring.ts
+          npx ts-node scripts/test-drop-28-customer-journey.ts
           npx ts-node scripts/test-drop-z-e2e-adversarial.ts
 
       - name: Build Production Artifacts
