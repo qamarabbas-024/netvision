@@ -438,20 +438,6 @@ export class MasterCapstoneService {
       throw new ForbiddenException(`Access denied: You do not own Capstone attempt "${attemptId}".`);
     }
 
-    // Idempotency: Return existing result if already finalized (handles double-clicks, browser refreshes, reconnects)
-    if (attempt.status === ExamAttemptStatus.PASSED || attempt.status === ExamAttemptStatus.FAILED) {
-      return {
-        attemptId: attempt.id,
-        examCode: CAPSTONE_CONFIG.examCode,
-        status: attempt.status,
-        score: attempt.score,
-        passed: attempt.passed,
-        submittedAt: attempt.submittedAt,
-        result: attempt.resultMetadataJson,
-        isIdempotent: true,
-      };
-    }
-
     if (attempt.status !== ExamAttemptStatus.IN_PROGRESS) {
       throw new BadRequestException(`Cannot submit exam attempt with status: ${attempt.status}.`);
     }
