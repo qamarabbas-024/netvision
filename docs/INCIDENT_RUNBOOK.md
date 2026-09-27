@@ -231,7 +231,7 @@ To ensure operational monitoring capability is actually proven rather than exist
    - Host Incident Log Sink: Persists full incident details to `.storage/incidents/incident-<id>.json` to ensure 100% auditability even if outbound webhooks fail.
 3. **Scheduled Automated Probes via CI/CD**:
    - Workflow: `.github/workflows/synthetic-monitoring.yml` runs every 30 minutes on GitHub Actions and supports manual on-demand triggers.
-4. **Third-Party SaaS Integration Evaluation Status**:
+4. **Lightweight External Monitoring Evaluation**:
    - Evaluated: UptimeRobot, Better Stack.
    - Configuration Status: Ready for webhook target binding via `ALERT_WEBHOOK_URL`. Not hardcoded or dependent on external paid vendors.
 
