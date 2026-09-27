@@ -4,9 +4,9 @@ import React from 'react';
 
 export const StatsSection: React.FC = () => {
   const stats = [
-    { value: '30+', label: 'Curriculum Benchmark Lessons', detail: 'Foundational through Advanced' },
-    { value: '20+', label: 'Interactive CLI Diagnostic Labs', detail: 'Deterministic web sandbox execution' },
-    { value: '4 Tiers', label: 'Structured Progression Levels', detail: 'Foundation → Beginner → Intermediate → Advanced' },
+    { value: '46', label: 'Curriculum Benchmark Lessons', detail: 'Foundational through Advanced' },
+    { value: '46', label: 'Curriculum Engineering Labs', detail: '18 Simulation, 21 Guided, 7 Conceptual' },
+    { value: '5 Tracks', label: 'Flagship Credential Tracks', detail: 'Foundations → Switching → Routing → Security → DevOps' },
     { value: '100%', label: 'Open Access & Guest Support', detail: 'Instant learning without registration friction' },
   ];
 

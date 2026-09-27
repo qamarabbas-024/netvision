@@ -277,7 +277,7 @@ export default function CertificateVerifyPage() {
                 <div>
                   <span className="text-[10px] font-mono text-zinc-500 uppercase block">Verification Status</span>
                   <span className="text-sm font-bold text-rose-400">
-                    {isTampered ? 'INVALID SIGNATURE — TAMPERED' : `${certData.status} — NOT ACTIVE`}
+                    {isTampered ? 'TAMPERED / INTEGRITY CHECK FAILED' : `${certData.status} — NOT ACTIVE`}
                   </span>
                 </div>
               </div>

@@ -12,7 +12,7 @@ Computer networking education has historically been divided between abstract tex
 1. **Visual Packet Mechanics**: Inspect frames and packets moving across topologies with step-by-step encapsulation and decapsulation animations.
 2. **Multi-Modal Pedagogy**: Every concept integrates an intuitive real-world analogy, simplified explanation, RFC-grounded technical mechanics, and an operational cheatsheet.
 3. **Deterministic CLI Practice Labs**: Execute core network diagnostic commands (`ping`, `traceroute`, `ip`, `arp`, `netstat`, `route`, `iptables`, `tcpdump`) in an isolated browser-accessible terminal environment.
-4. **Server-Authoritative Certifications**: Earn rigorous digital credentials backed by cryptographically verifiable identifiers and server-side evaluation.
+4. **Server-Authoritative Certifications**: Earn rigorous digital credentials backed by unique verification codes, tamper-evident integrity hashes, and server-side evaluation.
 
 ---
 
@@ -59,7 +59,7 @@ NetVision structures its professional networking curriculum into **5 Flagship Co
 
 ### 2. Professional Credentials & Eligibility Rules
 
-NetVision issues six authoritative digital credentials. All evaluations occur server-side; credentials carry a unique cryptographic identifier verifiable through the public registry.
+NetVision issues six authoritative digital credentials. All evaluations occur server-side; credentials carry a unique verification code backed by NetVision's authoritative PostgreSQL registry and public verification portal.
 
 | Credential Code | Credential Designation | Prerequisites & Eligibility Rules |
 |:---|:---|:---|

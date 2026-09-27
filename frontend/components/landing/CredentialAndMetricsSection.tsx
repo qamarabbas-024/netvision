@@ -69,7 +69,7 @@ export const CredentialAndMetricsSection: React.FC = () => {
                 <div className="w-8 h-8 rounded-lg bg-[#0f172a] border border-[#1e293b] flex items-center justify-center text-[#22c55e] mb-2">
                   <Network className="w-4 h-4" />
                 </div>
-                <strong className="text-sm sm:text-base font-extrabold text-white">15+</strong>
+                <strong className="text-sm sm:text-base font-extrabold text-white">18</strong>
                 <span className="text-[10px] font-mono text-[#64748b]">Simulations</span>
               </div>
 
@@ -77,7 +77,7 @@ export const CredentialAndMetricsSection: React.FC = () => {
                 <div className="w-8 h-8 rounded-lg bg-[#0f172a] border border-[#1e293b] flex items-center justify-center text-[#22c55e] mb-2">
                   <GitBranch className="w-4 h-4" />
                 </div>
-                <strong className="text-sm sm:text-base font-extrabold text-white">30+</strong>
+                <strong className="text-sm sm:text-base font-extrabold text-white">46</strong>
                 <span className="text-[10px] font-mono text-[#64748b]">Labs</span>
               </div>
 

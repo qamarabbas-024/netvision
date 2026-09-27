@@ -23,9 +23,9 @@ export const FAQSection: React.FC = () => {
         'NetVision runs entirely in modern web browsers without installation, featuring real-time packet inspection, interactive 3D topology visualization, live protocol state convergence, and verifiable practical competency certification.',
     },
     {
-      question: 'Are certificates cryptographically verifiable?',
+      question: 'How are certificates verified?',
       answer:
-        'Yes. Every awarded credential features a unique verification identifier that employers, recruiters, and institutions can authenticate in real-time through our official public verification registry.',
+        'Every awarded credential features a unique verification code backed by NetVision\'s official PostgreSQL verification registry. Employers, recruiters, and institutions can authenticate credential validity, issuance timestamp, and candidate identity in real time at /certificates/verify.',
     },
   ];
 

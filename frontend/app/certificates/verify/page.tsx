@@ -70,7 +70,7 @@ export default function CertificateVerificationPortalPage() {
               Verify Credential Authenticity
             </h1>
             <p className="text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
-              Confirm the official status, issuance timestamp, and cryptographic seal of any NetVision specialist certification or Pinnacle Mastery credential.
+              Confirm the official status, issuance timestamp, and database registry record of any NetVision specialist certification or Pinnacle Mastery credential.
             </p>
           </div>
 
@@ -142,9 +142,9 @@ export default function CertificateVerificationPortalPage() {
                 <ShieldCheck className="w-4 h-4" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xs font-bold text-white">Cryptographic Proof</h3>
+                <h3 className="text-xs font-bold text-white">Integrity Verification</h3>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  Tamper-evident verification hash confirming credential integrity and grading tier.
+                  Tamper-evident SHA-256 integrity hash confirming credential authenticity and grading tier.
                 </p>
               </div>
             </div>
