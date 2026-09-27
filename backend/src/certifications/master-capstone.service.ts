@@ -522,19 +522,6 @@ export class MasterCapstoneService {
         });
 
         if (updateResult.count === 0) {
-          const finalized = await tx.examAttempt.findUnique({ where: { id: attemptId } });
-          if (finalized && (finalized.status === ExamAttemptStatus.PASSED || finalized.status === ExamAttemptStatus.FAILED)) {
-            return {
-              attemptId: finalized.id,
-              examCode: CAPSTONE_CONFIG.examCode,
-              status: finalized.status,
-              score: finalized.score,
-              passed: finalized.passed,
-              submittedAt: finalized.submittedAt,
-              result: finalized.resultMetadataJson,
-              isIdempotent: true,
-            };
-          }
           throw new BadRequestException('Exam attempt has already been submitted or is no longer in progress.');
         }
 
