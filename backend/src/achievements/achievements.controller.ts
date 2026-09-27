@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AchievementsService } from './achievements.service';
+import { UnlockAchievementDto } from './dto/unlock-achievement.dto';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
 import { LearnerIdentity, LearnerIdentityContext } from '../auth/decorators/learner-identity.decorator';
 
@@ -40,7 +41,7 @@ export class AchievementsController {
   @Post('unlock')
   async unlockAchievement(
     @LearnerIdentity() identity: LearnerIdentityContext,
-    @Body() dto: { slug: string }
+    @Body() dto: UnlockAchievementDto
   ) {
     if (!identity.userId && !identity.anonymousId) {
       throw new UnauthorizedException('Authentication token or X-Anonymous-ID header is required.');

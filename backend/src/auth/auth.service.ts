@@ -92,19 +92,19 @@ export class AuthService {
       },
     });
 
-    if (existingUser) {
-      if (existingUser.email === normalizedEmail) {
-        throw new ConflictException('An account with this email address already exists.');
-      }
-      throw new ConflictException('This username is already taken. Please choose another.');
-    }
-
     const argon2Options: argon2.Options = {
       type: argon2.argon2id,
       memoryCost: 65536,
       timeCost: 3,
       parallelism: 4,
     };
+
+    if (existingUser) {
+      // Zero-Trust: Equalize CPU timing with dummy Argon2 hash to prevent timing oracles
+      await argon2.hash(dto.password, argon2Options).catch(() => false);
+      throw new ConflictException('An account with this email address or username already exists.');
+    }
+
     const passwordHash = await argon2.hash(dto.password, argon2Options);
     const emailVerificationEnabled = this.isEmailVerificationEnabled();
 
@@ -402,6 +402,8 @@ export class AuthService {
     });
 
     if (!user) {
+      // Zero-Trust: Equalize timing with dummy hash verification to prevent timing-based user enumeration
+      await argon2.verify(DUMMY_HASH, 'dummy-reset-timing-padding').catch(() => false);
       return { message: 'If your account exists, a password reset link has been dispatched to your email.' };
     }
 

@@ -21,6 +21,7 @@ import { ExecuteLabCommandDto } from './dto/execute-lab-command.dto';
 import { ValidateLabDto } from './dto/validate-lab.dto';
 import { ClaimProgressDto } from './dto/claim-progress.dto';
 import { ClaimCertificateDto } from './dto/claim-certificate.dto';
+import { UnlockLabHintDto } from './dto/unlock-lab-hint.dto';
 import { CourseLevel } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../auth/guards/optional-jwt-auth.guard';
@@ -149,9 +150,9 @@ export class TopicsController {
   async unlockLabHint(
     @LearnerIdentity() identity: LearnerIdentityContext,
     @Param('id') id: string,
-    @Body('sessionId') sessionId?: string
+    @Body() dto?: UnlockLabHintDto
   ) {
-    return this.topicsService.unlockLabHint(identity, id, sessionId);
+    return this.topicsService.unlockLabHint(identity, id, dto?.sessionId);
   }
 
   @ApiOperation({ summary: 'Safely execute command in simulated lab environment' })

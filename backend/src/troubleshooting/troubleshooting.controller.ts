@@ -18,6 +18,7 @@ import {
   ApplyRemediationDto,
   RunVerificationDto,
 } from '@netvision/shared';
+import { StartTroubleshootingSessionDto } from './dto/start-session.dto';
 
 @ApiTags('troubleshooting')
 @Controller('troubleshooting')
@@ -48,9 +49,9 @@ export class TroubleshootingController {
   @HttpCode(HttpStatus.OK)
   async startSession(
     @LearnerIdentity() identity: LearnerIdentityContext,
-    @Body('scenarioId') scenarioId: string
+    @Body() dto: StartTroubleshootingSessionDto
   ) {
-    return this.troubleshootingService.startSession(identity, scenarioId);
+    return this.troubleshootingService.startSession(identity, dto.scenarioId);
   }
 
   @ApiOperation({ summary: 'Get current status of a troubleshooting session' })

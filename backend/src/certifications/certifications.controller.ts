@@ -17,6 +17,10 @@ import { MasterCapstoneService } from './master-capstone.service';
 import { StartExamAttemptDto } from './dto/start-exam-attempt.dto';
 import { SubmitExamAttemptDto } from './dto/submit-exam-attempt.dto';
 import { SubmitCapstoneAttemptDto } from './dto/submit-capstone-attempt.dto';
+import { TroubleshootingActionDto } from './dto/troubleshooting-action.dto';
+import { AnswerPacketDto } from './dto/answer-packet.dto';
+import { PracticalActionDto } from './dto/practical-action.dto';
+import { RequestHintDto } from './dto/request-hint.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AuthRateLimit, UserRateLimit } from '../security/rate-limiter/rate-limit.decorators';
 import { ExamType } from '@prisma/client';
@@ -203,7 +207,7 @@ export class CertificationsController {
   async executeTroubleshootingAction(
     @Req() req: any,
     @Param('attemptId') attemptId: string,
-    @Body() dto: any
+    @Body() dto: TroubleshootingActionDto
   ) {
     return this.certsService.executeTroubleshootingAction(req.user.id, attemptId, dto);
   }
@@ -215,7 +219,7 @@ export class CertificationsController {
   async answerPacketQuestion(
     @Req() req: any,
     @Param('attemptId') attemptId: string,
-    @Body() dto: any
+    @Body() dto: AnswerPacketDto
   ) {
     return this.certsService.answerPacketQuestion(req.user.id, attemptId, dto);
   }
@@ -270,7 +274,7 @@ export class CertificationsController {
   async executePracticalAction(
     @Req() req: any,
     @Param('attemptId') attemptId: string,
-    @Body() dto: any
+    @Body() dto: PracticalActionDto
   ) {
     return this.certsService.executePracticalAction(req.user.id, attemptId, dto);
   }
@@ -282,7 +286,7 @@ export class CertificationsController {
   async requestPracticalHint(
     @Req() req: any,
     @Param('attemptId') attemptId: string,
-    @Body() dto: any
+    @Body() dto: RequestHintDto
   ) {
     return this.certsService.requestPracticalHint(req.user.id, attemptId, dto);
   }
