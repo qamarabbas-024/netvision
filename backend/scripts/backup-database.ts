@@ -34,6 +34,7 @@ export async function createDatabaseBackup(options?: {
   outDir?: string;
   encryptionKey?: Buffer;
   prisma?: PrismaClient;
+  customData?: Record<string, any[]>;
 }): Promise<{ backupFile: string; sha256File: string; metadata: BackupMetadata }> {
   const outDir = options?.outDir || path.join(process.cwd(), 'backups');
   if (!fs.existsSync(outDir)) {
@@ -48,30 +49,115 @@ export async function createDatabaseBackup(options?: {
 
   console.log(`[Backup] Starting NetVision database backup at ${new Date().toISOString()}...`);
 
-  // 1. Collect table data
+  // 1. Collect table data across all schema entities
   const tablesData: Record<string, any[]> = {};
   const tableCounts: Record<string, number> = {};
 
-  try {
-    const users = await prisma.user.findMany().catch(() => []);
-    const courses = await prisma.course.findMany().catch(() => []);
-    const modules = await prisma.module.findMany().catch(() => []);
-    const lessons = await prisma.lesson.findMany().catch(() => []);
-    const certificates = await prisma.certificate.findMany().catch(() => []);
-    const certifications = await prisma.certificationDefinition.findMany().catch(() => []);
-
-    tablesData.users = users;
-    tablesData.courses = courses;
-    tablesData.modules = modules;
-    tablesData.lessons = lessons;
-    tablesData.certificates = certificates;
-    tablesData.certificationDefinitions = certifications;
-
-    for (const [t, rows] of Object.entries(tablesData)) {
-      tableCounts[t] = rows.length;
+  if (options?.customData) {
+    for (const [table, rows] of Object.entries(options.customData)) {
+      tablesData[table] = Array.isArray(rows) ? rows : [];
+      tableCounts[table] = tablesData[table].length;
     }
-  } catch (err: any) {
-    console.warn(`[Backup] Note: Direct Prisma query warning (using available snapshot state): ${err?.message || err}`);
+  } else {
+    try {
+      const [
+        users,
+        anonymousLearners,
+        courses,
+        modules,
+        lessons,
+        lessonObjectives,
+        lessonConcepts,
+        lessonCommands,
+        lessonExamples,
+        lessonMistakes,
+        lessonRecaps,
+        lessonLabs,
+        quizzes,
+        quizQuestions,
+        userProgress,
+        quizAttempts,
+        labAttempts,
+        sandboxSessions,
+        certificates,
+        certificationDefinitions,
+        examAttempts,
+        achievements,
+        userAchievements,
+        simulationStates,
+        savedLessons,
+        oauthAccounts,
+        commandReferences,
+        emailVerifications,
+        passwordResetTokens,
+      ] = await Promise.all([
+        (prisma as any).user?.findMany().catch(() => []) || [],
+        (prisma as any).anonymousLearner?.findMany().catch(() => []) || [],
+        (prisma as any).course?.findMany().catch(() => []) || [],
+        (prisma as any).module?.findMany().catch(() => []) || [],
+        (prisma as any).lesson?.findMany().catch(() => []) || [],
+        (prisma as any).lessonObjective?.findMany().catch(() => []) || [],
+        (prisma as any).lessonConcept?.findMany().catch(() => []) || [],
+        (prisma as any).lessonCommand?.findMany().catch(() => []) || [],
+        (prisma as any).lessonExample?.findMany().catch(() => []) || [],
+        (prisma as any).lessonMistake?.findMany().catch(() => []) || [],
+        (prisma as any).lessonRecap?.findMany().catch(() => []) || [],
+        (prisma as any).lessonLab?.findMany().catch(() => []) || [],
+        (prisma as any).quiz?.findMany().catch(() => []) || [],
+        (prisma as any).quizQuestion?.findMany().catch(() => []) || [],
+        (prisma as any).userProgress?.findMany().catch(() => []) || [],
+        (prisma as any).quizAttempt?.findMany().catch(() => []) || [],
+        (prisma as any).labAttempt?.findMany().catch(() => []) || [],
+        (prisma as any).sandboxSession?.findMany().catch(() => []) || [],
+        (prisma as any).certificate?.findMany().catch(() => []) || [],
+        (prisma as any).certificationDefinition?.findMany().catch(() => []) || [],
+        (prisma as any).examAttempt?.findMany().catch(() => []) || [],
+        (prisma as any).achievement?.findMany().catch(() => []) || [],
+        (prisma as any).userAchievement?.findMany().catch(() => []) || [],
+        (prisma as any).simulationState?.findMany().catch(() => []) || [],
+        (prisma as any).savedLesson?.findMany().catch(() => []) || [],
+        (prisma as any).oauthAccount?.findMany().catch(() => []) || [],
+        (prisma as any).commandReference?.findMany().catch(() => []) || [],
+        (prisma as any).emailVerification?.findMany().catch(() => []) || [],
+        (prisma as any).passwordResetToken?.findMany().catch(() => []) || [],
+      ]);
+
+      tablesData.users = users;
+      tablesData.anonymousLearners = anonymousLearners;
+      tablesData.courses = courses;
+      tablesData.modules = modules;
+      tablesData.lessons = lessons;
+      tablesData.lessonObjectives = lessonObjectives;
+      tablesData.lessonConcepts = lessonConcepts;
+      tablesData.lessonCommands = lessonCommands;
+      tablesData.lessonExamples = lessonExamples;
+      tablesData.lessonMistakes = lessonMistakes;
+      tablesData.lessonRecaps = lessonRecaps;
+      tablesData.lessonLabs = lessonLabs;
+      tablesData.quizzes = quizzes;
+      tablesData.quizQuestions = quizQuestions;
+      tablesData.userProgress = userProgress;
+      tablesData.quizAttempts = quizAttempts;
+      tablesData.labAttempts = labAttempts;
+      tablesData.sandboxSessions = sandboxSessions;
+      tablesData.certificates = certificates;
+      tablesData.certificationDefinitions = certificationDefinitions;
+      tablesData.examAttempts = examAttempts;
+      tablesData.achievements = achievements;
+      tablesData.userAchievements = userAchievements;
+      tablesData.simulationStates = simulationStates;
+      tablesData.savedLessons = savedLessons;
+      tablesData.oauthAccounts = oauthAccounts;
+      tablesData.commandReferences = commandReferences;
+      tablesData.emailVerifications = emailVerifications;
+      tablesData.passwordResetTokens = passwordResetTokens;
+
+      for (const [t, rows] of Object.entries(tablesData)) {
+        tableCounts[t] = rows.length;
+      }
+    } catch (err: any) {
+      console.warn(`[Backup] Note: Direct Prisma query warning (using available snapshot state): ${err?.message || err}`);
+    }
   }
 
   // 2. Serialize to JSON & Gzip compress
