@@ -148,47 +148,56 @@ export class TokenRevocationService implements OnModuleDestroy {
   /**
    * Synchronizes local in-memory state with shared disk storage if modified by another instance.
    */
-  public syncFromDisk(): void {
+  public syncFromDisk(force = false): void {
     // 1. Revoked Tokens
     const currentRevMtime = this.getFileMtime(this.revokedTokensFile);
-    if (currentRevMtime !== this.revokedTokensMtime && currentRevMtime > 0) {
+    if ((force || currentRevMtime !== this.revokedTokensMtime) && currentRevMtime > 0) {
       const records = this.readJsonSafe<Record<string, RevokedTokenRecord>>(this.revokedTokensFile);
       if (records) {
-        this.revokedTokens = new Map(Object.entries(records));
+        for (const [k, v] of Object.entries(records)) {
+          this.revokedTokens.set(k, v);
+        }
         this.revokedTokensMtime = currentRevMtime;
       }
     }
 
     // 2. User Cutoffs
     const currentCutMtime = this.getFileMtime(this.userCutoffsFile);
-    if (currentCutMtime !== this.userCutoffsMtime && currentCutMtime > 0) {
+    if ((force || currentCutMtime !== this.userCutoffsMtime) && currentCutMtime > 0) {
       const cutoffs = this.readJsonSafe<Record<string, number>>(this.userCutoffsFile);
       if (cutoffs) {
-        this.userRevocationCutoffs = new Map(Object.entries(cutoffs));
+        for (const [userId, ts] of Object.entries(cutoffs)) {
+          const existing = this.userRevocationCutoffs.get(userId) || 0;
+          this.userRevocationCutoffs.set(userId, Math.max(existing, ts));
+        }
         this.userCutoffsMtime = currentCutMtime;
       }
     }
 
     // 3. Refresh Sessions
     const currentSessMtime = this.getFileMtime(this.refreshSessionsFile);
-    if (currentSessMtime !== this.refreshSessionsMtime && currentSessMtime > 0) {
+    if ((force || currentSessMtime !== this.refreshSessionsMtime) && currentSessMtime > 0) {
       const sessions = this.readJsonSafe<Record<string, RefreshSession>>(this.refreshSessionsFile);
       if (sessions) {
-        this.refreshSessions = new Map(Object.entries(sessions));
+        for (const [k, v] of Object.entries(sessions)) {
+          this.refreshSessions.set(k, v);
+        }
         this.refreshSessionsMtime = currentSessMtime;
       }
     }
 
     // 4. Family Tokens
     const currentFamMtime = this.getFileMtime(this.familyTokensFile);
-    if (currentFamMtime !== this.familyTokensMtime && currentFamMtime > 0) {
+    if ((force || currentFamMtime !== this.familyTokensMtime) && currentFamMtime > 0) {
       const families = this.readJsonSafe<Record<string, string[]>>(this.familyTokensFile);
       if (families) {
-        const famMap = new Map<string, Set<string>>();
         for (const [famId, hashes] of Object.entries(families)) {
-          famMap.set(famId, new Set(hashes));
+          if (!this.familyTokens.has(famId)) {
+            this.familyTokens.set(famId, new Set(hashes));
+          } else {
+            for (const h of hashes) this.familyTokens.get(famId)!.add(h);
+          }
         }
-        this.familyTokens = famMap;
         this.familyTokensMtime = currentFamMtime;
       }
     }

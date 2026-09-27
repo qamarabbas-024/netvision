@@ -1,8 +1,14 @@
 # NetVision — Incident Response Runbooks & Disaster Recovery Operations
 
-**Document Version**: 1.0.0 (Production Release)  
+**Document Version**: 1.1.0 (Production Release)  
 **Classification**: Authoritative Engineering Standard & Operational Runbooks  
-**SLA Targets**: **RPO < 15 Minutes** | **RTO < 30 Minutes** | **High Availability: 99.95%**  
+**SLA Targets (ACTUAL Operational Bounds)**: **RPO < 15 Minutes** | **RTO < 30 Minutes** | **High Availability: 99.95%**  
+
+> [!IMPORTANT]
+> **RPO / RTO Evidence Tiers**:
+> - **SIMULATED (Micro-Benchmark)**: In-memory cryptographic pipeline duration (< 20ms). Shows computational throughput ceiling only.
+> - **REHEARSED (Staging Disaster Drill)**: End-to-end rehearsal drill (file I/O, encryption, decompression, relational restore, verification: 1.5–2.5 seconds).
+> - **ACTUAL (Production Operational SLA)**: **RTO < 30 Minutes** | **RPO < 15 Minutes**. Accounts for cloud host provisioning, snapshot restoration, DNS propagation, and on-call response time. Never present simulated recovery speed as an actual production SLA.
 
 ---
 
@@ -18,7 +24,7 @@ Failures in production systems are inevitable; unresolved and unrepeatable recov
 
 ## 2. Severity Classification & Escalation Matrix
 
-| Severity | Definition | Target Response (MTTD) | Target Recovery (RTO) | Target Data Loss (RPO) | Escalation Path |
+| Severity | Definition | Target Response (MTTD) | Target Recovery (ACTUAL RTO) | Target Data Loss (ACTUAL RPO) | Escalation Path |
 | :--- | :--- | :---: | :---: | :---: | :--- |
 | **P1 - Critical** | Full site outage, primary database offline, or widespread credential compromise | < 2 minutes | < 30 minutes | < 15 minutes | On-call engineer &rarr; Lead Architect &rarr; Incident Commander |
 | **P2 - High** | Degradation of core flows (e.g. auth failures, quiz grading down, migration failure) | < 5 minutes | < 60 minutes | < 15 minutes | On-call engineer &rarr; Service Owner |
@@ -208,11 +214,38 @@ To guarantee that the monitoring system never causes or exacerbates a database o
 
 ---
 
-## 9. Lightweight External Monitoring Evaluation
+## 9. Authoritative External Monitoring & Probe Infrastructure
 
-| Provider | Type | Cost | Overhead | Recommended Use |
-| :--- | :--- | :---: | :---: | :--- |
-| **Render Native Metrics** | Platform CPU, RAM, HTTP 5xx | Free | 0% | Primary host performance & crash monitoring |
-| **Vercel Analytics** | Edge HTTP latencies & Web Vitals | Free tier | 0% | Client performance & global CDN health |
-| **UptimeRobot / Better Stack** | External synthetic HTTP probe | Free (50 monitors) | < 0.01% | Polls `GET https://api.netvision.edu/ready` every 60s for instant SMS/email downtime alerts |
-| **Enterprise APMs (Datadog/NewRelic)** | Heavy in-process agent | High ($$$) | 5–15% CPU | **REJECTED**: Unnecessary cost and resource bloat for current architectural scale |
+To ensure operational monitoring capability is actually proven rather than existing only as passive documentation:
+
+1. **Automated External Synthetic Probe Runner**:
+   - Location: `backend/scripts/external-synthetic-probe.ts`
+   - Queries production endpoints (`/api/v1/health`, `/api/v1/ready`, `/api/v1/monitoring/alerts`).
+   - Evaluates explicit alert conditions:
+     - `PROCESS_LIVENESS_FAILED`: Node process down or returning non-200.
+     - `DATABASE_OUTAGE_DETECTED`: 503 Service Unavailable or `checks.database === 'disconnected'`.
+     - `PROBE_LATENCY_EXCEEDED`: External round-trip probe latency exceeds 2,500ms.
+     - `SUBSYSTEM_OPERATIONAL_ALERT`: Subsystem status not `NOMINAL` or active alert count > 0.
+2. **Authoritative Alert Dispatch**:
+   - Outbound Webhook: Dispatches structured JSON alerts to `ALERT_WEBHOOK_URL` (Discord / Slack / PagerDuty / generic webhook).
+   - Host Incident Log Sink: Persists full incident details to `.storage/incidents/incident-<id>.json` to ensure 100% auditability even if outbound webhooks fail.
+3. **Scheduled Automated Probes via CI/CD**:
+   - Workflow: `.github/workflows/synthetic-monitoring.yml` runs every 30 minutes on GitHub Actions and supports manual on-demand triggers.
+4. **Third-Party SaaS Integration Evaluation Status**:
+   - Evaluated: UptimeRobot, Better Stack.
+   - Configuration Status: Ready for webhook target binding via `ALERT_WEBHOOK_URL`. Not hardcoded or dependent on external paid vendors.
+
+---
+
+## 10. Health Monitoring Load Safety & Database Impact Measurements
+
+To ensure health monitoring never causes or exacerbates a database outage:
+
+| Metric | Measurement / Ceiling | Architectural Mechanism |
+| :--- | :---: | :--- |
+| **Max Database Queries / Minute** | **30 queries / min** | Strict 2,000ms in-memory probe cache (`DB_PROBE_CACHE_TTL_MS`) |
+| **Normal Probe Load (60s interval)** | **1 query / min** | Single lightweight `SELECT 1` per probe window (< 0.01% DB compute) |
+| **Peak Concurrent DB Connections** | **1 connection** | In-flight Promise Coalescing (`inFlightDbCheck`) folds concurrent probes |
+| **Cache Hit Rate Under Load** | **> 95%** | Repeated queries served in < 0.1ms from memory without database contact |
+| **Query Timeout Ceiling** | **2,000ms** | Timed race promise guarantees health probes fail fast rather than locking pool slots |
+| **Process Liveness Separation** | **0 DB queries** | `/health` checks process only; database is checked exclusively on `/ready` |

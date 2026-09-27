@@ -31,6 +31,9 @@ packages/*/src/**/*.d.ts
 docker-data/
 backend/prisma/migrations/dev.db
 .storage/
+backups/
+backend/backups/
+*.enc
 
 # IDE & Operating System
 .vscode/
