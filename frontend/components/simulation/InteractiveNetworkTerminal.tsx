@@ -269,16 +269,18 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
         <div className="flex items-center gap-2">
           <button
             onClick={handleCopyLogs}
-            className="p-1 rounded text-zinc-400 hover:text-white bg-[#1a1a24] border border-[#272732] text-xs flex items-center gap-1"
+            aria-label="Copy terminal output"
+            className="p-1 rounded text-zinc-400 hover:text-white bg-[#1a1a24] border border-[#272732] text-xs flex items-center gap-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-sky-400"
           >
-            {isCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+            {isCopied ? <Check className="w-3 h-3 text-emerald-400" aria-hidden="true" /> : <Copy className="w-3 h-3" aria-hidden="true" />}
             <span className="text-[10px] hidden sm:inline">{isCopied ? 'Copied' : 'Copy'}</span>
           </button>
           <button
             onClick={() => setLogs([])}
-            className="p-1 rounded text-zinc-400 hover:text-white bg-[#1a1a24] border border-[#272732] text-xs flex items-center gap-1"
+            aria-label="Clear terminal output"
+            className="p-1 rounded text-zinc-400 hover:text-white bg-[#1a1a24] border border-[#272732] text-xs flex items-center gap-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-sky-400"
           >
-            <RotateCcw className="w-3 h-3" />
+            <RotateCcw className="w-3 h-3" aria-hidden="true" />
             <span className="text-[10px] hidden sm:inline">Clear</span>
           </button>
         </div>
@@ -286,33 +288,37 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 
       {/* Terminal Output Stream */}
       <div
+        role="log"
+        aria-live="polite"
+        aria-label="Interactive terminal output stream"
+        tabIndex={0}
         onClick={() => inputRef.current?.focus()}
-        className="p-4 bg-[#09090b] min-h-[260px] max-h-[360px] overflow-y-auto text-xs leading-relaxed text-zinc-300 flex flex-col gap-1 cursor-text"
+        className="p-4 bg-[#09090b] min-h-[260px] max-h-[360px] overflow-y-auto text-xs leading-relaxed text-zinc-300 flex flex-col gap-1 cursor-text focus:outline-none focus-visible:ring-1 focus-visible:ring-sky-500/40"
       >
         {logs.map((log) => {
           if (log.type === 'input') {
             return (
-              <div key={log.id} className="text-[#00f0ff] font-bold">
+              <div key={log.id} className="text-[#00f0ff] font-bold break-all">
                 {log.text}
               </div>
             );
           }
           if (log.type === 'error') {
             return (
-              <div key={log.id} className="text-rose-400 whitespace-pre-wrap">
+              <div key={log.id} className="text-rose-400 whitespace-pre-wrap break-all">
                 {log.text}
               </div>
             );
           }
           if (log.type === 'system') {
             return (
-              <div key={log.id} className="text-zinc-500 whitespace-pre-wrap">
+              <div key={log.id} className="text-zinc-500 whitespace-pre-wrap break-all">
                 {log.text}
               </div>
             );
           }
           return (
-            <div key={log.id} className="text-emerald-400/90 whitespace-pre-wrap">
+            <div key={log.id} className="text-emerald-400/90 whitespace-pre-wrap break-all">
               {log.text}
             </div>
           );
@@ -329,13 +335,15 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
           value={inputVal}
           onChange={(e) => setInputVal(e.target.value)}
           onKeyDown={handleKeyDown}
+          aria-label="Terminal command input"
           placeholder='Try "ping 8.8.8.8", "traceroute 93.184.216.34", "show ip route", "tcpdump", or "help"...'
           className="flex-1 bg-transparent text-xs font-mono text-white focus:outline-none placeholder:text-zinc-600"
           autoFocus
         />
         <button
           onClick={() => executeCommand(inputVal)}
-          className="px-2.5 py-1 rounded bg-[#00f0ff] text-black font-bold text-xs hover:bg-[#00f0ff]/90 transition-all font-mono shrink-0"
+          aria-label="Execute command"
+          className="px-2.5 py-1 rounded bg-[#00f0ff] text-black font-bold text-xs hover:bg-[#00f0ff]/90 transition-all font-mono shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
         >
           Exec ↵
         </button>

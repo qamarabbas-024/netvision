@@ -252,8 +252,8 @@ export const WiresharkPcapStudio: React.FC = () => {
       {/* 3-Pane Dissection Workspace */}
       <div className="flex flex-col h-[480px]">
         {/* Pane 1: Packet Summary Table */}
-        <div className="h-[180px] overflow-y-auto border-b border-[#272732] bg-[#0c0c10]">
-          <table className="w-full text-left font-mono text-[11px] border-collapse">
+        <div className="h-[180px] overflow-y-auto overflow-x-auto border-b border-[#272732] bg-[#0c0c10]">
+          <table className="w-full min-w-[640px] text-left font-mono text-[11px] border-collapse">
             <thead className="sticky top-0 bg-[#14141b] border-b border-[#272732] text-zinc-400 uppercase text-[10px]">
               <tr>
                 <th className="py-1.5 px-3 w-12">No.</th>

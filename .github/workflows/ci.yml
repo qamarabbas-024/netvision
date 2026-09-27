@@ -99,6 +99,7 @@ jobs:
           npx ts-node -T scripts/test-drop-18-observability-dr.ts
           npx ts-node -T scripts/test-drop-19-academic-quality.ts
           npx ts-node -T scripts/test-drop-20-public-trust.ts
+          npx ts-node -T scripts/test-drop-21-discoverability-a11y-perf.ts
           npx ts-node scripts/test-drop-z-e2e-adversarial.ts
 
       - name: Build Production Artifacts

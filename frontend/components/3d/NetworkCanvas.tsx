@@ -733,9 +733,57 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(containerRef.current);
 
+    // Accessibility: Respect OS-level reduced motion preferences
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let isIntersecting = true;
+    let isDocVisible = typeof document !== 'undefined' ? !document.hidden : true;
+    let isLoopRunning = true;
+    let lastHudUpdateTime = 0;
+
+    const checkShouldRun = () => {
+      const shouldRun = isIntersecting && isDocVisible && isMountedRef.current;
+      const state = sceneStateRef.current;
+      if (!state) return;
+
+      if (shouldRun && !isLoopRunning) {
+        isLoopRunning = true;
+        state.clock.start();
+        state.animFrameId = requestAnimationFrame(animate);
+      } else if (!shouldRun && isLoopRunning) {
+        isLoopRunning = false;
+        state.clock.stop();
+        cancelAnimationFrame(state.animFrameId);
+      }
+    };
+
+    const onVisibilityChange = () => {
+      isDocVisible = typeof document !== 'undefined' ? !document.hidden : true;
+      checkShouldRun();
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', onVisibilityChange);
+    }
+
+    // Performance: Pause 3D animation loop when canvas is scrolled out of viewport
+    let intersectionObserver: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined' && containerRef.current) {
+      intersectionObserver = new IntersectionObserver(
+        ([entry]) => {
+          isIntersecting = entry.isIntersecting;
+          checkShouldRun();
+        },
+        { threshold: 0.05 }
+      );
+      intersectionObserver.observe(containerRef.current);
+    }
+
     // Animation Loop
     const animate = () => {
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current || !isLoopRunning) return;
       const state = sceneStateRef.current;
       if (!state) return;
 
@@ -771,7 +819,7 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
         const offsets = pMesh.userData.offsets as number[];
         const posAttr = pMesh.geometry.attributes.position as THREE.BufferAttribute;
 
-        if (!isPausedRef.current) {
+        if (!isPausedRef.current && !prefersReducedMotion) {
           for (let i = 0; i < offsets.length; i++) {
             offsets[i] = (offsets[i] + delta * 0.25) % 1;
             const pt = curve.getPoint(offsets[i]);
@@ -797,48 +845,56 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
           state.educationalPacketMesh.position.set(pt.x, pt.y + 0.15, pt.z);
 
           // Rotate core
-          state.educationalPacketMesh.rotation.y += delta * 3;
-          state.educationalPacketMesh.rotation.x += delta * 2;
+          if (!prefersReducedMotion) {
+            state.educationalPacketMesh.rotation.y += delta * 3;
+            state.educationalPacketMesh.rotation.x += delta * 2;
+          }
         }
       }
 
-      // Animate subtle device floats and LED flickers
-      state.deviceMeshes.forEach((mesh, id) => {
-        const initialY = NETWORK_DEVICES.find((d) => d.id === id)?.position[1] || 0;
-        mesh.position.y = initialY + Math.sin(time * 2 + id.charCodeAt(0)) * 0.03;
-      });
+      // Animate subtle device floats and LED flickers (disabled under prefers-reduced-motion)
+      if (!prefersReducedMotion) {
+        state.deviceMeshes.forEach((mesh, id) => {
+          const initialY = NETWORK_DEVICES.find((d) => d.id === id)?.position[1] || 0;
+          mesh.position.y = initialY + Math.sin(time * 2 + id.charCodeAt(0)) * 0.03;
+        });
+      }
 
-      // Render
+      // Render Three.js frame
       state.renderer.render(state.scene, state.camera);
 
-      // Project 3D HUD tag positions to 2D screen coordinates
-      if (!isMountedRef.current) return;
-      const currentWidth = containerRef.current?.clientWidth || width;
-      const currentHeight = containerRef.current?.clientHeight || height;
-      const newHudPositions: { [key: string]: ProjectedHudData } = {};
-      EDUCATIONAL_PACKETS.forEach((pkt) => {
-        const worldPos = new THREE.Vector3();
-        if (pkt.id === 'pkt-dns') worldPos.set(-2.8, 2.2, -0.4);
-        else if (pkt.id === 'pkt-tcp-syn') worldPos.set(0.8, 2.4, 0.4);
-        else if (pkt.id === 'pkt-ip') worldPos.set(4.4, 2.3, -0.6);
-        else if (pkt.id === 'pkt-http3') worldPos.set(8.0, 2.6, 0.6);
+      // Throttled HUD coordinates projection (10Hz max to avoid React 60Hz re-render overhead)
+      const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+      if (now - lastHudUpdateTime > 100 && isMountedRef.current) {
+        lastHudUpdateTime = now;
+        const currentWidth = containerRef.current?.clientWidth || width;
+        const currentHeight = containerRef.current?.clientHeight || height;
+        const newHudPositions: { [key: string]: ProjectedHudData } = {};
+        EDUCATIONAL_PACKETS.forEach((pkt) => {
+          const worldPos = new THREE.Vector3();
+          if (pkt.id === 'pkt-dns') worldPos.set(-2.8, 2.2, -0.4);
+          else if (pkt.id === 'pkt-tcp-syn') worldPos.set(0.8, 2.4, 0.4);
+          else if (pkt.id === 'pkt-ip') worldPos.set(4.4, 2.3, -0.6);
+          else if (pkt.id === 'pkt-http3') worldPos.set(8.0, 2.6, 0.6);
 
-        const projected = worldPos.clone().project(state.camera);
-        const isVisible = projected.z < 1;
-        const screenX = ((projected.x + 1) * currentWidth) / 2;
-        const screenY = ((-projected.y + 1) * currentHeight) / 2;
+          const projected = worldPos.clone().project(state.camera);
+          const isVisible = projected.z < 1;
+          const screenX = ((projected.x + 1) * currentWidth) / 2;
+          const screenY = ((-projected.y + 1) * currentHeight) / 2;
 
-        newHudPositions[pkt.id] = {
-          x: screenX,
-          y: screenY,
-          visible: isVisible,
-          label: pkt.label,
-          details: pkt.details,
-        };
-      });
+          newHudPositions[pkt.id] = {
+            x: screenX,
+            y: screenY,
+            visible: isVisible,
+            label: pkt.label,
+            details: pkt.details,
+          };
+        });
 
-      if (isMountedRef.current) {
         setProjectedHudPositions(newHudPositions);
+      }
+
+      if (isMountedRef.current && isLoopRunning) {
         state.animFrameId = requestAnimationFrame(animate);
       }
     };
@@ -850,6 +906,13 @@ export const NetworkCanvas: React.FC<NetworkCanvasProps> = ({
     // Cleanup: aggressive WebGL context and geometry/material/texture disposal
     return () => {
       isMountedRef.current = false;
+      isLoopRunning = false;
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+      }
+      if (intersectionObserver) {
+        intersectionObserver.disconnect();
+      }
       resizeObserver.disconnect();
       if (sceneStateRef.current) {
         cancelAnimationFrame(sceneStateRef.current.animFrameId);

@@ -83,6 +83,14 @@ export const AppTopbar: React.FC = () => {
   return (
     <>
       <header className="w-full bg-[#16181f] border-b border-[#2a2e39] px-4 sm:px-6 py-2.5 flex items-center justify-between gap-3 relative z-30 font-sans">
+        {/* Skip to Main Content Link (WCAG 2.1 AA 2.4.1 Bypass Blocks) */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[#38bdf8] focus:text-[#0b0f17] focus:font-bold focus:shadow-2xl focus:outline-none focus:ring-2 focus:ring-white text-xs font-mono"
+        >
+          Skip to main content
+        </a>
+
         {/* Mobile Menu Hamburger */}
         <button
           type="button"
@@ -98,6 +106,8 @@ export const AppTopbar: React.FC = () => {
           <div className="relative flex items-center">
             <Search className="absolute left-3 w-4 h-4 text-[#646c7d]" />
             <input
+              id="curriculum-search-input"
+              aria-label="Search curriculum"
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}

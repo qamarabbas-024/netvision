@@ -427,7 +427,7 @@ export default function CourseDetailPage() {
                 </div>
 
                 <p className="text-xs text-[#8e95a5] leading-relaxed">
-                  Completing all curriculum lessons, interactive exercises, and diagnostic evaluations validates course mastery and qualifies your account for an official cryptographic certificate.
+                  Completing all curriculum lessons, interactive exercises, and diagnostic evaluations validates course mastery and qualifies your account for an official verified certificate.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">

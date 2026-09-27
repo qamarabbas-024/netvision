@@ -878,6 +878,12 @@ export default function MasterCapstonePage() {
                         : 'bg-[#14151a] border-[#2a2e39] text-[#38bdf8]'
                     }`}
                   >
+                    {/* Screen reader milestone alert */}
+                    <div role="status" aria-live="assertive" className="sr-only">
+                      {remainingSeconds === 600 ? 'Alert: 10 minutes remaining in examination.' :
+                       remainingSeconds === 300 ? 'Alert: 5 minutes remaining in examination.' :
+                       remainingSeconds === 60 ? 'Critical Alert: 1 minute remaining in examination.' : null}
+                    </div>
                     <Clock className="w-4 h-4 shrink-0" />
                     <div>
                       <span className="text-[9px] uppercase tracking-wider block text-[#8e95a5] leading-none">

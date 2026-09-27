@@ -60,7 +60,7 @@ export default function Home() {
         onScrollToCertifications={handleScrollToCertifications}
       />
 
-      <main>
+      <main id="main-content">
         {/* Hero Section with 3D Network Observatory and 2x3 Feature Matrix */}
         <HeroSection
           currentStageId={currentStageId}

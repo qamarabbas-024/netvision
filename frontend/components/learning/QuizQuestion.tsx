@@ -139,7 +139,7 @@ export const QuizQuestion: React.FC<QuizQuestionProps> = ({
                 >
                   {String.fromCharCode(65 + idx)}
                 </span>
-                <span className="text-xs sm:text-sm leading-relaxed break-word-all">{optionText}</span>
+                <span className="text-xs sm:text-sm leading-relaxed break-words [overflow-wrap:anywhere]">{optionText}</span>
               </div>
 
               {resultFeedback && idx === resultFeedback.correctOption && (
