@@ -28,6 +28,7 @@ jobs:
 
     env:
       DATABASE_URL: "postgresql://netvision:netvision_secure_password@localhost:5432/netvision_db?schema=public"
+      DIRECT_URL: "postgresql://netvision:netvision_secure_password@localhost:5432/netvision_db?schema=public"
       JWT_SECRET: "netvision_ci_test_secret_must_be_over_32_characters_long"
 
     steps:
