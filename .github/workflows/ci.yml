@@ -51,6 +51,11 @@ jobs:
       - name: Build Workspace Packages
         run: pnpm --filter "@netvision/*" build
 
+      - name: Database Governance & Workflow Drift Guard
+        run: |
+          cd backend
+          npx ts-node scripts/guard-db-command.ts --scan-workflows
+
       - name: Generate Prisma Client & Run Migrations
         run: |
           cd backend
@@ -101,6 +106,8 @@ jobs:
           npx ts-node -T scripts/test-drop-19-academic-quality.ts
           npx ts-node -T scripts/test-drop-20-public-trust.ts
           npx ts-node -T scripts/test-drop-21-discoverability-a11y-perf.ts
+          npx ts-node scripts/test-drop-25-security-failure-semantics.ts
+          npx ts-node scripts/test-drop-26-database-governance.ts
           npx ts-node scripts/test-drop-z-e2e-adversarial.ts
 
       - name: Build Production Artifacts
