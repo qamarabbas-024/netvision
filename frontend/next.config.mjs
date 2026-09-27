@@ -22,6 +22,50 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/certification',
+        destination: '/certificates',
+        permanent: true,
+      },
+      {
+        source: '/certifications',
+        destination: '/certificates',
+        permanent: true,
+      },
+      {
+        source: '/certificate',
+        destination: '/certificates',
+        permanent: true,
+      },
+      {
+        source: '/course',
+        destination: '/courses',
+        permanent: true,
+      },
+      {
+        source: '/capstone',
+        destination: '/certifications/capstone',
+        permanent: true,
+      },
+      {
+        source: '/progress',
+        destination: '/dashboard',
+        permanent: true,
+      },
+      {
+        source: '/quiz',
+        destination: '/exams',
+        permanent: true,
+      },
+      {
+        source: '/lab',
+        destination: '/labs',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -53,7 +53,12 @@ export default function RegisterPage() {
         router.push('/login?registered=true');
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during registration.');
+      const isNetworkErr = err?.name === 'TypeError' || err?.message?.toLowerCase().includes('fetch');
+      setError(
+        isNetworkErr
+          ? 'Unable to connect to the registration server. Please check your network connection and retry.'
+          : err.message || 'An error occurred during registration.'
+      );
     } finally {
       setIsLoading(false);
     }

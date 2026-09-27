@@ -54,6 +54,14 @@ export function disposeObject(obj: THREE.Object3D) {
  */
 export function disposeThreeScene(scene: THREE.Scene, renderer: THREE.WebGLRenderer) {
   if (scene) {
+    if (scene.background && typeof (scene.background as any).dispose === 'function') {
+      (scene.background as any).dispose();
+      scene.background = null;
+    }
+    if (scene.environment && typeof (scene.environment as any).dispose === 'function') {
+      (scene.environment as any).dispose();
+      scene.environment = null;
+    }
     scene.traverse(disposeObject);
     while (scene.children.length > 0) {
       scene.remove(scene.children[0]);

@@ -22,6 +22,8 @@ export class ApiError extends Error {
   status: number;
   isBackendUnavailable: boolean;
   isNotFound: boolean;
+  isUnauthorized: boolean;
+  isForbidden: boolean;
   isAborted: boolean;
   requestId?: string;
 
@@ -31,6 +33,8 @@ export class ApiError extends Error {
     this.status = status;
     this.isBackendUnavailable = status >= 500 || status === 0 || status === 503;
     this.isNotFound = status === 404;
+    this.isUnauthorized = status === 401;
+    this.isForbidden = status === 403;
     this.isAborted = isAborted;
     this.requestId = requestId;
   }
@@ -273,8 +277,8 @@ export async function claimAnonymousProgressApi(anonymousId: string) {
   }
 }
 
-export async function getCertificateByIdApi(idOrCode: string) {
-  return await fetchApi<any>(`/certificates/${encodeURIComponent(idOrCode)}`);
+export async function getCertificateByIdApi(idOrCode: string, options?: { signal?: AbortSignal }) {
+  return await fetchApi<any>(`/certificates/${encodeURIComponent(idOrCode)}`, { signal: options?.signal });
 }
 
 // =========================================================================
@@ -535,14 +539,16 @@ export async function verifyCertificatePublicApi(credentialId: string): Promise<
 /**
  * Retrieves all active certificates owned by the authenticated learner (IDOR protected).
  */
-export async function getUserCertificatesApi(): Promise<UserCertificateItem[]> {
+export async function getUserCertificatesApi(options?: { signal?: AbortSignal }): Promise<UserCertificateItem[]> {
   try {
-    return await fetchApi<UserCertificateItem[]>('/certificates/mine');
-  } catch {
+    return await fetchApi<UserCertificateItem[]>('/certificates/mine', { signal: options?.signal });
+  } catch (err: any) {
+    if (err?.isAborted) throw err;
     try {
-      return await fetchApi<UserCertificateItem[]>('/certificates');
-    } catch {
-      return [];
+      return await fetchApi<UserCertificateItem[]>('/certificates', { signal: options?.signal });
+    } catch (fallbackErr: any) {
+      if (fallbackErr?.isAborted) throw fallbackErr;
+      throw fallbackErr || err;
     }
   }
 }

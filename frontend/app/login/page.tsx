@@ -57,7 +57,12 @@ function LoginContent() {
       setAuth(data.user, data.accessToken, rememberMe);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'An error occurred during authentication.');
+      const isNetworkErr = err?.name === 'TypeError' || err?.message?.toLowerCase().includes('fetch');
+      setError(
+        isNetworkErr
+          ? 'Unable to connect to the authentication server. Please check your network connection and retry.'
+          : err.message || 'An error occurred during authentication.'
+      );
     } finally {
       setIsLoading(false);
     }

@@ -13,6 +13,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { RouterIcon } from '@/components/ui/Icons';
 import { getUserProgressApi, getTopicsApi } from '@/lib/api';
+import { GuestProgressService } from '@/services/GuestProgressService';
 import { useAuthStore } from '@/stores/authStore';
 import { PulsePacketLoader } from '@/components/ui/Loading';
 import { DashboardCertifications } from '@/components/certification/DashboardCertifications';
@@ -28,6 +29,7 @@ import {
   Clock,
   ShieldCheck,
   User,
+  RotateCcw,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -36,28 +38,63 @@ export default function DashboardPage() {
   const [topicsCatalog, setTopicsCatalog] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [progressSyncError, setProgressSyncError] = useState<string | null>(null);
 
   const loadDashboardData = async (signal?: AbortSignal) => {
     setIsLoading(true);
     setLoadError(null);
+    setProgressSyncError(null);
     try {
-      const [progressData, catalogData] = await Promise.all([
-        getUserProgressApi({ signal }).catch((err) => {
-          if (signal?.aborted || err?.isAborted) return null;
-          console.warn('Could not fetch user progress:', err);
-          return null;
-        }),
-        getTopicsApi(undefined, undefined, { signal }).catch((err) => {
-          if (signal?.aborted || err?.isAborted) return [];
-          console.warn('Could not fetch topics catalog:', err);
-          return [];
-        }),
-      ]);
+      let fetchedProgress: any = null;
+      let fetchedCatalog: any[] = [];
+      let progressErrorMsg: string | null = null;
+
+      try {
+        fetchedProgress = await getUserProgressApi({ signal });
+      } catch (err: any) {
+        if (signal?.aborted || err?.isAborted) return;
+        console.warn('Could not fetch user progress:', err);
+        if (isAuthenticated) {
+          progressErrorMsg =
+            err?.isBackendUnavailable || err?.status >= 500
+              ? 'Live learning telemetry sync is temporarily paused. Could not reach server to retrieve your progress.'
+              : err?.message || 'Could not synchronize progress with server.';
+        }
+      }
+
+      try {
+        fetchedCatalog = await getTopicsApi(undefined, undefined, { signal });
+      } catch (err: any) {
+        if (signal?.aborted || err?.isAborted) return;
+        console.warn('Could not fetch topics catalog:', err);
+      }
+
       if (signal?.aborted) return;
-      if (progressData) setUserProgress(progressData);
-      if (catalogData) setTopicsCatalog(catalogData);
-      if (!progressData && (!catalogData || catalogData.length === 0)) {
-        setLoadError('Service temporarily unavailable. Unable to connect to learning server.');
+
+      if (fetchedProgress) {
+        setUserProgress(fetchedProgress);
+      } else if (!isAuthenticated) {
+        // Hydrate guest progress from localStorage so guest progress is truthfully visible
+        const guestData = GuestProgressService.getProgress();
+        const completedCount = guestData.completedLessonIds.length;
+        const totalXp = Object.values(guestData.lessonScores).reduce((sum, score) => sum + score, 0);
+        setUserProgress({
+          completedLessons: completedCount,
+          totalLessons: 30,
+          overallProgressPercent: Math.min(100, Math.round((completedCount / 30) * 100)),
+          studyStreak: completedCount > 0 ? 1 : 0,
+          totalXp,
+          certificatesEarned: 0,
+          currentCourse: null,
+          badges: { earned: completedCount > 0 ? 1 : 0, total: 5, items: [] },
+          recentLessons: [],
+        });
+      } else if (progressErrorMsg) {
+        setProgressSyncError(progressErrorMsg);
+      }
+
+      if (fetchedCatalog && fetchedCatalog.length > 0) {
+        setTopicsCatalog(fetchedCatalog);
       }
     } catch (err: any) {
       if (signal?.aborted || err?.isAborted) return;
@@ -177,6 +214,33 @@ export default function DashboardPage() {
                         <Button variant="primary" size="sm" className="w-full text-xs font-bold">Create Account</Button>
                       </Link>
                     </div>
+                  </div>
+                )}
+
+                {/* 1b. TELEMETRY SYNC ERROR BANNER (When backend sync fails) */}
+                {progressSyncError && (
+                  <div id="dashboard-sync-alert" className="surface-2 p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shrink-0 font-mono text-[10px] font-bold">
+                        SYNC
+                      </div>
+                      <div>
+                        <h4 className="text-xs sm:text-sm font-bold text-[#f4f5f7]">Telemetry Sync Paused</h4>
+                        <p className="text-xs text-[#8e95a5]">
+                          {progressSyncError}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      id="dashboard-retry-sync-btn"
+                      variant="primary"
+                      size="sm"
+                      onClick={() => loadDashboardData()}
+                      leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+                      className="shrink-0 w-full sm:w-auto"
+                    >
+                      Retry Sync
+                    </Button>
                   </div>
                 )}
 

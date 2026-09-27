@@ -82,7 +82,7 @@ export default function CertificatesCatalogPage() {
     isOpen: false,
   });
 
-  const loadAllData = useCallback(async () => {
+  const loadAllData = useCallback(async (signal?: AbortSignal) => {
     if (!isAuthenticated) {
       setIsLoading(false);
       return;
@@ -94,15 +94,22 @@ export default function CertificatesCatalogPage() {
     try {
       // Parallel fetch to avoid waterfalls
       const [certsResult, masteryResult, ...courseResults] = await Promise.allSettled([
-        getUserCertificatesApi(),
+        getUserCertificatesApi({ signal }),
         checkMasteryEligibilityApi(),
         ...FLAGSHIP_5_COURSES.map((c) => checkCourseEligibilityApi(c.code)),
       ]);
 
+      if (signal?.aborted) return;
+
       if (certsResult.status === 'fulfilled') {
         setUserCertificates(certsResult.value);
       } else {
-        console.warn('Failed to fetch certificates:', certsResult.reason);
+        const errReason: any = certsResult.reason;
+        console.warn('Failed to fetch certificates:', errReason);
+        if (errReason?.isBackendUnavailable || errReason?.status >= 500 || errReason?.status === 0) {
+          setLoadError(errReason?.message || 'Service temporarily unavailable. Unable to connect to the credential registry.');
+          return;
+        }
       }
 
       if (masteryResult.status === 'fulfilled') {
@@ -122,15 +129,22 @@ export default function CertificatesCatalogPage() {
       });
       setCourseEligibilities(eligibilities);
     } catch (err: any) {
+      if (signal?.aborted || err?.isAborted) return;
       console.error('Failed to load certificates portal data:', err);
       setLoadError(err?.message || 'Failed to load official certificates.');
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
-    loadAllData();
+    const controller = new AbortController();
+    loadAllData(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, [loadAllData]);
 
   // Handle certificate claim with Drop L Celebration Experience

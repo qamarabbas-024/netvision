@@ -36,6 +36,8 @@ export default function CertificateDetailPage() {
   const [certData, setCertData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isNotFound, setIsNotFound] = useState<boolean>(false);
+  const [isBackendUnavailable, setIsBackendUnavailable] = useState<boolean>(false);
 
   // PDF download state
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
@@ -47,34 +49,54 @@ export default function CertificateDetailPage() {
   // Share link copy state
   const [copied, setCopied] = useState<boolean>(false);
 
-  const loadCertificate = useCallback(async () => {
+  const loadCertificate = useCallback(async (signal?: AbortSignal) => {
     if (!certId) {
       setIsLoading(false);
+      setIsNotFound(true);
       setError('No certificate identifier provided.');
       return;
     }
 
     setIsLoading(true);
     setError(null);
+    setIsNotFound(false);
+    setIsBackendUnavailable(false);
     setDownloadFeedback(null);
 
     try {
-      const data = await getCertificateByIdApi(certId);
+      const data = await getCertificateByIdApi(certId, { signal });
+      if (signal?.aborted) return;
       if (data && (data.credentialId || data.code || data.id)) {
         setCertData(data);
       } else {
+        setIsNotFound(true);
         setError(`Certificate record "${certId}" could not be located on the authoritative server.`);
       }
     } catch (err: any) {
+      if (signal?.aborted || err?.isAborted) return;
       console.error('Error fetching certificate details:', err);
-      setError(err?.message || `Certificate credential "${certId}" was not found or is invalid.`);
+      if (err?.status === 404 || err?.isNotFound) {
+        setIsNotFound(true);
+        setError(`Certificate credential "${certId}" was not found or is invalid.`);
+      } else if (err?.isBackendUnavailable || err?.status >= 500) {
+        setIsBackendUnavailable(true);
+        setError('Service temporarily unavailable. Unable to connect to the authoritative certification registry.');
+      } else {
+        setError(err?.message || `Certificate credential "${certId}" could not be retrieved.`);
+      }
     } finally {
-      setIsLoading(false);
+      if (!signal?.aborted) {
+        setIsLoading(false);
+      }
     }
   }, [certId]);
 
   useEffect(() => {
-    loadCertificate();
+    const controller = new AbortController();
+    loadCertificate(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, [loadCertificate]);
 
   // Handle authoritative backend PDF download
@@ -149,19 +171,27 @@ export default function CertificateDetailPage() {
           <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400">
             <ShieldAlert className="w-6 h-6" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[#f4f5f7]">Certificate Record Not Found</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-[#f4f5f7]">
+            {isNotFound
+              ? 'Certificate Record Not Found'
+              : isBackendUnavailable
+              ? 'Verification Service Temporarily Unavailable'
+              : 'Certificate Retrieval Failed'}
+          </h1>
           <p className="text-xs sm:text-sm text-[#8e95a5] leading-relaxed">
             {error || `The requested credential identifier "${certId}" was not found or does not represent an active certified credential.`}
           </p>
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={loadCertificate}
-              leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
-            >
-              Retry
-            </Button>
+            {!isNotFound && (
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => loadCertificate()}
+                leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+              >
+                Retry Verification
+              </Button>
+            )}
             <Link href="/certificates">
               <Button variant="secondary" size="sm">
                 Browse Certifications
