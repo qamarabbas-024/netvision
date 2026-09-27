@@ -66,6 +66,7 @@
     "test:drop19": "ts-node -T scripts/test-drop-19-academic-quality.ts",
     "test:drop20": "ts-node -T scripts/test-drop-20-public-trust.ts",
     "test:drop21": "ts-node -T scripts/test-drop-21-discoverability-a11y-perf.ts",
+    "test:drop23": "ts-node scripts/test-drop-23-dns-tls-cutover.ts",
     "db:guard": "ts-node scripts/guard-db-command.ts",
     "db:backup": "ts-node scripts/backup-database.ts",
     "db:restore": "ts-node scripts/restore-database.ts",
