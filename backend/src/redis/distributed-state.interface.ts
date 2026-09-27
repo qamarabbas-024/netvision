@@ -19,6 +19,40 @@ export enum StateClassification {
 }
 
 /**
+ * NETVISION — DROP 25: DISTRIBUTED SECURITY STATE CLASSIFICATION
+ */
+export enum SecurityStateTier {
+  SECURITY_AUTHORITATIVE = 'SECURITY_AUTHORITATIVE',
+  USER_STATE = 'USER_STATE',
+  CACHE = 'CACHE',
+  OPTIONAL_TELEMETRY = 'OPTIONAL_TELEMETRY',
+}
+
+export const DROP_25_STATE_CLASSIFICATION = {
+  TOKEN_REVOCATION: SecurityStateTier.SECURITY_AUTHORITATIVE,
+  REFRESH_TOKEN_FAMILIES: SecurityStateTier.SECURITY_AUTHORITATIVE,
+  BLACKLIST: SecurityStateTier.SECURITY_AUTHORITATIVE,
+  USER_REVOCATION_CUTOFF: SecurityStateTier.SECURITY_AUTHORITATIVE,
+  ACTIVE_LAB_SESSIONS: SecurityStateTier.USER_STATE,
+  RATE_LIMITING_AUTH: SecurityStateTier.SECURITY_AUTHORITATIVE,
+  RATE_LIMITING_PUBLIC: SecurityStateTier.OPTIONAL_TELEMETRY,
+  CACHE_CATALOG_TOPICS: SecurityStateTier.CACHE,
+  CACHE_USER_IDENTITY: SecurityStateTier.CACHE,
+} as const;
+
+export const SECURITY_AUTHORITATIVE_STORES = {
+  TOKEN_REVOCATION: 'PostgreSQL (Authoritative) + Redis (L2 Distributed Fast-Path)',
+  REFRESH_TOKEN_FAMILIES: 'PostgreSQL (Authoritative) + Redis (L2 Distributed Fast-Path)',
+  BLACKLIST: 'PostgreSQL (Authoritative) + Redis (L2 Distributed Fast-Path)',
+  USER_REVOCATION_CUTOFF: 'PostgreSQL (user.updatedAt) + Redis (L2 Cutoff Cache)',
+  ACTIVE_LAB_SESSIONS: 'PostgreSQL (SandboxSession Layer 3) + Redis (L2 Coordinator)',
+  RATE_LIMITING_AUTH: 'Redis (Distributed Sliding Window) / Degraded Tightened Local Window',
+  RATE_LIMITING_PUBLIC: 'Local In-Memory Sliding Window (Ephemeral Safe Degradation)',
+  CACHE: 'PostgreSQL (Source of Truth) / Redis (Ephemeral L2)',
+} as const;
+
+
+/**
  * Exact Redis Key Namespaces & TTL Policies:
  * All keys MUST be strictly namespaced with 'netvision:<domain>:<entity>'.
  * Unbounded or untracked keys are strictly forbidden.

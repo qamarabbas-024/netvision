@@ -268,6 +268,17 @@ export class RateLimiterService {
   /**
    * Rate limit check for Public routes.
    */
+  /**
+   * Evaluates if Rate Limiter is running in Degraded Secure Mode due to Redis outage.
+   */
+  public isDegradedSecureMode(): boolean {
+    return !this.redisService || !this.redisService.isAvailable();
+  }
+
+  /**
+   * Rate limit check for Public routes (Classification: OPTIONAL TELEMETRY / DEGRADED SAFE).
+   * In Redis outage, safely degrades to local in-memory window.
+   */
   public checkPublicLimit(ip: string): RateLimitResult {
     const key = `public:ip:${ip}`;
     return this.consume(key, this.config.publicLimit, this.config.publicTtlMs);
@@ -284,6 +295,8 @@ export class RateLimiterService {
 
   /**
    * Rate limit check for Authentication routes (login, register, verify-otp, resend-otp).
+   * Classification: SECURITY AUTHORITATIVE.
+   * In Redis outage, enters Degraded Tightened Security Mode (halved threshold to prevent cluster spray).
    */
   public checkAuthLimit(ip: string, email?: string): RateLimitResult {
     // 1. Check progressive backoff cooldown first
@@ -300,9 +313,18 @@ export class RateLimiterService {
       };
     }
 
+    // Determine effective limit: Clamped in degraded mode to prevent distributed spray attacks
+    const isDegraded = this.isDegradedSecureMode();
+    const effectiveIpLimit = isDegraded
+      ? Math.max(2, Math.floor(this.config.authLimit / 2))
+      : this.config.authLimit;
+    const effectiveAccountLimit = isDegraded
+      ? Math.max(2, Math.floor(this.config.authPerAccountLimit / 2))
+      : this.config.authPerAccountLimit;
+
     // 2. Check per-IP auth rate limit
     const ipKey = `auth:ip:${ip}`;
-    const ipRes = this.consume(ipKey, this.config.authLimit, this.config.authTtlMs);
+    const ipRes = this.consume(ipKey, effectiveIpLimit, this.config.authTtlMs);
     if (!ipRes.allowed) {
       return { ...ipRes, reason: 'IP_LIMIT_EXCEEDED' };
     }
@@ -311,7 +333,7 @@ export class RateLimiterService {
     if (email) {
       const normalizedEmail = email.toLowerCase().trim();
       const accountKey = `auth:account:${normalizedEmail}`;
-      const accountRes = this.consume(accountKey, this.config.authPerAccountLimit, this.config.authTtlMs);
+      const accountRes = this.consume(accountKey, effectiveAccountLimit, this.config.authTtlMs);
       if (!accountRes.allowed) {
         return { ...accountRes, reason: 'ACCOUNT_LIMIT_EXCEEDED' };
       }
@@ -322,6 +344,8 @@ export class RateLimiterService {
 
   /**
    * Rate limit check for Strict Authentication actions (forgot-password, reset-password).
+   * Classification: SECURITY AUTHORITATIVE.
+   * In Redis outage, enters Degraded Tightened Security Mode.
    */
   public checkStrictAuthLimit(ip: string, email?: string): RateLimitResult {
     // 1. Check progressive backoff cooldown
@@ -338,9 +362,17 @@ export class RateLimiterService {
       };
     }
 
+    const isDegraded = this.isDegradedSecureMode();
+    const effectiveIpLimit = isDegraded
+      ? Math.max(1, Math.floor(this.config.strictAuthLimit / 2))
+      : this.config.strictAuthLimit;
+    const effectiveAccountLimit = isDegraded
+      ? Math.max(1, Math.floor(this.config.strictAuthPerAccountLimit / 2))
+      : this.config.strictAuthPerAccountLimit;
+
     // 2. Check per-IP strict auth rate limit
     const ipKey = `strict-auth:ip:${ip}`;
-    const ipRes = this.consume(ipKey, this.config.strictAuthLimit, this.config.strictAuthTtlMs);
+    const ipRes = this.consume(ipKey, effectiveIpLimit, this.config.strictAuthTtlMs);
     if (!ipRes.allowed) {
       return { ...ipRes, reason: 'IP_LIMIT_EXCEEDED' };
     }
@@ -349,7 +381,7 @@ export class RateLimiterService {
     if (email) {
       const normalizedEmail = email.toLowerCase().trim();
       const accountKey = `strict-auth:account:${normalizedEmail}`;
-      const accountRes = this.consume(accountKey, this.config.strictAuthPerAccountLimit, this.config.strictAuthTtlMs);
+      const accountRes = this.consume(accountKey, effectiveAccountLimit, this.config.strictAuthTtlMs);
       if (!accountRes.allowed) {
         return { ...accountRes, reason: 'ACCOUNT_LIMIT_EXCEEDED' };
       }

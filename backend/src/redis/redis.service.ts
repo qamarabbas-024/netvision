@@ -100,6 +100,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return this.isConnected && this.client !== null && this.client.status === 'ready';
   }
 
+  public setConnected(connected: boolean): void {
+    this.isConnected = connected;
+  }
+
   /**
    * Testing hook for multi-instance distributed state simulation
    */
@@ -119,6 +123,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       if (!raw) return null;
       return JSON.parse(raw) as T;
     } catch (err: any) {
+      this.isConnected = false;
       this.logger.warn(`[DistributedState] Redis GET error for key ${key}: ${err?.message || err}`);
       return null;
     }
@@ -135,6 +140,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       }
       return true;
     } catch (err: any) {
+      this.isConnected = false;
       this.logger.warn(`[DistributedState] Redis SET error for key ${key}: ${err?.message || err}`);
       return false;
     }

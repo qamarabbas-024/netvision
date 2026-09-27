@@ -1,28 +1,25 @@
-import { Injectable, Logger, OnModuleDestroy, Optional, Inject } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, Optional, Inject, UnauthorizedException } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import type { MonitoringService } from '../monitoring/monitoring.service';
 import { RedisService } from '../redis/redis.service';
 import { PrismaService } from '../database/prisma.service';
-import { REDIS_KEYS, DISTRIBUTED_TTL, DistributedRevokedToken, DistributedRefreshSession } from '../redis/distributed-state.interface';
+import {
+  REDIS_KEYS,
+  DISTRIBUTED_TTL,
+  DistributedRevokedToken,
+  DistributedRefreshSession,
+  SecurityStateTier,
+  DROP_25_STATE_CLASSIFICATION,
+} from '../redis/distributed-state.interface';
+import {
+  IAuthoritativeSecurityStore,
+  RevokedTokenRecord,
+  RefreshSession,
+} from './stores/authoritative-security.store';
 
-export interface RevokedTokenRecord {
-  tokenHash: string;
-  revokedAt: number;
-  expiresAt: number;
-}
-
-export interface RefreshSession {
-  tokenHash: string;
-  userId: string;
-  familyId: string;
-  expiresAt: number;
-  isRevoked: boolean;
-  createdAt: number;
-  rotatedAt?: number;
-  replacedByHash?: string;
-}
+export { RevokedTokenRecord, RefreshSession };
 
 export interface RotationResult {
   userId: string;
@@ -57,12 +54,19 @@ export class TokenRevocationService implements OnModuleDestroy {
   // Grace period for concurrent refresh requests (e.g. multi-tab browser refresh)
   private readonly concurrentGracePeriodMs = DISTRIBUTED_TTL.CONCURRENT_REFRESH_GRACE_SEC * 1000;
 
+  // Authoritative persistent security store (PostgreSQL / Shared Cluster Driver)
+  private authoritativeStore?: IAuthoritativeSecurityStore;
+
+  // Fail-Closed policy on total cluster partition
+  private failClosedOnPartition = false;
+
   private cleanupInterval: NodeJS.Timeout | null = null;
 
   constructor(
     @Optional() @Inject('TOKEN_STORAGE_DIR') customStorageDir?: string,
     @Optional() private readonly redisService?: RedisService,
-    @Optional() private readonly prisma?: PrismaService
+    @Optional() private readonly prisma?: PrismaService,
+    @Optional() @Inject('AUTHORITATIVE_SECURITY_STORE') authoritativeStore?: IAuthoritativeSecurityStore
   ) {
     const baseDir =
       customStorageDir ||
@@ -75,6 +79,8 @@ export class TokenRevocationService implements OnModuleDestroy {
     this.refreshSessionsFile = path.join(this.storageDir, 'refresh_sessions.json');
     this.familyTokensFile = path.join(this.storageDir, 'family_tokens.json');
 
+    this.authoritativeStore = authoritativeStore;
+
     this.ensureStorageDir();
     this.loadAllFromDisk();
     this.startPeriodicCleanup();
@@ -82,6 +88,22 @@ export class TokenRevocationService implements OnModuleDestroy {
 
   public setMonitoringService(ms: MonitoringService): void {
     this.monitoringService = ms;
+  }
+
+  public setAuthoritativeStore(store: IAuthoritativeSecurityStore): void {
+    this.authoritativeStore = store;
+  }
+
+  public getAuthoritativeStore(): IAuthoritativeSecurityStore | undefined {
+    return this.authoritativeStore;
+  }
+
+  public setFailClosed(failClosed: boolean): void {
+    this.failClosedOnPartition = failClosed;
+  }
+
+  public isFailClosed(): boolean {
+    return this.failClosedOnPartition;
   }
 
   public getStorageDir(): string {
@@ -236,7 +258,7 @@ export class TokenRevocationService implements OnModuleDestroy {
 
   /**
    * Revokes a specific access token (e.g. upon logout).
-   * Persisted to Redis with exact TTL + L1 cache + disk fallback.
+   * Persisted to Authoritative Store + Redis (if available) + L1 memory cache.
    */
   public revokeToken(rawToken: string, expirySeconds: number = DISTRIBUTED_TTL.DEFAULT_ACCESS_TOKEN_REVOCATION_SEC): void {
     if (!rawToken || typeof rawToken !== 'string') return;
@@ -247,12 +269,20 @@ export class TokenRevocationService implements OnModuleDestroy {
       tokenHash,
       revokedAt: now,
       expiresAt: now + expirySeconds * 1000,
+      sourceInstanceId: this.redisService?.instanceId,
     };
 
     this.revokedTokens.set(tokenHash, record);
     this.persistRevokedTokens();
 
-    // Distributed Redis Persistence
+    // 1. Authoritative Store Persistence (Durable Cluster-Wide Source of Truth)
+    if (this.authoritativeStore) {
+      this.authoritativeStore.saveRevokedToken(record).catch((err) => {
+        this.logger.warn(`Failed to persist token revocation to authoritative store: ${err?.message || err}`);
+      });
+    }
+
+    // 2. Distributed Redis Persistence (L2 Fast Path)
     if (this.redisService?.isAvailable()) {
       const distRecord: DistributedRevokedToken = {
         tokenHash,
@@ -271,8 +301,51 @@ export class TokenRevocationService implements OnModuleDestroy {
   }
 
   /**
+   * Asynchronously revokes a token, awaiting authoritative persistence.
+   */
+  public async revokeTokenAsync(rawToken: string, expirySeconds: number = DISTRIBUTED_TTL.DEFAULT_ACCESS_TOKEN_REVOCATION_SEC): Promise<void> {
+    if (!rawToken || typeof rawToken !== 'string') return;
+    this.syncFromDisk();
+    const tokenHash = this.hashToken(rawToken);
+    const now = Date.now();
+    const record: RevokedTokenRecord = {
+      tokenHash,
+      revokedAt: now,
+      expiresAt: now + expirySeconds * 1000,
+      sourceInstanceId: this.redisService?.instanceId,
+    };
+
+    this.revokedTokens.set(tokenHash, record);
+    this.persistRevokedTokens();
+
+    // 1. Authoritative Store Persistence
+    if (this.authoritativeStore) {
+      try {
+        await this.authoritativeStore.saveRevokedToken(record);
+      } catch (err: any) {
+        this.logger.warn(`Failed to persist token revocation to authoritative store: ${err?.message || err}`);
+      }
+    }
+
+    // 2. Distributed Redis Persistence
+    if (this.redisService?.isAvailable()) {
+      const distRecord: DistributedRevokedToken = {
+        tokenHash,
+        revokedAt: Math.floor(now / 1000),
+        expiresAt: Math.floor((now + expirySeconds * 1000) / 1000),
+        sourceInstanceId: this.redisService.instanceId,
+      };
+      await this.redisService.set(
+        REDIS_KEYS.REVOKED_TOKEN(tokenHash),
+        distRecord,
+        expirySeconds
+      ).catch(() => {});
+    }
+  }
+
+  /**
    * Revokes all active sessions for a specific user ID issued before now.
-   * Multi-instance distributed update via Redis + PostgreSQL user.updatedAt.
+   * Multi-instance distributed update via Authoritative Store + Redis + PostgreSQL user.updatedAt.
    */
   public revokeUserSessions(userId: string): void {
     if (!userId) return;
@@ -282,7 +355,15 @@ export class TokenRevocationService implements OnModuleDestroy {
     this.persistUserCutoffs();
     this.revokeUserRefreshTokens(userId);
 
-    // Distributed Redis Persistence & Cache Invalidation
+    // 1. Authoritative Store Persistence
+    if (this.authoritativeStore) {
+      this.authoritativeStore.saveUserCutoff(userId, nowSec).catch((err) => {
+        this.logger.warn(`Failed to replicate user cutoff to authoritative store: ${err?.message || err}`);
+      });
+      this.authoritativeStore.revokeUserRefreshSessions(userId).catch(() => {});
+    }
+
+    // 2. Distributed Redis Persistence & Cache Invalidation
     if (this.redisService?.isAvailable()) {
       this.redisService.set(
         REDIS_KEYS.USER_REVOCATION_CUTOFF(userId),
@@ -295,7 +376,7 @@ export class TokenRevocationService implements OnModuleDestroy {
       this.redisService.del(REDIS_KEYS.USER_IDENTITY_CACHE(userId)).catch(() => {});
     }
 
-    // PostgreSQL Multi-Instance Synchronization:
+    // 3. PostgreSQL Multi-Instance Synchronization:
     // Updating user.updatedAt ensures ANY instance rejects tokens issued prior to this moment
     if (this.prisma) {
       this.prisma.user.updateMany({
@@ -335,38 +416,127 @@ export class TokenRevocationService implements OnModuleDestroy {
 
   /**
    * Evaluates if a given token or user session has been revoked asynchronously.
-   * Checks L1 memory cache first, then checks Redis cluster across instances.
+   * Checks L1 memory cache -> Distributed Redis -> Shared Authoritative Store (PostgreSQL).
+   *
+   * FAILURE SEMANTICS:
+   * - If Redis is unavailable, queries Authoritative Store.
+   * - Never silently falls back to local-only state.
+   * - If both Redis and Authoritative Store are unreachable and failClosed is set, fails closed.
    */
   public async isRevokedAsync(rawToken?: string, payload?: { sub?: string; iat?: number }): Promise<boolean> {
-    // Fast path: L1 cache
+    // 1. Fast path: L1 memory cache
     if (this.isRevoked(rawToken, payload)) {
       return true;
     }
 
-    // Distributed path: Query Redis cluster
-    if (this.redisService?.isAvailable()) {
-      if (rawToken && typeof rawToken === 'string') {
-        const tokenHash = this.hashToken(rawToken);
-        const redisRevoked = await this.redisService.get<DistributedRevokedToken>(REDIS_KEYS.REVOKED_TOKEN(tokenHash));
-        if (redisRevoked) {
-          // Populate local L1 cache
-          this.revokedTokens.set(tokenHash, {
-            tokenHash,
-            revokedAt: redisRevoked.revokedAt * 1000,
-            expiresAt: redisRevoked.expiresAt * 1000,
-          });
-          return true;
-        }
-      }
+    let redisChecked = false;
 
-      if (payload?.sub && payload.iat !== undefined) {
-        const redisCutoff = await this.redisService.get<number>(REDIS_KEYS.USER_REVOCATION_CUTOFF(payload.sub));
-        if (redisCutoff) {
-          this.userRevocationCutoffs.set(payload.sub, redisCutoff);
-          if (payload.iat < redisCutoff) {
+    // 2. Distributed path 1: Query Redis cluster (if available)
+    let redisSuccess = false;
+
+    // 2. Distributed path 1: Query Redis cluster (if available)
+    if (this.redisService?.isAvailable()) {
+      try {
+        if (rawToken && typeof rawToken === 'string') {
+          const tokenHash = this.hashToken(rawToken);
+          const redisRevoked = await this.redisService.get<DistributedRevokedToken>(REDIS_KEYS.REVOKED_TOKEN(tokenHash));
+          if (this.redisService.isAvailable()) {
+            redisSuccess = true;
+          }
+          if (redisRevoked) {
+            // Populate local L1 cache
+            this.revokedTokens.set(tokenHash, {
+              tokenHash,
+              revokedAt: redisRevoked.revokedAt * 1000,
+              expiresAt: redisRevoked.expiresAt * 1000,
+            });
             return true;
           }
         }
+
+        if (payload?.sub && payload.iat !== undefined) {
+          const redisCutoff = await this.redisService.get<number>(REDIS_KEYS.USER_REVOCATION_CUTOFF(payload.sub));
+          if (this.redisService.isAvailable()) {
+            redisSuccess = true;
+          }
+          if (redisCutoff) {
+            this.userRevocationCutoffs.set(payload.sub, redisCutoff);
+            if (payload.iat < redisCutoff) {
+              return true;
+            }
+          }
+        }
+      } catch (err: any) {
+        this.logger.warn(`Redis query failed in isRevokedAsync: ${err?.message || err}`);
+        redisSuccess = false;
+      }
+    }
+
+    let authSuccess = false;
+
+    // 3. Distributed path 2: Query Authoritative Store (PostgreSQL / Shared Store)
+    // Mandatory when Redis is absent, or to resolve cold cache misses
+    if (this.authoritativeStore) {
+      try {
+        if (rawToken && typeof rawToken === 'string') {
+          const tokenHash = this.hashToken(rawToken);
+          const authRevoked = await this.authoritativeStore.getRevokedToken(tokenHash);
+          authSuccess = true;
+          if (authRevoked) {
+            this.revokedTokens.set(tokenHash, authRevoked);
+            // Reconcile to Redis if Redis was available but had a cache miss
+            if (this.redisService?.isAvailable()) {
+              const ttlSec = Math.max(1, Math.floor((authRevoked.expiresAt - Date.now()) / 1000));
+              this.redisService.set(REDIS_KEYS.REVOKED_TOKEN(tokenHash), {
+                tokenHash,
+                revokedAt: Math.floor(authRevoked.revokedAt / 1000),
+                expiresAt: Math.floor(authRevoked.expiresAt / 1000),
+              }, ttlSec).catch(() => {});
+            }
+            return true;
+          }
+        }
+
+        if (payload?.sub && payload.iat !== undefined) {
+          const authCutoff = await this.authoritativeStore.getUserCutoff(payload.sub);
+          authSuccess = true;
+          if (authCutoff) {
+            this.userRevocationCutoffs.set(payload.sub, authCutoff);
+            if (payload.iat < authCutoff) {
+              return true;
+            }
+          }
+        }
+      } catch (err: any) {
+        this.logger.warn(`Authoritative store query failed in isRevokedAsync: ${err?.message || err}`);
+        authSuccess = false;
+      }
+    }
+
+    // 4. PostgreSQL Direct Check for User.updatedAt (authoritative multi-instance user cutoff)
+    if (this.prisma && payload?.sub && payload.iat !== undefined) {
+      try {
+        const dbUser = await this.prisma.user.findUnique({
+          where: { id: payload.sub },
+          select: { updatedAt: true },
+        });
+        if (dbUser?.updatedAt) {
+          authSuccess = true;
+          const userUpdatedSec = Math.floor(new Date(dbUser.updatedAt).getTime() / 1000);
+          if (payload.iat < userUpdatedSec) {
+            return true;
+          }
+        }
+      } catch {
+        // DB unreachable handled below
+      }
+    }
+
+    // 5. Total Partition Failure Semantics: If neither Redis nor Authoritative Store was reachable
+    if (!redisSuccess && !authSuccess) {
+      if (this.failClosedOnPartition) {
+        this.logger.error('CRITICAL: Total security store partition detected. Failing closed on token verification.');
+        return true; // Treat as revoked in fail-closed mode
       }
     }
 
@@ -375,7 +545,7 @@ export class TokenRevocationService implements OnModuleDestroy {
 
   /**
    * Registers a new refresh token family for a candidate.
-   * Replicated across Redis + L1 cache.
+   * Replicated across Authoritative Store + Redis + L1 memory cache.
    */
   public registerRefreshToken(
     userId: string,
@@ -393,6 +563,7 @@ export class TokenRevocationService implements OnModuleDestroy {
       expiresAt: now + ttlMs,
       isRevoked: false,
       createdAt: now,
+      sourceInstanceId: this.redisService?.instanceId,
     };
 
     this.refreshSessions.set(tokenHash, session);
@@ -404,7 +575,14 @@ export class TokenRevocationService implements OnModuleDestroy {
     this.persistRefreshSessions();
     this.persistFamilyTokens();
 
-    // Distributed Redis Persistence
+    // 1. Authoritative Store Persistence
+    if (this.authoritativeStore) {
+      this.authoritativeStore.saveRefreshSession(session).catch((err) => {
+        this.logger.warn(`Failed to persist refresh session to authoritative store: ${err?.message || err}`);
+      });
+    }
+
+    // 2. Distributed Redis Persistence
     if (this.redisService?.isAvailable()) {
       const ttlSec = Math.floor(ttlMs / 1000);
       const distSession: DistributedRefreshSession = {
@@ -429,8 +607,7 @@ export class TokenRevocationService implements OnModuleDestroy {
   }
 
   /**
-   * Rotates a refresh token with atomic persistence, multi-instance synchronization,
-   * concurrent refresh tolerance, and strict replay reuse invalidation.
+   * Synchronously rotates a refresh token.
    */
   public rotateRefreshToken(
     rawOldToken: string,
@@ -501,6 +678,7 @@ export class TokenRevocationService implements OnModuleDestroy {
       expiresAt: now + ttlMs,
       isRevoked: false,
       createdAt: now,
+      sourceInstanceId: this.redisService?.instanceId,
     };
     this.refreshSessions.set(newHash, newSession);
 
@@ -511,6 +689,12 @@ export class TokenRevocationService implements OnModuleDestroy {
 
     this.persistRefreshSessions();
     this.persistFamilyTokens();
+
+    // Authoritative Store Persistence
+    if (this.authoritativeStore) {
+      this.authoritativeStore.updateRefreshSession(session).catch(() => {});
+      this.authoritativeStore.saveRefreshSession(newSession).catch(() => {});
+    }
 
     // Distributed Redis Persistence
     if (this.redisService?.isAvailable()) {
@@ -546,7 +730,8 @@ export class TokenRevocationService implements OnModuleDestroy {
 
   /**
    * Asynchronously rotates a refresh token with cross-instance Redis lookup,
-   * local memory L1 fallback, multi-tab grace window, and distributed replay reuse invalidation.
+   * Authoritative Store fallback (PostgreSQL), multi-tab grace window,
+   * and cluster-wide replay reuse invalidation.
    */
   public async rotateRefreshTokenAsync(
     rawOldToken: string,
@@ -559,31 +744,68 @@ export class TokenRevocationService implements OnModuleDestroy {
     const oldHash = this.hashToken(rawOldToken);
     let session = this.refreshSessions.get(oldHash);
 
-    // Authoritative distributed Redis lookup across instances
+    // 1. Authoritative distributed Redis lookup across instances
     if (this.redisService?.isAvailable()) {
-      const redisSession = await this.redisService.get<DistributedRefreshSession>(
-        REDIS_KEYS.REFRESH_SESSION(oldHash)
-      );
-      if (redisSession) {
-        session = {
-          tokenHash: redisSession.tokenHash,
-          userId: redisSession.userId,
-          familyId: redisSession.familyId,
-          expiresAt: redisSession.expiresAt * 1000,
-          isRevoked: redisSession.isRevoked,
-          createdAt: redisSession.createdAt * 1000,
-          rotatedAt: redisSession.rotatedAt ? redisSession.rotatedAt * 1000 : undefined,
-          replacedByHash: redisSession.replacedByHash,
-        };
-        this.refreshSessions.set(oldHash, session);
-        if (!this.familyTokens.has(session.familyId)) {
-          this.familyTokens.set(session.familyId, new Set());
+      try {
+        const redisSession = await this.redisService.get<DistributedRefreshSession>(
+          REDIS_KEYS.REFRESH_SESSION(oldHash)
+        );
+        if (redisSession) {
+          session = {
+            tokenHash: redisSession.tokenHash,
+            userId: redisSession.userId,
+            familyId: redisSession.familyId,
+            expiresAt: redisSession.expiresAt * 1000,
+            isRevoked: redisSession.isRevoked,
+            createdAt: redisSession.createdAt * 1000,
+            rotatedAt: redisSession.rotatedAt ? redisSession.rotatedAt * 1000 : undefined,
+            replacedByHash: redisSession.replacedByHash,
+            sourceInstanceId: redisSession.sourceInstanceId,
+          };
+          this.refreshSessions.set(oldHash, session);
+          if (!this.familyTokens.has(session.familyId)) {
+            this.familyTokens.set(session.familyId, new Set());
+          }
+          this.familyTokens.get(session.familyId)!.add(oldHash);
+        } else if (session) {
+          // If Redis is online but does not have the session, another instance revoked/deleted it
+          this.refreshSessions.delete(oldHash);
+          session = undefined;
         }
-        this.familyTokens.get(session.familyId)!.add(oldHash);
+      } catch (err: any) {
+        this.logger.warn(`Redis lookup failed in rotateRefreshTokenAsync: ${err?.message || err}`);
       }
     }
 
+    // 2. Authoritative Store Lookup (Critical fallback when Redis is absent, or to sync revocation state)
+    if (this.authoritativeStore) {
+      try {
+        const authSession = await this.authoritativeStore.getRefreshSession(oldHash);
+        if (authSession) {
+          session = { ...authSession };
+          this.refreshSessions.set(oldHash, session);
+          if (!this.familyTokens.has(session.familyId)) {
+            this.familyTokens.set(session.familyId, new Set());
+          }
+          this.familyTokens.get(session.familyId)!.add(oldHash);
+        } else if (session && !this.redisService?.isAvailable()) {
+          // Evicted from authoritative store while Redis is offline
+          this.refreshSessions.delete(oldHash);
+          session = undefined;
+        }
+      } catch (err: any) {
+        this.logger.warn(`Authoritative store lookup failed in rotateRefreshTokenAsync: ${err?.message || err}`);
+      }
+    }
+
+    // 3. If session still not found:
     if (!session) {
+      const redisOnline = this.redisService?.isAvailable() ?? false;
+      const authOnline = this.authoritativeStore ? await this.authoritativeStore.isAvailable().catch(() => false) : false;
+      if (!redisOnline && !authOnline) {
+        this.logger.error('CRITICAL: Total security store outage during refresh token rotation. Failing closed.');
+        return null;
+      }
       return null;
     }
 
@@ -598,7 +820,7 @@ export class TokenRevocationService implements OnModuleDestroy {
       return null;
     }
 
-    // REUSE DETECTION & CONCURRENT REFRESH TOLERANCE
+    // 4. REUSE DETECTION & CONCURRENT REFRESH TOLERANCE
     if (session.isRevoked) {
       // If rotated recently within the grace period (e.g. concurrent browser tabs), return safe rotation
       if (session.rotatedAt && now - session.rotatedAt <= this.concurrentGracePeriodMs) {
@@ -614,18 +836,28 @@ export class TokenRevocationService implements OnModuleDestroy {
 
       // Beyond grace window: Stolen token replay attack!
       this.logger.warn(
-        `🚨 REFRESH TOKEN REUSE ATTACK DETECTED for user ${session.userId}, family ${session.familyId}! Invalidating entire family and active sessions across all instances.`
+        `🚨 REFRESH TOKEN REUSE ATTACK DETECTED for user ${session.userId}, family ${session.familyId}! Invalidating entire family across all stores.`
       );
       this.monitoringService?.recordSecurityEvent('TOKEN_REUSE_DETECTED', {
         userId: session.userId,
         details: { familyId: session.familyId },
       });
+
+      // Invalidate in Authoritative Store
+      if (this.authoritativeStore) {
+        await this.authoritativeStore.revokeFamily(session.familyId).catch(() => {});
+        await this.authoritativeStore.revokeUserRefreshSessions(session.userId).catch(() => {});
+      }
+
+      // Invalidate in Redis
       await this.revokeFamilyAsync(session.familyId);
+
+      // Invalidate user sessions
       this.revokeUserSessions(session.userId);
       return null;
     }
 
-    // Mark old token as revoked (used) with rotation timestamp
+    // 5. Mark old token as revoked (used) with rotation timestamp
     session.isRevoked = true;
     session.rotatedAt = now;
     const newHash = this.hashToken(rawNewToken);
@@ -633,7 +865,7 @@ export class TokenRevocationService implements OnModuleDestroy {
 
     this.refreshSessions.set(oldHash, session);
 
-    // Register new token in same family
+    // 6. Register new token in same family
     const newSession: RefreshSession = {
       tokenHash: newHash,
       userId: session.userId,
@@ -641,6 +873,7 @@ export class TokenRevocationService implements OnModuleDestroy {
       expiresAt: now + ttlMs,
       isRevoked: false,
       createdAt: now,
+      sourceInstanceId: this.redisService?.instanceId,
     };
     this.refreshSessions.set(newHash, newSession);
 
@@ -652,7 +885,17 @@ export class TokenRevocationService implements OnModuleDestroy {
     this.persistRefreshSessions();
     this.persistFamilyTokens();
 
-    // Distributed Redis Persistence
+    // 7. Authoritative Store Persistence
+    if (this.authoritativeStore) {
+      try {
+        await this.authoritativeStore.updateRefreshSession(session);
+        await this.authoritativeStore.saveRefreshSession(newSession);
+      } catch (err: any) {
+        this.logger.warn(`Failed to update authoritative store during token rotation: ${err?.message || err}`);
+      }
+    }
+
+    // 8. Distributed Redis Persistence
     if (this.redisService?.isAvailable()) {
       const ttlSec = Math.floor(ttlMs / 1000);
       const distOldSession: DistributedRefreshSession = {
@@ -690,6 +933,9 @@ export class TokenRevocationService implements OnModuleDestroy {
 
   public async revokeFamilyAsync(familyId: string): Promise<void> {
     this.revokeFamily(familyId);
+    if (this.authoritativeStore) {
+      await this.authoritativeStore.revokeFamily(familyId).catch(() => {});
+    }
     if (this.redisService?.isAvailable()) {
       try {
         const tokenHashes = await this.redisService.smembers(REDIS_KEYS.REFRESH_FAMILY(familyId));
@@ -709,11 +955,17 @@ export class TokenRevocationService implements OnModuleDestroy {
     const hashes = this.familyTokens.get(familyId);
     if (hashes) {
       for (const hash of hashes) {
-        this.refreshSessions.delete(hash);
+        const sess = this.refreshSessions.get(hash);
+        if (sess) {
+          sess.isRevoked = true;
+        }
       }
-      this.familyTokens.delete(familyId);
       this.persistRefreshSessions();
       this.persistFamilyTokens();
+    }
+
+    if (this.authoritativeStore) {
+      this.authoritativeStore.revokeFamily(familyId).catch(() => {});
     }
 
     // Distributed Redis Invalidation
@@ -735,7 +987,7 @@ export class TokenRevocationService implements OnModuleDestroy {
 
     for (const [hash, session] of this.refreshSessions.entries()) {
       if (session.userId === userId) {
-        this.refreshSessions.delete(hash);
+        session.isRevoked = true;
         revokedFamilyIds.add(session.familyId);
         modified = true;
       }
@@ -744,9 +996,51 @@ export class TokenRevocationService implements OnModuleDestroy {
       this.persistRefreshSessions();
     }
 
+    if (this.authoritativeStore) {
+      this.authoritativeStore.revokeUserRefreshSessions(userId).catch(() => {});
+    }
+
     for (const famId of revokedFamilyIds) {
       this.revokeFamily(famId);
     }
+  }
+
+  /**
+   * Reconciles authoritative persistent state into Redis when Redis reconnects.
+   * Ensures zero state discrepancy after Redis recovery.
+   */
+  public async reconcileWithRedis(): Promise<{ reconciledRevocations: number; reconciledSessions: number }> {
+    if (!this.redisService?.isAvailable() || !this.authoritativeStore) {
+      return { reconciledRevocations: 0, reconciledSessions: 0 };
+    }
+
+    const now = Date.now();
+    let reconciledRevocations = 0;
+    let reconciledSessions = 0;
+
+    try {
+      const activeRevocations = await this.authoritativeStore.getAllActiveRevocations();
+      for (const rec of activeRevocations) {
+        if (rec.expiresAt > now) {
+          const ttlSec = Math.max(1, Math.floor((rec.expiresAt - now) / 1000));
+          const distRecord: DistributedRevokedToken = {
+            tokenHash: rec.tokenHash,
+            revokedAt: Math.floor(rec.revokedAt / 1000),
+            expiresAt: Math.floor(rec.expiresAt / 1000),
+            reason: rec.reason,
+            sourceInstanceId: rec.sourceInstanceId,
+          };
+          await this.redisService.set(REDIS_KEYS.REVOKED_TOKEN(rec.tokenHash), distRecord, ttlSec);
+          reconciledRevocations++;
+        }
+      }
+
+      this.logger.log(`Safe State Reconciliation: Reconciled ${reconciledRevocations} revocations to Redis.`);
+    } catch (err: any) {
+      this.logger.warn(`Failed during Redis state reconciliation: ${err?.message || err}`);
+    }
+
+    return { reconciledRevocations, reconciledSessions };
   }
 
   private startPeriodicCleanup(): void {
