@@ -25,6 +25,8 @@ export class HealthController {
       uptimeSeconds: this.monitoringService.getMetricsSummary().uptimeSeconds,
       timestamp: new Date().toISOString(),
       version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      commitSha: process.env.RENDER_GIT_COMMIT || process.env.GIT_COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA || 'local-dev',
     };
   }
 
@@ -42,6 +44,9 @@ export class HealthController {
     const responsePayload = {
       status: isReady ? 'ready' : 'unhealthy',
       service: 'NetVision API',
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      commitSha: process.env.RENDER_GIT_COMMIT || process.env.GIT_COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA || 'local-dev',
       timestamp: new Date().toISOString(),
       checks: {
         database: dbCheck.healthy ? 'connected' : 'disconnected',

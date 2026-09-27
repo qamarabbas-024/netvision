@@ -16,6 +16,7 @@ packages/*/src/**/*.d.ts
 # Environment variables & Local secrets
 .env
 .env.*
+.env.local
 !.env.example
 *.pem
 *.key

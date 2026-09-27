@@ -95,6 +95,7 @@ jobs:
           npx ts-node scripts/test-drop-14-architecture-hardening.ts
           npx ts-node scripts/test-drop-15-security-red-team.ts
           npx ts-node scripts/test-drop-16-database-integrity.ts
+          npx ts-node scripts/test-drop-17-production-deployment.ts
           npx ts-node scripts/test-drop-z-e2e-adversarial.ts
 
       - name: Build Production Artifacts

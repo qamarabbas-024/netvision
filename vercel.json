@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "pnpm --filter \"@netvision/*\" build && pnpm --filter netvision-frontend build",
+  "outputDirectory": "frontend/.next",
+  "installCommand": "pnpm install --frozen-lockfile"
+}

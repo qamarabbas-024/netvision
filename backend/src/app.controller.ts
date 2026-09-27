@@ -31,6 +31,8 @@ export class AppController {
       database: dbStatus,
       timestamp: new Date().toISOString(),
       version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      commitSha: process.env.RENDER_GIT_COMMIT || process.env.GIT_COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA || 'local-dev',
     };
   }
 }
