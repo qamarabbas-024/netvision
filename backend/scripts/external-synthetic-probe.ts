@@ -62,6 +62,15 @@ export interface IncidentRecord {
   };
 }
 
+export interface WebhookConfigStatus {
+  configured: boolean;
+  webhookUrlMasked?: string;
+  provider: 'SLACK' | 'PAGERDUTY' | 'DISCORD' | 'GENERIC_WEBHOOK' | 'NONE';
+  operationalDependency: 'CONFIGURED' | 'OPEN';
+  incidentLogSinkAvailable: boolean;
+  incidentLogDir: string;
+}
+
 export interface SyntheticProbeSummary {
   timestamp: string;
   targetBaseUrl: string;
@@ -71,6 +80,7 @@ export interface SyntheticProbeSummary {
   activeAlertCount: number;
   incidentCreated: boolean;
   incident?: IncidentRecord;
+  webhookConfig: WebhookConfigStatus;
 }
 
 export class ExternalSyntheticProbe {
@@ -101,15 +111,62 @@ export class ExternalSyntheticProbe {
   }
 
   /**
+   * Evaluates whether external alerting channels (Slack, PagerDuty, or Webhook) are configured.
+   * If unconfigured, explicitly marks the operational dependency as OPEN.
+   */
+  public getWebhookConfigurationStatus(): WebhookConfigStatus {
+    const rawUrl = this.webhookUrl || process.env.ALERT_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL || process.env.PAGERDUTY_KEY;
+    const hasUrl = !!(rawUrl && rawUrl.trim() !== '');
+
+    if (!hasUrl) {
+      return {
+        configured: false,
+        provider: 'NONE',
+        operationalDependency: 'OPEN',
+        incidentLogSinkAvailable: fs.existsSync(this.incidentDir),
+        incidentLogDir: this.incidentDir,
+      };
+    }
+
+    let provider: WebhookConfigStatus['provider'] = 'GENERIC_WEBHOOK';
+    const lower = (rawUrl || '').toLowerCase();
+    if (lower.includes('slack.com')) {
+      provider = 'SLACK';
+    } else if (lower.includes('pagerduty.com')) {
+      provider = 'PAGERDUTY';
+    } else if (lower.includes('discord.com')) {
+      provider = 'DISCORD';
+    }
+
+    const masked = (rawUrl || '').replace(/(https?:\/\/[^/]+\/).*/, '$1*****');
+
+    return {
+      configured: true,
+      webhookUrlMasked: masked,
+      provider,
+      operationalDependency: 'CONFIGURED',
+      incidentLogSinkAvailable: fs.existsSync(this.incidentDir),
+      incidentLogDir: this.incidentDir,
+    };
+  }
+
+  /**
    * Performs an HTTP/HTTPS GET probe to a specific endpoint.
    */
   public async probeEndpoint(endpointPath: string, directUrl?: string): Promise<EndpointProbeResult> {
-    const fullUrl = directUrl || `${this.baseUrl}${endpointPath.startsWith('/') ? endpointPath : `/${endpointPath}`}`;
+    let fullUrl = directUrl;
+    if (!fullUrl) {
+      if (this.baseUrl.endsWith('/api/v1') && endpointPath.startsWith('/api/v1/')) {
+        fullUrl = `${this.baseUrl}${endpointPath.substring('/api/v1'.length)}`;
+      } else {
+        fullUrl = `${this.baseUrl}${endpointPath.startsWith('/') ? endpointPath : `/${endpointPath}`}`;
+      }
+    }
     const start = Date.now();
 
     return new Promise<EndpointProbeResult>((resolve) => {
       try {
-        const parsedUrl = new URL(fullUrl);
+        const parsedUrl = new URL(fullUrl!);
         const isHttps = parsedUrl.protocol === 'https:';
         const client = isHttps ? https : http;
 
@@ -196,14 +253,14 @@ export class ExternalSyntheticProbe {
     const readyProbe = probes['ready'] || probes['/api/v1/ready'] || probes['/ready'];
     const dbDisconnected =
       !readyProbe ||
-      readyProbe.statusCode === 503 ||
+      readyProbe.statusCode !== 200 ||
       readyProbe.body?.checks?.database === 'disconnected';
     conditions.push({
       conditionId: 'DATABASE_OUTAGE_DETECTED',
       severity: 'CRITICAL',
-      description: 'Primary database connection failed: /ready probe returned 503 or database disconnected',
+      description: 'Primary database connection failed: /ready probe returned non-200 or database disconnected',
       triggered: dbDisconnected,
-      actualValue: readyProbe ? `${readyProbe.statusCode} (${readyProbe.body?.checks?.database || 'unknown'})` : 'UNREACHABLE',
+      actualValue: readyProbe ? `${readyProbe.statusCode} (${readyProbe.body?.checks?.database || readyProbe.error || 'unknown'})` : 'UNREACHABLE',
       threshold: '200 OK (database: connected)',
     });
 
@@ -247,18 +304,7 @@ export class ExternalSyntheticProbe {
       incidentLogSaved: false,
     };
 
-    // 1. Authoritative Local Incident Sink (always persists on host for auditing)
-    try {
-      this.ensureIncidentDir();
-      const filePath = path.join(this.incidentDir, `incident-${incident.incidentId}.json`);
-      fs.writeFileSync(filePath, JSON.stringify(incident, null, 2), 'utf8');
-      status.incidentLogSaved = true;
-      status.incidentLogPath = filePath;
-    } catch (err: any) {
-      status.incidentLogSaved = false;
-    }
-
-    // 2. Outbound Webhook Delivery
+    // 1. Outbound Webhook Delivery
     if (this.webhookUrl) {
       status.webhookAttempted = true;
       try {
@@ -268,6 +314,22 @@ export class ExternalSyntheticProbe {
         status.webhookDelivered = false;
         status.webhookError = err?.message || String(err);
       }
+    } else {
+      status.webhookAttempted = false;
+      status.webhookDelivered = false;
+      status.webhookError = 'Operational dependency OPEN: ALERT_WEBHOOK_URL unconfigured; incident recorded in local file sink';
+    }
+
+    // 2. Authoritative Local Incident Sink (persists complete incident record including webhook delivery status)
+    try {
+      this.ensureIncidentDir();
+      const filePath = path.join(this.incidentDir, `incident-${incident.incidentId}.json`);
+      status.incidentLogSaved = true;
+      status.incidentLogPath = filePath;
+      incident.deliveryStatus = { ...status };
+      fs.writeFileSync(filePath, JSON.stringify(incident, null, 2), 'utf8');
+    } catch (err: any) {
+      status.incidentLogSaved = false;
     }
 
     return status;
@@ -330,6 +392,7 @@ export class ExternalSyntheticProbe {
    */
   public async executeProbeCycle(options?: {
     customProbes?: Record<string, EndpointProbeResult>;
+    useRootPaths?: boolean;
   }): Promise<SyntheticProbeSummary> {
     const timestamp = new Date().toISOString();
 
@@ -338,10 +401,14 @@ export class ExternalSyntheticProbe {
     if (options?.customProbes) {
       probes = options.customProbes;
     } else {
+      const healthPath = options?.useRootPaths ? '/health' : '/api/v1/health';
+      const readyPath = options?.useRootPaths ? '/ready' : '/api/v1/ready';
+      const alertsPath = options?.useRootPaths ? '/monitoring/alerts' : '/api/v1/monitoring/alerts';
+
       const [health, ready, alerts] = await Promise.all([
-        this.probeEndpoint('/api/v1/health'),
-        this.probeEndpoint('/api/v1/ready'),
-        this.probeEndpoint('/api/v1/monitoring/alerts'),
+        this.probeEndpoint(healthPath),
+        this.probeEndpoint(readyPath),
+        this.probeEndpoint(alertsPath),
       ]);
       probes = { health, ready, alerts };
     }
@@ -376,6 +443,8 @@ export class ExternalSyntheticProbe {
       incident.deliveryStatus = await this.deliverAlert(incident);
     }
 
+    const webhookConfig = this.getWebhookConfigurationStatus();
+
     return {
       timestamp,
       targetBaseUrl: this.baseUrl,
@@ -385,6 +454,7 @@ export class ExternalSyntheticProbe {
       activeAlertCount: triggered.length,
       incidentCreated: !isHealthy,
       incident,
+      webhookConfig,
     };
   }
 }
@@ -396,6 +466,7 @@ async function runCli(): Promise<void> {
   const args = process.argv.slice(2);
   let targetUrl = process.env.API_URL || 'http://localhost:4000';
   let simulate = false;
+  let useRootPaths = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--url' && args[i + 1]) {
@@ -403,11 +474,15 @@ async function runCli(): Promise<void> {
       i++;
     } else if (args[i] === '--simulate-incident') {
       simulate = true;
+    } else if (args[i] === '--root-paths') {
+      useRootPaths = true;
     }
   }
 
   console.log(`[Synthetic Monitor] Probing target: ${targetUrl}...`);
   const monitor = new ExternalSyntheticProbe({ baseUrl: targetUrl });
+  const webhookStatus = monitor.getWebhookConfigurationStatus();
+  console.log(`[Synthetic Monitor] Operational Alerting Channel: ${webhookStatus.operationalDependency} (Provider: ${webhookStatus.provider})`);
 
   let summary: SyntheticProbeSummary;
   if (simulate) {
@@ -420,7 +495,7 @@ async function runCli(): Promise<void> {
       },
     });
   } else {
-    summary = await monitor.executeProbeCycle();
+    summary = await monitor.executeProbeCycle({ useRootPaths });
   }
 
   console.log(`[Synthetic Monitor] Cycle Complete at ${summary.timestamp}`);

@@ -23,6 +23,8 @@
     "db:guard": "ts-node scripts/guard-db-command.ts",
     "db:verify:workflows": "ts-node scripts/guard-db-command.ts --scan-workflows",
     "test:drop26": "ts-node scripts/test-drop-26-database-governance.ts",
+    "test:drop27": "ts-node scripts/test-drop-27-external-monitoring.ts",
+    "probe:synthetic": "ts-node scripts/external-synthetic-probe.ts",
     "test:governance": "ts-node scripts/test-drop-26-database-governance.ts",
     "test:email": "ts-node scripts/test-email.ts",
     "test:email:suite": "ts-node scripts/test-email-suite.ts",
