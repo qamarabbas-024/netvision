@@ -287,6 +287,60 @@ async function runDatabaseResilienceTestSuite() {
     'Eliminated 31-second request starvation across concurrent requests'
   );
 
+  // 2.8 50 Simultaneous Database Failures: Uncontrolled Retry Storm Prevention
+  console.log('\n--- Group 2.8: 50 Simultaneous DB Failures (Zero Retry Storm) ---');
+  let stormPermanentAttempts = 0;
+  const start50Permanent = Date.now();
+  const FIFTY_CLIENTS = 50;
+
+  const simultaneous50Permanent = await Promise.all(
+    Array.from({ length: FIFTY_CLIENTS }).map(async () => {
+      return simulateMiddlewareExecution('findMany', async () => {
+        stormPermanentAttempts++;
+        throw quotaErr;
+      });
+    })
+  );
+  const elapsed50PermanentMs = Date.now() - start50Permanent;
+
+  assert(
+    simultaneous50Permanent.every((res) => res.attempts === 1),
+    `All 50 simultaneous failing requests made exactly 1 attempt (0 retries each)`
+  );
+  assert(
+    stormPermanentAttempts === FIFTY_CLIENTS,
+    `Zero retry amplification: 50 requests generated exactly 50 attempts (NOT 50 * 6 = 300)`
+  );
+  assert(
+    elapsed50PermanentMs < 200,
+    `50 concurrent permanent failures terminate instantly (${elapsed50PermanentMs}ms < 200ms)`
+  );
+
+  let stormTransientAttempts = 0;
+  const start50Transient = Date.now();
+  const simultaneous50Transient = await Promise.all(
+    Array.from({ length: FIFTY_CLIENTS }).map(async () => {
+      return simulateMiddlewareExecution('findFirst', async () => {
+        stormTransientAttempts++;
+        throw p1017;
+      });
+    })
+  );
+  const elapsed50TransientMs = Date.now() - start50Transient;
+
+  assert(
+    simultaneous50Transient.every((res) => res.attempts === 3),
+    'All 50 concurrent transient requests bounded to max 2 retries (3 attempts each = 150 total)'
+  );
+  assert(
+    stormTransientAttempts === FIFTY_CLIENTS * 3,
+    `Controlled bounded attempts: 50 requests generated exactly 150 attempts (actual: ${stormTransientAttempts})`
+  );
+  assert(
+    elapsed50TransientMs < 1500,
+    `All 50 concurrent transient requests completed within bounded budget (${elapsed50TransientMs}ms < 1500ms)`
+  );
+
   // =========================================================================
   // TEST GROUP 3: Health Probe Debouncing, TTL Caching & Query Storms
   // =========================================================================
