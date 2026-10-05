@@ -466,6 +466,7 @@ async function runCli(): Promise<void> {
   const args = process.argv.slice(2);
   let targetUrl = process.env.API_URL || 'http://localhost:4000';
   let simulate = false;
+  let simulateHealthy = false;
   let useRootPaths = false;
 
   for (let i = 0; i < args.length; i++) {
@@ -474,6 +475,8 @@ async function runCli(): Promise<void> {
       i++;
     } else if (args[i] === '--simulate-incident') {
       simulate = true;
+    } else if (args[i] === '--simulate-healthy') {
+      simulateHealthy = true;
     } else if (args[i] === '--root-paths') {
       useRootPaths = true;
     }
@@ -494,6 +497,15 @@ async function runCli(): Promise<void> {
         alerts: { endpoint: '/api/v1/monitoring/alerts', url: `${targetUrl}/api/v1/monitoring/alerts`, statusCode: 200, latencyMs: 15, body: { status: 'CRITICAL', activeAlertsCount: 1 } },
       },
     });
+  } else if (simulateHealthy) {
+    console.log('[Synthetic Monitor] Running simulated healthy probe cycle...');
+    summary = await monitor.executeProbeCycle({
+      customProbes: {
+        health: { endpoint: '/api/v1/health', url: `${targetUrl}/api/v1/health`, statusCode: 200, latencyMs: 12, body: { status: 'ok' } },
+        ready: { endpoint: '/api/v1/ready', url: `${targetUrl}/api/v1/ready`, statusCode: 200, latencyMs: 18, body: { status: 'ready', checks: { database: 'connected' } } },
+        alerts: { endpoint: '/api/v1/monitoring/alerts', url: `${targetUrl}/api/v1/monitoring/alerts`, statusCode: 200, latencyMs: 15, body: { status: 'NOMINAL', activeAlertsCount: 0 } },
+      },
+    });
   } else {
     summary = await monitor.executeProbeCycle({ useRootPaths });
   }
@@ -506,6 +518,14 @@ async function runCli(): Promise<void> {
     console.log(`  Webhook Delivered: ${summary.incident.deliveryStatus.webhookDelivered}`);
     console.log(`  Incident Log Saved: ${summary.incident.deliveryStatus.incidentLogSaved} (${summary.incident.deliveryStatus.incidentLogPath})`);
   }
+
+  if (!summary.healthy) {
+    console.error(`\n❌ [Synthetic Monitor] PROBE FAILED: Target system is UNHEALTHY! (${summary.activeAlertCount} critical condition(s) triggered)`);
+    process.exit(1);
+  }
+
+  console.log(`\n✓ [Synthetic Monitor] PROBE PASSED: Target system is healthy.`);
+  process.exit(0);
 }
 
 if (require.main === module) {

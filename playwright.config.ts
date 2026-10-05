@@ -46,6 +46,43 @@ export default defineConfig({
         ...(process.env.CI ? {} : { channel: 'chrome' }),
       },
     },
+    {
+      name: 'msedge',
+      use: {
+        ...devices['Desktop Edge'],
+        channel: 'msedge',
+      },
+    },
+    {
+      name: 'desktop-1280x800',
+      use: {
+        viewport: { width: 1280, height: 800 },
+        ...(process.env.CI ? {} : { channel: 'chrome' }),
+      },
+    },
+    {
+      name: 'tablet-ipad',
+      use: {
+        ...devices['iPad (gen 7)'],
+        defaultBrowserType: 'chromium',
+        ...(process.env.CI ? {} : { channel: 'chrome' }),
+      },
+    },
+    {
+      name: 'mobile-pixel',
+      use: {
+        ...devices['Pixel 5'],
+        ...(process.env.CI ? {} : { channel: 'chrome' }),
+      },
+    },
+    {
+      name: 'mobile-iphone',
+      use: {
+        ...devices['iPhone 12'],
+        defaultBrowserType: 'chromium',
+        ...(process.env.CI ? {} : { channel: 'chrome' }),
+      },
+    },
   ],
   webServer: [
     {

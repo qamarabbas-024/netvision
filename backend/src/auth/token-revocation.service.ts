@@ -429,8 +429,6 @@ export class TokenRevocationService implements OnModuleDestroy {
       return true;
     }
 
-    let redisChecked = false;
-
     // 2. Distributed path 1: Query Redis cluster (if available)
     let redisSuccess = false;
 
@@ -1016,7 +1014,7 @@ export class TokenRevocationService implements OnModuleDestroy {
 
     const now = Date.now();
     let reconciledRevocations = 0;
-    let reconciledSessions = 0;
+    const reconciledSessions = 0;
 
     try {
       const activeRevocations = await this.authoritativeStore.getAllActiveRevocations();
