@@ -11,6 +11,14 @@ function createMockConfig(env: Record<string, string>): ConfigService {
   } as unknown as ConfigService;
 }
 
+function createMockRedis(isAvailable = true): any {
+  return {
+    isAvailable: () => isAvailable,
+    set: async () => {},
+    get: async () => null,
+  };
+}
+
 let passedAssertions = 0;
 
 function assert(condition: boolean, msg: string) {
@@ -126,7 +134,7 @@ async function runRateLimitingTestSuite() {
   console.log('\n[SECTION 4] Authentication Protection: Per-IP and Per-Account Limits');
   {
     const mockConfig = createMockConfig({});
-    const service = new RateLimiterService(mockConfig);
+    const service = new RateLimiterService(mockConfig, createMockRedis(true));
     service.overrideConfig({
       authLimit: 4,
       authPerAccountLimit: 3,
