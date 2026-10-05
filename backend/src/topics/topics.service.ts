@@ -2187,9 +2187,12 @@ export class TopicsService {
       try {
         return await this.prisma.$transaction(
           async (tx) => {
-        const anonLearner = await tx.anonymousLearner.findUnique({
-          where: { id: anonymousId },
-        });
+            // Serialize concurrent claims for this anonymousId using PostgreSQL advisory transaction lock
+            await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${anonymousId}))`;
+
+            const anonLearner = await tx.anonymousLearner.findUnique({
+              where: { id: anonymousId },
+            });
 
       const anonProgress = await tx.userProgress.findMany({
         where: { anonymousId },
@@ -2234,7 +2237,7 @@ export class TopicsService {
       for (const currentAnonProg of anonProgress) {
         const existingUserProg = existingProgMap.get(currentAnonProg.lessonId);
 
-        if (existingUserProg) {
+        if (existingUserProg && existingUserProg.id !== currentAnonProg.id) {
           let earliestCompletedAt = existingUserProg.completedAt;
           if (existingUserProg.completedAt && currentAnonProg.completedAt) {
             earliestCompletedAt =
@@ -2306,12 +2309,12 @@ export class TopicsService {
         const existingSaved = await tx.savedLesson.findFirst({
           where: { userId, lessonId: currentSaved.lessonId },
         });
-        if (existingSaved) {
+        if (existingSaved && existingSaved.id !== currentSaved.id) {
           const { count: delSavedCount } = await tx.savedLesson.deleteMany({ where: { id: currentSaved.id } });
           if (delSavedCount > 0) {
             claimedSavedCount++;
           }
-        } else {
+        } else if (!existingSaved) {
           const { count: updSavedCount } = await tx.savedLesson.updateMany({
             where: { id: currentSaved.id, anonymousId },
             data: { userId, anonymousId: null },
@@ -2340,14 +2343,14 @@ export class TopicsService {
         const existingAch = await tx.userAchievement.findFirst({
           where: { userId, achievementId: currentAch.achievementId },
         });
-        if (existingAch) {
+        if (existingAch && existingAch.id !== currentAch.id) {
           const { count: delAchCount } = await tx.userAchievement.deleteMany({
             where: { id: currentAch.id },
           });
           if (delAchCount > 0) {
             claimedAchievementCount++;
           }
-        } else {
+        } else if (!existingAch) {
           const { count: updAchCount } = await tx.userAchievement.updateMany({
             where: { id: currentAch.id, anonymousId },
             data: { userId, anonymousId: null },
