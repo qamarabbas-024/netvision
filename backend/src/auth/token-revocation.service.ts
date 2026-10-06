@@ -474,7 +474,7 @@ export class TokenRevocationService implements OnModuleDestroy {
 
     // 3. Distributed path 2: Query Authoritative Store (PostgreSQL / Shared Store)
     // Mandatory when Redis is absent, or to resolve cold cache misses
-    if (this.authoritativeStore) {
+    if (!redisSuccess && this.authoritativeStore) {
       try {
         if (rawToken && typeof rawToken === 'string') {
           const tokenHash = this.hashToken(rawToken);
@@ -511,8 +511,8 @@ export class TokenRevocationService implements OnModuleDestroy {
       }
     }
 
-    // 4. PostgreSQL Direct Check for User.updatedAt (authoritative multi-instance user cutoff)
-    if (this.prisma && payload?.sub && payload.iat !== undefined) {
+    // 4. PostgreSQL Direct Check for User.updatedAt (authoritative multi-instance user cutoff when Redis is absent)
+    if (!redisSuccess && this.prisma && payload?.sub && payload.iat !== undefined) {
       try {
         const dbUser = await this.prisma.user.findUnique({
           where: { id: payload.sub },

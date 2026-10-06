@@ -401,6 +401,7 @@ async function runDrop10PerformanceTests() {
             createMany: async () => ({ count: 0 }),
             deleteMany: async () => ({ count: 0 }),
           },
+          $executeRaw: async () => 1,
         };
         return cb(tx);
       },

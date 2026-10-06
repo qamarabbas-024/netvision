@@ -14,7 +14,7 @@
  *    - Zero misleading claims of "cryptographic signatures", "digital signatures", "blockchain", or "cryptographic attestations"
  *    - SHA-256 integrity hashes described as tamper-evident hashes
  * 3. Documentation Integrity:
- *    - Zero internal machine paths ("c:\My works", "C:\Users\Qamar Abbas") in documentation
+ *    - Zero internal machine paths ("c:\My works", local user home directories) in documentation
  *    - Architecture docs, deployment docs, and README match current Node 22 LTS / pnpm 11 baseline
  * 4. Legal Compliance & Educational Disclaimers:
  *    - Terms of Service & Privacy Policy pages exist and are populated
