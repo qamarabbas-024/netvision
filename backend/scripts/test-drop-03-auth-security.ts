@@ -660,7 +660,8 @@ async function runDrop03SecurityTests() {
     // 9.2 Verification with tampered state
     mockReq.cookies['netvision_oauth_state'] = generatedState;
     let tamperedOk: boolean = true;
-    stateStore.verify(mockReq, generatedState.replace('a', 'b'), (_err, ok) => {
+    const tamperedState = (generatedState[0] === '0' ? '1' : '0') + generatedState.slice(1);
+    stateStore.verify(mockReq, tamperedState, (_err, ok) => {
       tamperedOk = Boolean(ok);
     });
     assert(!tamperedOk, 'Tampered OAuth state rejected safely');
