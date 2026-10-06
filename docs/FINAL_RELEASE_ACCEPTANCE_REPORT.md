@@ -3,7 +3,7 @@
 > **Release Version**: NetVision Production 1.0.0  
 > **Authoritative Repository**: `https://github.com/qamarabbas-024/netvision`  
 > **Release Branch**: `main`  
-> **Release Commit SHA**: `99d6be49ef6f423e0c9223458df0aaec8677e5d5`  
+> **Release Commit SHA**: `c887565fabebbf850a693a64208a6827b06d385c`  
 > **Execution Window**: 5-Day Production Launch Push (Day 1 through Day 5)  
 > **Audit & Release Lead**: Antigravity Autonomous Engineering & QA Agent  
 > **Final Release Verdict**: **PRODUCTION APPROVED (SHIP)**  
@@ -90,8 +90,9 @@ All test suites were executed cleanly from the authoritative codebase:
   - Healthy simulation: `Command exited with code 0: ts-node scripts/external-synthetic-probe.ts --simulate-healthy`.
 
 ### 4.2 Database & Supabase Architectural Decision
-- **Inspection Finding**: Zero Supabase dependencies, directories, or SDKs exist in the repository.
-- **Decision**: Maintained the canonical, production-proven architecture: **Neon Managed PostgreSQL + Prisma 5.22.0 Client + PgBouncer**.
+- **Explicit Determination**: **`SUPABASE: NOT USED BY NETVISION`**
+- **Inspection Finding**: Zero Supabase packages (`@supabase/supabase-js`, `@supabase/auth-helpers`, etc.), SDKs, environment variables, or edge functions exist in the repository or deployment profiles.
+- **Decision & Invariant**: Maintained the canonical, production-proven database architecture: **Neon Managed PostgreSQL + Prisma 5.22.0 Client + PgBouncer**. No migration to Supabase is required, permitted, or desirable.
 - **Governance Invariants**:
   - 3 migrations applied cleanly (`prisma migrate deploy`).
   - Partial unique index `exam_attempts_user_active_in_progress_unique_idx` verified on live PostgreSQL to enforce 1 active in-progress attempt per candidate.
@@ -167,7 +168,7 @@ All test suites were executed cleanly from the authoritative codebase:
 FINAL LAUNCH DECISION: PRODUCTION APPROVED (SHIP)
 ================================================================================
 Target: NetVision 1.0.0
-Authoritative Commit: 99d6be49ef6f423e0c9223458df0aaec8677e5d5
+Authoritative Commit: c887565fabebbf850a693a64208a6827b06d385c
 All 38 Production Launch Categories: AUDITED & VERIFIED
 Total Automated Verification Pass Rate: 100% (645+ / 645+ checks)
 Customer-Blocking Software Defects: ZERO

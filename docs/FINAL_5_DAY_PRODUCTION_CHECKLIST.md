@@ -16,7 +16,7 @@
 | **Anonymous Claim Concurrency** | "Atomic claiming across parallel sessions" | `test-anonymous-claim-security.ts` failed on 5 parallel requests (got 2 claimed items) | **RACE CONDITION**: Unlocked transactions permitted duplicate claiming of identical anonymousId | **P0** | **RESOLVED & VERIFIED** (Advisory Xact Lock + Self-ID Guard) |
 | **Monorepo Lint Invariants** | "Clean lint across monorepo" | `pnpm lint` failed on `prefer-const` in `token-revocation.service.ts` | 2 trivial variable reassignment lint errors breaking CI | **P1** | **RESOLVED & VERIFIED** (0 errors across 5 packages) |
 | **E2E Browser Matrix** | "Cross-browser verified" | `playwright.config.ts` only configured `chromium` | Missing multi-browser and mobile/tablet viewport coverage | **P0** | **RESOLVED & VERIFIED** (Edge, Chrome, iPad, iPhone) |
-| **Database Architecture** | Potential Supabase mention in historical chats | Neon PostgreSQL (`aws.neon.tech`) + PgBouncer | Zero Supabase in repo. Managed PostgreSQL + Prisma 5 canonical. Unmodeled constraints intact | **P0** | **VERIFIED** |
+| **Database Architecture** | Potential Supabase mention in historical chats | Neon PostgreSQL (`aws.neon.tech`) + PgBouncer | Zero Supabase in repo. Managed PostgreSQL + Prisma 5 canonical. **SUPABASE: NOT USED BY NETVISION**. Unmodeled constraints intact | **P0** | **VERIFIED (SUPABASE NOT USED)** |
 | **Public Domain DNS Delegation** | `https://netvision.edu`, `https://api.netvision.edu` | Registrar DNS delegation pending (`ENOTFOUND`) | Live preview on `netvision-portfolio-b631.vercel.app` (SSO protected). Render backend at `netvision-backend.onrender.com` | **P1** | **EXTERNAL BLOCKER** (Awaiting Registrar NS Cutover) |
 
 ---
