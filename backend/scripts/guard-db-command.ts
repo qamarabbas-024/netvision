@@ -95,7 +95,7 @@ export interface WorkflowScanResult {
  */
 export function determineDatabaseTier(
   dbUrl = process.env.DATABASE_URL || '',
-  nodeEnv = process.env.NODE_ENV || 'development'
+  nodeEnv = process.env.NODE_ENV || (process.env.CI === 'true' ? 'test' : 'development')
 ): DatabaseTier {
   const normalizedUrl = dbUrl.toLowerCase();
   const normalizedEnv = nodeEnv.toLowerCase();
@@ -123,12 +123,17 @@ export function determineDatabaseTier(
     }
   }
 
-  // 3. Test / CI evaluation
+  // 3. Explicit Development evaluation
+  if (normalizedEnv === 'development' || normalizedEnv === 'dev') {
+    return DatabaseTier.DEVELOPMENT;
+  }
+
+  // 4. Test / CI evaluation
   if (normalizedEnv === 'test' || process.env.CI === 'true') {
     return DatabaseTier.TEST;
   }
 
-  // 4. Development default
+  // 5. Development default
   return DatabaseTier.DEVELOPMENT;
 }
 
