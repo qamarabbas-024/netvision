@@ -30,7 +30,18 @@ import { CANONICAL_CREDENTIALS } from '@netvision/shared';
 
 export default function CertificateDetailPage() {
   const params = useParams();
-  const rawId = params?.id as string;
+  const [pathnameId, setPathnameId] = useState<string>('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const match = window.location.pathname.match(/\/certificates\/([^/?#]+)/);
+      if (match && match[1]) {
+        setPathnameId(match[1]);
+      }
+    }
+  }, []);
+
+  const rawId = (params?.id as string) || pathnameId;
   const certId = decodeURIComponent(rawId || '');
 
   const [certData, setCertData] = useState<any>(null);
@@ -49,11 +60,8 @@ export default function CertificateDetailPage() {
   // Share link copy state
   const [copied, setCopied] = useState<boolean>(false);
 
-  const loadCertificate = useCallback(async (signal?: AbortSignal) => {
-    if (!certId) {
-      setIsLoading(false);
-      setIsNotFound(true);
-      setError('No certificate identifier provided.');
+  const loadCertificate = useCallback(async (targetId = certId, signal?: AbortSignal) => {
+    if (!targetId) {
       return;
     }
 
@@ -64,25 +72,25 @@ export default function CertificateDetailPage() {
     setDownloadFeedback(null);
 
     try {
-      const data = await getCertificateByIdApi(certId, { signal });
+      const data = await getCertificateByIdApi(targetId, { signal });
       if (signal?.aborted) return;
       if (data && (data.credentialId || data.code || data.id)) {
         setCertData(data);
       } else {
         setIsNotFound(true);
-        setError(`Certificate record "${certId}" could not be located on the authoritative server.`);
+        setError(`Certificate record "${targetId}" could not be located on the authoritative server.`);
       }
     } catch (err: any) {
       if (signal?.aborted || err?.isAborted) return;
       console.error('Error fetching certificate details:', err);
       if (err?.status === 404 || err?.isNotFound) {
         setIsNotFound(true);
-        setError(`Certificate credential "${certId}" was not found or is invalid.`);
+        setError(`Certificate credential "${targetId}" was not found or is invalid.`);
       } else if (err?.isBackendUnavailable || err?.status >= 500) {
         setIsBackendUnavailable(true);
         setError('Service temporarily unavailable. Unable to connect to the authoritative certification registry.');
       } else {
-        setError(err?.message || `Certificate credential "${certId}" could not be retrieved.`);
+        setError(err?.message || `Certificate credential "${targetId}" could not be retrieved.`);
       }
     } finally {
       if (!signal?.aborted) {
@@ -92,12 +100,23 @@ export default function CertificateDetailPage() {
   }, [certId]);
 
   useEffect(() => {
+    if (!certId) {
+      // Allow a brief timeout for dynamic route hydration before declaring no ID provided
+      const timer = setTimeout(() => {
+        if (!certId) {
+          setIsLoading(false);
+          setIsNotFound(true);
+          setError('No certificate identifier provided.');
+        }
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
     const controller = new AbortController();
-    loadCertificate(controller.signal);
+    loadCertificate(certId, controller.signal);
     return () => {
       controller.abort();
     };
-  }, [loadCertificate]);
+  }, [certId, loadCertificate]);
 
   // Handle authoritative backend PDF download
   const handleDownloadPdf = async () => {

@@ -108,13 +108,28 @@ async function bootstrap() {
     })
   );
 
-  // Enable CORS for Frontend
+  // Enable CORS for Frontend (Supports configured CORS_ORIGIN, *.vercel.app preview URLs, Render, and Localhost)
   const rawCors = process.env.CORS_ORIGIN || 'http://localhost:3000';
-  const corsOrigins = rawCors.includes(',')
+  const configuredOrigins = rawCors.includes(',')
     ? rawCors.split(',').map((s) => s.trim()).filter(Boolean)
-    : rawCors;
+    : [rawCors.trim()];
+
   app.enableCors({
-    origin: corsOrigins,
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      // Allow requests with no origin (e.g. mobile applications, curl, server-side fetch)
+      if (!origin || rawCors === '*') {
+        return callback(null, true);
+      }
+      const isConfigured = configuredOrigins.includes(origin);
+      const isLocal = origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:');
+      const isVercelPreview = origin.endsWith('.vercel.app');
+      const isRenderPreview = origin.endsWith('.onrender.com');
+
+      if (isConfigured || isLocal || isVercelPreview || isRenderPreview) {
+        return callback(null, true);
+      }
+      callback(null, false);
+    },
     credentials: true,
   });
 

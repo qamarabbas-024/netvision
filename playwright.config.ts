@@ -50,7 +50,7 @@ export default defineConfig({
       name: 'msedge',
       use: {
         ...devices['Desktop Edge'],
-        channel: 'msedge',
+        ...(process.env.CI ? {} : { channel: 'msedge' }),
       },
     },
     {
@@ -99,6 +99,11 @@ export default defineConfig({
         ),
         JWT_SECRET:
           process.env.JWT_SECRET || 'netvision_ci_test_secret_must_be_over_32_characters_long',
+        RATE_LIMIT_PUBLIC_LIMIT: '10000',
+        RATE_LIMIT_USER_LIMIT: '10000',
+        RATE_LIMIT_AUTH_LIMIT: '5000',
+        RATE_LIMIT_AUTH_PER_ACCOUNT_LIMIT: '5000',
+        RATE_LIMIT_STRICT_AUTH_LIMIT: '5000',
       },
     },
     {
