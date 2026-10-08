@@ -2,8 +2,8 @@ name: External Synthetic Monitoring & Health Probes
 
 on:
   schedule:
-    # Run every 30 minutes to evaluate production uptime and health
-    - cron: '*/30 * * * *'
+    # Run every 15 minutes to keep Render backend warm and verify uptime
+    - cron: '*/15 * * * *'
   workflow_dispatch:
     inputs:
       target_url:
