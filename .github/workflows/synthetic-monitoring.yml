@@ -11,6 +11,10 @@ on:
         required: false
         default: 'https://netvision-backend.onrender.com'
 
+concurrency:
+  group: synthetic-monitoring-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -18,28 +22,28 @@ jobs:
   probe:
     name: Probe Production Endpoints
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js 22 LTS
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          cache: 'pnpm'
 
-      - name: Install Backend Dependencies
-        run: pnpm --filter netvision-backend install --frozen-lockfile
+      - name: Warm-Up Ping & Wake Render Service
+        env:
+          TARGET_URL: ${{ github.event.inputs.target_url || 'https://netvision-backend.onrender.com' }}
+        run: |
+          echo "Warming up target backend at ${TARGET_URL}..."
+          # Render free tier spin-up can take up to 45s; give curl resilient retry
+          curl -s -o /dev/null -w "Warm-up HTTP Status: %{http_code}\n" --retry 3 --retry-delay 5 --max-time 45 "${TARGET_URL}/api/v1/health" || true
 
       - name: Execute Synthetic Health Probe Cycle
         env:
           API_URL: ${{ github.event.inputs.target_url || 'https://netvision-backend.onrender.com' }}
           ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
         run: |
-          cd backend
-          npx ts-node -T scripts/external-synthetic-probe.ts --url "$API_URL" --allow-pending
+          node --no-warnings --experimental-strip-types backend/scripts/external-synthetic-probe.ts --url "$API_URL" --timeout 15000 --allow-pending

@@ -535,7 +535,9 @@ async function runCli(): Promise<void> {
   process.exit(0);
 }
 
-if (require.main === module) {
+const isMain = (typeof require !== 'undefined' && require.main === module) ||
+  (typeof process !== 'undefined' && process.argv[1] && process.argv[1].includes('external-synthetic-probe'));
+if (isMain) {
   runCli().catch((err) => {
     console.error('Fatal probe error:', err);
     process.exit(1);
