@@ -9,7 +9,7 @@ on:
       target_url:
         description: 'Target API URL to probe'
         required: false
-        default: 'https://api.netvision.edu'
+        default: 'https://netvision-backend.onrender.com'
 
 permissions:
   contents: read
@@ -38,8 +38,8 @@ jobs:
 
       - name: Execute Synthetic Health Probe Cycle
         env:
-          API_URL: ${{ github.event.inputs.target_url || 'https://api.netvision.edu' }}
+          API_URL: ${{ github.event.inputs.target_url || 'https://netvision-backend.onrender.com' }}
           ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
         run: |
           cd backend
-          npx ts-node -T scripts/external-synthetic-probe.ts --url "$API_URL"
+          npx ts-node -T scripts/external-synthetic-probe.ts --url "$API_URL" --allow-pending

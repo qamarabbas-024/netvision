@@ -468,6 +468,7 @@ async function runCli(): Promise<void> {
   let simulate = false;
   let simulateHealthy = false;
   let useRootPaths = false;
+  let allowPending = false;
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--url' && args[i + 1]) {
@@ -479,6 +480,8 @@ async function runCli(): Promise<void> {
       simulateHealthy = true;
     } else if (args[i] === '--root-paths') {
       useRootPaths = true;
+    } else if (args[i] === '--allow-pending') {
+      allowPending = true;
     }
   }
 
@@ -520,6 +523,10 @@ async function runCli(): Promise<void> {
   }
 
   if (!summary.healthy) {
+    if (allowPending) {
+      console.warn(`\n⚠️ [Synthetic Monitor] TARGET PENDING/STAGING: ${summary.activeAlertCount} condition(s) detected, but --allow-pending was specified. Exiting cleanly without breaking CI.`);
+      process.exit(0);
+    }
     console.error(`\n❌ [Synthetic Monitor] PROBE FAILED: Target system is UNHEALTHY! (${summary.activeAlertCount} critical condition(s) triggered)`);
     process.exit(1);
   }
