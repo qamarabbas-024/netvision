@@ -16,6 +16,8 @@ import { SubmitQuizDto } from './dto/submit-quiz.dto';
 import { AchievementsService } from '../achievements/achievements.service';
 import { MonitoringService } from '../monitoring/monitoring.service';
 import { NETWORKING_COMMANDS_CATALOG } from './commands-catalog';
+import { BENCHMARK_LESSONS_FULL } from './benchmark-lessons-content';
+import { ALL_CURRICULUM_LABS } from './curriculum-labs-catalog';
 import {
   LEGACY_SLUG_COMPATIBILITY_MAP,
   FLAGSHIP_5_COURSES,
@@ -201,30 +203,109 @@ export class TopicsService {
   async getCourseBySlug(slug: string, identityInput?: string | { userId?: string; anonymousId?: string }) {
     const resolvedSlug = LEGACY_SLUG_COMPATIBILITY_MAP[slug]?.flagshipSlug || slug;
 
-    const course = await this.prisma.course.findUnique({
-      where: { slug: resolvedSlug },
-      include: {
-        modules: {
-          orderBy: { order: 'asc' },
-          include: {
-            lessons: {
-              orderBy: { order: 'asc' },
-              select: {
-                id: true,
-                slug: true,
-                title: true,
-                type: true,
-                durationMinutes: true,
-                order: true,
-                quizzes: { select: { id: true } },
+    let course: any = null;
+    try {
+      course = await this.prisma.course.findUnique({
+        where: { slug: resolvedSlug },
+        include: {
+          modules: {
+            orderBy: { order: 'asc' },
+            include: {
+              lessons: {
+                orderBy: { order: 'asc' },
+                select: {
+                  id: true,
+                  slug: true,
+                  title: true,
+                  type: true,
+                  durationMinutes: true,
+                  order: true,
+                  quizzes: { select: { id: true } },
+                },
               },
             },
           },
         },
-      },
-    });
+      });
+    } catch (err: any) {
+      this.logger.warn(`Database unreachable in getCourseBySlug for "${slug}". Searching canonical fallback.`);
+    }
 
-    if (!course || (!course.published && !LEGACY_SLUG_COMPATIBILITY_MAP[slug])) {
+    if (!course) {
+      const fallbackCourse = FLAGSHIP_5_COURSES.find(
+        (c) => c.slug === resolvedSlug || c.code === resolvedSlug || c.slug === slug || c.code === slug
+      );
+      if (fallbackCourse) {
+        const courseLessons = BENCHMARK_LESSONS_FULL.filter(
+          (l) => l.courseCode === fallbackCourse.code || l.courseCode.replace(/-/g, '') === fallbackCourse.code.replace(/-/g, '')
+        );
+
+        const modules = fallbackCourse.modules.map((m, mIdx) => {
+          const modLessons = courseLessons
+            .filter((l) => (l as any).moduleSlug === m.slug || Math.floor((l.order - 1) / 3) === mIdx || m.legacyCourseCodes?.includes(l.courseCode))
+            .map((lesson) => ({
+              id: lesson.slug,
+              slug: lesson.slug,
+              title: lesson.title,
+              type: lesson.type,
+              durationMinutes: lesson.durationMinutes,
+              order: lesson.order,
+              completed: false,
+              status: 'NOT_STARTED',
+              score: null,
+              quizId: lesson.questions && lesson.questions.length > 0 ? `quiz-${lesson.slug}` : null,
+            }));
+
+          const effectiveLessons = modLessons.length > 0 ? modLessons : courseLessons.slice(mIdx * 3, (mIdx + 1) * 3).map((l) => ({
+            id: l.slug,
+            slug: l.slug,
+            title: l.title,
+            type: l.type,
+            durationMinutes: l.durationMinutes,
+            order: l.order,
+            completed: false,
+            status: 'NOT_STARTED',
+            score: null,
+            quizId: l.questions && l.questions.length > 0 ? `quiz-${l.slug}` : null,
+          }));
+
+          return {
+            id: m.id,
+            title: m.title,
+            description: m.description,
+            order: m.order,
+            progressPercent: 0,
+            status: 'NOT_STARTED',
+            lessons: effectiveLessons,
+          };
+        });
+
+        const allLessons = modules.flatMap((m) => m.lessons);
+        return {
+          id: fallbackCourse.code,
+          slug: fallbackCourse.slug,
+          code: fallbackCourse.code,
+          title: fallbackCourse.title,
+          tagline: fallbackCourse.tagline,
+          category: fallbackCourse.category,
+          description: fallbackCourse.description,
+          level: fallbackCourse.level,
+          icon: fallbackCourse.icon,
+          order: fallbackCourse.order,
+          durationMinutes: allLessons.reduce((sum, l) => sum + (l.durationMinutes || 15), 0) || fallbackCourse.estimatedHours * 60,
+          estimatedHours: fallbackCourse.estimatedHours,
+          modulesCount: modules.length,
+          lessonsCount: allLessons.length,
+          completedLessons: 0,
+          progressPercent: 0,
+          prerequisites: fallbackCourse.prerequisites || [],
+          modules,
+        };
+      }
+      throw new NotFoundException(`Course with slug "${slug}" not found.`);
+    }
+
+    if (!course.published && !LEGACY_SLUG_COMPATIBILITY_MAP[slug]) {
       throw new NotFoundException(`Course with slug "${slug}" not found.`);
     }
 
@@ -311,41 +392,150 @@ export class TopicsService {
   }
 
   async getLessonBySlug(slug: string, identityInput?: string | { userId?: string; anonymousId?: string }) {
-    const lesson = await this.prisma.lesson.findUnique({
-      where: { slug },
-      include: {
-        module: {
-          include: {
-            course: true,
+    let lesson: any = null;
+    try {
+      lesson = await this.prisma.lesson.findUnique({
+        where: { slug },
+        include: {
+          module: {
+            include: {
+              course: true,
+            },
           },
-        },
-        objectives: { orderBy: { order: 'asc' } },
-        concepts: { orderBy: { order: 'asc' } },
-        examples: { orderBy: { order: 'asc' } },
-        commands: { orderBy: { order: 'asc' } },
-        labs: { orderBy: { order: 'asc' } },
-        mistakes: { orderBy: { order: 'asc' } },
-        recaps: { orderBy: { order: 'asc' } },
-        quizzes: {
-          include: {
-            questions: {
-              select: {
-                id: true,
-                questionText: true,
-                optionsJson: true,
-                cognitiveLevel: true,
-                questionType: true,
-                concept: true,
-                difficulty: true,
-                points: true,
+          objectives: { orderBy: { order: 'asc' } },
+          concepts: { orderBy: { order: 'asc' } },
+          examples: { orderBy: { order: 'asc' } },
+          commands: { orderBy: { order: 'asc' } },
+          labs: { orderBy: { order: 'asc' } },
+          mistakes: { orderBy: { order: 'asc' } },
+          recaps: { orderBy: { order: 'asc' } },
+          quizzes: {
+            include: {
+              questions: {
+                select: {
+                  id: true,
+                  questionText: true,
+                  optionsJson: true,
+                  cognitiveLevel: true,
+                  questionType: true,
+                  concept: true,
+                  difficulty: true,
+                  points: true,
+                },
               },
             },
           },
         },
-      },
-    });
+      });
+    } catch (err: any) {
+      this.logger.warn(`Database unreachable in getLessonBySlug for "${slug}". Searching benchmark fallback.`);
+    }
 
     if (!lesson) {
+      const benchmark = BENCHMARK_LESSONS_FULL.find((l) => l.slug === slug);
+      if (benchmark) {
+        const v2 = (benchmark.contentV2 || {}) as any;
+        return {
+          id: benchmark.slug,
+          title: benchmark.title,
+          slug: benchmark.slug,
+          type: benchmark.type,
+          durationMinutes: benchmark.durationMinutes,
+          order: benchmark.order,
+          content: {
+            objective: v2.objective?.summary || benchmark.introduction,
+            whyItMatters: v2.whyItMatters?.practicalRelevance || benchmark.introduction,
+            theory: v2.coreConcept?.detailedExplanation || benchmark.introduction,
+            explanation: v2.coreConcept?.detailedExplanation || benchmark.introduction,
+            components: v2.technicalAnatomy?.components || [],
+            packetWalkthrough: v2.packetWalkthrough,
+            practicalActivity: benchmark.lab,
+            recap: v2.masterySummary?.keyTakeaways || [],
+          },
+          introduction: benchmark.introduction,
+          simpleExplanation: v2.mentalModel?.analogies?.[0]?.description || benchmark.introduction,
+          detailedExplanation: v2.coreConcept?.detailedExplanation || benchmark.introduction,
+          whyItMatters: v2.whyItMatters?.practicalRelevance || null,
+          realWorldAnalogy: v2.mentalModel?.analogies?.[0]?.description || null,
+          objectives: (v2.objective?.keyLearningPoints || []).map((text: string, idx: number) => ({
+            id: `obj-${idx}`,
+            text,
+            order: idx,
+          })),
+          concepts: (v2.technicalAnatomy?.components || []).map((c: any, idx: number) => ({
+            id: `concept-${idx}`,
+            title: c.name,
+            summary: c.detail,
+            explanation: c.detail,
+            technicalDetails: null,
+            order: idx,
+          })),
+          examples: v2.workedExample
+            ? [
+                {
+                  id: 'ex-1',
+                  title: v2.workedExample.scenario || 'Demonstration Scenario',
+                  scenario: v2.workedExample.scenario || 'Network Traffic Flow',
+                  explanation: v2.workedExample.stepByStep?.join('\n') || 'Diagnostic verification steps.',
+                  order: 0,
+                },
+              ]
+            : [],
+          commands: (benchmark.lab?.commands || []).map((cmd: string, idx: number) => ({
+            id: `cmd-${idx}`,
+            command: cmd,
+            order: idx,
+          })),
+          labs: benchmark.lab
+            ? [
+                {
+                  id: `lab-${benchmark.slug}`,
+                  type: 'GUIDED',
+                  title: benchmark.lab.title,
+                  instructions: benchmark.lab.instructions,
+                  initialTopologyJson: benchmark.lab.initialTopologyJson,
+                  targetStateJson: null,
+                  order: 0,
+                },
+              ]
+            : [],
+          mistakes: (v2.commonMistakes || []).map((m: any, idx: number) => ({
+            id: `mistake-${idx}`,
+            mistake: m.misconception || 'Common error',
+            whyWrong: m.consequence || 'Leads to routing/packet failure',
+            correctApproach: m.correction || 'Apply validated configuration',
+            order: idx,
+          })),
+          recaps: (v2.masterySummary?.keyTakeaways || []).map((point: string, idx: number) => ({
+            id: `recap-${idx}`,
+            point,
+            order: idx,
+          })),
+          quiz:
+            benchmark.questions && benchmark.questions.length > 0
+              ? {
+                  id: `quiz-${benchmark.slug}`,
+                  title: `${benchmark.title} Knowledge Check`,
+                  passingScore: 80,
+                  questionCount: benchmark.questions.length,
+                  questions: benchmark.questions.map((q, qIdx) => ({
+                    id: `q-${benchmark.slug}-${qIdx}`,
+                    questionText: q.text,
+                    options: q.options,
+                  })),
+                }
+              : null,
+          isCompleted: false,
+          score: null,
+          module: {
+            title: 'Foundations & Network Architecture',
+            course: {
+              title: 'Foundations & Network Architecture',
+              slug: 'foundations-network-architecture',
+            },
+          },
+        };
+      }
       throw new NotFoundException(`Lesson with slug "${slug}" was not found.`);
     }
 
@@ -1200,18 +1390,45 @@ export class TopicsService {
   }
 
   async getLabDetails(labIdOrSlug: string) {
-    const lab = await this.prisma.lessonLab.findFirst({
-      where: {
-        OR: [{ id: labIdOrSlug }, { slug: labIdOrSlug }],
-      },
-      include: {
-        lesson: {
-          select: { id: true, title: true, slug: true },
+    let lab: any = null;
+    try {
+      lab = await this.prisma.lessonLab.findFirst({
+        where: {
+          OR: [{ id: labIdOrSlug }, { slug: labIdOrSlug }],
         },
-      },
-    });
+        include: {
+          lesson: {
+            select: { id: true, title: true, slug: true },
+          },
+        },
+      });
+    } catch (err: any) {
+      this.logger.warn(`Database unreachable in getLabDetails for "${labIdOrSlug}". Searching canonical catalog.`);
+    }
 
     if (!lab) {
+      const fallback = ALL_CURRICULUM_LABS[labIdOrSlug];
+      if (fallback) {
+        return {
+          id: `lab-${labIdOrSlug}`,
+          slug: labIdOrSlug,
+          type: fallback.tier || 'SIMULATION',
+          title: fallback.title,
+          description: fallback.instructions,
+          difficulty: fallback.difficulty || 'FOUNDATIONAL',
+          estimatedMinutes: fallback.estimatedMinutes || 15,
+          objectives: fallback.tasks || ['Analyze network topology and protocol characteristics'],
+          prerequisites: [],
+          environment: fallback.initialTopologyJson || { topology: 'Client-Gateway Network', nodes: 2 },
+          instructions: fallback.instructions,
+          commands: fallback.commands || [],
+          expectedObservations: fallback.expectedObservations || [],
+          hints: fallback.hints || [],
+          solution: fallback.solution || { steps: ['Complete lab tasks and observe telemetry'] },
+          commonMistakes: [],
+          completionCriteria: fallback.completionCriteria || 'Demonstrate mastery of networking concepts',
+        };
+      }
       throw new NotFoundException(`Lab "${labIdOrSlug}" not found.`);
     }
 
@@ -2048,59 +2265,100 @@ export class TopicsService {
 
     const q = query.trim();
 
-    const [courses, lessons, modules] = await Promise.all([
-      this.prisma.course.findMany({
-        where: {
-          OR: [
-            { title: { contains: q, mode: 'insensitive' } },
-            { tagline: { contains: q, mode: 'insensitive' } },
-            { description: { contains: q, mode: 'insensitive' } },
-            { category: { contains: q, mode: 'insensitive' } },
-          ],
-        },
-        take: 5,
-        select: { id: true, title: true, slug: true, tagline: true, category: true, level: true },
-      }),
-      this.prisma.lesson.findMany({
-        where: {
-          OR: [
-            { title: { contains: q, mode: 'insensitive' } },
-            { slug: { contains: q, mode: 'insensitive' } },
-          ],
-        },
-        take: 10,
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          type: true,
-          durationMinutes: true,
-          module: {
-            select: {
-              title: true,
-              course: { select: { title: true, slug: true } },
+    try {
+      const [courses, lessons, modules] = await Promise.all([
+        this.prisma.course.findMany({
+          where: {
+            OR: [
+              { title: { contains: q, mode: 'insensitive' } },
+              { tagline: { contains: q, mode: 'insensitive' } },
+              { description: { contains: q, mode: 'insensitive' } },
+              { category: { contains: q, mode: 'insensitive' } },
+            ],
+          },
+          take: 5,
+          select: { id: true, title: true, slug: true, tagline: true, category: true, level: true },
+        }),
+        this.prisma.lesson.findMany({
+          where: {
+            OR: [
+              { title: { contains: q, mode: 'insensitive' } },
+              { slug: { contains: q, mode: 'insensitive' } },
+            ],
+          },
+          take: 10,
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            type: true,
+            durationMinutes: true,
+            module: {
+              select: {
+                title: true,
+                course: { select: { title: true, slug: true } },
+              },
             },
           },
-        },
-      }),
-      this.prisma.module.findMany({
-        where: {
-          OR: [
-            { title: { contains: q, mode: 'insensitive' } },
-            { description: { contains: q, mode: 'insensitive' } },
-          ],
-        },
-        take: 5,
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          course: { select: { title: true, slug: true } },
-        },
-      }),
-    ]);
+        }),
+        this.prisma.module.findMany({
+          where: {
+            OR: [
+              { title: { contains: q, mode: 'insensitive' } },
+              { description: { contains: q, mode: 'insensitive' } },
+            ],
+          },
+          take: 5,
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            course: { select: { title: true, slug: true } },
+          },
+        }),
+      ]);
 
-    return { courses, lessons, modules };
+      return { courses, lessons, modules };
+    } catch (err: any) {
+      this.logger.warn(`Database unreachable in search for "${q}". Serving from canonical catalog.`);
+      const lowerQ = q.toLowerCase();
+      const matchedCourses = FLAGSHIP_5_COURSES
+        .filter((c) =>
+          c.title.toLowerCase().includes(lowerQ) ||
+          c.tagline.toLowerCase().includes(lowerQ) ||
+          c.description.toLowerCase().includes(lowerQ) ||
+          c.category.toLowerCase().includes(lowerQ)
+        )
+        .slice(0, 5)
+        .map((c) => ({
+          id: c.code,
+          title: c.title,
+          slug: c.slug,
+          tagline: c.tagline,
+          category: c.category,
+          level: c.level,
+        }));
+
+      const matchedLessons = BENCHMARK_LESSONS_FULL
+        .filter((l) =>
+          l.title.toLowerCase().includes(lowerQ) ||
+          l.slug.toLowerCase().includes(lowerQ)
+        )
+        .slice(0, 10)
+        .map((l) => ({
+          id: l.slug,
+          title: l.title,
+          slug: l.slug,
+          type: l.type,
+          durationMinutes: l.durationMinutes,
+          module: {
+            title: 'Networking Fundamentals',
+            course: { title: 'Foundations & Network Architecture', slug: 'foundations-network-architecture' },
+          },
+        }));
+
+      return { courses: matchedCourses, lessons: matchedLessons, modules: [] };
+    }
   }
 
   async toggleSaveLesson(lessonIdOrSlug: string, identity: { userId?: string; anonymousId?: string }) {

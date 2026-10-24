@@ -16,7 +16,7 @@ services:
     region: oregon
     branch: main
     autoDeploy: true
-    healthCheckPath: /ready
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production

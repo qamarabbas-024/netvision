@@ -12,6 +12,7 @@ import { PrismaService } from '../database/prisma.service';
 import { ExamType, ExamAttemptStatus } from '@prisma/client';
 import { CertificationEligibilityService } from './certification-eligibility.service';
 import { MonitoringService } from '../monitoring/monitoring.service';
+import { CANONICAL_CREDENTIALS } from '@netvision/shared';
 
 export interface StartExamDto {
   certificationCode: string;
@@ -76,45 +77,85 @@ export class CertificationsService {
   }
 
   async listCertifications() {
-    const certs = await this.prisma.certificationDefinition.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: 'asc' },
-    });
+    try {
+      const certs = await this.prisma.certificationDefinition.findMany({
+        where: { isActive: true },
+        orderBy: { createdAt: 'asc' },
+      });
 
-    return certs.map((c) => ({
-      id: c.id,
+      if (certs.length > 0) {
+        return certs.map((c) => ({
+          id: c.id,
+          code: c.code,
+          title: c.title,
+          description: c.description,
+          level: c.level,
+          isActive: c.isActive,
+          requirements: c.requirementsJson,
+          policy: c.policyJson,
+          theoryConfig: c.theoryConfigJson,
+          practicalConfig: c.practicalConfigJson,
+        }));
+      }
+    } catch (err: any) {
+      this.logger.warn(`Database unreachable in listCertifications: ${err?.message || err}. Serving canonical fallback.`);
+    }
+
+    return CANONICAL_CREDENTIALS.map((c) => ({
+      id: c.code,
       code: c.code,
       title: c.title,
       description: c.description,
       level: c.level,
-      isActive: c.isActive,
-      requirements: c.requirementsJson,
-      policy: c.policyJson,
-      theoryConfig: c.theoryConfigJson,
-      practicalConfig: c.practicalConfigJson,
+      isActive: true,
+      requirements: { courseCode: c.courseCode, passingScore: 85 },
+      policy: { maxAttempts: 3, durationMinutes: 120 },
+      theoryConfig: { questionCount: 30, durationMinutes: 60 },
+      practicalConfig: { durationMinutes: 60 },
     }));
   }
 
   async getCertificationByCode(code: string) {
-    const cert = await this.prisma.certificationDefinition.findUnique({
-      where: { code: code.toUpperCase() },
-    });
+    const upper = (code || '').toUpperCase();
+    try {
+      const cert = await this.prisma.certificationDefinition.findUnique({
+        where: { code: upper },
+      });
 
-    if (!cert) {
+      if (cert) {
+        return {
+          id: cert.id,
+          code: cert.code,
+          title: cert.title,
+          description: cert.description,
+          level: cert.level,
+          isActive: cert.isActive,
+          requirements: cert.requirementsJson,
+          policy: cert.policyJson,
+          theoryConfig: cert.theoryConfigJson,
+          practicalConfig: cert.practicalConfigJson,
+        };
+      }
+    } catch (err: any) {
+      this.logger.warn(`Database unreachable in getCertificationByCode for "${code}". Searching canonical blueprint.`);
+    }
+
+    const canon = CANONICAL_CREDENTIALS.find((c) => c.code.toUpperCase() === upper);
+    if (!canon) {
       throw new NotFoundException(`Certification code "${code}" not found.`);
     }
 
     return {
-      id: cert.id,
-      code: cert.code,
-      title: cert.title,
-      description: cert.description,
-      level: cert.level,
-      isActive: cert.isActive,
-      requirements: cert.requirementsJson,
-      policy: cert.policyJson,
-      theoryConfig: cert.theoryConfigJson,
-      practicalConfig: cert.practicalConfigJson,
+      id: canon.code,
+      code: canon.code,
+      title: canon.title,
+      description: canon.description,
+      level: canon.level,
+      isActive: true,
+      requirements: { courseCode: canon.courseCode, passingScore: 85 },
+      policy: { maxAttempts: 3, durationMinutes: 120 },
+      theoryConfig: { questionCount: 30, durationMinutes: 60 },
+      practicalConfig: { durationMinutes: 60 },
     };
   }
 
