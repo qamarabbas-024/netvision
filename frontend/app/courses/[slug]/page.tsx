@@ -225,22 +225,22 @@ export default function CourseDetailPage() {
           <AppTopbar />
 
           <main className="p-4 sm:p-8 flex-1 overflow-y-auto bg-net-grid-pattern">
-            <div className="max-w-6xl mx-auto flex flex-col gap-8">
+            <div className="max-w-6xl mx-auto flex flex-col gap-4 sm:gap-5">
               {/* Back to Catalog Breadcrumb */}
               <Link
                 href="/courses"
-                className="inline-flex items-center gap-2 text-xs font-mono text-[#8e95a5] hover:text-[#38bdf8] transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-mono text-[#8e95a5] hover:text-[#38bdf8] transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 Back to Course Catalog
               </Link>
 
               {/* Course Header Banner */}
-              <div className="surface-2 p-6 sm:p-8 rounded-xl border border-[#2a2e39] shadow-instrument flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative overflow-hidden">
+              <div className="surface-2 p-4 sm:p-5 rounded-xl border border-[#2a2e39] shadow-instrument flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6 relative overflow-hidden">
                 <div className="flex-1">
-                  <div className="flex flex-wrap items-center gap-2.5 mb-3">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
                     {topic.code && (
-                      <span className="px-2 py-0.5 rounded-md bg-[#14151a] border border-[#2a2e39] text-xs font-mono font-bold text-[#38bdf8]">
+                      <span className="px-1.5 py-0.5 rounded-md bg-[#14151a] border border-[#2a2e39] text-xs font-mono font-bold text-[#38bdf8]">
                         {topic.code}
                       </span>
                     )}
@@ -253,15 +253,15 @@ export default function CourseDetailPage() {
                     </span>
                   </div>
 
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#f4f5f7] tracking-tight mb-2">
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#f4f5f7] tracking-tight mb-1.5">
                     {topic.title}
                   </h1>
-                  <p className="text-xs sm:text-sm text-[#8e95a5] max-w-2xl mb-6 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-[#8e95a5] max-w-2xl mb-3.5 leading-relaxed">
                     {topic.tagline || topic.description}
                   </p>
 
                   {/* Course-Scoped Progress Metric */}
-                  <div className="max-w-md space-y-1.5">
+                  <div className="max-w-md space-y-1">
                     <div className="flex justify-between text-xs font-mono">
                       <span className="text-[#8e95a5]">Course Completion</span>
                       <span className="text-[#38bdf8] font-bold">

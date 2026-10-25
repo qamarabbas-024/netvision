@@ -96,13 +96,13 @@ export const CourseCard: React.FC<CourseCardProps> = ({
   }
 
   return (
-    <div className="surface-2 p-5 sm:p-6 rounded-xl border border-[#2a2e39] hover:border-[#38bdf8]/40 hover:bg-[#1f222c] transition-all flex flex-col justify-between h-full group relative shadow-instrument font-sans">
+    <div className="surface-2 p-3.5 sm:p-4 rounded-xl border border-[#2a2e39] hover:border-[#38bdf8]/40 hover:bg-[#1f222c] transition-all flex flex-col justify-between h-full group relative shadow-instrument font-sans">
       <div>
         {/* Header Badges Row */}
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-3.5">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
+          <div className="flex items-center gap-1.5">
             {course.code && (
-              <span className="px-2 py-0.5 rounded-md bg-[#14151a] border border-[#2a2e39] text-[10px] font-mono font-bold text-[#38bdf8]">
+              <span className="px-1.5 py-0.5 rounded-md bg-[#14151a] border border-[#2a2e39] text-[10px] font-mono font-bold text-[#38bdf8]">
                 {course.code}
               </span>
             )}
@@ -135,7 +135,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
                 aria-label={`Bookmark course ${course.title}`}
               >
                 <Bookmark
-                  className={`w-4 h-4 ${isBookmarked ? 'text-[#38bdf8] fill-[#38bdf8]' : ''}`}
+                  className={`w-3.5 h-3.5 ${isBookmarked ? 'text-[#38bdf8] fill-[#38bdf8]' : ''}`}
                 />
               </button>
             )}
@@ -143,28 +143,28 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         </div>
 
         {/* Title & Icon */}
-        <div className="flex items-start gap-3 mb-2.5 min-w-0">
-          <div className="w-9 h-9 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-center justify-center shrink-0">
+        <div className="flex items-start gap-2.5 mb-2 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-center justify-center shrink-0">
             {renderIcon(course.icon)}
           </div>
           <div className="min-w-0 flex-1">
             <span className="text-[10px] font-mono text-[#8e95a5] block uppercase tracking-wider truncate mb-0.5">
               {course.category}
             </span>
-            <h3 className="text-base font-bold text-[#f4f5f7] group-hover:text-[#38bdf8] transition-colors leading-snug">
+            <h3 className="text-sm sm:text-base font-bold text-[#f4f5f7] group-hover:text-[#38bdf8] transition-colors leading-snug">
               {course.title}
             </h3>
           </div>
         </div>
 
         {/* Tagline / "Why It Matters" */}
-        <p className="text-xs text-[#8e95a5] line-clamp-2 mb-3.5 leading-relaxed">
+        <p className="text-xs text-[#8e95a5] line-clamp-2 mb-2.5 leading-relaxed">
           {course.tagline}
         </p>
 
         {/* Prerequisites notice if present */}
         {course.prerequisites && course.prerequisites.length > 0 && (
-          <div className="mb-3.5 px-2.5 py-1.5 rounded-md bg-[#14151a] border border-[#2a2e39] text-[10px] text-[#8e95a5] flex items-center gap-2">
+          <div className="mb-2.5 px-2 py-1 rounded-md bg-[#14151a] border border-[#2a2e39] text-[10px] text-[#8e95a5] flex items-center gap-1.5">
             <span className="font-mono text-[#646c7d] font-bold">PREREQ:</span>
             <span className="text-[#c4c9d4] font-medium truncate">
               {course.prerequisites.join(', ')}
@@ -174,7 +174,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
       </div>
 
       {/* Bottom Metrics & Primary CTA */}
-      <div className="pt-3.5 border-t border-[#2a2e39] flex flex-col gap-3">
+      <div className="pt-2.5 border-t border-[#2a2e39] flex flex-col gap-2.5">
         {/* Course-Scoped Progress Bar if started */}
         {isStarted && (
           <div className="space-y-1">

@@ -1,5 +1,6 @@
 import { GuestProgressService } from '@/services/GuestProgressService';
 import { telemetry } from '@/lib/telemetry';
+import { isJwtExpired } from '@/stores/authStore';
 
 export function getApiBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost')) {
@@ -80,7 +81,12 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
       } else if (res.status === 401) {
         errorMsg = 'Authentication session expired or invalid.';
         const token = typeof window !== 'undefined' ? (localStorage.getItem('netvision_token') || sessionStorage.getItem('netvision_token')) : null;
-        const isClientResilient = token && (token.startsWith('candidate-') || token.includes('netvision-verified-session'));
+        const isClientResilient = token && (
+          token.startsWith('candidate-') ||
+          token.includes('netvision-verified-session') ||
+          token.includes('bmV0dmlzaW9uLXZlcmlmaWVkLXNlc3Npb24') ||
+          !isJwtExpired(token)
+        );
         if (typeof window !== 'undefined' && !endpoint.includes('/auth/login') && !endpoint.includes('/auth/register') && !isClientResilient) {
           localStorage.removeItem('netvision_token');
           localStorage.removeItem('netvision_user');

@@ -1,4 +1,4 @@
-import { FLAGSHIP_5_COURSES, FlagshipCourseDefinition } from '@netvision/shared';
+import { FLAGSHIP_5_COURSES, type FlagshipCourseDefinition } from '@netvision/shared';
 
 export interface FallbackLesson {
   id: string;
@@ -103,12 +103,12 @@ function buildFallbackLessonsForModule(moduleSlug: string, moduleTitle: string):
       {
         id: 'les-c01-m01-01-alias',
         slug: 'what-is-binary',
-        title: 'Bits, Bytes, Binary & Hexadecimal',
+        title: 'Binary Mathematics & Positional Weighting',
         type: 'THEORY',
         durationMinutes: 15,
         visualizationType: 'BINARY_CONVERTER',
         visualType: 'BINARY_CONVERTER',
-        contentMarkdown: '# What Is Binary?\n\nFoundational digital bit representation, 8-bit octets, and base-2 mathematics in computer networks.',
+        contentMarkdown: '# Binary Mathematics & Positional Weighting\n\nFoundational digital bit representation, 8-bit octets, and base-2 mathematics in computer networks.',
       },
       {
         id: 'les-c01-m01-02',

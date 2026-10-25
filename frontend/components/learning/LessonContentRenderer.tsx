@@ -299,19 +299,19 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
       : [];
 
   return (
-    <div className="flex flex-col gap-6 text-[#f4f5f7] max-w-5xl mx-auto font-sans">
+    <div className="flex flex-col gap-4 sm:gap-5 text-[#f4f5f7] max-w-5xl mx-auto font-sans">
       {/* 1. LESSON TITLE & PURPOSE */}
-      <div className="space-y-3">
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight">
+      <div className="space-y-2">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#f4f5f7] tracking-tight">
           {lesson.title}
         </h1>
 
         {(content.shortExplanation || content.whyItMatters || content.step3_whyItMatters) && (
-          <div className="p-3.5 rounded-xl surface-2 border border-[#2a2e39] text-xs sm:text-sm text-[#8e95a5] leading-relaxed flex items-start gap-3 shadow-subtle">
-            <Info className="w-4 h-4 text-[#38bdf8] shrink-0 mt-0.5" />
+          <div className="p-2.5 sm:p-3 rounded-lg surface-2 border border-[#2a2e39] text-xs text-[#8e95a5] leading-relaxed flex items-start gap-2.5 shadow-subtle">
+            <Info className="w-3.5 h-3.5 text-[#38bdf8] shrink-0 mt-0.5" />
             <div>
-              <strong className="text-[#f4f5f7] font-bold block mb-0.5">Why It Matters:</strong>
-              {content.whyItMatters || content.step3_whyItMatters || content.shortExplanation}
+              <strong className="text-[#f4f5f7] font-semibold inline mr-1">Why It Matters:</strong>
+              <span>{content.whyItMatters || content.step3_whyItMatters || content.shortExplanation}</span>
             </div>
           </div>
         )}
@@ -319,20 +319,20 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({
 
       {/* 2. LEARNING OBJECTIVES */}
       {objectivesList.length > 0 && (
-        <Card className="p-4 sm:p-5 surface-2 border border-[#2a2e39] rounded-xl space-y-3 shadow-subtle">
+        <Card className="p-3 sm:p-3.5 surface-2 border border-[#2a2e39] rounded-xl space-y-2 shadow-subtle">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#38bdf8]" />
-            <h2 className="text-xs font-mono font-bold text-[#f4f5f7] uppercase tracking-wider">
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#38bdf8]" />
+            <h2 className="text-[11px] font-mono font-bold text-[#f4f5f7] uppercase tracking-wider">
               Learning Objectives
             </h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {objectivesList.map((obj, idx) => (
               <div
                 key={idx}
-                className="p-2.5 rounded-lg bg-[#14151a] border border-[#2a2e39] flex items-start gap-2 text-xs text-[#c4c9d4]"
+                className="p-2 rounded-md bg-[#14151a] border border-[#2a2e39] flex items-start gap-2 text-xs text-[#c4c9d4]"
               >
-                <span className="w-4 h-4 rounded bg-[#38bdf8]/10 text-[#38bdf8] font-mono font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5 border border-[#38bdf8]/20">
+                <span className="w-3.5 h-3.5 rounded bg-[#38bdf8]/10 text-[#38bdf8] font-mono font-bold flex items-center justify-center text-[9px] shrink-0 mt-0.5 border border-[#38bdf8]/20">
                   {idx + 1}
                 </span>
                 <span className="leading-snug">{obj}</span>

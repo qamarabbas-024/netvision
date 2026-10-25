@@ -132,22 +132,22 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
   const featuredCourse = topics.find((t) => t.code === 'NET-101') || topics[0];
 
   return (
-    <div id="curriculum-catalog" className="flex flex-col gap-8 font-sans">
+    <div id="curriculum-catalog" className="flex flex-col gap-4 sm:gap-5 font-sans">
       {/* Catalog Header & Search */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <span className="text-xs font-mono text-[#38bdf8] uppercase tracking-widest font-semibold block mb-1">
+          <span className="text-[10px] font-mono text-[#38bdf8] uppercase tracking-widest font-semibold block mb-0.5">
             CANONICAL LEARNING PROGRESSION
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#f4f5f7] tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#f4f5f7] tracking-tight">
             Course Catalog & Curriculum
           </h1>
-          <p className="text-xs sm:text-sm text-[#8e95a5] mt-1 max-w-2xl leading-relaxed">
+          <p className="text-xs text-[#8e95a5] mt-0.5 max-w-2xl leading-relaxed">
             Structured computer networking curriculum. Progress step-by-step from digital representation to advanced enterprise routing and security.
           </p>
         </div>
 
-        <div className="w-full lg:w-80">
+        <div className="w-full lg:w-72">
           <SearchInput
             placeholder="Search courses, protocols, or NET-101..."
             value={searchQuery}
@@ -158,40 +158,40 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
 
       {/* Featured Starter Course Banner */}
       {featuredCourse && !searchQuery && activeTier === 'ALL' && (
-        <div className="surface-2 p-6 sm:p-7 rounded-xl border border-[#2a2e39] shadow-elevated relative overflow-hidden">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
-            <div className="flex flex-col gap-2.5 max-w-2xl">
-              <div className="flex items-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#2563eb]/20 text-[#38bdf8] border border-[#2563eb]/30 text-[10px] font-mono font-bold uppercase">
-                  <Sparkles className="w-3 h-3" />
+        <div className="surface-2 p-4 sm:p-5 rounded-xl border border-[#2a2e39] shadow-elevated relative overflow-hidden">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 sm:gap-4 relative z-10">
+            <div className="flex flex-col gap-1.5 max-w-2xl">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#2563eb]/20 text-[#38bdf8] border border-[#2563eb]/30 text-[9px] font-mono font-bold uppercase">
+                  <Sparkles className="w-2.5 h-2.5" />
                   RECOMMENDED ENTRY POINT
                 </span>
                 {featuredCourse.code && (
-                  <span className="text-xs font-mono font-bold text-[#8e95a5]">
+                  <span className="text-[11px] font-mono font-bold text-[#8e95a5]">
                     {featuredCourse.code}
                   </span>
                 )}
                 <Badge variant="cyan" dot={true}>Level 0: Foundations</Badge>
               </div>
 
-              <h2 className="text-xl sm:text-2xl font-extrabold text-[#f4f5f7] tracking-tight">
+              <h2 className="text-base sm:text-lg font-bold text-[#f4f5f7] tracking-tight">
                 {featuredCourse.title}
               </h2>
-              <p className="text-xs sm:text-sm text-[#8e95a5] leading-relaxed">
+              <p className="text-xs text-[#8e95a5] leading-relaxed line-clamp-2">
                 {featuredCourse.tagline || featuredCourse.description}
               </p>
 
-              <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-[#8e95a5] pt-1">
-                <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-[#646c7d]" />
+              <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-[#8e95a5] pt-0.5">
+                <span className="flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-[#646c7d]" />
                   {featuredCourse.estimatedHours} Hours
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-[#646c7d]" />
+                <span className="flex items-center gap-1">
+                  <BookOpen className="w-3 h-3 text-[#646c7d]" />
                   {featuredCourse.lessonsCount} Core Lessons
                 </span>
-                <span className="flex items-center gap-1.5 text-[#10b981]">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="flex items-center gap-1 text-[#10b981]">
+                  <CheckCircle2 className="w-3 h-3" />
                   Zero Prerequisites Required
                 </span>
               </div>
@@ -200,9 +200,9 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
             <Link href={`/courses/${featuredCourse.slug}`} className="shrink-0 w-full sm:w-auto">
               <Button
                 variant="primary"
-                size="md"
-                rightIcon={<ArrowRight className="w-4 h-4" />}
-                className="w-full sm:w-auto justify-center font-bold px-6 py-3"
+                size="sm"
+                rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                className="w-full sm:w-auto justify-center font-bold px-4 py-2 text-xs"
               >
                 Start Foundational Track
               </Button>
@@ -212,10 +212,10 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
       )}
 
       {/* Tier Selector Tabs: Level 0 -> Level 1 -> Level 2 -> Level 3 */}
-      <div className="flex items-center gap-2 p-1.5 bg-[#14151a] rounded-xl border border-[#2a2e39] overflow-x-auto shadow-inner">
+      <div className="flex items-center gap-1.5 p-1 bg-[#14151a] rounded-xl border border-[#2a2e39] overflow-x-auto shadow-inner">
         <button
           onClick={() => setActiveTier('ALL')}
-          className={`px-3.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap font-mono cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-1.5 whitespace-nowrap font-mono cursor-pointer ${
             activeTier === 'ALL'
               ? 'bg-[#1b1e26] text-[#38bdf8] border border-[#2a2e39] font-bold shadow-sm'
               : 'text-[#8e95a5] hover:text-[#f4f5f7]'
@@ -227,7 +227,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
 
         <button
           onClick={() => setActiveTier('FOUNDATIONAL')}
-          className={`px-3.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap font-mono cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-1.5 whitespace-nowrap font-mono cursor-pointer ${
             activeTier === 'FOUNDATIONAL'
               ? 'bg-[#1b1e26] text-[#38bdf8] border border-[#2a2e39] font-bold shadow-sm'
               : 'text-[#8e95a5] hover:text-[#f4f5f7]'
@@ -239,7 +239,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
 
         <button
           onClick={() => setActiveTier('BEGINNER')}
-          className={`px-3.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap font-mono cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-1.5 whitespace-nowrap font-mono cursor-pointer ${
             activeTier === 'BEGINNER'
               ? 'bg-[#1b1e26] text-[#10b981] border border-[#2a2e39] font-bold shadow-sm'
               : 'text-[#8e95a5] hover:text-[#f4f5f7]'
@@ -251,7 +251,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
 
         <button
           onClick={() => setActiveTier('INTERMEDIATE')}
-          className={`px-3.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap font-mono cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-1.5 whitespace-nowrap font-mono cursor-pointer ${
             activeTier === 'INTERMEDIATE'
               ? 'bg-[#1b1e26] text-[#818cf8] border border-[#2a2e39] font-bold shadow-sm'
               : 'text-[#8e95a5] hover:text-[#f4f5f7]'
@@ -263,7 +263,7 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
 
         <button
           onClick={() => setActiveTier('ADVANCED')}
-          className={`px-3.5 py-2 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-2 whitespace-nowrap font-mono cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all flex items-center gap-1.5 whitespace-nowrap font-mono cursor-pointer ${
             activeTier === 'ADVANCED'
               ? 'bg-[#1b1e26] text-[#ef4444] border border-[#2a2e39] font-bold shadow-sm'
               : 'text-[#8e95a5] hover:text-[#f4f5f7]'
@@ -275,14 +275,14 @@ export const CurriculumSection: React.FC<CurriculumSectionProps> = ({
       </div>
 
       {/* Filter Row: Category Pills & Status Selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#2a2e39]">
-        <div className="flex items-center gap-2 overflow-x-auto">
-          <span className="text-xs font-mono text-[#646c7d] mr-1 shrink-0">Topic:</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1 border-b border-[#2a2e39]">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <span className="text-[11px] font-mono text-[#646c7d] mr-1 shrink-0">Topic:</span>
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
                 selectedCategory === cat
                   ? 'bg-[#1b1e26] text-[#38bdf8] border border-[#38bdf8]/40 font-bold'
                   : 'bg-[#14151a] text-[#8e95a5] hover:text-[#f4f5f7] border border-[#2a2e39]'

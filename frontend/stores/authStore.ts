@@ -14,7 +14,7 @@ interface AuthState {
   initializeAuth: () => Promise<void>;
 }
 
-function isJwtExpired(token: string | null): boolean {
+export function isJwtExpired(token: string | null): boolean {
   if (!token || token === 'cookie-session') return false;
   try {
     const parts = token.split('.');
@@ -119,6 +119,21 @@ export const useAuthStore = create<AuthState>((set) => ({
       return;
     }
 
+    // Immediately hydrate session from stored profile so UI never flashes Guest
+    let initialUser: any = null;
+    if (storedUserJson) {
+      try {
+        initialUser = JSON.parse(storedUserJson);
+        const jwtParts = token.split('.');
+        if (jwtParts.length === 3) {
+          const b64 = jwtParts[1].replace(/-/g, '+').replace(/_/g, '/');
+          const decoded = JSON.parse(decodeURIComponent(atob(b64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+          initialUser.role = decoded.role || initialUser.role || 'STUDENT';
+        }
+        set({ user: initialUser, token, isAuthenticated: true, isLoading: false });
+      } catch (_) {}
+    }
+
     try {
       const apiBase = getApiBaseUrl();
       const headers: Record<string, string> = {};
@@ -126,7 +141,6 @@ export const useAuthStore = create<AuthState>((set) => ({
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      let remoteVerified = false;
       try {
         const res = await fetch(`${apiBase}/auth/me`, {
           headers,
@@ -136,26 +150,23 @@ export const useAuthStore = create<AuthState>((set) => ({
         if (res.ok) {
           const userData = await res.json();
           set({ user: userData, token: token || 'cookie-session', isAuthenticated: true, isLoading: false });
-          remoteVerified = true;
           return;
         }
       } catch (_) {
         // Remote endpoint unreachable or cold
       }
 
-      // If remote verification didn't succeed (e.g. offline or 404), preserve valid non-expired sessions
-      if (!remoteVerified && token && storedUserJson && !isJwtExpired(token)) {
-        try {
-          const parsedUser = JSON.parse(storedUserJson);
-          const jwtParts = token.split('.');
-          if (jwtParts.length === 3) {
-            const b64 = jwtParts[1].replace(/-/g, '+').replace(/_/g, '/');
-            const decoded = JSON.parse(decodeURIComponent(atob(b64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-            parsedUser.role = decoded.role || parsedUser.role || 'STUDENT';
-          }
-          set({ user: parsedUser, token, isAuthenticated: true, isLoading: false });
+      // If remote verification didn't succeed, preserve valid unexpired sessions
+      if (token && (storedUserJson || initialUser) && !isJwtExpired(token)) {
+        if (!initialUser && storedUserJson) {
+          try {
+            initialUser = JSON.parse(storedUserJson);
+          } catch (_) {}
+        }
+        if (initialUser) {
+          set({ user: initialUser, token, isAuthenticated: true, isLoading: false });
           return;
-        } catch (e) {}
+        }
       }
 
       // Only purge if token is actually expired

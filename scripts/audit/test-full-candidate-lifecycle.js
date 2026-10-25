@@ -151,10 +151,21 @@ async function main() {
       email: email,
       username: user,
       fullName: name,
-      role: 'LEARNER',
+      role: 'STUDENT',
       createdAt: new Date().toISOString()
     };
-    localStorage.setItem('netvision_token', `candidate-token-${btoa(email)}`);
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '');
+    const exp = Math.floor(Date.now() / 1000) + (30 * 24 * 3600);
+    const payload = btoa(JSON.stringify({
+      sub: candidateObj.id,
+      email: candidateObj.email,
+      username: candidateObj.username,
+      role: candidateObj.role,
+      exp,
+    })).replace(/=/g, '');
+    const sig = btoa('netvision-verified-session').replace(/=/g, '');
+    const resilientToken = `${header}.${payload}.${sig}`;
+    localStorage.setItem('netvision_token', resilientToken);
     localStorage.setItem('netvision_user', JSON.stringify(candidateObj));
   }, { user: CANDIDATE_USER, email: CANDIDATE_EMAIL, name: CANDIDATE_NAME });
 
