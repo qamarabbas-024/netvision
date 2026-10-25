@@ -1,7 +1,7 @@
 import { GuestProgressService } from '@/services/GuestProgressService';
 import { telemetry } from '@/lib/telemetry';
 
-function getApiBaseUrl(): string {
+export function getApiBaseUrl(): string {
   if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost')) {
     return process.env.NEXT_PUBLIC_API_URL;
   }
