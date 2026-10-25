@@ -46,6 +46,7 @@ export const FooterSection: React.FC = () => {
                 href="https://github.com"
                 target="_blank"
                 rel="noreferrer"
+                aria-label="GitHub Repository"
                 className="p-2 rounded-xl bg-[#0c121e] border border-slate-800 text-slate-400 hover:text-white hover:border-emerald-500/50 hover:shadow-[0_0_12px_rgba(16,185,129,0.25)] transition-all cursor-pointer"
                 title="GitHub Repository"
               >
@@ -55,6 +56,7 @@ export const FooterSection: React.FC = () => {
                 href="https://twitter.com"
                 target="_blank"
                 rel="noreferrer"
+                aria-label="Twitter / X Profile"
                 className="p-2 rounded-xl bg-[#0c121e] border border-slate-800 text-slate-400 hover:text-white hover:border-cyan-500/50 hover:shadow-[0_0_12px_rgba(6,182,212,0.25)] transition-all cursor-pointer"
                 title="Twitter / X"
               >
@@ -64,6 +66,7 @@ export const FooterSection: React.FC = () => {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noreferrer"
+                aria-label="LinkedIn Network"
                 className="p-2 rounded-xl bg-[#0c121e] border border-slate-800 text-slate-400 hover:text-white hover:border-emerald-500/50 hover:shadow-[0_0_12px_rgba(16,185,129,0.25)] transition-all cursor-pointer"
                 title="LinkedIn Network"
               >

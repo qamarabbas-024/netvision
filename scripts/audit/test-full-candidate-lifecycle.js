@@ -20,13 +20,18 @@ const CANDIDATE_NAME = process.env.CANDIDATE_NAME || 'Candidate ABCD';
 const CANDIDATE_PASS = 'SecureNetPass2026!';
 
 const isHeadless = process.argv.includes('--headless');
+const saveScreenshots = process.argv.includes('--screenshots');
 const slowMoSpeed = isHeadless ? 0 : 300;
 
 const TIMESTAMP = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-const OUT_DIR = path.resolve(__dirname, '../../artifacts/audits', `candidate_${TIMESTAMP}`);
+const OUT_DIR = saveScreenshots 
+  ? path.resolve(__dirname, '../../artifacts/audits', `candidate_${TIMESTAMP}`)
+  : path.resolve(__dirname, '../../docs/audit');
 const SCREENSHOTS_DIR = path.join(OUT_DIR, 'screenshots');
 
-fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
+if (saveScreenshots) {
+  fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
+}
 
 console.log('========================================================================');
 console.log('   NETVISION CANDIDATE LIFECYCLE & A-TO-Z UI/UX AUDIT ENGINE');
@@ -76,8 +81,10 @@ async function main() {
   // Helper for screenshot
   const snap = async (name) => {
     const filename = `${name}.png`;
-    const fullpath = path.join(SCREENSHOTS_DIR, filename);
-    await page.screenshot({ path: fullpath, fullPage: false }).catch(() => {});
+    if (saveScreenshots) {
+      const fullpath = path.join(SCREENSHOTS_DIR, filename);
+      await page.screenshot({ path: fullpath, fullPage: false }).catch(() => {});
+    }
     return filename;
   };
 

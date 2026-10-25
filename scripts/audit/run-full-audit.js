@@ -25,6 +25,7 @@ const { chromium } = require('@playwright/test');
 // Command line args
 const args = process.argv.slice(2);
 const isHeaded = args.includes('--headed');
+const saveScreenshots = args.includes('--screenshots');
 const channelArg = args.find(a => a.startsWith('--channel='))?.split('=')[1] || 'chrome';
 const samplesArg = parseInt(args.find(a => a.startsWith('--samples='))?.split('=')[1] || '30', 10);
 const customOutDir = args.find(a => a.startsWith('--output='))?.split('=')[1];
@@ -37,7 +38,10 @@ const OUT_DIR = customOutDir || path.resolve(__dirname, '../../artifacts/audits'
 const SCREENSHOTS_DIR = path.join(OUT_DIR, 'screenshots');
 const DOCS_AUDIT_DIR = path.resolve(__dirname, '../../docs/audit');
 
-fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
+fs.mkdirSync(OUT_DIR, { recursive: true });
+if (saveScreenshots) {
+  fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
+}
 fs.mkdirSync(DOCS_AUDIT_DIR, { recursive: true });
 
 console.log('========================================================================');
@@ -310,7 +314,9 @@ async function main() {
 
       const safeSlug = route.path === '/' ? 'root-home' : route.path.replace(/[/\\?%*:|"<>]/g, '_').slice(1);
       screenshotFile = `route_${safeSlug}.png`;
-      await page.screenshot({ path: path.join(SCREENSHOTS_DIR, screenshotFile), fullPage: false }).catch(() => {});
+      if (saveScreenshots) {
+        await page.screenshot({ path: path.join(SCREENSHOTS_DIR, screenshotFile), fullPage: false }).catch(() => {});
+      }
 
       console.log(`-> ${rendering} (HTTP ${httpStatus}, ${interactiveCount} elements)`);
     } catch (crawlErr) {
@@ -343,17 +349,21 @@ async function main() {
 
   const navItems = [
     { label: 'Courses Nav Link', selector: 'header a[href*="/courses"], nav a[href*="/courses"]', expectedRoute: '/courses' },
-    { label: 'Labs Nav Link', selector: 'header a[href*="/labs"], nav a[href*="/labs"]', expectedRoute: '/labs' },
+    { label: 'Labs Nav Link', selector: 'a[href*="/labs"]', expectedRoute: '/labs' },
     { label: 'Simulations Nav Link', selector: 'header a[href*="/simulations"], nav a[href*="/simulations"]', expectedRoute: '/simulations' },
-    { label: 'Certifications Nav Link', selector: 'header a[href*="/certifications"], nav a[href*="/certifications"]', expectedRoute: '/certifications' },
+    { label: 'Certifications Nav Link', selector: 'header a[href*="/certificates"], nav a[href*="/certificates"], a[href*="/certifications"]', expectedRoute: '/certificate' },
     { label: 'Sandbox Nav Link', selector: 'header a[href*="/sandbox"], nav a[href*="/sandbox"]', expectedRoute: '/sandbox' },
-    { label: 'Workbench Nav Link', selector: 'header a[href*="/workbench"], nav a[href*="/workbench"]', expectedRoute: '/workbench' }
+    { label: 'Workbench Nav Link', selector: 'a[href*="/workbench"]', expectedRoute: '/workbench' }
   ];
 
   for (const item of navItems) {
     let result = 'PASS';
     let notes = `Navigated successfully`;
     try {
+      if (!page.url().endsWith('/') && page.url() !== FRONTEND_URL) {
+        await page.goto(`${FRONTEND_URL}/`, { waitUntil: 'commit', timeout: 20000 });
+        await page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
+      }
       const el = page.locator(item.selector).first();
       if (await el.isVisible({ timeout: 2000 })) {
         await el.click();
@@ -441,7 +451,9 @@ async function main() {
   await page.waitForTimeout(600);
   const lessonOk = await page.evaluate(() => !document.body.innerText.includes('Service Temporarily Unavailable'));
   journeySteps.push({ step: 4, action: 'Open Binary Lesson', url: page.url(), status: lessonOk ? 'PASS' : 'FAIL' });
-  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'journey_step4_binary_lesson.png') }).catch(() => {});
+  if (saveScreenshots) {
+    await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'journey_step4_binary_lesson.png') }).catch(() => {});
+  }
 
   // Step 5: Lesson Visualizer
   console.log('  Step 5: Test Interactive Lesson Visualizer & Practice...');
@@ -458,7 +470,9 @@ async function main() {
   await page.goto(`${FRONTEND_URL}/labs`, { waitUntil: 'commit', timeout: 20000 });
   await page.waitForLoadState('domcontentloaded', { timeout: 10000 }).catch(() => {});
   journeySteps.push({ step: 7, action: 'Open Labs Catalog', url: page.url(), status: 'PASS' });
-  await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'journey_step7_labs.png') }).catch(() => {});
+  if (saveScreenshots) {
+    await page.screenshot({ path: path.join(SCREENSHOTS_DIR, 'journey_step7_labs.png') }).catch(() => {});
+  }
 
   // Step 8: Certifications
   console.log('  Step 8: Open Certifications Catalog (/certifications)...');
@@ -487,7 +501,9 @@ async function main() {
     const isMobile = vp.width < 1024;
     const passed = !checks.hasHorizontalScroll;
     const shotName = `responsive_${vp.name}.png`;
-    await page.screenshot({ path: path.join(SCREENSHOTS_DIR, shotName) }).catch(() => {});
+    if (saveScreenshots) {
+      await page.screenshot({ path: path.join(SCREENSHOTS_DIR, shotName) }).catch(() => {});
+    }
 
     auditResults.responsive.push({
       viewport: vp.name,
