@@ -1,7 +1,9 @@
 # NetVision 🌐
 
 > **Visual Network Engineering & Verifiable Certification Platform**  
-> An interactive learning platform combining packet-flow visualizations, deterministic CLI sandbox labs, multi-modal networking curricula, and server-authoritative certification credentials.
+> An interactive learning platform combining packet-flow visualizations, deterministic CLI sandbox labs, multi-modal networking curricula, and server-authoritative certification credentials.  
+> 
+> 🌐 **Live Platform**: [https://netvision-portfolio-b631.vercel.app](https://netvision-portfolio-b631.vercel.app)
 
 ---
 
