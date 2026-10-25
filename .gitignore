@@ -64,11 +64,12 @@ __pycache__/
 *.webm
 *.avi
 
-# Playwright Test Artifacts
+# Playwright Test Artifacts & Audit Runs
 test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+artifacts/
 
 # Internal Audit Reports, Red-Team Assessments & Forensic Ledgers
 # (DO NOT COMMIT OR EXPOSE TO PUBLIC REPOSITORY)
