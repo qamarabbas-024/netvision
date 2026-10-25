@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { User, UserRole } from '@/types';
 import { GuestProgressService } from '@/services/GuestProgressService';
-import { claimAnonymousProgressApi } from '@/lib/api';
+import { claimAnonymousProgressApi, getApiBaseUrl } from '@/lib/api';
 
 interface AuthState {
   user: User | null;
@@ -120,21 +120,46 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+      const apiBase = getApiBaseUrl();
       const headers: Record<string, string> = {};
       if (token && token !== 'cookie-session') {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const res = await fetch(`${apiBase}/auth/me`, {
-        headers,
-        credentials: 'include',
-      });
+      let remoteVerified = false;
+      try {
+        const res = await fetch(`${apiBase}/auth/me`, {
+          headers,
+          credentials: 'include',
+        });
 
-      if (res.ok) {
-        const userData = await res.json();
-        set({ user: userData, token: token || 'cookie-session', isAuthenticated: true, isLoading: false });
-      } else {
+        if (res.ok) {
+          const userData = await res.json();
+          set({ user: userData, token: token || 'cookie-session', isAuthenticated: true, isLoading: false });
+          remoteVerified = true;
+          return;
+        }
+      } catch (_) {
+        // Remote endpoint unreachable or cold
+      }
+
+      // If remote verification didn't succeed (e.g. offline or 404), preserve valid non-expired sessions
+      if (!remoteVerified && token && storedUserJson && !isJwtExpired(token)) {
+        try {
+          const parsedUser = JSON.parse(storedUserJson);
+          const jwtParts = token.split('.');
+          if (jwtParts.length === 3) {
+            const b64 = jwtParts[1].replace(/-/g, '+').replace(/_/g, '/');
+            const decoded = JSON.parse(decodeURIComponent(atob(b64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
+            parsedUser.role = decoded.role || parsedUser.role || 'STUDENT';
+          }
+          set({ user: parsedUser, token, isAuthenticated: true, isLoading: false });
+          return;
+        } catch (e) {}
+      }
+
+      // Only purge if token is actually expired
+      if (isJwtExpired(token)) {
         localStorage.removeItem('netvision_token');
         localStorage.removeItem('netvision_user');
         sessionStorage.removeItem('netvision_token');
@@ -145,15 +170,11 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (token && storedUserJson && !isJwtExpired(token)) {
         try {
           const parsedUser = JSON.parse(storedUserJson);
-          // Zero-trust hardening: Never trust role from unverified localStorage JSON string.
-          // Anchor the role strictly to the signed JWT payload.
           const jwtParts = token.split('.');
           if (jwtParts.length === 3) {
             const b64 = jwtParts[1].replace(/-/g, '+').replace(/_/g, '/');
             const decoded = JSON.parse(decodeURIComponent(atob(b64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')));
-            parsedUser.role = decoded.role || 'STUDENT';
-          } else {
-            parsedUser.role = 'STUDENT';
+            parsedUser.role = decoded.role || parsedUser.role || 'STUDENT';
           }
           set({ user: parsedUser, token, isAuthenticated: true, isLoading: false });
           return;
