@@ -392,10 +392,16 @@ export class TopicsService {
   }
 
   async getLessonBySlug(slug: string, identityInput?: string | { userId?: string; anonymousId?: string }) {
+    const LEGACY_LESSON_SLUG_MAP: Record<string, string> = {
+      'what-is-binary': 'net-101-bits-bytes-binary-hex',
+      'binary-foundations': 'net-101-bits-bytes-binary-hex',
+      'digital-representation-foundations': 'net-101-bits-bytes-binary-hex',
+    };
+    const resolvedSlug = LEGACY_LESSON_SLUG_MAP[slug] || slug;
     let lesson: any = null;
     try {
       lesson = await this.prisma.lesson.findUnique({
-        where: { slug },
+        where: { slug: resolvedSlug },
         include: {
           module: {
             include: {
@@ -432,7 +438,7 @@ export class TopicsService {
     }
 
     if (!lesson) {
-      const benchmark = BENCHMARK_LESSONS_FULL.find((l) => l.slug === slug);
+      const benchmark = BENCHMARK_LESSONS_FULL.find((l) => l.slug === resolvedSlug || l.slug === slug);
       if (benchmark) {
         const v2 = (benchmark.contentV2 || {}) as any;
         return {

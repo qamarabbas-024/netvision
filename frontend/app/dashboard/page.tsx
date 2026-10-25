@@ -129,22 +129,25 @@ export default function DashboardPage() {
 
   // Determine active course context
   const activeCourse = progress.currentCourse || (topicsCatalog.length > 0 ? topicsCatalog[0] : null) || {
-    title: 'Computer & Digital Information Foundations',
-    slug: 'net-101-digital-foundations',
-    code: 'NET-101',
+    title: 'Foundations & Network Architecture',
+    slug: 'foundations-network-architecture',
+    code: 'NV-C01',
     completedLessons: 0,
-    totalLessons: 5,
+    totalLessons: 12,
     progressPercent: 0,
-    nextLessonSlug: 'what-is-binary',
+    nextLessonSlug: 'net-101-bits-bytes-binary-hex',
   };
 
-  const activeTitle = activeCourse.title || 'Computer & Digital Information Foundations';
-  const activeSlug = activeCourse.slug || 'net-101-digital-foundations';
-  const activeCode = activeCourse.code || 'NET-101';
+  const activeTitle = activeCourse.title || 'Foundations & Network Architecture';
+  const activeSlug = activeCourse.slug || 'foundations-network-architecture';
+  const activeCode = activeCourse.code || 'NV-C01';
   const activeCompleted = activeCourse.completedLessons ?? 0;
-  const activeTotal = activeCourse.totalLessons || activeCourse.lessonsCount || 5;
+  const activeTotal = activeCourse.totalLessons || activeCourse.lessonsCount || 12;
   const activePercent = activeCourse.progressPercent ?? 0;
-  const activeNextLesson = activeCourse.nextLessonSlug || 'what-is-binary';
+  const activeNextLesson =
+    activeCourse.nextLessonSlug ||
+    activeCourse.modules?.[0]?.lessons?.[0]?.slug ||
+    'net-101-bits-bytes-binary-hex';
 
   // Extract earned badges
   const badgeItems = progress?.badges?.items?.length

@@ -1,6 +1,20 @@
 import { GuestProgressService } from '@/services/GuestProgressService';
 import { telemetry } from '@/lib/telemetry';
 
+function getApiBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL && !process.env.NEXT_PUBLIC_API_URL.includes('localhost')) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1'
+  ) {
+    return 'https://netvision-backend.onrender.com/api/v1';
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
+}
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1';
 
 function getAuthHeaders(): HeadersInit {
@@ -41,7 +55,8 @@ export class ApiError extends Error {
 }
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${API_BASE}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
+  const base = getApiBaseUrl();
+  const url = `${base}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   try {
     const res = await fetch(url, {
       credentials: 'include',
@@ -132,9 +147,6 @@ export async function getTopicDetailApi(slug: string, options?: { signal?: Abort
     return await fetchApi<any>(`/courses/${slug}`, { signal: options?.signal });
   } catch (err: any) {
     if (err?.isAborted) throw err;
-    if (err?.status === 404) {
-      throw err;
-    }
     if (options?.allowFallback !== false) {
       const fallback = getFallbackTopicDetail(slug);
       if (fallback) {
@@ -151,9 +163,6 @@ export async function getLessonDetailApi(slug: string, options?: { signal?: Abor
     return await fetchApi<any>(`/lessons/${slug}`, { signal: options?.signal });
   } catch (err: any) {
     if (err?.isAborted) throw err;
-    if (err?.status === 404) {
-      throw err;
-    }
     if (options?.allowFallback !== false) {
       const fallback = getFallbackLessonDetail(slug);
       if (fallback) {
