@@ -42,11 +42,11 @@ services:
       - key: TRUSTED_PROXY
         value: loopback
       - key: CORS_ORIGIN
-        value: https://netvision-portfolio-b631.vercel.app
+        value: https://netvision.edu
       - key: API_URL
-        value: https://netvision-backend.onrender.com
+        value: https://api.netvision.edu
       - key: FRONTEND_URL
-        value: https://netvision-portfolio-b631.vercel.app
+        value: https://netvision.edu
       - key: EMAIL_VERIFICATION_ENABLED
         value: "false"
 
@@ -71,9 +71,9 @@ services:
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
       - key: NEXT_PUBLIC_API_URL
-        value: https://netvision-backend.onrender.com/api/v1
+        value: https://api.netvision.edu/api/v1
       - key: NEXT_PUBLIC_SITE_URL
-        value: https://netvision-portfolio-b631.vercel.app
+        value: https://netvision.edu
 
   # ----------------------------------------------------------------------------
   # 3. Distributed Redis Cache (Sessions, Revocations & Stampede Defense)
